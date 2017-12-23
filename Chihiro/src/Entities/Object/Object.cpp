@@ -2,6 +2,7 @@
 #include "ClientPackets.h"
 #include "GameHandler.h"
 #include "World.h"
+#include "ArRegion.h"
 
 Object::Object()
 {
@@ -447,6 +448,20 @@ bool WorldObject::Step(uint tm)
     }
     this->lastStepTime = tm;
     return res;
+}
+
+void WorldObject::RemoveFromWorld()
+{
+    sArRegion->GetRegion(*this)->RemoveObject(this);
+    if(!IsInWorld())
+        return;
+    Object::RemoveFromWorld();
+}
+
+void WorldObject::AddToWorld()
+{
+    sArRegion->GetRegion(*this)->AddObject(this);
+    Object::AddToWorld();
 }
 
 ArMoveVector::ArMoveVector(const ArMoveVector *src)

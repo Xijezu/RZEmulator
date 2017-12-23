@@ -26,8 +26,6 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
 
     _InitValues();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
-
-    AddToWorld();
 }
 
 Player::~Player()
@@ -157,7 +155,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
 
         CalculateStat();
 
-        sArRegion->GetRegion(*this)->AddObject(this);
+        AddToWorld();
 
     } else {
         return false;

@@ -583,13 +583,8 @@ public:
 
     void SendEnterMsg(XSocket *socket, WorldObject *obj, MainType mainType, SubType subType);
 
-    virtual void RemoveFromWorld()
-    {
-        if (!IsInWorld())
-            return;
-
-        Object::RemoveFromWorld();
-    }
+    virtual void AddToWorld();
+    virtual void RemoveFromWorld();
 
     Position GetCurrentPosition(uint t)
     {

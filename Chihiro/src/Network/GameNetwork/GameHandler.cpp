@@ -452,6 +452,7 @@ void GameSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position>
 bool GameSession::onReturnToLobby(XPacket *pRecvPct)
 {
     sWorld->RemoveSession(GetAccountId());
+    _player->RemoveFromWorld();
     if (_player != nullptr) {
         _player->Save(false);
         delete _player;
@@ -828,9 +829,9 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
             XPacket resultPct(TS_SC_NPC_TRADE_INFO);
             resultPct << (uint8_t) 0;
             resultPct << item_code;
-            resultPct << (int64_t) buy_count;
-            resultPct << (int64_t) mt.price_ratio;
-            resultPct << (int64_t) mt.huntaholic_ratio;
+            resultPct << (int64) buy_count;
+            resultPct << (int64) mt.price_ratio;
+            resultPct << (int64) mt.huntaholic_ratio;
             resultPct << (uint32_t) _player->GetLastContactLong("npc");
             _player->GetSession().GetSocket().SendPacket(resultPct);
         }
