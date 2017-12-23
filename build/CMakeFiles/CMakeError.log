@@ -1,0 +1,51 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/bin/make" "cmTC_2bf0d/fast"
+/bin/make -f CMakeFiles/cmTC_2bf0d.dir/build.make CMakeFiles/cmTC_2bf0d.dir/build
+make[1]: Verzeichnis „/home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp“ wird betreten
+Building C object CMakeFiles/cmTC_2bf0d.dir/CheckSymbolExists.c.o
+/bin/cc    -o CMakeFiles/cmTC_2bf0d.dir/CheckSymbolExists.c.o   -c "/home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c"
+Linking C executable cmTC_2bf0d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2bf0d.dir/link.txt --verbose=1
+/bin/cc      CMakeFiles/cmTC_2bf0d.dir/CheckSymbolExists.c.o  -o cmTC_2bf0d 
+CMakeFiles/cmTC_2bf0d.dir/CheckSymbolExists.c.o: In Funktion »main«:
+CheckSymbolExists.c:(.text+0x1b): Warnung: undefinierter Verweis auf »pthread_create«
+collect2: Fehler: ld gab 1 als Ende-Status zurück
+make[1]: *** [CMakeFiles/cmTC_2bf0d.dir/build.make:98: cmTC_2bf0d] Fehler 1
+make[1]: Verzeichnis „/home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp“ wird verlassen
+make: *** [Makefile:126: cmTC_2bf0d/fast] Fehler 2
+
+File /home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/bin/make" "cmTC_943dc/fast"
+/bin/make -f CMakeFiles/cmTC_943dc.dir/build.make CMakeFiles/cmTC_943dc.dir/build
+make[1]: Verzeichnis „/home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp“ wird betreten
+Building C object CMakeFiles/cmTC_943dc.dir/CheckFunctionExists.c.o
+/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_943dc.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_943dc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_943dc.dir/link.txt --verbose=1
+/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_943dc.dir/CheckFunctionExists.c.o  -o cmTC_943dc -lpthreads 
+/bin/ld: -lpthreads kann nicht gefunden werden
+collect2: Fehler: ld gab 1 als Ende-Status zurück
+make[1]: *** [CMakeFiles/cmTC_943dc.dir/build.make:98: cmTC_943dc] Fehler 1
+make[1]: Verzeichnis „/home/xijezu/dev/rappelz/Rappelz Emulator/build/CMakeFiles/CMakeTmp“ wird verlassen
+make: *** [Makefile:126: cmTC_943dc/fast] Fehler 2
+
+

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
+set (CMAKE_CXX_STANDARD 14)
 
 # Set RPATH-handing (CMake parameters)
 set(CMAKE_SKIP_BUILD_RPATH 0)

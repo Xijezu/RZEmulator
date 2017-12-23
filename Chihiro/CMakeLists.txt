@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 project(Chihiro)
 
-set (CMAKE_CXX_STANDARD 14)
-
 file(GLOB_RECURSE sources_Entities src/Entities/*.cpp src/Entities/*.h)
 file(GLOB_RECURSE sources_Scripting src/Scripting/*.cpp src/Scripting/*.h)
 file(GLOB_RECURSE sources_X2D src/X2D/*.cpp src/X2D/*.h)

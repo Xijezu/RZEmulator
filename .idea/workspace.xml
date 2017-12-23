@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
-      <config projectName="Project" targetName="Chihiro" />
       <config projectName="Project" targetName="Mononoke" />
+      <config projectName="Project" targetName="Chihiro" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -13,158 +13,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ef52a130-3d17-4a6a-aff5-082bde7d7037" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.gitmodules" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/CMakeLists.txt" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/FieldProp/FieldProp.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/FieldProp/FieldProp.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Item/Item.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Item/Item.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Item/ItemFields.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/NPC/NPC.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/NPC/NPC.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Player/TimeSync.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Summon/Summon.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Summon/Summon.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/DatabaseTemplates.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/GameRule.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/GameRule.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/ObjectMgr.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/ObjectMgr.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Main.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/TerrainSeamlessWorld.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/TerrainSeamlessWorld.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/WorldLocation.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Map/WorldLocation.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/AuthNetwork.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/AuthNetwork.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/AuthSession.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/ClientPackets.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameAcceptor.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Scripting/XLua.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/Scripting/XLua.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Boxf.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Boxf.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Linef.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Linef.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/MapLocationInfo.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Pointf.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/Pointf.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/PolygonF.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/PolygonF.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/QuadTreeMapInfo.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/QuadTreeMapInfo.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/QuadTreeMli.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/QuadTreeMli.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/RectangleF.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Chihiro/src/X2D/RectangleF.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/CMakeLists.txt" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/authserver.conf" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Lists/GameList.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Lists/PlayerList.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Main.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthClient/AuthClientPackets.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthClient/ClientAcceptor.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthClient/ClientAuthPackets.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthClient/ClientHandler.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthClient/ClientHandler.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthGame/AuthGamePackets.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthGame/GameAcceptor.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthGame/GameAuthPackets.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthGame/GameHandler.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/Mononoke/src/Server/AuthGame/GameHandler.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/cmake/macros/FindACE.cmake" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/cmake/macros/FindMYSQL.cmake" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/dep/sol2" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/AutoPtr.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Callback.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Common.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Common.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/CompilerDefs.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Configuration/Config.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Configuration/Config.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Containers.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/AdhocStatement.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/AdhocStatement.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/DatabaseEnv.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/DatabaseWorker.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/DatabaseWorker.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/DatabaseWorkerPool.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/Field.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/Field.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/MySQLConnection.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/MySQLConnection.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/MySQLThreading.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/PreparedStatement.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/PreparedStatement.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/QueryHolder.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/QueryHolder.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/QueryResult.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/QueryResult.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/SQLOperation.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/Transaction.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Database/Transaction.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Debugging/Errors.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Debugging/Errors.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Define.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/FactoryHolder.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/LinkedList.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/LinkedReference/RefManager.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/LinkedReference/Reference.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/ObjectRegistry.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/TypeContainer.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/TypeContainerFunctions.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/TypeContainerFunctionsPtr.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/TypeContainerVisitor.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/TypeList.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Dynamic/UnorderedMap.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/ByteBuffer.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/MD5.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/MD5.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/XDes.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/XDes.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/XRc4Cipher.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/XRc4Cipher.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Encryption/rc4_cipher.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Logging/Log.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Logging/Log.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Server/TS_MESSAGE.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Server/XPacket.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Server/XSocket.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Server/XSocket.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/ByteConverter.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/EventProcessor.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/EventProcessor.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/SignalHandler.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/Timer.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/Util.cpp" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/Utilities/Util.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/SFMT.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/checked.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/core.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/randomc.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/unchecked.h" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/shared/utf8/utf8.h" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/CMakeLists.txt" afterPath="$PROJECT_DIR$/Chihiro/CMakeLists.txt" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Mononoke/CMakeFiles/Mononoke.dir/flags.make" afterPath="$PROJECT_DIR$/cmake-build-debug/Mononoke/CMakeFiles/Mononoke.dir/flags.make" />
     </list>
     <ignored path="Mononoke.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -190,11 +42,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="GameHandler.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GameHandler.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2392">
-              <caret line="651" column="54" lean-forward="true" selection-start-line="651" selection-start-column="54" selection-end-line="651" selection-end-column="54" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="184">
+              <caret line="8" column="37" lean-forward="true" selection-start-line="8" selection-start-column="37" selection-end-line="8" selection-end-column="37" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Chihiro/CMakeLists.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="23">
+              <caret line="1" column="16" lean-forward="false" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -215,16 +87,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="162">
               <caret line="597" column="0" lean-forward="false" selection-start-line="597" selection-start-column="0" selection-end-line="597" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="XLua.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chihiro/src/Scripting/XLua.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="541">
-              <caret line="365" column="17" lean-forward="false" selection-start-line="365" selection-start-column="17" selection-end-line="365" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -337,7 +199,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Chihiro/src/Map/X2D.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/X2D/MapLocationInfo.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/X2D/RectangleF.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/X2D/PolygonF.h" />
@@ -370,7 +231,6 @@
         <option value="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/World.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/World.cpp" />
-        <option value="$PROJECT_DIR$/Chihiro/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/World/World.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.cpp" />
@@ -388,6 +248,8 @@
         <option value="$PROJECT_DIR$/Chihiro/src/Scripting/XLua.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
       </list>
     </option>
   </component>
@@ -581,15 +443,16 @@
       <workItem from="1513848564623" duration="36567000" />
       <workItem from="1513899043778" duration="32322000" />
       <workItem from="1513960242030" duration="52084000" />
-      <workItem from="1514044789307" duration="14518000" />
+      <workItem from="1514044789307" duration="15767000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="358042000" />
+    <option name="totallyTimeSpent" value="359291000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="22" y="30" width="1876" height="1028" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3238958" sideWeight="0.47596154" order="7" side_tool="false" content_ui="tabs" />
@@ -603,7 +466,7 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32739422" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -656,14 +519,6 @@
     <select />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Scripting/XLua.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1357">
-          <caret line="59" column="16" lean-forward="false" selection-start-line="59" selection-start-column="16" selection-end-line="59" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitmodules">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -850,13 +705,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/RappelzScheduler.cpp" />
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/RappelzScheduler.h" />
-    <entry file="file://$PROJECT_DIR$/Chihiro/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="39" column="53" lean-forward="false" selection-start-line="39" selection-start-column="53" selection-end-line="39" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
@@ -1033,8 +881,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2392">
-          <caret line="651" column="54" lean-forward="true" selection-start-line="651" selection-start-column="54" selection-end-line="651" selection-end-column="54" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23">
+          <caret line="1" column="16" lean-forward="false" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="8" column="37" lean-forward="true" selection-start-line="8" selection-start-column="37" selection-end-line="8" selection-end-column="37" />
           <folding />
         </state>
       </provider>
