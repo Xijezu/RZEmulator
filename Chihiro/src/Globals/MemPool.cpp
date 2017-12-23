@@ -44,9 +44,9 @@ Item *MemoryPoolMgr::FindItem(uint32_t handle)
     return nullptr;
 }
 
-Object* MemoryPoolMgr::getPtrFromId(uint32_t handle)
+WorldObject* MemoryPoolMgr::getPtrFromId(uint32_t handle)
 {
-   Object* result = nullptr;
+    WorldObject* result = nullptr;
 
     uint idbase = handle & 0xE0000000;
     if (idbase != 0)
@@ -58,11 +58,11 @@ Object* MemoryPoolMgr::getPtrFromId(uint32_t handle)
                 break;
             /*case 0x40000000:
                 result = (GameObject)getMonsterPtrFromId(uid);
-                break;
+                break;*/
             case 0x80000000:
-                result = (GameObject)getPlayerPtrFromId(uid);
+                result = getPlayerPtrFromId(handle);
                 break;
-            case 0xC0000000:
+            /*case 0xC0000000:
                 result = (GameObject)getSummonPtrFromId(uid);
                 break;
             case 0xE0000000:
@@ -80,7 +80,7 @@ Object* MemoryPoolMgr::getPtrFromId(uint32_t handle)
     return result;
 }
 
-Object *MemoryPoolMgr::getMiscPtrFromId(uint32_t handle)
+WorldObject *MemoryPoolMgr::getMiscPtrFromId(uint32_t handle)
 {
     if (m_hsMisc.count(handle) == 1)
         return m_hsMisc[handle];
@@ -93,4 +93,11 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
     item->m_Instance.UID = sWorld->getItemIndex();
     m_nMiscTop++;
     m_hsItem.insert(std::make_pair<uint, Item *>((uint)(item->m_nHandle), (Item*)item));
+}
+
+WorldObject *MemoryPoolMgr::getPlayerPtrFromId(uint32_t handle)
+{
+    if(m_hsPlayer.count(handle) == 1)
+        return m_hsPlayer[handle];
+    return nullptr;
 }

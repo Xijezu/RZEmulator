@@ -87,6 +87,7 @@ public:
     bool onMoveRequest(XPacket *);
     bool onRegionUpdate(XPacket *);
 	bool onChangeLocation(XPacket *);
+	bool onQuery(XPacket *);
     bool onTimeSync(XPacket *);
     bool onGameTime(XPacket *);
 

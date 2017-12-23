@@ -1,15 +1,11 @@
 #include "World.h"
 #include "DatabaseEnv.h"
 #include "Network/GameNetwork/ClientPackets.h"
-#include "Configuration/Config.h"
 #include "Map/ArRegion.h"
 #include "Globals/ObjectMgr.h"
 #include "Timer.h"
-#include "FieldProp/FieldProp.h"
 #include "Scripting/XLua.h"
 #include "Messages.h"
-
-const int g_nRegionSize = 180;
 
 World::World() : startTime(getMSTime())
 {

@@ -8,6 +8,7 @@
 #include "Dynamic/UnorderedMap.h"
 
 typedef UNORDERED_MAP<uint32, GameSession*> SessionMap;
+const int g_nRegionSize = 180;
 
 class World
 {

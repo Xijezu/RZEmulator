@@ -26,7 +26,6 @@
 #include "Messages.h"
 #include "Scripting/XLua.h"
 
-#include <algorithm>
 #include "Encryption/MD5.h"
 #include "Map/ArRegion.h"
 #include "ObjectMgr.h"
@@ -882,5 +881,24 @@ bool GameSession::onTimeSync(XPacket *pRecvPct)
 bool GameSession::onGameTime(XPacket *pRecvPct)
 {
     Messages::SendGameTime(_player);
+    return true;
+}
+
+bool GameSession::onQuery(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto handle = pRecvPct->read<uint>();
+
+    WorldObject* obj = sMemoryPool->getPtrFromId(handle);
+    if(obj != nullptr) {
+        if(!sArRegion->IsVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                (uint)(obj->GetPositionY() / g_nRegionSize),
+                (uint)(_player->GetPositionX() / g_nRegionSize),
+                (uint)(_player->GetPositionY() / g_nRegionSize))) {
+            MX_LOG_DEBUG("network", "onQuery failed: Not visible region!");
+            return true;
+        }
+        Messages::sendEnterMessage(_player, obj, false);
+    }
     return true;
 }

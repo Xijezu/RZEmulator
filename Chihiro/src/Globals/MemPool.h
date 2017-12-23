@@ -20,8 +20,9 @@ public:
     Summon *AllocSummon(uint);
 
     Item *FindItem(uint32_t handle);
-    Object* getPtrFromId(uint32_t handle);
-    Object* getMiscPtrFromId(uint32_t handle);
+    WorldObject* getPtrFromId(uint32_t handle);
+    WorldObject* getMiscPtrFromId(uint32_t handle);
+    WorldObject* getPlayerPtrFromId(uint32_t handle);
 
 private:
     uint32_t m_nMiscTop{0x20000001};
