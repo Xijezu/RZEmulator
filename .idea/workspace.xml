@@ -14,12 +14,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ef52a130-3d17-4a6a-aff5-082bde7d7037" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.cpp" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.h" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.h" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.h" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.h" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/World/World.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.cpp" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/World/World.h" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.h" />
     </list>
     <ignored path="Mononoke.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -48,8 +43,8 @@
       <file leaf-file-name="GameHandler.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="382">
-              <caret line="893" column="24" lean-forward="false" selection-start-line="893" selection-start-column="24" selection-end-line="893" selection-end-column="24" />
+            <state relative-caret-position="207">
+              <caret line="100" column="28" lean-forward="false" selection-start-line="100" selection-start-column="28" selection-end-line="100" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -129,7 +124,7 @@
         <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
-              <caret line="9" column="21" lean-forward="false" selection-start-line="9" selection-start-column="21" selection-end-line="9" selection-end-column="21" />
+              <caret line="7" column="21" lean-forward="false" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -468,7 +463,7 @@
       <workItem from="1513848564623" duration="36567000" />
       <workItem from="1513899043778" duration="32322000" />
       <workItem from="1513960242030" duration="52084000" />
-      <workItem from="1514044789307" duration="22059000" />
+      <workItem from="1514044789307" duration="22317000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed a bug that caused the game to crash when relogging (enter message on nullptr)">
       <created>1514064463747</created>
@@ -477,11 +472,18 @@
       <option name="project" value="LOCAL" />
       <updated>1514064463747</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Fixed a bug that caused the game to crash when relogging (enter message on nullptr)">
+      <created>1514070122786</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1514070122786</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="365583000" />
+    <option name="totallyTimeSpent" value="365841000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="22" y="30" width="1876" height="1028" extended-state="0" />
@@ -499,7 +501,7 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32739422" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -534,6 +536,7 @@
     </ignored-roots>
     <MESSAGE value="Fixed a bug that caused the game to crash when relogging (enter message on nullptr)" />
     <option name="LAST_COMMIT_MESSAGE" value="Fixed a bug that caused the game to crash when relogging (enter message on nullptr)" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -931,15 +934,15 @@
     <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
-          <caret line="9" column="21" lean-forward="false" selection-start-line="9" selection-start-column="21" selection-end-line="9" selection-end-column="21" />
+          <caret line="7" column="21" lean-forward="false" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="382">
-          <caret line="893" column="24" lean-forward="false" selection-start-line="893" selection-start-column="24" selection-end-line="893" selection-end-column="24" />
+        <state relative-caret-position="207">
+          <caret line="100" column="28" lean-forward="false" selection-start-line="100" selection-start-column="28" selection-end-line="100" selection-end-column="28" />
           <folding />
         </state>
       </provider>

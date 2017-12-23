@@ -96,7 +96,8 @@ const GameHandler packetHandler[] =
                                   {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &GameSession::onBuyItem},
                                   {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &GameSession::onChangeLocation},
                                   {TS_TIMESYNC,                 STATUS_AUTHED,    &GameSession::onTimeSync},
-                                  {TS_CS_GAME_TIME,             STATUS_AUTHED,    &GameSession::onGameTime}
+                                  {TS_CS_GAME_TIME,             STATUS_AUTHED,    &GameSession::onGameTime},
+                                  {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
