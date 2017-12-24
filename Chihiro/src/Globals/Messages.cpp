@@ -96,7 +96,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     summonPct.fill(pSummon->GetName(), 19);
     summonPct << (int32_t)pSummon->GetSummonCode();
     summonPct << (int32_t)pSummon->getLevel();
-    summonPct << (int32_t)100; // TODO: SP
+    summonPct << (int32_t)1000; // TODO: SP
     pPlayer->GetSession().GetSocket().SendPacket(summonPct);
 
     SendStatInfo(pPlayer, pSummon);
@@ -379,4 +379,18 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
     }
     packet.FinalizePacket();
     pPlayer->GetSession().GetSocket().SendPacket(packet);
+}
+
+void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool need_to_display)
+{
+    XPacket hpmpPct(TS_SC_HPMP);
+    hpmpPct << pUnit->GetHandle();
+    hpmpPct << add_hp;
+    hpmpPct << (int)pUnit->GetHealth();
+    hpmpPct << (int)pUnit->GetMaxHealth();
+    hpmpPct << (int)add_mp;
+    hpmpPct << (int)pUnit->GetMana();
+    hpmpPct << (int)pUnit->GetMaxMana();
+    hpmpPct << (uint8_t)(need_to_display ? 1 : 0);
+    sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), hpmpPct);
 }

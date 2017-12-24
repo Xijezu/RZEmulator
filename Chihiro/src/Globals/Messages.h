@@ -32,6 +32,7 @@ public:
     static void SendMoveMessage(Player *, Unit *);
     static void SendTimeSynch(Player*);
     static void SendWearInfo(Player*,Unit*);
+    static void BroadcastHPMPMessage(Unit*,int,float,bool);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

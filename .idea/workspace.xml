@@ -14,13 +14,16 @@
   <component name="ChangeListManager">
     <list default="true" id="ef52a130-3d17-4a6a-aff5-082bde7d7037" name="Default" comment="Fixed movement &amp; enter for multiplayer">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp" />
-      <change beforePath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.cpp" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.h" afterPath="$PROJECT_DIR$/Chihiro/src/Globals/Messages.h" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" afterPath="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
       <change beforePath="$PROJECT_DIR$/Chihiro/src/World/World.cpp" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.cpp" />
+      <change beforePath="$PROJECT_DIR$/Chihiro/src/World/World.h" afterPath="$PROJECT_DIR$/Chihiro/src/World/World.h" />
     </list>
     <ignored path="Mononoke.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,8 +52,28 @@
       <file leaf-file-name="GameHandler.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2583">
-              <caret line="890" column="0" lean-forward="false" selection-start-line="890" selection-start-column="0" selection-end-line="890" selection-end-column="0" />
+            <state relative-caret-position="290">
+              <caret line="281" column="71" lean-forward="false" selection-start-line="281" selection-start-column="71" selection-end-line="281" selection-end-column="71" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="46">
+              <caret line="2" column="7" lean-forward="false" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TS_MESSAGE.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/shared/Server/TS_MESSAGE.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="162">
+              <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -59,48 +82,28 @@
       <file leaf-file-name="Player.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="422" column="51" lean-forward="false" selection-start-line="422" selection-start-column="51" selection-end-line="422" selection-end-column="51" />
+            <state relative-caret-position="-345">
+              <caret line="146" column="69" lean-forward="false" selection-start-line="146" selection-start-column="69" selection-end-line="146" selection-end-column="69" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Messages.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="World.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="299">
+              <caret line="35" column="12" lean-forward="false" selection-start-line="35" selection-start-column="12" selection-end-line="35" selection-end-column="12" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Messages.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="143" column="25" lean-forward="false" selection-start-line="143" selection-start-column="25" selection-end-line="143" selection-end-column="25" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Messages.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/Messages.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="33" column="44" lean-forward="false" selection-start-line="33" selection-start-column="44" selection-end-line="33" selection-end-column="44" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Object.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="581" column="30" lean-forward="false" selection-start-line="581" selection-start-column="30" selection-end-line="581" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NPC.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/NPC/NPC.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="-3266">
+              <caret line="57" column="43" lean-forward="false" selection-start-line="57" selection-start-column="37" selection-end-line="57" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -109,21 +112,21 @@
       <file leaf-file-name="Unit.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="59" column="0" lean-forward="false" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="267">
+              <caret line="377" column="30" lean-forward="false" selection-start-line="377" selection-start-column="30" selection-end-line="377" selection-end-column="30" />
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Object.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp">
+      <file leaf-file-name="Object.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="598">
-              <caret line="368" column="64" lean-forward="false" selection-start-line="368" selection-start-column="64" selection-end-line="368" selection-end-column="64" />
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="231">
+              <caret line="109" column="24" lean-forward="false" selection-start-line="109" selection-start-column="24" selection-end-line="109" selection-end-column="24" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -131,8 +134,18 @@
       <file leaf-file-name="World.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="610">
-              <caret line="242" column="44" lean-forward="true" selection-start-line="242" selection-start-column="44" selection-end-line="242" selection-end-column="44" />
+            <state relative-caret-position="162">
+              <caret line="240" column="0" lean-forward="false" selection-start-line="240" selection-start-column="0" selection-end-line="240" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ArRegion.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="922">
+              <caret line="164" column="31" lean-forward="false" selection-start-line="164" selection-start-column="31" selection-end-line="164" selection-end-column="31" />
               <folding />
             </state>
           </provider>
@@ -142,11 +155,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sendmove</find>
-      <find>lastste</find>
-      <find>regionchange</find>
-      <find>region</find>
-      <find>GetCurrentPosition(uint t)</find>
       <find>onRegion</find>
       <find>movere</find>
       <find>onregioncha</find>
@@ -172,6 +180,11 @@
       <find>removefr</find>
       <find>class WorldObjec</find>
       <find>onReturn</find>
+      <find>onChat</find>
+      <find>AddTo</find>
+      <find>ReadCharacter</find>
+      <find>Calculate</find>
+      <find>Characterinfo</find>
     </findStrings>
     <replaceStrings>
       <replace>XPacket</replace>
@@ -195,8 +208,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Chihiro/src/X2D/PolygonF.h" />
-        <option value="$PROJECT_DIR$/Chihiro/src/X2D/PolygonF.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/X2D/QuadTreeMli.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Globals/DatabaseTemplates.h" />
         <option value="$PROJECT_DIR$/shared/Utilities/ByteConverter.h" />
@@ -219,8 +230,6 @@
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/Summon/Summon.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/Summon/Summon.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/Functors.h" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/World.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/World.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.h" />
@@ -236,16 +245,20 @@
         <option value="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/Globals/MemPool.h" />
-        <option value="$PROJECT_DIR$/Chihiro/src/World/World.h" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
         <option value="$PROJECT_DIR$/cmake-build-debug/Chihiro/chihiro.conf" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Globals/Messages.h" />
         <option value="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h" />
-        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Globals/Messages.h" />
+        <option value="$PROJECT_DIR$/Chihiro/src/World/World.h" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/World/World.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.cpp" />
         <option value="$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp" />
+        <option value="$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -338,18 +351,15 @@
               <item name="Rappelz Emulator" type="462c0819:PsiDirectoryNode" />
               <item name="Chihiro" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="World" type="462c0819:PsiDirectoryNode" />
+              <item name="Network" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Rappelz Emulator" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
               <item name="Rappelz Emulator" type="462c0819:PsiDirectoryNode" />
-              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Rappelz Emulator" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
-              <item name="Rappelz Emulator" type="462c0819:PsiDirectoryNode" />
-              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
               <item name="Chihiro" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="Network" type="462c0819:PsiDirectoryNode" />
+              <item name="GameNetwork" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -366,19 +376,19 @@
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/cmake-build-debug/Chihiro" />
-      <recent name="$PROJECT_DIR$/Chihiro/src/Entities" />
-      <recent name="$PROJECT_DIR$/Mononoke/include/Server/AuthGame" />
-      <recent name="$PROJECT_DIR$/Mononoke/include/Server/AuthClient" />
-      <recent name="$PROJECT_DIR$/cmake/macros" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Chihiro/src/World" />
       <recent name="$PROJECT_DIR$/Chihiro/src/Entities" />
       <recent name="$PROJECT_DIR$/Mononoke/src/Server/AuthGame" />
       <recent name="$PROJECT_DIR$/Mononoke/src/Server/AuthClient" />
       <recent name="$PROJECT_DIR$/Mononoke/src" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cmake-build-debug/Chihiro" />
+      <recent name="$PROJECT_DIR$/Chihiro/src/Entities" />
+      <recent name="$PROJECT_DIR$/Mononoke/include/Server/AuthGame" />
+      <recent name="$PROJECT_DIR$/Mononoke/include/Server/AuthClient" />
+      <recent name="$PROJECT_DIR$/cmake/macros" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -464,7 +474,7 @@
       <workItem from="1513848564623" duration="36567000" />
       <workItem from="1513899043778" duration="32322000" />
       <workItem from="1513960242030" duration="52084000" />
-      <workItem from="1514044789307" duration="27596000" />
+      <workItem from="1514044789307" duration="32488000" />
     </task>
     <task id="LOCAL-00001" summary="Fixed a bug that caused the game to crash when relogging (enter message on nullptr)">
       <created>1514064463747</created>
@@ -487,18 +497,25 @@
       <option name="project" value="LOCAL" />
       <updated>1514070346041</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Fixed movement &amp; enter for multiplayer">
+      <created>1514075669061</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1514075669061</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="371120000" />
+    <option name="totallyTimeSpent" value="376012000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="22" y="30" width="1876" height="1028" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3238958" sideWeight="0.47596154" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3238958" sideWeight="0.47596154" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31030577" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3370044" sideWeight="0.52403843" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.4636752" order="9" side_tool="false" content_ui="tabs" />
@@ -509,7 +526,7 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32739422" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.398641" sideWeight="0.42628205" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -550,17 +567,10 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp</url>
-          <line>890</line>
-          <option name="timeStamp" value="897" />
-        </line-breakpoint>
-      </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="902" />
+      <option name="time" value="905" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -574,21 +584,6 @@
     <select />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Mononoke/authserver.conf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Mononoke/src/Server/AuthClient/ClientHandler.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="140" column="31" lean-forward="false" selection-start-line="140" selection-start-column="31" selection-end-line="140" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/shared/Common.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1410">
@@ -633,13 +628,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/shared/Server/TS_MESSAGE.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Summon/Summon.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="161">
@@ -667,14 +655,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Functors.h" />
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="188">
-          <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/shared/Threading/LockedQueue.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3237">
@@ -722,16 +702,6 @@
         <state relative-caret-position="418">
           <caret line="191" column="34" lean-forward="false" selection-start-line="191" selection-start-column="34" selection-end-line="191" selection-end-column="34" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="35" column="28" lean-forward="false" selection-start-line="35" selection-start-column="28" selection-end-line="35" selection-end-column="28" />
-          <folding>
-            <element signature="e#731#757#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -831,14 +801,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="138">
-          <caret line="10" column="30" lean-forward="false" selection-start-line="10" selection-start-column="30" selection-end-line="10" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/MemPool.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1035">
@@ -851,22 +813,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="69">
           <caret line="3" column="25" lean-forward="false" selection-start-line="3" selection-start-column="25" selection-end-line="3" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/ClientPackets.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="131" column="58" lean-forward="false" selection-start-line="131" selection-start-column="58" selection-end-line="131" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -889,14 +835,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="59" column="0" lean-forward="false" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/NPC/NPC.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -905,60 +843,132 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/Messages.h">
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/WorldRunnable.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="33" column="44" lean-forward="false" selection-start-line="33" selection-start-column="44" selection-end-line="33" selection-end-column="44" />
+        <state relative-caret-position="232">
+          <caret line="35" column="28" lean-forward="false" selection-start-line="35" selection-start-column="28" selection-end-line="35" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h">
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/Messages.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="473">
-          <caret line="581" column="30" lean-forward="false" selection-start-line="581" selection-start-column="30" selection-end-line="581" selection-end-column="30" />
+        <state relative-caret-position="414">
+          <caret line="34" column="33" lean-forward="false" selection-start-line="34" selection-start-column="33" selection-end-line="34" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/ClientPackets.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="133" column="4" lean-forward="false" selection-start-line="133" selection-start-column="4" selection-end-line="133" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Map/ArRegion.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="140" column="100" lean-forward="false" selection-start-line="140" selection-start-column="100" selection-end-line="140" selection-end-column="100" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="35" column="12" lean-forward="false" selection-start-line="35" selection-start-column="12" selection-end-line="35" selection-end-column="12" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="598">
-          <caret line="368" column="64" lean-forward="false" selection-start-line="368" selection-start-column="64" selection-end-line="368" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="422" column="51" lean-forward="false" selection-start-line="422" selection-start-column="51" selection-end-line="422" selection-end-column="51" />
+        <state relative-caret-position="208">
+          <caret line="54" column="19" lean-forward="true" selection-start-line="54" selection-start-column="19" selection-end-line="54" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Object/Object.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2583">
-          <caret line="890" column="0" lean-forward="false" selection-start-line="890" selection-start-column="0" selection-end-line="890" selection-end-column="0" />
+        <state relative-caret-position="231">
+          <caret line="109" column="24" lean-forward="false" selection-start-line="109" selection-start-column="24" selection-end-line="109" selection-end-column="24" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.cpp">
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Unit/CreatureAttribute.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="610">
-          <caret line="242" column="44" lean-forward="true" selection-start-line="242" selection-start-column="44" selection-end-line="242" selection-end-column="44" />
+        <state relative-caret-position="-2111">
+          <caret line="57" column="31" lean-forward="false" selection-start-line="57" selection-start-column="31" selection-end-line="57" selection-end-column="31" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Chihiro/src/Globals/Messages.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="143" column="25" lean-forward="false" selection-start-line="143" selection-start-column="25" selection-end-line="143" selection-end-column="25" />
+        <state relative-caret-position="-3266">
+          <caret line="57" column="43" lean-forward="false" selection-start-line="57" selection-start-column="37" selection-end-line="57" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Player/Player.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-345">
+          <caret line="146" column="69" lean-forward="false" selection-start-line="146" selection-start-column="69" selection-end-line="146" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/shared/Server/TS_MESSAGE.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/World/World.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="240" column="0" lean-forward="false" selection-start-line="240" selection-start-column="0" selection-end-line="240" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Map/ArRegion.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="922">
+          <caret line="164" column="31" lean-forward="false" selection-start-line="164" selection-start-column="31" selection-end-line="164" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Entities/Unit/Unit.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="267">
+          <caret line="377" column="30" lean-forward="false" selection-start-line="377" selection-start-column="30" selection-end-line="377" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Chihiro/src/Network/GameNetwork/GameHandler.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="290">
+          <caret line="281" column="71" lean-forward="false" selection-start-line="281" selection-start-column="71" selection-end-line="281" selection-end-column="71" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="46">
+          <caret line="2" column="7" lean-forward="false" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
           <folding />
         </state>
       </provider>

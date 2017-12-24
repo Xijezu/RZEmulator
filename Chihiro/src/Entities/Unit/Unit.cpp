@@ -2,6 +2,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "GameRule.h"
+#include "Messages.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -362,10 +363,22 @@ void Unit::CalculateStat()
     SetMaxHealth((uint32_t) (GetInt32Value(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth());
     SetMaxMana((uint32_t)(GetInt32Value(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana());
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
+    auto hp = GetMaxHealth();
+    auto mp = GetMaxMana();
     // TODO this.onCompleteCalculateStat();
     SetHealth(GetHealth());
     SetMana(GetMana());
-
+    if(IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
+    {
+        Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
+    } else {
+        if(GetSubType() == ST_Summon && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
+        {
+            auto s = dynamic_cast<Summon*>(this);
+            //if(s != nullptr)
+                //Messages::SendHPMPMessage()
+        }
+    }
 }
 
 void Unit::applyItemEffect()

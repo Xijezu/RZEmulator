@@ -153,8 +153,8 @@ bool Player::ReadCharacter(std::string _name, int _race)
             return false;
 
         CalculateStat();
-
         AddToWorld();
+        Messages::SendHPMPMessage(this, this, GetHealth(), GetMana(), true);
         //Messages::sendEnterMessage(this, this, false);
 
     } else {

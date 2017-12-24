@@ -138,6 +138,7 @@ public :
     ArRegion *GetRegion(WorldObject &pObject);
     ArRegion *GetRegion(uint32 rx, uint32 ry, uint32 layer);
     void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, std::function<void (ArRegion*)> fn);
+    void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, std::function<void (ArRegion*)> fn);
     void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, std::function<void (ArRegion*)> fn);
 
     // needed for IsvisibleRegion

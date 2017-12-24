@@ -279,11 +279,11 @@ bool GameSession::onLogin(XPacket *pRecvPct)
     packet << _player->GetPositionZ();
     packet << (uint8) _player->GetLayer();
     packet << (uint32) _player->GetOrientation();
-    packet << (uint32) sConfigMgr->GetIntDefault("Game.RegionSize", 150);
-    packet << _player->GetUInt32Value(UNIT_FIELD_HEALTH);
-    packet << (uint16) _player->GetUInt32Value(UNIT_FIELD_MANA);
-    packet << _player->GetUInt32Value(UNIT_FIELD_HEALTH);
-    packet << (uint16) _player->GetUInt32Value(UNIT_FIELD_MANA);
+    packet << (uint32) sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    packet << (uint32)_player->GetHealth();
+    packet << (uint16) _player->GetMana();
+    packet << (uint32)_player->GetMaxHealth();
+    packet << (uint16) _player->GetMaxMana();
     packet << _player->GetUInt32Value(UNIT_FIELD_HAVOC);
     packet << _player->GetUInt32Value(UNIT_FIELD_HAVOC);
     packet << _player->GetUInt32Value(UNIT_FIELD_SEX);
@@ -604,6 +604,8 @@ bool GameSession::onChatRequest(XPacket *_packet)
             sScriptingMgr->RunString(_player, request.szMsg.substr(5));
         } else if (tokenizer[0] == "/loc"s) {
             _player->ChangeLocation(_player->GetPositionX(), _player->GetPositionY(), false, false);
+        } else if(tokenizer[0] == "/calc"s) {
+            _player->CalculateStat();
         }
         return true;
     }

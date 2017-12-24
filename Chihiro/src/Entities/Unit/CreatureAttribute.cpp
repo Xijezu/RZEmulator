@@ -55,7 +55,7 @@ void CreatureStat::Add(CreatureStat v)
 
 void CreatureStat::WriteToPacket(XPacket &packet)
 {
-    packet << (int16_t) -1;
+    packet << (int16_t) stat_id;
     packet << (int16_t) (strength > 32000 ? 32000 : strength);
     packet << (int16_t) (vital > 32000 ? 32000 : vital);
     packet << (int16_t) (dexterity > 32000 ? 32000 : dexterity);

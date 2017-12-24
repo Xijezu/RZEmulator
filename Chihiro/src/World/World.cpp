@@ -244,3 +244,21 @@ void World::Update(uint diff)
         }
     }
 }
+
+void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
+{
+    sArRegion->DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, [&packet](ArRegion* rgn) {
+        rgn->DoEachClient([&packet](WorldObject* obj) {
+            dynamic_cast<Player*>(obj)->GetSession().GetSocket().SendPacket(packet);
+        });
+    });
+}
+
+void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
+{
+    sArRegion->DoEachVisibleRegion(rx, ry, layer, [&packet](ArRegion* rgn) {
+       rgn->DoEachClient([&packet](WorldObject* obj) {
+           dynamic_cast<Player*>(obj)->GetSession().GetSocket().SendPacket(packet);
+       });
+    });
+}
