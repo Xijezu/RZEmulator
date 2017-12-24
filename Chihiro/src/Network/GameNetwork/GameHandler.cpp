@@ -55,6 +55,7 @@ void GameSession::OnClose(void)
 {
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
+    sWorld->RemoveSession(GetAccountId());
     if (_player != nullptr && _player->IsInWorld())
         delete _player;
 }
@@ -834,8 +835,6 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
             XPacket resultPct(TS_SC_NPC_TRADE_INFO);
             resultPct << (uint8_t) 0;
             resultPct << item_code;
-            resultPct << (int64) buy_count;
-            resultPct << (int64) mt.price_ratio;
 #if EPIC > 4
             resultPct << (int64) mt.huntaholic_ratio;
 #endif
@@ -960,6 +959,7 @@ bool GameSession::onJobLevelUp(XPacket *pRecvPct)
     }
     _player->Save(true);
     Messages::SendPropertyMessage(_player, cr, "job_level", cr->GetCurrentJLv());
+    Messages::SendPropertyMessage(_player, cr, "jp", cr->GetJP());
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
     return true;
 }

@@ -74,7 +74,7 @@ public:
     { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth); }
 
     int32 GetPrevJobLv(int nDepth)
-    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_JOBLEVEL + nDepth); }
+    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_PREV_JLV + nDepth); }
 
     void regenHPMP(uint t);
 
@@ -137,10 +137,10 @@ public:
     { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
 
     void SetEXP(uint exp)
-    { SetUInt32Value(UNIT_FIELD_EXP, exp); }
+    { SetUInt64Value(UNIT_FIELD_EXP, exp); onExpChange(); }
 
-    uint32 GetEXP() const
-    { return uint32(GetUInt32Value(UNIT_FIELD_EXP)); }
+    uint64 GetEXP() const
+    { return GetUInt64Value(UNIT_FIELD_EXP); }
 
     bool IsFullHealth() const
     { return GetHealth() == GetMaxHealth(); }
@@ -236,6 +236,7 @@ public:
     float m_nRegenHP{}, m_fRegenMP{};
 protected:
     virtual void onRegisterSkill(int,int,int,int) { };
+    virtual void onExpChange() { };
     //UNORDERED_MAP<int, Item> m_anWear;
     uint m_nLastUpdatedTime{};
     DeathState _deathState;

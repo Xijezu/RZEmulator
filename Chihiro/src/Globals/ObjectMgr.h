@@ -53,6 +53,8 @@ public:
 
     int GetNeedJpForJobLevelUp(int,int);
     int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
+    long GetNeedExp(int level);
+
     std::vector<MarketInfo> GetMarketInfo(std::string);
     ushort IsLearnableSkill(Unit*,int,int, int&);
 

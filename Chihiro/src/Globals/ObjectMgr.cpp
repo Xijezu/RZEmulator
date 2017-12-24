@@ -30,8 +30,10 @@ bool ObjectMgr::InitGameContent()
         return false;
     else if(!LoadSkillTreeResource() || !LoadLevelResource())
         return false;
-    else
-        return true;
+
+    MX_LOG_INFO("server.worldserver", "GetNeedExp(3): %d", GetNeedExp(3));
+
+    return true;
 }
 
 bool ObjectMgr::LoadItemResource()
@@ -526,10 +528,10 @@ bool ObjectMgr::LoadSkillJP()
         Field *field = result->Fetch();
         int off = 0;
         int skill_id = field[off++].GetInt32();
-        SkillBase sb = _skillBaseStore[skill_id];
-        if(sb.id != 0) {
+        SkillBase* sb = &_skillBaseStore[skill_id];
+        if(sb->id != 0) {
             for(int v = 0; v < 50; ++v) {
-                sb.m_need_jp[v] = field[off++].GetInt32();
+                sb->m_need_jp[v] = field[off++].GetInt32();
             }
         }
         ++count;
@@ -886,7 +888,7 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
         return TS_RESULT_NOT_ENOUGH_JOB_LEVEL;
     }
     if(bMaxLimit) {
-        return TS_RESULT_NOT_ENOUGH_SKILL;
+        return TS_RESULT_LIMIT_MAX;
     }
     return TS_RESULT_ACCESS_DENIED;
 }
@@ -942,5 +944,17 @@ SkillBase ObjectMgr::GetSkillBase(int skill_id)
     if(_skillBaseStore.count(skill_id) == 1)
         return _skillBaseStore[skill_id];
     return { };
+}
+
+long ObjectMgr::GetNeedExp(int level)
+{
+    int l = level;
+    if(l < 1)
+        l = 1;
+    if(l > 300)
+        l = 300;
+    if(_levelResourceStore.size() < l)
+        l = _levelResourceStore.size() -1;
+    return _levelResourceStore[l-1].normal_exp;
 }
 

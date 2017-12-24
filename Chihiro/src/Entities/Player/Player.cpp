@@ -72,7 +72,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_RACE, (*result)[9].GetInt32());
         SetInt32Value(UNIT_FIELD_SEX, (*result)[10].GetInt32());
         SetInt32Value(UNIT_FIELD_LEVEL, (*result)[11].GetInt32());
-        SetInt32Value(UNIT_FIELD_EXP, (int) (*result)[12].GetInt64());
+        SetUInt64Value(UNIT_FIELD_EXP, (int) (*result)[12].GetUInt64());
         SetInt32Value(UNIT_FIELD_HEALTH, (*result)[13].GetInt32());
         SetInt32Value(UNIT_FIELD_MANA, (*result)[14].GetInt32());
         SetInt32Value(UNIT_FIELD_STAMINA, (*result)[15].GetInt32());
@@ -81,7 +81,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_JOBPOINT, (*result)[18].GetInt32());
         for (int i = 0; i < 3; i++) {
             SetInt32Value(UNIT_FIELD_PREV_JOB + i, (*result)[19 + i].GetInt32());
-            SetInt32Value(UNIT_FIELD_JOBLEVEL + i, (*result)[22 + i].GetInt32());
+            SetInt32Value(UNIT_FIELD_PREV_JLV + i, (*result)[22 + i].GetInt32());
         }
         SetInt32Value(UNIT_FIELD_IP, (int) (*result)[25].GetFloat());
         SetInt32Value(UNIT_FIELD_CHA, (*result)[26].GetInt32());
@@ -129,22 +129,17 @@ bool Player::ReadCharacter(std::string _name, int _race)
         }
 
         int nSummonIdx = 0;
-        for(int i = 0; i < 6; ++i)
-        {
-            if (GetInt32Value(UNIT_FIELD_SUMMON + i) != 0)
-            {
+        for(int i = 0; i < 6; ++i) {
+            if (GetInt32Value(UNIT_FIELD_SUMMON + i) != 0) {
                 auto pSummon = GetSummon(GetInt32Value(UNIT_FIELD_SUMMON + i));
-                if (pSummon != nullptr)
-                {
+                if (pSummon != nullptr) {
                     //nSummonHP[nSummonIdx] = pSummon.m_nHP;
-                    pSummon->m_cSlotIdx = (uint8_t)nSummonIdx;
+                    pSummon->m_cSlotIdx = (uint8_t) nSummonIdx;
                     //nSummonMP[nSummonIdx] = pSummon.m_fMP;
                     pSummon->CalculateStat();
                     m_aBindSummonCard[nSummonIdx] = pSummon->m_pItem;
                     nSummonIdx++;
-                }
-                else
-                {
+                } else {
                     MX_LOG_ERROR("entities", "Invalid Summon Bind!");
                 }
             }
@@ -300,15 +295,15 @@ bool Player::ReadSummonList(int UID)
             summon->SetUInt32Value(UNIT_FIELD_UID, sid);
             summon->m_nSummonInfo = code;
             summon->m_nCardUID = card_uid;
-            summon->SetUInt32Value(UNIT_FIELD_EXP, exp);
+            summon->SetUInt64Value(UNIT_FIELD_EXP, exp);
             summon->SetJP(jp);
             summon->SetName(name);
             summon->SetLevel(lv);
             summon->SetCurrentJLv(jlv);
             summon->SetInt32Value(UNIT_FIELD_PREV_JOB, prev_level_01);
             summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, prev_level_02);
-            summon->SetInt32Value(UNIT_FIELD_JOBLEVEL, prev_id_01);
-            summon->SetInt32Value(UNIT_FIELD_JOBLEVEL + 1, prev_id_02);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, prev_id_01);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, prev_id_02);
             summon->SetInt32Value(UNIT_FIELD_HEALTH, hp);
             summon->SetInt32Value(UNIT_FIELD_MANA, mp);
             summon->m_nTransform = transform;
@@ -408,7 +403,6 @@ void Player::SendGoldChaosMessage()
 
 void Player::SendJobInfo()
 {
-    int depth = GetInt32Value(UNIT_FIELD_JOB_DEPTH);
     SendPropertyMessage("job", GetCurrentJob());
     SendPropertyMessage("jlv", GetCurrentJLv());
     for (int i = 0; i < 3; ++i) {
@@ -724,7 +718,9 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
     if(pItem->m_Instance.UID != 0) {
         // Update Item Owner
     }
+
     sMemoryPool->AllocItemHandle(pItem);
+
     if(!bSkipUpdateToDB) {
         pItem->DBInsert();
     }
@@ -797,5 +793,73 @@ void Player::onRegisterSkill(int skillUID, int skill_id, int prev_level, int ski
     } else {
         Skill::DB_InsertSkill(this, skillUID, this->GetUInt32Value(UNIT_FIELD_UID), 0, skill_id, skill_level);
     }
+    Messages::SendPropertyMessage(this, this, "jp", GetJP());
     Messages::SendSkillList(this,this,skill_id);
+}
+
+void Player::onExpChange()
+{
+    int level = 1;
+    auto exp = GetEXP();
+    long calcExp = 0;
+    if(sObjectMgr->GetNeedExp(1) <= exp) {
+        do
+        {
+            if (level >= 300)
+                break;
+            ++level;
+        }
+        while (sObjectMgr->GetNeedExp(level) <= exp);
+    }
+    level -= 1;
+    Messages::SendEXPMessage(this, this);
+    int oldLevel = getLevel();
+    if(level != 0 && level != oldLevel) {
+        SetLevel(level);
+        if(level < oldLevel) {
+            this->CalculateStat();
+        } else  {
+//            sScriptingMgr->RunString(this, "on_player_level_up()");
+
+            /*if(getLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
+                SetUInt64Value(UNIT_FIELD_MAX_REACHED_LEVEL)*/
+
+            this->CalculateStat();
+            if(GetHealth() != 0) {
+                SetHealth(GetMaxHealth());
+                SetMana(GetMaxMana());
+            }
+            Messages::BroadcastHPMPMessage(this, 0, 0, false);
+            // TODO: Guild & Party level update
+        }
+        this->Save(false);
+        Messages::BroadcastLevelMsg(this);
+    } else {
+        if(m_nLastSaveTime + 3000 < sWorld->GetArTime())
+            Save(true);
+    }
+}
+
+void Player::onChangeProperty(std::string key, int value)
+{
+    if(key == "hp") {
+        Messages::BroadcastHPMPMessage(this, value, 0, false);
+        return;
+    } else if(key == "lvl" || key == "lv" || key == "level") {
+        SetEXP(sObjectMgr->GetNeedExp(value));
+        return;
+    } else if(key == "exp") {
+        onExpChange();
+        return;
+    } else if(key == "gold") {
+        SendGoldChaosMessage();
+        return;
+    } else if(key == "job") {
+        this->CalculateStat();
+        //return;
+    } else if(key == "jlvl" || key == "jlv" || key == "job_level") {
+        Messages::SendPropertyMessage(this, this, "job_level", GetCurrentJLv());
+        return;
+    }
+    Messages::SendPropertyMessage(this, this, key, value);
 }

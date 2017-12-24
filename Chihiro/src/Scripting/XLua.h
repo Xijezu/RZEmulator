@@ -52,7 +52,9 @@ private:
     int SCRIPT_GetItemNameID(int);
     int SCRIPT_GetItemCode(uint);
     int SCRIPT_UpdateGoldChaos();
+    int SCRIPT_LearnAllSkill();
     void SCRIPT_SavePlayer();
+    uint SCRIPT_InsertItem(sol::variadic_args);
 
     sol::object SCRIPT_GetValue(std::string);
     void SCRIPT_SetValue(std::string,int64);

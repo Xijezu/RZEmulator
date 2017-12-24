@@ -75,6 +75,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_item_price", &XLua::SCRIPT_GetItemPrice, this);
     m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
     m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
+    m_pState.set_function("insert_item", &XLua::SCRIPT_InsertItem, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -240,6 +241,18 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     } else if (szKey == "name") {
         return return_object(m_pUnit->GetName());
     }
+    else if(szKey == "job_0")
+        return return_object(m_pUnit->GetPrevJobId(0));
+    else if(szKey == "job_1")
+        return return_object(m_pUnit->GetPrevJobId(1));
+    else if(szKey == "job_2")
+        return return_object(m_pUnit->GetPrevJobId(2));
+    else if(szKey == "jlv_0")
+        return return_object(m_pUnit->GetPrevJobLv(0));
+    else if(szKey == "jlv_1")
+        return return_object(m_pUnit->GetPrevJobLv(1));
+    else if(szKey == "jlv2")
+        return return_object(m_pUnit->GetPrevJobLv(2));
 
     if(m_pUnit->GetSubType() == ST_Player) {
         auto player = dynamic_cast<Player*>(m_pUnit);
@@ -287,13 +300,10 @@ void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
         m_pUnit->SetInt32Value(UNIT_FIELD_RACE, nValue);
     } else if (szKey == "job") {
         m_pUnit->SetCurrentJob(nValue);
-        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "job", nValue);
     } else if (szKey == "level" || szKey == "lv") {
-        m_pUnit->SetLevel(nValue);
-        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "level", nValue);
+        m_pUnit->SetEXP(sObjectMgr->GetNeedExp(nValue));
     } else if (szKey == "job_level" || szKey == "jlv") {
         m_pUnit->SetCurrentJLv(nValue);
-        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "job_level", nValue);
     } else if(szKey == "x") {
         m_pUnit->Relocate(nValue, m_pUnit->GetPositionY());
     } else if(szKey == "y") {
@@ -309,13 +319,23 @@ void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
     } else if(szKey == "mp") {
         m_pUnit->SetMana(nValue);
         Messages::BroadcastHPMPMessage(m_pUnit,0,  nValue, false);
-    }
+    } else if(szKey == "job_0")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, nValue);
+    else if(szKey == "job_1")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, nValue);
+    else if(szKey == "job_2")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, nValue);
+    else if(szKey == "jlv_0")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, nValue);
+    else if(szKey == "jlv_1")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 1, nValue);
+    else if(szKey == "jlv_2")
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 2, nValue);
 
     if(m_pUnit->GetSubType() == ST_Player) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
             player->SetUInt64Value(UNIT_FIELD_GOLD, nValue);
-            player->SendGoldChaosMessage();
         } else if(szKey == "permission") {
             player->SetInt32Value(UNIT_FIELD_PERMISSION, nValue);
         } else if(szKey == "chaos") {
@@ -323,6 +343,9 @@ void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
             player->SendGoldChaosMessage();
         }
     }
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player != nullptr)
+        player->onChangeProperty(szKey, nValue);
 }
 
 sol::object XLua::SCRIPT_GetEnv(std::string szKey)
@@ -498,4 +521,28 @@ void XLua::SCRIPT_SavePlayer()
     if(m_pUnit == nullptr)
         return;
     dynamic_cast<Player*>(m_pUnit)->Save(false);
+}
+
+uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
+{
+    if(m_pUnit == nullptr)
+        return 0;
+
+    if(args.size() < 2)
+        return 0;
+
+    int nCode = args[0].get<int>();
+    int nCount = args[1].get<int>();
+    int nEnhance = args.size() >= 3 ? args[2].get<int>() : 0;
+    int nLevel = args.size() >= 4 ? args[3].get<int>() : 0;
+    int nFlag = args.size() >= 5 ? args[4].get<int>() : 0;
+    auto player = dynamic_cast<Player*>(m_pUnit);
+
+    if(player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0) {
+        auto item = Item::AllocItem(0, nCode, nCount, GenerateCode::ByScript, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
+        player->PushItem(item, nCount, false);
+
+        return item->m_nHandle;
+    }
+    return 0;
 }

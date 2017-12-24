@@ -87,6 +87,7 @@ public:
 
     void ShowDialog();
     bool IsValidTrigger(std::string);
+    void onChangeProperty(std::string, int);
 
     bool IsFixedDialogTrigger(std::string szTrigger)
     { return false; }
@@ -107,8 +108,11 @@ public:
     int m_nWorldLocationId{0};
     TimeSynch m_TS{200,2,10};
 
+    Summon* m_pMainSummon{nullptr};
+
 protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
+    void onExpChange() override;
 
 private:
     GameSession           *m_session;

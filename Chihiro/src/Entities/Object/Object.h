@@ -46,7 +46,7 @@ enum EUnitFields {
     UNIT_FIELD_HANDLE                = 0x0000, // Size: 1
     UNIT_FIELD_ACCOUNT_ID            = 0x0001, // Size: 1
     UNIT_FIELD_LEVEL                 = 0x0002, // Size: 1
-    UNIT_FIELD_EXP                   = 0x0003, // Size: 1
+    UNIT_FIELD_STATUS                = 0x0003, // Size: 1>
     UNIT_FIELD_PERMISSION            = 0x0004, // Size: 1
     UNIT_FIELD_JOBPOINT              = 0x0005, // Size: 1
     UNIT_FIELD_HEALTH                = 0x0006, // Size: 1
@@ -59,7 +59,7 @@ enum EUnitFields {
     UNIT_FIELD_RACE                  = 0x000D, // Size: 1
     UNIT_FIELD_SEX                   = 0x000E, // Size: 1
     UNIT_FIELD_PREV_JOB              = 0x000F, // Size: 3
-    UNIT_FIELD_JOBLEVEL              = 0x0012, // Size: 3
+    UNIT_FIELD_PREV_JLV              = 0x0012, // Size: 3
     UNIT_FIELD_HAVOC                 = 0x0015, // Size: 1
     UNIT_FIELD_JOB_DEPTH             = 0x0016, // Size: 1
     UNIT_FIELD_IP                    = 0x0017, // Size: 1
@@ -94,8 +94,8 @@ enum EUnitFields {
     UNIT_FIELD_ADDITIONAL_HEAL       = 0x0046, // Size: 1
     UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0047, // Size: 1
     UNIT_FIELD_UID                   = 0x0048, // Size: 1
-    UNIT_FIELD_STATUS                = 0x0049,
-    UNIT_END                         = 0x004A
+    UNIT_FIELD_EXP                   = 0x0049, // Size: 2
+    UNIT_END                         = 0x004B
 };
 
 class ArRegion;
@@ -580,6 +580,7 @@ public:
     void _Create(uint32 handle, uint32 phaseMask);
 
     void SendEnterMsg(Player *);
+    void AddNoise(int, int, int);
 
     virtual void AddToWorld();
     virtual void RemoveFromWorld();

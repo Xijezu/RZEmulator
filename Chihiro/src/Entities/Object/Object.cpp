@@ -436,6 +436,22 @@ void WorldObject::AddToWorld()
     Object::AddToWorld();
 }
 
+void WorldObject::AddNoise(int r1, int r2, int v)
+{
+    float prev_x = GetPositionX();
+    float prev_y = GetPositionX();
+
+    auto rs = (double)AR_REGION_SIZE;
+    auto tx = (int) (GetPositionX() / rs);
+    auto ty = (int) (GetPositionY() / rs);
+    m_positionX = (float)(r1 % v - v / 2) + GetPositionX();
+    m_positionY = (float)(r2 % v - v / 2) + GetPositionY();
+    if ((int)(m_positionX / rs) != tx)
+        m_positionX = prev_x;
+    if ((int)(m_positionY / rs) != ty)
+        m_positionY = prev_y;
+}
+
 ArMoveVector::ArMoveVector(const ArMoveVector *src)
 {
     this->m_positionX = src->m_positionX;

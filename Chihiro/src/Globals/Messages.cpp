@@ -408,3 +408,12 @@ void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool 
     hpmpPct << (uint8_t)(need_to_display ? 1 : 0);
     sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), hpmpPct);
 }
+
+void Messages::BroadcastLevelMsg(Unit *pUnit)
+{
+    XPacket levelPct(TS_SC_LEVEL_UPDATE);
+    levelPct << (uint32)pUnit->GetHandle();
+    levelPct << (int)pUnit->getLevel();
+    levelPct << (int)pUnit->GetCurrentJLv();
+    sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), levelPct);
+}
