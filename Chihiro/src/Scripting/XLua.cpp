@@ -283,10 +283,13 @@ void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
         m_pUnit->SetInt32Value(UNIT_FIELD_RACE, nValue);
     } else if (szKey == "job") {
         m_pUnit->SetCurrentJob(nValue);
+        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "job", nValue);
     } else if (szKey == "level" || szKey == "lv") {
         m_pUnit->SetLevel(nValue);
+        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "level", nValue);
     } else if (szKey == "job_level" || szKey == "jlv") {
         m_pUnit->SetCurrentJLv(nValue);
+        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "job_level", nValue);
     } else if(szKey == "x") {
         m_pUnit->Relocate(nValue, m_pUnit->GetPositionY());
     } else if(szKey == "y") {
@@ -295,6 +298,13 @@ void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
         m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, nValue);
     } else if (szKey == "jp") {
         m_pUnit->SetJP(nValue);
+        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "jp", nValue);
+    } else if(szKey == "hp") {
+        m_pUnit->SetHealth(nValue);
+        Messages::BroadcastHPMPMessage(m_pUnit, nValue, 0, false);
+    } else if(szKey == "mp") {
+        m_pUnit->SetMana(nValue);
+        Messages::BroadcastHPMPMessage(m_pUnit,0,  nValue, false);
     }
 
     if(m_pUnit->GetSubType() == ST_Player) {

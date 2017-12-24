@@ -70,6 +70,9 @@ public:
     void CleanupsBeforeDelete(bool finalCleanup = true);                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
     virtual void Update(uint32 time);
+    virtual void OnUpdate();
+
+    void regenHPMP(uint t);
 
     uint32 HasUnitTypeMask(uint32 mask) const
     { return mask & m_unitTypeMask; }
@@ -150,6 +153,11 @@ public:
     float GetHealthPct() const
     { return GetMaxHealth() ? 100.f * GetHealth() / GetMaxHealth() : 0.0f; }
 
+    void AddHealth(int hp)
+    { SetHealth(GetHealth() + hp); }
+    void AddMana(int mp)
+    { SetMana(GetMana() + mp); }
+
     void SetHealth(uint32);
     void SetMana(uint32);
 
@@ -220,8 +228,11 @@ public:
     Item       *m_anWear[Item::MAX_ITEM_WEAR]{ };
     std::vector<Skill> m_vSkillList;
     uint m_nMovableTime{0};
+
+    float m_nRegenHP{}, m_fRegenMP{};
 protected:
     //UNORDERED_MAP<int, Item> m_anWear;
+    uint m_nLastUpdatedTime{};
     DeathState _deathState;
     void processPendingMove();
     uint32 m_unitTypeMask;

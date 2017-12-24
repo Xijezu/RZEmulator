@@ -66,6 +66,7 @@ public:
 
     // Database
     void Update(uint diff) override;
+    void OnUpdate() override;
     void Save(bool);
 
     // Item relevant
@@ -118,6 +119,8 @@ private:
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };
     std::vector<Summon *> m_vSummonList{ };
+
+    uint m_nLastSaveTime{ };
 
     // Dialog stuff
     int         m_nDialogType{ };

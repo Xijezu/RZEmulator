@@ -88,8 +88,11 @@ public:
     bool onRegionUpdate(XPacket *);
 	bool onChangeLocation(XPacket *);
 	bool onQuery(XPacket *);
+	bool onUpdate(XPacket *);
     bool onTimeSync(XPacket *);
     bool onGameTime(XPacket *);
+
+	bool onJobLevelUp(XPacket *);
 
     bool onPutOnItem(XPacket *);
     bool onPutOffItem(XPacket *);

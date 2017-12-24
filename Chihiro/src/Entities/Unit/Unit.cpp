@@ -3,6 +3,7 @@
 #include "World.h"
 #include "GameRule.h"
 #include "Messages.h"
+#include "ClientPackets.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -896,5 +897,100 @@ void Unit::processPendingMove()
                 }
             }
         }
+    }
+}
+
+void Unit::OnUpdate()
+{
+    uint ct = sWorld->GetArTime();
+    if(HasFlag(UNIT_FIELD_STATUS, NeedToCalculateStat)) {
+        CalculateStat();
+        RemoveFlag(UNIT_FIELD_STATUS, NeedToCalculateStat);
+    }
+    this->regenHPMP(ct);
+}
+
+void Unit::regenHPMP(uint t)
+{
+    float prev_mp;
+    int prev_hp;
+    float pt;
+
+    uint et = t - m_nLastUpdatedTime;
+    if (et >= 300) {
+        float etf = (float) et / 6000.0f;
+        //prev_mp = et;
+
+        if (GetHealth() != 0) {
+            prev_mp = GetHealth();
+            prev_hp = GetMana();
+            if (!HasFlag(UNIT_FIELD_STATUS, HPRegenStopped)) {
+                pt     = GetMaxHealth() * m_cAtribute.nHPRegenPercentage;
+                pt     = pt * 0.01f * etf;// + 0.0;
+                pt     = pt + m_cAtribute.nHPRegenPoint * etf;
+                /*if (this.IsSitDown()) {
+                    pt *= this.m_fHealRatioByRest;
+                    pt += (float) this.m_nAdditionalHealByRest;
+                }*/
+                if (pt < 1.0f)
+                    pt = 1.0f;
+                pt *= GetFloatValue(UNIT_FIELD_HP_REGEN_MOD);
+                int pti = static_cast<int>(pt);
+                if (pti != 0.0) {
+                    AddHealth(pti);
+                }
+                /*this.m_nHPDecPart = (int) ((pt - (double) pti) * 100.0 + (double) this.m_nHPDecPart);
+                int part = this.m_nHPDecPart / 100;
+                if (part != 0) {
+                    this.AddHP(part);
+                    this.m_nHPDecPart = this.m_nHPDecPart % 100;
+                }*/
+            }
+            if (!HasFlag(UNIT_FIELD_STATUS, MPRegenStopped)) {
+                pt = GetMaxMana() * m_cAtribute.nMPRegenPercentage;
+                pt = pt * 0.01f * etf;// +0.0;
+                pt = pt + (float) m_cAtribute.nMPRegenPoint * etf;
+
+                /*if (this.IsSitDown())
+                    pt = this.m_fMPHealRatioByRest * pt;*/
+                if (pt < 1.0f)
+                    pt = 1.0f;
+                pt     = GetInt32Value(UNIT_FIELD_MP_REGEN_MOD);
+                if (pt != 0.0)
+                    AddMana(pt);
+            }
+            if (prev_hp != GetHealth() || prev_mp != GetMana()) {
+                this->m_fRegenMP += (GetMana() - prev_mp);
+                this->m_nRegenHP += GetHealth() - prev_hp;
+                if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3) {
+                    XPacket hpmpPct(TS_SC_REGEN_HPMP);
+                    hpmpPct << (uint) GetHandle();
+                    hpmpPct << (int16) m_nRegenHP;
+                    hpmpPct << (int16) m_fRegenMP;
+                    hpmpPct << (int32) GetHealth();
+                    hpmpPct << (int16) GetMana();
+
+                    this->m_nRegenHP = 0;
+                    this->m_fRegenMP = 0;
+                    if (IsInWorld()) {
+                        sWorld->Broadcast((uint) (GetPositionX() / g_nRegionSize), (uint) (GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
+                    }
+                    /*if (this.IsSummon())
+                    {
+                        Summon s = (Summon) this;
+                        Player player = s.m_master;
+                        if (player != null)
+                        {
+                            if (player.bIsInWorld && (player.m_StatusFlag & StatusFlags.LoginComplete) != 0)
+                            {
+                                if (player.m_nLogoutTime == 0)
+                                    player.Connection.SendTCP(pak);
+                            }
+                        }
+                    }*/
+                }
+            }
+        }
+        m_nLastUpdatedTime = t;
     }
 }

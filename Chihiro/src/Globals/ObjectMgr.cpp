@@ -8,7 +8,7 @@
 
 bool ObjectMgr::InitGameContent()
 {
-    if(!LoadMapContent() || !LoadWorldLocation())
+    if (!LoadMapContent() || !LoadWorldLocation())
         return false;
     if (!LoadStatResource())
         return false;
@@ -16,7 +16,7 @@ bool ObjectMgr::InitGameContent()
         return false;
     else if (!LoadNPCResource())
         return false;
-    else if(!LoadMarketResource())
+    else if (!LoadMarketResource())
         return false;
     else if (!LoadMonsterResource())
         return false;
@@ -25,6 +25,10 @@ bool ObjectMgr::InitGameContent()
     else if (!LoadJobResource())
         return false;
     else if (!LoadSummonResource())
+        return false;
+    else if (!LoadSkillResource())
+        return false;
+    else if(!LoadSkillTreeResource() || !LoadLevelResource())
         return false;
     else
         return true;
@@ -136,6 +140,189 @@ bool ObjectMgr::LoadItemResource()
 
 bool ObjectMgr::LoadMonsterResource()
 {
+    return true;
+}
+
+bool ObjectMgr::LoadSkillTreeResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM SkillTreeResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltreetemplates. DB packetHandler `SkillTreeResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field        *field = result->Fetch();
+        int idx = 0;
+        SkillTreeBase base{ };
+        base.job_id = field[idx++].GetInt32();
+        base.skill_id = field[idx++].GetInt32();
+        base.min_skill_lv = field[idx++].GetInt32();
+        base.max_skill_lv = field[idx++].GetInt32();
+        base.lv = field[idx++].GetInt32();
+        base.job_lv = field[idx++].GetInt32();
+        base.jp_ratio = field[idx++].GetFloat();
+        for(int i = 0; i < 3; i++) {
+            base.need_skill_id[i] = field[idx++].GetInt32();
+            base.need_skill_lv[i] = field[idx++].GetInt32();
+        }
+        _skillTreeResourceStore[base.job_id] = base;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skilltreetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+bool ObjectMgr::LoadSkillResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM SkillResource");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltemplates. DB packetHandler `SkillResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        int idx = 0;
+        Field        *field = result->Fetch();
+        SkillBase base{ };
+        base.id = field[idx++].GetInt32();
+        idx += 2;
+        base.text_id = field[idx++].GetInt32();
+        base.is_valid = field[idx++].GetInt16();
+        base.elemental = field[idx++].GetUInt8();
+        base.is_passive = field[idx++].GetUInt8();
+        base.is_physical_act = field[idx++].GetUInt8();
+        base.is_harmful = field[idx++].GetUInt8();
+        base.is_need_target = field[idx++].GetUInt8();
+        base.is_corpse = field[idx++].GetUInt8();
+        base.is_toggle = field[idx++].GetUInt8();
+        base.toggle_group = field[idx++].GetInt32();
+        base.casting_type = field[idx++].GetUInt8();
+        base.casting_level = field[idx++].GetUInt8();
+        base.cast_range = field[idx++].GetInt32();
+        base.valid_range = field[idx++].GetInt32();
+        base.cost_hp = field[idx++].GetInt32();
+        base.cost_hp_per_skl = field[idx++].GetInt32();
+        base.cost_mp = field[idx++].GetInt32();
+        base.cost_mp_per_skl = field[idx++].GetInt32();
+        base.cost_hp_per = field[idx++].GetFloat();
+        base.cost_hp_per_skl_per = field[idx++].GetFloat();
+        base.cost_mp_per = field[idx++].GetFloat();
+        base.cost_mp_per_skl_per = field[idx++].GetFloat();
+        base.cost_havoc = field[idx++].GetInt32();
+        base.cost_havoc_per_skl = field[idx++].GetInt32();
+        base.cost_energy = field[idx++].GetFloat();
+        base.cost_energy_per_skl = field[idx++].GetFloat();
+        base.cost_exp = field[idx++].GetInt32();
+        base.cost_exp_per_enhance = field[idx++].GetInt32();
+        base.cost_jp = field[idx++].GetInt32();
+        base.cost_jp_per_enhance = field[idx++].GetInt32();
+        base.cost_item = field[idx++].GetInt32();
+        base.cost_item_count = field[idx++].GetInt32();
+        base.cost_item_count_per = field[idx++].GetInt32();
+        base.need_level = field[idx++].GetInt32();
+        base.need_hp = field[idx++].GetInt32();
+        base.need_mp = field[idx++].GetInt32();
+        base.need_havoc = field[idx++].GetInt32();
+        base.need_havoc_burst = field[idx++].GetInt32();
+        base.need_state_id = field[idx++].GetInt16();
+        base.need_state_level = field[idx++].GetInt16();
+        base.vf_one_hand_sword = field[idx++].GetUInt8();
+        base.vf_two_hand_sword = field[idx++].GetUInt8();
+        base.vf_double_sword = field[idx++].GetUInt8();
+        base.vf_dagger = field[idx++].GetUInt8();
+        base.vf_double_dagger = field[idx++].GetUInt8();
+        base.vf_spear = field[idx++].GetUInt8();
+        base.vf_axe = field[idx++].GetUInt8();
+        base.vf_one_hand_axe = field[idx++].GetUInt8();
+        base.vf_double_axe = field[idx++].GetUInt8();
+        base.vf_one_hand_mace = field[idx++].GetUInt8();
+        base.vf_two_hand_mace = field[idx++].GetUInt8();
+        base.vf_lightbow =field[idx++].GetUInt8();
+        base.vf_heavybow = field[idx++].GetUInt8();
+        base.vf_crossbow = field[idx++].GetUInt8();
+        base.vf_one_hand_staff = field[idx++].GetUInt8();
+        base.vf_two_hand_staff = field[idx++].GetUInt8();
+        base.vf_shield_only = field[idx++].GetUInt8();
+        base.vf_is_not_need_weapon = field[idx++].GetUInt8();
+        base.delay_cast = field[idx++].GetFloat();
+        base.delay_cast_per_skl = field[idx++].GetFloat();
+        base.delay_cast_mode_per = field[idx++].GetFloat();
+        base.delay_common = field[idx++].GetFloat();
+        base.delay_cooltime = field[idx++].GetFloat();
+        base.delay_cooltime_mode = field[idx++].GetFloat();
+        base.cool_time_group_id = field[idx++].GetInt32();
+        base.uf_self = field[idx++].GetUInt8();
+        base.uf_party = field[idx++].GetUInt8();
+        base.uf_guild = field[idx++].GetUInt8();
+        base.uf_neutral = field[idx++].GetUInt8();
+        base.uf_purple = field[idx++].GetUInt8();
+        base.uf_enemy = field[idx++].GetUInt8();
+        base.tf_avatar = field[idx++].GetUInt8();
+        base.tf_summon = field[idx++].GetUInt8();
+        base.tf_monster = field[idx++].GetUInt8();
+        base.target = field[idx++].GetInt16();
+        base.effect_type = field[idx++].GetInt16();
+        base.state_id = field[idx++].GetInt32();
+        base.state_level_base = field[idx++].GetInt32();
+        base.state_level_per_skl = field[idx++].GetFloat();
+        base.state_level_per_enhance = field[idx++].GetFloat();
+        base.state_second = field[idx++].GetFloat();
+        base.state_second_per_level = field[idx++].GetFloat();
+        base.state_second_per_enhance = field[idx++].GetFloat();
+        base.state_type = field[idx++].GetUInt8();
+        base.probability_on_hit = field[idx++].GetInt32();
+        base.probability_inc_by_slv = field[idx++].GetInt32();
+        base.hit_bonus = field[idx++].GetInt16();
+        base.hit_bonus_per_enhance = field[idx++].GetInt16();
+        base.hate_mod = field[idx++].GetFloat();
+        base.hate_basic = field[idx++].GetInt16();
+        base.hate_per_skl = field[idx++].GetFloat();
+        base.hate_per_enhance = field[idx++].GetFloat();
+        base.critical_bonus = field[idx++].GetInt32();
+        base.critical_bonus_per_skl = field[idx++].GetInt32();
+        for(int i = 0; i < 20; i++) {
+            base.var[i] = field[idx++].GetFloat();
+        }
+        idx += 2;
+        base.is_projectile = field[idx++].GetInt16();
+        base.projectile_speed = field[idx++].GetFloat();
+        base.projectile_acceleration = field[idx++].GetFloat();
+        _skillBaseStore[base.id] = base;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skilltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+bool ObjectMgr::LoadLevelResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM LevelResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field        *field = result->Fetch();
+        LevelResourceTemplate base{};
+        base.level = field[0].GetInt32();
+        base.normal_exp = field[1].GetInt64();
+        for(int i = 0; i < 4; i++)
+            base.jlv[i] = field[2+i].GetInt32();
+        _levelResourceStore[base.level] = base;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Leveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
 
@@ -597,4 +784,11 @@ int ObjectMgr::GetLocationID(float x, float y)
         }
     }
     return loc_id;
+}
+
+int ObjectMgr::GetNeedJpForJobLevelUp(int jlv, int depth)
+{
+    if(depth > 3 || jlv > 49)
+        return 0;
+    return _levelResourceStore[jlv].jlv[depth];
 }

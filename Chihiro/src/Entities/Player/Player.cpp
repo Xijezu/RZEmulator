@@ -762,8 +762,26 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
 
 void Player::Update(uint diff)
 {
+    if(!IsInWorld())
+        return;
+
+    uint ct = sWorld->GetArTime();
+
+    bool bIsMoving = IsMoving(ct);
     if(HasFlag(UNIT_FIELD_STATUS, MovePending)) {
         processPendingMove();
     }
+
     Unit::Update(diff);
+}
+
+void Player::OnUpdate()
+{
+    uint ct = sWorld->GetArTime();
+    if(m_nLastSaveTime + 30000 < ct) {
+        this->Save(false);
+        Position pos = GetCurrentPosition(ct);
+        ChangeLocation(pos.GetPositionX(), pos.GetPositionY(), false, true);
+    }
+    Unit::OnUpdate();
 }

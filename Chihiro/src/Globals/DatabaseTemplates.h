@@ -23,6 +23,12 @@ struct LocationInfoHeader {
     float fRadius{};
 };
 
+struct LevelResourceTemplate {
+    int level{};
+    int64 normal_exp{};
+    int jlv[4]{};
+};
+
 struct ItemTemplate {
     int32       id;
     int32       name_id;

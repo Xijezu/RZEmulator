@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 project(Chihiro)
 
 file(GLOB_RECURSE sources_Entities src/Entities/*.cpp src/Entities/*.h)
+file(GLOB_RECURSE sources_Skills src/Skills/*.cpp src/Skills/*.h)
 file(GLOB_RECURSE sources_Scripting src/Scripting/*.cpp src/Scripting/*.h)
 file(GLOB_RECURSE sources_X2D src/X2D/*.cpp src/X2D/*.h)
 file(GLOB_RECURSE sources_Globals src/Globals/*.cpp src/Globals/*.h)
@@ -15,6 +16,7 @@ set(SOURCE_FILES ${sources_Entities}
                  ${sources_X2D}
                  ${sources_Globals}
                  ${sources_Map}
+                 ${sources_Skills}
                  ${sources_Network}
                  ${sources_localdir}
                  ${sources_World})
@@ -35,6 +37,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Network
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Network/GameNetwork
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Skills
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/World
                     ${MYSQL_INCLUDE_DIR}
                     ${ACE_INCLUDE_DIR})

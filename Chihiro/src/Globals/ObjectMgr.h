@@ -8,6 +8,7 @@
 #include <Player/Player.h>
 #include "QuadTreeMapInfo.h"
 #include "Dynamic/UnorderedMap.h"
+#include "SkillBase.h"
 
 class ObjectMgr {
 public:
@@ -17,11 +18,14 @@ public:
     ~ObjectMgr()
     {};
 
-    typedef UNORDERED_MAP<uint32, ItemTemplate>           ItemTemplateContainer;
-    typedef UNORDERED_MAP<uint32, CreatureStat>           CreatureBaseStat;
-    typedef UNORDERED_MAP<uint32, JobLevelBonusTemplate>  JobLevelBonusTemplateContainer;
-    typedef UNORDERED_MAP<uint32, JobResourceTemplate>    JobResourceTemplateContainer;
-    typedef UNORDERED_MAP<uint32, SummonResourceTemplate> SummonResourceTemplateContainer;
+    typedef UNORDERED_MAP<uint32, ItemTemplate>                 ItemTemplateContainer;
+    typedef UNORDERED_MAP<uint32, CreatureStat>                 CreatureBaseStat;
+    typedef UNORDERED_MAP<uint32, JobLevelBonusTemplate>        JobLevelBonusTemplateContainer;
+    typedef UNORDERED_MAP<uint32, JobResourceTemplate>          JobResourceTemplateContainer;
+    typedef UNORDERED_MAP<uint32, SummonResourceTemplate>       SummonResourceTemplateContainer;
+    typedef UNORDERED_MAP<uint32, SkillTreeBase>                SkillTreeTemplateContainer;
+    typedef UNORDERED_MAP<uint32, SkillBase>                    SkillBaseContainer;
+    typedef UNORDERED_MAP<uint32, LevelResourceTemplate>        LevelTemplateContainer;
     typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
 
     bool LoadStatResource();
@@ -34,6 +38,9 @@ public:
     bool LoadMarketResource();
     bool LoadWorldLocation();
     bool LoadMapContent();
+    bool LoadSkillResource();
+    bool LoadLevelResource();
+    bool LoadSkillTreeResource();
     bool InitGameContent();
 
     CreatureStat GetStatInfo(int stat_id);
@@ -41,6 +48,7 @@ public:
     CreatureStat GetJobLevelBonus(int depth, int jobs[], int levels[]);
     JobResourceTemplate GetJobInfo(int job_id);
     SummonResourceTemplate GetSummonBase(int idx);
+    int GetNeedJpForJobLevelUp(int,int);
     std::vector<MarketInfo> GetMarketInfo(std::string);
     int GetLocationID(float x, float y);
     int g_currentLocationId{0};
@@ -52,6 +60,9 @@ private:
     JobLevelBonusTemplateContainer  _jobBonusStore;
     SummonResourceTemplateContainer _summonResourceStore;
     MarketResourceTemplateContainer _marketResourceStore;
+    SkillTreeTemplateContainer      _skillTreeResourceStore;
+    LevelTemplateContainer          _levelResourceStore;
+    SkillBaseContainer              _skillBaseStore;
 
     void SetDefaultLocation(int x, int y, float fMapLength, int LocationId);
     void RegisterMapLocationInfo(MapLocationInfo location_info);

@@ -74,7 +74,6 @@ const GameHandler packetHandler[] =
                                   {TS_CS_VERSION,               STATUS_CONNECTED, &GameSession::HandleNullPacket},
                                   {TS_CS_VERSION2,              STATUS_CONNECTED, &GameSession::HandleNullPacket},
                                   {TS_CS_PING,                  STATUS_CONNECTED, &GameSession::HandleNullPacket},
-                                  {TS_CS_UPDATE,                STATUS_CONNECTED, &GameSession::HandleNullPacket},
                                   {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &GameSession::onAuthResult},
                                   {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &GameSession::onAccountWithAuth},
                                   {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &GameSession::onLogoutTimerRequest},
@@ -97,7 +96,9 @@ const GameHandler packetHandler[] =
                                   {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &GameSession::onChangeLocation},
                                   {TS_TIMESYNC,                 STATUS_AUTHED,    &GameSession::onTimeSync},
                                   {TS_CS_GAME_TIME,             STATUS_AUTHED,    &GameSession::onGameTime},
-                                  {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery}
+                                  {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery},
+                                  {TS_CS_UPDATE,                STATUS_AUTHED,    &GameSession::onUpdate},
+                                  {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &GameSession::onJobLevelUp}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -903,5 +904,58 @@ bool GameSession::onQuery(XPacket *pRecvPct)
         }
         Messages::sendEnterMessage(_player, obj, false);
     }
+    return true;
+}
+
+bool GameSession::onUpdate(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto handle = pRecvPct->read<uint>();
+
+    auto unit = dynamic_cast<Unit*>(_player);
+    if(handle != _player->GetHandle()) {
+        // Do Summon stuff here
+    }
+    if(unit != nullptr) {
+        unit->OnUpdate();
+        return true;
+    }
+    return false;
+}
+
+bool GameSession::onJobLevelUp(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto target = pRecvPct->read<uint>();
+
+    Unit* cr = dynamic_cast<Player*>(_player);
+    if(cr == nullptr) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, target);
+        return false;
+    }
+    if(cr->GetSubType() == ST_Player && cr->GetHandle() != _player->GetHandle()) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, target);
+        return false;
+    }
+    int jp = sObjectMgr->GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), _player->GetJobDepth());
+    if(cr->GetJP() < jp) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_JP, target);
+        return true;
+    }
+    if(jp == 0) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_LIMIT_MAX, target);
+        return true;
+    }
+    cr->SetJP(cr->GetJP() -jp);
+    cr->SetCurrentJLv(cr->GetCurrentJLv() + 1);
+    cr->CalculateStat();
+    if(cr->GetSubType() == ST_Player) {
+        dynamic_cast<Player*>(cr)->Save(true);
+    } else {
+        // Summon
+    }
+    _player->Save(true);
+    Messages::SendPropertyMessage(_player, cr, "job_level", cr->GetCurrentJLv());
+    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
     return true;
 }
