@@ -18,7 +18,6 @@
 #include "Messages.h"
 #include "Player.h"
 #include "ClientPackets.h"
-#include "Summon/Summon.h"
 #include "GameHandler.h"
 #include "World.h"
 
@@ -142,7 +141,7 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szK
         packet << (uint32_t)pUnit->GetHandle();
         packet << (uint8) 1;
         packet.fill(szKey, 16);
-        packet << nValue;
+        packet << (int64)nValue;
         packet.FinalizePacket();
         pPlayer->GetSession().GetSocket().SendPacket(packet);
 }
@@ -332,7 +331,7 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool bAbsolu
 {
     if(pObj == nullptr || pPlayer == nullptr)
         return;
-    pObj->SendEnterMsg(&pPlayer->GetSession().GetSocket());
+    pObj->SendEnterMsg(pPlayer);
 
     if(pObj->GetObjType() != 0 && pObj->bIsMoving /*&& pObj->IsInWorld()*/)
         SendMoveMessage(pPlayer, dynamic_cast<Unit*>(pObj));
@@ -356,4 +355,28 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
         }
         pPlayer->GetSession().GetSocket().SendPacket(movePct);
     }
+}
+
+void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
+{
+    XPacket packet(TS_SC_WEAR_INFO);
+    packet << pUnit->GetHandle();
+    for (int i = 0; i < Item::MAX_ITEM_WEAR; i++) {
+        int wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
+        if (i == 2 && wear_info == 0)
+            wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 2);
+        if (i == 4 && wear_info == 0)
+            wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 3);
+        if (i == 5 && wear_info == 0)
+            wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 4);
+        packet << wear_info;
+    }
+    for (auto &i : pUnit->m_anWear) {
+        packet << (i != nullptr ? i->m_Instance.nEnhance : 0);
+    }
+    for (auto &i : pUnit->m_anWear) {
+        packet << (i != nullptr ? i->m_Instance.nLevel : 0);
+    }
+    packet.FinalizePacket();
+    pPlayer->GetSession().GetSocket().SendPacket(packet);
 }

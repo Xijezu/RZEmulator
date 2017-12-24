@@ -132,7 +132,7 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
 			sArRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(),
 										   [=](ArRegion* region) {
 												region->DoEachClient([=](WorldObject* obj) {
-													Messages::SendMoveMessage(dynamic_cast<Player*>(pUnit), dynamic_cast<Unit*>(obj));
+													Messages::SendMoveMessage(dynamic_cast<Player*>(obj), pUnit);
 												});
 										   });
 		}

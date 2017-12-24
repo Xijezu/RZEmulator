@@ -561,7 +561,7 @@ public:
     uint lastStepTime{};
 };
 
-class XSocket;
+class Player;
 
 class WorldObject : public Object, public ArMoveVector {
 protected:
@@ -579,9 +579,7 @@ public:
 
     void _Create(uint32 handle, uint32 phaseMask);
 
-    void SendEnterMsg(XSocket *socket);
-
-    void SendEnterMsg(XSocket *socket, WorldObject *obj, MainType mainType, SubType subType);
+    void SendEnterMsg(Player *);
 
     virtual void AddToWorld();
     virtual void RemoveFromWorld();

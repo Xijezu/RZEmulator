@@ -68,9 +68,9 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
     pEnterPct << (int32_t) pUnit->getLevel();
     pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
     pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    if (pUnit->m_bIsFirstEnter) {
+    if (false/*pUnit->m_bIsFirstEnter*/) {
         pEnterPct << (uint8_t) true;
-        pUnit->m_bIsFirstEnter = false;
+        pUnit->m_bIsFirstEnter = true;
     } else {
         pEnterPct << (uint8_t) false;
     }

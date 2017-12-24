@@ -3,6 +3,7 @@
 #include "GameHandler.h"
 #include "World.h"
 #include "ArRegion.h"
+#include "Messages.h"
 
 Object::Object()
 {
@@ -338,42 +339,10 @@ WorldObject::~WorldObject()
 {
 }
 
-void WorldObject::SendEnterMsg(XSocket *socket, WorldObject *obj, MainType mainType, SubType subType)
-{
-    XPacket packet(TS_SC_ENTER);
-    packet << (uint8_t) mainType;
-    packet << obj->GetHandle();
-    packet << obj->GetPositionX();
-    packet << obj->GetPositionY();
-    packet << obj->GetPositionZ();
-    packet << (uint8) obj->GetLayer();
-    packet << (uint8_t) subType;
-    packet << (uint32_t) 0; // Status Code
-    packet << (float) obj->GetOrientation();
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_HEALTH);
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_MAX_HEALTH);
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_MANA);
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_MAX_MANA);
-    packet << (int32_t) obj->GetUInt32Value(UNIT_FIELD_LEVEL);
-    packet << (uint8_t) obj->GetInt32Value(UNIT_FIELD_RACE);
-    packet << (uint32_t) obj->GetInt32Value(UNIT_FIELD_SKIN_COLOR);
-    packet << (uint8_t) (true == true ? 1 : 0); // is_first_enter
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_STAMINA);
-    // Player Packet
-    packet << (uint8_t) obj->GetInt32Value(UNIT_FIELD_SEX);
-    packet << (uint32_t) 0;
-    packet << (int32_t) 0;
-    packet.fill(obj->GetName(), 19);
-    packet << (uint16_t) obj->GetUInt32Value(UNIT_FIELD_JOB);
-    packet << (uint32_t) 0;
-    packet << (int32_t) obj->GetInt32Value(UNIT_FIELD_GUILD_ID);
-    socket->SendPacket(packet);
-}
 
-#include "NPC.h"
-#include <fstream>
 
-void WorldObject::SendEnterMsg(XSocket *socket)
+
+void WorldObject::SendEnterMsg(Player *pPlayer)
 {
     Position tmpPos = this->GetCurrentPosition(sWorld->GetArTime());
     XPacket packet(TS_SC_ENTER);
@@ -381,8 +350,8 @@ void WorldObject::SendEnterMsg(XSocket *socket)
     packet << GetHandle();
     packet << tmpPos.GetPositionX();
     packet << tmpPos.GetPositionY();
-    packet << GetPositionZ();
-    packet << (uint8) GetLayer();
+    packet << (float)0; GetPositionZ();
+    packet << (uint8) 0;//GetLayer();
     packet << (uint8_t)GetSubType();
 
     switch (GetSubType()) {
@@ -395,7 +364,10 @@ void WorldObject::SendEnterMsg(XSocket *socket)
         default:
             break;
     }
-    socket->SendPacket(packet);
+    pPlayer->GetSession().GetSocket().SendPacket(packet);
+    if(GetSubType() == ST_Player)
+        Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));
+
 }
 
 void WorldObject::SetWorldObject(bool on)

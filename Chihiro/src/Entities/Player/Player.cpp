@@ -2,7 +2,6 @@
 #include "MemPool.h"
 #include "Database/DatabaseEnv.h"
 #include "Network/GameNetwork/GameHandler.h"
-#include "Map/ArRegion.h"
 #include "ObjectMgr.h"
 #include "GameNetwork/ClientPackets.h"
 #include "Messages.h"
@@ -99,8 +98,8 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_CHAOS, (*result)[48].GetInt32());
         std::string flag_list = (*result)[50].GetString();
         Tokenizer      token(flag_list, '\n');
-        for (auto   iter      = token.begin(); iter != token.end(); ++iter) {
-            Tokenizer flag(*iter, ':');
+        for (auto iter : token) {
+            Tokenizer flag(iter, ':');
             if (flag.size() == 2) {
                 SetFlag(flag[1], flag[0]);
             }
@@ -156,6 +155,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         CalculateStat();
 
         AddToWorld();
+        //Messages::sendEnterMessage(this, this, false);
 
     } else {
         return false;

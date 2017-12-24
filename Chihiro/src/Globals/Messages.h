@@ -31,6 +31,7 @@ public:
     static void sendEnterMessage(Player *, WorldObject *, bool);
     static void SendMoveMessage(Player *, Unit *);
     static void SendTimeSynch(Player*);
+    static void SendWearInfo(Player*,Unit*);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };
