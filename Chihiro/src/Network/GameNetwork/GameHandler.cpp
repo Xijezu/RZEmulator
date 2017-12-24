@@ -836,7 +836,9 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
             resultPct << item_code;
             resultPct << (int64) buy_count;
             resultPct << (int64) mt.price_ratio;
+#if EPIC > 4
             resultPct << (int64) mt.huntaholic_ratio;
+#endif
             resultPct << (uint32_t) _player->GetLastContactLong("npc");
             _player->GetSession().GetSocket().SendPacket(resultPct);
         }
