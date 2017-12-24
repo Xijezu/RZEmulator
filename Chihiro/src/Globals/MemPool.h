@@ -23,6 +23,7 @@ public:
     WorldObject* getPtrFromId(uint32_t handle);
     WorldObject* getMiscPtrFromId(uint32_t handle);
     WorldObject* getPlayerPtrFromId(uint32_t handle);
+    Item* getItemPtrFromId(uint32_t handle);
 
 private:
     uint32_t m_nMiscTop{0x20000001};

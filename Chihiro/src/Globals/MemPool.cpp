@@ -101,3 +101,10 @@ WorldObject *MemoryPoolMgr::getPlayerPtrFromId(uint32_t handle)
         return m_hsPlayer[handle];
     return nullptr;
 }
+
+Item *MemoryPoolMgr::getItemPtrFromId(uint32_t handle)
+{
+    if(m_hsItem.count(handle) == 1)
+        return m_hsItem[handle];
+    return nullptr;
+}

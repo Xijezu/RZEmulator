@@ -19,6 +19,7 @@
 #include <experimental/filesystem>
 #include "Messages.h"
 #include "ObjectMgr.h"
+#include "MemPool.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -43,6 +44,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);
     m_pState.set_function("dlg_text", &XLua::SCRIPT_DialogText, this);
+    m_pState.set_function("dlg_text_without_quest_menu", &XLua::SCRIPT_DialogText, this);
     m_pState.set_function("dlg_menu", &XLua::SCRIPT_DialogMenu, this);
     m_pState.set_function("dlg_show", &XLua::SCRIPT_DialogShow, this);
     m_pState.set_function("open_market", &XLua::SCRIPT_ShowMarket, this);
@@ -61,6 +63,18 @@ bool XLua::InitializeLua()
     m_pState.set_function("message", &XLua::SCRIPT_Message, this);
     m_pState.set_function("call_lc_In", &XLua::SCRIPT_SetCurrentLocationID, this);
     m_pState.set_function("warp", &XLua::SCRIPT_Warp, this);
+    m_pState.set_function("get_server_category", &XLua::SCRIPT_GetServerCategory, this);
+    // Blacksmith functionality
+    m_pState.set_function("get_wear_item_handle", &XLua::SCRIPT_GetWearItemHandle, this);
+    m_pState.set_function("get_item_level", &XLua::SCRIPT_GetItemLevel, this);
+    m_pState.set_function("set_item_level", &XLua::SCRIPT_SetItemLevel, this);
+    m_pState.set_function("get_item_enhance", &XLua::SCRIPT_GetItemEnhance, this);
+    m_pState.set_function("get_item_name_id", &XLua::SCRIPT_GetItemNameID, this);
+    m_pState.set_function("get_item_code", &XLua::SCRIPT_GetItemCode, this);
+    m_pState.set_function("update_gold_chaos", &XLua::SCRIPT_UpdateGoldChaos, this);
+    m_pState.set_function("get_item_price", &XLua::SCRIPT_GetItemPrice, this);
+    m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
+    m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -143,7 +157,7 @@ int XLua::SCRIPT_GetNPCID()
     if (player == nullptr)
         return -1;
 
-    player->GetLastContactLong("npc");
+    return player->GetLastContactLong("npc");
 }
 
 void XLua::SCRIPT_DialogTitle(std::string szTitle)
@@ -369,4 +383,105 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
         return;
     }
     player->SendWarpMessage(x, y, 0, 0);
+}
+
+int XLua::SCRIPT_GetServerCategory()
+{
+    int result = 0;
+    result = ((sConfigMgr->GetIntDefault("Game.ServiceServer", 0) != 0) ? 1 : 0) << 29;
+    result = result | (((sConfigMgr->GetIntDefault("Game.PKServer", 0) != 0) ? 1 : 0) << 28);
+    result = result + sConfigMgr->GetIntDefault("Game.ServerIndex", 0);
+    return result;
+}
+
+int XLua::SCRIPT_GetWearItemHandle(int index)
+{
+    if(m_pUnit == nullptr)
+        return 0;
+
+    if(index < 0 || index > Item::MAX_ITEM_WEAR)
+        return 0;
+
+    return m_pUnit->m_anWear[index] == nullptr ? 0 : m_pUnit->m_anWear[index]->m_nHandle;
+}
+
+int XLua::SCRIPT_GetItemLevel(uint handle)
+{
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    return item->m_Instance.nLevel;
+}
+
+int XLua::SCRIPT_GetItemEnhance(uint handle)
+{
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    return item->m_Instance.nEnhance;
+}
+
+int XLua::SCRIPT_SetItemLevel(uint handle, int level)
+{
+    if(level > 255)
+        return 0;
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    item->m_Instance.nLevel = level;
+    item->m_bIsNeedUpdateToDB = true;
+    Messages::SendItemMessage(dynamic_cast<Player*>(m_pUnit), item);
+    if(item->m_Instance.nWearInfo != WearNone) {
+        if(item->m_Instance.OwnSummonHandle != 0) {
+            // get summon
+        } else {
+            m_pUnit->CalculateStat();
+        }
+    }
+    return level;
+}
+
+int XLua::SCRIPT_GetItemRank(uint handle)
+{
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    return item->m_pItemBase.rank;
+}
+
+
+int XLua::SCRIPT_GetItemPrice(uint handle)
+{
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    return item->m_pItemBase.price;
+}
+
+int XLua::SCRIPT_GetItemNameID(int code)
+{
+    return sObjectMgr->GetItemBase(code).name_id;
+}
+
+int XLua::SCRIPT_GetItemCode(uint handle)
+{
+    auto item = sMemoryPool->getItemPtrFromId(handle);
+    if(item == nullptr)
+        return 0;
+    return item->m_Instance.Code;
+}
+
+int XLua::SCRIPT_UpdateGoldChaos()
+{
+    if(m_pUnit == nullptr)
+        return 0;
+    dynamic_cast<Player*>(m_pUnit)->SendGoldChaosMessage();
+    return 1;
+}
+
+void XLua::SCRIPT_SavePlayer()
+{
+    if(m_pUnit == nullptr)
+        return;
+    dynamic_cast<Player*>(m_pUnit)->Save(false);
 }

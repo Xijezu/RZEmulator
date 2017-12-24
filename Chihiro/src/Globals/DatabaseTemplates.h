@@ -25,6 +25,7 @@ struct LocationInfoHeader {
 
 struct ItemTemplate {
     int32       id;
+    int32       name_id;
     int32       type;
     int32       group;
     int32       iclass;

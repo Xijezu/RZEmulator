@@ -47,7 +47,7 @@ bool ObjectMgr::LoadItemResource()
                                                     "opt_var1_2, opt_var2_2, opt_type_3, opt_var1_3, opt_var2_3, enhance_0_id, enhance_0_01,"
                                                     "enhance_0_02, enhance_0_03, enhance_0_04, enhance_1_id, enhance_1_01, enhance_1_02,"
                                                     "enhance_1_03, enhance_1_04, skill_id, state_id, state_level, state_time, state_type, cool_time, "
-                                                    "cool_time_group, script_text FROM ItemResource;");
+                                                    "cool_time_group, script_text, name_id FROM ItemResource;");
 
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 item templates. DB packetHandler `ItemResource` is empty!");
@@ -123,6 +123,7 @@ bool ObjectMgr::LoadItemResource()
         itemTemplate.cool_time       = fields[91].GetInt32();
         itemTemplate.cool_time_group = fields[92].GetInt16();
         itemTemplate.script_text     = fields[93].GetString();
+        itemTemplate.name_id         = fields[94].GetInt32();
 
         _itemTemplateStore[itemTemplate.id] = itemTemplate;
 

@@ -40,6 +40,19 @@ private:
 
     // Values
     int SCRIPT_GetLocalFlag();
+    int SCRIPT_GetServerCategory();
+
+    // Blacksmith
+    int SCRIPT_GetWearItemHandle(int);
+    int SCRIPT_GetItemLevel(uint);
+    int SCRIPT_GetItemEnhance(uint);
+    int SCRIPT_SetItemLevel(uint, int);
+    int SCRIPT_GetItemPrice(uint);
+    int SCRIPT_GetItemRank(uint);
+    int SCRIPT_GetItemNameID(int);
+    int SCRIPT_GetItemCode(uint);
+    int SCRIPT_UpdateGoldChaos();
+    void SCRIPT_SavePlayer();
 
     sol::object SCRIPT_GetValue(std::string);
     void SCRIPT_SetValue(std::string,int64);
