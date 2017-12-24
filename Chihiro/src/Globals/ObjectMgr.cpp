@@ -26,7 +26,7 @@ bool ObjectMgr::InitGameContent()
         return false;
     else if (!LoadSummonResource())
         return false;
-    else if (!LoadSkillResource())
+    else if (!LoadSkillResource() || !LoadSkillJP())
         return false;
     else if(!LoadSkillTreeResource() || !LoadLevelResource())
         return false;
@@ -168,7 +168,7 @@ bool ObjectMgr::LoadSkillTreeResource()
             base.need_skill_id[i] = field[idx++].GetInt32();
             base.need_skill_lv[i] = field[idx++].GetInt32();
         }
-        _skillTreeResourceStore[base.job_id] = base;
+        RegisterSkillTree(base);
         ++count;
     } while (result->NextRow());
 
@@ -511,6 +511,34 @@ bool ObjectMgr::LoadNPCResource()
     return true;
 }
 
+bool ObjectMgr::LoadSkillJP()
+{
+    uint32      oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM SkillJPResource;");
+
+
+    if (!result) {
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field *field = result->Fetch();
+        int off = 0;
+        int skill_id = field[off++].GetInt32();
+        SkillBase sb = _skillBaseStore[skill_id];
+        if(sb.id != 0) {
+            for(int v = 0; v < 50; ++v) {
+                sb.m_need_jp[v] = field[off++].GetInt32();
+            }
+        }
+        ++count;
+    } while (result->NextRow());
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+
 
 bool ObjectMgr::LoadWorldLocation()
 {
@@ -792,3 +820,127 @@ int ObjectMgr::GetNeedJpForJobLevelUp(int jlv, int depth)
         return 0;
     return _levelResourceStore[jlv].jlv[depth];
 }
+
+ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
+{
+    ushort ilsResult = TS_RESULT_ACCESS_DENIED;
+    for(int i = 0; i < 4; ++i) {
+        if(pUnit->GetPrevJobLv(i) != 0) {
+            ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetPrevJobId(i), pUnit->GetPrevJobLv(i));
+            if(ilsResult == TS_RESULT_SUCCESS) {
+                job_id = pUnit->GetPrevJobId(i);
+                break;
+            }
+            if(ilsResult != TS_RESULT_ACCESS_DENIED && ilsResult != TS_RESULT_LIMIT_MAX && ilsResult != TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
+                break;
+        }
+    }
+    if(ilsResult == TS_RESULT_ACCESS_DENIED || ilsResult == TS_RESULT_LIMIT_MAX || ilsResult == TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
+    {
+        ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
+        if(ilsResult == TS_RESULT_SUCCESS)
+            job_id = pUnit->GetCurrentJob();
+    }
+    return ilsResult;
+}
+
+ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
+{
+    bool bMaxLimit = false;
+    bool bFound = false;
+
+    auto st = getSkillTree(nJobID);
+    if(st.empty()) {
+        return TS_RESULT_ACCESS_DENIED;
+    }
+    for(auto stree : st) {
+        if(stree.skill_id == skill_id) {
+            if(stree.max_skill_lv >= skill_level) {
+                if(stree.lv > pUnit->getLevel()) {
+                    return TS_RESULT_NOT_ENOUGH_LEVEL;
+                }
+                if(stree.job_lv <= unit_job_level) {
+                    for(int nsi = 0; nsi < 3; nsi++) {
+                        if(stree.need_skill_id[nsi] == 0)
+                            break;
+                        if(pUnit->GetCurrentSkillLevel(stree.need_skill_id[nsi]) < stree.need_skill_lv[nsi]) {
+                            return TS_RESULT_NOT_ENOUGH_SKILL;
+                        }
+                    }
+                    SkillBase sb =  GetSkillBase(skill_id);
+                    if(sb.id == 0)
+                        return TS_RESULT_ACCESS_DENIED;
+
+                    if(pUnit->GetJP() < (int)((float)sb.GetNeedJobPoint(skill_level) * stree.jp_ratio)) {
+                        return TS_RESULT_NOT_ENOUGH_JP;
+                    }
+                    return TS_RESULT_SUCCESS;
+                }
+                bFound = true;
+            } else {
+                bMaxLimit = true;
+            }
+        }
+    }
+    if(bFound) {
+        return TS_RESULT_NOT_ENOUGH_JOB_LEVEL;
+    }
+    if(bMaxLimit) {
+        return TS_RESULT_NOT_ENOUGH_SKILL;
+    }
+    return TS_RESULT_ACCESS_DENIED;
+}
+
+void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
+{
+    for(auto& stg : _skillTreeResourceStore) {
+        if(stg.skill_id == base.skill_id && stg.job_id == base.job_id) {
+            stg.skillTrees.emplace_back(base);
+            return;
+        }
+    }
+    SkillTreeGroup g{};
+    g.job_id = base.job_id;
+    g.skill_id = base.skill_id;
+    g.skillTrees.emplace_back(base);
+    _skillTreeResourceStore.emplace_back(g);
+}
+
+std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
+{
+    std::vector<SkillTreeBase> skills { };
+    for(auto& stg : _skillTreeResourceStore) {
+        if(stg.job_id == job_id) {
+            for(auto st : stg.skillTrees)  {
+                skills.emplace_back(st);
+            }
+        }
+    }
+    return skills;
+}
+
+int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID)
+{
+    auto pSkillBase = GetSkillBase(skill_id);
+    std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
+    float jp_ratio = -1.0f;
+    if(pSkillBase.id != 0 && skill_level <= 50 && !trees.empty()) {
+        for(auto st : trees) {
+            if(st.skill_id == skill_id && st.max_skill_lv >= skill_level) {
+                jp_ratio = st.jp_ratio;
+            }
+        }
+        if(jp_ratio == -1.0f)
+            jp_ratio = 1.0f;
+        return (int)(pSkillBase.GetNeedJobPoint(skill_level) * jp_ratio);
+    }
+    return -1;
+}
+
+SkillBase ObjectMgr::GetSkillBase(int skill_id)
+{
+    if(_skillBaseStore.count(skill_id) == 1)
+        return _skillBaseStore[skill_id];
+    return { };
+}
+

@@ -93,6 +93,7 @@ public:
     bool onGameTime(XPacket *);
 
 	bool onJobLevelUp(XPacket *);
+    bool onLearnSkill(XPacket *);
 
     bool onPutOnItem(XPacket *);
     bool onPutOffItem(XPacket *);

@@ -719,10 +719,12 @@ public:
     void append(const uint8 *src, size_t cnt)
     {
         if (!cnt)
-            throw ByteBufferSourceException(_wpos, size(), cnt);
+            return;
+            //throw ByteBufferSourceException(_wpos, size(), cnt);
 
         if (!src)
-            throw ByteBufferSourceException(_wpos, size(), cnt);
+            return;
+            //throw ByteBufferSourceException(_wpos, size(), cnt);
 
                 ASSERT(size() < 10000000);
 

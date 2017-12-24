@@ -44,6 +44,7 @@ public:
     uint64_t getPlayerIndex();
     uint64_t getPetIndex();
     uint64_t getSummonIndex();
+	uint64_t getSkillIndex();
 private:
 	SessionMap m_sessions;
 	uint64_t s_nItemIndex{0};
@@ -56,6 +57,7 @@ private:
 	uint64_t s_nPlayerIndex{0};
 	uint64_t s_nPetIndex{0};
 	uint64_t s_nSummonIndex{0};
+	uint64_t s_nSkillIndex{0};
 };
 
 #define sWorld ACE_Singleton<World, ACE_Thread_Mutex>::instance()

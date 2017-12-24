@@ -23,7 +23,7 @@ public:
     typedef UNORDERED_MAP<uint32, JobLevelBonusTemplate>        JobLevelBonusTemplateContainer;
     typedef UNORDERED_MAP<uint32, JobResourceTemplate>          JobResourceTemplateContainer;
     typedef UNORDERED_MAP<uint32, SummonResourceTemplate>       SummonResourceTemplateContainer;
-    typedef UNORDERED_MAP<uint32, SkillTreeBase>                SkillTreeTemplateContainer;
+    typedef std::vector<SkillTreeGroup>                         SkillTreeTemplateContainer;
     typedef UNORDERED_MAP<uint32, SkillBase>                    SkillBaseContainer;
     typedef UNORDERED_MAP<uint32, LevelResourceTemplate>        LevelTemplateContainer;
     typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
@@ -41,15 +41,21 @@ public:
     bool LoadSkillResource();
     bool LoadLevelResource();
     bool LoadSkillTreeResource();
+    bool LoadSkillJP();
     bool InitGameContent();
 
     CreatureStat GetStatInfo(int stat_id);
     ItemTemplate GetItemBase(int item_id);
+    SkillBase GetSkillBase(int);
     CreatureStat GetJobLevelBonus(int depth, int jobs[], int levels[]);
     JobResourceTemplate GetJobInfo(int job_id);
     SummonResourceTemplate GetSummonBase(int idx);
+
     int GetNeedJpForJobLevelUp(int,int);
+    int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
     std::vector<MarketInfo> GetMarketInfo(std::string);
+    ushort IsLearnableSkill(Unit*,int,int, int&);
+
     int GetLocationID(float x, float y);
     int g_currentLocationId{0};
 
@@ -67,6 +73,10 @@ private:
     void SetDefaultLocation(int x, int y, float fMapLength, int LocationId);
     void RegisterMapLocationInfo(MapLocationInfo location_info);
     void LoadLocationFile(std::string szFilename,int x, int y, float fAttrLen, float fMapLength);
+    ushort isLearnableSkill(Unit* pUnit, int skill_id, int skill_level,int nJobID, int unit_job_level);
+    void RegisterSkillTree(SkillTreeBase base);
+
+    std::vector<SkillTreeBase> getSkillTree(int job_id);
 
     X2D::QuadTreeMapInfo *g_qtLocationInfo{nullptr};
 

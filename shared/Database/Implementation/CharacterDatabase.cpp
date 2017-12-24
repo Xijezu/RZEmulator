@@ -37,4 +37,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_ADD_ITEM, "INSERT INTO Item VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_DEFAULT_ITEM, "INSERT INTO Item VALUES(?, ?, 0, 0, 0, 0, 0, ?, 0, 0, 0, 0, 0, 0, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NOW(), NOW())", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_DEL_CHARACTER, "UPDATE `Character` SET name = CONCAT('@' , name , ' ', DATE_FORMAT(NOW(), '%d-%m-%y %H:%i:%s')) WHERE name = ? AND account_id = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_ADD_SKILL, "INSERT INTO Skill VALUES (?,?,?,?,?,?);", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_UPD_SKILL, "UPDATE Skill SET skill_level = ?, cool_time = ? WHERE owner_id = ? AND sid = ?", CONNECTION_ASYNC);
 }

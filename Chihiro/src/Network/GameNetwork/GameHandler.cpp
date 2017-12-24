@@ -29,6 +29,7 @@
 #include "Encryption/MD5.h"
 #include "Map/ArRegion.h"
 #include "ObjectMgr.h"
+#include "Skill.h"
 
 // Constructo - give it a socket
 GameSession::GameSession(XSocket &socket) : _socket(socket)
@@ -98,7 +99,8 @@ const GameHandler packetHandler[] =
                                   {TS_CS_GAME_TIME,             STATUS_AUTHED,    &GameSession::onGameTime},
                                   {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery},
                                   {TS_CS_UPDATE,                STATUS_AUTHED,    &GameSession::onUpdate},
-                                  {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &GameSession::onJobLevelUp}
+                                  {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &GameSession::onJobLevelUp},
+                                  {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &GameSession::onLearnSkill}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -958,4 +960,34 @@ bool GameSession::onJobLevelUp(XPacket *pRecvPct)
     Messages::SendPropertyMessage(_player, cr, "job_level", cr->GetCurrentJLv());
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
     return true;
+}
+
+bool GameSession::onLearnSkill(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto target_handle = pRecvPct->read<uint>();
+    auto skill_id = pRecvPct->read<int>();
+    //auto skill_level = pRecvPct->read<int16>();
+
+    if(_player == nullptr)
+        return false;
+
+    ushort result = 0;
+    int jobID = 0;
+    int value = 0;
+
+    auto target = dynamic_cast<Unit*>(_player);
+    if(false /*if creature*/){
+
+    }
+    int currentLevel = target->GetBaseSkillLevel(skill_id)+1;
+    //if(skill_level == currentLevel)
+    //{
+        result = sObjectMgr->IsLearnableSkill(target, skill_id, currentLevel, jobID);
+        if(result == TS_RESULT_SUCCESS)
+        {
+            target->RegisterSkill(skill_id, currentLevel, 0, jobID);
+        }
+        Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
+    //}
 }

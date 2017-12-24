@@ -4,6 +4,7 @@
 #include "GameRule.h"
 #include "Messages.h"
 #include "ClientPackets.h"
+#include "Skill.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -23,6 +24,10 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject), m_unitTypeMask(0)
 
 Unit::~Unit()
 {
+    for(auto sk : m_vSkillList) {
+        //delete sk;
+    }
+    m_vSkillList.clear();
 }
 
 void Unit::AddToWorld()
@@ -993,4 +998,53 @@ void Unit::regenHPMP(uint t)
         }
         m_nLastUpdatedTime = t;
     }
+}
+
+int Unit::GetBaseSkillLevel(int skill_id)
+{
+    Skill* s = GetSkill(skill_id);
+    return s == nullptr ? 0 : s->skill_level;
+}
+
+Skill* Unit::GetSkill(int skill_id)
+{
+    for(auto s : m_vSkillList) {
+        if(s->skill_id == skill_id)
+            return s;
+    }
+    return nullptr;
+}
+
+Skill* Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID)
+{
+    Skill* pSkill = nullptr;
+    int nNeedJP = sObjectMgr->GetNeedJpForSkillLevelUp(skill_id, skill_level, nJobID);
+    if(GetJP() >= nNeedJP) {
+        SetJP(GetJP() - nNeedJP);
+        if(GetJP() < 0)
+            SetJP(0);
+
+        uint64_t nSkillUID = 0;
+        int nPrevLevel = GetBaseSkillLevel(skill_id);
+        if(nPrevLevel == 0) {
+            nSkillUID = sWorld->getSkillIndex();
+            pSkill = new Skill(this, nSkillUID, skill_id);
+        } else {
+            pSkill = GetSkill(skill_id);
+            nSkillUID = pSkill == nullptr ? 0 : pSkill->sid;
+        }
+        if(pSkill != nullptr) {
+            pSkill->skill_level = skill_level;
+            m_vSkillList.emplace_back(pSkill);
+
+            onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
+        }
+    }
+    return pSkill;
+}
+
+int Unit::GetCurrentSkillLevel(int skill_id)
+{
+    auto s = GetSkill(skill_id);
+    return s == nullptr ? 0 : s->skill_level + 0;
 }

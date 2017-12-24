@@ -157,7 +157,11 @@ int XLua::SCRIPT_GetNPCID()
     if (player == nullptr)
         return -1;
 
-    return player->GetLastContactLong("npc");
+    auto t = sMemoryPool->getMiscPtrFromId(player->GetLastContactLong("npc"));
+    if(t != nullptr)  {
+        return t->GetUInt32Value(UNIT_FIELD_UID);
+    }
+    return 0;
 }
 
 void XLua::SCRIPT_DialogTitle(std::string szTitle)

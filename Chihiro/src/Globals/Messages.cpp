@@ -20,6 +20,7 @@
 #include "ClientPackets.h"
 #include "GameHandler.h"
 #include "World.h"
+#include "Skill.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -167,15 +168,28 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
 {
     XPacket skillPct(TS_SC_SKILL_LIST);
     skillPct << (uint32_t)pUnit->GetHandle();
-    skillPct << (uint16_t)pUnit->m_vSkillList.size();
-    skillPct << (uint8_t)0; // reset | modification_type ?
+    if(skill_id == 0) {
+        skillPct << (uint16_t) pUnit->m_vSkillList.size();
+        skillPct << (uint8_t) 0; // reset | modification_type ?
 
-    for(auto& t : pUnit->m_vSkillList) {
-        skillPct << (int32_t)t.skill_id;
-        skillPct << (int8_t)t.skill_level;
-        skillPct << (int8_t)t.skill_level;
-        skillPct << (uint32_t)0;
-        skillPct << (uint32_t)0;
+        for (auto t : pUnit->m_vSkillList) {
+            skillPct << (int32_t) t->skill_id;
+            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->skill_level);
+            skillPct << (int8_t) t->skill_level;
+            skillPct << (uint32_t) 0;
+            skillPct << (uint32_t) 0;
+        }
+    }else {
+        auto skill = pUnit->GetSkill(skill_id);
+        if(skill == nullptr)
+            return;
+        skillPct << (ushort)1; // Size
+        skillPct << (uint8_t)0; // reset | modification_type?
+        skillPct << (int)skill_id;
+        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill->skill_level);
+        skillPct << (int8_t)skill->skill_level;
+        skillPct << (uint32_t) 0;
+        skillPct << (uint32_t) 0;
     }
     pPlayer->GetSession().GetSocket().SendPacket(skillPct);
 }

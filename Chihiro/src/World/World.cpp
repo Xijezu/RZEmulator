@@ -37,6 +37,7 @@ void World::InitWorld()
     // Dörti häckz, plz ihgnoar
     s_nItemIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();;
     s_nPlayerIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Character`;").get()->Fetch()->GetUInt64();
+	s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
 
 	MX_LOG_INFO("server.worldserver", "Initializing scripting...");
 	sScriptingMgr->InitializeLua();
@@ -104,6 +105,11 @@ uint64_t World::getPetIndex()
 uint64_t World::getSummonIndex()
 {
     return ++s_nSummonIndex;
+}
+
+uint64_t World::getSkillIndex()
+{
+	return ++s_nSkillIndex;
 }
 
 bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
@@ -236,7 +242,7 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
 
 void World::Update(uint diff)
 {
-    for (auto session : m_sessions) {
+    for (auto& session : m_sessions) {
         if (session.second != nullptr && session.second->GetPlayer() != nullptr) {
             session.second->GetPlayer()->Update(diff);
         } else {

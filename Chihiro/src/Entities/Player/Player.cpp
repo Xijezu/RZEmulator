@@ -7,6 +7,7 @@
 #include "Messages.h"
 #include "Scripting/XLua.h"
 #include "World.h"
+#include "Skill.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -211,14 +212,14 @@ bool Player::ReadSkillList(int)
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
         do {
             Field *fields = result->Fetch();
-            Skill skill{};
-            skill.sid = fields[0].GetInt32();
-            skill.owner_id = fields[1].GetInt32();
-            skill.summon_id = fields[2].GetInt32();
-            skill.skill_id = fields[3].GetInt32();
-            skill.skill_level = fields[4].GetInt32();
-            skill.cool_time = fields[5].GetInt32();
-            if(skill.summon_id == 0)
+            auto skill = new Skill();
+            skill->sid = fields[0].GetInt32();
+            skill->owner_id = fields[1].GetInt32();
+            skill->summon_id = fields[2].GetInt32();
+            skill->skill_id = fields[3].GetInt32();
+            skill->skill_level = fields[4].GetInt32();
+            skill->cool_time = fields[5].GetInt32();
+            if(skill->summon_id == 0)
                 m_vSkillList.push_back(skill);
         } while (result->NextRow());
     }
@@ -368,7 +369,7 @@ void Player::SendLoginProperties()
     Messages::SendItemList(this, false);
     Messages::SendCreatureEquipMessage(this, false);
 
-    Messages::SendSkillList(this, this, -1);
+    Messages::SendSkillList(this, this, 0);
     // TODO Summon Skill Msg
 
     SendWearInfo();
@@ -647,7 +648,7 @@ void Player::SetDialogText(std::string szText)
 
 void Player::AddDialogMenu(std::string szKey, std::string szValue)
 {
-    if (!szKey.empty() && !szValue.empty())
+    if (!szKey.empty())
     {
         if (szKey.find('\t') == std::string::npos && szValue.find('\t') == std::string::npos)
         {
@@ -784,4 +785,17 @@ void Player::OnUpdate()
         ChangeLocation(pos.GetPositionX(), pos.GetPositionY(), false, true);
     }
     Unit::OnUpdate();
+}
+
+void Player::onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level)
+{
+    SkillBase sb = sObjectMgr->GetSkillBase(skill_id);
+    if(sb.id != 0 && sb.is_valid == 2)
+        return;
+    if(prev_level != 0) {
+        Skill::DB_UpdateSkill(this,skillUID,skill_level);
+    } else {
+        Skill::DB_InsertSkill(this, skillUID, this->GetUInt32Value(UNIT_FIELD_UID), 0, skill_id, skill_level);
+    }
+    Messages::SendSkillList(this,this,skill_id);
 }

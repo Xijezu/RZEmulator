@@ -10,6 +10,7 @@
 #include "CreatureAttribute.h"
 
 class World;
+class Skill;
 
 enum DeathState {
     ALIVE          = 0,
@@ -48,15 +49,6 @@ enum StatusFlags : uint {
     CompeteDead         = 0x4000000,
 };
 
-struct Skill {
-    int sid;
-    int owner_id;
-    int summon_id;
-    int skill_id;
-    int skill_level;
-    int cool_time;
-};
-
 class Unit : public WorldObject {
 public:
     virtual ~Unit();
@@ -71,6 +63,18 @@ public:
 
     virtual void Update(uint32 time);
     virtual void OnUpdate();
+
+    /// SKILLS
+    int GetCurrentSkillLevel(int skill_id);
+    int GetBaseSkillLevel(int skill_id);
+    Skill* GetSkill(int skill_id);
+    Skill* RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
+    /// END SKILLS
+    int32 GetPrevJobId(int nDepth)
+    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth); }
+
+    int32 GetPrevJobLv(int nDepth)
+    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_JOBLEVEL + nDepth); }
 
     void regenHPMP(uint t);
 
@@ -226,11 +230,12 @@ public:
 // 	void RemoveAllGameObjects();
     Unit(bool isWorldObject);
     Item       *m_anWear[Item::MAX_ITEM_WEAR]{ };
-    std::vector<Skill> m_vSkillList;
+    std::vector<Skill*> m_vSkillList;
     uint m_nMovableTime{0};
 
     float m_nRegenHP{}, m_fRegenMP{};
 protected:
+    virtual void onRegisterSkill(int,int,int,int) { };
     //UNORDERED_MAP<int, Item> m_anWear;
     uint m_nLastUpdatedTime{};
     DeathState _deathState;

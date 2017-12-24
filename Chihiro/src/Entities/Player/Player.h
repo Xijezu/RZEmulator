@@ -17,12 +17,6 @@ public:
 
     static void EnterPacket(XPacket &, Player *);
 
-    int32 GetPrevJobId(int nDepth)
-    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth); }
-
-    int32 GetPrevJobLv(int nDepth)
-    { if (nDepth > 3) return 0; else return GetInt32Value(UNIT_FIELD_JOBLEVEL + nDepth); }
-
     int32 GetPermission()
     { return GetInt32Value(UNIT_FIELD_PERMISSION); }
 
@@ -112,6 +106,9 @@ public:
     WorldLocation *m_WorldLocation{nullptr};
     int m_nWorldLocationId{0};
     TimeSynch m_TS{200,2,10};
+
+protected:
+    void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
 
 private:
     GameSession           *m_session;
