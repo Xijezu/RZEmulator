@@ -28,6 +28,11 @@ public:
 	void AddSummonToWorld(Summon* pSummon);
     void RemoveObjectFromWorld(WorldObject* obj);
 
+	// Warping
+	void WarpBegin(Player*);
+	void WarpEnd(Player*, Position, uint8_t);
+	void WarpEndSummon(Player*, Position, uint8_t, Summon*, bool);
+
     void onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage);
 	/// Get the number of current active sessions
 	const SessionMap& GetAllSessions() const { return m_sessions; }

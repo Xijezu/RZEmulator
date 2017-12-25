@@ -38,6 +38,10 @@ public:
     bool ReadEquipItem();
     bool ReadSkillList(int);
 
+    // Warping
+    void PendWarp(int x, int y, uint8_t layer);
+    void ProcessWarp();
+
     std::string GetFlag(std::string flag)
     { return m_lFlagList[flag]; }
 
@@ -48,13 +52,16 @@ public:
     void SendPropertyMessage(std::string key, std::string value);
     void SendPropertyMessage(std::string key, int64 value);
 
+    // Summon
+    void LogoutNow(int callerIdx);
+    void RemoveAllSummonFromWorld();
+
     void SendLoginProperties();
     void SendGoldChaosMessage();
     void SendJobInfo();
     void SendWearInfo();
 
     void SendSummonInfo();
-    void SendWarpMessage(float, float, float, uint8_t);
 
     Summon *GetSummon(int);
     Summon *GetSummonByHandle(uint);
@@ -83,6 +90,7 @@ public:
     void SetDialogTitle(std::string, int);
     void SetDialogText(std::string);
     void AddDialogMenu(std::string, std::string);
+    void ClearDialogMenu();
 
     bool HasDialog()
     { return m_szDialogTitle.length() > 0; }
@@ -117,7 +125,7 @@ protected:
     void onExpChange() override;
 
 private:
-    GameSession           *m_session;
+    GameSession           *m_session{nullptr};
     std::string           m_szAccount;
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };

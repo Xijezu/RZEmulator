@@ -425,3 +425,15 @@ void Messages::GetEncodedInt(XPacket& packet, uint32 nDecoded)
     packet << (uint16) 0;
     packet << (uint16) LOWORD(nDecoded);
 }
+
+void Messages::SendWarpMessage(Player *pPlayer)
+{
+    if(pPlayer == nullptr)
+        return;
+    XPacket packet(CSPACKETS::TS_SC_WARP);
+    packet << pPlayer->GetPositionX();
+    packet << pPlayer->GetPositionY();
+    packet << pPlayer->GetPositionZ();
+    packet << (uint8_t)pPlayer->GetLayer();
+    pPlayer->GetSession().GetSocket().SendPacket(packet);
+}

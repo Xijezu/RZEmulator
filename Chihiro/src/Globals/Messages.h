@@ -35,6 +35,7 @@ public:
     static void BroadcastHPMPMessage(Unit*,int,float,bool);
     static void BroadcastLevelMsg(Unit*);
     static void GetEncodedInt(XPacket&,uint32);
+    static void SendWarpMessage(Player*);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

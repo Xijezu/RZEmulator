@@ -193,17 +193,21 @@ void World::AddObjectToWorld(WorldObject *obj)
                                        rgn->DoEachClient([=](Unit *client) { // enterProc
                                            // BEGIN Send Enter Message to each other
                                            if (client->GetHandle() != obj->GetHandle()) {
-                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
+                                               if (client->IsInWorld())
+                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
                                                if (client->GetSubType() == ST_Player) {
-                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit*>(obj), false);
+                                                   if (obj->IsInWorld())
+                                                       Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit *>(obj), false);
                                                }
                                            }
                                        });    // END Send Enter Message to each other
-                                       rgn->DoEachMovableObject( [=](WorldObject *lbObj) {
-                                           Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
+                                       rgn->DoEachMovableObject([=](WorldObject *lbObj) {
+                                           if (lbObj->IsInWorld())
+                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
                                        });
-                                       rgn->DoEachStaticObject( [=](WorldObject *lbObj) {
-                                           Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
+                                       rgn->DoEachStaticObject([=](WorldObject *lbObj) {
+                                           if (lbObj->IsInWorld())
+                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
                                        });
                                    });
     region->AddObject(obj);
@@ -277,4 +281,57 @@ void World::AddSummonToWorld(Summon *pSummon)
     AddObjectToWorld(pSummon);
     //pSummon->m_bIsSummoned = true;
     pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+}
+
+void World::WarpBegin(Player * pPlayer)
+{
+	if(pPlayer->IsInWorld())
+		RemoveObjectFromWorld(pPlayer);
+	if(pPlayer->m_pMainSummon != nullptr)
+		RemoveObjectFromWorld(pPlayer->m_pMainSummon);
+	// Same for sub summon
+	// same for pet
+}
+
+void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
+{
+	if(pPlayer == nullptr)
+		return;
+
+	uint ct = GetArTime();
+
+	if(layer != pPlayer->GetLayer()) {
+		// TODO Layer management
+	}
+	pPlayer->SetCurrentXY(pPosition.GetPositionX(), pPosition.GetPositionY());
+	pPlayer->StopMove();
+
+	Messages::SendWarpMessage(pPlayer);
+	if(pPlayer->m_pMainSummon != nullptr)
+		WarpEndSummon(pPlayer, pPosition, layer, pPlayer->m_pMainSummon, 0);
+
+	((Unit*)pPlayer)->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	AddObjectToWorld(pPlayer);
+	pPlayer->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	Position pos = pPlayer->GetCurrentPosition(ct);
+	// Set Move
+	Messages::SendPropertyMessage(pPlayer,pPlayer, "channel", 0);
+	pPlayer->ChangeLocation(pPlayer->GetPositionX(), pPlayer->GetPositionY(), false, true);
+	pPlayer->Save(true);
+}
+
+void World::WarpEndSummon(Player *pPlayer , Position pos, uint8_t layer, Summon *pSummon, bool)
+{
+	uint ct = GetArTime();
+	if(pSummon == nullptr)
+		return;
+	pSummon->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
+	pSummon->SetLayer(layer);
+	pSummon->StopMove();
+	pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	pSummon->AddNoise(rand32(), rand32(), 35);
+	AddObjectToWorld(pSummon);
+	pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	auto position = pSummon->GetCurrentPosition(ct);
+	// Set move
 }

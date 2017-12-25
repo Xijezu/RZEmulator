@@ -56,8 +56,11 @@ void GameSession::OnClose(void)
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
     sWorld->RemoveSession(GetAccountId());
-    if (_player != nullptr && _player->IsInWorld())
+    if (_player != nullptr && _player->IsInWorld()) {
+        _player->LogoutNow(2);
         delete _player;
+        _player = nullptr;
+    }
 }
 
 enum eStatus {
@@ -474,8 +477,8 @@ void GameSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position>
 bool GameSession::onReturnToLobby(XPacket *pRecvPct)
 {
     sWorld->RemoveSession(GetAccountId());
-    _player->RemoveFromWorld();
     if (_player != nullptr) {
+        _player->LogoutNow(2);
         _player->Save(false);
         delete _player;
         _player = nullptr;
@@ -619,7 +622,7 @@ bool GameSession::onChatRequest(XPacket *_packet)
     if (request.type != 3 && request.szMsg[0] == 47) {
         Tokenizer tokenizer(request.szMsg, ' ');
         if (tokenizer[0] == "/warp"s) {
-            _player->SendWarpMessage((float) std::stoi(tokenizer[1], nullptr, 0), (float) std::stoi(tokenizer[2], nullptr, 0), 0, 0);
+            _player->PendWarp((float) std::stoi(tokenizer[1], nullptr, 0), (float) std::stoi(tokenizer[2], nullptr, 0), 0);
         } else if (tokenizer[0] == "/save"s) {
             _player->Save(false);
         } else if (tokenizer[0] == "/run"s) {

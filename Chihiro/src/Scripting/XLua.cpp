@@ -419,7 +419,7 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     if (x < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < x || y < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < y) {
         return;
     }
-    player->SendWarpMessage(x, y, 0, 0);
+    player->PendWarp(x, y, 0);
 }
 
 int XLua::SCRIPT_GetServerCategory()

@@ -30,6 +30,11 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
 
 Player::~Player()
 {
+    /*if(m_pSubSummon != nullptr) {
+        sWorld->RemoveObjectFromWorld(m_pSubSummon);
+        m_pSubSummon = nullptr;
+    }*/
+
     if(!IsInWorld())
         return;
 
@@ -449,20 +454,6 @@ void Player::SendWearInfo()
     }
     packet.FinalizePacket();
     m_session->GetSocket().SendPacket(packet);
-}
-
-void Player::SendWarpMessage(float x, float y, float z, uint8_t layer)
-{
-    Relocate(x,y);
-    XPacket packet(CSPACKETS::TS_SC_WARP);
-    packet << x;
-    packet << y;
-    packet << z;
-    packet << layer;
-    m_session->GetSocket().SendPacket(packet);
-    ChangeLocation(x,y,false,true);
-    Messages::SendPropertyMessage(this, this, "channel", 0);
-    this->Save(true);
 }
 
 void Player::Save(bool bOnlyPlayer)
@@ -910,4 +901,80 @@ Summon *Player::GetSummonByHandle(uint handle)
             return s;
     }
     return nullptr;
+}
+
+void Player::PendWarp(int x, int y, uint8_t layer)
+{
+    Unit::SetFlag(UNIT_FIELD_STATUS, StatusFlags::Invincible);
+
+    if(m_pMainSummon != nullptr)
+        m_pMainSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::Invincible);
+    // PendWarp end, ProcessWarp start
+    if(x >= 0.0f && y >= 0.0f /*MapWidth check*/) {
+        int min_rx = -1, min_ry = -1, max_rx = 0, max_ry = 0;
+        for(auto& s : m_vSummonList) {
+            if(s->IsInWorld()) {
+                if((int)((s->GetPositionX() + 108) / g_nRegionSize) < min_rx)
+                    min_rx = (int)((s->GetPositionX() + 108) / g_nRegionSize);
+                if ((int)((s->GetPositionX() + 108) /g_nRegionSize) > max_rx)
+                    max_rx = (int)((s->GetPositionX() + 108) / g_nRegionSize);
+                if ((int)((s->GetPositionY() + 112) /g_nRegionSize) < min_ry)
+                    min_ry = (int)((GetPositionY() + 112) / g_nRegionSize);
+                if ((int)((GetPositionY() + 112) / g_nRegionSize) > min_ry)
+                    max_ry = (int)((GetPositionY() + 112) / g_nRegionSize);
+            }
+        }
+
+        int rx = (int)(GetPositionX() / g_nRegionSize);
+        int min_rx_value = (int)(x / g_nRegionSize);
+        if (min_rx_value >= rx)
+            min_rx_value = rx;
+
+        int max_rx_value = (int)(x/ g_nRegionSize);
+        if (max_rx_value < rx)
+            max_rx_value = rx;
+
+        int ry = (int)(GetPositionY() / g_nRegionSize);
+        int min_ry_value = (int)(y / g_nRegionSize);
+        if (min_ry_value >= ry)
+            min_ry_value = ry;
+
+        int max_ry_value = (int)(y / g_nRegionSize);
+        if (max_ry_value < ry)
+            max_ry_value = ry;
+
+        if(IsInWorld()) {
+            Position pos{};
+            pos.Relocate(x, y, 0);
+
+            sWorld->WarpBegin(this);
+            sWorld->WarpEnd(this, pos, layer);
+            ClearDialogMenu();
+        }
+    }
+}
+
+void Player::ClearDialogMenu()
+{
+    m_szDialogMenu = "";
+}
+
+void Player::LogoutNow(int callerIdx)
+{
+    if(IsInWorld()) {
+        RemoveAllSummonFromWorld();
+        RemoveFromWorld();
+        Save(false);
+        sWorldLocationMgr->RemoveFromLocation(this);
+    }
+}
+
+void Player::RemoveAllSummonFromWorld()
+{
+    for(auto& s : m_vSummonList) {
+        if(s->IsInWorld()) {
+            s->RemoveFromWorld();
+            sWorld->RemoveObjectFromWorld(s);
+        }
+    }
 }
