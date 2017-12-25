@@ -97,6 +97,7 @@ public:
 
     bool onPutOnItem(XPacket *);
     bool onPutOffItem(XPacket *);
+	bool onEquipSummon(XPacket *);
 
     bool onContact(XPacket *);
 	bool onDialog(XPacket *);

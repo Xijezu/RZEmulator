@@ -18,6 +18,7 @@ public:
     void AllocItemHandle(Item *item);
     Player *AllocPlayer();
     Summon *AllocSummon(uint);
+    Summon *AllocNewSummon(Player*,Item*);
 
     Item *FindItem(uint32_t handle);
     WorldObject* getPtrFromId(uint32_t handle);

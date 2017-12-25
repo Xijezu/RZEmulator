@@ -108,3 +108,23 @@ Item *MemoryPoolMgr::getItemPtrFromId(uint32_t handle)
         return m_hsItem[handle];
     return nullptr;
 }
+
+Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
+{
+    std::string szName = "HurrDurr!"s;
+    Summon* s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase.summon_id);
+    s->SetUInt32Value(UNIT_FIELD_UID, sWorld->getSummonIndex());
+    s->SetLevel(1);
+    s->m_pItem = pItem;
+    s->CalculateStat();
+    s->SetJP(10);
+    s->SetName(szName);
+
+    s->SetFullHealth();
+    s->SetMana(s->GetMaxMana());
+
+    pItem->m_Instance.Socket[0] = s->GetUInt32Value(UNIT_FIELD_UID);
+    pItem->m_bIsNeedUpdateToDB = true;
+    pItem->m_pSummon = s;
+    return s;
+}

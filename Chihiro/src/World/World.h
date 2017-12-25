@@ -25,6 +25,7 @@ public:
 	bool RemoveSession(uint32 id);
 
 	void AddObjectToWorld(WorldObject* obj);
+	void AddSummonToWorld(Summon* pSummon);
     void RemoveObjectFromWorld(WorldObject* obj);
 
     void onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage);

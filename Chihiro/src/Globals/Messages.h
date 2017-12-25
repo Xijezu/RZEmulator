@@ -34,6 +34,7 @@ public:
     static void SendWearInfo(Player*,Unit*);
     static void BroadcastHPMPMessage(Unit*,int,float,bool);
     static void BroadcastLevelMsg(Unit*);
+    static void GetEncodedInt(XPacket&,uint32);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

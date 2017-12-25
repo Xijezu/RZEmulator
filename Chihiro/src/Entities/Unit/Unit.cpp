@@ -66,7 +66,7 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
 
 void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
 {
-    pEnterPct << (uint32_t) 0; // TODO: status
+    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_STATUS); // TODO: status
     pEnterPct << pUnit->GetOrientation();
     pEnterPct << (int32_t) pUnit->GetHealth();
     pEnterPct << (int32_t) pUnit->GetMaxHealth();
@@ -75,12 +75,7 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
     pEnterPct << (int32_t) pUnit->getLevel();
     pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
     pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    if (false/*pUnit->m_bIsFirstEnter*/) {
-        pEnterPct << (uint8_t) true;
-        pUnit->m_bIsFirstEnter = true;
-    } else {
-        pEnterPct << (uint8_t) false;
-    }
+    pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) == 1 ? 1 : 0);
     pEnterPct << (int32_t) 0;
 }
 
@@ -960,7 +955,7 @@ void Unit::regenHPMP(uint t)
                     pt = this.m_fMPHealRatioByRest * pt;*/
                 if (pt < 1.0f)
                     pt = 1.0f;
-                pt     = GetInt32Value(UNIT_FIELD_MP_REGEN_MOD);
+                pt     = GetFloatValue(UNIT_FIELD_MP_REGEN_MOD);
                 if (pt != 0.0)
                     AddMana(pt);
             }

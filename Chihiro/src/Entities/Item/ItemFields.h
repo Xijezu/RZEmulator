@@ -7,6 +7,18 @@
 
 static const long MAX_GOLD_FOR_INVENTORY = 100000000000;
 
+enum FlagBits : uint {
+    FB_Card          = 0x01,
+    FB_Full          = 0x02,
+    FB_Inserted      = 0x04,
+    FB_Failed        = 0x08,
+    FB_Event         = 0x10,
+    FB_ContainsPet   = 0x20,
+    FB_Taming        = 0x20000000,
+    FB_NonChaosStone = 0x40000000,
+    FB_Summon        = 0x80000000,
+};
+
 enum ItemFlag : int {
     FLAG_CASHITEM   = 0,
     FLAG_WEAR       = 1,

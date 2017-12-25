@@ -12,9 +12,14 @@ public:
     explicit Summon(uint, uint);
     ~Summon() = default;
 
+    static void DB_InsertSummon(Player*,Summon*);
+    static void EnterPacket(XPacket &, Summon *);
+
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
     int32_t GetSummonCode();
+
+    void OnUpdate() override;
 
     void applyJobLevelBonus() override
     {};
@@ -31,6 +36,8 @@ public:
     Item* m_pItem;
     void SetSummonInfo(int);
     uint8_t m_cSlotIdx{};
+protected:
+    void processWalk(uint t);
 private:
     SummonResourceTemplate m_tSummonBase;
     Player *m_pMaster;

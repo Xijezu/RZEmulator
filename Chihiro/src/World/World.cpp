@@ -38,6 +38,7 @@ void World::InitWorld()
     s_nItemIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();;
     s_nPlayerIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Character`;").get()->Fetch()->GetUInt64();
 	s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
+	s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
 
 	MX_LOG_INFO("server.worldserver", "Initializing scripting...");
 	sScriptingMgr->InitializeLua();
@@ -267,4 +268,13 @@ void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
            dynamic_cast<Player*>(obj)->GetSession().GetSocket().SendPacket(packet);
        });
     });
+}
+
+void World::AddSummonToWorld(Summon *pSummon)
+{
+    pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    pSummon->AddToWorld();
+    AddObjectToWorld(pSummon);
+    //pSummon->m_bIsSummoned = true;
+    pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
 }

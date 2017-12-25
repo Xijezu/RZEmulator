@@ -417,3 +417,11 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
     levelPct << (int)pUnit->GetCurrentJLv();
     sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), levelPct);
 }
+
+void Messages::GetEncodedInt(XPacket& packet, uint32 nDecoded)
+{
+    packet << (uint16) 0;
+    packet << (uint16) HIWORD(nDecoded);
+    packet << (uint16) 0;
+    packet << (uint16) LOWORD(nDecoded);
+}

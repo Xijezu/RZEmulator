@@ -359,7 +359,10 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
             NPC::EnterPacket(packet, dynamic_cast<NPC *>(this));
             break;
         case ST_Player:
-            Player::EnterPacket(packet, dynamic_cast<Player*>(this));
+            Player::EnterPacket(packet, dynamic_cast<Player *>(this));
+            break;
+        case ST_Summon:
+            Summon::EnterPacket(packet, dynamic_cast<Summon *>(this));
             break;
         default:
             break;
@@ -506,7 +509,6 @@ bool ArMoveVector::Step(uint current_time)
         if(ends.empty() || this->m_positionX == (ends.back()).end.m_positionX &&
                                    m_positionY == (ends.back()).end.m_positionY &&
                                    m_positionZ == (ends.back()).end.m_positionZ) {
-            MX_LOG_DEBUG("network", "Like wtf dude %f %f",m_positionX, m_positionY);
             bIsMoving = false;
             ends.clear();
             res = true;

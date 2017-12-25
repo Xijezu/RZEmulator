@@ -101,7 +101,8 @@ const GameHandler packetHandler[] =
                                   {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery},
                                   {TS_CS_UPDATE,                STATUS_AUTHED,    &GameSession::onUpdate},
                                   {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &GameSession::onJobLevelUp},
-                                  {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &GameSession::onLearnSkill}
+                                  {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &GameSession::onLearnSkill},
+                                  {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &GameSession::onEquipSummon}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -308,7 +309,6 @@ bool GameSession::onMoveRequest(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     std::vector<Position> vPctInfo{ }, vMoveInfo{ };
-    MX_LOG_DEBUG("network", "Before: %f, %f", _player->GetPositionX(), _player->GetPositionY());
 
     auto handle     = pRecvPct->read<uint32_t>();
     auto x          = pRecvPct->read<float>();
@@ -335,13 +335,31 @@ bool GameSession::onMoveRequest(XPacket *pRecvPct)
     Position wayPoint{ };
 
     uint ct = sWorld->GetArTime();
-    speed = 50;
+    speed = 25;
     auto mover = dynamic_cast<Unit *>(_player);
 
     if (handle == 0 || handle == _player->GetHandle()) {
         // Set Speed if ride
     } else {
-        // Do Summon Movement
+        mover = _player->GetSummonByHandle(handle);
+        if(mover != nullptr && mover->GetHandle() == handle) {
+            npos.m_positionX = x;
+            npos.m_positionY = y;
+            npos.m_positionZ = 0;
+
+            distance = npos.GetExactDist2d(_player);
+            if(distance >= 1800.0f) {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_FAR, 0);
+                return true;
+            }
+
+            if(distance < 120.0f) {
+                speed = (int)((float)speed * 1.1f);
+            } else {
+                speed = (int)((float)speed * 2.0f);
+            }
+
+        }
     }
 
     if (mover == nullptr) {
@@ -992,4 +1010,101 @@ bool GameSession::onLearnSkill(XPacket *pRecvPct)
         }
         Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
     //}
+}
+
+bool GameSession::onEquipSummon(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+
+    bool bShowDialog = pRecvPct->read<bool>();
+    int card_handle[6] = {0};
+    for(int i = 0; i < 6; i++) {
+        card_handle[i] = pRecvPct->read<uint>();
+    }
+
+    if(false /*IsItemUseable()*/)
+        return true;
+
+    int nCFL = _player->GetCurrentSkillLevel(SkillId::CreatureControl);
+    if(nCFL < 0)
+        return true;
+
+    if(nCFL > 6)
+        nCFL = 6;
+
+    Item* pItem = nullptr;
+    Summon* summon = nullptr;
+    for(int i = 0; i < 6; ++i) {
+        bool bFound = false;
+        pItem = nullptr;
+        if(card_handle[i] != 0) {
+            pItem = _player->FindItemByHandle(card_handle[i]);
+            if(pItem != nullptr) {
+                if(pItem->m_pItemBase.group != 13 ||
+                        _player->GetHandle() != pItem->m_Instance.OwnerHandle ||
+                        (pItem->m_Instance.Flag & (uint)FlagBits::FB_Summon) == 0)
+                    continue;
+            }
+        }
+        for(int j = 0; j < 6; j++) {
+            if(pItem != nullptr) {
+                // Belt Slot Card
+            }
+        }
+        if(bFound)
+            continue;
+
+        if(_player->m_aBindSummonCard[i] != nullptr) {
+            if(pItem == nullptr || _player->m_aBindSummonCard[i]->m_nHandle != pItem->m_nHandle)
+            {
+                summon = _player->m_aBindSummonCard[i]->m_pSummon;
+                if(card_handle[i] == 0)
+                    _player->m_aBindSummonCard[i] = nullptr;
+                if(summon != nullptr && !summon->IsInWorld()) {
+                    for(int k = 0; k < 24; ++k) {
+                        if(summon->GetWornItem((ItemWearType)k) != nullptr)
+                            summon->putoffItem((ItemWearType)k);
+                    }
+                }
+            }
+        }
+
+        if(pItem != nullptr) {
+            if((pItem->m_Instance.Flag & FlagBits::FB_Summon) != 0) {
+                summon = pItem->m_pSummon;
+                if(summon == nullptr) {
+                    summon = sMemoryPool->AllocNewSummon(_player, pItem);
+                    summon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete);
+                    _player->AddSummon(summon, true);
+                    Messages::SendItemMessage(_player, pItem);
+
+                    Summon::DB_InsertSummon(_player, summon);
+                    auto strCode = std::to_string(summon->GetSummonCode());
+                    auto strHandle = std::to_string(summon->GetHandle());
+                    sScriptingMgr->RunString(_player, "on_first_summon(" + strCode + ","s + strHandle +")"s);
+                    summon->CalculateStat();
+                }
+                summon->m_cSlotIdx = (uint8_t)i;
+                summon->CalculateStat();
+            }
+            _player->m_aBindSummonCard[i] = pItem;
+        }
+    }
+    if(nCFL > 1) {
+        for(int i = 0; i < 6; ++i) {
+            if(_player->m_aBindSummonCard[i] == nullptr) {
+                for(int x = i+1; x < 6; ++x) {
+                    if(_player->m_aBindSummonCard[x] != nullptr) {
+                        _player->m_aBindSummonCard[i] = _player->m_aBindSummonCard[x];
+                        _player->m_aBindSummonCard[x] = nullptr;
+                    }
+                }
+            }
+        }
+    }
+    Messages::SendCreatureEquipMessage(_player, bShowDialog);
+    return true;
 }

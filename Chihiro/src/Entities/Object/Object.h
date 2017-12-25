@@ -568,6 +568,7 @@ protected:
     explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
     std::vector<Position> m_PendingMovePos{};
     uint8_t m_nPendingMoveSpeed{};
+    uint lastProcessTime{0};
 public:
     virtual ~WorldObject();
 

@@ -57,6 +57,8 @@ public:
     void SendWarpMessage(float, float, float, uint8_t);
 
     Summon *GetSummon(int);
+    Summon *GetSummonByHandle(uint);
+    void AddSummon(Summon*,bool);
 
     // Database
     void Update(uint diff) override;

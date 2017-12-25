@@ -57,6 +57,9 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer)
 
 bool Player::ReadCharacter(std::string _name, int _race)
 {
+    int mainSummon = 0;
+    int subSummon = 0;
+
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_CHARACTER);
     stmt->setString(0, _name);
     stmt->setInt32(1, m_session->GetAccountId());
@@ -105,9 +108,8 @@ bool Player::ReadCharacter(std::string _name, int _race)
                 SetFlag(flag[1], flag[0]);
             }
         }
-        for (int    i         = 0; i < 2; i++) {
-            SetInt32Value(UNIT_FIELD_ACTIVE_SUMMON + i, (*result)[51 + i].GetInt32());
-        }
+        mainSummon = (*result)[51].GetInt32();
+        subSummon = (*result)[52].GetInt32();
         SetInt32Value(UNIT_FIELD_REMAIN_SUMMON_TIME, (*result)[53].GetInt32());
         SetInt32Value(UNIT_FIELD_PET, (*result)[54].GetInt32());
         SetUInt64Value(UNIT_FIELD_CHAT_BLOCK_TIME, (*result)[55].GetUInt64());
@@ -145,11 +147,14 @@ bool Player::ReadCharacter(std::string _name, int _race)
             }
         }
 
+        if(mainSummon != 0) {
+            m_pMainSummon = GetSummon(mainSummon);
+        }
+
         if(!ReadEquipItem() || !ReadSkillList(GetInt32Value(UNIT_FIELD_UID)))
             return false;
 
         CalculateStat();
-        AddToWorld();
         Messages::SendHPMPMessage(this, this, GetHealth(), GetMana(), true);
         //Messages::sendEnterMessage(this, this, false);
 
@@ -190,7 +195,9 @@ bool Player::ReadItemList(int sid)
 
                 item->m_Instance.nWearInfo     = (ItemWearType) fields[i++].GetInt32();
                 item->m_Instance.nOwnSummonUID = summon_id;
+                item->m_Instance.OwnerHandle   = GetHandle();
                 item->m_Instance.nIdx          = inv;
+                item->m_pSummon = nullptr;
                 item->m_bIsNeedUpdateToDB      = inv != idx;
                 item->m_Instance.nOwnerUID     = sid;
                 m_lInventory[j++] = item;
@@ -388,7 +395,16 @@ void Player::SendLoginProperties()
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
 
     if(!_bIsInWorld) {
+        AddToWorld();
         sWorld->AddObjectToWorld(this);
+    }
+
+    if (m_pMainSummon != nullptr) {
+        m_pMainSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::Invincible);
+        m_pMainSummon->SetCurrentXY(GetPositionX(),GetPositionY());
+        m_pMainSummon->AddNoise(rand32(), rand32(), 30);
+        m_pMainSummon->SetLayer(GetLayer());
+        sWorld->AddSummonToWorld(m_pMainSummon);
     }
 }
 
@@ -454,30 +470,37 @@ void Player::Save(bool bOnlyPlayer)
     // "UPDATE `Character` SET x = ?, y = ?, z = ?, layer = ?, exp = ?, lv = ?, hp = ?, mp = ?, stamina = ?, jlv = ?, jp = ?, total_jp = ?, job_0 = ?, job_1 = ?, job_2 = ?,
     // jlv_0 = ?, jlv_1 = ?, jlv_2 = ?, permission = ?, job = ?, gold = ?, party_id = ?, guild_id = ? WHERE sid = ?"
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPDATE_CHARACTER);
-    stmt->setFloat(0, GetPositionX());
-    stmt->setFloat(1, GetPositionY());
-    stmt->setFloat(2, GetPositionZ());
-    stmt->setInt32(3, GetLayer());
-    stmt->setInt64(4, GetEXP());
-    stmt->setInt32(5, getLevel());
-    stmt->setInt32(6, GetHealth());
-    stmt->setInt32(7, GetMana());
-    stmt->setInt32(8, GetStamina());
-    stmt->setInt32(9, GetCurrentJLv());
-    stmt->setInt32(10, GetJP());
-    stmt->setInt32(11, GetTotalJP());
-    stmt->setInt32(12, GetPrevJobId(0));
-    stmt->setInt32(13, GetPrevJobId(1));
-    stmt->setInt32(14, GetPrevJobId(2));
-    stmt->setInt32(15, GetPrevJobLv(0));
-    stmt->setInt32(16, GetPrevJobLv(1));
-    stmt->setInt32(17, GetPrevJobLv(2));
-    stmt->setInt32(18, GetPermission());
-    stmt->setInt32(19, GetCurrentJob());
-    stmt->setInt64(20, GetGold());
-    stmt->setInt32(21, GetPartyID());
-    stmt->setInt32(22, GetGuildID());
-    stmt->setInt32(23, GetInt32Value(UNIT_FIELD_UID));
+    uint8_t i = 0;
+    stmt->setFloat(i++, GetPositionX());
+    stmt->setFloat(i++, GetPositionY());
+    stmt->setFloat(i++, GetPositionZ());
+    stmt->setInt32(i++, GetLayer());
+    stmt->setInt64(i++, GetEXP());
+    stmt->setInt32(i++, getLevel());
+    stmt->setInt32(i++, GetHealth());
+    stmt->setInt32(i++, GetMana());
+    stmt->setInt32(i++, GetStamina());
+    stmt->setInt32(i++, GetCurrentJLv());
+    stmt->setInt32(i++, GetJP());
+    stmt->setInt32(i++, GetTotalJP());
+    stmt->setInt32(i++, GetPrevJobId(0));
+    stmt->setInt32(i++, GetPrevJobId(1));
+    stmt->setInt32(i++, GetPrevJobId(2));
+    stmt->setInt32(i++, GetPrevJobLv(0));
+    stmt->setInt32(i++, GetPrevJobLv(1));
+    stmt->setInt32(i++, GetPrevJobLv(2));
+    stmt->setInt32(i++, GetPermission());
+    stmt->setInt32(i++, GetCurrentJob());
+    stmt->setInt64(i++, GetGold());
+    stmt->setInt32(i++, GetPartyID());
+    stmt->setInt32(i++, GetGuildID());
+    for(auto summon : m_aBindSummonCard)
+        stmt->setInt32(i++, summon != nullptr && summon->m_pSummon != nullptr ? summon->m_pSummon->GetInt32Value(UNIT_FIELD_UID) : 0);
+    stmt->setInt32(i++, m_pMainSummon != nullptr ? m_pMainSummon->GetInt32Value(UNIT_FIELD_UID) : 0);
+    stmt->setInt32(i++, 0);// Sub Summon
+    stmt->setInt32(i++, 0); // Pet
+    stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_CHAOS));
+    stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_UID));
     CharacterDatabase.Execute(stmt);
 
     if(!bOnlyPlayer) {
@@ -780,6 +803,12 @@ void Player::OnUpdate()
         Position pos = GetCurrentPosition(ct);
         ChangeLocation(pos.GetPositionX(), pos.GetPositionY(), false, true);
     }
+
+    for(auto summon : m_aBindSummonCard) {
+        if(summon != nullptr && summon->m_pSummon != nullptr)
+            summon->m_pSummon->OnUpdate();
+    }
+
     Unit::OnUpdate();
 }
 
@@ -862,4 +891,23 @@ void Player::onChangeProperty(std::string key, int value)
         return;
     }
     Messages::SendPropertyMessage(this, this, key, value);
+}
+
+void Player::AddSummon(Summon *pSummon, bool bSendMsg)
+{
+    m_vSummonList.emplace_back(pSummon);
+    if(bSendMsg)
+        Messages::SendAddSummonMessage(this, pSummon);
+    if(pSummon->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete)) {
+        // Update Summon
+    }
+}
+
+Summon *Player::GetSummonByHandle(uint handle)
+{
+    for(auto s : m_vSummonList) {
+        if(s->GetHandle() == handle)
+            return s;
+    }
+    return nullptr;
 }
