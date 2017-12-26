@@ -2,12 +2,12 @@
 #define __WORLD_H
 
 #include "Common.h"
-#include "Network/GameNetwork/GameHandler.h"
+#include "Network/GameNetwork/WorldSession.h"
 #include "Entities/Player/Player.h"
 #include "Unit.h"
 #include "Dynamic/UnorderedMap.h"
 
-typedef UNORDERED_MAP<uint32, GameSession*> SessionMap;
+typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 const int g_nRegionSize = 180;
 
 class World
@@ -20,8 +20,8 @@ public:
 
 	bool SetMultipleMove(Unit* pUnit, Position curPos, std::vector<Position>newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
 
-	GameSession* FindSession(uint32 id) const;
-	void AddSession(GameSession* s);
+	WorldSession* FindSession(uint32 id) const;
+	void AddSession(WorldSession* s);
 	bool RemoveSession(uint32 id);
 
 	void AddObjectToWorld(WorldObject* obj);
@@ -65,5 +65,5 @@ private:
 	uint64_t s_nSkillIndex{0};
 };
 
-#define sWorld ACE_Singleton<World, ACE_Thread_Mutex>::instance()
+#define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif // __WORLD_H

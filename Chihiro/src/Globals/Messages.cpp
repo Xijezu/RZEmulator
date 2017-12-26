@@ -357,7 +357,7 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
 
     if(pUnit->ends.size() < 2000) {
         XPacket movePct(TS_SC_MOVE);
-        movePct << (uint32_t)pUnit->lastStepTime;
+        movePct << (uint32_t)sWorld->GetArTime();
         movePct << (uint32)pUnit->GetHandle();
         movePct << (uint8_t)pUnit->GetLayer();
         movePct << (uint8_t)pUnit->speed;

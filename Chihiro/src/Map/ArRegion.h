@@ -97,6 +97,7 @@ public:
     { /*if (m_Regions) delete[] m_Regions*/; }
 
     UNORDERED_MAP<uint32, ArRegion> m_nRegions;
+    //ArRegion* m_nRegions[REGION_BLOCK_COUNT * REGION_BLOCK_COUNT] {nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,12 +120,17 @@ public:
         if (layer > 256)
             return nullptr;
 
+        //if(m_RegionBases[layer] == nullptr)
+            //m_RegionBases[layer] = new ArRegionBase;
+
+        //return m_RegionBases[layer]->m_nRegions
         return &m_RegionBases[layer].m_nRegions[rx + (REGION_BLOCK_COUNT * ry)];
 
     }
 
 private:
     UNORDERED_MAP<uint32, ArRegionBase> m_RegionBases;
+    //ArRegionBase* m_RegionBases[256] {nullptr};
 };
 
 //////////////////////////////////////////////////////////////////////////

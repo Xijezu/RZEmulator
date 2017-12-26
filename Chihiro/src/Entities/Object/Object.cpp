@@ -1,6 +1,6 @@
 #include "Object.h"
 #include "ClientPackets.h"
-#include "GameHandler.h"
+#include "WorldSession.h"
 #include "World.h"
 #include "ArRegion.h"
 #include "Messages.h"

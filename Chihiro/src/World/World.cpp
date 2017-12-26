@@ -52,7 +52,7 @@ void World::InitWorld()
 }
 
 /// Find a session by its id
-GameSession* World::FindSession(uint32 id) const
+WorldSession* World::FindSession(uint32 id) const
 {
 	SessionMap::const_iterator itr = m_sessions.find(id);
 
@@ -73,7 +73,7 @@ bool World::RemoveSession(uint32 id)
     return false;
 }
 
-void World::AddSession(GameSession* s)
+void World::AddSession(WorldSession* s)
 {
 	if(s == nullptr)
 		return;
@@ -195,6 +195,7 @@ void World::AddObjectToWorld(WorldObject *obj)
                                                    Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit *>(obj), false);
                                            }
                                        });    // END Send Enter Message to each other
+									   /// Sending enter messages of NPCs and pets to the object - if it's an player
                                        rgn->DoEachMovableObject([=](WorldObject *lbObj) {
                                            if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);

@@ -26,11 +26,11 @@
 #include <ace/Acceptor.h>
 #include <ace/SOCK_Acceptor.h>
 
-class GameAcceptor : public ACE_Acceptor<XSocket, ACE_SOCK_Acceptor>
+class WorldSockAcceptor : public ACE_Acceptor<XSocket, ACE_SOCK_Acceptor>
 {
 public:
-    GameAcceptor()  { }
-    virtual ~GameAcceptor()
+    WorldSockAcceptor()  { }
+    virtual ~WorldSockAcceptor()
     {
         if (reactor())
             reactor()->cancel_timer(this, 1);

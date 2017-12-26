@@ -16,7 +16,7 @@
   */
 
 #include "Common.h"
-#include "GameNetwork/GameHandler.h"
+#include "GameNetwork/WorldSession.h"
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "GameNetwork/ClientPackets.h"
@@ -32,35 +32,30 @@
 #include "Skill.h"
 
 // Constructo - give it a socket
-GameSession::GameSession(XSocket *socket) : _socket(socket)
+WorldSession::WorldSession(WorldSocket *socket) : _socket(socket)
 {
     _rc4decode.SetKey("}h79q~B%al;k'y $E");
     _rc4encode.SetKey("}h79q~B%al;k'y $E");
 }
 
 // Close patch file descriptor before leaving
-GameSession::~GameSession()
+WorldSession::~WorldSession()
 {
     _rc4decode.Clear();
     _rc4encode.Clear();
 }
 
 // Accept the connection - function itself not used here because we're only interested in the game server data itself
-void GameSession::OnAccept()
+/*void WorldSession::OnAccept()
 {
 
 }
-
-void GameSession::OnClose()
+*/
+void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
-    sWorld->RemoveSession(GetAccountId());
-    if (_player != nullptr && _player->IsInWorld()) {
-        _player->LogoutNow(2);
-        delete _player;
-        _player = nullptr;
-    }
+    onReturnToLobby(nullptr);
 }
 
 enum eStatus {
@@ -71,47 +66,47 @@ enum eStatus {
 typedef struct GameHandler {
     uint16_t cmd;
     uint8_t  status;
-    bool (GameSession::*handler)(XPacket *);
+    bool (WorldSession::*handler)(XPacket *);
 } GameHandler;
 
 const GameHandler packetHandler[] =
                           {
-                                  {TS_CS_VERSION,               STATUS_CONNECTED, &GameSession::HandleNullPacket},
-                                  {TS_CS_VERSION2,              STATUS_CONNECTED, &GameSession::HandleNullPacket},
-                                  {TS_CS_PING,                  STATUS_CONNECTED, &GameSession::HandleNullPacket},
-                                  {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &GameSession::onAuthResult},
-                                  {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &GameSession::onAccountWithAuth},
-                                  {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &GameSession::onLogoutTimerRequest},
-                                  {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &GameSession::onLogoutTimerRequest},
-                                  {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &GameSession::onReturnToLobby},
-                                  {TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &GameSession::onCharacterList},
-                                  {TS_CS_LOGIN,                 STATUS_AUTHED,    &GameSession::onLogin},
-                                  {TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &GameSession::onCharacterName},
-                                  {TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &GameSession::onCreateCharacter},
-                                  {TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &GameSession::onDeleteCharacter},
-                                  {TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &GameSession::onMoveRequest},
-                                  {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &GameSession::onRegionUpdate},
-                                  {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &GameSession::onChatRequest},
-                                  {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &GameSession::onPutOnItem},
-                                  {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &GameSession::onPutOffItem},
-                                  {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &GameSession::onGetSummonSetupInfo},
-                                  {TS_CS_CONTACT,               STATUS_AUTHED,    &GameSession::onContact},
-                                  {TS_CS_DIALOG,                STATUS_AUTHED,    &GameSession::onDialog},
-                                  {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &GameSession::onBuyItem},
-                                  {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &GameSession::onChangeLocation},
-                                  {TS_TIMESYNC,                 STATUS_AUTHED,    &GameSession::onTimeSync},
-                                  {TS_CS_GAME_TIME,             STATUS_AUTHED,    &GameSession::onGameTime},
-                                  {TS_CS_QUERY,                 STATUS_AUTHED,    &GameSession::onQuery},
-                                  {TS_CS_UPDATE,                STATUS_AUTHED,    &GameSession::onUpdate},
-                                  {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &GameSession::onJobLevelUp},
-                                  {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &GameSession::onLearnSkill},
-                                  {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &GameSession::onEquipSummon}
+                                  {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                  {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                  {TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                  {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
+                                  {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
+                                  {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                  {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                  {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
+                                  {TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &WorldSession::onCharacterList},
+                                  {TS_CS_LOGIN,                 STATUS_AUTHED,    &WorldSession::onLogin},
+                                  {TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &WorldSession::onCharacterName},
+                                  {TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onCreateCharacter},
+                                  {TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onDeleteCharacter},
+                                  {TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &WorldSession::onMoveRequest},
+                                  {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
+                                  {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
+                                  {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
+                                  {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
+                                  {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
+                                  {TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
+                                  {TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
+                                  {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
+                                  {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
+                                  {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
+                                  {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
+                                  {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
+                                  {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
+                                  {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
+                                  {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
+                                  {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
 /// Handler for incoming packets
-void GameSession::ProcessIncoming(XPacket *pRecvPct)
+void WorldSession::ProcessIncoming(XPacket *pRecvPct)
 {
     ACE_ASSERT(pRecvPct);
 
@@ -135,31 +130,31 @@ void GameSession::ProcessIncoming(XPacket *pRecvPct)
 
     // Report unknown packets in the error log
     if (i == tableSize) {
-        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->getRemoteAddress().c_str());
+        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteAddress().c_str());
         return;
     }
     aptr.release();
 }
 
-void GameSession::Decrypt(void *pBuf, size_t size, bool isPeek)
+/*void WorldSession::Decrypt(void *pBuf, size_t size, bool isPeek)
 {
     _rc4decode.Decode(pBuf, pBuf, size, isPeek);
 }
 
-void GameSession::Encrypt(void *pBuf, size_t size, bool isPeek)
+void WorldSession::Encrypt(void *pBuf, size_t size, bool isPeek)
 {
     _rc4encode.Encode(pBuf, pBuf, size, isPeek);
-}
+}*/
 
 /// TODO: The whole stuff needs a rework, it is working as intended but it's just a dirty hack
-bool GameSession::onAccountWithAuth(XPacket *pGamePct)
+bool WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
     s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *) (pGamePct)->contents());
     sAuthNetwork->SendAccountToAuth(*this, result->account, result->one_time_key);
     return true;
 }
 
-void GameSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
+void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
 {
     XPacket packet(TS_SC_RESULT);
     packet << (uint16) _msg;
@@ -169,7 +164,7 @@ void GameSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
     _socket->handle_output();
 }
 
-bool GameSession::onCharacterList(XPacket *pGamePct)
+bool WorldSession::onCharacterList(XPacket *pGamePct)
 {
     XPacket packet(TS_SC_CHARACTER_LIST);
     packet << (uint32) time(nullptr);
@@ -209,7 +204,7 @@ bool GameSession::onCharacterList(XPacket *pGamePct)
 }
 
 /// TODO: Might need to put this in player class?
-std::vector<LobbyCharacterInfo> GameSession::_PrepareCharacterList(uint32 account_id)
+std::vector<LobbyCharacterInfo> WorldSession::_PrepareCharacterList(uint32 account_id)
 {
     std::vector<LobbyCharacterInfo> _info;
     PreparedStatement               *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_CHARACTERLIST);
@@ -250,7 +245,7 @@ std::vector<LobbyCharacterInfo> GameSession::_PrepareCharacterList(uint32 accoun
     return _info;
 }
 
-bool GameSession::onAuthResult(XPacket *pGamePct)
+bool WorldSession::onAuthResult(XPacket *pGamePct)
 {
     AG_CLIENT_LOGIN *result = ((AG_CLIENT_LOGIN *) (pGamePct)->contents());
     if (result->result == TS_RESULT_SUCCESS) {
@@ -262,7 +257,7 @@ bool GameSession::onAuthResult(XPacket *pGamePct)
     return true;
 }
 
-bool GameSession::onLogin(XPacket *pRecvPct)
+bool WorldSession::onLogin(XPacket *pRecvPct)
 {
     s_ClientLogin_CS *result = ((s_ClientLogin_CS *) (pRecvPct)->contents());
 
@@ -308,7 +303,7 @@ bool GameSession::onLogin(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onMoveRequest(XPacket *pRecvPct)
+bool WorldSession::onMoveRequest(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     std::vector<Position> vPctInfo{ }, vMoveInfo{ };
@@ -458,7 +453,7 @@ bool GameSession::onMoveRequest(XPacket *pRecvPct)
     return true;
 }
 
-void GameSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position> vMoveInfo)
+void WorldSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position> vMoveInfo)
 {
     Player  *p = reinterpret_cast<Player *>(&obj);
     XPacket packet(TS_SC_MOVE);
@@ -474,7 +469,7 @@ void GameSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position>
     packet.textlike();
 }
 
-bool GameSession::onReturnToLobby(XPacket *pRecvPct)
+bool WorldSession::onReturnToLobby(XPacket *pRecvPct)
 {
     sWorld->RemoveSession(GetAccountId());
     if (_player != nullptr) {
@@ -483,11 +478,12 @@ bool GameSession::onReturnToLobby(XPacket *pRecvPct)
         delete _player;
         _player = nullptr;
     }
-    _SendResultMsg(pRecvPct->GetPacketID(), 0, 0);
+    if(pRecvPct != nullptr)
+        _SendResultMsg(pRecvPct->GetPacketID(), 0, 0);
     return true;
 }
 
-bool GameSession::onCreateCharacter(XPacket *pRecvPct)
+bool WorldSession::onCreateCharacter(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     LobbyCharacterInfo info{ };
@@ -583,7 +579,7 @@ bool GameSession::onCreateCharacter(XPacket *pRecvPct)
     _SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
 }
 
-bool GameSession::checkCharacterName(std::string szName)
+bool WorldSession::checkCharacterName(std::string szName)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_NAMECHECK);
     stmt->setString(0, szName);
@@ -593,7 +589,7 @@ bool GameSession::checkCharacterName(std::string szName)
     return true;
 }
 
-bool GameSession::onCharacterName(XPacket *pRecvPct)
+bool WorldSession::onCharacterName(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     std::string szName = pRecvPct->read<std::string>();
@@ -606,7 +602,7 @@ bool GameSession::onCharacterName(XPacket *pRecvPct)
 
 }
 
-bool GameSession::onChatRequest(XPacket *_packet)
+bool WorldSession::onChatRequest(XPacket *_packet)
 {
     CS_CHATREQUEST request = { };
 
@@ -659,13 +655,13 @@ bool GameSession::onChatRequest(XPacket *_packet)
 
 }
 
-bool GameSession::onLogoutTimerRequest(XPacket *pRecvPct)
+bool WorldSession::onLogoutTimerRequest(XPacket *pRecvPct)
 {
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
     return true;
 }
 
-bool GameSession::onPutOnItem(XPacket *_packet)
+bool WorldSession::onPutOnItem(XPacket *_packet)
 {
     _packet->read_skip(7);
     auto position      = _packet->read<uint8_t>();
@@ -698,7 +694,7 @@ bool GameSession::onPutOnItem(XPacket *_packet)
     return true;
 }
 
-bool GameSession::onPutOffItem(XPacket *_packet)
+bool WorldSession::onPutOffItem(XPacket *_packet)
 {
     _packet->read_skip(7);
     auto position      = _packet->read<uint8_t>();
@@ -728,7 +724,7 @@ bool GameSession::onPutOffItem(XPacket *_packet)
     return true;
 }
 
-bool GameSession::onRegionUpdate(XPacket *pRecvPct)
+bool WorldSession::onRegionUpdate(XPacket *pRecvPct)
 {
     if (_player == nullptr)
         return true;
@@ -745,7 +741,7 @@ bool GameSession::onRegionUpdate(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onGetSummonSetupInfo(XPacket *pRecvPct)
+bool WorldSession::onGetSummonSetupInfo(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     bool showDialog = pRecvPct->read<uint8_t>() == 1;
@@ -753,7 +749,7 @@ bool GameSession::onGetSummonSetupInfo(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onContact(XPacket *pRecvPct)
+bool WorldSession::onContact(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint32_t>();
@@ -766,7 +762,7 @@ bool GameSession::onContact(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onDialog(XPacket *pRecvPct)
+bool WorldSession::onDialog(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto        size    = pRecvPct->read<uint16_t>();
@@ -795,7 +791,7 @@ bool GameSession::onDialog(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onBuyItem(XPacket *pRecvPct)
+bool WorldSession::onBuyItem(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto item_code = pRecvPct->read<int>();
@@ -866,7 +862,7 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
 
 }
 
-bool GameSession::onDeleteCharacter(XPacket *pRecvPct)
+bool WorldSession::onDeleteCharacter(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto name = pRecvPct->ReadString(19);
@@ -878,7 +874,7 @@ bool GameSession::onDeleteCharacter(XPacket *pRecvPct)
     _SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
 }
 
-bool GameSession::onChangeLocation(XPacket *pRecvPct)
+bool WorldSession::onChangeLocation(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto x = pRecvPct->read<float>();
@@ -888,7 +884,7 @@ bool GameSession::onChangeLocation(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onTimeSync(XPacket *pRecvPct)
+bool WorldSession::onTimeSync(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto packet_time = pRecvPct->read<int>();
@@ -906,13 +902,13 @@ bool GameSession::onTimeSync(XPacket *pRecvPct)
     ACE_NOTREACHED(return true);
 }
 
-bool GameSession::onGameTime(XPacket *pRecvPct)
+bool WorldSession::onGameTime(XPacket *pRecvPct)
 {
     Messages::SendGameTime(_player);
     return true;
 }
 
-bool GameSession::onQuery(XPacket *pRecvPct)
+bool WorldSession::onQuery(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint>();
@@ -931,7 +927,7 @@ bool GameSession::onQuery(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onUpdate(XPacket *pRecvPct)
+bool WorldSession::onUpdate(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint>();
@@ -947,7 +943,7 @@ bool GameSession::onUpdate(XPacket *pRecvPct)
     return false;
 }
 
-bool GameSession::onJobLevelUp(XPacket *pRecvPct)
+bool WorldSession::onJobLevelUp(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto target = pRecvPct->read<uint>();
@@ -985,7 +981,7 @@ bool GameSession::onJobLevelUp(XPacket *pRecvPct)
     return true;
 }
 
-bool GameSession::onLearnSkill(XPacket *pRecvPct)
+bool WorldSession::onLearnSkill(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto target_handle = pRecvPct->read<uint>();
@@ -1015,7 +1011,7 @@ bool GameSession::onLearnSkill(XPacket *pRecvPct)
     //}
 }
 
-bool GameSession::onEquipSummon(XPacket *pRecvPct)
+bool WorldSession::onEquipSummon(XPacket *pRecvPct)
 {
     if(_player == nullptr)
         return false;

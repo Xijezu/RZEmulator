@@ -1,17 +1,12 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "Configuration/Config.h"
 #include "Utilities/SignalHandler.h"
-#include "Network/GameNetwork/GameAcceptor.h"
+#include "WorldSocketMgr.h"
 #include "Network/AuthSession.h"
 #include "World.h"
 #include "WorldRunnable.h"
 
-#include <ace/Dev_Poll_Reactor.h>
 #include <ace/TP_Reactor.h>
-#include <ace/ACE.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Event_Handler.h>
 
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
@@ -97,11 +92,14 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ACE_INET_Addr game_addr(sConfigMgr->GetIntDefault("GameServer.Port", 4514), sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0").c_str());
-	GameAcceptor acceptor;
-	if (acceptor.open(game_addr, ACE_Reactor::instance(), ACE_NONBLOCK) == -1) {
-		printf("Error creating acceptor at %s:%d\n", game_addr.get_host_addr(), game_addr.get_port_number());
-		return 1;
+	uint16 worldPort = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+	std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
+	//WorldSockAcceptor acceptor;
+	if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)
+	{
+		MX_LOG_ERROR("server.worldserver", "Failed to start network");
+		return -1;
+		// go down and shutdown the server
 	}
 	// maximum counter for next ping
 	uint32 numLoops = 30 * (MINUTE * 1000000 / 100000);

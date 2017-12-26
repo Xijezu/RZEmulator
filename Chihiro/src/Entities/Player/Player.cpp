@@ -1,7 +1,7 @@
 #include "Player/Player.h"
 #include "MemPool.h"
 #include "Database/DatabaseEnv.h"
-#include "Network/GameNetwork/GameHandler.h"
+#include "Network/GameNetwork/WorldSession.h"
 #include "ObjectMgr.h"
 #include "GameNetwork/ClientPackets.h"
 #include "Messages.h"

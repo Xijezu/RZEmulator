@@ -35,7 +35,7 @@ public:
         ACE_Connector::close();
     }
 
-	void SendAccountToAuth(GameSession& session, std::string login_name, uint64 one_time_key)
+	void SendAccountToAuth(WorldSession& session, std::string login_name, uint64 one_time_key)
 	{
 		_session->AccountToAuth(&session, login_name, one_time_key);
 	}

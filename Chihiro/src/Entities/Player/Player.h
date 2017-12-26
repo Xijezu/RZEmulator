@@ -7,7 +7,7 @@
 #include "Summon/Summon.h"
 #include "WorldLocation.h"
 #include "TimeSync.h"
-class GameSession;
+class WorldSession;
 
 
 class Player : public Unit {
@@ -106,10 +106,10 @@ public:
 
     void SendPacket(XPacket& pPacket);
 
-    GameSession& GetSession()
+    WorldSession& GetSession()
     { return *m_session; }
 
-    void SetSession(GameSession *session)
+    void SetSession(WorldSession *session)
     { m_session = session; }
 
     void applyJobLevelBonus() override;
@@ -127,7 +127,7 @@ protected:
     void onExpChange() override;
 
 private:
-    GameSession           *m_session{nullptr};
+    WorldSession           *m_session{nullptr};
     std::string           m_szAccount;
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };

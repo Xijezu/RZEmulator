@@ -28,13 +28,13 @@
 #include <ace/Basic_Types.h>
 #include "Common.h"
 #include "XPacket.h"
-#include "Server/TS_MESSAGE.h"
 
-class XSocket : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+struct TS_MESSAGE;
+
+typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> Base;
+
+class XSocket : public Base
 {
-private:
-	typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> Base;
-
 public:
 	class Session
 	{
@@ -55,11 +55,18 @@ public:
 	typedef ACE_Thread_Mutex LockType;
 	typedef ACE_Guard<LockType> GuardType;
 
-	int SendPacket(TS_MESSAGE& packet, size_t len) { packet.SetChecksum();  return SendPacket(reinterpret_cast<char*>(&packet), len); }
+	//int SendPacket(TS_MESSAGE& packet, size_t len) { packet.SetChecksum();  return SendPacket(reinterpret_cast<char*>(&packet), len); }
 	int SendPacket(XPacket& packet) { packet.FinalizePacket(); return SendPacket((char*)packet.contents(), packet.size()); }
 	int SendPacket(const char *buf, size_t len);
 
-	/// returning informations for remote host
+    /// Add reference to this object.
+    long AddReference(void);
+
+    /// Remove reference to this object.
+    long RemoveReference(void);
+
+
+    /// returning informations for remote host
 	const std::string& getRemoteAddress(void) const;
 	uint16 getRemotePort(void) const;
 
@@ -120,4 +127,4 @@ private:
 };
 
 #endif // __XSOCKET_H_
- 
+

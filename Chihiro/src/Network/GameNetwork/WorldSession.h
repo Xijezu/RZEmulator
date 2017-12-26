@@ -20,7 +20,7 @@
 
 #include "Common.h"
 #include "Log.h"
-#include "Server/XSocket.h"
+#include "WorldSocket.h"
 #include "Encryption/XRc4Cipher.h"
 #include "Entities/Player/Player.h"
 
@@ -46,18 +46,18 @@ struct LobbyCharacterInfo {
 };
 
 // Handle the player network
-class GameSession: public XSocket::Session {
+class WorldSession {
 public:
-    explicit GameSession(XSocket *socket);
-    virtual ~GameSession();
+    explicit WorldSession(WorldSocket *socket);
+    virtual ~WorldSession();
 
     // Accept & Close handler
-    void OnAccept() override;
-    void OnClose() override;
+    //void OnAccept() override;
+    void OnClose();
 
-    void Decrypt(void *, size_t, bool/* =false */) override;
-    void Encrypt(void *, size_t, bool/* =false */) override;
-    void ProcessIncoming(XPacket *) override;
+    //void Decrypt(void *, size_t, bool/* =false */) override;
+    //void Encrypt(void *, size_t, bool/* =false */) override;
+    void ProcessIncoming(XPacket *);
 
     uint32 GetAccountId() const
     { return _accountId; }
@@ -65,7 +65,7 @@ public:
     Player *GetPlayer() const
     { return _player != nullptr ? _player : nullptr; }
 
-    XSocket *GetSocket() const
+    WorldSocket *GetSocket() const
     { return _socket != nullptr ? _socket : nullptr; }
 
     bool HandleNullPacket(XPacket *)
@@ -111,7 +111,7 @@ public:
     std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 private:
     bool checkCharacterName(std::string);
-    XSocket *_socket{nullptr};
+    WorldSocket *_socket{nullptr};
     XRC4Cipher _rc4encode{ };
     XRC4Cipher _rc4decode{ };
 

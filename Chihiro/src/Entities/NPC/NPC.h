@@ -2,7 +2,7 @@
 #define _NPC_H_
 
 #include "Entities/Unit/Unit.h"
-#include "Network/GameNetwork/GameHandler.h"
+#include "Network/GameNetwork/WorldSession.h"
 
 class NPC : public Unit {
 public:

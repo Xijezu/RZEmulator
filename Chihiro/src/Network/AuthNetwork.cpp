@@ -2,8 +2,6 @@
 #include "AuthNetwork.h"
 #include "AuthSession.h"
 #include "../../../Mononoke/src/Server/AuthGame/AuthGamePackets.h"
-#include <ace/Connector.h>
-#include <ace/SOCK_Connector.h>
 
 AuthNetwork::AuthNetwork(XSocket& socket) : socket_(socket)
 {
@@ -33,7 +31,7 @@ void AuthNetwork::ProcessIncoming(XPacket* _packet) {
 	}
 }
 
-void AuthNetwork::AccountToAuth(GameSession* session, std::string login_name, uint64 one_time_key)
+void AuthNetwork::AccountToAuth(WorldSession* session, std::string login_name, uint64 one_time_key)
 {
 	m_Queue[login_name] = session;
 	XPacket packet(20010);
