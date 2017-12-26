@@ -914,6 +914,8 @@ void Player::PendWarp(int x, int y, uint8_t layer)
     if(x >= 0.0f && y >= 0.0f /*MapWidth check*/) {
         int min_rx = -1, min_ry = -1, max_rx = 0, max_ry = 0;
         for(auto& s : m_vSummonList) {
+            if(s == nullptr)
+                continue;
             if(s->IsInWorld()) {
                 if((int)((s->GetPositionX() + 108) / g_nRegionSize) < min_rx)
                     min_rx = (int)((s->GetPositionX() + 108) / g_nRegionSize);
