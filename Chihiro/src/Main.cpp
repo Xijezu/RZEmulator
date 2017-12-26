@@ -1,11 +1,11 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Utilities/SignalHandler.h"
-#include "WorldSocketMgr.h"
 #include "Network/AuthSession.h"
 #include "World.h"
 #include "WorldRunnable.h"
 
+#include "WorldSocketMgr.h"
 #include <ace/TP_Reactor.h>
 
 #ifndef _CHIHIRO_CORE_CONFIG
