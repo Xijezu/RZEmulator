@@ -30,7 +30,8 @@ public:
         else if (obj->GetObjType() == OBJ_STATIC)
             m_vStatic[obj->GetHandle()] = obj;
         obj->_region = this;
-        //obj->_bIsInWorld = true;
+        //obj->bIsInWorld = true;
+        obj->AddToWorld();
     }
 
     void RemoveObject(WorldObject *obj)
@@ -42,11 +43,12 @@ public:
         else if (obj->GetObjType() == OBJ_STATIC)
             m_vStatic.erase(obj->GetHandle());
         obj->_region = nullptr;
+        obj->RemoveFromWorld();
     }
 
     uint DoEachClient(const std::function<void (Unit*)>& fn) {
         for(auto& obj : this->m_vClient) {
-            if(obj.second != nullptr)
+            if(obj.second != nullptr && obj.second->IsInWorld())
                 fn(dynamic_cast<Unit*>(obj.second));
                 //fn.run(dynamic_cast<Unit*>(obj.second));
         }

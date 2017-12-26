@@ -1,6 +1,5 @@
 #include "World.h"
 #include "DatabaseEnv.h"
-#include "Network/GameNetwork/ClientPackets.h"
 #include "Map/ArRegion.h"
 #include "Globals/ObjectMgr.h"
 #include "Timer.h"
@@ -59,7 +58,7 @@ GameSession* World::FindSession(uint32 id) const
 	if (itr != m_sessions.end())
 		return itr->second;                                 // also can return NULL for kicked session
 	else
-		return NULL;
+		return nullptr;
 }
 
 /// Remove a given session
@@ -75,17 +74,11 @@ bool World::RemoveSession(uint32 id)
 
 void World::AddSession(GameSession* s)
 {
+	if(s == nullptr)
+		return;
     if(m_sessions.count(s->GetAccountId()) == 0) {
         m_sessions.insert({ (uint32)s->GetAccountId(), s });
     }
-}
-
-void World::SendResult(Player &_player, uint16_t nMsg, uint16_t result, uint16_t value) {
-	XPacket packet(CSPACKETS::TS_SC_RESULT);
-	packet << nMsg;
-	packet << result;
-	packet << (uint32_t)value;
-	_player.GetSession().GetSocket().SendPacket(packet);
 }
 
 uint64_t World::getItemIndex()
@@ -136,11 +129,11 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
 		pUnit->SetMultipleMove(newPos, speed, t);
 
 		if(bBroadcastMove) {
-			sArRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(),
-										   [=](ArRegion* region) {
-												region->DoEachClient([=](WorldObject* obj) {
-													Messages::SendMoveMessage(dynamic_cast<Player*>(obj), pUnit);
-												});
+			sArRegion->DoEachVisibleRegion((uint) (pUnit->GetPositionX() / g_nRegionSize), (uint) (pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(),
+										   [=](ArRegion *region) {
+											   region->DoEachClient([=](WorldObject *obj) {
+												   Messages::SendMoveMessage(dynamic_cast<Player *>(obj), pUnit);
+											   });
 										   });
 		}
         result = true;
@@ -193,20 +186,20 @@ void World::AddObjectToWorld(WorldObject *obj)
                                        rgn->DoEachClient([=](Unit *client) { // enterProc
                                            // BEGIN Send Enter Message to each other
                                            if (client->GetHandle() != obj->GetHandle()) {
-                                               if (client->IsInWorld())
+                                               // Enter message FROM doEachRegion-Client TO obj
+                                               if (client->IsInWorld() && obj->GetSubType() == ST_Player)
                                                    Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
-                                               if (client->GetSubType() == ST_Player) {
-                                                   if (obj->IsInWorld())
-                                                       Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit *>(obj), false);
-                                               }
+                                               // Enter message FROM obj TO doEachRegion-Client
+                                               if (client->GetSubType() == ST_Player)
+                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit *>(obj), false);
                                            }
                                        });    // END Send Enter Message to each other
                                        rgn->DoEachMovableObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld())
+                                           if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
                                        });
                                        rgn->DoEachStaticObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld())
+                                           if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
                                        });
                                    });
@@ -228,6 +221,9 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
+    auto region = sArRegion->GetRegion(*obj);
+	if(region != nullptr)
+		region->RemoveObject(obj);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -260,7 +256,7 @@ void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPack
 {
     sArRegion->DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, [&packet](ArRegion* rgn) {
         rgn->DoEachClient([&packet](WorldObject* obj) {
-            dynamic_cast<Player*>(obj)->GetSession().GetSocket().SendPacket(packet);
+            dynamic_cast<Player*>(obj)->SendPacket(packet);
         });
     });
 }
@@ -269,7 +265,7 @@ void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
 {
     sArRegion->DoEachVisibleRegion(rx, ry, layer, [&packet](ArRegion* rgn) {
        rgn->DoEachClient([&packet](WorldObject* obj) {
-           dynamic_cast<Player*>(obj)->GetSession().GetSocket().SendPacket(packet);
+           dynamic_cast<Player*>(obj)->SendPacket(packet);
        });
     });
 }
@@ -277,7 +273,7 @@ void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
 void World::AddSummonToWorld(Summon *pSummon)
 {
     pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
-    pSummon->AddToWorld();
+    //pSummon->AddToWorld();
     AddObjectToWorld(pSummon);
     //pSummon->m_bIsSummoned = true;
     pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);

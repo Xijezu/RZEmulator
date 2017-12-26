@@ -48,7 +48,7 @@ struct LobbyCharacterInfo {
 // Handle the player network
 class GameSession: public XSocket::Session {
 public:
-    explicit GameSession(XSocket &socket);
+    explicit GameSession(XSocket *socket);
     virtual ~GameSession();
 
     // Accept & Close handler
@@ -65,8 +65,8 @@ public:
     Player *GetPlayer() const
     { return _player != nullptr ? _player : nullptr; }
 
-    XSocket &GetSocket(void)
-    { return _socket; }
+    XSocket *GetSocket() const
+    { return _socket != nullptr ? _socket : nullptr; }
 
     bool HandleNullPacket(XPacket *)
     { return true; }
@@ -111,7 +111,7 @@ public:
     std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 private:
     bool checkCharacterName(std::string);
-    XSocket &_socket;
+    XSocket *_socket{nullptr};
     XRC4Cipher _rc4encode{ };
     XRC4Cipher _rc4decode{ };
 

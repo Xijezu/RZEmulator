@@ -367,7 +367,7 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
         default:
             break;
     }
-    pPlayer->GetSession().GetSocket().SendPacket(packet);
+    pPlayer->SendPacket(packet);
     if(GetSubType() == ST_Player)
         Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));
 
@@ -427,7 +427,7 @@ bool WorldObject::Step(uint tm)
 
 void WorldObject::RemoveFromWorld()
 {
-    sArRegion->GetRegion(*this)->RemoveObject(this);
+    //sArRegion->GetRegion(*this)->RemoveObject(this);
     if(!IsInWorld())
         return;
     Object::RemoveFromWorld();
@@ -435,7 +435,7 @@ void WorldObject::RemoveFromWorld()
 
 void WorldObject::AddToWorld()
 {
-    sArRegion->GetRegion(*this)->AddObject(this);
+    //sArRegion->GetRegion(*this)->AddObject(this);
     Object::AddToWorld();
 }
 

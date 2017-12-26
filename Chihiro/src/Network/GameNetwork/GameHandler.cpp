@@ -32,26 +32,26 @@
 #include "Skill.h"
 
 // Constructo - give it a socket
-GameSession::GameSession(XSocket &socket) : _socket(socket)
+GameSession::GameSession(XSocket *socket) : _socket(socket)
 {
     _rc4decode.SetKey("}h79q~B%al;k'y $E");
     _rc4encode.SetKey("}h79q~B%al;k'y $E");
 }
 
 // Close patch file descriptor before leaving
-GameSession::~GameSession(void)
+GameSession::~GameSession()
 {
     _rc4decode.Clear();
     _rc4encode.Clear();
 }
 
 // Accept the connection - function itself not used here because we're only interested in the game server data itself
-void GameSession::OnAccept(void)
+void GameSession::OnAccept()
 {
 
 }
 
-void GameSession::OnClose(void)
+void GameSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
@@ -135,7 +135,7 @@ void GameSession::ProcessIncoming(XPacket *pRecvPct)
 
     // Report unknown packets in the error log
     if (i == tableSize) {
-        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket.getRemoteAddress().c_str());
+        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->getRemoteAddress().c_str());
         return;
     }
     aptr.release();
@@ -165,8 +165,8 @@ void GameSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
     packet << (uint16) _msg;
     packet << (uint16) _result;
     packet << (int32) _value;
-    _socket.SendPacket(packet);
-    _socket.handle_output();
+    _socket->SendPacket(packet);
+    _socket->handle_output();
 }
 
 bool GameSession::onCharacterList(XPacket *pGamePct)
@@ -204,7 +204,7 @@ bool GameSession::onCharacterList(XPacket *pGamePct)
             packet << info.at(i).wear_item_level_info[j];
         }
     }
-    _socket.SendPacket(packet);
+    _socket->SendPacket(packet);
     return true;
 }
 
@@ -302,7 +302,7 @@ bool GameSession::onLogin(XPacket *pRecvPct)
     packet.fill(result->szName, 19);
     packet << (uint32) sConfigMgr->GetIntDefault("Game.CellSize", 6);
     packet << _player->GetUInt32Value(UNIT_FIELD_GUILD_ID);
-    _socket.SendPacket(packet);
+    GetSocket()->SendPacket(packet);
 
     _player->SendLoginProperties();
     return true;
@@ -644,7 +644,7 @@ bool GameSession::onChatRequest(XPacket *_packet)
         result << (uint8_t) request.len;
         result << (uint8_t) request.type;
         result << std::string((char *) request.szMsg.data());
-        _player->GetSession()._socket.SendPacket(result);
+        GetSocket()->SendPacket(result);
         return true;
     } else if (request.type == 3) {
         // Whisper
@@ -661,7 +661,7 @@ bool GameSession::onChatRequest(XPacket *_packet)
 
 bool GameSession::onLogoutTimerRequest(XPacket *pRecvPct)
 {
-    sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
+    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
     return true;
 }
 
@@ -681,14 +681,14 @@ bool GameSession::onPutOnItem(XPacket *_packet)
 
         if (ci != nullptr) {
             if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == NULL) {
-                sWorld->SendResult(*_player, TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
+                Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return true;
             }
 
             if (_player->putonItem((ItemWearType) position, ci) == 0) {
                 _player->CalculateStat();
                 Messages::SendStatInfo(_player, _player);
-                sWorld->SendResult(*_player, TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
+                Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
                 if (true) { // TODO: isPlayer()
                     _player->SendWearInfo();
                 }
@@ -709,16 +709,16 @@ bool GameSession::onPutOffItem(XPacket *_packet)
 
     //if(!_player->isAlive())
     if (false)
-        sWorld->SendResult(*_player, TS_CS_PUTOFF_ITEM, 5, 0);
+        Messages::SendResult(_player, TS_CS_PUTOFF_ITEM, 5, 0);
 
     Item *curitem = _player->GetWornItem((ItemWearType) position);
     if (curitem == nullptr) {
-        sWorld->SendResult(*_player, TS_CS_PUTOFF_ITEM, 1, 0);
+        Messages::SendResult(_player, TS_CS_PUTOFF_ITEM, 1, 0);
     } else {
         uint16_t por = _player->putoffItem((ItemWearType) position);
         _player->CalculateStat();
         Messages::SendStatInfo(_player, _player);
-        sWorld->SendResult(*_player, _packet->GetPacketID(), 0, 0);
+        Messages::SendResult(_player, _packet->GetPacketID(), 0, 0);
         if (por == 0) {
             if (true) {// TODO IsPlayer
                 _player->SendWearInfo();
@@ -804,14 +804,14 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
     auto szMarketName = _player->GetLastContactStr("market");
     if (buy_count == 0) {
         MX_LOG_TRACE("network", "onBuyItem - %s: buy_count was 0!", _player->GetName());
-        sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
         return false;
     }
 
     auto market = sObjectMgr->GetMarketInfo(szMarketName);
     if (market.empty()) {
         MX_LOG_TRACE("network", "onBuyItem - %s: market was empty!", _player->GetName());
-        sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
         return false;
     }
 
@@ -830,7 +830,7 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
 
             auto nTotalPrice = (uint) floor(buy_count * mt.price_ratio);
             if (nTotalPrice / buy_count != mt.price_ratio || _player->GetGold() < nTotalPrice) {
-                sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
                 return true;
             }
             // TODO Add Huntaholic Check
@@ -839,7 +839,7 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
 
             auto result = _player->ChangeGold(_player->GetGold() - nTotalPrice);
             if (result != TS_RESULT_SUCCESS) {
-                sWorld->SendResult(*_player, pRecvPct->GetPacketID(), result, 0);
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), result, 0);
                 return true;
             }
 
@@ -852,7 +852,7 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
                     _player->PushItem(item, buy_count, false);
                 }
             }
-            sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item_code);
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item_code);
             XPacket resultPct(TS_SC_NPC_TRADE_INFO);
             resultPct << (uint8_t) 0;
             resultPct << item_code;
@@ -860,7 +860,7 @@ bool GameSession::onBuyItem(XPacket *pRecvPct)
             resultPct << (int64) mt.huntaholic_ratio;
 #endif
             resultPct << (uint32_t) _player->GetLastContactLong("npc");
-            _player->GetSession().GetSocket().SendPacket(resultPct);
+            GetSocket()->SendPacket(resultPct);
         }
     }
 
@@ -874,7 +874,7 @@ bool GameSession::onDeleteCharacter(XPacket *pRecvPct)
     stmt->setString(0, name);
     stmt->setInt32(1, _accountId);
     CharacterDatabase.Execute(stmt);
-    //sWorld->SendResult(*_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
+    //Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
     _SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
 }
 
@@ -897,7 +897,7 @@ bool GameSession::onTimeSync(XPacket *pRecvPct)
     if (_player->m_TS.m_vT.size() >= 4) {
         XPacket result(TS_SC_SET_TIME);
         result << (uint32_t) _player->m_TS.GetInterval();
-        _player->GetSession().GetSocket().SendPacket(result);
+        GetSocket()->SendPacket(result);
         return true;
     } else {
         Messages::SendTimeSynch(_player);

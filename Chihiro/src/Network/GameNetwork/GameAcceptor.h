@@ -39,11 +39,11 @@ public:
 protected:
     virtual int make_svc_handler(XSocket* &sh)
     {
-        if (sh == 0)
+        if (sh == nullptr)
             ACE_NEW_RETURN(sh, XSocket, -1);
 
         sh->reactor(reactor());
-        sh->set_session(new GameSession(*sh));
+        sh->set_session(new GameSession(sh));
         return 0;
     }
 
@@ -61,7 +61,7 @@ protected:
         {
             //sLog->outError("Out of file descriptors, suspending incoming connections for 10 seconds");
             reactor()->remove_handler(this, ACE_Event_Handler::ACCEPT_MASK | ACE_Event_Handler::DONT_CALL);
-            reactor()->schedule_timer(this, NULL, ACE_Time_Value(10));
+            reactor()->schedule_timer(this, nullptr, ACE_Time_Value(10));
         }
 #endif
         return 0;

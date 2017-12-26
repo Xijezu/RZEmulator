@@ -104,7 +104,9 @@ public:
 
     ushort_t ChangeGold(long);
 
-    GameSession &GetSession()
+    void SendPacket(XPacket& pPacket);
+
+    GameSession& GetSession()
     { return *m_session; }
 
     void SetSession(GameSession *session)
@@ -129,7 +131,7 @@ private:
     std::string           m_szAccount;
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };
-    std::vector<Summon *> m_vSummonList{ };
+    std::vector<Summon *> m_vSummonList{nullptr};
 
     uint m_nLastSaveTime{ };
 

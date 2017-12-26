@@ -41,9 +41,12 @@ Player::~Player()
     for (auto &t : m_lInventory) {
         m_lInventory.erase(t.first);
         delete t.second;
+        t.second = nullptr;
     }
     for(auto &t : m_vSummonList) {
+        sWorld->RemoveObjectFromWorld(t);
         delete t;
+        t = nullptr;
     }
     m_vSummonList.clear();
 }
@@ -349,8 +352,7 @@ void Player::SendPropertyMessage(std::string key, std::string value)
     packet << (uint64) 0;
     packet << value;
     packet << (uint8) 0;
-    packet.FinalizePacket();
-    m_session->GetSocket().SendPacket(packet);
+    SendPacket(packet);
 }
 
 void Player::SendPropertyMessage(std::string key, int64 value)
@@ -360,13 +362,12 @@ void Player::SendPropertyMessage(std::string key, int64 value)
     packet << (uint8) 1;
     packet.fill(key, 16);
     packet << value;
-    packet.FinalizePacket();
-    m_session->GetSocket().SendPacket(packet);
+    SendPacket(packet);
 }
 
 void Player::SendLoginProperties()
 {
-    sWorld->AddSession(&this->GetSession());
+    sWorld->AddSession(m_session);
     CalculateStat();
     // Login();
     for(auto summon: m_vSummonList) {
@@ -400,14 +401,13 @@ void Player::SendLoginProperties()
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
 
     if(!_bIsInWorld) {
-        AddToWorld();
         sWorld->AddObjectToWorld(this);
     }
 
     if (m_pMainSummon != nullptr) {
         m_pMainSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::Invincible);
         m_pMainSummon->SetCurrentXY(GetPositionX(),GetPositionY());
-        m_pMainSummon->AddNoise(rand32(), rand32(), 30);
+        m_pMainSummon->AddNoise(rand32(), rand32(), 50);
         m_pMainSummon->SetLayer(GetLayer());
         sWorld->AddSummonToWorld(m_pMainSummon);
     }
@@ -418,8 +418,7 @@ void Player::SendGoldChaosMessage()
     XPacket packet(TS_SC_GOLD_UPDATE);
     packet << GetUInt64Value(UNIT_FIELD_GOLD);
     packet << GetInt32Value(UNIT_FIELD_CHAOS);
-    packet.FinalizePacket();
-    m_session->GetSocket().SendPacket(packet);
+    SendPacket(packet);
 }
 
 void Player::SendJobInfo()
@@ -452,8 +451,7 @@ void Player::SendWearInfo()
     for (auto &i : m_anWear) {
         packet << (i != nullptr ? i->m_Instance.nLevel : 0);
     }
-    packet.FinalizePacket();
-    m_session->GetSocket().SendPacket(packet);
+    SendPacket(packet);
 }
 
 void Player::Save(bool bOnlyPlayer)
@@ -595,14 +593,15 @@ void Player::SendItemWearInfoMessage(Item item, Unit *u)
     packet << (int16_t) item.m_Instance.nWearInfo;
     packet << (uint32_t) (u != nullptr ? u->GetHandle() : 0);
     packet << (int32_t) item.m_Instance.nEnhance;
-    GetSession().GetSocket().SendPacket(packet);
+    SendPacket(packet);
 }
 
 Summon* Player::GetSummon(int summon_sid)
 {
     for(auto summon : m_vSummonList) {
-        if(summon->GetInt32Value(UNIT_FIELD_UID) == summon_sid)
-            return summon;
+        if(summon != nullptr)
+            if(summon->GetInt32Value(UNIT_FIELD_UID) == summon_sid)
+                return summon;
     }
     return nullptr;
 }
@@ -758,7 +757,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
     XPacket locPct(TS_SC_CHANGE_LOCATION);
     locPct << (int)m_nWorldLocationId;
     locPct << (int)nl;
-    m_session->GetSocket().SendPacket(locPct);
+    SendPacket(locPct);
     if(m_nWorldLocationId != nl) {
         if(m_nWorldLocationId != 0) {
             sWorldLocationMgr->RemoveFromLocation(this);
@@ -897,6 +896,8 @@ void Player::AddSummon(Summon *pSummon, bool bSendMsg)
 Summon *Player::GetSummonByHandle(uint handle)
 {
     for(auto s : m_vSummonList) {
+        if(s == nullptr)
+            continue;
         if(s->GetHandle() == handle)
             return s;
     }
@@ -972,9 +973,19 @@ void Player::LogoutNow(int callerIdx)
 void Player::RemoveAllSummonFromWorld()
 {
     for(auto& s : m_vSummonList) {
+        if(s == nullptr)
+            continue;
         if(s->IsInWorld()) {
-            s->RemoveFromWorld();
             sWorld->RemoveObjectFromWorld(s);
+        }
+    }
+}
+
+void Player::SendPacket(XPacket &pPacket)
+{
+    if(m_session != nullptr) {
+        if(m_session->GetSocket() != nullptr) {
+            m_session->GetSocket()->SendPacket(pPacket);
         }
     }
 }

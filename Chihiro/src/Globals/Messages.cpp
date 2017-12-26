@@ -18,7 +18,6 @@
 #include "Messages.h"
 #include "Player.h"
 #include "ClientPackets.h"
-#include "GameHandler.h"
 #include "World.h"
 #include "Skill.h"
 
@@ -31,7 +30,7 @@ void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
     resultPct << (uint32_t)pUnit->GetHandle();
     resultPct << (int64)pUnit->GetEXP();
     resultPct << (uint32_t)pUnit->GetJP();
-    pPlayer->GetSession().GetSocket().SendPacket(resultPct);
+    pPlayer->SendPacket(resultPct);
 }
 
 void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
@@ -43,7 +42,7 @@ void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
     resultPct << (uint32_t)pUnit->GetHandle();
     resultPct << (uint32_t)pUnit->getLevel();
     resultPct << pUnit->GetCurrentJLv();
-    pPlayer->GetSession().GetSocket().SendPacket(resultPct);
+    pPlayer->SendPacket(resultPct);
 }
 
 void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float add_mp, bool display)
@@ -62,7 +61,7 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
     statPct << (int32_t)pUnit->GetMana();
     statPct << (int32_t)pUnit->GetMaxMana();
     statPct << (uint8_t)(display ? 1 : 0);
-    pPlayer->GetSession().GetSocket().SendPacket(statPct);
+    pPlayer->SendPacket(statPct);
 }
 
 void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
@@ -76,14 +75,14 @@ void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
     pUnit->m_cStat.WriteToPacket(statPct);
     pUnit->m_cAtribute.WriteToPacket(statPct);
     statPct << (uint8_t) 0;
-    pPlayer->GetSession().GetSocket().SendPacket(statPct);
+    pPlayer->SendPacket(statPct);
 
     statPct.Reset();
     statPct << (uint32_t) pUnit->GetHandle();
     pUnit->m_cStatByState.WriteToPacket(statPct);
     pUnit->m_cAtributeByState.WriteToPacket(statPct);
     statPct << (uint8_t) 1;
-    pPlayer->GetSession().GetSocket().SendPacket(statPct);
+    pPlayer->SendPacket(statPct);
 }
 
 void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
@@ -98,7 +97,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     summonPct << (int32_t)pSummon->GetSummonCode();
     summonPct << (int32_t)pSummon->getLevel();
     summonPct << (int32_t)1000; // TODO: SP
-    pPlayer->GetSession().GetSocket().SendPacket(summonPct);
+    pPlayer->SendPacket(summonPct);
 
     SendStatInfo(pPlayer, pSummon);
 
@@ -133,7 +132,7 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
             summonPct << (uint32_t)0;
         }
     }
-    pPlayer->GetSession().GetSocket().SendPacket(summonPct);
+    pPlayer->SendPacket(summonPct);
 }
 
 void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szKey, int64_t nValue)
@@ -144,7 +143,7 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szK
         packet.fill(szKey, 16);
         packet << (int64)nValue;
         packet.FinalizePacket();
-        pPlayer->GetSession().GetSocket().SendPacket(packet);
+        pPlayer->SendPacket(packet);
 }
 
 void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, std::string szTitle, std::string szText, std::string szMenu)
@@ -161,7 +160,7 @@ void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type,
     dialogPct.fill(szTitle, 0);
     dialogPct.fill(szText,0);
     dialogPct.fill(szMenu,0);
-    pPlayer->GetSession().GetSocket().SendPacket(dialogPct);
+    pPlayer->SendPacket(dialogPct);
 }
 
 void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
@@ -191,7 +190,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (uint32_t) 0;
         skillPct << (uint32_t) 0;
     }
-    pPlayer->GetSession().GetSocket().SendPacket(skillPct);
+    pPlayer->SendPacket(skillPct);
 }
 
 void Messages::SendChatMessage(int nChatType, std::string szSenderName, Player* target, std::string szMsg)
@@ -205,7 +204,7 @@ void Messages::SendChatMessage(int nChatType, std::string szSenderName, Player* 
         chatPct << (uint16_t)szMsg.length();
         chatPct << (uint8_t)nChatType;
         chatPct.fill(szMsg, szMsg.length());
-        target->GetSession().GetSocket().SendPacket(chatPct);
+        target->SendPacket(chatPct);
     }
 }
 
@@ -229,7 +228,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, std::vector<
 #endif // EPIC >= 5
     }
 
-    pPlayer->GetSession().GetSocket().SendPacket(marketPct);
+    pPlayer->SendPacket(marketPct);
 }
 
 void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
@@ -240,7 +239,7 @@ void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
     XPacket inventoryPct(TS_SC_INVENTORY);
     inventoryPct << (uint16_t)1;
     fillItemInfo(inventoryPct, pItem);
-    pPlayer->GetSession().GetSocket().SendPacket(inventoryPct);
+    pPlayer->SendPacket(inventoryPct);
 }
 
 void Messages::fillItemInfo(XPacket &packet, Item *item)
@@ -283,7 +282,7 @@ void Messages::SendTimeSynch(Player* pPlayer)
 
     XPacket result(TS_TIMESYNC);
     result << (uint32_t)sWorld->GetArTime();
-    pPlayer->GetSession().GetSocket().SendPacket(result);
+    pPlayer->SendPacket(result);
 }
 
 void Messages::SendGameTime(Player *pPlayer)
@@ -294,7 +293,7 @@ void Messages::SendGameTime(Player *pPlayer)
     XPacket gtPct(TS_SC_GAME_TIME);
     gtPct << (uint32)sWorld->GetArTime();
     gtPct << (int64)time(nullptr);
-    pPlayer->GetSession().GetSocket().SendPacket(gtPct);
+    pPlayer->SendPacket(gtPct);
 }
 
 void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
@@ -322,7 +321,7 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
                         ++lcnt;
                     } while (lcnt < ltotal);
                 }
-                pPlayer->GetSession().GetSocket().SendPacket(packet);
+                pPlayer->SendPacket(packet);
                 idx += 200;
             } while (idx < count);
         }
@@ -338,7 +337,7 @@ void Messages::SendResult(Player *pPlayer, uint16_t nMsg, uint16 nResult, uint16
     packet << nMsg;
     packet << nResult;
     packet << (uint32_t)nValue;
-    pPlayer->GetSession().GetSocket().SendPacket(packet);
+    pPlayer->SendPacket(packet);
 }
 
 void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool bAbsolute)
@@ -367,7 +366,7 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
             movePct << (float)pos.end.m_positionX;
             movePct << (float)pos.end.m_positionY;
         }
-        pPlayer->GetSession().GetSocket().SendPacket(movePct);
+        pPlayer->SendPacket(movePct);
     }
 }
 
@@ -392,7 +391,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
         packet << (i != nullptr ? i->m_Instance.nLevel : 0);
     }
     packet.FinalizePacket();
-    pPlayer->GetSession().GetSocket().SendPacket(packet);
+    pPlayer->SendPacket(packet);
 }
 
 void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool need_to_display)
@@ -435,5 +434,5 @@ void Messages::SendWarpMessage(Player *pPlayer)
     packet << pPlayer->GetPositionY();
     packet << pPlayer->GetPositionZ();
     packet << (uint8_t)pPlayer->GetLayer();
-    pPlayer->GetSession().GetSocket().SendPacket(packet);
+    pPlayer->SendPacket(packet);
 }

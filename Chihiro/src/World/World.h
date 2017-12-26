@@ -38,7 +38,6 @@ public:
 	const SessionMap& GetAllSessions() const { return m_sessions; }
 	uint32 GetSessionCount() const { return m_sessions.size(); }
 
-	void SendResult(Player&, uint16_t, uint16_t, uint16_t);
     void Broadcast(uint, uint, uint, uint, uint8, XPacket);
     void Broadcast(uint, uint, uint8, XPacket);
 	uint GetArTime();

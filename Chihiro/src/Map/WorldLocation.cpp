@@ -16,9 +16,7 @@
   */
 
 #include <Entities/Player/Player.h>
-#include "WorldLocation.h"
 #include "ClientPackets.h"
-#include "GameNetwork/GameHandler.h"
 
 WorldLocation::WorldLocation(const WorldLocation& src)
 {
@@ -48,7 +46,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
             XPacket worldLocationPct(TS_SC_WEATHER_INFO);
             worldLocationPct << (uint32_t)idx;
             worldLocationPct << (uint16_t)m_vWorldLocation[i].current_weather;
-            player->GetSession().GetSocket().SendPacket(worldLocationPct);
+            player->SendPacket(worldLocationPct);
             return &m_vWorldLocation[i];
         }
     }
@@ -81,7 +79,7 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
             XPacket weatherPct(TS_SC_WEATHER_INFO);
             weatherPct << (uint32_t)idx;
             weatherPct << (uint16_t)wl.current_weather;
-            player->GetSession().GetSocket().SendPacket(weatherPct);
+            player->SendPacket(weatherPct);
             return;
         }
     }
