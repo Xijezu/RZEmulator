@@ -964,10 +964,9 @@ void Player::LogoutNow(int callerIdx)
 {
     if(IsInWorld()) {
         RemoveAllSummonFromWorld();
-        RemoveFromWorld();
-        Save(false);
-        sWorldLocationMgr->RemoveFromLocation(this);
+        sWorld->RemoveObjectFromWorld(this);
     }
+    Save(false);
 }
 
 void Player::RemoveAllSummonFromWorld()
