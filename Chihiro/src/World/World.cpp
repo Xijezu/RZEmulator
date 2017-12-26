@@ -5,6 +5,7 @@
 #include "Timer.h"
 #include "Scripting/XLua.h"
 #include "Messages.h"
+#include "ClientPackets.h"
 
 World::World() : startTime(getMSTime())
 {
@@ -221,9 +222,25 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
-    auto region = sArRegion->GetRegion(*obj);
-	if(region != nullptr)
-		region->RemoveObject(obj);
+    // Get Region
+    auto    region = sArRegion->GetRegion(*obj);
+    // Create & set leave packet
+    XPacket leavePct(TS_SC_LEAVE);
+    leavePct << obj->GetHandle();
+    // Send one to each player in visible region
+    sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize),
+                                   (uint) (obj->GetPositionY() / g_nRegionSize),
+                                   obj->GetLayer(),
+                                   [&leavePct](ArRegion *lbRegion) {
+                                       lbRegion->DoEachClient([&leavePct](WorldObject *lbPlayer) {
+                                           if (lbPlayer != nullptr && lbPlayer->IsInWorld()) {
+                                               dynamic_cast<Player *>(lbPlayer)->SendPacket(leavePct);
+                                           }
+                                       });
+                                   });
+    // Finally, remove object from map
+    if (region != nullptr)
+        region->RemoveObject(obj);
 }
 
 void World::step(WorldObject *obj, uint tm)
