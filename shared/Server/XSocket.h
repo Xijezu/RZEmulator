@@ -55,7 +55,7 @@ public:
 	typedef ACE_Thread_Mutex LockType;
 	typedef ACE_Guard<LockType> GuardType;
 
-	//int SendPacket(TS_MESSAGE& packet, size_t len) { packet.SetChecksum();  return SendPacket(reinterpret_cast<char*>(&packet), len); }
+	int SendPacket(TS_MESSAGE& packet, size_t len) { packet.SetChecksum();  return SendPacket(reinterpret_cast<char*>(&packet), len); }
 	int SendPacket(XPacket& packet) { packet.FinalizePacket(); return SendPacket((char*)packet.contents(), packet.size()); }
 	int SendPacket(const char *buf, size_t len);
 

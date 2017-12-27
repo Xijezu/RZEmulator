@@ -4,6 +4,7 @@
 
 #include "MemPool.h"
 #include "World.h"
+#include "ObjectMgr.h"
 
 Item *MemoryPoolMgr::AllocItem()
 {
@@ -56,9 +57,9 @@ WorldObject* MemoryPoolMgr::getPtrFromId(uint32_t handle)
             case 0x20000000:
                 result = getMiscPtrFromId(handle);
                 break;
-            /*case 0x40000000:
-                result = (GameObject)getMonsterPtrFromId(uid);
-                break;*/
+            case 0x40000000:
+                result = getMonsterPtrFromId(handle);
+                break;
             case 0x80000000:
                 result = getPlayerPtrFromId(handle);
                 break;
@@ -127,4 +128,23 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
     pItem->m_bIsNeedUpdateToDB = true;
     pItem->m_pSummon = s;
     return s;
+}
+
+Monster *MemoryPoolMgr::AllocMonster(uint idx)
+{
+    MonsterBase mb = sObjectMgr->GetMonsterInfo(idx);
+    if(mb.id == 0)
+        return nullptr;
+    Monster* p = new Monster{m_nMonsterTop, mb};
+    p->SetUInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
+    m_nMonsterTop++;
+    m_hsMonster.insert(std::make_pair<uint,Monster*>(p->GetHandle(), (Monster*)p));
+    return p;
+}
+
+WorldObject *MemoryPoolMgr::getMonsterPtrFromId(uint32_t handle)
+{
+    if(m_hsMonster.count(handle) == 1)
+        return m_hsMonster[handle];
+    return nullptr;
 }

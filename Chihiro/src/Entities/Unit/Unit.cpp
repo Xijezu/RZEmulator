@@ -66,15 +66,15 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
 
 void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
 {
-    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_STATUS); // TODO: status
+    pEnterPct << (uint32_t)0;// pUnit->GetUInt32Value(UNIT_FIELD_STATUS); // TODO: status
     pEnterPct << pUnit->GetOrientation();
     pEnterPct << (int32_t) pUnit->GetHealth();
     pEnterPct << (int32_t) pUnit->GetMaxHealth();
     pEnterPct << (int32_t) pUnit->GetMana();
     pEnterPct << (int32_t) pUnit->GetMaxMana();
     pEnterPct << (int32_t) pUnit->getLevel();
-    pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
-    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
+    pEnterPct << (uint8_t) 0;pUnit->GetUInt32Value(UNIT_FIELD_RACE);
+    pEnterPct << (uint32_t) 0;pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
     pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) == 1 ? 1 : 0);
     pEnterPct << (int32_t) 0;
 }

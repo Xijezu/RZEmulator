@@ -93,6 +93,9 @@ void WorldSocket::CloseSocket (void)
         if(m_Session)
             m_Session->OnClose();
 
+        m_Crypt.Clear();
+        m_Decrypt.Clear();
+
         m_Session = NULL;
     }
 }

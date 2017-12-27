@@ -15,14 +15,6 @@ struct NPCTemplate {
     std::string contact_script;
 };
 
-struct LocationInfoHeader {
-    int   nPriority{ };
-    float x{ };
-    float y{ };
-    float z{ };
-    float fRadius{};
-};
-
 struct LevelResourceTemplate {
     int level{};
     int64 normal_exp{};

@@ -11,6 +11,49 @@ class XPacket;
 struct MarketInfo;
 class WorldObject;
 
+struct scramble_map {
+    scramble_map()
+    {
+        int  v3;
+        int  i;
+        uint8_t v5;
+
+        for (i = 0; i < 32; ++i) {
+            map[i] = (uint8_t ) i;
+        }
+
+        v3     = 3;
+        for (i = 0; i < 32; ++i) {
+            v5 = map[i];
+            if (v3 >= 32)
+                v3 += -32 * (v3 >> 5);
+            map[i]  = map[v3];
+            map[v3] = v5;
+            v3 += i + 3;
+        }
+    }
+
+    uint8_t map[32]{0};
+};
+
+static scramble_map map{};
+
+static int bits_scramble(int c)
+{
+    int  result;
+    uint v2;
+
+    result = 0;
+    v2     = 0;
+    do {
+        if ((((uint) 1 << (int) v2) & c) != 0)
+            result |= 1 << map.map[v2];
+        ++v2;
+    } while (v2 < 32);
+    return result;
+}
+
+
 class Messages {
 public:
     static void SendEXPMessage(Player *, Unit *);

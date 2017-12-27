@@ -6,9 +6,11 @@
 #include "Entities/Player/Player.h"
 #include "Unit.h"
 #include "Dynamic/UnorderedMap.h"
+#include "RespawnObject.h"
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 const int g_nRegionSize = 180;
+
 
 class World
 {
@@ -26,6 +28,7 @@ public:
 
 	void AddObjectToWorld(WorldObject* obj);
 	void AddSummonToWorld(Summon* pSummon);
+	void AddMonsterToWorld(Monster* pMonster);
     void RemoveObjectFromWorld(WorldObject* obj);
 
 	// Warping
@@ -63,6 +66,8 @@ private:
 	uint64_t s_nPetIndex{0};
 	uint64_t s_nSummonIndex{0};
 	uint64_t s_nSkillIndex{0};
+
+	std::vector<RespawnObject> m_vRespawnList{};
 };
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()

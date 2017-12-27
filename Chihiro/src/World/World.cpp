@@ -6,6 +6,8 @@
 #include "Scripting/XLua.h"
 #include "Messages.h"
 #include "ClientPackets.h"
+#include "Maploader.h"
+#include "RespawnObject.h"
 
 World::World() : startTime(getMSTime())
 {
@@ -40,13 +42,24 @@ void World::InitWorld()
 	s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
 	s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
 
-	MX_LOG_INFO("server.worldserver", "Initializing scripting...");
-	sScriptingMgr->InitializeLua();
-	MX_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
-
-	oldTime = getMSTime();
 	sObjectMgr->InitGameContent();
 	MX_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));
+
+    oldTime = getMSTime();
+    MX_LOG_INFO("server.worldserver", "Initializing scripting...");
+    sScriptingMgr->InitializeLua();
+	sMapContent->LoadMapContent();
+	sMapContent->InitMapInfo();
+    MX_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
+	MX_LOG_INFO("server.worldserver", "Mobs: %d", sObjectMgr->g_vRespawnInfo.size());
+
+    for(auto& ri : sObjectMgr->g_vRespawnInfo) {
+        MonsterRespawnInfo nri(ri);
+        float cx = (nri.right - nri.left) * 0.5f + nri.left;
+        float cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
+        RespawnObject ro(nri);
+        m_vRespawnList.emplace_back(ro);
+    }
 
 	MX_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }
@@ -232,9 +245,9 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize),
                                    (uint) (obj->GetPositionY() / g_nRegionSize),
                                    obj->GetLayer(),
-                                   [&leavePct](ArRegion *lbRegion) {
-                                       lbRegion->DoEachClient([&leavePct](WorldObject *lbPlayer) {
-                                           if (lbPlayer != nullptr && lbPlayer->IsInWorld()) {
+                                   [&leavePct,&obj](ArRegion *lbRegion) {
+                                       lbRegion->DoEachClient([&leavePct,&obj](WorldObject *lbPlayer) {
+                                           if (lbPlayer != nullptr && lbPlayer->IsInWorld() && lbPlayer->GetHandle() != obj->GetHandle()) {
                                                dynamic_cast<Player *>(lbPlayer)->SendPacket(leavePct);
                                            }
                                        });
@@ -267,6 +280,9 @@ void World::Update(uint diff)
         } else {
             m_sessions.erase(session.first);
         }
+    }
+    for(auto& ro : m_vRespawnList) {
+        ro.Update(diff);
     }
 }
 
@@ -348,4 +364,11 @@ void World::WarpEndSummon(Player *pPlayer , Position pos, uint8_t layer, Summon 
 	pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
 	auto position = pSummon->GetCurrentPosition(ct);
 	// Set move
+}
+
+void World::AddMonsterToWorld(Monster *pMonster)
+{
+    pMonster->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    AddObjectToWorld(pMonster);
+    pMonster->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
 }

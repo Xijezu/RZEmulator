@@ -5,11 +5,12 @@
 #include "MemPool.h"
 #include "TerrainSeamlessWorld.h"
 #include <fstream>
+#include "World.h"
+#include "Monster.h"
+#include "Maploader.h"
 
 bool ObjectMgr::InitGameContent()
 {
-    if (!LoadMapContent() || !LoadWorldLocation())
-        return false;
     if (!LoadStatResource())
         return false;
     else if (!LoadItemResource())
@@ -30,8 +31,8 @@ bool ObjectMgr::InitGameContent()
         return false;
     else if(!LoadSkillTreeResource() || !LoadLevelResource())
         return false;
-
-    MX_LOG_INFO("server.worldserver", "GetNeedExp(3): %d", GetNeedExp(3));
+    if (!LoadWorldLocation())
+        return false;
 
     return true;
 }
@@ -142,6 +143,90 @@ bool ObjectMgr::LoadItemResource()
 
 bool ObjectMgr::LoadMonsterResource()
 {
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM MonsterResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0, y = 0;
+    do {
+        Field        *field = result->Fetch();
+        int idx = 0;
+        MonsterBase base{};
+        base.id = field[idx++].GetInt32();
+        base.monster_group = field[idx++].GetInt32();
+        idx++;
+        base.location_id = field[idx++].GetInt32();
+        idx += 14; // 14 unused columns, mostly for rendering clientside
+        base.level = field[idx++].GetInt32();
+        base.grp = field[idx++].GetInt32();
+        base.magic_type = field[idx++].GetInt32();
+        base.race = field[idx++].GetInt32();
+        base.visible_range = field[idx++].GetInt32();
+        base.chase_range = field[idx++].GetInt32();
+        for(auto& curr : base.flag) {
+            curr = field[idx++].GetInt32();
+        }
+        base.monster_type = field[idx++].GetInt32();
+        base.stat_id = field[idx++].GetInt32();
+        base.fight_type = field[idx++].GetInt32();
+        idx += 9;
+        base.weapon_type = field[idx++].GetInt32();
+        base.attack_motion_speed = field[idx++].GetInt32();
+        base.ability = field[idx++].GetInt32();
+        base.standard_walk_speed = field[idx++].GetInt32();
+        base.standard_run_speed = field[idx++].GetInt32();
+        base.walk_speed = field[idx++].GetInt32();
+        base.run_speed = field[idx++].GetInt32();
+        base.attack_range = field[idx++].GetFloat();
+        base.hp = field[idx++].GetInt32();
+        base.mp = field[idx++].GetInt32();
+        base.attacK_point = field[idx++].GetInt32();
+        base.magic_point = field[idx++].GetInt32();
+        base.defence = field[idx++].GetInt32();
+        base.magic_defence = field[idx++].GetInt32();
+        base.attack_speed = field[idx++].GetInt32();
+        base.magic_speed = field[idx++].GetInt32();
+        base.accuracy = field[idx++].GetInt32();
+        base.magic_accuracy = field[idx++].GetInt32();
+        base.avoid = field[idx++].GetInt32();
+        base.magic_avoid = field[idx++].GetInt32();
+        base.taming_id = field[idx++].GetInt32();
+        base.taming_percentage = field[idx++].GetFloat();
+        base.taming_exp_mod = field[idx++].GetFloat();
+        for(y = 0; y < 2; y++) {
+            base.exp[y] = field[idx++].GetInt32();
+            base.jp[y] = field[idx++].GetInt32();
+            if(y == 0)
+                base.gold_drop_percentage = field[idx++].GetInt32();
+            base.gold_min[y] = field[idx++].GetInt32();
+            base.gold_max[y] = field[idx++].GetInt32();
+            if(y == 0)
+                base.chaos_drop_percentage = field[idx++].GetInt32();
+            base.chaos_min[y] = field[idx++].GetInt32();
+            base.chaos_max[y] = field[idx++].GetInt32();
+        }
+        for(y = 0; y < 10; y++) {
+            base.drop_item_id[y] = field[idx++].GetInt32();
+            base.drop_percentage[y] = field[idx++].GetFloat();
+            base.drop_min_count[y] = field[idx++].GetInt32();
+            base.drop_max_count[y] = field[idx++].GetInt32();
+            base.drop_min_level[y] = field[idx++].GetInt32();
+            base.drop_max_level[y] = field[idx++].GetInt32();
+        }
+        for( y = 0; y < 4; y++) {
+            base.skill_id[y] = field[idx++].GetInt32();
+            base.skill_lv[y] = field[idx++].GetInt32();
+            base.skill_probability[y] = field[idx++].GetFloat();
+        }
+        base.local_flag = field[idx++].GetInt32();
+        _monsterBaseStore[base.id] = base;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
 
@@ -686,115 +771,6 @@ std::vector<MarketInfo> ObjectMgr::GetMarketInfo(std::string szKey)
     return std::vector<MarketInfo>();
 }
 
-bool ObjectMgr::LoadMapContent()
-{
-    TerrainSeamlessWorldInfo seamlessWorldInfo{ };
-    if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false)) {
-        MX_LOG_FATAL("server.worldserver", "TerrainSeamlessWorld.cfg read error !");
-        return false;
-    }
-
-    int y = 0;
-    fTileSize  = seamlessWorldInfo.m_fTileLength;
-    fMapLength = seamlessWorldInfo.m_nSegmentCountPerMap * seamlessWorldInfo.m_fTileLength * seamlessWorldInfo.m_nTileCountPerSegment;
-    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y) {
-        for (int i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i) {
-            std::string strLocationFileName = seamlessWorldInfo.GetLocationFileName(i, y);
-
-            if (strLocationFileName.length() != 0) {
-                int wid = seamlessWorldInfo.GetWorldID(i, y);
-                if (wid != -1) {
-                    SetDefaultLocation(i, y, fMapLength, wid);
-                }
-                LoadLocationFile(("Resource/NewMap/"s+strLocationFileName), i, y, fAttrLen, fMapLength);
-            }
-        }
-    }
-    return true;
-}
-
-void ObjectMgr::SetDefaultLocation(int x, int y, float fMapLength, int LocationId)
-{
-    X2D::Pointf begin{};
-    X2D::Pointf end{};
-
-    begin.x = (x * fMapLength);
-    begin.y = (y * fMapLength);
-    end.x = ((x + 1) * fMapLength);
-    end.y = ((y + 1) * fMapLength);
-    MapLocationInfo li(begin,end, LocationId, 2147483646);
-    RegisterMapLocationInfo(li);
-}
-
-void ObjectMgr::RegisterMapLocationInfo(MapLocationInfo location_info)
-{
-    if(g_qtLocationInfo == nullptr)
-    {
-        g_qtLocationInfo = new X2D::QuadTreeMapInfo(g_nMapWidth, g_nMapHeight);
-    }
-    g_qtLocationInfo->Add(std::move(location_info));
-}
-
-#include "Scripting/XLua.h"
-void ObjectMgr::LoadLocationFile(std::string szFilename, int x, int y, float fAttrLen, float fMapLength)
-{
-    int nCharSize;
-    LocationInfoHeader lih{};
-    int nPolygonCount;
-    int nPointCount;
-
-    std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
-    infile.seekg(0,std::ios::end);
-    int size = infile.tellg();
-    infile.seekg(0,std::ios::beg);
-    if(size == -1)
-        return;
-    ByteBuffer buffer{};
-    buffer.resize(size);
-    infile.read(reinterpret_cast<char*>(&buffer[0]), size);
-    infile.close();
-
-    auto total_entries = buffer.read<int>();
-    for(int i = 0; i < total_entries; ++i) {
-        lih.nPriority = buffer.read<int>();
-        lih.x = buffer.read<float>();
-        lih.y = buffer.read<float>();
-        lih.z = buffer.read<float>();
-        lih.fRadius = buffer.read<float>();
-
-        nCharSize = buffer.read<int>();
-        if(nCharSize > 1) {
-            buffer.read_skip(nCharSize);
-        }
-        nCharSize = buffer.read<int>();
-        g_currentLocationId = 0;
-        if(nCharSize <= 1)
-            continue;
-
-        auto script = buffer.ReadString(nCharSize);
-        sScriptingMgr->RunString(script);
-        if(g_currentLocationId == 0)
-            continue;
-
-        nPolygonCount = buffer.read<int>();
-        for(int cp = 0; cp < nPolygonCount; ++cp) {
-            nPointCount = buffer.read<int>();
-            float sx = x * fMapLength;
-            float sy = y * fMapLength;
-            std::vector<X2D::Pointf> points{};
-
-            for(int p = 0; p < nPointCount; ++p) {
-                X2D::Pointf pt{ };
-                pt.x = sx + ((float) buffer.read<int>() * fAttrLen);
-                pt.x = sy + ((float) buffer.read<int>() * fAttrLen);
-                points.emplace_back(pt);
-                auto location_info = MapLocationInfo(points, g_currentLocationId, 0);
-                RegisterMapLocationInfo(location_info);
-            }
-        }
-    }
-}
-
 int ObjectMgr::GetLocationID(float x, float y)
 {
     int loc_id = 0;
@@ -803,7 +779,7 @@ int ObjectMgr::GetLocationID(float x, float y)
     pt.x = x;
     pt.y = y;
     X2D::QuadTreeMapInfo::FunctorAdaptor fn{};
-    g_qtLocationInfo->Enum(pt, fn);
+    sMapContent->g_qtLocationInfo->Enum(pt, fn);
 
     for(auto& info : fn.pResult)
     {
@@ -958,3 +934,52 @@ long ObjectMgr::GetNeedExp(int level)
     return _levelResourceStore[l-1].normal_exp;
 }
 
+void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
+{
+    Position pos{};
+    pos.Relocate(x,y);
+
+    if(g_vWayPoint.count(waypoint_id) >= 1) {
+        g_vWayPoint[waypoint_id].vWayPoint.emplace_back(pos);
+        return;
+    }
+    Waypoint wp{};
+    wp.way_point_id = waypoint_id;
+    wp.way_point_speed = 0;
+    wp.way_point_type = 1;
+    wp.vWayPoint.emplace_back(pos);
+    g_vWayPoint[waypoint_id] = wp;
+}
+
+void ObjectMgr::SetWayPointType(int waypoint_id, int type)
+{
+    if(g_vWayPoint.count(waypoint_id) == 0)
+        return;
+    g_vWayPoint[waypoint_id].way_point_type = type;
+}
+
+void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
+{
+    if(_monsterBaseStore.count(info.monster_id))
+        g_vRespawnInfo.emplace_back(info);
+    else
+        MX_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
+}
+
+MonsterBase ObjectMgr::GetMonsterInfo(uint idx)
+{
+    if(_monsterBaseStore.count(idx) == 1)
+        return _monsterBaseStore[idx];
+    return { };
+}
+
+Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, bool bNeedLock)
+{
+    auto mob = sMemoryPool->AllocMonster(id);
+    if(mob != nullptr) {
+        mob->SetCurrentXY(x, y);
+        mob->SetLayer(0);
+        sWorld->AddMonsterToWorld(mob);
+    }
+    return mob;
+}

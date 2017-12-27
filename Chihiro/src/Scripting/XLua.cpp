@@ -20,12 +20,13 @@
 #include "Messages.h"
 #include "ObjectMgr.h"
 #include "MemPool.h"
+#include "World.h"
 
 namespace fs = std::experimental::filesystem;
 
 XLua::XLua()
 {
-    m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::package);
+    m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::package);
 }
 
 bool XLua::InitializeLua()
@@ -37,7 +38,6 @@ bool XLua::InitializeLua()
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
     m_pState.set_function("add_way_point", &XLua::SCRIPT_AddWayPoint, this);
     m_pState.set_function("respawn_rare_mob", &XLua::SCRIPT_RespawnRareMob, this);
-    m_pState.set_function("respawn_rare_mob", &XLua::SCRIPT_RespawnRareMob2, this);
     m_pState.set_function("respawn_roaming_mob", &XLua::SCRIPT_RespawnRoamingMob, this);
     m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian, this);
     // NPC relevant
@@ -76,6 +76,10 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
     m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
     m_pState.set_function("insert_item", &XLua::SCRIPT_InsertItem, this);
+    m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
+    m_pState.set_function("cprint", &XLua::SCRIPT_CPrint, this);
+    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
+    m_pState.set_function("add_npc", &XLua::SCRIPT_AddMonster, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -119,27 +123,41 @@ bool XLua::RunString(Unit *pObject, std::string pScript)
 
 bool XLua::RunString(std::string szScript)
 {
-    m_pState.script(szScript);
+    try {
+        m_pState.script(szScript);
+    }catch(sol::error err) {
+        MX_LOG_ERROR("scripting", "%s", err.what());
+    }
 }
 
 void XLua::SCRIPT_SetWayPointType(int waypoint_id, int waypoint_type)
 {
-
+    sObjectMgr->SetWayPointType(waypoint_id, waypoint_type);
 }
 
 void XLua::SCRIPT_AddWayPoint(int waypoint_id, int x, int y)
 {
-
+    sObjectMgr->AddWayPoint(waypoint_id, x, y);
 }
 
-void XLua::SCRIPT_RespawnRareMob(int, int, int, int, int, int, int, int)
+void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
 {
+    if(args.size() < 7)
+        return;
 
-}
+    uint id = args[0].get<uint>();
+    uint interval = args[1].get<uint>();
+    float left = args[3].get<float>();
+    float top = args[4].get<float>();
+    float right = left + 1;
+    float bottom = top + 1;
+    uint monster_id = args[5].get<uint>();
+    uint max_num = args[6].get<uint>();
+    bool is_wander = args[7].get<bool>();
+    int wander_id = args.size() > 7 ? args[8].get<uint>() : 0;
 
-void XLua::SCRIPT_RespawnRareMob2(int, int, int, int, int, int, int)
-{
-
+    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
+    sObjectMgr->RegisterMonsterRespawnInfo(info);
 }
 
 void XLua::SCRIPT_RespawnRoamingMob(int, int, int, int, int)
@@ -545,4 +563,38 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
         return item->m_nHandle;
     }
     return 0;
+}
+
+void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
+{
+    if(args.size() < 9)
+        return;
+    auto id = args[0].get<int>();
+    auto interval = args[1].get<uint>();
+    auto left = args[2].get<float>();
+    auto top =  args[3].get<float>();
+    auto right =  args[4].get<float>();
+    auto bottom =  args[5].get<float>();
+    auto monster_id =  args[6].get<uint>();
+    auto max_num =  args[7].get<uint>();
+    auto inc =  args[8].get<uint>();
+    auto wander_id = args.size() > 9 ? args[9].get<int>() : 0;
+    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
+    sObjectMgr->RegisterMonsterRespawnInfo(info);
+}
+
+void XLua::SCRIPT_CPrint(sol::variadic_args)
+{
+
+}
+
+void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
+{
+    for(int i = 0; i < amount; i++) {
+        auto mob = sMemoryPool->AllocMonster(id);
+        if(mob == nullptr)
+            return;
+        mob->SetCurrentXY(x, y);
+        sWorld->AddMonsterToWorld(mob);
+    }
 }

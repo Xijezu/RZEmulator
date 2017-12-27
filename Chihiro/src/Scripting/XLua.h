@@ -26,10 +26,12 @@ private:
     // Monster
     void SCRIPT_SetWayPointType(int, int);
     void SCRIPT_AddWayPoint(int, int, int);
-    void SCRIPT_RespawnRareMob(int, int, int, int, int, int, int, int);
-    void SCRIPT_RespawnRareMob2(int, int, int, int, int, int, int);
+    void SCRIPT_RespawnRareMob(sol::variadic_args);
     void SCRIPT_RespawnRoamingMob(int, int, int, int, int);
     void SCRIPT_RespawnGuardian(int, int, int, int, int, int, int, int);
+    void SCRIPT_AddRespawnInfo(sol::variadic_args);
+    void SCRIPT_CPrint(sol::variadic_args);
+    void SCRIPT_AddMonster(int, int, int, int);
 
     // NPC
     int SCRIPT_GetNPCID();

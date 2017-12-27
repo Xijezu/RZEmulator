@@ -23,10 +23,12 @@ set(SOURCE_FILES ${sources_Entities}
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Monster
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Summon
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/FieldProp
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Item
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/NPC
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/RespawnObject
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Object
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Player
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Unit

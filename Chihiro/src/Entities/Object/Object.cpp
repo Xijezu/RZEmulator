@@ -4,6 +4,7 @@
 #include "World.h"
 #include "ArRegion.h"
 #include "Messages.h"
+#include "Monster.h"
 
 Object::Object()
 {
@@ -340,6 +341,7 @@ WorldObject::~WorldObject()
 }
 
 
+#include <fstream>
 
 
 void WorldObject::SendEnterMsg(Player *pPlayer)
@@ -364,9 +366,18 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
         case ST_Summon:
             Summon::EnterPacket(packet, dynamic_cast<Summon *>(this));
             break;
+        case ST_Mob:
+            Monster::EnterPacket(packet, dynamic_cast<Monster*>(this));
+            break;
         default:
             break;
     }
+    if(GetSubType() == ST_Mob) {
+        std::fstream stream("/tmp/test.hex", std::ios::out | std::ios::binary);
+        stream.write((char *) &packet.contents()[0], packet.size());
+        stream.close();
+    }
+
     pPlayer->SendPacket(packet);
     if(GetSubType() == ST_Player)
         Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));

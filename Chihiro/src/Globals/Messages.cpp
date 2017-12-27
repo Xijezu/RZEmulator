@@ -419,10 +419,10 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
 
 void Messages::GetEncodedInt(XPacket& packet, uint32 nDecoded)
 {
-    packet << (uint16) 0;
-    packet << (uint16) HIWORD(nDecoded);
-    packet << (uint16) 0;
-    packet << (uint16) LOWORD(nDecoded);
+    packet << (int16) 0;
+    packet << (int16) HIWORD(nDecoded);
+    packet << (int16) 0;
+    packet << (int16) LOWORD(nDecoded);
 }
 
 void Messages::SendWarpMessage(Player *pPlayer)
