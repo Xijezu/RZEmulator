@@ -21,7 +21,8 @@
 #include "DatabaseEnv.h"
 #include "Messages.h"
 #include "World.h"
-
+#include "ClientPackets.h"
+#include "ArRegion.h"
 // static
 void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon)
 {
@@ -57,6 +58,7 @@ void Summon::SetSummonInfo(int idx)
 {
     m_tSummonBase = sObjectMgr->GetSummonBase(idx);
     SetCurrentJob(idx);
+    this->m_nTransform = m_tSummonBase.form;
 }
 
 int Summon::GetSummonCode()
@@ -71,6 +73,35 @@ uint32_t Summon::GetCardHandle()
     return m_pItem->m_nHandle;
 }
 
+void Summon::DB_UpdateSummon(Player *pMaster, Summon *pSummon)
+{
+    // PrepareStatement(CHARACTER_UPD_SUMMON, "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?,
+    // exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?,
+    // prev_level_01 = ?, prev_level_02 = ?, prev_id_01 = ?, prev_id_02 = ?, hp = ?, mp = ? WHERE sid = ?;", CONNECTION_ASYNC);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_SUMMON);
+
+    uint8_t i = 0;
+    stmt->setInt32(i++, 0); // account id
+    stmt->setInt32(i++, pMaster->GetInt32Value(UNIT_FIELD_UID));
+    stmt->setInt32(i++, pSummon->GetSummonCode());
+    stmt->setUInt64(i++, pSummon->GetEXP());
+    stmt->setInt32(i++, pSummon->GetJP());
+    stmt->setUInt64(i++, 0); // Last decreased exp
+    stmt->setString(i++, pSummon->GetName());
+    stmt->setInt32(i++, pSummon->m_nTransform);
+    stmt->setInt32(i++, pSummon->getLevel());
+    stmt->setInt32(i++, pSummon->getLevel()); // jlv
+    stmt->setInt32(i++, pSummon->getLevel()); // Max lvl
+    stmt->setInt32(i++, pSummon->GetPrevJobLv(0));
+    stmt->setInt32(i++, pSummon->GetPrevJobLv(1));
+    stmt->setInt32(i++, pSummon->GetPrevJobId(0));
+    stmt->setInt32(i++, pSummon->GetPrevJobId(1));
+    stmt->setInt32(i++, pSummon->GetHealth());
+    stmt->setInt32(i++, pSummon->GetMana());
+    stmt->setInt32(i, pSummon->GetUInt32Value(UNIT_FIELD_UID));
+    CharacterDatabase.Execute(stmt);
+}
+
 void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_SUMMON);
@@ -83,7 +114,7 @@ void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
     stmt->setInt32(6, pSummon->GetJP());
     stmt->setUInt64(7, 0);                                              // Last Decreased EXP
     stmt->setString(8, pSummon->GetName());
-    stmt->setInt32(9, 1);                                               // transform
+    stmt->setInt32(9, pSummon->m_nTransform);                           // transform
     stmt->setInt32(10, pSummon->getLevel());
     stmt->setInt32(11, pSummon->GetCurrentJLv());
     stmt->setInt32(12, 1);                                              // max lvl
@@ -133,4 +164,144 @@ void Summon::processWalk(uint t)
             sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
         }
     }
+}
+
+void Summon::OnAfterReadSummon()
+{
+
+}
+
+void Summon::onExpChange()
+{
+    int level = 1;
+    int lvl   = 0;
+    int oblv  = 0;
+    int jp    = 0;
+    switch (m_tSummonBase.form) {
+        case 1:
+            lvl  = 50;
+            oblv = 60;
+            break;
+        case 2:
+            lvl  = 100;
+            oblv = 115;
+            break;
+        case 3:
+            lvl  = 170;
+            oblv = 170;
+            break;
+        default:
+            return;
+    }
+    if (lvl > 1) {
+        do {
+            auto need = sObjectMgr->GetNeedSummonExp(level);
+            if (need == 0 || need > GetEXP())
+                break;
+            ++level;
+            if (level > oblv)  /// @todo add max level reached
+                ++jp;
+        } while (level < oblv);
+    }
+    if (m_pMaster != nullptr)
+        Messages::SendEXPMessage(m_pMaster, this);
+
+    if (level != 0) {
+        if (level != getLevel()) {
+            long uid = 0;
+            if (m_pItem != nullptr)
+                uid = m_pItem->m_Instance.UID;
+            int ljp = 0;
+            if (level <= getLevel())
+                ljp = 0;
+            else
+                ljp = jp;
+
+            int levelchange = level - getLevel();
+            SetCurrentJLv(level);
+            SetInt32Value(UNIT_FIELD_LEVEL, level);
+            if (levelchange <= 0) {
+                CalculateStat();
+            } else {
+                auto old_hp = GetHealth();
+                auto old_mp = GetMana();
+                SetJP(GetJP() + jp);
+                CalculateStat();
+                if (GetHealth() != 0) {
+                    SetHealth(GetMaxHealth());
+                    SetMana(GetMaxMana());
+                }
+                if (IsInWorld()) {
+                    Messages::BroadcastHPMPMessage(this, GetHealth() - old_hp, GetMana() - old_mp, false);
+                } else {
+                    if (m_pMaster != nullptr) {
+                        Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - old_hp, GetMana() - old_mp, false);
+                    }
+                }
+                if (m_pMaster != nullptr)
+                    Messages::SendPropertyMessage(m_pMaster, this, "jp", GetJP());
+            }
+            DB_UpdateSummon(m_pMaster, this);
+            if (m_pItem != nullptr && m_pMaster != nullptr)
+                Messages::SendItemMessage(m_pMaster, m_pItem);
+            if (IsInWorld())
+                Messages::BroadcastLevelMsg(this);
+            if (m_pMaster != nullptr)
+                Messages::SendLevelMessage(m_pMaster, this);
+        }
+    }
+}
+
+bool Summon::DoEvolution()
+{
+     auto prev_hp = GetHealth();
+    auto prev_mp = GetMana();
+
+    if(this->m_tSummonBase.form < 3) {
+        // @TODO Ride
+        if(false) {
+            return false;
+        } else {
+            auto nTargetCode = m_tSummonBase.evolve_target;
+            SetSummonInfo(nTargetCode);
+            CalculateStat();
+            m_pMaster->Save(false);
+
+            XPacket evoPct(TS_SC_SUMMON_EVOLUTION);
+            evoPct << m_pItem->m_nHandle;
+            evoPct << GetHandle();
+            evoPct.fill(GetName(), 19);
+            evoPct << (int)m_tSummonBase.id;
+            if(IsInWorld()) {
+                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY()/g_nRegionSize), GetLayer(), evoPct);
+            } else {
+                if(m_pMaster != nullptr)
+                    m_pMaster->SendPacket(evoPct);
+            }
+
+            if(sArRegion->IsVisibleRegion(
+                    (uint)(GetPositionX() / g_nRegionSize),
+                    (uint)(GetPositionY() / g_nRegionSize),
+                    (uint)(m_pMaster->GetPositionX() / g_nRegionSize),
+                    (uint)(m_pMaster->GetPositionY() / g_nRegionSize)) == 0) {
+                m_pMaster->SendPacket(evoPct);
+            }
+            Messages::SendStatInfo(m_pMaster, this);
+            Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
+            Messages::SendLevelMessage(m_pMaster, this);
+            Messages::SendEXPMessage(m_pMaster, this);
+
+            if(m_pItem != nullptr)  {
+                /*int i = 0;
+                for( i = 0; i < m_tSummonBase.form - 1; ++i) {
+                    m_pItem->m_Instance.Socket[i+1] = GetPrevJobLv(i);
+                }
+                m_pItem->m_Instance.Socket[i + 1] = getLevel();*/
+                if(m_pMaster != nullptr)
+                    Messages::SendItemMessage(m_pMaster, m_pItem);
+            }
+            return true;
+        }
+    }
+    return false;
 }

@@ -25,6 +25,8 @@ bool ObjectMgr::InitGameContent()
         return false;
     else if (!LoadJobResource())
         return false;
+    else if(!LoadSummonLevelResource())
+        return false;
     else if (!LoadSummonResource())
         return false;
     else if (!LoadSkillResource() || !LoadSkillJP())
@@ -521,6 +523,28 @@ bool ObjectMgr::LoadJobResource()
     return true;
 }
 
+bool ObjectMgr::LoadSummonLevelResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT level, normal_exp FROM SummonLevelResource ORDER BY level ASC");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. DB packetHandler `SummonLevelResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field                 *field = result->Fetch();
+        auto level = field[0].GetInt32();
+        auto exp = field[1].GetUInt64();
+        _summonLevelStore[level] = exp;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLeveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 bool ObjectMgr::LoadJobLevelBonus()
 {
     uint32_t    oldMSTime = getMSTime();
@@ -982,4 +1006,11 @@ Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool 
         sWorld->AddMonsterToWorld(mob);
     }
     return mob;
+}
+
+uint64 ObjectMgr::GetNeedSummonExp(int level)
+{
+    if(level <= 300 && level > 0)
+        return _summonLevelStore[level];
+    return 0;
 }

@@ -315,10 +315,10 @@ bool Player::ReadSummonList(int UID)
             summon->SetName(name);
             summon->SetLevel(lv);
             summon->SetCurrentJLv(jlv);
-            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, prev_level_01);
-            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, prev_level_02);
-            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, prev_id_01);
-            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, prev_id_02);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, prev_id_01);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, prev_id_02);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, prev_level_01);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, prev_level_02);
             summon->SetInt32Value(UNIT_FIELD_HEALTH, hp);
             summon->SetInt32Value(UNIT_FIELD_MANA, mp);
             summon->m_nTransform = transform;
@@ -493,8 +493,14 @@ void Player::Save(bool bOnlyPlayer)
     CharacterDatabase.Execute(stmt);
 
     if(!bOnlyPlayer) {
-        for (auto item : m_lInventory) {
+        for (auto& item : m_lInventory) {
             item.second->DBUpdate();
+        }
+
+        for(auto& summon : m_vSummonList) {
+            if(summon == nullptr)
+                continue;
+            Summon::DB_UpdateSummon(this, summon);
         }
     }
 }
@@ -889,7 +895,7 @@ void Player::AddSummon(Summon *pSummon, bool bSendMsg)
     if(bSendMsg)
         Messages::SendAddSummonMessage(this, pSummon);
     if(pSummon->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete)) {
-        // Update Summon
+        Summon::DB_UpdateSummon(this, pSummon);
     }
 }
 

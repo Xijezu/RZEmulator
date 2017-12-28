@@ -63,10 +63,10 @@ WorldObject* MemoryPoolMgr::getPtrFromId(uint32_t handle)
             case 0x80000000:
                 result = getPlayerPtrFromId(handle);
                 break;
-            /*case 0xC0000000:
-                result = (GameObject)getSummonPtrFromId(uid);
+            case 0xC0000000:
+                result = getSummonPtrFromId(handle);
                 break;
-            case 0xE0000000:
+            /*case 0xE0000000:
                 result = (GameObject)getPetPtrFromId(uid);
                 break;*/
             default:
@@ -135,11 +135,18 @@ Monster *MemoryPoolMgr::AllocMonster(uint idx)
     MonsterBase mb = sObjectMgr->GetMonsterInfo(idx);
     if(mb.id == 0)
         return nullptr;
-    Monster* p = new Monster{m_nMonsterTop, mb};
-    p->SetUInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
+    auto p = new Monster{m_nMonsterTop, mb};
+    p->SetInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
     m_nMonsterTop++;
     m_hsMonster.insert(std::make_pair<uint,Monster*>(p->GetHandle(), (Monster*)p));
     return p;
+}
+
+WorldObject *MemoryPoolMgr::getSummonPtrFromId(uint32_t handle)
+{
+    if(m_hsSummon.count(handle) == 1)
+        return m_hsSummon[handle];
+    return nullptr;
 }
 
 WorldObject *MemoryPoolMgr::getMonsterPtrFromId(uint32_t handle)

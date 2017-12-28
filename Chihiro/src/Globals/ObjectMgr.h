@@ -24,6 +24,7 @@ public:
     ~ObjectMgr() = default;
 
     typedef UNORDERED_MAP<uint32, ItemTemplate>                 ItemTemplateContainer;
+    typedef UNORDERED_MAP<uint32, uint64>                       SummonLevelBaseContainer;
     typedef UNORDERED_MAP<uint32, CreatureStat>                 CreatureBaseStat;
     typedef UNORDERED_MAP<uint32, JobLevelBonusTemplate>        JobLevelBonusTemplateContainer;
     typedef UNORDERED_MAP<uint32, JobResourceTemplate>          JobResourceTemplateContainer;
@@ -40,6 +41,7 @@ public:
     bool LoadNPCResource();
     bool LoadMonsterResource();
     bool LoadItemResource();
+    bool LoadSummonLevelResource();
     bool LoadSummonResource();
     bool LoadMarketResource();
     bool LoadWorldLocation();
@@ -64,6 +66,7 @@ public:
     int GetNeedJpForJobLevelUp(int, int);
     int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
     long GetNeedExp(int level);
+    uint64 GetNeedSummonExp(int level);
     Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, /*IMonsterDeleteHandler pDeleteHandler,*/ bool bNeedLock);
 
     std::vector<MarketInfo> GetMarketInfo(std::string);
@@ -84,6 +87,7 @@ private:
     SummonResourceTemplateContainer _summonResourceStore;
     MarketResourceTemplateContainer _marketResourceStore;
     SkillTreeTemplateContainer      _skillTreeResourceStore;
+    SummonLevelBaseContainer        _summonLevelStore;
     LevelTemplateContainer          _levelResourceStore;
     SkillBaseContainer              _skillBaseStore;
     MonsterBaseContainer            _monsterBaseStore;

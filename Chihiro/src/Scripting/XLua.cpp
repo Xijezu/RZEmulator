@@ -80,6 +80,12 @@ bool XLua::InitializeLua()
     m_pState.set_function("cprint", &XLua::SCRIPT_CPrint, this);
     m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
     m_pState.set_function("add_npc", &XLua::SCRIPT_AddMonster, this);
+    m_pState.set_function("get_creature_value", &XLua::SCRIPT_GetCreatureValue, this);
+    m_pState.set_function("set_creature_value", &XLua::SCRIPT_SetCreatureValue, this);
+    m_pState.set_function("gcv", &XLua::SCRIPT_GetCreatureValue, this);
+    m_pState.set_function("scv", &XLua::SCRIPT_SetCreatureValue, this);
+    m_pState.set_function("get_creature_handle", &XLua::SCRIPT_GetCreatureHandle, this);
+    m_pState.set_function("creature_evolution", &XLua::SCRIPT_CreatureEvolution, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -596,5 +602,105 @@ void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
             return;
         mob->SetCurrentXY(x, y);
         sWorld->AddMonsterToWorld(mob);
+    }
+}
+
+int XLua::SCRIPT_GetCreatureHandle(int idx)
+{
+    if(m_pUnit == nullptr || m_pUnit->GetSubType() != ST_Player)
+        return 0;
+
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player->m_aBindSummonCard[idx] != nullptr && player->m_aBindSummonCard[idx]->m_pSummon != nullptr) {
+        return player->m_aBindSummonCard[idx]->m_pSummon->GetHandle();
+    }
+    return 0;
+}
+
+void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object value)
+{
+    auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    if(summon == nullptr && handle < 6 && handle > 0) {
+        auto player = dynamic_cast<Player*>(m_pUnit);
+        if(player != nullptr) {
+            if(player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr) {
+                summon = player->m_aBindSummonCard[handle]->m_pSummon;
+            }
+        }
+    }
+
+    if(summon == nullptr)
+        return;
+
+    auto type = value.get_type();
+    if(type == sol::type::number) {
+        if(key == "level"s || key == "lv"s) {
+            summon->SetEXP(sObjectMgr->GetNeedSummonExp(value.as<int>()));
+            Messages::SendEXPMessage(dynamic_cast<Player*>(m_pUnit), summon);
+        } else if(key == "ev_1_ID"s) {
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, value.as<int>());
+        } else if(key == "ev_2_ID"s) {
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, value.as<int>());
+        } else if(key == "ev_1_level"s) {
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, value.as<int>());
+        } else if(key == "ev_2_level"s) {
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, value.as<int>());
+        } else if(key == "hp") {
+            summon->SetHealth(value.as<float>());
+            Messages::SendHPMPMessage(dynamic_cast<Player*>(m_pUnit), summon, summon->GetHealth(), 0, false);
+        } else if(key == "mp") {
+            summon->SetMana(value.as<float>());
+            Messages::SendHPMPMessage(dynamic_cast<Player*>(m_pUnit), summon, 0, summon->GetMana(), false);
+        }
+    }
+}
+
+sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
+{
+    auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    if(summon == nullptr && handle < 6 && handle > 0) {
+        auto player = dynamic_cast<Player*>(m_pUnit);
+        if(player != nullptr) {
+            if(player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr) {
+                summon = player->m_aBindSummonCard[handle]->m_pSummon;
+            }
+        }
+    }
+
+    if(summon == nullptr)
+        return return_object(0);
+
+    if(key == "hp"s) {
+        return return_object(summon->GetHealth());
+    } else if(key == "mp"s) {
+        return return_object(summon->GetMana());
+    } else if(key == "max_hp"s) {
+        return return_object(summon->GetMaxHealth());///run creature_evolution(get_creature_handle(0))
+    } else if(key == "max_mp"s) { ///run scv(get_creature_handle(0), "lv", 120)
+        // /run insert_item(540006, 1, 0, 0, -2147483648)
+
+        return return_object(summon->GetMaxMana());
+    } else if(key == "evolution_depth"s) {
+        return return_object(summon->m_nTransform);
+    }  else if(key == "level"s) {
+        return return_object(summon->getLevel());
+    }else if(key == "job"s) {
+        return return_object(summon->GetSummonCode());
+    } else if(key == "name"s) {
+        return return_object(summon->GetName());
+    } else if(key == "summon_state"s) {
+        return return_object(summon->GetInt32Value(UNIT_FIELD_STATUS));
+    }
+}
+
+void XLua::SCRIPT_CreatureEvolution(int slot)
+{
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player == nullptr)
+        return;
+
+    auto summon = player->GetSummonByHandle(slot);
+    if(summon!= nullptr) {
+        summon->DoEvolution();
     }
 }

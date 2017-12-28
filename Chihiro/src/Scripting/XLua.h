@@ -33,6 +33,12 @@ private:
     void SCRIPT_CPrint(sol::variadic_args);
     void SCRIPT_AddMonster(int, int, int, int);
 
+    // Summon
+    int SCRIPT_GetCreatureHandle(int);
+    sol::object SCRIPT_GetCreatureValue(int,std::string);
+    void SCRIPT_SetCreatureValue(int,std::string,sol::object);
+    void SCRIPT_CreatureEvolution(int);
+
     // NPC
     int SCRIPT_GetNPCID();
     void SCRIPT_DialogTitle(std::string);

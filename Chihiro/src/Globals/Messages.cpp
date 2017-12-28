@@ -102,17 +102,6 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     SendStatInfo(pPlayer, pSummon);
 
     SendHPMPMessage(pPlayer, pSummon, pSummon->GetHealth(), pSummon->GetMana(), false);
-    // Doesnt work or I'm too dumb
-
-    //SendPropertyMessage(pPlayer, pSummon, "hp", 500);
-    //SendPropertyMessage(pPlayer, pSummon, "mp", 600);
-    //SendPropertyMessage(pPlayer, pSummon, "max_hp", 700);
-    //SendPropertyMessage(pPlayer, pSummon, "max_mana", 800);
-    //SendPropertyMessage(pPlayer, pSummon, "hp", (int64_t)pSummon->GetHealth());
-    //SendPropertyMessage(pPlayer, pSummon, "max_hp", (int64_t)pSummon->GetMaxHealth());
-    //SendPropertyMessage(pPlayer, pSummon, "mp", (int64_t)pSummon->GetMana());
-    //SendPropertyMessage(pPlayer, pSummon, "max_mp", (int64_t)pSummon->GetMaxMana());
-
     SendLevelMessage(pPlayer, pSummon);
     SendEXPMessage(pPlayer, pSummon);
     // SendSPMessage(pPlayer, pSummon);
@@ -173,7 +162,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
 
         for (auto t : pUnit->m_vSkillList) {
             skillPct << (int32_t) t->skill_id;
-            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->skill_level);
+            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->skill_id);
             skillPct << (int8_t) t->skill_level;
             skillPct << (uint32_t) 0;
             skillPct << (uint32_t) 0;
@@ -203,7 +192,7 @@ void Messages::SendChatMessage(int nChatType, std::string szSenderName, Player* 
         chatPct.fill(szSenderName, 21);
         chatPct << (uint16_t)szMsg.length();
         chatPct << (uint8_t)nChatType;
-        chatPct.fill(szMsg, szMsg.length());
+        chatPct.fill(szMsg, szMsg.length()+1);
         target->SendPacket(chatPct);
     }
 }
@@ -258,10 +247,25 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     packet << (uint8_t) item->m_Instance.nLevel;
     packet << (uint32_t) item->m_Instance.Flag;
 
-    packet << (int32_t) item->m_Instance.Socket[0];
-    packet << (int32_t) item->m_Instance.Socket[1];
-    packet << (int32_t) item->m_Instance.Socket[2];
-    packet << (int32_t) item->m_Instance.Socket[3];
+    int socket[4] {0};
+    std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(socket));
+
+    if(item->m_pItemBase.group == ItemGroup::SummonCard) {
+        if(item->m_pSummon != nullptr) {
+            int slot = 1;
+            int tl = item->m_pSummon->m_nTransform;
+            while(slot < tl) {
+                socket[slot] = item->m_pSummon->GetPrevJobLv(slot -1);
+                ++slot;
+            }
+            socket[slot] = item->m_pSummon->getLevel();
+        }
+    }
+
+    packet << (int32_t) socket[0];
+    packet << (int32_t) socket[1];
+    packet << (int32_t) socket[2];
+    packet << (int32_t) socket[3];
     // Prior to Epic 6 we have to use 2 dummy socket slots.
     // Can you imagine how much time I wasted on this?
     packet << (int32_t) 0;

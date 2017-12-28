@@ -13,6 +13,7 @@ public:
     ~Summon() = default;
 
     static void DB_InsertSummon(Player*,Summon*);
+    static void DB_UpdateSummon(Player*,Summon*);
     static void EnterPacket(XPacket &, Summon *);
 
     void OnAfterReadSummon();
@@ -35,9 +36,11 @@ public:
     int m_nTransform{ };
     Item* m_pItem;
     void SetSummonInfo(int);
+    bool DoEvolution();
     uint8_t m_cSlotIdx{};
 protected:
     void processWalk(uint t);
+    void onExpChange() override;
 private:
     SummonResourceTemplate m_tSummonBase;
     Player *m_pMaster;
