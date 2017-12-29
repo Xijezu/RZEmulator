@@ -68,9 +68,10 @@ int Summon::GetSummonCode()
 
 uint32_t Summon::GetCardHandle()
 {
-    ACE_ASSERT(m_pItem);
-
-    return m_pItem->m_nHandle;
+    if(m_pItem != nullptr)
+        return m_pItem->m_nHandle;
+    else
+        return 0;
 }
 
 void Summon::DB_UpdateSummon(Player *pMaster, Summon *pSummon)

@@ -40,7 +40,6 @@ public:
 
     // Warping
     void PendWarp(int x, int y, uint8_t layer);
-    void ProcessWarp();
 
     std::string GetFlag(std::string flag)
     { return m_lFlagList[flag]; }
@@ -61,8 +60,6 @@ public:
     void SendJobInfo();
     void SendWearInfo();
 
-    void SendSummonInfo();
-
     Summon *GetSummon(int);
     Summon *GetSummonByHandle(uint);
     void AddSummon(Summon*,bool);
@@ -77,9 +74,13 @@ public:
     Item *FindItemBySID(uint64_t);
     Item *FindItemByHandle(uint32_t);
     void PushItem(Item *, int, bool);
+    void PopItem(Item*,bool);
+
+    bool Erase(Item*,uint64,bool);
+    void SetItemCount(Item* pItem, uint64 nc, bool bSkipUpdateToDB);
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
-    void SendItemWearInfoMessage(Item item, Unit *u);
+    void SendItemWearInfoMessage(Item* item, Unit *u);
     void ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast);
 
     // Dialog Relevant
@@ -106,8 +107,11 @@ public:
 
     void SendPacket(XPacket& pPacket);
 
-    WorldSession& GetSession()
+    WorldSession& GetSession() const
     { return *m_session; }
+
+    void SetClientInfo(std::string value)
+    { m_szClientInfo = value; }
 
     void SetSession(WorldSession *session)
     { m_session = session; }
@@ -142,6 +146,7 @@ private:
     std::string m_szDialogText{ };
     std::string m_szDialogMenu{ };
     std::string m_szSpecialDialogMenu{ };
+    std::string m_szClientInfo{ };
 };
 
 #endif // _PLAYER_H_

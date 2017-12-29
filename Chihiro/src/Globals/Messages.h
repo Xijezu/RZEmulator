@@ -2,6 +2,7 @@
 #define PROJECT_MESSAGES_H
 
 #include "Common.h"
+#include "Object.h"
 
 class Unit;
 class Player;
@@ -69,6 +70,9 @@ public:
     static void SendMarketInfo(Player *, uint32_t, std::vector<MarketInfo>);
     static void SendItemList(Player *, bool);
     static void SendItemMessage(Player *, Item *);
+    static void SendItemCountMessage(Player*, Item*);
+    static void SendItemDestroyMessage(Player*, Item*);
+    static void SendSkillCastFailMessage(Player*, uint caster, uint target, uint16 skill_id, uint8 skill_level, Position pos, int error_code);
     static void SendGameTime(Player *);
     static void SendResult(Player *, uint16_t, uint16_t, uint16_t);
     static void sendEnterMessage(Player *, WorldObject *, bool);

@@ -89,8 +89,6 @@ public:
     uint32_t getLevel() const
     { return GetUInt32Value(UNIT_FIELD_LEVEL); }
 
-    uint8 getLevelForTarget(WorldObject const * /*target*/) const
-    { return getLevel(); }
 
     void SetLevel(uint8 lvl)
     { SetInt32Value(UNIT_FIELD_LEVEL, lvl); }
@@ -142,25 +140,12 @@ public:
     uint64 GetEXP() const
     { return GetUInt64Value(UNIT_FIELD_EXP); }
 
-    bool IsFullHealth() const
-    { return GetHealth() == GetMaxHealth(); }
-
-    bool HealthBelowPct(int32 pct) const
-    { return GetHealth() * uint64(100) < GetMaxHealth() * uint64(pct); }
-
-    bool HealthAbovePct(int32 pct) const
-    { return GetHealth() * uint64(100) > GetMaxHealth() * uint64(pct); }
-
-    bool HealthAbovePctHealed(int32 pct, uint32 heal) const
-    { return (GetHealth() + heal) * uint64(100) > GetMaxHealth() * uint64(pct); }
-
-    float GetHealthPct() const
-    { return GetMaxHealth() ? 100.f * GetHealth() / GetMaxHealth() : 0.0f; }
-
     void AddHealth(int hp)
     { SetHealth(GetHealth() + hp); }
     void AddMana(int mp)
     { SetMana(GetMana() + mp); }
+
+    void SetSkill(int,int,int,int);
 
     void SetHealth(uint32);
     void SetMana(uint32);
@@ -174,7 +159,6 @@ public:
     inline void SetFullHealth()
     { SetHealth(GetMaxHealth()); }
 
-    void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
 
     virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
 
@@ -182,23 +166,11 @@ public:
     bool UpdatePosition(const Position &pos, bool teleport = false)
     { return UpdatePosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
 
-    void UpdateOrientation(float orientation);
-
-    bool isAlive() const
-    { return (_deathState == ALIVE); };
-
-    bool isDying() const
-    { return (_deathState == JUST_DIED); };
-
-    bool isDead() const
-    { return (_deathState == DEAD); };
-
-    DeathState getDeathState()
-    { return _deathState; };
-
-    virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
 
     void SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time);
+
+
+    int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);
 
     // Event handler
     EventProcessor _Events;
@@ -210,7 +182,7 @@ public:
     void finalizeStat();
     void calcAttribute(CreatureAtributeServer &attribute);
     void applyItemEffect();
-    void onItemWearEffect(Item pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
+    void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
     Item *GetWornItem(ItemWearType);
     virtual uint16_t putonItem(ItemWearType pos, Item *item) = 0;
     virtual uint16_t putoffItem(ItemWearType) = 0;
@@ -233,10 +205,13 @@ public:
     std::vector<Skill*> m_vSkillList;
     uint m_nMovableTime{0};
 
+    Skill* m_castingSkill{nullptr};
+
     float m_nRegenHP{}, m_fRegenMP{};
 protected:
     virtual void onRegisterSkill(int,int,int,int) { };
     virtual void onExpChange() { };
+    virtual void onAttackAndSkillProcess();
     //UNORDERED_MAP<int, Item> m_anWear;
     uint m_nLastUpdatedTime{};
     DeathState _deathState;

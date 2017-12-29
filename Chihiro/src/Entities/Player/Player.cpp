@@ -125,6 +125,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_PK_MODE, (*result)[57].GetInt8());
         SetInt32Value(UNIT_FIELD_JOB, (*result)[58].GetInt32());
         SetInt32Value(UNIT_FIELD_JLV, (*result)[59].GetInt32());
+        m_szClientInfo = (*result)[60].GetString();
 
         if(getLevel() == 0) {
             SetLevel(1);
@@ -221,18 +222,98 @@ bool Player::ReadSkillList(int)
     stmt->setInt32(0, GetInt32Value(UNIT_FIELD_UID));
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
         do {
-            Field *fields = result->Fetch();
-            auto skill = new Skill();
-            skill->sid = fields[0].GetInt32();
-            skill->owner_id = fields[1].GetInt32();
-            skill->summon_id = fields[2].GetInt32();
-            skill->skill_id = fields[3].GetInt32();
-            skill->skill_level = fields[4].GetInt32();
-            skill->cool_time = fields[5].GetInt32();
-            if(skill->summon_id == 0)
-                m_vSkillList.push_back(skill);
+            Field *fields     = result->Fetch();
+            auto  sid         = fields[0].GetInt32();
+            auto  owner_id    = fields[1].GetInt32();
+            auto  summon_id   = fields[2].GetInt32();
+            auto  skill_id    = fields[3].GetInt32();
+            auto  skill_level = fields[4].GetInt32();
+            auto  cool_time   = fields[5].GetInt32();
+            if (summon_id == 0)
+                SetSkill(sid, skill_id, skill_level, cool_time);
+
+
         } while (result->NextRow());
     }
+
+    SetSkill(-1, 6001, 20, 0);
+    SetSkill(-1, 6002, 20, 0);
+    SetSkill(-1, 6003, 20, 0);
+    SetSkill(-1, 6004, 20, 0);
+    SetSkill(-1, 6005, 20, 0);
+    SetSkill(-1, 6006, 20, 0);
+    SetSkill(-1, 6007, 20, 0);
+    SetSkill(-1, 6008, 20, 0);
+    SetSkill(-1, 6009, 20, 0);
+//                SetSkill(-1, 6010, 20, 0);
+    SetSkill(-1, 6013, 20, 0);
+    SetSkill(-1, 6014, 20, 0);
+    SetSkill(-1, 6015, 20, 0);
+    SetSkill(-1, 6016, 20, 0);
+    SetSkill(-1, 6017, 20, 0);
+    SetSkill(-1, 6018, 20, 0);
+    SetSkill(-1, 6019, 20, 0);
+    SetSkill(-1, 6020, 20, 0);
+    SetSkill(-1, 6021, 20, 0);
+    SetSkill(-1, 64809, 20, 0);
+    SetSkill(-1, 64810, 20, 0);
+    SetSkill(-2, 6901, 20, 0);
+    SetSkill(-2, 6902, 20, 0);
+    SetSkill(-2, 6903, 20, 0);
+    SetSkill(-2, 6904, 20, 0);
+    SetSkill(-2, 6905, 20, 0);
+    SetSkill(-2, 6906, 20, 0);
+    SetSkill(-2, 6909, 20, 0);
+    SetSkill(-2, 64806, 20, 0);
+    SetSkill(-2, 64807, 20, 0);
+    SetSkill(-1, 6022, 20, 0);
+    SetSkill(-1, 6023, 20, 0);
+    SetSkill(-1, 6024, 20, 0);
+    SetSkill(-1, 6025, 20, 0);
+    SetSkill(-1, 6026, 20, 0);
+    SetSkill(-1, 6027, 20, 0);
+    SetSkill(-1, 6028, 20, 0);
+    SetSkill(-1, 6029, 20, 0);
+    SetSkill(-1, 6030, 20, 0);
+    SetSkill(-1, 6031, 20, 0);
+    SetSkill(-1, 6032, 20, 0);
+    SetSkill(-1, 6033, 20, 0);
+    SetSkill(-1, 6034, 20, 0);
+    SetSkill(-1, 6035, 20, 0);
+    SetSkill(-1, 6036, 20, 0);
+    SetSkill(-1, 6037, 20, 0);
+    SetSkill(-1, 6038, 20, 0);
+    SetSkill(-1, 6039, 20, 0);
+    SetSkill(-1, 6040, 20, 0);
+    SetSkill(-1, 6041, 20, 0);
+    SetSkill(-1, 6042, 20, 0);
+    SetSkill(-1, 6043, 20, 0);
+    SetSkill(-1, 6044, 20, 0);
+    SetSkill(-1, 6045, 20, 0);
+    SetSkill(-1, 6046, 20, 0);
+    SetSkill(-1, 6047, 20, 0);
+    SetSkill(-1, 6048, 20, 0);
+    SetSkill(-1, 6049, 20, 0);
+    SetSkill(-1, 6061, 20, 0);
+    SetSkill(-1, 6062, 20, 0);
+    SetSkill(-1, 6063, 20, 0);
+    SetSkill(-1, 6064, 20, 0);
+    SetSkill(-1, 6065, 20, 0);
+    SetSkill(-1, 6066, 20, 0);
+    SetSkill(-1, 6067, 20, 0);
+    SetSkill(-1, 6068, 20, 0);
+    SetSkill(-1, 6069, 20, 0);
+    SetSkill(-1, 6070, 20, 0);
+    SetSkill(-1, 6071, 20, 0);
+    SetSkill(-1, 6072, 20, 0);
+    SetSkill(-1, 10009, 20, 0);
+    SetSkill(-1, 10010, 20, 0);
+    SetSkill(-1, 64808, 20, 0);
+    SetSkill(-1, 64813, 20, 0);
+    SetSkill(-1, 64814, 20, 0);
+    SetSkill(-1, 65061, 20, 0);
+    SetSkill(-1, 65062, 20, 0);
+
     return true;
 }
 
@@ -328,6 +409,7 @@ bool Player::ReadSummonList(int UID)
                 card->m_pSummon = summon;
                 card->m_Instance.Socket[0] = sid;
                 card->m_bIsNeedUpdateToDB = true;
+                card->m_Instance.OwnSummonHandle = summon->GetHandle();
                 summon->m_pItem = card;
                 /*m_player.AddSummon(summon, false);
                 readCreatureSkillList(summon);
@@ -349,7 +431,11 @@ void Player::SendPropertyMessage(std::string key, std::string value)
     packet << GetUInt32Value(UNIT_FIELD_HANDLE);
     packet << (uint8) 0;
     packet.fill(key, 16);
+#if EPIC > 4
     packet << (uint64) 0;
+#else
+    packet << (uint32) 0;
+#endif
     packet << value;
     packet << (uint8) 0;
     SendPacket(packet);
@@ -396,7 +482,7 @@ void Player::SendLoginProperties()
     SendPropertyMessage("stamina", (int64) GetUInt32Value(UNIT_FIELD_STAMINA));
     SendPropertyMessage("max_stamina", (int64) GetUInt32Value(UNIT_FIELD_STAMINA));
     SendPropertyMessage("channel", (int64) 0);
-
+    SendPropertyMessage("client_info", m_szClientInfo);
     Messages::SendGameTime(this);
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
 
@@ -489,12 +575,14 @@ void Player::Save(bool bOnlyPlayer)
     stmt->setInt32(i++, 0);// Sub Summon
     stmt->setInt32(i++, 0); // Pet
     stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_CHAOS));
+    stmt->setString(i++, m_szClientInfo);
     stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_UID));
     CharacterDatabase.Execute(stmt);
 
     if(!bOnlyPlayer) {
         for (auto& item : m_lInventory) {
-            item.second->DBUpdate();
+            if(item.second->m_bIsNeedUpdateToDB)
+                item.second->DBUpdate();
         }
 
         for(auto& summon : m_vSummonList) {
@@ -573,7 +661,7 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
     item->m_bIsNeedUpdateToDB  = true;
     item->m_Instance.nWearInfo = pos;
     m_anWear[pos] = item;
-    SendItemWearInfoMessage(*item, this);
+    SendItemWearInfoMessage(item, this);
     return TS_RESULT_SUCCESS;
 }
 
@@ -587,18 +675,18 @@ uint16_t Player::putoffItem(ItemWearType pos)
         item->m_Instance.nWearInfo = ItemWearType::WearNone;
         item->m_bIsNeedUpdateToDB  = true;
         m_anWear[pos] = nullptr;
-        SendItemWearInfoMessage(*item, this);
+        SendItemWearInfoMessage(item, this);
     }
     return TS_RESULT_SUCCESS;
 }
 
-void Player::SendItemWearInfoMessage(Item item, Unit *u)
+void Player::SendItemWearInfoMessage(Item* item, Unit *u)
 {
     XPacket packet(TS_SC_ITEM_WEAR_INFO);
-    packet << (uint32_t) item.m_nHandle;
-    packet << (int16_t) item.m_Instance.nWearInfo;
+    packet << (uint32_t) item->m_nHandle;
+    packet << (int16_t) item->m_Instance.nWearInfo;
     packet << (uint32_t) (u != nullptr ? u->GetHandle() : 0);
-    packet << (int32_t) item.m_Instance.nEnhance;
+    packet << (int32_t) item->m_Instance.nEnhance;
     SendPacket(packet);
 }
 
@@ -786,6 +874,9 @@ void Player::Update(uint diff)
     bool bIsMoving = IsMoving(ct);
     if(HasFlag(UNIT_FIELD_STATUS, MovePending)) {
         processPendingMove();
+    }
+    if(!bIsMoving) {
+        onAttackAndSkillProcess();
     }
 
     Unit::Update(diff);
@@ -995,4 +1086,43 @@ void Player::SendPacket(XPacket &pPacket)
             m_session->GetSocket()->SendPacket(pPacket);
         }
     }
+}
+
+bool Player::Erase(Item *pItem, uint64 count, bool bSkipUpdateToDB)
+{
+    if(FindItemByHandle(pItem->m_nHandle) == nullptr)
+        return false;
+
+    if(pItem->m_Instance.nCount <= count) {
+        // TODO update weight
+        PopItem(pItem, false);
+        // POP ITEM
+        return true;
+    }
+
+    // TODO update weight
+    uint64 nc = pItem->m_Instance.nCount - count;
+    SetItemCount(pItem, nc, bSkipUpdateToDB);
+    return true;
+}
+
+void Player::SetItemCount(Item *pItem, uint64 nc, bool bSkipUpdateToDB)
+{
+    pItem->m_Instance.nCount = nc;
+    Messages::SendItemCountMessage(this, pItem);
+    if(!bSkipUpdateToDB)
+        pItem->DBUpdate();
+}
+
+void Player::PopItem(Item *pItem, bool bSkipUpdateToDB)
+{
+    pItem->SetOwnerInfo(0, 0, 0);
+
+    Messages::SendItemDestroyMessage(this, pItem);
+    if(!bSkipUpdateToDB)
+        pItem->DBUpdate();
+
+    m_lInventory.erase(pItem->m_Instance.nIdx);
+
+    delete pItem;
 }

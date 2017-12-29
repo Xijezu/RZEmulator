@@ -161,9 +161,9 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (uint8_t) 0; // reset | modification_type ?
 
         for (auto t : pUnit->m_vSkillList) {
-            skillPct << (int32_t) t->skill_id;
-            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->skill_id);
-            skillPct << (int8_t) t->skill_level;
+            skillPct << (int32_t) t->m_nSkillID;
+            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->m_nSkillID);
+            skillPct << (int8_t) t->m_nSkillLevel;
             skillPct << (uint32_t) 0;
             skillPct << (uint32_t) 0;
         }
@@ -174,8 +174,8 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (ushort)1; // Size
         skillPct << (uint8_t)0; // reset | modification_type?
         skillPct << (int)skill_id;
-        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill->skill_level);
-        skillPct << (int8_t)skill->skill_level;
+        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill->m_nSkillLevel);
+        skillPct << (int8_t)skill->m_nSkillLevel;
         skillPct << (uint32_t) 0;
         skillPct << (uint32_t) 0;
     }
@@ -439,4 +439,43 @@ void Messages::SendWarpMessage(Player *pPlayer)
     packet << pPlayer->GetPositionZ();
     packet << (uint8_t)pPlayer->GetLayer();
     pPlayer->SendPacket(packet);
+}
+
+void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
+{
+    if(pPlayer == nullptr || pItem == nullptr)
+        return;
+
+    XPacket itemPct(TS_SC_UPDATE_ITEM_COUNT);
+    itemPct << pItem->m_nHandle;
+    itemPct << (uint64)pItem->m_Instance.nCount;
+    pPlayer->SendPacket(itemPct);
+}
+
+void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
+{
+    if(pPlayer == nullptr || pItem == nullptr)
+        return;
+
+    XPacket itemPct(TS_SC_DESTROY_ITEM);
+    itemPct << pItem->m_nHandle;
+
+    pPlayer->SendPacket(itemPct);
+}
+
+void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint target, uint16 skill_id, uint8 skill_level, Position pos, int error_code)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket skillPct(TS_SC_SKILL);
+    skillPct << skill_id;
+    skillPct << skill_level;
+    skillPct << caster;
+    skillPct << target;
+    skillPct << pos.GetPositionX();
+    skillPct << pos.GetPositionY();
+    skillPct << pos.GetPositionZ();
+    skillPct << pos.GetLayer();
+
 }

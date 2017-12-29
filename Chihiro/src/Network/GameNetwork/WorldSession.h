@@ -91,6 +91,7 @@ public:
 	bool onUpdate(XPacket *);
     bool onTimeSync(XPacket *);
     bool onGameTime(XPacket *);
+	bool onSetProperty(XPacket *);
 
 	bool onJobLevelUp(XPacket *);
     bool onLearnSkill(XPacket *);
@@ -103,6 +104,9 @@ public:
 	bool onDialog(XPacket *);
 
 	bool onBuyItem(XPacket *);
+	bool onSellItem(XPacket *);
+
+	bool onSkill(XPacket *);
 
     bool onGetSummonSetupInfo(XPacket *);
 

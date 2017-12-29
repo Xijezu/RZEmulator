@@ -76,7 +76,7 @@ WorldObject* MemoryPoolMgr::getPtrFromId(uint32_t handle)
     }
     else
     {
-        //result = (GameObject) getItemPtrFromId(uid);
+        result = getItemPtrFromId(handle);
     }
     return result;
 }
@@ -91,7 +91,9 @@ WorldObject *MemoryPoolMgr::getMiscPtrFromId(uint32_t handle)
 void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
-    item->m_Instance.UID = sWorld->getItemIndex();
+    if(item->m_Instance.UID != 0) {
+        item->m_Instance.UID = sWorld->getItemIndex();
+    }
     m_nMiscTop++;
     m_hsItem.insert(std::make_pair<uint, Item *>((uint)(item->m_nHandle), (Item*)item));
 }
@@ -103,7 +105,7 @@ WorldObject *MemoryPoolMgr::getPlayerPtrFromId(uint32_t handle)
     return nullptr;
 }
 
-Item *MemoryPoolMgr::getItemPtrFromId(uint32_t handle)
+WorldObject *MemoryPoolMgr::getItemPtrFromId(uint32_t handle)
 {
     if(m_hsItem.count(handle) == 1)
         return m_hsItem[handle];

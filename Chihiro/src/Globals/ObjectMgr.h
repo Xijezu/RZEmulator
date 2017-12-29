@@ -57,6 +57,7 @@ public:
 
     CreatureStat GetStatInfo(int stat_id);
     ItemTemplate GetItemBase(int item_id);
+    uint64 GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying);
     SkillBase GetSkillBase(int);
     CreatureStat GetJobLevelBonus(int depth, int jobs[], int levels[]);
     JobResourceTemplate GetJobInfo(int job_id);

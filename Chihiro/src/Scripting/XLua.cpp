@@ -468,7 +468,7 @@ int XLua::SCRIPT_GetWearItemHandle(int index)
 
 int XLua::SCRIPT_GetItemLevel(uint handle)
 {
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     return item->m_Instance.nLevel;
@@ -476,7 +476,7 @@ int XLua::SCRIPT_GetItemLevel(uint handle)
 
 int XLua::SCRIPT_GetItemEnhance(uint handle)
 {
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     return item->m_Instance.nEnhance;
@@ -486,7 +486,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 {
     if(level > 255)
         return 0;
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     item->m_Instance.nLevel = level;
@@ -504,7 +504,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 
 int XLua::SCRIPT_GetItemRank(uint handle)
 {
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     return item->m_pItemBase.rank;
@@ -513,7 +513,7 @@ int XLua::SCRIPT_GetItemRank(uint handle)
 
 int XLua::SCRIPT_GetItemPrice(uint handle)
 {
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     return item->m_pItemBase.price;
@@ -526,7 +526,7 @@ int XLua::SCRIPT_GetItemNameID(int code)
 
 int XLua::SCRIPT_GetItemCode(uint handle)
 {
-    auto item = sMemoryPool->getItemPtrFromId(handle);
+    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     if(item == nullptr)
         return 0;
     return item->m_Instance.Code;
@@ -668,7 +668,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     }
 
     if(summon == nullptr)
-        return return_object(0);
+        return return_object((int)0);
 
     if(key == "hp"s) {
         return return_object(summon->GetHealth());

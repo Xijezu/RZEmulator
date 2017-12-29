@@ -27,7 +27,7 @@ public:
     WorldObject* getMonsterPtrFromId(uint32_t handle);
     WorldObject* getSummonPtrFromId(uint32_t handle);
     WorldObject* getPlayerPtrFromId(uint32_t handle);
-    Item* getItemPtrFromId(uint32_t handle);
+    WorldObject* getItemPtrFromId(uint32_t handle);
 
 private:
     uint32_t m_nMiscTop{0x20000001};

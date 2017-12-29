@@ -100,7 +100,10 @@ const GameHandler packetHandler[] =
                                   {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
                                   {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
                                   {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
-                                  {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon}
+                                  {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
+                                  {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
+                                  {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
+                                  {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -1018,10 +1021,10 @@ bool WorldSession::onEquipSummon(XPacket *pRecvPct)
 
     pRecvPct->read_skip(7);
 
-    bool bShowDialog = pRecvPct->read<bool>();
+    auto bShowDialog = pRecvPct->read<bool>();
     int card_handle[6] = {0};
-    for(int i = 0; i < 6; i++) {
-        card_handle[i] = pRecvPct->read<uint>();
+    for (int &i : card_handle) {
+        i = pRecvPct->read<uint>();
     }
 
     if(false /*IsItemUseable()*/)
@@ -1105,5 +1108,132 @@ bool WorldSession::onEquipSummon(XPacket *pRecvPct)
         }
     }
     Messages::SendCreatureEquipMessage(_player, bShowDialog);
+    return true;
+}
+
+bool WorldSession::onSellItem(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+    auto handle = pRecvPct->read<uint>();
+    auto sell_count = pRecvPct->read<uint16>();
+
+    auto item = _player->FindItemByHandle(handle);
+    if(item == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle()) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
+        return true;
+    }
+    if(sell_count == 0) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
+        return false;
+    }
+    //if(!_player.IsSelllable) @todo
+
+    auto nPrice = sObjectMgr->GetItemSellPrice(item->m_pItemBase.price, item->m_pItemBase.rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
+    auto nResultCount = item->m_Instance.nCount - sell_count;
+    auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
+    if(nResultCount < 0) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item->m_Instance.Code);
+        return false;
+    }
+    if(_player->GetGold() + sell_count * nPrice > MAX_GOLD_FOR_INVENTORY) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
+        return true;
+    }
+    if(!_player->Erase(item, sell_count, false)) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
+        return true;
+    }
+    auto nPrevGold = _player->GetGold();
+    if(_player->ChangeGold(_player->GetGold() + sell_count * nPrice) != 0) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
+        return false;
+    }
+
+    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item->m_Instance.Code);
+    XPacket tradePct(TS_SC_NPC_TRADE_INFO);
+    tradePct << (uint8)1;
+    tradePct << item->m_Instance.Code;
+    tradePct << (int64)sell_count;
+    tradePct << (int64)sell_count * nPrice;
+    tradePct << (uint)_player->GetLastContactLong("npc");
+    _player->SendPacket(tradePct);
+    return true;
+}
+
+bool WorldSession::onSkill(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+    auto skill_id = pRecvPct->read<uint16>();
+    auto caster = pRecvPct->read<uint32>();
+    auto target = pRecvPct->read<uint32>();
+    auto x = pRecvPct->read<float>();
+    auto y = pRecvPct->read<float>();
+    auto z = pRecvPct->read<float>();
+    auto layer = pRecvPct->read<uint8>();
+    auto skill_level = pRecvPct->read<uint8>();
+
+    if(_player->GetHealth() == 0)
+        return true;
+
+    WorldObject* pTarget{nullptr};
+    Position pos{};
+    pos.Relocate(x, y, z);
+
+    auto pCaster = dynamic_cast<Unit*>(_player);
+    if(caster != _player->GetHandle())
+        pCaster = _player->GetSummonByHandle(caster);
+
+    if(pCaster == nullptr || !pCaster->IsInWorld()) {
+        Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_EXIST);
+        return false;
+    }
+    auto base = sObjectMgr->GetSkillBase(skill_id);
+    if(base.id == 0 || base.is_valid == 0 || base.is_valid == 2) {
+        Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_ACCESS_DENIED);
+        return false;
+    }
+    /// @todo isCastable
+    if(target != 0) {
+        pTarget = dynamic_cast<WorldObject*>(sMemoryPool->getPtrFromId(target));
+        if(pTarget == nullptr) {
+            Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_EXIST);
+            return false;
+        }
+    }
+
+    auto ct = sWorld->GetArTime();
+    if(pCaster->IsMoving(ct)) {
+        Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_ACTABLE);
+        return true;
+    }
+
+    // @todo is_spell_act
+    auto skill = pCaster->GetSkill(skill_id);
+    if(skill != nullptr && skill->m_nSkillUID != -1) {
+        //if(skill_level > skill->skill_level /* +skill.m_nSkillLevelAdd*/)
+            //skill_level = skill_level + skill.m_nSkillLevelAdd;
+        int res = pCaster->CastSkill(skill_id, skill_level, target, pos, pCaster->GetLayer(), false);
+        if(res != 0)
+            Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, res);
+    }
+    return true;
+}
+
+bool WorldSession::onSetProperty(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    std::string key = pRecvPct->ReadString(16);
+    if(key != "client_info"s)
+        return false;
+
+    std::string value = pRecvPct->ReadString(pRecvPct->size() - 16 - 7);
+    _player->SetClientInfo(value);
+
     return true;
 }

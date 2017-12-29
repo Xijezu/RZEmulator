@@ -3,31 +3,39 @@
 
 #include "Common.h"
 
-enum TargetType : short
-{
-    TT_Misc = 0,
-    Target = 1,
-    RegionWithTarget = 2,
-    RegionWithoutTarget = 3,
-    Region = 4,
-    TargetExceptCaster = 6,
-    Party = 21,
-    Guild = 22,
-    AttackTeam = 23,
-    TT_Summon = 31,
-    PartySummon = 32,
+enum SkillState : short {
+    ST_Fire          = 0,
+    ST_Casting       = 1,
+    ST_CastingUpdate = 2,
+    ST_Cancel        = 3,
+    ST_RegionFire    = 4,
+    ST_Complete      = 5
+};
+
+enum TargetType : short {
+    TT_Misc                          = 0,
+    Target                           = 1,
+    RegionWithTarget                 = 2,
+    RegionWithoutTarget              = 3,
+    Region                           = 4,
+    TargetExceptCaster               = 6,
+    Party                            = 21,
+    Guild                            = 22,
+    AttackTeam                       = 23,
+    TT_Summon                        = 31,
+    PartySummon                      = 32,
     RegionNearMainSummonWithoutTaget = 44,
-    SelfWithSummon = 45,
-    PartyWithSummon = 51,
-    Master = 101,
-    SelfWithMaster = 102,
-    CreatureTypeNone = 201,
-    CreatureTypeFire = 202,
-    CreatureTypeWater = 203,
-    CreatureTypeWind = 204,
-    CreatureTypeEarth = 205,
-    CreatureTypeLight = 206,
-    CreatureTypeDark = 207,
+    SelfWithSummon                   = 45,
+    PartyWithSummon                  = 51,
+    Master                           = 101,
+    SelfWithMaster                   = 102,
+    CreatureTypeNone                 = 201,
+    CreatureTypeFire                 = 202,
+    CreatureTypeWater                = 203,
+    CreatureTypeWind                 = 204,
+    CreatureTypeEarth                = 205,
+    CreatureTypeLight                = 206,
+    CreatureTypeDark                 = 207,
 };
 
 enum SkillId : int {
@@ -315,9 +323,9 @@ struct SkillTreeBase {
 };
 
 struct SkillTreeGroup {
-    int job_id{};
-    int skill_id{};
-    std::vector<SkillTreeBase> skillTrees{};
+    int                        job_id{ };
+    int                        skill_id{ };
+    std::vector<SkillTreeBase> skillTrees{ };
 };
 
 struct SkillBase {
@@ -327,13 +335,18 @@ struct SkillBase {
         int result;
 
         if (skill_lv <= 50)
-            result = this->m_need_jp[skill_lv-1];
+            result = this->m_need_jp[skill_lv - 1];
         else
             result = this->m_need_jp[49];
         return result;
     }
 
-    int m_need_jp[50]{};
+    uint GetCastDelay(int skill_lv, int enhance)
+    {
+        return (uint) ((float) ((float) delay_cast + (float) skill_lv * (float) delay_cast_per_skl) * (float) (delay_cast_mode_per * (float) enhance + 1.0f));
+    }
+
+    int m_need_jp[50]{ };
 
     int     id{ };
     int     text_id{ };
@@ -355,14 +368,14 @@ struct SkillBase {
     int     cost_mp{ };
     int     cost_mp_per_skl{ };
     int     cost_mp_per_enhance{ };
-    float  cost_hp_per{ };
-    float  cost_hp_per_skl_per{ };
-    float  cost_mp_per{ };
-    float  cost_mp_per_skl_per{ };
+    float   cost_hp_per{ };
+    float   cost_hp_per_skl_per{ };
+    float   cost_mp_per{ };
+    float   cost_mp_per_skl_per{ };
     int     cost_havoc{ };
     int     cost_havoc_per_skl{ };
-    float  cost_energy{ };
-    float  cost_energy_per_skl{ };
+    float   cost_energy{ };
+    float   cost_energy_per_skl{ };
     int     cost_exp{ };
     int     cost_exp_per_enhance{ };
     int     cost_jp{ };
@@ -396,12 +409,12 @@ struct SkillBase {
     uint8_t vf_two_hand_staff{ };
     uint8_t vf_shield_only{ };
     uint8_t vf_is_not_need_weapon{ };
-    float  delay_cast{ };
-    float  delay_cast_per_skl{ };
-    float  delay_cast_mode_per{ };
-    float  delay_common{ };
-    float  delay_cooltime{ };
-    float  delay_cooltime_mode{ };
+    float   delay_cast{ };
+    float   delay_cast_per_skl{ };
+    float   delay_cast_mode_per{ };
+    float   delay_common{ };
+    float   delay_cooltime{ };
+    float   delay_cooltime_mode{ };
     int     cool_time_group_id{ };
     uint8_t uf_self{ };
     uint8_t uf_party{ };
@@ -416,27 +429,27 @@ struct SkillBase {
     short   effect_type{ };
     int     state_id{ };
     int     state_level_base{ };
-    float  state_level_per_skl{ };
-    float  state_level_per_enhance{ };
-    float  state_second{ };
-    float  state_second_per_level{ };
-    float  state_second_per_enhance{ };
+    float   state_level_per_skl{ };
+    float   state_level_per_enhance{ };
+    float   state_second{ };
+    float   state_second_per_level{ };
+    float   state_second_per_enhance{ };
     uint8_t state_type{ };
     int     probability_on_hit{ };
     int     probability_inc_by_slv{ };
     short   hit_bonus{ };
     short   hit_bonus_per_enhance{ };
     short   percentage{ };
-    float  hate_mod{ };
+    float   hate_mod{ };
     short   hate_basic{ };
-    float  hate_per_skl{ };
-    float  hate_per_enhance{ };
+    float   hate_per_skl{ };
+    float   hate_per_enhance{ };
     int     critical_bonus{ };
     int     critical_bonus_per_skl{ };
-    float  var[20]{ };
+    float   var[20]{ };
     short   is_projectile{ };
-    float  projectile_speed{ };
-    float  projectile_acceleration{ };
+    float   projectile_speed{ };
+    float   projectile_acceleration{ };
 };
 
 

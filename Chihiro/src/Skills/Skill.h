@@ -2,21 +2,48 @@
 #define PROJECT_SKILL_H
 
 #include "Common.h"
+#include "Object.h"
+#include "SkillBase.h"
 
+class XPacket;
 class Unit;
+
 class Skill {
 public:
-    Skill() = default;
+    Skill() = delete;
     Skill(Unit* pOwner, int _uid, int _id);
     static void DB_InsertSkill(Unit*,uint,uint,uint,uint,uint);
     static void DB_UpdateSkill(Unit*,uint,uint);
 
-    int sid;
-    int owner_id;
-    int summon_id;
-    int skill_id;
-    int skill_level;
+    int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
+    void ProcSkill();
+
+    int m_nSkillUID;
+    Unit* m_pOwner{nullptr};
+    int m_nSummonID;
+    int m_nSkillID;
+    int m_nSkillLevel;
     int cool_time;
+
+    SkillBase m_SkillBase{};
+
+    void broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType);
+    void broadcastSkillMessage(int rx1, int ry1, int rx2, int ry2, uint8 layer, int cost_hp, int cost_mp, int nType);
+
+    // For processing skill
+private:
+    Position m_targetPosition{};
+    uint8 m_nRequestedSkillLevel;
+    uint m_nCastingDelay;
+    uint16 m_nErrorCode;
+    uint m_hTarget;
+    uint m_nCastTime;
+    uint m_nFireTime;
+protected:
+    void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
+private:
+    int PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
+    int PrepareUnummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
 };
 
 

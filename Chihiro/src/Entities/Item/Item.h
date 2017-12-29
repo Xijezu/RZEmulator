@@ -9,6 +9,7 @@
 #include "ItemFields.h"
 #include "Dynamic/UnorderedMap.h"
 #include "DatabaseTemplates.h"
+#include "Object.h"
 
 class Summon;
 
@@ -35,8 +36,10 @@ public:
     int          Socket[4]{0};
 };
 
-class Item {
+class Item : public WorldObject {
 public:
+    Item() : WorldObject(true) { _subType = ST_Object; };
+
     static const int MAX_COOLTIME_GROUP   = 40;
     static const int MAX_OPTION_NUMBER    = 4;
     static const int MAX_SOCKET_NUMBER    = 4;

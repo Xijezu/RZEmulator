@@ -19,6 +19,8 @@ public:
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
     int32_t GetSummonCode();
+    Player* GetMaster() const
+    { return m_pMaster; }
 
     void OnUpdate() override;
 

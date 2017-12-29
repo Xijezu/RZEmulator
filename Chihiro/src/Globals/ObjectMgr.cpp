@@ -339,12 +339,12 @@ bool ObjectMgr::LoadSkillResource()
         base.vf_two_hand_staff = field[idx++].GetUInt8();
         base.vf_shield_only = field[idx++].GetUInt8();
         base.vf_is_not_need_weapon = field[idx++].GetUInt8();
-        base.delay_cast = field[idx++].GetFloat();
-        base.delay_cast_per_skl = field[idx++].GetFloat();
-        base.delay_cast_mode_per = field[idx++].GetFloat();
-        base.delay_common = field[idx++].GetFloat();
-        base.delay_cooltime = field[idx++].GetFloat();
-        base.delay_cooltime_mode = field[idx++].GetFloat();
+        base.delay_cast = field[idx++].GetFloat() * 100;
+        base.delay_cast_per_skl = field[idx++].GetFloat()* 100;
+        base.delay_cast_mode_per = field[idx++].GetFloat()* 100;
+        base.delay_common = field[idx++].GetFloat()* 100;
+        base.delay_cooltime = field[idx++].GetFloat()* 100;
+        base.delay_cooltime_mode = field[idx++].GetFloat()* 100;
         base.cool_time_group_id = field[idx++].GetInt32();
         base.uf_self = field[idx++].GetUInt8();
         base.uf_party = field[idx++].GetUInt8();
@@ -1012,5 +1012,54 @@ uint64 ObjectMgr::GetNeedSummonExp(int level)
 {
     if(level <= 300 && level > 0)
         return _summonLevelStore[level];
+    return 0;
+}
+
+uint64 ObjectMgr::GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying)
+{
+    uint64 k;
+    float f[8]{0};
+    int i;
+
+    k = price;
+    if (rank <= 8)
+    {
+        f[0] = 1.35f;
+        f[1] = 0.4f;
+        f[2] = 0.2f;
+        f[3] = 0.13f;
+        f[4] = 0.1f;
+        f[5] = 0.1f;
+        f[6] = 0.1f;
+        f[7] = 0.1f;
+        if (lv >= 2)
+        {
+            i = lv - 1;
+            do
+            {
+                if (rank != 0 && rank != 1 )
+                {
+                    if ( rank == 2 )
+                    {
+                        k += (long)((k * 0.4f * 0.01f) * 100);
+                    }
+                    else
+                    {
+                        k += (long)((f[rank] * k * 0.001f) * 1000);
+                    }
+                }
+                else
+                {
+                    k += (long)((k * 1.35f * 0.1f) * 10);
+                }
+                --i;
+            }
+            while (i > 0);
+        }
+        if (same_price_for_buying)
+            return k;
+        else
+            return k / 4;
+    }
     return 0;
 }

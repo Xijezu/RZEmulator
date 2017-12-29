@@ -47,8 +47,8 @@ bool Item::IsWearable()
 
 void Item::DBUpdate()
 {
-    if (!m_bIsNeedUpdateToDB)
-        return;
+    /*if (!m_bIsNeedUpdateToDB)
+        return;*/
 
     uint8_t i = 0;
     //PrepareStatement(CHARACTER_UPD_ITEM, "UPDATE `Item` SET owner_id = ?, account_id = ?,

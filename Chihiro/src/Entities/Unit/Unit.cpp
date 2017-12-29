@@ -5,6 +5,7 @@
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Skill.h"
+#include "MemPool.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -77,25 +78,6 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
     pEnterPct << (uint32_t) 0;pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
     pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) == 1 ? 1 : 0);
     pEnterPct << (int32_t) 0;
-}
-
-void Unit::setDeathState(DeathState s)
-{
-    if (s != ALIVE && s != JUST_RESPAWNED) {
-
-    }
-
-    if (s == JUST_DIED) {
-
-        if (IsInWorld()) {
-
-        }
-        // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
-        // do not why since in IncreaseMaxHealth currenthealth is checked
-        SetHealth(0);
-    }
-
-    _deathState = s;
 }
 
 Item *Unit::GetWornItem(ItemWearType idx)
@@ -398,13 +380,13 @@ void Unit::applyItemEffect()
 
                 for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
                     if (ib.base_type[ol] != 0) {
-                        onItemWearEffect(*curItem, true, ib.base_type[ol], ib.base_var[ol][0], ib.base_var[ol][1], fItemRatio);
+                        onItemWearEffect(curItem, true, ib.base_type[ol], ib.base_var[ol][0], ib.base_var[ol][1], fItemRatio);
                     }
                 }
 
                 for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
                     if (ib.opt_var[ol] != 0) {
-                        onItemWearEffect(*curItem, false, ib.opt_type[ol], ib.opt_var[ol][0], ib.opt_var[ol][1], fItemRatio);
+                        onItemWearEffect(curItem, false, ib.opt_type[ol], ib.opt_var[ol][0], ib.opt_var[ol][1], fItemRatio);
                     }
                 }
 
@@ -428,7 +410,7 @@ void Unit::applyItemEffect()
                             if (realEnhance > 12) {
                                 fTotalPoints += (ib._enhance[3][ol] * (float) (realEnhance - 12));
                             }
-                            onItemWearEffect(*curItem, false, ib.enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
+                            onItemWearEffect(curItem, false, ib.enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
                         }
                     }
                 }
@@ -610,11 +592,11 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
     }
 }
 
-void Unit::onItemWearEffect(Item pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
+void Unit::onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
 {
     float        result;
     float        item_var_penalty;
-    ItemTemplate tpl = sObjectMgr->GetItemBase(pItem.m_nItemID);
+    ItemTemplate tpl = sObjectMgr->GetItemBase(pItem->m_nItemID);
 
     if (type == 14)
         item_var_penalty = var1;
@@ -622,10 +604,10 @@ void Unit::onItemWearEffect(Item pItem, bool bIsBaseVar, int type, float var1, f
         item_var_penalty = var1 * fRatio;
 
     if (type != 14) {
-        if (pItem.m_nItemID != 0 && bIsBaseVar) {
+        if (pItem->m_nItemID != 0 && bIsBaseVar) {
             item_var_penalty += (float) (var2 * (float) tpl.level);
             result           = var1;
-            item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int) var1, getLevel(), tpl.rank, pItem.m_Instance.nLevel);
+            item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int) var1, getLevel(), tpl.rank, pItem->m_Instance.nLevel);
         }
         // TODO m_fItemMod = item_var_penalty
     }
@@ -998,13 +980,13 @@ void Unit::regenHPMP(uint t)
 int Unit::GetBaseSkillLevel(int skill_id)
 {
     Skill* s = GetSkill(skill_id);
-    return s == nullptr ? 0 : s->skill_level;
+    return s == nullptr ? 0 : s->m_nSkillLevel;
 }
 
 Skill* Unit::GetSkill(int skill_id)
 {
     for(auto s : m_vSkillList) {
-        if(s->skill_id == skill_id)
+        if(s->m_nSkillID == skill_id)
             return s;
     }
     return nullptr;
@@ -1026,10 +1008,10 @@ Skill* Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
             pSkill = new Skill(this, nSkillUID, skill_id);
         } else {
             pSkill = GetSkill(skill_id);
-            nSkillUID = pSkill == nullptr ? 0 : pSkill->sid;
+            nSkillUID = pSkill == nullptr ? 0 : pSkill->m_nSkillUID;
         }
         if(pSkill != nullptr) {
-            pSkill->skill_level = skill_level;
+            pSkill->m_nSkillLevel = skill_level;
             m_vSkillList.emplace_back(pSkill);
 
             onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
@@ -1041,5 +1023,81 @@ Skill* Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
 int Unit::GetCurrentSkillLevel(int skill_id)
 {
     auto s = GetSkill(skill_id);
-    return s == nullptr ? 0 : s->skill_level + 0;
+    return s == nullptr ? 0 : s->m_nSkillLevel + 0;
+}
+
+void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
+{
+    auto skill = new Skill(this, skill_uid, skill_id);
+    skill->m_nSkillID = skill_id;
+    skill->m_nSkillLevel = skill_level;
+    skill->m_nSkillUID = skill_uid;
+    skill->cool_time = remain_cool_time;
+    m_vSkillList.emplace_back(skill);
+}
+
+int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem)
+{
+    auto player = dynamic_cast<Player*>(this);
+    Summon *summon{nullptr};
+    Position tpos(pos);
+
+    auto pSkill = GetSkill(nSkillID);
+    if(pSkill == nullptr /* current casting skill || using storage */)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
+    /// Checking here if return feather due to nullptrs
+    // Return feather
+    if(pSkillTarget == nullptr && nSkillID == 6020 && GetSubType() == ST_Player /* && IsInSiegeOrRaidDungeon*/)
+        return TS_RESULT_NOT_ACTABLE;
+    if(pSkillTarget == nullptr)
+        return TS_RESULT_NOT_EXIST;
+
+    switch(sObjectMgr->GetSkillBase(nSkillID).target) {
+        case TargetType::Master:
+            if(!this->GetSubType() == ST_Summon)
+                return TS_RESULT_NOT_ACTABLE;
+            summon = dynamic_cast<Summon*>(this);
+            if(summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
+                return TS_RESULT_NOT_ACTABLE;
+            break;
+        case TargetType::SelfWithMaster:
+            if(!this->GetSubType() == ST_Summon)
+                return TS_RESULT_NOT_ACTABLE;
+            summon = dynamic_cast<Summon*>(this);
+            if(pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
+                return TS_RESULT_NOT_ACTABLE;
+            break;
+        case TargetType::TargetExceptCaster:
+            if(pSkillTarget->GetHandle() == GetHandle())
+                return TS_RESULT_NOT_ACTABLE;
+            break;
+        default:
+            break;
+    }
+
+    if(pSkillTarget->GetSubType() != ST_Object && !pSkillTarget->IsInWorld())
+        return TS_RESULT_NOT_ACTABLE;
+
+    uint ct = sWorld->GetArTime();
+
+    Position t = (pSkillTarget->GetCurrentPosition(ct));
+    float target_distance = (GetCurrentPosition(ct).GetExactDist2d(&t) - 6.0f);
+    float enemy_distance = target_distance - (6.0f); // @Todo: Unit Size
+    float range_mod = 1.2f;
+    if(pSkillTarget->bIsMoving) {
+        if(pSkillTarget->IsInWorld())
+            range_mod = 1.5f;
+    }
+    bool isInRange{false};
+    //if(sObjectMgr->GetSkillBase(nSkillID).cast_range == -1)
+        //isInRange = enemy_distance < (12*m_cAtribute.nAttackRange) / 100f
+    int res = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
+}
+
+void Unit::onAttackAndSkillProcess()
+{
+    if (m_castingSkill != nullptr)
+        m_castingSkill->ProcSkill();
 }
