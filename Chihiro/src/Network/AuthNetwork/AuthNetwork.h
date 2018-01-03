@@ -1,24 +1,25 @@
 #ifndef _AUTHSESSION_H_
 #define _AUTHSESSION_H_
+
 #include "Common.h"
 #include "Configuration/Config.h"
-#include "Network/AuthNetwork.h"
+#include "AuthSession.h"
 #include <ace/Connector.h>
 #include <ace/SOCK_Connector.h>
 #include "Encryption/ByteBuffer.h"
 
 /// Doing this inline, I really don't want to waste another file :p
 
-class AuthSession : public ACE_Connector<XSocket, ACE_SOCK_Connector> {
+class AuthNetwork : public ACE_Connector<XSocket, ACE_SOCK_Connector> {
 public:
-	AuthSession()
+	AuthNetwork()
     {
         ACE_NEW(_socket, XSocket);
-        ACE_NEW(_session, AuthNetwork(*_socket));
+        ACE_NEW(_session, AuthSession(*_socket));
         _socket->set_session(_session);
     }
 
-	~AuthSession()  = default;
+	~AuthNetwork()  = default;
 
 	int InitializeNetwork(ACE_INET_Addr& auth_addr)
     {
@@ -29,6 +30,12 @@ public:
 		}
 		SendServerInfo();
 		return 0;
+	}
+
+	void Stop()
+	{
+		this->close();
+		delete _socket;
 	}
 
     virtual int close() {
@@ -68,8 +75,8 @@ private:
 	}
 
 	XSocket* _socket;
-	AuthNetwork* _session;
+	AuthSession* _session;
 };
 
-#define sAuthNetwork ACE_Singleton<AuthSession, ACE_Thread_Mutex>::instance()
+#define sAuthNetwork ACE_Singleton<AuthNetwork, ACE_Thread_Mutex>::instance()
 #endif // _AUTHSESSION_H_

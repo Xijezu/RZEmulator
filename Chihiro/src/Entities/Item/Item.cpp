@@ -34,7 +34,7 @@ Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level
 
 ItemWearType Item::GetWearType()
 {
-    return (ItemWearType) m_pItemBase.wear_type;
+    return (ItemWearType) m_pItemBase->wear_type;
 }
 
 bool Item::IsWearable()

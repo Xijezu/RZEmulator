@@ -12,6 +12,23 @@ enum MonsterFlag : uint16 {
     MF_RESPONCE_BATTLE
 };
 
+enum MonsterGenerateCode : int
+{
+    MGC_None = 0,
+    MGC_ByRespawn = 1,
+    MGC_ByScript = 2,
+    MGC_ByShoveling = 3,
+};
+
+enum MonsterStatus : int
+{
+    MS_Normal = 0,
+    MS_Tracking = 1,
+    MS_FindAttackPos = 2,
+    MS_Attack = 3,
+    MS_Dead = 4,
+};
+
 struct MonsterRespawnInfo {
     uint interval;
     float left;
@@ -37,6 +54,8 @@ struct MonsterRespawnInfo {
         top = _top;
         right = _right;
         bottom = _bottom;
+        layer = 0;
+        dungeon_id = 0;
         monster_id = _monster_id;
         max_num = _max_num;
         inc = _inc;
@@ -51,6 +70,8 @@ struct MonsterBase {
     int   location_id;
     int   level;
     int   grp;
+    float size;
+    float scale;
     int   magic_type;
     int   race;
     int   visible_range;
@@ -102,13 +123,79 @@ struct MonsterBase {
     int   local_flag;
 };
 
+struct VirtualParty {
+    VirtualParty() = default;
+
+    VirtualParty(int id, int d, int lv)
+    {
+        fContribute = 0.0f;
+        hPlayer = 0;
+        nPartyID = id;
+        nDamage = d;
+        nLevel = lv;
+        bTamer = false;
+    }
+
+    VirtualParty(uint h, int d, int lv)
+    {
+        fContribute = 0.0f;
+        hPlayer = h;
+        nPartyID = 0;
+        nDamage = d;
+        nLevel = lv;
+        bTamer = false;
+    }
+
+    static bool GreaterByDamage(VirtualParty lh, VirtualParty rh)
+    {
+        return lh.nDamage > rh.nDamage;
+    }
+
+    static bool GreaterByContribute(VirtualParty lh, VirtualParty rh)
+    {
+        return lh.fContribute > rh.fContribute;
+    }
+
+    int nPartyID;
+    uint hPlayer;
+    int nDamage;
+    float fContribute;
+    bool bTamer;
+    int nLevel;
+};
+
+struct takePriority {
+    struct ItemPickupOrder {
+        uint hPlayer[3];
+        int nPartyID[3];
+    };
+
+    ItemPickupOrder PickupOrder{};
+};
+
+struct DamageTag {
+    DamageTag(uint _uid, uint _time, int _damage)
+    {
+        uid     = _uid;
+        nTime   = _time;
+        nDamage = _damage;
+    }
+
+    uint uid;
+    uint nTime;
+    int  nDamage;
+};
+
 class Monster : public Unit {
 public:
 
     static void EnterPacket(XPacket& pEnterPct, Monster* monster);
 
-    explicit Monster(uint handle, MonsterBase mb);
+    explicit Monster(uint handle, MonsterBase* mb);
     ~Monster() = default;
+
+    MonsterBase* GetBase() const
+    { return m_Base; }
 
     void applyJobLevelBonus() override
     {};
@@ -119,8 +206,30 @@ public:
     uint16_t putoffItem(ItemWearType) override
     {};
 
+    float GetSize() const override
+    { return m_Base->size; }
+
+    float GetScale() const override
+    { return m_Base->scale; }
+protected:
+    int onDamage(Unit* pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
+    void onDead(Unit* pFrom, bool decreaseEXPOnDead) override;
 private:
-    MonsterBase m_Base;
+    DamageTag* addDamage(uint handle, int nDamage);
+    DamageTag* getDamageTag(uint handle, uint t);
+    void calcPartyContribute(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
+    void procEXP(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
+
+    std::vector<DamageTag> m_vDamageList{};
+    MonsterBase* m_Base{nullptr};
+
+    // Attack related
+    uint m_hFirstAttacker;
+    uint m_nFirstAttackTime;
+    uint m_nTotalDamage;
+    // Taming related
+    uint m_hTamer;
+    uint m_nTamedTime;
 };
 
 

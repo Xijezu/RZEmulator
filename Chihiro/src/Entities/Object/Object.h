@@ -5,6 +5,7 @@
 //#include "ArRegion.h"
 #include "Dynamic/UnorderedMap.h"
 #include "Encryption/ByteBuffer.h"
+#include "Util.h"
 
 // used for creating values for respawn for example
 #define MAKE_PAIR64(l, h)  uint64(uint32(l) | (uint64(h) << 32))
@@ -95,7 +96,14 @@ enum EUnitFields {
     UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0047, // Size: 1
     UNIT_FIELD_UID                   = 0x0048, // Size: 1
     UNIT_FIELD_EXP                   = 0x0049, // Size: 2
-    UNIT_END                         = 0x004B
+    UNIT_FIELD_DEAD_TIME             = 0x004B,
+    UNIT_END                   = 0x004C
+};
+
+enum EBattleFields {
+    BATTLE_FIELD_TARGET_HANDLE         = UNIT_END + 0x0001, // Size: 1
+    BATTLE_FIELD_NEXT_ATTACKABLE_TIME  = UNIT_END + 0x0002, // Size: 2
+    BATTLE_FIELD_END                   = UNIT_END + 0x0003
 };
 
 class ArRegion;
@@ -312,7 +320,7 @@ struct Position {
     float  m_positionY{ };
     float  m_positionZ{ };
     float  _orientation{ };
-    uint32 m_nLayer{ };
+    uint8 m_nLayer{ };
 
     float prevX{}, prevY{};
 
@@ -333,10 +341,10 @@ struct Position {
         this->m_positionY = y;
     }
 
-    int32 GetLayer() const
+    uint8 GetLayer() const
     { return m_nLayer; }
 
-    void SetLayer(int value)
+    void SetLayer(uint8 value)
     { m_nLayer = value; }
 
     void Relocate(float x, float y)
@@ -375,8 +383,6 @@ struct Position {
         m_positionZ  = pos->m_positionZ;
         _orientation = pos->_orientation;
     }
-
-    void RelocateOffset(const Position &offset);
 
     void SetOrientation(float orientation)
     {
@@ -432,8 +438,6 @@ struct Position {
         return pos;
     }
 
-    bool IsPositionValid() const;
-
     float GetExactDist2dSq(float x, float y) const
     {
         float dx = m_positionX - x;
@@ -483,43 +487,10 @@ struct Position {
         return sqrt(GetExactDistSq(pos));
     }
 
-    void GetPositionOffsetTo(const Position &endPos, Position &retOffset) const;
-
-    float GetAngle(const Position *pos) const;
-
-    float GetAngle(float x, float y) const;
-
-    float GetRelativeAngle(const Position *pos) const
+    std::string ToString() const
     {
-        return GetAngle(pos) - _orientation;
+        return string_format("Position: X: %u, Y: %u, Layer: %u", GetPositionX(), GetPositionY(), GetLayer());
     }
-
-    float GetRelativeAngle(float x, float y) const
-    { return GetAngle(x, y) - _orientation; }
-
-    void GetSinCos(float x, float y, float &vsin, float &vcos) const;
-
-    bool IsInDist2d(float x, float y, float dist) const
-    {
-        return GetExactDist2dSq(x, y) < dist * dist;
-    }
-
-    bool IsInDist2d(const Position *pos, float dist) const
-    {
-        return GetExactDist2dSq(pos) < dist * dist;
-    }
-
-    bool IsInDist(float x, float y, float z, float dist) const
-    {
-        return GetExactDistSq(x, y, z) < dist * dist;
-    }
-
-    bool IsInDist(const Position *pos, float dist) const
-    {
-        return GetExactDistSq(pos) < dist * dist;
-    }
-
-    std::string ToString() const;
 };
 
 class ArMoveVector : public Position {
@@ -564,13 +535,8 @@ public:
 class Player;
 
 class WorldObject : public Object, public ArMoveVector {
-protected:
-    explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
-    std::vector<Position> m_PendingMovePos{};
-    uint8_t m_nPendingMoveSpeed{};
-    uint lastProcessTime{0};
 public:
-    virtual ~WorldObject();
+    ~WorldObject() override;
 
     virtual void Update(uint32 /*time_diff*/)
     {}
@@ -578,13 +544,12 @@ public:
     bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
     bool Step(uint tm) override;
 
-    void _Create(uint32 handle, uint32 phaseMask);
 
     void SendEnterMsg(Player *);
     void AddNoise(int, int, int);
 
-    virtual void AddToWorld();
-    virtual void RemoveFromWorld();
+    void AddToWorld() override;
+    void RemoveFromWorld() override;
 
     Position GetCurrentPosition(uint t)
     {
@@ -606,35 +571,6 @@ public:
         return result;
     }
 
-    void GetNearPoint2D(float &x, float &y, float distance, float absAngle) const;
-
-    void GetNearPoint(WorldObject const *searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const;
-
-    void GetClosePoint(float &x, float &y, float &z, float size, float distance2d = 0, float angle = 0) const
-    {
-        // angle calculated from current orientation
-        GetNearPoint(NULL, x, y, z, size, distance2d, GetOrientation() + angle);
-    }
-
-    void MovePosition(Position &pos, float dist, float angle);
-
-    void GetNearPosition(Position &pos, float dist, float angle)
-    {
-        GetPosition(&pos);
-        MovePosition(pos, dist, angle);
-    }
-
-    void MovePositionToFirstCollision(Position &pos, float dist, float angle);
-
-    void GetFirstCollisionPosition(Position &pos, float dist, float angle)
-    {
-        GetPosition(&pos);
-        MovePositionToFirstCollision(pos, dist, angle);
-    }
-
-    uint32 GetInstanceId() const
-    { return m_InstanceId; }
-
     const char *GetName() const
     { return m_name.c_str(); }
 
@@ -644,98 +580,17 @@ public:
     virtual const char *GetNameForLocaleIdx(LocaleConstant /*locale_idx*/) const
     { return GetName(); }
 
-    bool IsInMap(const WorldObject *obj) const
-    {
-        if (obj)
-            return IsInWorld() && obj->IsInWorld();// && (GetMap() == obj->GetMap());
-        return false;
-    }
-
-    virtual void CleanupsBeforeDelete(bool finalCleanup = true);  // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
-
-    virtual uint8 getLevelForTarget(WorldObject const * /*target*/) const
-    { return 1; }
-
-    virtual void SaveRespawnTime()
-    {}
-
-    void AddObjectToRemoveList();
-
-    float GetVisibilityRange() const;
-
-    float GetSightRange(const WorldObject *target = NULL) const;
-
-// 	virtual void SetMap(Map* map);
-// 	virtual void ResetMap();
-//	Map* GetMap() const { ASSERT(m_currMap); return m_currMap; }
-//	Map* FindMap() const { return m_currMap; }
-    //used to check all object's GetMap() calls when object is not in world!
-
-    //this function should be removed in nearest time...
-//	Map const* GetBaseMap() const;
-
-    //Creature*   FindNearestCreature(uint32 entry, float range, bool alive = true) const;
-    //GameObject* FindNearestGameObject(uint32 entry, float range) const;
-//	Player*     FindNearestPlayer(float range, bool alive = true);
-
-    //relocation and visibility system functions
-    void AddToNotify(uint16 f)
-    { m_notifyflags |= f; }
-
-    bool isNeedNotify(uint16 f) const
-    { return m_notifyflags & f; }
-
-    uint16 GetNotifyFlags() const
-    { return m_notifyflags; }
-
-    bool NotifyExecuted(uint16 f) const
-    { return m_executed_notifies & f; }
-
-    void SetNotified(uint16 f)
-    { m_executed_notifies |= f; }
-
-    void ResetAllNotifies()
-    {
-        m_notifyflags       = 0;
-        m_executed_notifies = 0;
-    }
-
-    bool isActiveObject() const
-    { return _isActive; }
-
-    void setActive(bool isActiveObject);
-
-    void SetWorldObject(bool apply);
-
-    bool IsPermanentWorldObject() const
-    { return m_isWorldObject; }
-
-    bool IsWorldObject() const;
-
-//	MovementInfo _movementInfo;
     ArRegion *_region;
     bool _bIsInWorld{false};
+
 protected:
+    explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
+    std::vector<Position> m_PendingMovePos{};
+    uint8_t m_nPendingMoveSpeed{};
+    uint lastProcessTime{0};
     std::string m_name;
     bool        _isActive;
     const bool  m_isWorldObject;
-
-    //these functions are used mostly for Relocate() and Player specific stuff...
-    //use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
-    //mapId/instanceId should be set in SetMap() function!
-
-    void SetLocationInstanceId(uint32 _instanceId)
-    { m_InstanceId = _instanceId; }
-
-private:
-//	Map* m_currMap;                                    //current object's Map location
-
-    //uint32 m_mapId;                                     // object at map with map_id
-    uint32 m_InstanceId;                                // in map copy with instance id
-    uint32 m_phaseMask;                                 // in area phase state
-
-    uint16 m_notifyflags;
-    uint16 m_executed_notifies;
 
 };
 

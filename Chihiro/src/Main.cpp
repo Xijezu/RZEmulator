@@ -2,7 +2,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"
 #include "Utilities/SignalHandler.h"
-#include "Network/AuthSession.h"
+#include "AuthNetwork.h"
 #include "World.h"
 #include "WorldRunnable.h"
 
@@ -23,8 +23,7 @@ GameDatabaseWorkerPool GameDatabase;								  // Accessor to the game server dat
 
 bool StartDB();
 void StopDB();
-bool stopEvent = false;
-///- Handle worldserver's termination signals
+
 /// Handle worldservers's termination signals
 class WorldServerSignalHandler : public Skyfire::SignalHandler
 {
@@ -39,7 +38,7 @@ public:
 				case SIGBREAK:
                     if (m_ServiceStatus != 1)
 #endif
-                stopEvent = true;
+				World::StopNow(SHUTDOWN_EXIT_CODE);
 				break;
 			default:
 				break;
@@ -111,7 +110,7 @@ int main(int argc, char **argv)
 	uint32 loopCounter = 0;
 
 	// Wait for termination signal
-	while (!stopEvent)
+	while (!World::IsStopped())
 	{
 		// dont move this outside the loop, the reactor will modify it
 		ACE_Time_Value interval(0, 100000);
@@ -127,6 +126,10 @@ int main(int argc, char **argv)
 			CharacterDatabase.KeepAlive();
 		}
 	}
+
+    // when the main thread closes the singletons get unloaded
+    // since worldrunnable uses them, it will crash if unloaded after master
+    worldThread.wait();
 
     StopDB();
 
@@ -148,7 +151,7 @@ bool StartDB()
 		return false;
 	}
 
-	async_threads = sConfigMgr->GetIntDefault("CharacterDB.WorkerThreads", 1);
+	async_threads = (uint8)sConfigMgr->GetIntDefault("CharacterDB.WorkerThreads", 2);
 	if (async_threads < 1 || async_threads > 32)
 	{
 		MX_LOG_ERROR("server.worldserver","Character database: invalid number of worker threads specified. "
@@ -156,7 +159,7 @@ bool StartDB()
 		return false;
 	}
 
-	synch_threads = sConfigMgr->GetIntDefault("CharacterDB.SynchThreads", 1);
+	synch_threads = (uint8)sConfigMgr->GetIntDefault("CharacterDB.SynchThreads", 2);
 
 	///- Initialize the world database
 	if (!CharacterDatabase.Open(dbstring, 1, synch_threads))
@@ -184,7 +187,6 @@ bool StartDB()
 
 void StopDB()
 {
-    sAuthNetwork->close();
     GameDatabase.Close();
     CharacterDatabase.Close();
     MySQL::Library_End();

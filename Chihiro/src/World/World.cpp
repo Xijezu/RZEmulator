@@ -8,15 +8,21 @@
 #include "ClientPackets.h"
 #include "Maploader.h"
 #include "RespawnObject.h"
+#include "WorldSession.h"
+
+ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
+uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
+ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
 
 World::World() : startTime(getMSTime())
 {
+    srand((unsigned int)time(NULL));
 }
 
 
 World::~World()
 {
-	CharacterDatabase.Close();
+
 }
 
 uint World::GetArTime()
@@ -51,7 +57,6 @@ void World::InitWorld()
 	sMapContent->LoadMapContent();
 	sMapContent->InitMapInfo();
     MX_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
-	MX_LOG_INFO("server.worldserver", "Mobs: %d", sObjectMgr->g_vRespawnInfo.size());
 
     for(auto& ri : sObjectMgr->g_vRespawnInfo) {
         MonsterRespawnInfo nri(ri);
@@ -95,27 +100,27 @@ void World::AddSession(WorldSession* s)
     }
 }
 
-uint64_t World::getItemIndex()
+uint64 World::GetItemIndex()
 {
     return ++s_nItemIndex;
 }
 
-uint64_t World::getPlayerIndex()
+uint64 World::GetPlayerIndex()
 {
     return ++s_nPlayerIndex;
 }
 
-uint64_t World::getPetIndex()
+uint64 World::GetPetIndex()
 {
     return ++s_nPetIndex;
 }
 
-uint64_t World::getSummonIndex()
+uint64 World::GetSummonIndex()
 {
     return ++s_nSummonIndex;
 }
 
-uint64_t World::getSkillIndex()
+uint64 World::GetSkillIndex()
 {
 	return ++s_nSkillIndex;
 }
@@ -155,13 +160,46 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
     return result;
 }
 
+bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
+{
+    Position oldPos{};
+    Position curPos2{};
+
+    if(bAbsoluteMove) {
+        if(obj->bIsMoving && obj->IsInWorld()) {
+            oldPos = *dynamic_cast<Position*>(obj);
+            obj->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
+            curPos2 = *dynamic_cast<Position*>(obj);
+            onMoveObject(obj, oldPos, curPos2);
+            enterProc(obj, (uint)(oldPos.GetPositionX() / g_nRegionSize), (uint)(oldPos.GetPositionY() / g_nRegionSize));
+            obj->SetMove(newPos, speed, t);
+        } else {
+            obj->SetMove(newPos, speed, t);
+        }
+        if(bBroadcastMove) {
+            sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize),
+                                           (uint) (obj->GetPositionY() / g_nRegionSize),
+                                           obj->GetLayer(),
+                                           [=](ArRegion *region) {
+                                               region->DoEachClient([=](WorldObject *pObj) {
+                                                   Messages::SendMoveMessage(dynamic_cast<Player *>(pObj), obj);
+                                               });
+                                           });
+
+        }
+        return true;
+    }
+    return false;
+}
+
+
 void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 {
 	auto prev_rx = (uint)(oldPos.m_positionX / g_nRegionSize);
 	auto prev_ry = (uint)(oldPos.m_positionY / g_nRegionSize);
 	if(prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize)) {
 		sArRegion->GetRegion(prev_rx, prev_ry, (uint32)pUnit->GetLayer())->RemoveObject(pUnit);
-		sArRegion->GetRegion(*pUnit)->AddObject(pUnit);
+		sArRegion->GetRegion(pUnit)->AddObject(pUnit);
 	}
 }
 
@@ -191,7 +229,7 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 
 void World::AddObjectToWorld(WorldObject *obj)
 {
-    auto region = sArRegion->GetRegion(*obj);
+    auto region = sArRegion->GetRegion(obj);
     if (region == nullptr)
         return;
 
@@ -237,7 +275,7 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
     // Get Region
-    auto    region = sArRegion->GetRegion(*obj);
+    auto    region = sArRegion->GetRegion(obj);
     // Create & set leave packet
     XPacket leavePct(TS_SC_LEAVE);
     leavePct << obj->GetHandle();
@@ -371,4 +409,65 @@ void World::AddMonsterToWorld(Monster *pMonster)
     pMonster->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
     AddObjectToWorld(pMonster);
     pMonster->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+}
+
+void World::KickAll()
+{
+    for(auto& itr : m_sessions) {
+        itr.second->KickPlayer();
+    }
+}
+
+void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
+{
+    float fJP = 0;
+    if(pPlayer->GetHealth() != 0) {
+        float fJP = jp;
+        // remove some immorality points here
+        if(pPlayer->GetInt32Value(UNIT_FIELD_IP) > 0) {
+            if(pCorpse->GetLevel() >= pPlayer->GetLevel()) {
+                float fIPDec = -1.0f;
+            }
+        }
+    }
+
+    int levelDiff = pPlayer->GetLevel() - pCorpse->GetLevel();
+    if(levelDiff > 0) {
+        exp = (1.0f - (float)levelDiff * 0.05f) * exp;
+        fJP = (1.0f - (float)levelDiff * 0.05f) * jp;
+    }
+
+    uint ct = GetArTime();
+    Position posPlayer = pPlayer->GetCurrentPosition(ct);
+    Position posCorpse = pCorpse->GetCurrentPosition(ct);
+    if(posCorpse.GetExactDist2d(&posPlayer) <= 500.0f) {
+        if(exp < 1.0f)
+            exp = 1.0f;
+        if(fJP < 0.0f)
+            fJP = 0.0f;
+
+        auto mob = dynamic_cast<Monster*>(pCorpse);
+        //if(pCorpse->GetSubType() == ST_Mob && mob.m_h)
+        /// TAMING
+    }
+
+    pPlayer->AddEXP(exp, jp, false);
+}
+
+void World::BroadcastStatusMessage(Unit *unit)
+{
+    if(unit == nullptr)
+        return;
+    XPacket packet(TS_SC_STATUS_CHANGE);
+    packet << unit->GetHandle();
+    packet << 0; // Get Status Message
+
+    sArRegion->DoEachVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize),
+                                   (uint)(unit->GetPositionY() / g_nRegionSize),
+                                   unit->GetLayer(),
+                                   [&packet](ArRegion* rgn) {
+                                       rgn->DoEachClient([&packet](WorldObject* obj) {
+                                           dynamic_cast<Player*>(obj)->SendPacket(packet);
+                                       });
+                                   });
 }

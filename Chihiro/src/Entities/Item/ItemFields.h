@@ -7,6 +7,17 @@
 
 static const long MAX_GOLD_FOR_INVENTORY = 100000000000;
 
+enum ElementalType {
+    TypeNone  = 0,
+    TypeFire  = 1,
+    TypeWater = 2,
+    TypeWind  = 3,
+    TypeEarth = 4,
+    TypeLight = 5,
+    TypeDark  = 6,
+    TypeCount = 7
+};
+
 enum FlagBits : uint {
     FB_Card          = 0x01,
     FB_Full          = 0x02,

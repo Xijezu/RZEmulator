@@ -1,19 +1,19 @@
 #include "Common.h"
-#include "AuthNetwork.h"
 #include "AuthSession.h"
+#include "AuthNetwork.h"
 #include "../../../Mononoke/src/Server/AuthGame/AuthGamePackets.h"
 
-AuthNetwork::AuthNetwork(XSocket& socket) : socket_(socket)
+AuthSession::AuthSession(XSocket& socket) : socket_(socket)
 {
 }
 
 
-AuthNetwork::~AuthNetwork()
+AuthSession::~AuthSession()
 {
 
 }
 
-void AuthNetwork::ProcessIncoming(XPacket* _packet) {
+void AuthSession::ProcessIncoming(XPacket* _packet) {
 	switch (_packet->GetPacketID())
 	{
 	case 20011:		// Clientlogin result
@@ -31,7 +31,7 @@ void AuthNetwork::ProcessIncoming(XPacket* _packet) {
 	}
 }
 
-void AuthNetwork::AccountToAuth(WorldSession* session, std::string login_name, uint64 one_time_key)
+void AuthSession::AccountToAuth(WorldSession* session, std::string login_name, uint64 one_time_key)
 {
 	m_Queue[login_name] = session;
 	XPacket packet(20010);

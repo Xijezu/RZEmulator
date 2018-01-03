@@ -24,7 +24,8 @@
 #include <ace/Auto_Ptr.h>
 
 #include "WorldSocket.h"
-#include "Player.h"
+#include "XPacket.h"
+#include "WorldSession.h"
 #include "World.h"
 #include "DatabaseEnv.h"
 #include "WorldSocketMgr.h"
@@ -133,7 +134,7 @@ int WorldSocket::SendPacket(XPacket& pct)
 
 
     //if (m_Session)
-        //SF_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode(), true).c_str());
+    //SF_LOG_TRACE("network.opcode", "S->C: %s %s", m_Session->GetPlayerInfo().c_str(), GetOpcodeNameForLogging(pkt->GetOpcode(), true).c_str());
 
 
     if (m_OutBuffer->space() >= pkt->size() && msg_queue()->is_empty())
@@ -463,9 +464,9 @@ int WorldSocket::handle_input_payload (void)
     m_Decrypt.Decode(&m_RecvWPct->contents()[0], &m_RecvWPct->contents()[0],  m_RecvWPct->size(), false);
     const int ret = ProcessIncoming(m_RecvWPct);
 
-    m_RecvPct.base(NULL, 0);
+    m_RecvPct.base(nullptr, 0);
     m_RecvPct.reset();
-    m_RecvWPct = NULL;
+    m_RecvWPct = nullptr;
 
     m_WorldHeader.reset();
 
@@ -609,10 +610,10 @@ int WorldSocket::ProcessIncoming(XPacket* new_pct)
 
     // Dump received packet.
     //if (sPacketLog->CanLogPacket())
-        //sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
+    //sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
 
     //if (m_Session)
-        //SF_LOG_TRACE("network.opcode", "C->S: %s %s", m_Session->GetPlayerInfo().c_str(), opcodeName.c_str());
+    //SF_LOG_TRACE("network.opcode", "C->S: %s %s", m_Session->GetPlayerInfo().c_str(), opcodeName.c_str());
 
     try
     {

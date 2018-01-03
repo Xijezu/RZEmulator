@@ -8,6 +8,7 @@
 #include "Scripting/XLua.h"
 #include "World.h"
 #include "Skill.h"
+#include "ArRegion.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -22,7 +23,7 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
     _mainType = MT_Player;
     _subType  = ST_Player;
     _objType  = OBJ_CLIENT;
-    _valuesCount = UNIT_END;
+    _valuesCount = BATTLE_FIELD_END;
 
     _InitValues();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
@@ -127,7 +128,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_JLV, (*result)[59].GetInt32());
         m_szClientInfo = (*result)[60].GetString();
 
-        if(getLevel() == 0) {
+        if(GetLevel() == 0) {
             SetLevel(1);
             SetCurrentJLv(1);
         }
@@ -551,7 +552,7 @@ void Player::Save(bool bOnlyPlayer)
     stmt->setFloat(i++, GetPositionZ());
     stmt->setInt32(i++, GetLayer());
     stmt->setInt64(i++, GetEXP());
-    stmt->setInt32(i++, getLevel());
+    stmt->setInt32(i++, GetLevel());
     stmt->setInt32(i++, GetHealth());
     stmt->setInt32(i++, GetMana());
     stmt->setInt32(i++, GetStamina());
@@ -593,22 +594,23 @@ void Player::Save(bool bOnlyPlayer)
     }
 }
 
-int Player::GetJobDepth()
+uint Player::GetJobDepth()
 {
-    int  job = GetCurrentJob();
     auto res = sObjectMgr->GetJobInfo(GetCurrentJob());
-    return res.job_depth;
+    if(res != nullptr)
+        return res->job_depth;
+    return 0;
 }
 
 void Player::applyJobLevelBonus()
 {
     int          levels[4]{ };
     int          jobs[4]{ };
-    int          i = 0;
+    uint          i = 0;
     CreatureStat stat{ };
 
     if (GetCurrentJob() != 0) {
-        int jobDepth = GetJobDepth();
+        uint jobDepth = GetJobDepth();
         for (i = 0; i < jobDepth; i++) {
             jobs[i]   = GetPrevJobId(i);
             levels[i] = GetPrevJobLv(i);
@@ -808,7 +810,7 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
         pItem->m_bIsNeedUpdateToDB = true;
     }
 
-    if(pItem->m_pItemBase.flaglist[FLAG_DUPLICATE] == 1) {
+    if(pItem->m_pItemBase->flaglist[FLAG_DUPLICATE] == 1) {
         auto i = FindItemByCode(pItem->m_Instance.Code);
         if(i != nullptr) {
             i->m_Instance.nCount += count;
@@ -901,8 +903,8 @@ void Player::OnUpdate()
 
 void Player::onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level)
 {
-    SkillBase sb = sObjectMgr->GetSkillBase(skill_id);
-    if(sb.id != 0 && sb.is_valid == 2)
+    auto sb = sObjectMgr->GetSkillBase(skill_id);
+    if(sb->id != 0 && sb->is_valid == 2)
         return;
     if(prev_level != 0) {
         Skill::DB_UpdateSkill(this,skillUID,skill_level);
@@ -929,7 +931,7 @@ void Player::onExpChange()
     }
     level -= 1;
     Messages::SendEXPMessage(this, this);
-    int oldLevel = getLevel();
+    int oldLevel = GetLevel();
     if(level != 0 && level != oldLevel) {
         SetLevel(level);
         if(level < oldLevel) {
@@ -937,7 +939,7 @@ void Player::onExpChange()
         } else  {
 //            sScriptingMgr->RunString(this, "on_player_level_up()");
 
-            /*if(getLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
+            /*if(GetLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
                 SetUInt64Value(UNIT_FIELD_MAX_REACHED_LEVEL)*/
 
             this->CalculateStat();
@@ -1125,4 +1127,52 @@ void Player::PopItem(Item *pItem, bool bSkipUpdateToDB)
     m_lInventory.erase(pItem->m_Instance.nIdx);
 
     delete pItem;
+}
+
+void Player::DoSummon(Summon* pSummon, Position pPosition)
+{
+    /*            if (!this.m_bIsSummonable)
+                return false;*/
+    if(pSummon->IsInWorld() /*|| m_pMainSummon != nullptr*/)
+        return;
+
+    DoUnSummon(m_pMainSummon);
+
+    // TODO Do Subsummon here
+    m_pMainSummon = pSummon;
+    pSummon->SetCurrentXY(pPosition.GetPositionX(), pPosition.GetPositionY());
+    pSummon->m_nLayer = this->GetLayer();
+    pSummon->StopMove();
+    sWorld->AddSummonToWorld(pSummon);
+    pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::NeedToCalculateStat);
+}
+
+void Player::DoUnSummon(Summon *pSummon)
+{
+    if(pSummon == nullptr)
+        return;
+
+    if(!pSummon->IsInWorld())
+        return;
+
+    m_pMainSummon = nullptr;
+
+    XPacket usPct(TS_SC_UNSUMMON);
+    usPct << pSummon->GetHandle();
+    sWorld->Broadcast((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize), pSummon->GetLayer(), usPct);
+    if(sArRegion->IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
+                                  (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) == 0) {
+        SendPacket(usPct);
+    }
+    sWorld->RemoveObjectFromWorld(pSummon);
+}
+
+void Player::onCantAttack(uint target, uint t)
+{
+    if(!bIsMoving || !IsInWorld()) {
+        if(m_nLastCantAttackTime + 100 < t) {
+            m_nLastCantAttackTime = t;
+            Messages::SendCantAttackMessage(this, this->GetHandle(), target, TS_RESULT_TOO_FAR);
+        }
+    }
 }

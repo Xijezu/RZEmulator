@@ -3,40 +3,38 @@
 #include "Map/ArRegion.h"
 #include "Utilities/Timer.h"
 #include "MemPool.h"
-#include "TerrainSeamlessWorld.h"
 #include <fstream>
+#include "TS_MESSAGE.h"
 #include "World.h"
 #include "Monster.h"
 #include "Maploader.h"
+#include "NPC.h"
 
 bool ObjectMgr::InitGameContent()
 {
     if (!LoadStatResource())
         return false;
-    else if (!LoadItemResource())
+    if (!LoadItemResource())
         return false;
-    else if (!LoadNPCResource())
+    if (!LoadNPCResource())
         return false;
-    else if (!LoadMarketResource())
+    if (!LoadMarketResource())
         return false;
-    else if (!LoadMonsterResource())
+    if (!LoadMonsterResource())
         return false;
-    else if (!LoadJobLevelBonus())
+    if (!LoadJobLevelBonus())
         return false;
-    else if (!LoadJobResource())
+    if (!LoadJobResource())
         return false;
-    else if(!LoadSummonLevelResource())
+    if(!LoadSummonLevelResource())
         return false;
-    else if (!LoadSummonResource())
+    if (!LoadSummonResource())
         return false;
-    else if (!LoadSkillResource() || !LoadSkillJP())
+    if (!LoadSkillResource() || !LoadSkillJP())
         return false;
-    else if(!LoadSkillTreeResource() || !LoadLevelResource())
+    if(!LoadSkillTreeResource() || !LoadLevelResource())
         return false;
-    if (!LoadWorldLocation())
-        return false;
-
-    return true;
+    return LoadWorldLocation();
 }
 
 bool ObjectMgr::LoadItemResource()
@@ -91,7 +89,7 @@ bool ObjectMgr::LoadItemResource()
         itemTemplate.use_max_level    = fields[20].GetInt32();
         itemTemplate.target_min_level = fields[21].GetInt32();
         itemTemplate.target_max_level = fields[22].GetInt32();
-        itemTemplate.range            = fields[23].GetFloat();
+        itemTemplate.range            = fields[23].GetFloat() * 100;
         itemTemplate.weight           = fields[24].GetFloat();
         itemTemplate.price            = fields[25].GetUInt32();
         itemTemplate.endurance        = fields[26].GetInt32();
@@ -161,7 +159,10 @@ bool ObjectMgr::LoadMonsterResource()
         base.monster_group = field[idx++].GetInt32();
         idx++;
         base.location_id = field[idx++].GetInt32();
-        idx += 14; // 14 unused columns, mostly for rendering clientside
+        idx += 5; // 14 unused columns, mostly for rendering clientside
+        base.size = field[idx++].GetFloat();
+        base.scale = field[idx++].GetFloat();
+        idx += 7;
         base.level = field[idx++].GetInt32();
         base.grp = field[idx++].GetInt32();
         base.magic_type = field[idx++].GetInt32();
@@ -223,7 +224,7 @@ bool ObjectMgr::LoadMonsterResource()
             base.skill_lv[y] = field[idx++].GetInt32();
             base.skill_probability[y] = field[idx++].GetFloat();
         }
-        base.local_flag = field[idx++].GetInt32();
+        base.local_flag = field[idx].GetInt32();
         _monsterBaseStore[base.id] = base;
         ++count;
     } while (result->NextRow());
@@ -280,8 +281,8 @@ bool ObjectMgr::LoadSkillResource()
         Field        *field = result->Fetch();
         SkillBase base{ };
         base.id = field[idx++].GetInt32();
-        idx += 2;
         base.text_id = field[idx++].GetInt32();
+        idx += 2;
         base.is_valid = field[idx++].GetInt16();
         base.elemental = field[idx++].GetUInt8();
         base.is_passive = field[idx++].GetUInt8();
@@ -299,6 +300,7 @@ bool ObjectMgr::LoadSkillResource()
         base.cost_hp_per_skl = field[idx++].GetInt32();
         base.cost_mp = field[idx++].GetInt32();
         base.cost_mp_per_skl = field[idx++].GetInt32();
+        base.cost_mp_per_enhance = field[idx++].GetInt32();
         base.cost_hp_per = field[idx++].GetFloat();
         base.cost_hp_per_skl_per = field[idx++].GetFloat();
         base.cost_mp_per = field[idx++].GetFloat();
@@ -321,6 +323,7 @@ bool ObjectMgr::LoadSkillResource()
         base.need_havoc_burst = field[idx++].GetInt32();
         base.need_state_id = field[idx++].GetInt16();
         base.need_state_level = field[idx++].GetInt16();
+        base.need_state_exhaust = field[idx++].GetInt16();
         base.vf_one_hand_sword = field[idx++].GetUInt8();
         base.vf_two_hand_sword = field[idx++].GetUInt8();
         base.vf_double_sword = field[idx++].GetUInt8();
@@ -340,7 +343,7 @@ bool ObjectMgr::LoadSkillResource()
         base.vf_shield_only = field[idx++].GetUInt8();
         base.vf_is_not_need_weapon = field[idx++].GetUInt8();
         base.delay_cast = field[idx++].GetFloat() * 100;
-        base.delay_cast_per_skl = field[idx++].GetFloat()* 100;
+        base.delay_cast_per_skl = field[idx++].GetFloat() * 100;
         base.delay_cast_mode_per = field[idx++].GetFloat()* 100;
         base.delay_common = field[idx++].GetFloat()* 100;
         base.delay_cooltime = field[idx++].GetFloat()* 100;
@@ -375,13 +378,13 @@ bool ObjectMgr::LoadSkillResource()
         base.hate_per_enhance = field[idx++].GetFloat();
         base.critical_bonus = field[idx++].GetInt32();
         base.critical_bonus_per_skl = field[idx++].GetInt32();
-        for(int i = 0; i < 20; i++) {
-            base.var[i] = field[idx++].GetFloat();
+        for (float &i : base.var) {
+            i = field[idx++].GetFloat();
         }
         idx += 2;
         base.is_projectile = field[idx++].GetInt16();
         base.projectile_speed = field[idx++].GetFloat();
-        base.projectile_acceleration = field[idx++].GetFloat();
+        base.projectile_acceleration = field[idx].GetFloat();
         _skillBaseStore[base.id] = base;
         ++count;
     } while (result->NextRow());
@@ -454,7 +457,7 @@ bool ObjectMgr::LoadMarketResource()
     }
 
     uint32 count = 0;
-    std::string lastMarket = "";
+    std::string lastMarket{};
     std::vector<MarketInfo> vContainer{};
     do {
         Field *field = result->Fetch();
@@ -462,12 +465,12 @@ bool ObjectMgr::LoadMarketResource()
         MarketInfo info {};
         info.sort_id = field[0].GetInt32();
         info.name = field[1].GetString();
-        info.code = field[2].GetInt32();
+        info.code = field[2].GetUInt32();
         info.price_ratio = field[3].GetFloat();
         info.huntaholic_ratio = field[4].GetFloat();
 
         auto itemBase = GetItemBase(info.code);
-        info.price_ratio = floor(info.price_ratio * itemBase.price);
+        info.price_ratio = floor(info.price_ratio * itemBase->price);
         info.huntaholic_ratio = 0;
 
         if(lastMarket.empty())
@@ -507,13 +510,13 @@ bool ObjectMgr::LoadJobResource()
         Field               *field = result->Fetch();
         JobResourceTemplate job{ };
         job.id        = field[i++].GetInt32();
-        job.stat_id   = field[i++].GetInt32();
+        job.stat_id   = field[i++].GetUInt32();
         job.job_class = field[i++].GetInt32();
-        job.job_depth = field[i++].GetInt32();
+        job.job_depth = field[i++].GetUInt32();
         job.up_lv     = field[i++].GetInt32();
         job.up_jlv    = field[i++].GetInt32();
-        for (int j                = 0; j < 4; j++) {
-            job.available_job[j] = field[i++].GetInt32();
+        for (int &j : job.available_job) {
+            j = field[i++].GetInt32();
         }
         _jobTemplateStore[job.id] = job;
         ++count;
@@ -607,14 +610,15 @@ bool ObjectMgr::LoadNPCResource()
         npc.contact_script = field[6].GetString();
 
         if (npc.local_flag == 0) {
-            auto *_npc = new NPC{ };
+            auto _npc = new NPC{ };
             _npc->Relocate((float) npc.x, (float) npc.y, (float) npc.z);
             _npc->SetUInt32Value(UNIT_FIELD_UID, npc.id);
             _npc->SetLayer(0);
             _npc->m_pBase = npc;
             sMemoryPool->AllocMiscHandle(*_npc);
-            auto region = sArRegion->GetRegion(*_npc);
+            auto region = sArRegion->GetRegion(_npc);
             region->AddObject(_npc);
+            _npcStore.emplace_back(_npc);
             ++count;
         }
     } while (result->NextRow());
@@ -639,8 +643,8 @@ bool ObjectMgr::LoadSkillJP()
         int skill_id = field[off++].GetInt32();
         SkillBase* sb = &_skillBaseStore[skill_id];
         if(sb->id != 0) {
-            for(int v = 0; v < 50; ++v) {
-                sb->m_need_jp[v] = field[off++].GetInt32();
+            for (int &v : sb->m_need_jp) {
+                v = field[off++].GetInt32();
             }
         }
         ++count;
@@ -664,12 +668,12 @@ bool ObjectMgr::LoadWorldLocation()
     uint32 count = 0;
     do {
         Field *field = result->Fetch();
-        auto idx = field[0].GetInt32();
+        auto idx = field[0].GetUInt32();
         auto location_type = field[1].GetUInt8();
-        auto time_idx = field[2].GetInt32();
-        auto weather_id = field[3].GetInt32();
+        auto time_idx = field[2].GetUInt32();
+        auto weather_id = field[3].GetUInt32();
         auto weather_ratio = field[4].GetUInt8();
-        auto weather_change_time = (field[5].GetUInt8()) * 6000;
+        auto weather_change_time = (field[5].GetUInt32()) * 6000;
         sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time,0);
         ++count;
     } while (result->NextRow());
@@ -710,7 +714,7 @@ bool ObjectMgr::LoadSummonResource()
         summon.weapon_type         = field[i++].GetInt32();
         summon.form                = field[i++].GetInt32();
         summon.evolve_target       = field[i++].GetInt32();
-        summon.card_id             = field[i++].GetInt32();
+        summon.card_id             = field[i].GetInt32();
         _summonResourceStore[summon.id] = summon;
         ++count;
     } while (result->NextRow());
@@ -718,22 +722,22 @@ bool ObjectMgr::LoadSummonResource()
     return true;
 }
 
-CreatureStat ObjectMgr::GetStatInfo(int stat_id)
+CreatureStat* const ObjectMgr::GetStatInfo(const uint stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
-        return _creatureBaseStore[stat_id];
-    return CreatureStat{ };
+        return &_creatureBaseStore[stat_id];
+    return nullptr;
 }
 
-ItemTemplate ObjectMgr::GetItemBase(int item_id)
+ItemTemplate* const ObjectMgr::GetItemBase(const uint item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1) {
-        return _itemTemplateStore[item_id];
+        return &_itemTemplateStore[item_id];
     }
-    return ItemTemplate{ };
+    return nullptr;
 }
 
-CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], int levels[])
+CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels[])
 {
     CreatureStat stat{ };
     if (depth >= 0) {
@@ -768,34 +772,33 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], int levels[])
             }
         }
     }
-
     return stat;
 }
 
-JobResourceTemplate ObjectMgr::GetJobInfo(int job_id)
+JobResourceTemplate* const ObjectMgr::GetJobInfo(const uint job_id)
 {
     if (_jobTemplateStore.count(job_id) == 1) {
-        return _jobTemplateStore[job_id];
+        return &_jobTemplateStore[job_id];
     }
-    return JobResourceTemplate{ };
+    return nullptr;
 }
 
-SummonResourceTemplate ObjectMgr::GetSummonBase(int idx)
+SummonResourceTemplate* const ObjectMgr::GetSummonBase(const uint idx)
 {
     if (_summonResourceStore.count(idx) == 1)
-        return _summonResourceStore[idx];
-    return SummonResourceTemplate{ };
+        return &_summonResourceStore[idx];
+    return nullptr;
 }
 
-std::vector<MarketInfo> ObjectMgr::GetMarketInfo(std::string szKey)
+std::vector<MarketInfo>* const ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
     if(_marketResourceStore.count(szKey) == 1) {
-        return _marketResourceStore[szKey];
+        return &_marketResourceStore[szKey];
     }
-    return std::vector<MarketInfo>();
+    return nullptr;
 }
 
-int ObjectMgr::GetLocationID(float x, float y)
+int ObjectMgr::GetLocationID(const float x, const float y) const
 {
     int loc_id = 0;
     int priority = 0x7fffffff;
@@ -816,14 +819,14 @@ int ObjectMgr::GetLocationID(float x, float y)
     return loc_id;
 }
 
-int ObjectMgr::GetNeedJpForJobLevelUp(int jlv, int depth)
+int ObjectMgr::GetNeedJpForJobLevelUp(const uint jlv, const uint depth)
 {
     if(depth > 3 || jlv > 49)
         return 0;
     return _levelResourceStore[jlv].jlv[depth];
 }
 
-ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
+ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int &job_id)
 {
     ushort ilsResult = TS_RESULT_ACCESS_DENIED;
     for(int i = 0; i < 4; ++i) {
@@ -846,7 +849,7 @@ ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
     return ilsResult;
 }
 
-ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
+ushort ObjectMgr::isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level)
 {
     bool bMaxLimit = false;
     bool bFound = false;
@@ -858,7 +861,7 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
     for(auto stree : st) {
         if(stree.skill_id == skill_id) {
             if(stree.max_skill_lv >= skill_level) {
-                if(stree.lv > pUnit->getLevel()) {
+                if(stree.lv > pUnit->GetLevel()) {
                     return TS_RESULT_NOT_ENOUGH_LEVEL;
                 }
                 if(stree.job_lv <= unit_job_level) {
@@ -869,11 +872,11 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
                             return TS_RESULT_NOT_ENOUGH_SKILL;
                         }
                     }
-                    SkillBase sb =  GetSkillBase(skill_id);
-                    if(sb.id == 0)
+                    auto sb =  GetSkillBase(skill_id);
+                    if(sb->id == 0)
                         return TS_RESULT_ACCESS_DENIED;
 
-                    if(pUnit->GetJP() < (int)((float)sb.GetNeedJobPoint(skill_level) * stree.jp_ratio)) {
+                    if(pUnit->GetJP() < (int)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio)) {
                         return TS_RESULT_NOT_ENOUGH_JP;
                     }
                     return TS_RESULT_SUCCESS;
@@ -923,10 +926,10 @@ std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
 
 int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID)
 {
-    auto pSkillBase = GetSkillBase(skill_id);
+    auto pSkillBase = GetSkillBase((uint)skill_id);
     std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
     float jp_ratio = -1.0f;
-    if(pSkillBase.id != 0 && skill_level <= 50 && !trees.empty()) {
+    if(pSkillBase->id != 0 && skill_level <= 50 && !trees.empty()) {
         for(auto st : trees) {
             if(st.skill_id == skill_id && st.max_skill_lv >= skill_level) {
                 jp_ratio = st.jp_ratio;
@@ -934,16 +937,16 @@ int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobI
         }
         if(jp_ratio == -1.0f)
             jp_ratio = 1.0f;
-        return (int)(pSkillBase.GetNeedJobPoint(skill_level) * jp_ratio);
+        return (int)(pSkillBase->GetNeedJobPoint(skill_level) * jp_ratio);
     }
     return -1;
 }
 
-SkillBase ObjectMgr::GetSkillBase(int skill_id)
+SkillBase* const ObjectMgr::GetSkillBase(const uint skill_id)
 {
     if(_skillBaseStore.count(skill_id) == 1)
-        return _skillBaseStore[skill_id];
-    return { };
+        return &_skillBaseStore[skill_id];
+    return nullptr;
 }
 
 long ObjectMgr::GetNeedExp(int level)
@@ -954,7 +957,7 @@ long ObjectMgr::GetNeedExp(int level)
     if(l > 300)
         l = 300;
     if(_levelResourceStore.size() < l)
-        l = _levelResourceStore.size() -1;
+        l = (int)(_levelResourceStore.size() -1);
     return _levelResourceStore[l-1].normal_exp;
 }
 
@@ -990,11 +993,11 @@ void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
         MX_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
 }
 
-MonsterBase ObjectMgr::GetMonsterInfo(uint idx)
+MonsterBase* const ObjectMgr::GetMonsterInfo(uint idx)
 {
     if(_monsterBaseStore.count(idx) == 1)
-        return _monsterBaseStore[idx];
-    return { };
+        return &_monsterBaseStore[idx];
+    return nullptr;
 }
 
 Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, bool bNeedLock)
@@ -1062,4 +1065,21 @@ uint64 ObjectMgr::GetItemSellPrice(uint64 price, int rank, int lv, bool same_pri
             return k / 4;
     }
     return 0;
+}
+
+void ObjectMgr::UnloadAll()
+{
+    g_vWayPoint.clear();
+    g_vRespawnInfo.clear();
+    _jobTemplateStore.clear();
+    _itemTemplateStore.clear();
+    _creatureBaseStore.clear();
+    _jobBonusStore.clear();
+    _summonLevelStore.clear();
+    _summonResourceStore.clear();
+    _marketResourceStore.clear();
+    _skillTreeResourceStore.clear();
+    _levelResourceStore.clear();
+    _skillBaseStore.clear();
+    _monsterBaseStore.clear();
 }

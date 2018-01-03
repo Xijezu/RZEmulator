@@ -248,7 +248,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     } else if (szKey == "y") {
         return return_object(m_pUnit->GetPositionY());
     } else if (szKey == "level" || szKey == "lv") {
-        return return_object(m_pUnit->getLevel());
+        return return_object(m_pUnit->GetLevel());
     } else if (szKey == "job_depth") {
         if (m_pUnit->GetSubType() == ST_Player)
             return return_object(dynamic_cast<Player *>(m_pUnit)->GetJobDepth());
@@ -389,10 +389,10 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
     if (player == nullptr)
         return;
 
-    std::vector<MarketInfo> info = sObjectMgr->GetMarketInfo(szMarket);
+    auto info = sObjectMgr->GetMarketInfo(szMarket);
 
-    if(!info.empty()) {
-        Messages::SendMarketInfo(player, player->GetLastContactLong("npc"), info);
+    if(info != nullptr && !info->empty()) {
+        Messages::SendMarketInfo(player, player->GetLastContactLong("npc"), *info);
     }
 }
 
@@ -505,23 +505,27 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 int XLua::SCRIPT_GetItemRank(uint handle)
 {
     auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
-    if(item == nullptr)
+    if(item == nullptr || item->m_pItemBase == nullptr)
         return 0;
-    return item->m_pItemBase.rank;
+    return item->m_pItemBase->rank;
 }
 
 
 int XLua::SCRIPT_GetItemPrice(uint handle)
 {
     auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
-    if(item == nullptr)
+    if(item == nullptr || item->m_pItemBase == nullptr)
         return 0;
-    return item->m_pItemBase.price;
+    return item->m_pItemBase->price;
 }
 
 int XLua::SCRIPT_GetItemNameID(int code)
 {
-    return sObjectMgr->GetItemBase(code).name_id;
+    auto base = sObjectMgr->GetItemBase(code);
+    if(base == nullptr)
+        return 0;
+    else
+        return base->name_id;
 }
 
 int XLua::SCRIPT_GetItemCode(uint handle)
@@ -683,7 +687,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     } else if(key == "evolution_depth"s) {
         return return_object(summon->m_nTransform);
     }  else if(key == "level"s) {
-        return return_object(summon->getLevel());
+        return return_object(summon->GetLevel());
     }else if(key == "job"s) {
         return return_object(summon->GetSummonCode());
     } else if(key == "name"s) {

@@ -40,7 +40,7 @@ void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
 
     XPacket resultPct(TS_SC_LEVEL_UPDATE);
     resultPct << (uint32_t)pUnit->GetHandle();
-    resultPct << (uint32_t)pUnit->getLevel();
+    resultPct << (uint32_t) pUnit->GetLevel();
     resultPct << pUnit->GetCurrentJLv();
     pPlayer->SendPacket(resultPct);
 }
@@ -73,7 +73,7 @@ void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
     XPacket statPct(1000);
     statPct << (uint32_t) pUnit->GetHandle();
     pUnit->m_cStat.WriteToPacket(statPct);
-    pUnit->m_cAtribute.WriteToPacket(statPct);
+    pUnit->m_Attribute.WriteToPacket(statPct);
     statPct << (uint8_t) 0;
     pPlayer->SendPacket(statPct);
 
@@ -95,7 +95,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     summonPct << (uint32_t)pSummon->GetHandle();
     summonPct.fill(pSummon->GetName(), 19);
     summonPct << (int32_t)pSummon->GetSummonCode();
-    summonPct << (int32_t)pSummon->getLevel();
+    summonPct << (int32_t) pSummon->GetLevel();
     summonPct << (int32_t)1000; // TODO: SP
     pPlayer->SendPacket(summonPct);
 
@@ -197,9 +197,9 @@ void Messages::SendChatMessage(int nChatType, std::string szSenderName, Player* 
     }
 }
 
-void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, std::vector<MarketInfo> pMarket)
+void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::vector<MarketInfo>& pMarket)
 {
-    if (pPlayer == nullptr || pMarket.empty())
+    if (pPlayer == nullptr  || pMarket.empty())
         return;
 
     XPacket marketPct(TS_SC_MARKET);
@@ -233,6 +233,9 @@ void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
 
 void Messages::fillItemInfo(XPacket &packet, Item *item)
 {
+    if(item == nullptr || item->m_pItemBase == nullptr)
+        return;
+
     packet << (uint32_t) item->m_nHandle;
     packet << (int32_t) item->m_Instance.Code;
     packet << (int64) item->m_Instance.UID;
@@ -250,7 +253,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     int socket[4] {0};
     std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(socket));
 
-    if(item->m_pItemBase.group == ItemGroup::SummonCard) {
+    if(item->m_pItemBase->group == ItemGroup::SummonCard) {
         if(item->m_pSummon != nullptr) {
             int slot = 1;
             int tl = item->m_pSummon->m_nTransform;
@@ -258,7 +261,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
                 socket[slot] = item->m_pSummon->GetPrevJobLv(slot -1);
                 ++slot;
             }
-            socket[slot] = item->m_pSummon->getLevel();
+            socket[slot] = item->m_pSummon->GetLevel();
         }
     }
 
@@ -416,7 +419,7 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
 {
     XPacket levelPct(TS_SC_LEVEL_UPDATE);
     levelPct << (uint32)pUnit->GetHandle();
-    levelPct << (int)pUnit->getLevel();
+    levelPct << (int) pUnit->GetLevel();
     levelPct << (int)pUnit->GetCurrentJLv();
     sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), levelPct);
 }
@@ -478,4 +481,16 @@ void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint targe
     skillPct << pos.GetPositionZ();
     skillPct << pos.GetLayer();
 
+}
+
+void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, int reason)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket atkPct(TS_SC_CANT_ATTACK);
+    atkPct << handle;
+    atkPct << target;
+    atkPct << reason;
+    pPlayer->SendPacket(atkPct);
 }

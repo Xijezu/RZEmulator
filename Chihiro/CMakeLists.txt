@@ -38,6 +38,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/X2D
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Network
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Network/GameNetwork
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Network/AuthNetwork
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Skills
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/World

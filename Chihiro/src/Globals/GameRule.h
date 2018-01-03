@@ -9,19 +9,13 @@
 class GameRule {
 public:
     static float GetItemLevelPenalty(int creature_level, int item_rank, int item_level);
-
     static int GetItemRecommendedLevel(int item_rank, int item_level);
-
     static int GetItemLevelLimit(int item_rank);
-
     static int GetItemRecommendModTable(int item_rank);
-
     static int GetRankLevel(int rank);
-
     static float GetItemValue(float, int, int, int, int);
-
-    static int _modtable[];
 private:
+    static int _modtable[];
 };
 
 

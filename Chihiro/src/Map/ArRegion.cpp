@@ -1,4 +1,8 @@
 #include "ArRegion.h"
+#include "Object.h"
+#include "Player.h"
+#include "Unit.h"
+#include "NPC.h"
 
 void ArRegionContainer::InitRegionSystem(uint32 width, uint32 height)
 {
@@ -8,12 +12,6 @@ void ArRegionContainer::InitRegionSystem(uint32 width, uint32 height)
     m_nRegionHeight      = (uint32) ((height / AR_REGION_SIZE) + 1.0f);
     m_nRegionBlockWidth  = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1; // 5
     m_nRegionBlockHeight = (m_nRegionHeight / REGION_BLOCK_COUNT) + 1;
-    //sLog->outBasic("%d", m_nRegionBlockHeight * m_nRegionBlockWidth);
-
-    //m_RegionBlock = new ArRegionBlock[m_nRegionBlockHeight * m_nRegionBlockWidth];
-// 	for (int i = 0; i < (m_nRegionBlockHeight*m_nRegionBlockWidth); i++) {
-// 		m_RegionBlock[i] = new ArRegionBlock();
-// 	}
 }
 
 bool ArRegionContainer::IsValidRegion(uint32 rx, uint32 ry, uint32 layer)
@@ -32,9 +30,9 @@ uint32 ArRegionContainer::IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint
     return result;
 }
 
-ArRegion *ArRegionContainer::GetRegion(WorldObject &pObject)
+ArRegion *ArRegionContainer::GetRegion(WorldObject *pObject)
 {
-    return GetRegion((uint32) pObject.GetPositionX() / AR_REGION_SIZE, (uint32) pObject.GetPositionY() / AR_REGION_SIZE, pObject.GetLayer());
+    return GetRegion((uint32) pObject->GetPositionX() / AR_REGION_SIZE, (uint32) pObject->GetPositionY() / AR_REGION_SIZE, pObject->GetLayer());
 }
 
 ArRegion *ArRegionContainer::GetRegion(uint32 rx, uint32 ry, uint32 layer)
@@ -156,4 +154,71 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
             }
         }
     }
+}
+
+void ArRegion::AddObject(WorldObject *obj)
+{
+    if (obj->GetObjType() == OBJ_MOVABLE) {
+        m_vMovable[obj->GetHandle()] = obj;
+    } else if (obj->GetObjType() == OBJ_CLIENT)
+        m_vClient[obj->GetHandle()] = obj;
+    else if (obj->GetObjType() == OBJ_STATIC)
+        m_vStatic[obj->GetHandle()] = obj;
+    obj->_region = this;
+    //obj->bIsInWorld = true;
+    obj->AddToWorld();
+}
+
+void ArRegion::RemoveObject(WorldObject *obj)
+{
+    if (obj->GetObjType() == OBJ_MOVABLE)
+        m_vMovable.erase(obj->GetHandle());
+    else if (obj->GetObjType() == OBJ_CLIENT)
+        m_vClient.erase(obj->GetHandle());
+    else if (obj->GetObjType() == OBJ_STATIC)
+        m_vStatic.erase(obj->GetHandle());
+    obj->_region = nullptr;
+    obj->RemoveFromWorld();
+}
+
+uint ArRegion::DoEachClient(const std::function<void(Unit *)> &fn)
+{
+    for(auto& obj : this->m_vClient) {
+        if(obj.second != nullptr && obj.second->IsInWorld())
+            fn(dynamic_cast<Unit*>(obj.second));
+        //fn.run(dynamic_cast<Unit*>(obj.second));
+    }
+}
+
+void ArRegion::DoEachMovableObject(const std::function<void(WorldObject *)> &fn)
+{
+    for (auto &obj : m_vMovable) {
+        if (obj.second != nullptr)
+            fn(obj.second);
+    }
+}
+
+void ArRegion::DoEachStaticObject(const std::function<void(WorldObject *)> &fn)
+{
+    for (auto &obj : m_vStatic) {
+        if (obj.second != nullptr)
+            fn(obj.second);
+    }
+}
+
+ArRegion *ArRegionBlock::getRegion(uint32 rx, uint32 ry, uint32 layer)
+{
+    if (layer > 256)
+        return nullptr;
+
+    if(m_RegionBases.count(layer) == 0)
+        m_RegionBases[layer] = new ArRegionBase{ };
+    return m_RegionBases[layer]->GetRegion(rx + (REGION_BLOCK_COUNT * ry));
+}
+
+ArRegion *ArRegionBase::GetRegion(uint idx)
+{
+    if(m_nRegions.count(idx) == 0)
+        m_nRegions[idx] = new ArRegion{ };
+    return m_nRegions[idx];
 }

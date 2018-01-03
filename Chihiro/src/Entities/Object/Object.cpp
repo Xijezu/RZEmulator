@@ -5,6 +5,7 @@
 #include "ArRegion.h"
 #include "Messages.h"
 #include "Monster.h"
+#include "NPC.h"
 
 Object::Object()
 {
@@ -330,18 +331,11 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-WorldObject::WorldObject(bool isWorldObject) : m_name(""), _isActive(false), m_isWorldObject(isWorldObject),
-/*m_currMap(NULL),*/ m_InstanceId(0),
-                                               m_notifyflags(0), m_executed_notifies(0)
+WorldObject::WorldObject(bool isWorldObject) : m_name(""), _isActive(false), m_isWorldObject(isWorldObject), _region(nullptr)
 {
 }
 
-WorldObject::~WorldObject()
-{
-}
-
-
-#include <fstream>
+WorldObject::~WorldObject() = default;
 
 
 void WorldObject::SendEnterMsg(Player *pPlayer)
@@ -352,8 +346,8 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
     packet << GetHandle();
     packet << tmpPos.GetPositionX();
     packet << tmpPos.GetPositionY();
-    packet << (float)0; GetPositionZ();
-    packet << (uint8) 0;//GetLayer();
+    packet << tmpPos.GetPositionZ();
+    packet << (uint8)GetLayer();
     packet << (uint8_t)GetSubType();
 
     switch (GetSubType()) {
@@ -372,41 +366,11 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
         default:
             break;
     }
-    if(GetSubType() == ST_Mob) {
-        std::fstream stream("/tmp/test.hex", std::ios::out | std::ios::binary);
-        stream.write((char *) &packet.contents()[0], packet.size());
-        stream.close();
-    }
 
     pPlayer->SendPacket(packet);
     if(GetSubType() == ST_Player)
         Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));
 
-}
-
-void WorldObject::SetWorldObject(bool on)
-{
-    if (!IsInWorld())
-        return;
-
-    //GetMap()->AddObjectToSwitchList(this, on);
-}
-
-bool WorldObject::IsWorldObject() const
-{
-    if (m_isWorldObject)
-        return true;
-
-// 	if (ToCreature() && ToCreature()->_isTempWorldObject)
-// 		return true;
-
-    return false;
-}
-
-void WorldObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
-{
-    if (IsInWorld())
-        RemoveFromWorld();
 }
 
 bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
@@ -438,7 +402,6 @@ bool WorldObject::Step(uint tm)
 
 void WorldObject::RemoveFromWorld()
 {
-    //sArRegion->GetRegion(*this)->RemoveObject(this);
     if(!IsInWorld())
         return;
     Object::RemoveFromWorld();
@@ -446,16 +409,15 @@ void WorldObject::RemoveFromWorld()
 
 void WorldObject::AddToWorld()
 {
-    //sArRegion->GetRegion(*this)->AddObject(this);
     Object::AddToWorld();
 }
 
 void WorldObject::AddNoise(int r1, int r2, int v)
 {
     float prev_x = GetPositionX();
-    float prev_y = GetPositionX();
+    float prev_y = GetPositionY();
 
-    auto rs = (double)AR_REGION_SIZE;
+    auto rs = (double)g_nRegionSize;
     auto tx = (int) (GetPositionX() / rs);
     auto ty = (int) (GetPositionY() / rs);
     m_positionX = (float)(r1 % v - v / 2) + GetPositionX();
@@ -586,7 +548,7 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     v9 = lengtha / (lengthb / 30.0);
     v10 = start_time;
     if((start_time & 0x80000000) != 0)
-        v10 = v10 + 4294967300.0;
+        v10 = v10 + 4294967300.0f;
 
     MoveInfo mi(_to, start_time);
     mi.end_time = (uint)(v9+v10);
@@ -604,7 +566,7 @@ void ArMoveVector::SetDirection(Position pos)
         direction.m_positionX = pos.m_positionX;
         direction.m_positionY = pos.m_positionY;
         direction.m_positionZ = pos.m_positionZ;
-        _orientation = (float)atan2(py, px);
+        _orientation = atan2(py, px);
     }
 }
 

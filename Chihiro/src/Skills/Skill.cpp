@@ -23,7 +23,7 @@
 #include "MemPool.h"
 #include "ClientPackets.h"
 
-Skill::Skill(Unit *pOwner, int _uid, int _id)
+Skill::Skill(Unit *pOwner, int _uid, int _id) : m_nErrorCode(0)
 {
     m_nSkillUID = _uid;
     m_nSkillID = _id;
@@ -65,19 +65,20 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     if(current_time + this->cool_time > current_time)
         return TS_RESULT_COOL_TIME;
 
-    if(m_SkillBase.effect_type == EffectType::ET_Summon || m_nSkillID == 4001) {
-        PrepareSummon(nSkillLevel, handle, pos, current_time);
+    if(m_SkillBase->effect_type == EffectType::ET_Summon || m_nSkillID == 4001) {
+        m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
     }
     auto m_nOriginalDelay = delay;
     if(delay == 0xffffffff) {
-        delay = m_SkillBase.GetCastDelay(nSkillLevel, 0);
-        delay *= 10;
-        /*if(m_nSkillID > 0 || m_nSkillID < -5) {
+        delay = m_SkillBase->GetCastDelay(nSkillLevel,0);
+        if(m_nSkillID > 0 || m_nSkillID < -5) {
             if(delay < 0)
                 delay = (uint)(delay + 4294967296);
-            delay = (uint)(delay / (m_pOwner->m_cAtribute.nCastingSpeed / 100.0f));
-            //delay = (uint)((float)delay * )
-        }*/
+            delay = (uint)(delay / (m_pOwner->m_Attribute.nCastingSpeed / 100.0f));
+            delay = (uint)((float)delay * (m_pOwner->GetCastingMod((ElementalType)m_SkillBase->elemental,
+                    m_SkillBase->is_physical_act == 1, m_SkillBase->is_harmful != 0,
+                    m_nOriginalDelay)));
+        }
     }
     m_nCastingDelay = m_nOriginalDelay;
     m_hTarget = handle;
@@ -85,10 +86,15 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     m_nFireTime = current_time + delay;
 
     if(m_nErrorCode == TS_RESULT_SUCCESS) {
+        m_nRequestedSkillLevel = (uint8)nSkillLevel;
         m_pOwner->m_castingSkill = this;
         broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                               (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
                               0, 0, 1);
+    } else {
+        broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
+                              (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
+                              0, 0, 5);
     }
 
     return TS_RESULT_SUCCESS;
@@ -97,7 +103,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 int Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
 {
     auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
-    if(item == nullptr || item->m_pItemBase.group != ItemGroup::SummonCard
+    if(item == nullptr ||  item->m_pItemBase == nullptr
+       || item->m_pItemBase->group != ItemGroup::SummonCard
        || item->m_Instance.OwnerHandle != m_pOwner->GetHandle()) {
         return TS_RESULT_NOT_ACTABLE;
     }
@@ -125,19 +132,18 @@ int Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint curren
             m_targetPosition = summon->GetCurrentPosition(current_time);
         } while(pos.GetPositionX() == m_targetPosition.GetPositionX() && pos.GetPositionY() == m_targetPosition.GetPositionY());
     } while(tmpPos.GetExactDist2d(&m_targetPosition) < 24.0f);
-    m_nErrorCode = TS_RESULT_SUCCESS;
-    m_nRequestedSkillLevel = (uint8)nSkillLevel;
+    return TS_RESULT_SUCCESS;
 }
 
 void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
 {
-    pct << (uint16)m_SkillBase.id;
+    pct << (uint16)m_SkillBase->id;
     pct << (uint8)m_nRequestedSkillLevel;
     pct << (uint32)m_pOwner->GetHandle();
     pct << (uint32)m_hTarget;
-    pct << (float)m_targetPosition.GetPositionX();
-    pct << (float)m_targetPosition.GetPositionY();
-    pct << (float)m_targetPosition.GetPositionZ();
+    pct << m_targetPosition.GetPositionX();
+    pct << m_targetPosition.GetPositionY();
+    pct << m_targetPosition.GetPositionZ();
     pct << (uint8)m_targetPosition.GetLayer();
     pct << (uint8)nType;
     pct << (int16)cost_hp;
@@ -156,6 +162,10 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
             pct << (uint8)0;
             return;
         }
+        if(nType == SkillState::ST_Cancel) {
+            pct << (uint8)0;
+            return;
+        }
         if(nType != SkillState::ST_RegionFire)
             return;
     }
@@ -164,6 +174,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     pct << (float)0;
     pct << (uint8)0;
     pct << (uint8)0;
+    pct << (uint16)0;
 }
 
 void Skill::broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType)
@@ -185,8 +196,12 @@ void Skill::ProcSkill()
     if(sWorld->GetArTime() < m_nFireTime)
         return;
     m_pOwner->m_castingSkill = nullptr;
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(m_hTarget));
-    sWorld->AddSummonToWorld(item->m_pSummon);
+
+    if(m_SkillBase->id == 4001)
+        DoSummon();
+    else if(m_SkillBase->id == 4002)
+        DoUnsummon();
+
 
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
@@ -195,4 +210,52 @@ void Skill::ProcSkill()
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
                           0, 0, 5);
 
+}
+
+void Skill::DoSummon()
+{
+    auto player = dynamic_cast<Player*>(m_pOwner);
+    if(player == nullptr)
+        return;
+
+    auto item = player->FindItemByHandle(m_hTarget);
+    if(item == nullptr)
+        return;
+
+    if(item->m_pItemBase->group != ItemGroup::SummonCard)
+        return;
+
+    auto summon = item->m_pSummon;
+    if(summon == nullptr || summon->GetMaster()->GetHandle() != player->GetHandle())
+        return;
+
+    if(!summon->IsInWorld())
+        player->DoSummon(summon, m_targetPosition);
+
+}
+
+void Skill::DoUnsummon()
+{
+    auto player = dynamic_cast<Player*>(m_pOwner);
+    if(player == nullptr)
+        return;
+
+    auto item = player->FindItemByHandle(m_hTarget);
+    if(item == nullptr)
+        return;
+
+    if(item->m_pItemBase->group != ItemGroup::SummonCard)
+        return;
+
+    auto summon = item->m_pSummon;
+    if(summon == nullptr || summon->GetMaster()->GetHandle() != player->GetHandle())
+        return;
+
+    if(summon->IsInWorld())
+        player->DoUnSummon(summon);
+}
+
+bool Skill::Cancel()
+{
+    return true;
 }

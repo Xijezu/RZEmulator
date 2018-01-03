@@ -343,7 +343,7 @@ struct SkillBase {
 
     uint GetCastDelay(int skill_lv, int enhance)
     {
-        return (uint) ((float) ((float) delay_cast + (float) skill_lv * (float) delay_cast_per_skl) * (float) (delay_cast_mode_per * (float) enhance + 1.0f));
+        return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
     }
 
     int m_need_jp[50]{ };

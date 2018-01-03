@@ -67,7 +67,7 @@ public:
     static void SendDialogMessage(Player *, uint32_t, int, std::string, std::string, std::string);
     static void SendSkillList(Player *, Unit *, int);
     static void SendChatMessage(int, std::string, Player*, std::string);
-    static void SendMarketInfo(Player *, uint32_t, std::vector<MarketInfo>);
+    static void SendMarketInfo(Player *, uint32_t, const std::vector<MarketInfo>&);
     static void SendItemList(Player *, bool);
     static void SendItemMessage(Player *, Item *);
     static void SendItemCountMessage(Player*, Item*);
@@ -83,6 +83,7 @@ public:
     static void BroadcastLevelMsg(Unit*);
     static void GetEncodedInt(XPacket&,uint32);
     static void SendWarpMessage(Player*);
+    static void SendCantAttackMessage(Player*,uint,uint,int);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

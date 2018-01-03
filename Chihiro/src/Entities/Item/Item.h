@@ -38,7 +38,8 @@ public:
 
 class Item : public WorldObject {
 public:
-    Item() : WorldObject(true) { _subType = ST_Object; };
+    Item() : WorldObject(true)
+    { _subType = ST_Object; };
 
     static const int MAX_COOLTIME_GROUP   = 40;
     static const int MAX_OPTION_NUMBER    = 4;
@@ -59,15 +60,15 @@ public:
 
 // private:
     ItemInstance m_Instance{ };
-    ItemTemplate m_pItemBase{ };
-    Summon       *m_pSummon{nullptr};
-    uint32_t     m_nHandle{0};
-    int          m_nAccountID{0};
-    int          m_nItemID{0};
-    uint32_t     m_unInventoryIndex{0};
-    bool         m_bIsEventDrop{0};
-    bool         m_bIsVirtualItem{0};
-    bool         m_bIsNeedUpdateToDB{false};
+    ItemTemplate *m_pItemBase{ };
+    Summon   *m_pSummon{nullptr};
+    uint32_t m_nHandle{0};
+    int      m_nAccountID{0};
+    int      m_nItemID{0};
+    uint32_t m_unInventoryIndex{0};
+    bool     m_bIsEventDrop{0};
+    bool     m_bIsVirtualItem{0};
+    bool     m_bIsNeedUpdateToDB{false};
 };
 
 

@@ -54,6 +54,7 @@ public:
     // Accept & Close handler
     //void OnAccept() override;
     void OnClose();
+	void KickPlayer();
 
     //void Decrypt(void *, size_t, bool/* =false */) override;
     //void Encrypt(void *, size_t, bool/* =false */) override;
@@ -107,10 +108,11 @@ public:
 	bool onSellItem(XPacket *);
 
 	bool onSkill(XPacket *);
+	bool onAttackRequest(XPacket* );
+	bool onCancelAction(XPacket* );
 
     bool onGetSummonSetupInfo(XPacket *);
 
-    void _SendMoveMsg(Object &obj, Position nPos, std::vector<Position> vMoveInfo);
     void _SendResultMsg(uint16, uint16, int);
     std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 private:

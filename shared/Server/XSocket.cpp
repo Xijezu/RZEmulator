@@ -95,6 +95,8 @@ int XSocket::close(int)
     shutdown();
 
     closing_ = true;
+    if(session_)
+        delete session_;
 
     remove_reference();
 

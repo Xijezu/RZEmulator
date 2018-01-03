@@ -30,7 +30,7 @@ void CreatureStat::Reset(int16_t v)
     luck         = v;
 }
 
-void CreatureStat::Copy(CreatureStat v)
+void CreatureStat::Copy(const CreatureStat& v)
 {
     stat_id      = v.stat_id;
     strength     = v.strength;
@@ -42,7 +42,7 @@ void CreatureStat::Copy(CreatureStat v)
     luck         = v.luck;
 }
 
-void CreatureStat::Add(CreatureStat v)
+void CreatureStat::Add(const CreatureStat& v)
 {
     strength += v.strength;
     vital += v.vital;
@@ -104,7 +104,7 @@ void CreatureAtributeServer::Reset(int16_t v)
     nMPAddByItem                 = v;
 }
 
-void CreatureAtributeServer::Copy(CreatureAtributeServer v)
+void CreatureAtributeServer::Copy(const CreatureAtributeServer& v)
 {
     nCritical          = v.nCritical;
     nCriticalPower     = v.nCriticalPower;

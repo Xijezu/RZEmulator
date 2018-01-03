@@ -21,13 +21,14 @@
 #include "Database/DatabaseEnv.h"
 #include "GameNetwork/ClientPackets.h"
 #include "../../../../Mononoke/src/Server/AuthGame/AuthGamePackets.h"
-#include "Network/AuthSession.h"
+#include "AuthNetwork.h"
 #include "MemPool.h"
 #include "Messages.h"
 #include "Scripting/XLua.h"
 
 #include "Encryption/MD5.h"
 #include "Map/ArRegion.h"
+#include "NPC.h"
 #include "ObjectMgr.h"
 #include "Skill.h"
 
@@ -103,7 +104,9 @@ const GameHandler packetHandler[] =
                                   {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
                                   {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
                                   {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
-                                  {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty}
+                                  {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
+                                  {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
+                                  {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -456,22 +459,6 @@ bool WorldSession::onMoveRequest(XPacket *pRecvPct)
     return true;
 }
 
-void WorldSession::_SendMoveMsg(Object &obj, Position nPos, std::vector<Position> vMoveInfo)
-{
-    Player  *p = reinterpret_cast<Player *>(&obj);
-    XPacket packet(TS_SC_MOVE);
-    packet << (uint32) time(NULL);
-    packet << p->GetHandle();
-    packet << (uint8) p->GetLayer();
-    packet << (uint8) 45;
-    packet << (uint16) vMoveInfo.size();
-    for (auto const &x : vMoveInfo) {
-        packet << x.GetPositionY();
-        packet << x.GetPositionX();
-    }
-    packet.textlike();
-}
-
 bool WorldSession::onReturnToLobby(XPacket *pRecvPct)
 {
     sWorld->RemoveSession(GetAccountId());
@@ -530,7 +517,7 @@ bool WorldSession::onCreateCharacter(XPacket *pRecvPct)
         for (int i         = 0; i < 5; i++) {
             stmt->setUInt32(j++, info.model_id[i]);
         }
-        auto     playerUID = sWorld->getPlayerIndex();
+        auto     playerUID = sWorld->GetPlayerIndex();
         stmt->setUInt32(j, playerUID);
         CharacterDatabase.Query(stmt);
 
@@ -556,21 +543,21 @@ bool WorldSession::onCreateCharacter(XPacket *pRecvPct)
         }
 
         auto itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->getItemIndex());
+        itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultWeaponCode);
         itemStmt->setInt32(3, WearWeapon);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->getItemIndex());
+        itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultArmorCode);
         itemStmt->setInt32(3, WearArmor);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->getItemIndex());
+        itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultBagCode);
         itemStmt->setInt32(3, WearBagSlot);
@@ -626,10 +613,14 @@ bool WorldSession::onChatRequest(XPacket *_packet)
             _player->Save(false);
         } else if (tokenizer[0] == "/run"s) {
             sScriptingMgr->RunString(_player, request.szMsg.substr(5));
+        } else if(tokenizer[0] == "/suicide"s) {
+            World::StopNow(SHUTDOWN_EXIT_CODE);
         } else if (tokenizer[0] == "/loc"s) {
             _player->ChangeLocation(_player->GetPositionX(), _player->GetPositionY(), false, false);
         } else if(tokenizer[0] == "/calc"s) {
             _player->CalculateStat();
+        } else if(tokenizer[0] == "/battle"s) {
+            //sWorld->BroadcastStatusMessage(dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(_player->GetTargetHandle())));
         }
         return true;
     }
@@ -679,7 +670,7 @@ bool WorldSession::onPutOnItem(XPacket *_packet)
         Item *ci = sMemoryPool->FindItem(item_handle);
 
         if (ci != nullptr) {
-            if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == NULL) {
+            if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == nullptr) {
                 Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return true;
             }
@@ -808,7 +799,7 @@ bool WorldSession::onBuyItem(XPacket *pRecvPct)
     }
 
     auto market = sObjectMgr->GetMarketInfo(szMarketName);
-    if (market.empty()) {
+    if (market->empty()) {
         MX_LOG_TRACE("network", "onBuyItem - %s: market was empty!", _player->GetName());
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
         return false;
@@ -816,10 +807,12 @@ bool WorldSession::onBuyItem(XPacket *pRecvPct)
 
     bool bJoinable{false};
 
-    for (auto mt : market) {
+    for (auto& mt : *market) {
         if (mt.code == item_code) {
             auto ibs = sObjectMgr->GetItemBase(item_code);
-            if (ibs.flaglist[FLAG_DUPLICATE] == 1) {
+            if(ibs == nullptr)
+                continue;
+            if (ibs->flaglist[FLAG_DUPLICATE] == 1) {
                 bJoinable = true;
             } else {
                 bJoinable     = false;
@@ -832,7 +825,6 @@ bool WorldSession::onBuyItem(XPacket *pRecvPct)
                 Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
                 return true;
             }
-            // TODO Add Huntaholic Check
             // TODO Add Weight Check
             uint32_t uid = 0;
 
@@ -1044,8 +1036,8 @@ bool WorldSession::onEquipSummon(XPacket *pRecvPct)
         pItem = nullptr;
         if(card_handle[i] != 0) {
             pItem = _player->FindItemByHandle(card_handle[i]);
-            if(pItem != nullptr) {
-                if(pItem->m_pItemBase.group != 13 ||
+            if(pItem != nullptr && pItem->m_pItemBase != nullptr) {
+                if(pItem->m_pItemBase->group != 13 ||
                         _player->GetHandle() != pItem->m_Instance.OwnerHandle ||
                         (pItem->m_Instance.Flag & (uint)FlagBits::FB_Summon) == 0)
                     continue;
@@ -1121,7 +1113,7 @@ bool WorldSession::onSellItem(XPacket *pRecvPct)
     auto sell_count = pRecvPct->read<uint16>();
 
     auto item = _player->FindItemByHandle(handle);
-    if(item == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle()) {
+    if(item == nullptr || item->m_pItemBase == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle()) {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
         return true;
     }
@@ -1131,7 +1123,7 @@ bool WorldSession::onSellItem(XPacket *pRecvPct)
     }
     //if(!_player.IsSelllable) @todo
 
-    auto nPrice = sObjectMgr->GetItemSellPrice(item->m_pItemBase.price, item->m_pItemBase.rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
+    auto nPrice = sObjectMgr->GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
     auto nResultCount = item->m_Instance.nCount - sell_count;
     auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
     if(nResultCount < 0) {
@@ -1155,7 +1147,7 @@ bool WorldSession::onSellItem(XPacket *pRecvPct)
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item->m_Instance.Code);
     XPacket tradePct(TS_SC_NPC_TRADE_INFO);
     tradePct << (uint8)1;
-    tradePct << item->m_Instance.Code;
+    tradePct << item->m_pItemBase->name_id;
     tradePct << (int64)sell_count;
     tradePct << (int64)sell_count * nPrice;
     tradePct << (uint)_player->GetLastContactLong("npc");
@@ -1194,7 +1186,7 @@ bool WorldSession::onSkill(XPacket *pRecvPct)
         return false;
     }
     auto base = sObjectMgr->GetSkillBase(skill_id);
-    if(base.id == 0 || base.is_valid == 0 || base.is_valid == 2) {
+    if(base == nullptr || base->id == 0 || base->is_valid == 0 || base->is_valid == 2) {
         Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_ACCESS_DENIED);
         return false;
     }
@@ -1235,5 +1227,70 @@ bool WorldSession::onSetProperty(XPacket *pRecvPct)
     std::string value = pRecvPct->ReadString(pRecvPct->size() - 16 - 7);
     _player->SetClientInfo(value);
 
+    return true;
+}
+
+void WorldSession::KickPlayer()
+{
+    if(_socket)
+        _socket->CloseSocket();
+}
+
+bool WorldSession::onAttackRequest(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+    auto handle = pRecvPct->read<uint>();
+    auto target = pRecvPct->read<uint>();
+
+    if(_player->GetHealth() == 0)
+        return true;
+
+    auto unit = dynamic_cast<Unit*>(_player);
+    if(handle != _player->GetHandle())
+        unit = _player->GetSummonByHandle(handle);
+    if(unit == nullptr) {
+        Messages::SendCantAttackMessage(_player, handle, target, TS_RESULT_NOT_OWN);
+        return false;
+    }
+
+    if(target == 0) { // Todo
+        return false;
+    }
+
+    auto pTarget = sMemoryPool->getPtrFromId(target);
+    if(pTarget == nullptr){
+        // Todo same as above
+        Messages::SendCantAttackMessage(_player, handle, target, TS_RESULT_NOT_EXIST);
+        return false;
+    }
+
+    // TODO isEnemy
+    // Todo various checks
+
+    unit->StartAttack(target, true);
+    return true;
+}
+
+bool WorldSession::onCancelAction(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+    auto handle = pRecvPct->read<uint>();
+    Unit* cancellor = _player->GetSummonByHandle(handle);
+    if(cancellor == nullptr || !cancellor->IsInWorld())
+        cancellor = dynamic_cast<Unit*>(_player);
+    if(cancellor->GetHandle() == handle) {
+        if (cancellor->m_castingSkill != nullptr) {
+            cancellor->CancelSkill();
+        } else {
+            if (cancellor->GetTargetHandle() != 0)
+                cancellor->CancelAttack();
+        }
+    }
     return true;
 }

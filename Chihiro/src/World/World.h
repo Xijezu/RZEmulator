@@ -2,29 +2,43 @@
 #define __WORLD_H
 
 #include "Common.h"
-#include "Network/GameNetwork/WorldSession.h"
-#include "Entities/Player/Player.h"
-#include "Unit.h"
 #include "Dynamic/UnorderedMap.h"
 #include "RespawnObject.h"
+
+enum ShutdownExitCode
+{
+	SHUTDOWN_EXIT_CODE = 0,
+	ERROR_EXIT_CODE    = 1,
+	RESTART_EXIT_CODE  = 2
+};
+
+class WorldSession;
+class Unit;
+class Player;
+class XPacket;
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 const int g_nRegionSize = 180;
 
-
 class World
 {
 public:
+    static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+
 	World();
 	~World();
 
 	void InitWorld();
 
 	bool SetMultipleMove(Unit* pUnit, Position curPos, std::vector<Position>newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
+	bool SetMove(Unit* obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
+
+	void addEXP(Unit* pCorpse, Player* pPlayer, float exp, float jp);
 
 	WorldSession* FindSession(uint32 id) const;
 	void AddSession(WorldSession* s);
 	bool RemoveSession(uint32 id);
+	void KickAll();
 
 	void AddObjectToWorld(WorldObject* obj);
 	void AddSummonToWorld(Summon* pSummon);
@@ -43,21 +57,28 @@ public:
 
     void Broadcast(uint, uint, uint, uint, uint8, XPacket);
     void Broadcast(uint, uint, uint8, XPacket);
+	void BroadcastStatusMessage(Unit* unit);
 	uint GetArTime();
 
 	void Update(uint);
-	static bool IsStopped() { return false; }
+    static uint8 GetExitCode() { return m_ExitCode; }
+    static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
+	static bool IsStopped() { return m_stopEvent.value(); }
 
-    uint64_t getItemIndex();
-    uint64_t getPlayerIndex();
-    uint64_t getPetIndex();
-    uint64_t getSummonIndex();
-	uint64_t getSkillIndex();
+    /// Gets and increments the identifier for DB insert statements
+    uint64 GetItemIndex();
+    uint64 GetPlayerIndex();
+    uint64 GetPetIndex();
+    uint64 GetSummonIndex();
+	uint64 GetSkillIndex();
 private:
+	static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
+	static uint8 m_ExitCode;
+
 	SessionMap m_sessions;
 	uint64_t s_nItemIndex{0};
 	const uint startTime;
-private:
+
 	void onMoveObject(WorldObject* pUnit, Position oldPos, Position newPos);
     bool onSetMove(WorldObject* pObject, Position curPos, Position lastpos);
 	void enterProc(WorldObject* pUint, uint prx, uint pry);

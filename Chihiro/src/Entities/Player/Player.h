@@ -29,7 +29,7 @@ public:
     int32 GetGuildID()
     { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
 
-    int GetJobDepth();
+    uint GetJobDepth();
 
     // Database stuff
     bool ReadCharacter(std::string, int);
@@ -103,6 +103,9 @@ public:
     bool IsFixedDialogTrigger(std::string szTrigger)
     { return false; }
 
+    void DoSummon(Summon* pSummon, Position pPosition);
+    void DoUnSummon(Summon* pSummon);
+
     ushort_t ChangeGold(long);
 
     void SendPacket(XPacket& pPacket);
@@ -129,6 +132,7 @@ public:
 protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
     void onExpChange() override;
+    void onCantAttack(uint target, uint t) override;
 
 private:
     WorldSession           *m_session{nullptr};
@@ -137,7 +141,7 @@ private:
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };
     std::vector<Summon *> m_vSummonList{nullptr};
 
-    uint m_nLastSaveTime{ };
+    uint m_nLastSaveTime{ }, m_nLastCantAttackTime{ };
 
     // Dialog stuff
     int         m_nDialogType{ };

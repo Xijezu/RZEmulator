@@ -50,6 +50,7 @@ public:
 
     /// Initial map loadig
     bool LoadMapContent();
+    void UnloadAll() { delete g_qtLocationInfo; }
     bool InitMapInfo();
     X2D::QuadTreeMapInfo *g_qtLocationInfo{nullptr};
 

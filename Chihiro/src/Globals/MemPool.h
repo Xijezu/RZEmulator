@@ -21,6 +21,8 @@ public:
     Monster* AllocMonster(uint idx);
     Summon *AllocNewSummon(Player*,Item*);
 
+    void Destroy();
+
     Item *FindItem(uint32_t handle);
     WorldObject* getPtrFromId(uint32_t handle);
     WorldObject* getMiscPtrFromId(uint32_t handle);

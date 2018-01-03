@@ -86,9 +86,9 @@ struct JobLevelBonusTemplate {
 
 struct JobResourceTemplate {
     int id;
-    int stat_id;
+    uint stat_id;
     int job_class;
-    int job_depth;
+    uint job_depth;
     int up_lv;
     int up_jlv;
     int available_job[4];
@@ -97,7 +97,7 @@ struct JobResourceTemplate {
 struct MarketInfo {
     int         sort_id;
     std::string name;
-    int         code;
+    uint         code;
     float       price_ratio;
     float       huntaholic_ratio;
 };

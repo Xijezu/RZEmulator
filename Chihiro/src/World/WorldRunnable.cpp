@@ -15,9 +15,15 @@
   *  with this program. If not, see <http://www.gnu.org/licenses/>.
   */
 
-#include "WorldRunnable.h"
-#include "Timer.h"
+#include "Common.h"
 #include "World.h"
+#include "WorldSocketMgr.h"
+#include "WorldRunnable.h"
+#include "AuthNetwork.h"
+#include "Timer.h"
+#include "MemPool.h"
+#include "ObjectMgr.h"
+#include "Maploader.h"
 
 #define WORLD_SLEEP_CONST 50
 
@@ -30,6 +36,8 @@ void WorldRunnable::run()
 
     // is Stopped event
     while (!World::IsStopped()) {
+        ++World::m_worldLoopCounter;
+
         realCurrTime = getMSTime();
         uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
 
@@ -41,4 +49,13 @@ void WorldRunnable::run()
         } else
             prevSleepTime = 0;
     }
+
+    sWorld->KickAll();
+    sAuthNetwork->close();
+    sWorldSocketMgr->StopNetwork();
+
+    sMemoryPool->Destroy();
+
+    sObjectMgr->UnloadAll();
+    sMapContent->UnloadAll();
 }

@@ -5,6 +5,81 @@
 
 class XPacket;
 
+struct CreatureElementalResist {
+    uint16 nResist[7];
+
+    void Reset(uint16 v)
+    {
+        for (int i = 0; i < 7; ++i) {
+            nResist[i] = v;
+        }
+    }
+};
+
+struct ExpertMod {
+    float fAvoid;
+    float fDamage;
+
+    void Reset(float v)
+    {
+        fAvoid  = v;
+        fDamage = v;
+    }
+};
+
+ struct DamageReduceInfo {
+     // Function       :     public void StructCreature::DamageReduceInfo::DamageReduceInfo(unsigned char, float, float, float, int, int, int, int, int)
+     bool IsAppliableCreatureGroup(int creature_group)
+     {
+         return apply_creature_group_list[0] == 99 || apply_creature_group_list[0] == creature_group
+                || apply_creature_group_list[1] == 99 || apply_creature_group_list[1] == creature_group
+                || apply_creature_group_list[2] == 99 || apply_creature_group_list[2] == creature_group
+                || apply_creature_group_list[3] == 99 || apply_creature_group_list[3] == creature_group
+                || apply_creature_group_list[4] == 99 || apply_creature_group_list[4] == creature_group;
+     }
+
+     uint8 ratio;
+     float physical_reduce;
+     float physical_skill_reduce;
+     float magical_skill_reduce;
+     int   apply_creature_group_list[5];
+ };
+
+struct StateMod {
+    StateMod()
+    {
+        fDamage   = 1.0f;
+        nDamage   = 0;
+        fCritical = 1.0f;
+        nCritical = 0;
+        fHate     = 1.0f;
+    }
+
+    StateMod(const StateMod& src)
+    {
+        fDamage   = src.fDamage;
+        nDamage   = src.nDamage;
+        fCritical = src.fCritical;
+        nCritical = src.nCritical;
+        fHate     = src.fHate;
+    }
+
+    void Copy(const StateMod& src)
+    {
+        fDamage   = src.fDamage;
+        nDamage   = src.nDamage;
+        fCritical = src.fCritical;
+        nCritical = src.nCritical;
+        fHate     = src.fHate;
+    }
+
+    float fDamage;
+    int   nDamage;
+    float fCritical;
+    int   nCritical;
+    float fHate;
+};
+
 class CreatureStat {
 public:
     CreatureStat()
@@ -12,9 +87,9 @@ public:
 
     void Reset(int16_t);
 
-    void Copy(CreatureStat);
+    void Copy(const CreatureStat&);
 
-    void Add(CreatureStat);
+    void Add(const CreatureStat&);
 
     void WriteToPacket(XPacket &);
 
@@ -174,7 +249,7 @@ public:
 
     void Reset(int16_t);
 
-    void Copy(CreatureAtributeServer);
+    void Copy(const CreatureAtributeServer&);
 
     void WriteToPacket(XPacket &packet);
 

@@ -41,7 +41,7 @@ Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
     _mainType = MT_NPC; // dont question it :^)
     _subType  = ST_Summon;
     _objType  = OBJ_MOVABLE;
-    _valuesCount = UNIT_END;
+    _valuesCount = BATTLE_FIELD_END;
 
     _InitValues();
     SetInt32Value(UNIT_FIELD_HANDLE, pHandle);
@@ -57,13 +57,15 @@ Summon* Summon::AllocSummon(Player * pMaster, uint pCode)
 void Summon::SetSummonInfo(int idx)
 {
     m_tSummonBase = sObjectMgr->GetSummonBase(idx);
+    if(m_tSummonBase == nullptr)
+        ASSERT(false);
     SetCurrentJob(idx);
-    this->m_nTransform = m_tSummonBase.form;
+    this->m_nTransform = m_tSummonBase->form;
 }
 
 int Summon::GetSummonCode()
 {
-    return m_tSummonBase.id;
+    return m_tSummonBase->id;
 }
 
 uint32_t Summon::GetCardHandle()
@@ -90,9 +92,9 @@ void Summon::DB_UpdateSummon(Player *pMaster, Summon *pSummon)
     stmt->setUInt64(i++, 0); // Last decreased exp
     stmt->setString(i++, pSummon->GetName());
     stmt->setInt32(i++, pSummon->m_nTransform);
-    stmt->setInt32(i++, pSummon->getLevel());
-    stmt->setInt32(i++, pSummon->getLevel()); // jlv
-    stmt->setInt32(i++, pSummon->getLevel()); // Max lvl
+    stmt->setInt32(i++, pSummon->GetLevel());
+    stmt->setInt32(i++, pSummon->GetLevel()); // jlv
+    stmt->setInt32(i++, pSummon->GetLevel()); // Max lvl
     stmt->setInt32(i++, pSummon->GetPrevJobLv(0));
     stmt->setInt32(i++, pSummon->GetPrevJobLv(1));
     stmt->setInt32(i++, pSummon->GetPrevJobId(0));
@@ -116,7 +118,7 @@ void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
     stmt->setUInt64(7, 0);                                              // Last Decreased EXP
     stmt->setString(8, pSummon->GetName());
     stmt->setInt32(9, pSummon->m_nTransform);                           // transform
-    stmt->setInt32(10, pSummon->getLevel());
+    stmt->setInt32(10, pSummon->GetLevel());
     stmt->setInt32(11, pSummon->GetCurrentJLv());
     stmt->setInt32(12, 1);                                              // max lvl
     stmt->setInt32(13, 0);                                              // fp
@@ -178,7 +180,7 @@ void Summon::onExpChange()
     int lvl   = 0;
     int oblv  = 0;
     int jp    = 0;
-    switch (m_tSummonBase.form) {
+    switch (m_tSummonBase->form) {
         case 1:
             lvl  = 50;
             oblv = 60;
@@ -208,17 +210,17 @@ void Summon::onExpChange()
         Messages::SendEXPMessage(m_pMaster, this);
 
     if (level != 0) {
-        if (level != getLevel()) {
+        if (level != GetLevel()) {
             long uid = 0;
             if (m_pItem != nullptr)
                 uid = m_pItem->m_Instance.UID;
             int ljp = 0;
-            if (level <= getLevel())
+            if (level <= GetLevel())
                 ljp = 0;
             else
                 ljp = jp;
 
-            int levelchange = level - getLevel();
+            int levelchange = level - GetLevel();
             SetCurrentJLv(level);
             SetInt32Value(UNIT_FIELD_LEVEL, level);
             if (levelchange <= 0) {
@@ -258,12 +260,12 @@ bool Summon::DoEvolution()
      auto prev_hp = GetHealth();
     auto prev_mp = GetMana();
 
-    if(this->m_tSummonBase.form < 3) {
+    if(this->m_tSummonBase->form < 3) {
         // @TODO Ride
         if(false) {
             return false;
         } else {
-            auto nTargetCode = m_tSummonBase.evolve_target;
+            auto nTargetCode = m_tSummonBase->evolve_target;
             SetSummonInfo(nTargetCode);
             CalculateStat();
             m_pMaster->Save(false);
@@ -272,7 +274,7 @@ bool Summon::DoEvolution()
             evoPct << m_pItem->m_nHandle;
             evoPct << GetHandle();
             evoPct.fill(GetName(), 19);
-            evoPct << (int)m_tSummonBase.id;
+            evoPct << m_tSummonBase->id;
             if(IsInWorld()) {
                 sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY()/g_nRegionSize), GetLayer(), evoPct);
             } else {
@@ -297,7 +299,7 @@ bool Summon::DoEvolution()
                 for( i = 0; i < m_tSummonBase.form - 1; ++i) {
                     m_pItem->m_Instance.Socket[i+1] = GetPrevJobLv(i);
                 }
-                m_pItem->m_Instance.Socket[i + 1] = getLevel();*/
+                m_pItem->m_Instance.Socket[i + 1] = GetLevel();*/
                 if(m_pMaster != nullptr)
                     Messages::SendItemMessage(m_pMaster, m_pItem);
             }

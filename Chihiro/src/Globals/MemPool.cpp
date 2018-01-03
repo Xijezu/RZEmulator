@@ -92,7 +92,7 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
     if(item->m_Instance.UID != 0) {
-        item->m_Instance.UID = sWorld->getItemIndex();
+        item->m_Instance.UID = sWorld->GetItemIndex();
     }
     m_nMiscTop++;
     m_hsItem.insert(std::make_pair<uint, Item *>((uint)(item->m_nHandle), (Item*)item));
@@ -114,9 +114,11 @@ WorldObject *MemoryPoolMgr::getItemPtrFromId(uint32_t handle)
 
 Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 {
+    if(pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
+        return nullptr;
     std::string szName = "HurrDurr!"s;
-    Summon* s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase.summon_id);
-    s->SetUInt32Value(UNIT_FIELD_UID, sWorld->getSummonIndex());
+    Summon* s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
+    s->SetUInt32Value(UNIT_FIELD_UID, sWorld->GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
     s->CalculateStat();
@@ -134,8 +136,8 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 
 Monster *MemoryPoolMgr::AllocMonster(uint idx)
 {
-    MonsterBase mb = sObjectMgr->GetMonsterInfo(idx);
-    if(mb.id == 0)
+    auto mb = sObjectMgr->GetMonsterInfo(idx);
+    if(mb == nullptr)
         return nullptr;
     auto p = new Monster{m_nMonsterTop, mb};
     p->SetInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
@@ -156,4 +158,32 @@ WorldObject *MemoryPoolMgr::getMonsterPtrFromId(uint32_t handle)
     if(m_hsMonster.count(handle) == 1)
         return m_hsMonster[handle];
     return nullptr;
+}
+
+void MemoryPoolMgr::Destroy()
+{
+    for(auto& obj : m_hsMisc) {
+        delete obj.second;
+    }
+    m_hsMisc.clear();
+
+    for(auto& obj : m_hsPlayer) {
+        delete obj.second;
+    }
+    m_hsPlayer.clear();
+
+    for(auto& obj : m_hsItem) {
+        delete obj.second;
+    }
+    m_hsItem.clear();
+
+    for(auto& obj : m_hsSummon) {
+        delete obj.second;
+    }
+    m_hsSummon.clear();
+
+    for(auto& obj : m_hsMonster) {
+        delete obj.second;
+    }
+    m_hsMonster.clear();
 }

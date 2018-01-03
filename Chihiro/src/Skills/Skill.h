@@ -17,6 +17,7 @@ public:
 
     int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
     void ProcSkill();
+    bool Cancel();
 
     int m_nSkillUID;
     Unit* m_pOwner{nullptr};
@@ -25,7 +26,7 @@ public:
     int m_nSkillLevel;
     int cool_time;
 
-    SkillBase m_SkillBase{};
+    SkillBase* m_SkillBase{nullptr};
 
     void broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType);
     void broadcastSkillMessage(int rx1, int ry1, int rx2, int ry2, uint8 layer, int cost_hp, int cost_mp, int nType);
@@ -42,8 +43,9 @@ private:
 protected:
     void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
 private:
+    void DoSummon();
+    void DoUnsummon();
     int PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
-    int PrepareUnummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
 };
 
 

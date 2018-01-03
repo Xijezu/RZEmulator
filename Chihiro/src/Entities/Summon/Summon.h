@@ -44,8 +44,8 @@ protected:
     void processWalk(uint t);
     void onExpChange() override;
 private:
-    SummonResourceTemplate m_tSummonBase;
-    Player *m_pMaster;
+    SummonResourceTemplate* m_tSummonBase{nullptr};
+    Player *m_pMaster{nullptr};
 };
 
 

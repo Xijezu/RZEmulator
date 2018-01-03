@@ -50,7 +50,7 @@ public:
 	};
 
 	XSocket(void);
-	virtual ~XSocket(void);
+	~XSocket(void) override;
 	/// Mutex type used for various synchronizations.
 	typedef ACE_Thread_Mutex LockType;
 	typedef ACE_Guard<LockType> GuardType;

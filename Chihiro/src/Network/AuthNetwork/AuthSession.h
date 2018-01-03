@@ -3,11 +3,11 @@
 #include "Server/XSocket.h"
 #include "Network/GameNetwork/WorldSession.h"
 
-class AuthNetwork : public XSocket::Session
+class AuthSession : public XSocket::Session
 {
 public:
-	AuthNetwork(XSocket& socket);
-	virtual ~AuthNetwork(void);
+	AuthSession(XSocket& socket);
+	virtual ~AuthSession(void);
 
 	/// Leaving the following empty because there's no usage for them in the auth connection
 	virtual void OnAccept(void) { }

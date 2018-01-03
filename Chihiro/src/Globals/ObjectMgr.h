@@ -11,6 +11,8 @@
 #include "SkillBase.h"
 #include "Monster.h"
 
+class NPC;
+
 struct Waypoint {
     int                   way_point_speed;
     int                   way_point_type;
@@ -51,29 +53,30 @@ public:
     bool LoadSkillJP();
     bool InitGameContent();
 
+    void UnloadAll();
+
     void AddWayPoint(int waypoint_id, float x, float y);
     void SetWayPointType(int waypoint_id, int type);
     void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
 
-    CreatureStat GetStatInfo(int stat_id);
-    ItemTemplate GetItemBase(int item_id);
+    CreatureStat* const GetStatInfo(uint stat_id);
+    ItemTemplate* const GetItemBase(uint item_id);
     uint64 GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying);
-    SkillBase GetSkillBase(int);
-    CreatureStat GetJobLevelBonus(int depth, int jobs[], int levels[]);
-    JobResourceTemplate GetJobInfo(int job_id);
-    SummonResourceTemplate GetSummonBase(int idx);
-    MonsterBase GetMonsterInfo(uint idx);
+    SkillBase* const GetSkillBase(uint);
+    CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
+    JobResourceTemplate* const GetJobInfo(uint job_id);
+    SummonResourceTemplate* const GetSummonBase(uint idx);
+    MonsterBase* const GetMonsterInfo(uint idx);
+    std::vector<MarketInfo>* const GetMarketInfo(const std::string&);
 
-    int GetNeedJpForJobLevelUp(int, int);
+    int GetNeedJpForJobLevelUp(uint, uint);
     int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
     long GetNeedExp(int level);
     uint64 GetNeedSummonExp(int level);
     Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, /*IMonsterDeleteHandler pDeleteHandler,*/ bool bNeedLock);
 
-    std::vector<MarketInfo> GetMarketInfo(std::string);
-    ushort IsLearnableSkill(Unit *, int, int, int &);
-
-    int GetLocationID(float x, float y);
+    ushort IsLearnableSkill(Unit *, uint, int, int &);
+    int GetLocationID(float x, float y) const;
 
     int g_currentLocationId{0};
 
@@ -93,7 +96,9 @@ private:
     SkillBaseContainer              _skillBaseStore;
     MonsterBaseContainer            _monsterBaseStore;
 
-    ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
+    std::vector<NPC*>               _npcStore;
+
+    ushort isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level);
     void RegisterSkillTree(SkillTreeBase base);
 
     std::vector<SkillTreeBase> getSkillTree(int job_id);
