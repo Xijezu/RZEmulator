@@ -14,6 +14,7 @@ public:
     static int GetItemRecommendModTable(int item_rank);
     static int GetRankLevel(int rank);
     static float GetItemValue(float, int, int, int, int);
+    static float GetPickableRange();
 private:
     static int _modtable[];
 };

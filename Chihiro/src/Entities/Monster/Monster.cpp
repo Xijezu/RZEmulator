@@ -22,6 +22,7 @@
 #include "Summon.h"
 #include "Player.h"
 #include "MemPool.h"
+#include "ObjectMgr.h"
 
 Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
 {
@@ -86,7 +87,8 @@ int Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damag
 void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
     Unit::onDead(pFrom, decreaseEXPOnDead);
-    SetFlag(UNIT_FIELD_STATUS, MonsterStatus::MS_Dead);
+    //SetFlag(UNIT_FIELD_STATUS, MonsterStatus::MS_Dead);
+    SetStatus(MonsterStatus::MS_Dead);
 
     std::vector<VirtualParty> vPartyContribute{};
     takePriority Priority{};
@@ -143,7 +145,7 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
         if(m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
             //procDropGold(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty, fGoldDropRateBonus);
-            //procDropItem(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty, fItemDropRateBonus);
+            procDropItem(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
         }
 
         // TODO: OnDeath script
@@ -161,7 +163,6 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     int nLastAttackPartyID = 0;
     Player* player{nullptr};
 
-    vPartyContribute.resize(m_vDamageList.size());
     if(m_nFirstAttackTime + 6000 < t) {
         m_hFirstAttacker = 0;
         fMaxDamageAdd = 0.4f;
@@ -252,5 +253,181 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
         } else {
             //sWorld->addEXP(this, vp.nPartyID, (int)fSharedEXP, (int)fSharedJP);
         }
+    }
+}
+
+void Monster::Update(uint diff)
+{
+    uint ct = sWorld->GetArTime();
+    MonsterStatus  ms = GetStatus();
+    if(ms != MonsterStatus::MS_Normal) {
+        if((int)ms > 0) {
+            if((int)ms <= 3) {
+                if(m_nLastUpdatedTime + 50 < ct)
+                    OnUpdate();
+
+                if(true/*IsActable*/) {
+                    if(GetHealth() == 0)
+                        return;
+                }
+            } else {
+                if(ms == MonsterStatus::MS_Dead) {
+                    processDead(ct);
+                    return;
+                }
+            }
+        }
+    } else {
+        if(m_nLastUpdatedTime + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending)) {
+            OnUpdate();
+
+            if(GetHealth() == 0)
+                return;
+            //if(GetHealth() == GetMaxHealth())
+                //clearHateList();
+        }
+
+    }
+
+    if(GetHealth() != 0) {
+        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending)) {
+            if(IsInWorld())
+                processPendingMove();
+        }
+        if(m_nTamedTime + 30000 < ct) {
+            m_hTamer = 0;
+            m_nTamedTime = -1;
+        }
+
+        if(bIsMoving && IsInWorld()) {
+            //processWalk
+        }
+    }
+
+    Unit::Update(diff);
+}
+
+void Monster::processDead(uint t)
+{
+    if(m_pDeleteHandler != nullptr) {
+        m_pDeleteHandler->onMonsterDelete(this);
+    }
+
+    if(GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t) {
+        if(IsInWorld())
+            sWorld->RemoveObjectFromWorld(this);
+        sMemoryPool->DeleteMonster(GetHandle(), true);
+    }
+}
+
+void Monster::SetStatus(MonsterStatus status)
+{
+    if(m_nStatus != MonsterStatus::MS_Dead) {
+        //if((int)status != m_nStatus && (int)status != 4 && (int)status != 0 && m_nStatus == 0)
+            //ResetTriggerCondition();
+        if(m_nStatus != status) {
+            m_nStatus = status;
+            //Messages::BroadcastStatusMessage(this);
+        }
+    }
+}
+
+void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty)
+{
+    long item_count;
+    for(int i = 0; i < 10; ++i) {
+        if(m_Base->drop_item_id[i] != 0 /*&& checkDrop */) {
+            item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
+            if(item_count < m_Base->drop_min_count[i]) {
+                MX_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
+            } else {
+                int level = irand(m_Base->drop_min_level[i], m_Base->drop_max_level[i]);
+                int code = m_Base->drop_item_id[i];
+                if(code >= 0)
+                    dropItem(pos, pKiller, pPriority, vPartyContribute, code, item_count, level, false, -1);
+                else
+                    dropItemGroup(pos, pKiller, pPriority, vPartyContribute, code, item_count, level, -1);
+            }
+        }
+    }
+}
+
+void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex)
+{
+    if(count == 0) {
+        MX_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %u, y: %u, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
+        return;
+    }
+
+    Unit* cr{nullptr};
+    Player* player{nullptr};
+
+    for(auto& ht : m_vHateList) {
+        if(ht.uid != 0) {
+            cr = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(ht.uid));
+
+            if(cr != nullptr) {
+                if(cr->GetSubType() == ST_Player)
+                    player = dynamic_cast<Player*>(cr);
+
+                if(cr->GetSubType() == ST_Summon)
+                    player = dynamic_cast<Summon*>(cr)->GetMaster();
+
+                if(player != nullptr && player->IsInWorld())
+                    break;
+            }
+        }
+    }
+
+    if(player == nullptr) {
+        if(pKiller == nullptr)
+            return;
+        if(pKiller->GetSubType() == ST_Player)
+            player = dynamic_cast<Player*>(pKiller);
+        if(pKiller->GetSubType() == ST_Summon)
+            player = dynamic_cast<Summon*>(pKiller)->GetMaster();
+    }
+
+    if(player != nullptr && player->IsInWorld()) {
+        auto ni = Item::AllocItem(0, code, count, GenerateCode::ByMonster, level, 0, 0, 0, 0, 0, 0, 0);
+        if(ni == nullptr)
+            return;
+        ni->SetPickupOrder(pPriority.PickupOrder);
+        ni->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
+        ni->SetLayer(GetLayer());
+        //ni->AddNoise(rand32(), rand32(), 18);
+
+        if((uint)nFlagIndex <= 0x1F)
+            ni->m_Instance.Flag |= (uint)(1 << (nFlagIndex & 0x1F));
+        if(bIsEventItem) {
+            ni->m_Instance.Flag |= 0x10;
+        }
+        sWorld->MonsterDropItemToWorld(this, ni);
+    }
+}
+
+void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex)
+{
+    std::map<int, long> mapDropItem{};
+    long nItemCount;
+    int nItemID;
+    for(int i = 0; i < count; ++i) {
+        nItemID = nDropGroupID;
+        nItemCount = 1;
+
+        do
+            sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+        while(nItemID < 0);
+        if(nItemID > 0) {
+            if(mapDropItem.count(nItemID) > 0) {
+                mapDropItem[nItemID] = mapDropItem[nItemID] + nItemCount;
+            } else {
+                mapDropItem.emplace(nItemID, nItemCount);
+            }
+        }
+    }
+
+    for(auto& kvp : mapDropItem) {
+        dropItem(pos, pKiller, pPriority, vPartyContribute, kvp.first, kvp.second, level, false, nFlagIndex);
     }
 }

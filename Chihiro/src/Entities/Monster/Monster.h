@@ -4,6 +4,32 @@
 #include "Common.h"
 #include "Unit.h"
 
+class Monster;
+struct MonsterDeleteHandler
+{
+    virtual void onMonsterDelete(Monster* mob) = 0;
+};
+
+struct takePriority {
+    ItemPickupOrder PickupOrder{};
+};
+
+struct HateTag {
+    HateTag(uint _uid, uint _time, int _hate)
+    {
+        uid   = _uid;
+        nTime = _time;
+        nHate = _hate;
+    }
+
+    uint uid;
+    uint nTime;
+    int  nHate;
+    bool bIsActive;
+    int  nBadAttackCount;
+    int  nLastMaxHate;
+};
+
 enum MonsterFlag : uint16 {
     MF_FIRST_ATTACK = 0,
     MF_GROUP_FIRST_ATTACK,
@@ -164,15 +190,6 @@ struct VirtualParty {
     int nLevel;
 };
 
-struct takePriority {
-    struct ItemPickupOrder {
-        uint hPlayer[3];
-        int nPartyID[3];
-    };
-
-    ItemPickupOrder PickupOrder{};
-};
-
 struct DamageTag {
     DamageTag(uint _uid, uint _time, int _damage)
     {
@@ -194,6 +211,8 @@ public:
     explicit Monster(uint handle, MonsterBase* mb);
     ~Monster() = default;
 
+    void Update(uint) override;
+
     MonsterBase* GetBase() const
     { return m_Base; }
 
@@ -211,16 +230,29 @@ public:
 
     float GetScale() const override
     { return m_Base->scale; }
+
+    MonsterStatus GetStatus() const
+    { return m_nStatus; }
+
+    void SetStatus(MonsterStatus status);
+
+    MonsterDeleteHandler* m_pDeleteHandler{nullptr};
 protected:
     int onDamage(Unit* pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
     void onDead(Unit* pFrom, bool decreaseEXPOnDead) override;
+    void processDead(uint t);//override;
 private:
     DamageTag* addDamage(uint handle, int nDamage);
     DamageTag* getDamageTag(uint handle, uint t);
     void calcPartyContribute(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
     void procEXP(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
+    void procDropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty);
+    void dropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex);
+    void dropItemGroup(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex);
 
     std::vector<DamageTag> m_vDamageList{};
+    std::vector<HateTag> m_vHateList{};
+
     MonsterBase* m_Base{nullptr};
 
     // Attack related
@@ -229,7 +261,9 @@ private:
     uint m_nTotalDamage;
     // Taming related
     uint m_hTamer;
-    uint m_nTamedTime;
+    int m_nTamedTime;
+
+    MonsterStatus m_nStatus;
 };
 
 

@@ -363,6 +363,8 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
         case ST_Mob:
             Monster::EnterPacket(packet, dynamic_cast<Monster*>(this));
             break;
+        case ST_Object:
+            Item::EnterPacket(packet, dynamic_cast<Item*>(this));
         default:
             break;
     }

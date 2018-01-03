@@ -9,6 +9,7 @@
 #include "Maploader.h"
 #include "RespawnObject.h"
 #include "WorldSession.h"
+#include "MemPool.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -62,7 +63,7 @@ void World::InitWorld()
         MonsterRespawnInfo nri(ri);
         float cx = (nri.right - nri.left) * 0.5f + nri.left;
         float cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
-        RespawnObject ro(nri);
+        auto ro = new RespawnObject{nri};
         m_vRespawnList.emplace_back(ro);
     }
 
@@ -243,17 +244,17 @@ void World::AddObjectToWorld(WorldObject *obj)
                                                    Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
                                                // Enter message FROM obj TO doEachRegion-Client
                                                if (client->GetSubType() == ST_Player)
-                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(client), dynamic_cast<Unit *>(obj), false);
+                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(client), obj, false);
                                            }
                                        });    // END Send Enter Message to each other
 									   /// Sending enter messages of NPCs and pets to the object - if it's an player
                                        rgn->DoEachMovableObject([=](WorldObject *lbObj) {
                                            if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
-                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
+                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
                                        });
                                        rgn->DoEachStaticObject([=](WorldObject *lbObj) {
                                            if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
-                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), dynamic_cast<Unit *>(lbObj), false);
+                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
                                        });
                                    });
     region->AddObject(obj);
@@ -320,8 +321,11 @@ void World::Update(uint diff)
         }
     }
     for(auto& ro : m_vRespawnList) {
-        ro.Update(diff);
+        ro->Update(diff);
+        m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
+
+    sMemoryPool->Update(diff);
 }
 
 void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
@@ -470,4 +474,42 @@ void World::BroadcastStatusMessage(Unit *unit)
                                            dynamic_cast<Player*>(obj)->SendPacket(packet);
                                        });
                                    });
+}
+
+void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
+{
+    if(pUnit == nullptr || pItem == nullptr)
+        return;
+    XPacket itemPct(TS_SC_ITEM_DROP_INFO);
+    itemPct << pUnit->GetHandle();
+    itemPct << pItem->GetHandle();
+    Broadcast((uint)(pItem->GetPositionX() / g_nRegionSize), (uint)(pItem->GetPositionY() / g_nRegionSize), pItem->GetLayer(), itemPct);
+    AddItemToWorld(pItem);
+}
+
+void World::AddItemToWorld(Item *pItem)
+{
+    AddObjectToWorld(pItem);
+    pItem->m_nDropTime = GetArTime();
+}
+// TODO: ItemCollector
+bool World::RemoveItemFromWorld(Item *pItem)
+{
+    RemoveObjectFromWorld(pItem);
+    pItem->m_nDropTime = 0;
+    return true;
+}
+
+uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
+{
+    uint item_handle = 0;
+    int code = pItem->m_Instance.Code;
+    if(code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY) {
+        pItem->m_Instance.nIdx = 0;
+        pItem->m_bIsNeedUpdateToDB = true;
+        pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
+        if(pItem != nullptr)
+            item_handle = pItem->GetHandle();
+    }
+    return item_handle;
 }

@@ -88,3 +88,8 @@ int GameRule::GetItemRecommendedLevel(int item_rank, int item_level)
     }
     return result;
 }
+
+float GameRule::GetPickableRange()
+{
+    return 20;
+}

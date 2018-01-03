@@ -6,6 +6,7 @@
 #include "ClientPackets.h"
 #include "Skill.h"
 #include "MemPool.h"
+#include "Item.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -125,12 +126,12 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
     } else {
         if ((nBitset & 0x80) != 0) {
             m_Attribute.nAttackPointRight += nValue;
-            /*this.m_nAttackPointRightWithoutWeapon += (short)nValue;
-            if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
+            //m_nAttackPointRightWithoutWeapon += (short)nValue;
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             {
                 m_Attribute.nAttackPointLeft += nValue;
-                this.m_nAttackPointLeftWithoutWeapon += (short)nValue;
-            }*/
+                //this.m_nAttackPointLeftWithoutWeapon += (short)nValue;
+            }
         }
         if ((nBitset & 0x100) != 0)
             m_Attribute.nMagicPoint += nValue;
@@ -140,21 +141,21 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_Attribute.nMagicDefence += nValue;
         if ((nBitset & 0x800) != 0) {
             m_Attribute.nAttackSpeedRight += nValue;
-            /*if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-                m_Attribute.nAttackSpeedLeft += nValue;*/
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                m_Attribute.nAttackSpeedLeft += nValue;
         }
         if ((nBitset & 0x1000) != 0)
             m_Attribute.nCastingSpeed += nValue;
-        /*if ((nBitset & 0x2000) != 0 && (this.m_StatusFlag & StatusFlags.MoveSpeedFixed) == 0)
+        if ((nBitset & 0x2000) != 0 && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
         {
-            Player p = this as Player;
-            if (p != null || p.m_nRidingStateUid == 0)
+            auto p = dynamic_cast<Player*>(this);
+            if (p != nullptr /*|| p.m_nRidingStateUid == 0*/)
                 m_Attribute.nMoveSpeed += nValue;
-        }*/
+        }
         if ((nBitset & 0x4000) != 0) {
             m_Attribute.nAccuracyRight += nValue;
-            //if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-            //    m_Attribute.nAccuracyLeft += nValue;
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                m_Attribute.nAccuracyLeft += nValue;
         }
         if ((nBitset & 0x8000) != 0)
             m_Attribute.nMagicAccuracy += nValue;
@@ -263,10 +264,11 @@ void Unit::CalculateStat()
 {
     CreatureAtributeServer stateAttr{ };
     CreatureStat           stateStat{ };
-    int                    prev_max_hp = GetMaxHealth();
-    int                    prev_max_mp = GetMaxMana();
-    int                    prev_hp     = GetHealth();
-    int                    prev_mp     = GetMana();
+
+    int prev_max_hp = GetMaxHealth();
+    int prev_max_mp = GetMaxMana();
+    int prev_hp     = GetHealth();
+    int prev_mp     = GetMana();
 
     SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, 1.0f);
@@ -297,9 +299,7 @@ void Unit::CalculateStat()
     //m_Resist.Reset(0);
     m_ResistAmplifier.Reset(0.0f);
 
-    auto basestat = sObjectMgr->GetStatInfo(GetInt32Value(UNIT_FIELD_JOB));
-    if(basestat == nullptr)
-        ASSERT(false);
+    auto basestat = sObjectMgr->GetStatInfo(GetUInt32Value(UNIT_FIELD_JOB));
     m_cStat.Copy(*basestat);
     // TODO onBeforeCalculateStat(); -> Reset in Player
     // TODO checkAdditionalItemEffect(); -> Nonexistant
@@ -373,7 +373,8 @@ void Unit::applyItemEffect()
             if (true) { // TODO TranslateWearPosition
                 float    fItemRatio = 1.0f;
                 // TODO fItemRatio = 0.4f
-                for (int ol         = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
+
+                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
                     if (curItem->m_pItemBase->base_type[ol] != 0) {
                         onItemWearEffect(curItem, true, curItem->m_pItemBase->base_type[ol], curItem->m_pItemBase->base_var[ol][0], curItem->m_pItemBase->base_var[ol][1], fItemRatio);
                     }
@@ -475,12 +476,12 @@ void Unit::ampParameter2(uint nBitset, float fValue)
     }*/
     if ((nBitset & 0x10000000) != 0) {
         m_AttributeAmplifier.fCriticalPower += fValue;
-    }/*
+    }
     if ((nBitset & 0x20000000) != 0)
-        this.m_StatusFlag |= StatusFlags.HPRegenStopped;
+        SetFlag(UNIT_FIELD_STATUS, StatusFlags::HPRegenStopped);
     if ((nBitset & 0x40000000) != 0)
-        this.m_StatusFlag |= StatusFlags.MPRegenStopped;
-    */
+        SetFlag(UNIT_FIELD_STATUS, StatusFlags::MPRegenStopped);
+
 }
 
 void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
@@ -509,13 +510,12 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
             m_StatAmplifier.luck += fValue;
         }
     } else {
-        //Player p = this as Player;
+        auto p = dynamic_cast<Player*>(this);
         if ((nBitset & 0x80) != 0) {
             m_AttributeAmplifier.fAttackPointRight += fValue;
-            /*if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-            {*/
-            m_AttributeAmplifier.fAttackPointLeft += fValue;
-            //}
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+                m_AttributeAmplifier.fAttackPointLeft += fValue;
+            }
         }
         if ((nBitset & 0x100) != 0) {
             m_AttributeAmplifier.fMagicPoint += fValue;
@@ -528,26 +528,24 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
         }
         if ((nBitset & 0x800) != 0) {
             m_AttributeAmplifier.fAttackSpeedRight += fValue;
-            /*if ((m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-            {*/
-            m_AttributeAmplifier.fAttackSpeedLeft += fValue;
-            //}
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+                m_AttributeAmplifier.fAttackSpeedLeft += fValue;
+            }
         }
         if ((nBitset & 0x1000) != 0) {
             m_AttributeAmplifier.fCastingSpeed += fValue;
         }
         if ((nBitset & 0x2000) != 0) {
-            /*if (p == null || p.m_nRidingStateUid == 0)
+            if (p == nullptr || true/*|| p->m_nRidingStateUid == 0*/)
             {
-                this.m_AttributeAmplifier.fMoveSpeed += fValue;
-            }*/
+                m_AttributeAmplifier.fMoveSpeed += fValue;
+            }
         }
         if ((nBitset & 0x4000) != 0) {
             m_AttributeAmplifier.fAccuracyRight += fValue;
-            /*if ((m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-            {*/
-            m_AttributeAmplifier.fAccuracyLeft += fValue;
-            //}
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+                m_AttributeAmplifier.fAccuracyLeft += fValue;
+            }
         }
         if ((nBitset & 0x8000) != 0) {
             m_AttributeAmplifier.fMagicAccuracy += fValue;
@@ -591,6 +589,11 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
 {
     float result;
     float item_var_penalty;
+
+    Player* p{nullptr};
+    if(GetSubType() == ST_Player)
+        p = dynamic_cast<Player*>(this);
+
     auto  tpl = sObjectMgr->GetItemBase(pItem->m_nItemID);
     if (tpl == nullptr)
         return;
@@ -601,7 +604,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
         item_var_penalty = var1 * fRatio;
 
     if (type != 14) {
-        if (pItem->m_nItemID != 0 && bIsBaseVar) {
+        if (pItem != nullptr && bIsBaseVar) {
             item_var_penalty += (float) (var2 * (float) tpl->level);
             result           = var1;
             item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int) var1, GetLevel(), tpl->rank, pItem->m_Instance.nLevel);
@@ -631,23 +634,23 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nMagicPoint += item_var_penalty;
                     return;
                 case 11:
-                    /*if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) == 0)
+                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
                     {
-                        this.m_Attribute.nAttackPointRight += item_var_penalty;
+                        m_Attribute.nAttackPointRight += item_var_penalty;
                     }
-                    else if (pItem == null || pItem.m_pItemBase.nGroup != 1)
+                    else if (pItem == nullptr || pItem->m_pItemBase->group != 1)
                     {
-                        this.m_Attribute.nAttackPointLeft += item_var_penalty;
-                        this.m_Attribute.nAttackPointRight += item_var_penalty;
+                        m_Attribute.nAttackPointLeft += item_var_penalty;
+                        m_Attribute.nAttackPointRight += item_var_penalty;
                     }
-                    else if (pItem.m_Instance.nWearInfo != ItemBase.ItemWearType.WearShield)
+                    else if (pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
                     {
-                        this.m_Attribute.nAttackPointRight += item_var_penalty;
+                        m_Attribute.nAttackPointRight += item_var_penalty;
                     }
                     else
                     {
-                        this.m_Attribute.nAttackPointLeft += item_var_penalty;
-                    }*/
+                        m_Attribute.nAttackPointLeft += item_var_penalty;
+                    }
                     return;
                 case 21:
                     m_Attribute.nBlockDefence += item_var_penalty;
@@ -656,42 +659,42 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nDefence += item_var_penalty;
                     return;
                 case 13:
-                    /*if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) == 0)
+                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
                     {
-                        this.m_Attribute.nAccuracyRight += item_var_penalty;
+                        m_Attribute.nAccuracyRight += item_var_penalty;
                     }
-                    else if (pItem == null || pItem.m_pItemBase.nGroup != 1)
+                    else if (pItem == nullptr || pItem->m_pItemBase->group != 1)
                     {
-                        this.m_Attribute.nAccuracyLeft += item_var_penalty;
-                        this.m_Attribute.nAccuracyRight += item_var_penalty;
+                        m_Attribute.nAccuracyLeft += item_var_penalty;
+                        m_Attribute.nAccuracyRight += item_var_penalty;
                     }
-                    else if (pItem.m_Instance.nWearInfo != ItemBase.ItemWearType.WearShield)
+                    else if (pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
                     {
-                        this.m_Attribute.nAccuracyRight += item_var_penalty;
+                        m_Attribute.nAccuracyRight += item_var_penalty;
                     }
                     else
                     {
-                        this.m_Attribute.nAccuracyLeft += item_var_penalty;
-                    }*/
+                        m_Attribute.nAccuracyLeft += item_var_penalty;
+                    }
                     return;
                 case 14:
-                    /*if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) == 0)
+                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
                     {
-                        this.m_Attribute.nAttackSpeedRight += item_var_penalty;
+                        m_Attribute.nAttackSpeedRight += item_var_penalty;
                     }
-                    else if (pItem == null || pItem.m_pItemBase.nGroup != 1)
+                    else if (pItem == nullptr || pItem->m_pItemBase->group != 1)
                     {
-                        this.m_Attribute.nAttackSpeedRight += item_var_penalty;
-                        this.m_Attribute.nAttackSpeedLeft += item_var_penalty;
+                        m_Attribute.nAttackSpeedRight += item_var_penalty;
+                        m_Attribute.nAttackSpeedLeft += item_var_penalty;
                     }
-                    else if ( pItem.m_Instance.nWearInfo != ItemBase.ItemWearType.WearShield)
+                    else if ( pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
                     {
-                        this.m_Attribute.nAttackSpeedRight += item_var_penalty;
+                        m_Attribute.nAttackSpeedRight += item_var_penalty;
                     }
                     else
                     {
-                        this.m_Attribute.nAttackSpeedLeft += item_var_penalty;
-                    }*/
+                        m_Attribute.nAttackSpeedLeft += item_var_penalty;
+                    }
                     return;
                 case 16:
                     m_Attribute.nMagicDefence += item_var_penalty;
@@ -700,7 +703,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nAvoid += item_var_penalty;
                     return;
                 case 18:
-                    if (true) // TODO if ((this.m_StatusFlag & StatusFlags.MoveSpeedFixed) == 0 && (p == null || p.m_nRidingStateUid == 0))
+                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed) && (p == nullptr || true)) // TODO: RidingStateUID
                         m_Attribute.nMoveSpeed += item_var_penalty;
                     return;
                 case 19:
@@ -752,13 +755,13 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
 
     if (false) {
         // isUsingBow | IsUsingCrossBow
+        v = (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
+        attribute.nAttackPointRight += v;
     } else {
         v = (2.8f * m_cStat.strength) + (fcm * b1);
         attribute.nAttackPointRight += v;
-        //if ((this.m_StatusFlag & StatusFlags.UsingDoubleWeapon) != 0)
-        if (false) {
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             attribute.nAttackPointLeft += v;// ((2 * this.m_Stat.strength) * fcm + bl);
-        }
     }
 
     attribute.nMagicPoint += ((2 * m_cStat.intelligence) + (fcm * b1));
@@ -767,13 +770,16 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     attribute.nMagicDefence += ((2 * m_cStat.mentality) + (fcm + b1));
     attribute.nMaxWeight += 10 * (GetLevel() + m_cStat.strength);
     attribute.nAccuracyRight += ((m_cStat.dexterity) * 0.5f + (fcm + b1));
-    // TODO Add left accu
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        attribute.nAccuracyLeft += ((m_StatAmplifier.dexterity) * 0.5f) + (fcm + b1);
     attribute.nMagicAccuracy += ((m_cStat.mentality * 0.4f + m_cStat.dexterity * 0.1f) * fcm + b1);
     attribute.nAvoid += (m_cStat.agility * 0.5f * fcm + b1);
     attribute.nMagicAvoid += (m_cStat.mentality * 0.5f * fcm + b1);
     attribute.nAttackSpeedRight += (100 + (m_cStat.agility * 0.1f));
-    // TODO Add left attackspeed
-    attribute.nMoveSpeed += (120 * fcm);
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        attribute.nAttackSpeedLeft += ((this->m_cStat.dexterity) * 0.5f + (fcm + b1));
+    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+        attribute.nMoveSpeed += (120 * fcm);
     attribute.nCastingSpeed += (100 * fcm);
     attribute.nCoolTimeSpeed   = 100;
 
@@ -824,15 +830,14 @@ void Unit::applyStatByItem()
 {
     std::vector<int> ref_list{ };
 
-    for (int i = 0; i < 24; i++) {
-        auto item = m_anWear[i];
+    for (auto& item : m_anWear) {
         if (item != nullptr) {
             if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
                 if (true) { // TODO TranslateWearPosition
                     for (int j = 0; j < 4; j++) {
                         short ot = item->m_pItemBase->opt_type[j];
-                        uint  bs = (uint32_t) item->m_pItemBase->opt_var[0][j];
-                        int   fv = (int32_t) item->m_pItemBase->opt_var[1][j];
+                        auto  bs = (uint) item->m_pItemBase->opt_var[0][j];
+                        auto  fv = (int) item->m_pItemBase->opt_var[1][j];
                         if (ot == 96)
                             incParameter(bs, fv, true);
                     }

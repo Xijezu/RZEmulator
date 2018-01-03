@@ -10,6 +10,7 @@ Item *MemoryPoolMgr::AllocItem()
 {
     auto *p = new Item{ };
     p->m_nHandle = m_nItemTop++;
+    p->SetUInt32Value(UNIT_FIELD_HANDLE, p->m_nHandle);
     m_hsItem.insert(std::pair<uint, Item *>(p->m_nHandle, p));
     return p;
 }
@@ -91,7 +92,8 @@ WorldObject *MemoryPoolMgr::getMiscPtrFromId(uint32_t handle)
 void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
-    if(item->m_Instance.UID != 0) {
+    item->SetUInt32Value(UNIT_FIELD_HANDLE, item->m_nHandle);
+    if(item->m_Instance.UID == 0) {
         item->m_Instance.UID = sWorld->GetItemIndex();
     }
     m_nMiscTop++;
@@ -186,4 +188,86 @@ void MemoryPoolMgr::Destroy()
         delete obj.second;
     }
     m_hsMonster.clear();
+}
+
+void MemoryPoolMgr::Update(uint diff)
+{
+    for(auto& player : m_hsPlayer) {
+        if(player.second == nullptr) {
+            m_hsPlayer.erase(player.first);
+            continue;
+        }
+        player.second->Update(diff);
+    }
+
+    for(auto& mob : m_hsMonster) {
+        if(mob.second == nullptr) {
+            m_hsMonster.erase(mob.first);
+            continue;
+        }
+        mob.second->Update(diff);
+    }
+
+    for(auto& obj : m_hsMisc) {
+        if(obj.second == nullptr) {
+            m_hsMisc.erase(obj.first);
+            continue;
+        }
+        obj.second->Update(diff);
+    }
+}
+
+void MemoryPoolMgr::DeletePlayer(uint handle, bool bNeedToDelete)
+{
+    if(m_hsPlayer.count(handle) == 1) {
+        if(bNeedToDelete) {
+            delete m_hsPlayer[handle];
+            m_hsPlayer[handle] = nullptr;
+        }
+        m_hsPlayer.erase(handle);
+    }
+}
+
+void MemoryPoolMgr::DeleteMonster(uint handle, bool bNeedToDelete)
+{
+    if(m_hsMonster.count(handle) == 1) {
+        if(bNeedToDelete) {
+            delete m_hsMonster[handle];
+            m_hsMonster[handle] = nullptr;
+        }
+        m_hsMonster.erase(handle);
+    }
+}
+
+void MemoryPoolMgr::DeleteItem(uint handle, bool bNeedToDelete)
+{
+    if(m_hsItem.count(handle) == 1) {
+        if(bNeedToDelete) {
+            delete m_hsItem[handle];
+            m_hsItem[handle] = nullptr;
+        }
+        m_hsItem.erase(handle);
+    }
+}
+
+void MemoryPoolMgr::DeleteSummon(uint handle, bool bNeedToDelete)
+{
+    if(m_hsSummon.count(handle) == 1) {
+        if(bNeedToDelete) {
+            delete m_hsSummon[handle];
+            m_hsSummon[handle] = nullptr;
+        }
+        m_hsSummon.erase(handle);
+    }
+}
+
+void MemoryPoolMgr::DeleteNPC(uint handle, bool bNeedToDelete)
+{
+    if(m_hsMisc.count(handle) == 1) {
+        if(bNeedToDelete) {
+            delete m_hsMisc[handle];
+            m_hsMisc[handle] = nullptr;
+        }
+        m_hsMisc.erase(handle);
+    }
 }

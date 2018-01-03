@@ -17,12 +17,12 @@ struct RespawnInfo : public MonsterRespawnInfo {
     uint prespawn_count;
 };
 
-class RespawnObject {
+class RespawnObject : public MonsterDeleteHandler{
 public:
     RespawnObject(MonsterRespawnInfo rh);
     ~RespawnObject() = default;
 
-    void OnMonsterDelete(Monster* mob);
+    void onMonsterDelete(Monster* mob) override;
     void Update(uint diff);
 
     RespawnInfo info;

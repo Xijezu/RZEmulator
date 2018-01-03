@@ -13,6 +13,11 @@
 
 class Summon;
 
+struct ItemPickupOrder {
+    uint hPlayer[3];
+    int  nPartyID[3];
+};
+
 class ItemInstance {
 public:
     uint         OwnerHandle{0};                            // 0x0
@@ -36,10 +41,21 @@ public:
     int          Socket[4]{0};
 };
 
+class XPacket;
+
 class Item : public WorldObject {
 public:
+    static void EnterPacket(XPacket &pEnterPct, Item *pItem);
+
     Item() : WorldObject(true)
-    { _subType = ST_Object; };
+    {
+        _mainType = MT_StaticObject;
+        _subType  = ST_Object;
+        _objType  = OBJ_STATIC;
+
+        _valuesCount = UNIT_FIELD_HANDLE + 1;
+        _InitValues();
+    };
 
     static const int MAX_COOLTIME_GROUP   = 40;
     static const int MAX_OPTION_NUMBER    = 4;
@@ -49,6 +65,7 @@ public:
 
     static Item *AllocItem(long uid, int code, long cnt, GenerateCode info, int level, int enhance,
             int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time);
+    static void PendFreeItem(Item* pItem);
 
     bool IsWearable();
     void DBUpdate();
@@ -57,18 +74,21 @@ public:
     ItemWearType GetWearType();
 
     void SetOwnerInfo(uint, int, int);
+    void SetPickupOrder(const ItemPickupOrder& order);
 
 // private:
-    ItemInstance m_Instance{ };
-    ItemTemplate *m_pItemBase{ };
-    Summon   *m_pSummon{nullptr};
-    uint32_t m_nHandle{0};
-    int      m_nAccountID{0};
-    int      m_nItemID{0};
-    uint32_t m_unInventoryIndex{0};
-    bool     m_bIsEventDrop{0};
-    bool     m_bIsVirtualItem{0};
-    bool     m_bIsNeedUpdateToDB{false};
+    ItemInstance    m_Instance{ };
+    ItemTemplate    *m_pItemBase{ };
+    Summon          *m_pSummon{nullptr};
+    uint32_t        m_nHandle{0};
+    int             m_nAccountID{0};
+    int             m_nItemID{0};
+    uint32_t        m_unInventoryIndex{0};
+    uint            m_nDropTime{0};
+    bool            m_bIsEventDrop{0};
+    bool            m_bIsVirtualItem{0};
+    bool            m_bIsNeedUpdateToDB{false};
+    ItemPickupOrder m_pPickupOrder{ };
 };
 
 

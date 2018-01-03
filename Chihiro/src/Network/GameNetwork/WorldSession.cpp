@@ -31,7 +31,7 @@
 #include "NPC.h"
 #include "ObjectMgr.h"
 #include "Skill.h"
-
+#include "GameRule.h"
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket *socket) : _socket(socket)
 {
@@ -106,7 +106,8 @@ const GameHandler packetHandler[] =
                                   {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
                                   {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
                                   {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
-                                  {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction}
+                                  {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
+                                  {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -465,7 +466,7 @@ bool WorldSession::onReturnToLobby(XPacket *pRecvPct)
     if (_player != nullptr) {
         _player->LogoutNow(2);
         _player->Save(false);
-        delete _player;
+        sMemoryPool->DeletePlayer(_player->GetHandle(), true);
         _player = nullptr;
     }
     if(pRecvPct != nullptr)
@@ -1293,4 +1294,77 @@ bool WorldSession::onCancelAction(XPacket *pRecvPct)
         }
     }
     return true;
+}
+
+bool WorldSession::onTakeItem(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return false;
+
+    pRecvPct->read_skip(7);
+    auto item_handle = pRecvPct->read<uint>();
+
+    uint ct = sWorld->GetArTime();
+
+    auto item = dynamic_cast<Item*>(sMemoryPool->getPtrFromId(item_handle));
+    if(item == nullptr || !item->IsInWorld()) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+        return false;
+    }
+
+    // TODO: Weight
+    if(item->m_Instance.OwnerHandle != 0) {
+        MX_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", _player->GetName(), item->GetHandle());
+        return false;
+    }
+
+    auto pos = _player->GetPosition();
+    if(GameRule::GetPickableRange() < item->GetExactDist2d(&pos)) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_FAR, item_handle);
+        return false;
+    }
+
+    // Quest Item Check TODO
+
+    auto drop_duration = ct - item->m_nDropTime;
+    int ry = 3000;
+    for(int i = 0; i < 3; i++) {
+        if(item->m_pPickupOrder.hPlayer[i] == 0 && item->m_pPickupOrder.nPartyID[i] == 0)
+            break;
+
+        if(item->m_pPickupOrder.nPartyID[i] <= 0 || item->m_pPickupOrder.nPartyID[i] != _player->GetInt32Value(UNIT_FIELD_PARTY_ID)) {
+            if(item->m_pPickupOrder.hPlayer[i] != _player->GetHandle()) {
+                if(drop_duration < ry) {
+                    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+                    return false;
+                }
+                ry += 1000;
+            }
+        }
+    }
+
+    if(item->m_Instance.Code == 0) {
+        if(_player->GetInt32Value(UNIT_FIELD_PARTY_ID) == 0) {
+            if(_player->GetGold() + item->m_Instance.nCount > MAX_GOLD_FOR_INVENTORY) {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item_handle);
+                return false;
+            }
+        }
+    }
+
+    XPacket resultPct(TS_SC_TAKE_ITEM_RESULT);
+    resultPct << item_handle;
+    resultPct << _player->GetHandle();
+    sWorld->Broadcast((uint)(_player->GetPositionX() / g_nRegionSize), (uint)(_player->GetPositionY() / g_nRegionSize), _player->GetLayer(), resultPct);
+    if(sWorld->RemoveItemFromWorld(item)) {
+        // TODO: Party
+        uint nih = sWorld->procAddItem(_player, item, false);
+        if(nih != 0) { // nih = new item handle
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, nih);
+            return true;
+        }
+        Item::PendFreeItem(item);
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+    }
+    return false;
 }

@@ -40,13 +40,15 @@ Player::~Player()
         return;
 
     for (auto &t : m_lInventory) {
-        m_lInventory.erase(t.first);
-        delete t.second;
+        sMemoryPool->DeleteItem(t.second->GetHandle(), true);
         t.second = nullptr;
     }
+    m_lInventory.clear();
+
     for(auto &t : m_vSummonList) {
-        sWorld->RemoveObjectFromWorld(t);
-        delete t;
+        if(t->IsInWorld())
+            sWorld->RemoveObjectFromWorld(t);
+        sMemoryPool->DeleteSummon(t->GetHandle(), true);
         t = nullptr;
     }
     m_vSummonList.clear();
@@ -246,7 +248,7 @@ bool Player::ReadSkillList(int)
     SetSkill(-1, 6007, 20, 0);
     SetSkill(-1, 6008, 20, 0);
     SetSkill(-1, 6009, 20, 0);
-//                SetSkill(-1, 6010, 20, 0);
+    SetSkill(-1, 6010, 20, 0);
     SetSkill(-1, 6013, 20, 0);
     SetSkill(-1, 6014, 20, 0);
     SetSkill(-1, 6015, 20, 0);
@@ -256,17 +258,12 @@ bool Player::ReadSkillList(int)
     SetSkill(-1, 6019, 20, 0);
     SetSkill(-1, 6020, 20, 0);
     SetSkill(-1, 6021, 20, 0);
-    SetSkill(-1, 64809, 20, 0);
-    SetSkill(-1, 64810, 20, 0);
     SetSkill(-2, 6901, 20, 0);
     SetSkill(-2, 6902, 20, 0);
     SetSkill(-2, 6903, 20, 0);
     SetSkill(-2, 6904, 20, 0);
     SetSkill(-2, 6905, 20, 0);
     SetSkill(-2, 6906, 20, 0);
-    SetSkill(-2, 6909, 20, 0);
-    SetSkill(-2, 64806, 20, 0);
-    SetSkill(-2, 64807, 20, 0);
     SetSkill(-1, 6022, 20, 0);
     SetSkill(-1, 6023, 20, 0);
     SetSkill(-1, 6024, 20, 0);
@@ -301,19 +298,8 @@ bool Player::ReadSkillList(int)
     SetSkill(-1, 6064, 20, 0);
     SetSkill(-1, 6065, 20, 0);
     SetSkill(-1, 6066, 20, 0);
-    SetSkill(-1, 6067, 20, 0);
-    SetSkill(-1, 6068, 20, 0);
-    SetSkill(-1, 6069, 20, 0);
-    SetSkill(-1, 6070, 20, 0);
-    SetSkill(-1, 6071, 20, 0);
-    SetSkill(-1, 6072, 20, 0);
     SetSkill(-1, 10009, 20, 0);
     SetSkill(-1, 10010, 20, 0);
-    SetSkill(-1, 64808, 20, 0);
-    SetSkill(-1, 64813, 20, 0);
-    SetSkill(-1, 64814, 20, 0);
-    SetSkill(-1, 65061, 20, 0);
-    SetSkill(-1, 65062, 20, 0);
 
     return true;
 }
@@ -464,7 +450,7 @@ void Player::SendLoginProperties()
     Messages::SendItemList(this, false);
     Messages::SendCreatureEquipMessage(this, false);
 
-    Messages::SendSkillList(this, this, 0);
+    Messages::SendSkillList(this, this, -1);
     // TODO Summon Skill Msg
 
     SendWearInfo();
@@ -805,6 +791,18 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
         MX_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
         return;
     }
+
+    // In this case gold
+    if(pItem->m_Instance.Code == 0) {
+        long nPrevGoldAmount = GetGold();
+        long gold = GetGold() + pItem->m_Instance.nCount;
+        if(ChangeGold(gold) != 0) {
+            // Log
+        }
+        Item::PendFreeItem(pItem);
+        return;
+    }
+
     if(pItem->m_Instance.nIdx == 0) {
         pItem->m_Instance.nIdx = (int)m_lInventory.size();
         pItem->m_bIsNeedUpdateToDB = true;

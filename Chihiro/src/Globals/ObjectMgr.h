@@ -36,6 +36,7 @@ public:
     typedef UNORDERED_MAP<uint32, MonsterBase>                  MonsterBaseContainer;
     typedef UNORDERED_MAP<uint32, LevelResourceTemplate>        LevelTemplateContainer;
     typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
+    typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
 
     bool LoadStatResource();
     bool LoadJobResource();
@@ -45,6 +46,7 @@ public:
     bool LoadItemResource();
     bool LoadSummonLevelResource();
     bool LoadSummonResource();
+    bool LoadDropGroupResource();
     bool LoadMarketResource();
     bool LoadWorldLocation();
     bool LoadSkillResource();
@@ -73,7 +75,10 @@ public:
     int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
     long GetNeedExp(int level);
     uint64 GetNeedSummonExp(int level);
-    Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, /*IMonsterDeleteHandler pDeleteHandler,*/ bool bNeedLock);
+    Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler* pDeleteHandler, bool bNeedLock);
+
+    DropGroup* GetDropGroupInfo(int drop_group_id);
+    bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, long &nItemCount);
 
     ushort IsLearnableSkill(Unit *, uint, int, int &);
     int GetLocationID(float x, float y) const;
@@ -95,6 +100,7 @@ private:
     LevelTemplateContainer          _levelResourceStore;
     SkillBaseContainer              _skillBaseStore;
     MonsterBaseContainer            _monsterBaseStore;
+    DropGroupTemplateContainer      _dropTemplateStore;
 
     std::vector<NPC*>               _npcStore;
 

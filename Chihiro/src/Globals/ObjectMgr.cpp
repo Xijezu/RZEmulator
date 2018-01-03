@@ -20,7 +20,7 @@ bool ObjectMgr::InitGameContent()
         return false;
     if (!LoadMarketResource())
         return false;
-    if (!LoadMonsterResource())
+    if (!LoadDropGroupResource() || !LoadMonsterResource())
         return false;
     if (!LoadJobLevelBonus())
         return false;
@@ -232,6 +232,33 @@ bool ObjectMgr::LoadMonsterResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
+
+bool ObjectMgr::LoadDropGroupResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM DropGroupResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 DropGrouptemplates. DB packetHandler `DropGroupResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field        *field = result->Fetch();
+        DropGroup dg{};
+        dg.uid = field->GetInt32();
+        for(int i = 0; i < MAX_DROP_GROUP; i++) {
+            dg.drop_item_id[i] = field->GetInt32();
+            dg.drop_percentage[i] = field->GetFloat() * 100000000;
+        }
+        _dropTemplateStore[dg.uid] = dg;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u DropGrouptemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 
 bool ObjectMgr::LoadSkillTreeResource()
 {
@@ -1000,12 +1027,13 @@ MonsterBase* const ObjectMgr::GetMonsterInfo(uint idx)
     return nullptr;
 }
 
-Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, bool bNeedLock)
+Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler*  pDeleteHandler, bool bNeedLock)
 {
     auto mob = sMemoryPool->AllocMonster(id);
     if(mob != nullptr) {
         mob->SetCurrentXY(x, y);
         mob->SetLayer(0);
+        mob->m_pDeleteHandler = pDeleteHandler;
         sWorld->AddMonsterToWorld(mob);
     }
     return mob;
@@ -1082,4 +1110,34 @@ void ObjectMgr::UnloadAll()
     _levelResourceStore.clear();
     _skillBaseStore.clear();
     _monsterBaseStore.clear();
+}
+
+bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, long &nItemCount)
+{
+    nItemID = 0;
+    nItemCount = 1;
+
+    auto dg = GetDropGroupInfo(nDropGroupID);
+    if(dg != nullptr) {
+        int cp = 0;
+        int p = irand(1, 100000000);
+        for(int i = 0; i < MAX_DROP_GROUP; ++i) {
+            cp += dg->drop_percentage[i];
+            if(p < cp) {
+                nItemID = dg->drop_item_id[i];
+                nItemCount = 1;
+                return true;
+            }
+        }
+    }
+    nItemID = 0;
+    nItemCount = 1;
+    return false;
+}
+
+DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
+{
+    if(_dropTemplateStore.count(drop_group_id) == 1)
+        return &_dropTemplateStore[drop_group_id];
+    return nullptr;
 }

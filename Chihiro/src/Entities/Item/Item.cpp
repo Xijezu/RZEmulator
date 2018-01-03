@@ -5,7 +5,9 @@
 #include "Item/Item.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
+#include "XPacket.h"
 #include "DatabaseEnv.h"
+#include "Messages.h"
 
 Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level, int enhance,
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
@@ -121,4 +123,29 @@ void Item::DBInsert()
     CharacterDatabase.Execute(stmt);
 
     m_bIsNeedUpdateToDB = false;
+}
+
+void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
+{
+    Messages::GetEncodedInt(pEnterPct, pItem->m_Instance.Code);
+    pEnterPct << (uint64)pItem->m_Instance.nCount;
+
+    pEnterPct << (uint)pItem->m_nDropTime;
+    for(int i = 0; i < 3; i++) {
+        pEnterPct << (uint)pItem->m_pPickupOrder.hPlayer[i];
+        pEnterPct << (uint)pItem->m_pPickupOrder.nPartyID[i];
+    }
+}
+
+void Item::SetPickupOrder(const ItemPickupOrder &order)
+{
+    for(int i = 0; i < 3; i++) {
+        m_pPickupOrder.hPlayer[i] = order.hPlayer[i];
+        m_pPickupOrder.nPartyID[i] = order.nPartyID[i];
+    }
+}
+
+void Item::PendFreeItem(Item *pItem)
+{
+    sMemoryPool->DeleteItem(pItem->GetHandle(), true);
 }

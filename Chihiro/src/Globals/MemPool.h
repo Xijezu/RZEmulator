@@ -21,6 +21,12 @@ public:
     Monster* AllocMonster(uint idx);
     Summon *AllocNewSummon(Player*,Item*);
 
+    void DeletePlayer(uint handle, bool bNeedToDelete);
+    void DeleteMonster(uint handle, bool bNeedToDelete);
+    void DeleteItem(uint handle, bool bNeedToDelete);
+    void DeleteSummon(uint handle, bool bNeedToDelete);
+    void DeleteNPC(uint handle, bool bNeedToDelete);
+
     void Destroy();
 
     Item *FindItem(uint32_t handle);
@@ -30,6 +36,8 @@ public:
     WorldObject* getSummonPtrFromId(uint32_t handle);
     WorldObject* getPlayerPtrFromId(uint32_t handle);
     WorldObject* getItemPtrFromId(uint32_t handle);
+
+    void Update(uint diff);
 
 private:
     uint32_t m_nMiscTop{0x20000001};

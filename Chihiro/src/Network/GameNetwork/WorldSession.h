@@ -110,6 +110,7 @@ public:
 	bool onSkill(XPacket *);
 	bool onAttackRequest(XPacket* );
 	bool onCancelAction(XPacket* );
+	bool onTakeItem(XPacket*);
 
     bool onGetSummonSetupInfo(XPacket *);
 

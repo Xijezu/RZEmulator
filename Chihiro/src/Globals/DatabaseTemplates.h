@@ -5,6 +5,16 @@
 #ifndef PROJECT_DATABASETEMPLATES_H
 #define PROJECT_DATABASETEMPLATES_H
 
+#define MAX_DROP_GROUP 10
+
+struct DropGroup {
+    int uid;
+    int drop_item_id[MAX_DROP_GROUP];
+    int drop_min_count[MAX_DROP_GROUP];
+    int drop_max_count[MAX_DROP_GROUP];
+    float drop_percentage[MAX_DROP_GROUP];
+};
+
 struct NPCTemplate {
     uint32      id;
     uint32      x;

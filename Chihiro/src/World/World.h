@@ -43,7 +43,13 @@ public:
 	void AddObjectToWorld(WorldObject* obj);
 	void AddSummonToWorld(Summon* pSummon);
 	void AddMonsterToWorld(Monster* pMonster);
+    void AddItemToWorld(Item* pItem);
+    bool RemoveItemFromWorld(Item* pItem);
     void RemoveObjectFromWorld(WorldObject* obj);
+    void MonsterDropItemToWorld(Unit* pUnit, Item* pItem);
+
+    // Item
+    uint procAddItem(Player* pClient, Item* pItem, bool bIsPartyProcess);
 
 	// Warping
 	void WarpBegin(Player*);
@@ -71,6 +77,8 @@ public:
     uint64 GetPetIndex();
     uint64 GetSummonIndex();
 	uint64 GetSkillIndex();
+
+	std::vector<RespawnObject*> m_vRespawnList{};
 private:
 	static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
 	static uint8 m_ExitCode;
@@ -87,8 +95,6 @@ private:
 	uint64_t s_nPetIndex{0};
 	uint64_t s_nSummonIndex{0};
 	uint64_t s_nSkillIndex{0};
-
-	std::vector<RespawnObject> m_vRespawnList{};
 };
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()

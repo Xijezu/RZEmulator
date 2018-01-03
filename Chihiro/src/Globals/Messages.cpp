@@ -156,11 +156,13 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
 {
     XPacket skillPct(TS_SC_SKILL_LIST);
     skillPct << (uint32_t)pUnit->GetHandle();
-    if(skill_id == 0) {
+    if(skill_id < 0) {
         skillPct << (uint16_t) pUnit->m_vSkillList.size();
         skillPct << (uint8_t) 0; // reset | modification_type ?
 
         for (auto t : pUnit->m_vSkillList) {
+            if(t->m_nSkillUID < 0)
+                continue;
             skillPct << (int32_t) t->m_nSkillID;
             skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->m_nSkillID);
             skillPct << (int8_t) t->m_nSkillLevel;
