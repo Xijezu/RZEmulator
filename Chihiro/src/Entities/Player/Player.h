@@ -7,15 +7,16 @@
 #include "Summon/Summon.h"
 #include "WorldLocation.h"
 #include "TimeSync.h"
+#include "QuestManager.h"
 class WorldSession;
 
 
-class Player : public Unit {
+class Player : public Unit, public QuestEventHandler {
 public:
     explicit Player(uint32);
     ~Player() override;
 
-    static void EnterPacket(XPacket &, Player *);
+    static void EnterPacket(XPacket &, Player *, Player*);
 
     int32 GetPermission()
     { return GetInt32Value(UNIT_FIELD_PERMISSION); }
@@ -113,6 +114,15 @@ public:
 
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
 
+    // Quest start
+    bool IsInProgressQuest(int code);
+    bool IsStartableQuest(int code, bool bForQuestMark);
+    bool IsFinishableQuest(int code);
+    bool CheckFinishableQuestAndGetQuestStruct(int code);
+    void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) override ;
+    void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) override;
+    Quest* FindQuest(int code);
+
     ushort_t ChangeGold(long);
 
     void SendPacket(XPacket& pPacket);
@@ -144,6 +154,7 @@ protected:
 private:
     WorldSession *m_session{nullptr};
     std::string  m_szAccount;
+    QuestManager m_QuestManager{};
 
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };

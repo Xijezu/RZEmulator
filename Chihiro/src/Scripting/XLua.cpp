@@ -44,7 +44,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);
     m_pState.set_function("dlg_text", &XLua::SCRIPT_DialogText, this);
-    m_pState.set_function("dlg_text_without_quest_menu", &XLua::SCRIPT_DialogText, this);
+    m_pState.set_function("dlg_text_without_quest_menu", &XLua::SCRIPT_DialogTextWithoutQuestMenu, this);
     m_pState.set_function("dlg_menu", &XLua::SCRIPT_DialogMenu, this);
     m_pState.set_function("dlg_show", &XLua::SCRIPT_DialogShow, this);
     m_pState.set_function("open_market", &XLua::SCRIPT_ShowMarket, this);
@@ -86,6 +86,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("scv", &XLua::SCRIPT_SetCreatureValue, this);
     m_pState.set_function("get_creature_handle", &XLua::SCRIPT_GetCreatureHandle, this);
     m_pState.set_function("creature_evolution", &XLua::SCRIPT_CreatureEvolution, this);
+    m_pState.set_function("quest_info", &XLua::SCRIPT_QuestInfo, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -205,7 +206,18 @@ void ::XLua::SCRIPT_DialogText(std::string szText)
         return;
 
     player->SetDialogText(szText);
+    sWorld->ShowQuestMenu(player);
 }
+
+void XLua::SCRIPT_DialogTextWithoutQuestMenu(std::string szText)
+{
+    auto player = dynamic_cast<Player *>(m_pUnit);
+    if (player == nullptr)
+        return;
+
+    player->SetDialogText(szText);
+}
+
 
 void XLua::SCRIPT_DialogMenu(std::string szKey, std::string szValue)
 {
@@ -707,4 +719,15 @@ void XLua::SCRIPT_CreatureEvolution(int slot)
     if(summon!= nullptr) {
         summon->DoEvolution();
     }
+}
+
+void XLua::SCRIPT_QuestInfo(int code, sol::variadic_args args)
+{
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player == nullptr)
+        return;
+    int textID = 0;
+    if(args.size() > 1)
+        textID = args[0].get<int>();
+    Messages::SendQuestInformation(player, code, textID);
 }

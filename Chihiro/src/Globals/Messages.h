@@ -57,6 +57,8 @@ static int bits_scramble(int c)
 
 class Messages {
 public:
+    static void GetEncodedInt(XPacket&,uint32);
+    static uint GetStatusCode(WorldObject* pObj, Player* pClient);
     static void SendEXPMessage(Player *, Unit *);
     static void SendHPMPMessage(Player *, Unit *, int, float, bool);
     static void SendLevelMessage(Player *, Unit *);
@@ -81,9 +83,9 @@ public:
     static void SendWearInfo(Player*,Unit*);
     static void BroadcastHPMPMessage(Unit*,int,float,bool);
     static void BroadcastLevelMsg(Unit*);
-    static void GetEncodedInt(XPacket&,uint32);
     static void SendWarpMessage(Player*);
     static void SendCantAttackMessage(Player*,uint,uint,int);
+    static void SendQuestInformation(Player* pPlayer, int code, int text);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

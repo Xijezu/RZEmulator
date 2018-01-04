@@ -8,13 +8,22 @@
 class NPC : public Unit {
 public:
     explicit NPC(NPCTemplate* base);
-    static void EnterPacket(XPacket& pEnterPct, NPC* pNPC);
+    static void EnterPacket(XPacket& pEnterPct, NPC* pNPC, Player* pPlayer);
 
     void LinkQuest(QuestLink* quest_link_info);
     NPCStatus GetStatus() const;
     void SetStatus(NPCStatus status);
     int GetNPCID() const;
+    bool HasStartableQuest(Player* player);
+    bool HasFinishableQuest(Player* player);
+    bool HasInProgressQuest(Player* player);
 
+    void DoEachStartableQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
+    void DoEachInProgressQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
+    void DoEachFinishableQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
+
+    int GetQuestTextID(int code, int progress) const;
+    int GetProgressFromTextID(int code, int textId) const;
 
     NPCTemplate* m_pBase;
 private:

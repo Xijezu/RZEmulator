@@ -75,7 +75,7 @@ class Unit : public WorldObject {
 public:
     virtual ~Unit();
 
-    static void EnterPacket(XPacket&, Unit*);
+    static void EnterPacket(XPacket&, Unit*, Player*);
 
     void AddToWorld() override;
     void RemoveFromWorld() override;

@@ -49,6 +49,9 @@ public:
     void MonsterDropItemToWorld(Unit* pUnit, Item* pItem);
 	bool checkDrop(Unit* pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
 
+	// Quest?
+	int ShowQuestMenu(Player* pPlayer);
+
     // Item
     uint procAddItem(Player* pClient, Item* pItem, bool bIsPartyProcess);
 

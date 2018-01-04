@@ -9,6 +9,7 @@
 #include "World.h"
 #include "Skill.h"
 #include "ArRegion.h"
+#include "NPC.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -54,9 +55,9 @@ Player::~Player()
     m_vSummonList.clear();
 }
 
-void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer)
+void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player* pReceiver)
 {
-    Unit::EnterPacket(pEnterPct, pPlayer);
+    Unit::EnterPacket(pEnterPct, pPlayer, pReceiver);
     pEnterPct << (uint8_t)pPlayer->GetInt32Value(UNIT_FIELD_SEX);
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(UNIT_FIELD_MODEL + 1);
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
@@ -750,7 +751,7 @@ void Player::AddDialogMenu(std::string szKey, std::string szValue)
             m_szDialogMenu += "\t";
             m_szDialogMenu += szKey;
             m_szDialogMenu += "\t";
-            m_szDialogMenu += szValue.empty() ? "0" : szValue;
+            m_szDialogMenu += szValue.empty() ? "" : szValue;
             m_szDialogMenu += "\t";
         }
     }
@@ -1528,4 +1529,85 @@ bool Player::IsSummoner()
     if (info != nullptr)
         return info->job_class == 4;
     return false;
+}
+
+bool Player::IsInProgressQuest(int code)
+{
+    bool result{false};
+
+    auto q =m_QuestManager.FindQuest(code);
+    if(q != nullptr)
+        result = !q->IsFinishable();
+    else
+        result = false;
+    return result;
+}
+
+bool Player::IsStartableQuest(int code, bool bForQuestMark)
+{
+    auto qbs = sObjectMgr->GetQuestBase(code);
+    if (qbs->nLimitLevel - GetLevel() > 4
+        || qbs->nLimitJobLevel > GetCurrentJLv()
+        || bForQuestMark
+           && qbs->nLimitIndication != 0
+           && GetLevel() - qbs->nLimitLevel > 12)
+        return false;
+
+    if (qbs->nLimitJob != 0) {
+        if (qbs->nLimitJob != GetCurrentJob())
+            return false;
+    } else {
+        if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0)
+            && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0)
+            && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0)
+            && (!IsSummoner() || (qbs->LimitFlag & 0x80) == 0))
+            return false;
+    }
+    if ((GetRace() != 3 || (qbs->LimitFlag & 8) == 0)
+        && (GetRace() != 4 || (qbs->LimitFlag & 2) == 0)
+        && (GetRace() != 5 || (qbs->LimitFlag & 4) == 0))
+        return false;
+    int fgid = qbs->nLimitFavorGroupID;
+    if(fgid == 999) {
+        auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(GetLastContactLong("npc")));
+
+        if(npc != nullptr)
+            fgid = npc->m_pBase->id;
+        else
+            fgid = 0;
+    }
+    // TODO: Favor
+    return m_QuestManager.IsStartableQuest(code);
+}
+
+bool Player::IsFinishableQuest(int code)
+{
+    return CheckFinishableQuestAndGetQuestStruct(code);
+}
+
+bool Player::CheckFinishableQuestAndGetQuestStruct(int code)
+{
+    bool result{false};
+    auto q1 = m_QuestManager.FindQuest(code);
+    if(q1 != nullptr && q1->IsFinishable())  {
+        result = true;
+    } else {
+        result = false;
+    }
+    return result;
+}
+
+void Player::onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus)
+{
+
+}
+
+void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress)
+{
+
+}
+
+Quest *Player::FindQuest(int code)
+{
+    return m_QuestManager.FindQuest(code);
 }

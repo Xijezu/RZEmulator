@@ -43,9 +43,9 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     SetLevel(mb->level);
 }
 
-void Monster::EnterPacket(XPacket &pEnterPct, Monster *monster)
+void Monster::EnterPacket(XPacket &pEnterPct, Monster *monster, Player* pPlayer)
 {
-    Unit::EnterPacket(pEnterPct, monster);
+    Unit::EnterPacket(pEnterPct, monster, pPlayer);
     //pEnterPct << (uint32_t)0;
     Messages::GetEncodedInt(pEnterPct, bits_scramble(monster->m_Base->id));
     // pEnterPct << (uint32_t)0;

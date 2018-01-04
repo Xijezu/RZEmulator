@@ -24,9 +24,9 @@
 #include "ClientPackets.h"
 #include "ArRegion.h"
 // static
-void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon)
+void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player* pPlayer)
 {
-    Unit::EnterPacket(pEnterPct, pSummon);
+    Unit::EnterPacket(pEnterPct, pSummon, pPlayer);
     pEnterPct << pSummon->m_pMaster->GetHandle();
     Messages::GetEncodedInt(pEnterPct, pSummon->GetSummonCode());
     pEnterPct.fill(pSummon->GetName(), 19);

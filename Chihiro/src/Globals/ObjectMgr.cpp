@@ -1413,3 +1413,12 @@ void ObjectMgr::AddNPCToWorld()
         }
     }
 }
+
+QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
+{
+    for(auto& l : _questLinkStore) {
+        if(l.code == code && (l.nStartTextID == start_id || start_id == 0))
+            return &l;
+    }
+    return nullptr;
+}

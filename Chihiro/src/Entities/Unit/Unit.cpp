@@ -62,9 +62,9 @@ void Unit::Update(uint32 p_time)
         return;
 }
 
-void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
+void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player* pPlayer)
 {
-    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_STATUS);
+    pEnterPct << (uint32_t) Messages::GetStatusCode(pUnit, pPlayer);
     pEnterPct << pUnit->GetOrientation();
     pEnterPct << (int32_t) pUnit->GetHealth();
     pEnterPct << (int32_t) pUnit->GetMaxHealth();

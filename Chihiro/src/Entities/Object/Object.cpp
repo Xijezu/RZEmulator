@@ -352,16 +352,16 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
 
     switch (GetSubType()) {
         case ST_NPC:
-            NPC::EnterPacket(packet, dynamic_cast<NPC *>(this));
+            NPC::EnterPacket(packet, dynamic_cast<NPC *>(this), pPlayer);
             break;
         case ST_Player:
-            Player::EnterPacket(packet, dynamic_cast<Player *>(this));
+            Player::EnterPacket(packet, dynamic_cast<Player *>(this), pPlayer);
             break;
         case ST_Summon:
-            Summon::EnterPacket(packet, dynamic_cast<Summon *>(this));
+            Summon::EnterPacket(packet, dynamic_cast<Summon *>(this), pPlayer);
             break;
         case ST_Mob:
-            Monster::EnterPacket(packet, dynamic_cast<Monster*>(this));
+            Monster::EnterPacket(packet, dynamic_cast<Monster*>(this), pPlayer);
             break;
         case ST_Object:
             Item::EnterPacket(packet, dynamic_cast<Item*>(this));

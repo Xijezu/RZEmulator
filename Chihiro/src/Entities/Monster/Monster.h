@@ -206,7 +206,7 @@ struct DamageTag {
 class Monster : public Unit {
 public:
 
-    static void EnterPacket(XPacket& pEnterPct, Monster* monster);
+    static void EnterPacket(XPacket& pEnterPct, Monster* monster, Player* pPlayer);
 
     explicit Monster(uint handle, MonsterBase* mb);
     ~Monster() = default;

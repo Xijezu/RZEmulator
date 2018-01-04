@@ -14,7 +14,7 @@ public:
 
     static void DB_InsertSummon(Player*,Summon*);
     static void DB_UpdateSummon(Player*,Summon*);
-    static void EnterPacket(XPacket &, Summon *);
+    static void EnterPacket(XPacket &, Summon *, Player* pPlayer);
 
     void OnAfterReadSummon();
     uint32_t GetCardHandle();

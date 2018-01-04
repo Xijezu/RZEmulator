@@ -81,6 +81,7 @@ public:
     MonsterBase* const GetMonsterInfo(uint idx);
     std::vector<MarketInfo>* const GetMarketInfo(const std::string&);
     QuestBaseServer* const GetQuestBase(int code);
+    QuestLink* const GetQuestLink(int code, int start_id);
     bool checkQuestTypeFlag(QuestType type, int flag);
 
     int GetNeedJpForJobLevelUp(uint, uint);

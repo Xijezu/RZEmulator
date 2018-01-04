@@ -43,6 +43,7 @@ private:
     int SCRIPT_GetNPCID();
     void SCRIPT_DialogTitle(std::string);
     void SCRIPT_DialogText(std::string);
+    void SCRIPT_DialogTextWithoutQuestMenu(std::string);
     void SCRIPT_DialogMenu(std::string, std::string);
     void SCRIPT_DialogShow();
 
@@ -81,6 +82,9 @@ private:
     void SCRIPT_SetCurrentLocationID(int);
 
     void SCRIPT_Warp(sol::variadic_args);
+
+    // Quest
+    void SCRIPT_QuestInfo(int code, sol::variadic_args args);
 
     Unit *m_pUnit{nullptr};
     sol::state m_pState{ };

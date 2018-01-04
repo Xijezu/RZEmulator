@@ -20,6 +20,9 @@
 #include "ClientPackets.h"
 #include "World.h"
 #include "Skill.h"
+#include "NPC.h"
+#include "MemPool.h"
+#include "ObjectMgr.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -495,4 +498,95 @@ void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, 
     atkPct << target;
     atkPct << reason;
     pPlayer->SendPacket(atkPct);
+}
+
+uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
+{
+    uint v2{0};
+    if(pObj->GetSubType() != ST_Player) {
+        if(pObj->GetSubType() == ST_NPC) {
+            auto npc = dynamic_cast<NPC*>(pObj);
+            if(npc->HasFinishableQuest(pClient))
+                v2 |= 0x400;
+            else if(npc->HasStartableQuest(pClient))
+                v2 |= 0x100;
+            else if(npc->HasInProgressQuest(pClient))
+                v2 |= 0x200;
+        }
+    }
+    return v2;
+}
+
+void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
+{
+    auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc")));
+    std::string strButton{};
+    std::string strTrigger{};
+    if(true) {
+        int progress = 0;
+        int type = 7;
+
+        if(text != 0) {
+            progress = npc->GetProgressFromTextID(code, text);
+            if(progress == 1)
+                type = 7;
+            if(progress == 2)
+                type = 8;
+        } else {
+            if(pPlayer->IsStartableQuest(code, false))
+                progress = 0;
+            else
+                progress = pPlayer->IsFinishableQuest(code) ? 2 : 1;
+        }
+        Quest* q = pPlayer->FindQuest(code);
+        int textID = text;
+        if(textID == 0)
+            textID = npc != nullptr ? npc->GetQuestTextID(code, progress) : q->m_Instance.nStartID;
+        if(npc == nullptr) {
+            if(q->m_QuestBase->nEndType != 1 || progress != 2) {
+                type = 7;
+                progress = 1;
+            } else {
+                QuestLink* l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
+                if(l != nullptr && l->nEndTextID != 0)
+                    textID = l->nEndTextID;
+                type = 8;
+            }
+        }
+        pPlayer->SetDialogTitle("Guide Arocel", type);
+        std::string buf = string_format("QUEST|%u|%u", code, textID);
+        pPlayer->SetDialogText(buf);
+        auto rQuestBase = sObjectMgr->GetQuestBase(code);
+
+        if(progress != 0) {
+            if(pPlayer->IsFinishableQuest(code)) {
+                int i = 0;
+                for(i = 0; i < 3; i++) {
+                    if(rQuestBase->OptionalReward[i].nItemCode == 0)
+                        break;
+
+                    strTrigger = string_format("end_quest( %u, %u )", code, i);
+                    pPlayer->AddDialogMenu("NULL", strTrigger);
+                }
+                if(i != 0) {
+                    strButton = "REWARD";
+                    strTrigger = std::to_string(rQuestBase->nCode);
+                } else {
+                    strTrigger = string_format("end_quest( %u, -1 )", code);
+                    pPlayer->AddDialogMenu("NULL", strTrigger);
+                    strButton = "REWARD";
+                    strTrigger = std::to_string(rQuestBase->nCode);
+                }
+            } else {
+                strButton = "OK";
+                strTrigger = "";
+            }
+        } else {
+            strTrigger = string_format("start_quest( %u, %u )", code, textID);
+            pPlayer->AddDialogMenu("START", strTrigger);
+            strTrigger = "";
+            strButton = "REJECT";
+        }
+        pPlayer->AddDialogMenu(strButton, strTrigger);
+    }
 }

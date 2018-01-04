@@ -11,6 +11,7 @@
 #include "WorldSession.h"
 #include "MemPool.h"
 #include "GameRule.h"
+#include "NPC.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -548,4 +549,36 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     }
 
     return (percentage * 1) * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod >= irand(1, 0x5F5E100u);
+}
+
+int World::ShowQuestMenu(Player *pPlayer)
+{
+    auto obj = sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc"));
+    auto npc = dynamic_cast<NPC*>(obj);
+    if(npc != nullptr) {
+        int* m_QuestProgress = new int{0};
+        auto functor = [=](Player* pPlayer, QuestLink* linkInfo) {
+            std::string szBuf{};
+            std::string szButtonName{};
+            auto qbs = sObjectMgr->GetQuestBase(linkInfo->code);
+            if((qbs->nType != QuestType::QT_RandomKillIndividual && qbs->nType != QuestType::QT_RandomCollect) || (*m_QuestProgress != 0)) {
+                int qpid = linkInfo->nStartTextID;
+                if(*m_QuestProgress == 1)
+                    qpid = linkInfo->nInProgressTextID;
+                else if(*m_QuestProgress == 2)
+                    qpid = linkInfo->nEndTextID;
+                szBuf = string_format("quest_info( %u, %u )", linkInfo->code, qpid);
+                szButtonName = string_format("QUEST|%u|%u", qbs->nQuestTextID, m_QuestProgress);
+                pPlayer->AddDialogMenu(szButtonName, szBuf);
+            }
+        };
+
+        npc->DoEachStartableQuest(pPlayer, functor);
+        *m_QuestProgress = 1;
+        npc->DoEachInProgressQuest(pPlayer, functor);
+        *m_QuestProgress = 2;
+        npc->DoEachFinishableQuest(pPlayer, functor);
+        delete m_QuestProgress;
+    }
+    return 0;
 }
