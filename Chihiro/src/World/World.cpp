@@ -67,6 +67,7 @@ void World::InitWorld()
         auto ro = new RespawnObject{nri};
         m_vRespawnList.emplace_back(ro);
     }
+    sObjectMgr->AddNPCToWorld();
 
 	MX_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }

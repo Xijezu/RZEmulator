@@ -15,7 +15,7 @@ public:
 
     Item *AllocItem();
     Item *AllocGold(uint64 gold, GenerateCode gcode);
-    void AllocMiscHandle(WorldObject &obj);
+    void AllocMiscHandle(WorldObject* obj);
     void AllocItemHandle(Item *item);
     Player *AllocPlayer();
     Summon *AllocSummon(uint);

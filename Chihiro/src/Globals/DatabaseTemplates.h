@@ -15,16 +15,6 @@ struct DropGroup {
     float drop_percentage[MAX_DROP_GROUP];
 };
 
-struct NPCTemplate {
-    uint32      id;
-    uint32      x;
-    uint32      y;
-    uint32      z;
-    uint32      face;
-    uint32      local_flag;
-    std::string contact_script;
-};
-
 struct LevelResourceTemplate {
     int level{};
     int64 normal_exp{};

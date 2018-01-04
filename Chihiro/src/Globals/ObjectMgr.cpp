@@ -24,6 +24,8 @@ bool ObjectMgr::InitGameContent()
         return false;
     if (!LoadJobLevelBonus())
         return false;
+    if(!LoadQuestResource() || !LoadQuestLinkResource())
+        return false;
     if (!LoadJobResource())
         return false;
     if(!LoadSummonLevelResource())
@@ -232,6 +234,130 @@ bool ObjectMgr::LoadMonsterResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
+
+bool ObjectMgr::LoadQuestResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM QuestResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field *field = result->Fetch();
+        int idx = 0;
+
+        QuestBaseServer q{};
+        q.nCode = field[idx++].GetInt32();
+        q.nQuestTextID = field[idx++].GetInt32();
+        q.nSummaryTextID = field[idx++].GetInt32();
+        q.nStatusTextID = field[idx++].GetInt32();
+        q.nLimitLevel = field[idx++].GetInt32();
+        q.nLimitJobLevel = field[idx++].GetInt32();
+        q.nLimitIndication = field[idx++].GetUInt8();
+
+        int limit_deva = field[idx++].GetInt32();
+        int limit_asura = field[idx++].GetInt32();
+        int limit_gaia = field[idx++].GetInt32();
+
+        int limit_fighter = field[idx++].GetInt32();
+        int limit_hunter = field[idx++].GetInt32();
+        int limit_magician = field[idx++].GetInt32();
+        int limit_summoner = field[idx++].GetInt32();
+
+        q.nLimitJob = field[idx++].GetInt32();
+        q.nLimitFavorGroupID = field[idx++].GetInt32();
+        q.nLimitFavor = field[idx++].GetInt32();
+        q.bIsRepeatable = field[idx++].GetUInt8() == 1;
+        q.nInvokeCondition = field[idx++].GetInt32();
+        q.nInvokeValue = field[idx++].GetInt32();
+        q.nType = (QuestType)field[idx++].GetInt32();
+        for (int &i : q.nValue) {
+            i = field[idx++].GetInt32();
+        }
+        q.nDropGroupID = field[idx++].GetInt32();
+        q.nQuestDifficulty = field[idx++].GetInt32();
+        q.nFavorGroupID = field[idx++].GetInt32();
+        q.nHateGroupID = field[idx++].GetInt32();
+        q.nFavor = field[idx++].GetInt32();
+        q.nEXP = field[idx++].GetUInt64();
+        q.nJP = field[idx++].GetInt32();
+        q.nGold = field[idx++].GetUInt64();
+        q.DefaultReward.nItemCode = field[idx++].GetInt32();
+        q.DefaultReward.nLevel = field[idx++].GetInt32();
+        q.DefaultReward.nQuantity = field[idx++].GetInt32();
+        for (auto &i : q.OptionalReward) {
+            i.nItemCode = field[idx++].GetInt32();
+            i.nLevel = field[idx++].GetInt32();
+            i.nQuantity = field[idx++].GetInt32();
+        }
+        for (int &i : q.nForeQuest) {
+            i = field[idx++].GetInt32();
+        }
+        q.bForceCheckType = field[idx++].GetUInt8() == 1;
+        q.strAcceptScript = field[idx++].GetString();
+        q.strClearScript = field[idx++].GetString();
+        q.strScript = field[idx].GetString();
+
+        if (limit_asura != 0)
+            q.LimitFlag |= 4;
+        if (limit_gaia != 0)
+            q.LimitFlag |= 8u;
+        if (limit_deva != 0)
+            q.LimitFlag |= 2u;
+        if (limit_hunter != 0)
+            q.LimitFlag |= 0x20u;
+        if (limit_fighter != 0)
+            q.LimitFlag |= 0x10u;
+        if (limit_magician != 0)
+            q.LimitFlag |= 0x40u;
+        if (limit_summoner != 0)
+            q.LimitFlag |= 0x80u;
+
+        _questTemplateStore[q.nCode] = q;
+
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+bool ObjectMgr::LoadQuestLinkResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM QuestLinkResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field *field = result->Fetch();
+        int idx = 0;
+
+        QuestLink ql{};
+        ql.nNPCID = field[idx++].GetInt32();
+        ql.code = field[idx++].GetInt32();
+        ql.bLF_Start = field[idx++].GetUInt8() == 1;
+        ql.bLF_Progress = field[idx++].GetUInt8() == 1;
+        ql.bLF_End = field[idx++].GetUInt8() == 1;
+        ql.nStartTextID = field[idx++].GetInt32();
+        ql.nInProgressTextID = field[idx++].GetInt32();
+        ql.nEndTextID = field[idx++].GetInt32();
+
+        _questLinkStore.emplace_back(ql);
+
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u QuestLinks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 
 bool ObjectMgr::LoadDropGroupResource()
 {
@@ -621,10 +747,10 @@ bool ObjectMgr::LoadJobLevelBonus()
 bool ObjectMgr::LoadNPCResource()
 {
     uint32      oldMSTime = getMSTime();
-    QueryResult result    = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script FROM NPCResource;");
+    QueryResult result    = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script, spawn_type FROM NPCResource;");
 
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPC templates. DB packetHandler `NPCResource` is empty!");
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. DB table `NPCResource` is empty!");
         return false;
     }
 
@@ -640,21 +766,12 @@ bool ObjectMgr::LoadNPCResource()
         npc.face           = field[4].GetUInt32();
         npc.local_flag     = field[5].GetUInt32();
         npc.contact_script = field[6].GetString();
+        npc.spawn_type     = field[7].GetInt32();
 
-        if (npc.local_flag == 0) {
-            auto _npc = new NPC{ };
-            _npc->Relocate((float) npc.x, (float) npc.y, (float) npc.z);
-            _npc->SetUInt32Value(UNIT_FIELD_UID, npc.id);
-            _npc->SetLayer(0);
-            _npc->m_pBase = npc;
-            sMemoryPool->AllocMiscHandle(*_npc);
-            auto region = sArRegion->GetRegion(_npc);
-            region->AddObject(_npc);
-            _npcStore.emplace_back(_npc);
-            ++count;
-        }
+        _npcTemplateStore[npc.id] = npc;
+
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u NPC templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u NPCs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
 
@@ -1145,4 +1262,154 @@ DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
     if(_dropTemplateStore.count(drop_group_id) == 1)
         return &_dropTemplateStore[drop_group_id];
     return nullptr;
+}
+
+QuestBaseServer* const ObjectMgr::GetQuestBase(int code)
+{
+    if(_questTemplateStore.count(code) == 1)
+        return &_questTemplateStore[code];
+    return nullptr;
+}
+
+bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
+{
+    switch(type)
+    {
+        case QuestType::QT_Misc:
+            return (flag & 1) != 0;
+
+        case QuestType::QT_KillTotal:
+            return (flag & 2) != 0;
+
+        case QuestType::QT_KillIndividual:
+            return (flag & 4) != 0;
+
+        case QuestType::QT_Collect:
+            return (flag & 8) != 0;
+
+        case QuestType::QT_HuntItem:
+            return (flag & 0x10) != 0;
+
+        case QuestType::QT_HuntItemFromAnyMonsters:
+            return (flag & 0x1000) != 0;
+
+        case QuestType::QT_LearnSkill:
+            return (flag & 0x20) != 0;
+
+        case QuestType::QT_UpgradeItem:
+            return (flag & 0x40) != 0;
+
+        case QuestType::QT_Contact:
+            return (flag & 0x80) != 0;
+
+        case QuestType::QT_JobLevel:
+            return (flag & 0x100) != 0;
+
+        case QuestType::QT_Parameter:
+            return (flag & 0x200) != 0;
+
+        case QuestType::QT_RandomKillIndividual:
+            return (flag & 0x400) != 0;
+
+        case QuestType::QT_RandomCollect:
+            return (flag & 0x800) != 0;
+
+        default:
+            return false;
+    }
+
+}
+
+bool ObjectMgr::IsInRandomPoolMonster(int group_id, int monster_id)
+{
+    bool result;
+//             ArMoveVector::MOVE_INFO *v3; // eax@11
+//             ArMoveVector::MOVE_INFO *v4; // eax@14
+//             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
+//             std::_Vector_iterator<GameContent::RANDOM_POOL_INFO,std::allocator<GameContent::RANDOM_POOL_INFO> > itRandom; // [sp+10h] [bp-10h]@8
+//             std::_Vector_iterator<RANDOM_POOL,std::allocator<RANDOM_POOL> > it; // [sp+18h] [bp-8h]@5
+
+    if (group_id == monster_id)
+    {
+        result = true;
+    }
+    else
+    {
+        if (group_id < 0)
+        {
+/*
+                    std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
+                        &this,
+                        dword_64F594,
+                        &g_vRandomPool);
+                    it.baseclass_0.baseclass_0.baseclass_0._Mycont = this.baseclass_0.baseclass_0._Mycont;
+                    it.baseclass_0._Myptr = this._Myptr;
+                    while ( 1 )
+                    {
+                        std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
+                            &itRandom,
+                            dword_64F598,
+                            &g_vRandomPool);
+                        if ( std::_Vector_const_iterator<X2D::Point<float>_std::allocator<X2D::Point<float>>>::operator__(
+                                 &it,
+                                 &itRandom) )
+                            break;
+                        if ( group_id == LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it)->end.x) )
+                        {
+                            v3 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it);
+                            std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
+                                &itRandom,
+                                LODWORD(v3->end.z),
+                                &v3->end.y);
+                            while ( 1 )
+                            {
+                                v4 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it);
+                                std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
+                                    &this,
+                                    LODWORD(v4->end.face),
+                                    &v4->end.y);
+                                if ( std::_Vector_const_iterator<X2D::Point<float>_std::allocator<X2D::Point<float>>>::operator__(
+                                         &itRandom,
+                                         &this) )
+                                    break;
+                                if ( LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&itRandom)->end.x) == monster_id )
+                                    return 1;
+                                std::_Vector_const_iterator<std::pair<GameContent::HUNTAHOLIC_MONSTER_RESPAWN_INFO_const___unsigned_long>_std::allocator<std::pair<GameContent::HUNTAHOLIC_MONSTER_RESPAWN_INFO_const___unsigned_long>>>::operator__(&itRandom);
+                            }
+                            break;
+                        }
+                        std::_Vector_const_iterator<StructCreature::AdditionalDamageInfo_std::allocator<StructCreature::AdditionalDamageInfo>>::operator__(&it);
+                    }
+*/
+            result = false;
+        }
+        else
+        {
+            result = false;
+        }
+    }
+    return result;
+}
+
+NPC *ObjectMgr::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
+{
+    auto npc = new NPC{npc_info};
+    npc->SetLayer(layer);
+    npc->CalculateStat();
+    for(auto& ql : _questLinkStore) {
+        if(ql.nNPCID == npc->m_pBase->id) {
+            npc->LinkQuest(&ql);
+        }
+    }
+    return npc;
+}
+
+void ObjectMgr::AddNPCToWorld()
+{
+    for(auto& npc : _npcTemplateStore) {
+        if(npc.second.spawn_type == NPC_SpawnType::NPC_ST_Normal && npc.second.local_flag == 0) {
+            auto nn = GetNewNPC(&npc.second, 0);
+            sWorld->AddObjectToWorld(nn);
+        }
+    }
 }

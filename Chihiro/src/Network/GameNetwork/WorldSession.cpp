@@ -759,7 +759,7 @@ bool WorldSession::onContact(XPacket *pRecvPct)
 
     if (npc != nullptr) {
         _player->SetLastContact("npc", handle);
-        sScriptingMgr->RunString(_player, npc->m_pBase.contact_script);
+        sScriptingMgr->RunString(_player, npc->m_pBase->contact_script);
     }
     return true;
 }

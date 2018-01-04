@@ -10,6 +10,8 @@
 #include "Dynamic/UnorderedMap.h"
 #include "SkillBase.h"
 #include "Monster.h"
+#include "NPCBase.h"
+#include "QuestBase.h"
 
 class NPC;
 
@@ -37,6 +39,9 @@ public:
     typedef UNORDERED_MAP<uint32, LevelResourceTemplate>        LevelTemplateContainer;
     typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
     typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
+    typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
+    typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
+    typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
 
     bool LoadStatResource();
     bool LoadJobResource();
@@ -46,6 +51,8 @@ public:
     bool LoadItemResource();
     bool LoadSummonLevelResource();
     bool LoadSummonResource();
+    bool LoadQuestResource();
+    bool LoadQuestLinkResource();
     bool LoadDropGroupResource();
     bool LoadMarketResource();
     bool LoadWorldLocation();
@@ -61,6 +68,9 @@ public:
     void SetWayPointType(int waypoint_id, int type);
     void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
 
+    NPC* GetNewNPC(NPCTemplate* npc_info, uint8 layer);
+    void AddNPCToWorld();
+
     CreatureStat* const GetStatInfo(uint stat_id);
     ItemTemplate* const GetItemBase(uint item_id);
     uint64 GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying);
@@ -70,12 +80,15 @@ public:
     SummonResourceTemplate* const GetSummonBase(uint idx);
     MonsterBase* const GetMonsterInfo(uint idx);
     std::vector<MarketInfo>* const GetMarketInfo(const std::string&);
+    QuestBaseServer* const GetQuestBase(int code);
+    bool checkQuestTypeFlag(QuestType type, int flag);
 
     int GetNeedJpForJobLevelUp(uint, uint);
     int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
     long GetNeedExp(int level);
     uint64 GetNeedSummonExp(int level);
     Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler* pDeleteHandler, bool bNeedLock);
+    bool IsInRandomPoolMonster(int group_id, int monster_id);
 
     DropGroup* GetDropGroupInfo(int drop_group_id);
     bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, long &nItemCount);
@@ -101,8 +114,9 @@ private:
     SkillBaseContainer              _skillBaseStore;
     MonsterBaseContainer            _monsterBaseStore;
     DropGroupTemplateContainer      _dropTemplateStore;
-
-    std::vector<NPC*>               _npcStore;
+    QuestResourceTemplateContainer  _questTemplateStore;
+    QuestLinkTemplateContainer      _questLinkStore;
+    NPCTemplateContainer            _npcTemplateStore;
 
     ushort isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level);
     void RegisterSkillTree(SkillTreeBase base);

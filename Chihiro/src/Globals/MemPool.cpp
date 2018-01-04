@@ -15,12 +15,12 @@ Item *MemoryPoolMgr::AllocItem()
     return p;
 }
 
-void MemoryPoolMgr::AllocMiscHandle(WorldObject &obj)
+void MemoryPoolMgr::AllocMiscHandle(WorldObject* obj)
 {
-    obj.SetUInt32Value(UNIT_FIELD_HANDLE, m_nMiscTop++);
+    obj->SetUInt32Value(UNIT_FIELD_HANDLE, m_nMiscTop++);
     m_nItemTop++;
     //m_hsMisc.emplace(obj.GetHandle(), obj);
-    m_hsMisc.insert(std::make_pair<uint, WorldObject *>(obj.GetHandle(), &obj));
+    m_hsMisc.insert(std::make_pair<uint, WorldObject *>(obj->GetHandle(), (WorldObject*)obj));
 }
 
 Player *MemoryPoolMgr::AllocPlayer()
