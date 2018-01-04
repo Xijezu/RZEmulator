@@ -23,7 +23,7 @@
 #include "MemPool.h"
 #include "ClientPackets.h"
 
-Skill::Skill(Unit *pOwner, int _uid, int _id) : m_nErrorCode(0)
+Skill::Skill(Unit *pOwner, uint64 _uid, int _id) : m_nErrorCode(0)
 {
     m_nSkillUID = _uid;
     m_nSkillID = _id;

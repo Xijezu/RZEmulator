@@ -308,3 +308,8 @@ bool Summon::DoEvolution()
     }
     return false;
 }
+
+bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList)
+{
+    return Unit::TranslateWearPosition(pos, item, ItemList);
+}

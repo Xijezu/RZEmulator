@@ -149,6 +149,7 @@ public:
 
     void SetLevel(uint8 lvl)
     { SetInt32Value(UNIT_FIELD_LEVEL, lvl); }
+    int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
 // 	uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
 // 	uint32 getRaceMask() const { return 1 << (getRace() - 1); }
 // 	uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
@@ -230,21 +231,19 @@ public:
 
     void CancelSkill();
     void CancelAttack();
+    void CalculateStat();
+    float GetItemChance() const;
 
     // Event handler
     EventProcessor _Events;
 
-    void CalculateStat();
-    void applyStatByItem();
-    virtual void applyJobLevelBonus() = 0;
-    void getAmplifiedStatByAmplifier(CreatureStat &);
-    void finalizeStat();
-    void calcAttribute(CreatureAtributeServer &attribute);
-    void applyItemEffect();
-    void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
+    virtual bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList);
     Item *GetWornItem(ItemWearType);
-    virtual uint16_t putonItem(ItemWearType pos, Item *item) = 0;
-    virtual uint16_t putoffItem(ItemWearType) = 0;
+    ushort Puton(ItemWearType pos, Item* item);
+    ushort Putoff(ItemWearType pos);
+    ItemWearType GetAbsoluteWearPos(ItemWearType pos);
+    ItemClass GetWeaponClass();
+    bool IsWearShield();
 
     ExpertMod                        m_Expert[10]{};
     CreatureStat                     m_cStat{ };
@@ -255,13 +254,14 @@ public:
     CreatureAttributeAmplifier       m_AttributeAmplifier{ };
     CreatureElementalResist          m_Resist{};
     CreatureElementalResistAmplifier m_ResistAmplifier{ };
+    int m_nUnitExpertLevel{0};
 
 // 	GameObject* GetGameObject(uint32 spellId) const;
 // 	void AddGameObject(GameObject* gameObj);
 // 	void RemoveGameObject(GameObject* gameObj, bool del);
 // 	void RemoveGameObject(uint32 spellid, bool del);
 // 	void RemoveAllGameObjects();
-    Unit(bool isWorldObject);
+    explicit Unit(bool isWorldObject);
     Item       *m_anWear[Item::MAX_ITEM_WEAR]{ };
     std::vector<Skill*> m_vSkillList;
     uint m_nMovableTime{0};
@@ -270,10 +270,24 @@ public:
 
     float m_nRegenHP{}, m_fRegenMP{};
 protected:
+    void applyStatByItem();
+    virtual void applyJobLevelBonus() { };
+    void applyPassiveSkillEffect();
+    virtual void applyPassiveSkillEffect(Skill* skill);
+    void getAmplifiedStatByAmplifier(CreatureStat &);
+    void finalizeStat();
+    void calcAttribute(CreatureAtributeServer &attribute);
+    void applyItemEffect();
+    void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
+
+
     virtual void onRegisterSkill(int,int,int,int) { };
     virtual void onExpChange() { };
     virtual void onAttackAndSkillProcess();
     virtual void onCantAttack(uint target, uint t) { };
+
+    virtual uint16_t putonItem(ItemWearType pos, Item *item);
+    virtual uint16_t putoffItem(ItemWearType);
     // Overwritten in Monster
     virtual int onDamage(Unit* pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical)
     { return nDamage; }

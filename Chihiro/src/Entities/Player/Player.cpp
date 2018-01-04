@@ -323,9 +323,11 @@ bool Player::ReadEquipItem()
                 unit = GetSummon(summon_id);
             }
             Item* item = FindItemBySID(sid);
+            std::vector<int> indices{ };
             if(item != nullptr && unit != nullptr) {
                 if(unit->m_anWear[wear_info] == nullptr) {
-                    if(true) {// TODO: TranslateWearPosition
+                    auto iwt = (ItemWearType)wear_info;
+                    if(TranslateWearPosition(iwt, item, &indices)) {
                         unit->m_anWear[wear_info] = item;
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
                         item->m_bIsNeedUpdateToDB = true;
@@ -636,21 +638,25 @@ Item *Player::FindItemByHandle(uint32_t handle)
     return nullptr;
 }
 
+// TODO
 uint16_t Player::putonItem(ItemWearType pos, Item *item)
 {
-    if (pos > Item::MAX_ITEM_WEAR || pos < 0)
-        return TS_RESULT_ACCESS_DENIED;
+    uint16_t result;
 
-    if(m_anWear[pos] != nullptr) {
-        m_anWear[pos]->m_Instance.nWearInfo = WearNone;
-        m_anWear[pos]->m_bIsNeedUpdateToDB = true;
+    if(pos == ItemWearType::WearShield) {
+        if(item->m_pItemBase->group == 1)
+            Unit::SetFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon);
     }
-
-    item->m_bIsNeedUpdateToDB  = true;
-    item->m_Instance.nWearInfo = pos;
-    m_anWear[pos] = item;
-    SendItemWearInfoMessage(item, this);
-    return TS_RESULT_SUCCESS;
+    result = Unit::putonItem(pos, item);
+    if(result == 0) {
+        if(m_anWear[pos] != nullptr && m_anWear[pos]->GetHandle() == item->GetHandle()) {
+            // Weight modifier
+        }
+        // UpdateWeight
+        // UpdateQuest
+        result = 0;
+    }
+    return result;
 }
 
 uint16_t Player::putoffItem(ItemWearType pos)
@@ -1173,4 +1179,353 @@ void Player::onCantAttack(uint target, uint t)
             Messages::SendCantAttackMessage(this, this->GetHandle(), target, TS_RESULT_TOO_FAR);
         }
     }
+}
+
+bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *vpOverlappItemList)
+{
+    if (!Unit::TranslateWearPosition(pos, pItem, vpOverlappItemList))
+        return false;
+    if ((pItem->m_Instance.Flag & 1) != 0)
+        return false;
+    bool ok{false};
+    if (pItem->m_pItemBase->limit_hunter != 0 && IsHunter())
+        ok  = true;
+    if (pItem->m_pItemBase->limit_fighter != 0 && IsFighter())
+        ok  = true;
+    if (pItem->m_pItemBase->limit_magician != 0 && IsMagician())
+        ok  = true;
+    if (pItem->m_pItemBase->limit_summoner != 0 && IsSummoner())
+        ok  = true;
+
+    if (!ok
+        || (GetRace() == 3 && pItem->m_pItemBase->limit_gaia == 0)
+        || (GetRace() == 4 && pItem->m_pItemBase->limit_deva == 0)
+        || (GetRace() == 5 && pItem->m_pItemBase->limit_asura == 0))
+        return false;
+
+    Item *item1{nullptr}, *item2{nullptr};
+    if (pos == ItemWearType::WearShield) {
+        if (pItem->m_pItemBase->group == ItemGroup::Bullet) {
+            item1 = m_anWear[0];
+            if (item1 == nullptr
+                || item1->m_pItemBase->iclass != ItemClass::ClassCrossBow
+                || item1->m_pItemBase->iclass != ItemClass::ClassLightBow
+                || item1->m_pItemBase->iclass != ItemClass::ClassHeavyBow)
+                return false;
+        }
+        if (pItem->m_pItemBase->group == ItemGroup::Weapon) {
+            item1 = m_anWear[0];
+            if (item1 == nullptr)
+                return false;
+
+            if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandSword && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandSword) {
+                // TODO: Check for PassiveSkill
+                pos = ItemWearType::WearWeapon;
+            } else if (item1->m_pItemBase->iclass == ItemClass::ClassDagger && pItem->m_pItemBase->iclass == ItemClass::ClassDagger) {
+                // TODO: Check for PassiveSkill
+                pos = ItemWearType::WearWeapon;
+            } else if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe) {
+                // TODO: CheckForPassiveSkill
+                pos = ItemWearType::WearWeapon;
+            }
+        }
+    }
+    if (pos == ItemWearType::WearDecoShield) {
+        if (pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandSword
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandSword
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoDagger
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandSpear
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandAxe
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandMace
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandMace
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoHeavyBow
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoLightBow
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoCrossBow
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandStaff
+            || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandStaff
+            || pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe) {
+            item1 = m_anWear[1];
+            item2 = m_anWear[0];
+            if (item1 != nullptr
+                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                && item1->m_pItemBase->iclass != ItemClass::ClassDagger
+                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
+                || item2 == nullptr
+                || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                || item2->m_pItemBase->iclass != ItemClass::ClassDagger
+                || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
+                || m_anWear[14] == nullptr) { // TODO: PassiveSkill
+                pos = ItemWearType::WearDecoWeapon;
+            }
+        } else {
+            item1 = m_anWear[1];
+            item2 = m_anWear[0];
+            if (item1 != nullptr && item1->m_pItemBase->iclass != ItemClass::ClassShield
+                || item2 != nullptr && item2->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
+                return false;
+            }
+        }
+    }
+    if (pItem->GetWearType() == ItemWearType::WearTwoHand)
+        pos = ItemWearType::WearWeapon;
+    if (pos == ItemWearType::WearTwoFingerRing)
+        pos = ItemWearType::WearRing;
+    item1   = m_anWear[9];
+    if (item1 != nullptr) {
+        if (item1->GetWearType() != ItemWearType::WearTwoFingerRing && pItem->GetWearType() == ItemWearType::WearRing)
+            pos = ItemWearType::WearSecondRing;
+    }
+    if (pos == ItemWearType::WearBagSlot) {
+        item1 = m_anWear[23];
+        if (item1 != nullptr) {
+            if (item1->m_Instance.Code != pItem->m_Instance.Code) {
+                int nCurrentVarIdx = -1;
+
+                for (int i = 0; i < 4; ++i) {
+                    if (item1->m_pItemBase->opt_type[i] == 20) {
+                        nCurrentVarIdx = i;
+                        break;
+                    }
+                }
+                int nCurrentVarIdx2 = -1;
+
+                for (int i = 0; i < 4; ++i) {
+                    if (pItem->m_pItemBase->opt_type[i] == 20) {
+                        nCurrentVarIdx2 = i;
+                        break;
+                    }
+                }
+
+                if (nCurrentVarIdx == -1)
+                    return false;
+                if (nCurrentVarIdx2 == -1)
+                    return false;
+
+                // TODO Check Capacity
+            }
+        }
+    }
+    if (pos != ItemWearType::WearDecoWeapon && pos != ItemWearType::WearDecoShield) {
+
+    } else {
+        item1 = m_anWear[pos != ItemWearType::WearDecoWeapon ? 1 : 0];
+        if(item1 == nullptr || (int)item1->m_pItemBase->iclass > (int)ItemClass::ClassShield)
+            return false;
+        switch(item1->m_pItemBase->iclass) {
+            case ItemClass::ClassShield:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoShield)
+                    return false;
+                break;
+            case ItemClass::ClassOneHandSword:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandSword)
+                    return false;
+                break;
+            case ItemClass::ClassTwoHandSword:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandSword)
+                    return false;
+                break;
+            case ItemClass::ClassDagger:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoDagger)
+                    return false;
+                break;
+            case ItemClass::ClassSpear:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandSpear)
+                    return false;
+                break;
+            case ItemClass::ClassTwoHandAxe:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandAxe)
+                    return false;
+                break;
+            case ItemClass::ClassOneHandMace:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandMace)
+                    return false;
+                break;
+            case ItemClass::ClassTwoHandMace:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandMace)
+                    return false;
+                break;
+            case ItemClass::ClassHeavyBow:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoHeavyBow)
+                    return false;
+                break;
+            case ItemClass::ClassLightBow:
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoLightBow)
+                    return false;
+                break;
+            case ItemClass::ClassCrossBow:
+                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoCrossBow)
+                    return false;
+                break;
+            case ItemClass::ClassOneHandStaff:
+                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandStaff)
+                    return false;
+                break;
+            case ItemClass::ClassTwoHandStaff:
+                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandStaff)
+                    return false;
+                break;
+            case ItemClass::ClassOneHandAxe:
+                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandAxe)
+                    return false;
+                break;
+            default:
+                return false;
+        }
+    }
+    if(pos >= 24 || pos < 0)
+        return false;
+
+    if(vpOverlappItemList != nullptr) {
+        if(m_anWear[pos] != nullptr)
+            vpOverlappItemList->emplace_back(pos);
+        if(pItem->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
+            if(m_anWear[1] != nullptr) {
+                if (!pItem->IsBow() && !pItem->IsCrossBow()
+                    || m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet) {
+                    vpOverlappItemList->emplace_back(1);
+                }
+                if(m_anWear[15] != nullptr) {
+                    vpOverlappItemList->emplace_back(15);
+                }
+            }
+        }
+        if(pos == ItemWearType::WearShield) {
+            item1 = m_anWear[15];
+            if(item1 != nullptr) {
+                if(pItem->m_pItemBase->iclass == ItemClass::ClassShield && item1->m_pItemBase->iclass != ItemClass::ClassDecoShield)
+                    vpOverlappItemList->emplace_back(15);
+                if(item1->m_pItemBase->iclass == ItemClass::ClassDecoShield)
+                    vpOverlappItemList->emplace_back(15);
+            }
+        }
+        item1 = m_anWear[0];
+        if(item1 != nullptr) {
+            if(item1->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
+                if(pos == ItemWearType::WearShield) {
+                    if(!item1->IsBow() && !item1->IsCrossBow() || pItem->m_pItemBase->group != ItemGroup::Bullet)
+                        vpOverlappItemList->emplace_back(0);
+                }
+            }
+        }
+
+        if(m_anWear[10] != nullptr && pItem->GetWearType() == ItemWearType::WearTwoFingerRing)
+            vpOverlappItemList->emplace_back(10);
+
+        item1 = m_anWear[9];
+        if(item1 != nullptr) {
+            if(item1->GetWearType() == ItemWearType::WearTwoFingerRing) {
+                if(pItem->GetWearType() == ItemWearType::WearRing)
+                    vpOverlappItemList->emplace_back(9);
+            }
+        }
+    }
+    return true;
+}
+
+bool Player::IsHunter()
+{
+    int job_id = GetCurrentJob();
+    if (job_id == 0)
+    {
+        switch(GetRace())
+        {
+            case 3:
+                job_id = 100;
+                break;
+            case 4:
+                job_id = 200;
+                break;
+            case 5:
+                job_id = 300;
+                break;
+            default:
+                break;
+        }
+    }
+    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+
+    if (info != nullptr)
+        return info->job_class == 2;
+    return false;
+}
+
+bool Player::IsFighter()
+{
+    int job_id = GetCurrentJob();
+    if (job_id == 0)
+    {
+        switch(GetRace())
+        {
+            case 3:
+                job_id = 100;
+                break;
+            case 4:
+                job_id = 200;
+                break;
+            case 5:
+                job_id = 300;
+                break;
+            default:
+                break;
+        }
+    }
+    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+
+    if (info != nullptr)
+        return info->job_class == 1;
+    return false;
+}
+
+bool Player::IsMagician()
+{
+    int job_id = GetCurrentJob();
+    if (job_id == 0)
+    {
+        switch(GetRace())
+        {
+            case 3:
+                job_id = 100;
+                break;
+            case 4:
+                job_id = 200;
+                break;
+            case 5:
+                job_id = 300;
+                break;
+            default:
+                break;
+        }
+    }
+    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+
+    if (info != nullptr)
+        return info->job_class == 3;
+    return false;
+}
+
+bool Player::IsSummoner()
+{
+    int job_id = GetCurrentJob();
+    if (job_id == 0)
+    {
+        switch(GetRace())
+        {
+            case 3:
+                job_id = 100;
+                break;
+            case 4:
+                job_id = 200;
+                break;
+            case 5:
+                job_id = 300;
+                break;
+            default:
+                break;
+        }
+    }
+    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+
+    if (info != nullptr)
+        return info->job_class == 4;
+    return false;
 }

@@ -5,6 +5,8 @@
 #include "GameRule.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
+float GameRule::_itemDropRate = 1.0f;
+float GameRule::_GoldDropRate = 1.0f;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
 {
@@ -92,4 +94,24 @@ int GameRule::GetItemRecommendedLevel(int item_rank, int item_level)
 float GameRule::GetPickableRange()
 {
     return 20;
+}
+
+float GameRule::GetItemDropRate()
+{
+    return _itemDropRate;
+}
+
+void GameRule::SetItemDropRate(float _itemDropRate)
+{
+    GameRule::_itemDropRate = _itemDropRate;
+}
+
+float GameRule::GetGoldDropRate()
+{
+    return _GoldDropRate;
+}
+
+void GameRule::SetGoldDropRate(float goldDropRate)
+{
+    _GoldDropRate = goldDropRate;
 }

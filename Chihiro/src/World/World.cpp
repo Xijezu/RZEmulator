@@ -10,6 +10,7 @@
 #include "RespawnObject.h"
 #include "WorldSession.h"
 #include "MemPool.h"
+#include "GameRule.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -512,4 +513,38 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
             item_handle = pItem->GetHandle();
     }
     return item_handle;
+}
+
+/*
+ bool __usercall checkDrop@<al>(StructCreature *pKiller@<esi>, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
+{
+  float fMod; // [sp+4h] [bp-8h]@1
+  float fCreatureCardMod; // [sp+8h] [bp-4h]@1
+  float fItemDropRate; // [sp+14h] [bp+8h]@4
+
+  fCreatureCardMod = 1.0;
+  fMod = (double)pKiller->vfptr[10].IsDeleteable((ArSchedulerObject *)pKiller) * 0.009999999776482582 + 1.0;
+  if ( code > 0 && StructItem::GetItemBase(code)->nGroup == 13 )
+    fCreatureCardMod = pKiller->m_fCreatureCardChance;
+  fItemDropRate = GameRule::fItemDropRate;
+  return (double)percentage * fMod * fItemDropRate * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod >= (double)XRandom(1u, 0x5F5E100u);
+}
+ */
+
+bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
+{
+    float fMod;
+    float fCreatureCardMod;
+
+    fCreatureCardMod = 1.0f;
+    fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
+    if (code > 0)
+    {
+        if (sObjectMgr->GetItemBase(code)->group == 13)
+            fCreatureCardMod = /*pKiller->m_fCreatureCardChance;*/ 1.0f; // actual wtf?
+        /*if (sObjectMgr->GetItemBase(code)->flaglist[FLAG_QUEST] != 0)
+            fDropRatePenalty = 1.0f;*/
+    }
+
+    return (percentage * 1) * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod >= irand(1, 0x5F5E100u);
 }

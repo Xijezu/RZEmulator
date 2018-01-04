@@ -23,6 +23,7 @@
 #include "Player.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
+#include "GameRule.h"
 
 Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
 {
@@ -144,7 +145,7 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
             //sWorld->addChaos(this, player, 1.0f);
 
         if(m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
-            //procDropGold(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty, fGoldDropRateBonus);
+            procDropGold(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
             procDropItem(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
         }
 
@@ -336,7 +337,7 @@ void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, 
 {
     long item_count;
     for(int i = 0; i < 10; ++i) {
-        if(m_Base->drop_item_id[i] != 0 /*&& checkDrop */) {
+        if(m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], (int)m_Base->drop_percentage[i], fDropRatePenalty, 1)) {
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
             if(item_count < m_Base->drop_min_count[i]) {
                 MX_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
@@ -430,4 +431,36 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
     for(auto& kvp : mapDropItem) {
         dropItem(pos, pKiller, pPriority, vPartyContribute, kvp.first, kvp.second, level, false, nFlagIndex);
     }
+}
+
+void Monster::ForceKill(Player *byPlayer)
+{
+    auto dmg = onDamage(byPlayer, ElementalType::TypeNone, DamageType::NormalPhysical, GetHealth(), false);
+    damage(byPlayer, dmg, false);
+    Messages::SendHPMPMessage(byPlayer, this, 0, 0, true);
+}
+
+void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
+{
+    long gold;
+    int tax;
+    int nGuildID;
+    Player* player{nullptr};
+    fDropRatePenalty = GameRule::GetGoldDropRate() * fDropRatePenalty;
+    if(rand32() % 100 >= m_Base->gold_drop_percentage * fDropRatePenalty)
+        return;
+
+    gold = irand(m_Base->gold_min[0], m_Base->gold_max[0]);
+    if(gold < 0)
+        gold = 1;
+
+    if(gold > 1000000)
+        gold = 1000000;
+    auto gi = sMemoryPool->AllocGold(gold, GenerateCode::ByMonster);
+    gi->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
+    gi->SetLayer(GetLayer());
+
+    gi->AddNoise(rand32(), rand32(), 18);
+    gi->SetPickupOrder(pPriority.PickupOrder);
+    sWorld->MonsterDropItemToWorld(this, gi);
 }

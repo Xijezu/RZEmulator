@@ -106,6 +106,13 @@ public:
     void DoSummon(Summon* pSummon, Position pPosition);
     void DoUnSummon(Summon* pSummon);
 
+    bool IsHunter();
+    bool IsFighter();
+    bool IsMagician();
+    bool IsSummoner();
+
+    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
+
     ushort_t ChangeGold(long);
 
     void SendPacket(XPacket& pPacket);
@@ -135,10 +142,12 @@ protected:
     void onCantAttack(uint target, uint t) override;
 
 private:
-    WorldSession           *m_session{nullptr};
-    std::string           m_szAccount;
+    WorldSession *m_session{nullptr};
+    std::string  m_szAccount;
+
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };
+
     std::vector<Summon *> m_vSummonList{nullptr};
 
     uint m_nLastSaveTime{ }, m_nLastCantAttackTime{ };

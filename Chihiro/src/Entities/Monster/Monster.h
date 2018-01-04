@@ -219,12 +219,6 @@ public:
     void applyJobLevelBonus() override
     {};
 
-    uint16_t putonItem(ItemWearType, Item *) override
-    {};
-
-    uint16_t putoffItem(ItemWearType) override
-    {};
-
     float GetSize() const override
     { return m_Base->size; }
 
@@ -235,6 +229,7 @@ public:
     { return m_nStatus; }
 
     void SetStatus(MonsterStatus status);
+    void ForceKill(Player* byPlayer);
 
     MonsterDeleteHandler* m_pDeleteHandler{nullptr};
 protected:
@@ -247,6 +242,7 @@ private:
     void calcPartyContribute(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
     void procEXP(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
     void procDropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty);
+    void procDropGold(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty);
     void dropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex);
     void dropItemGroup(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex);
 

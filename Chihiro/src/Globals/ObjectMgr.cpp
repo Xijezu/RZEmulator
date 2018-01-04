@@ -167,7 +167,7 @@ bool ObjectMgr::LoadMonsterResource()
         base.grp = field[idx++].GetInt32();
         base.magic_type = field[idx++].GetInt32();
         base.race = field[idx++].GetInt32();
-        base.visible_range = field[idx++].GetInt32();
+        base.visible_range = field[idx++].GetInt32() * 12;
         base.chase_range = field[idx++].GetInt32();
         for(auto& curr : base.flag) {
             curr = field[idx++].GetInt32();
@@ -183,7 +183,7 @@ bool ObjectMgr::LoadMonsterResource()
         base.standard_run_speed = field[idx++].GetInt32();
         base.walk_speed = field[idx++].GetInt32();
         base.run_speed = field[idx++].GetInt32();
-        base.attack_range = field[idx++].GetFloat();
+        base.attack_range = field[idx++].GetFloat() * 100;
         base.hp = field[idx++].GetInt32();
         base.mp = field[idx++].GetInt32();
         base.attacK_point = field[idx++].GetInt32();
@@ -213,7 +213,7 @@ bool ObjectMgr::LoadMonsterResource()
         }
         for(y = 0; y < 10; y++) {
             base.drop_item_id[y] = field[idx++].GetInt32();
-            base.drop_percentage[y] = field[idx++].GetFloat();
+            base.drop_percentage[y] = (int)(float)(field[idx++].GetFloat() * 100000000);
             base.drop_min_count[y] = field[idx++].GetInt32();
             base.drop_max_count[y] = field[idx++].GetInt32();
             base.drop_min_level[y] = field[idx++].GetInt32();
@@ -245,11 +245,12 @@ bool ObjectMgr::LoadDropGroupResource()
     uint32 count = 0;
     do {
         Field        *field = result->Fetch();
+        int idx = 0;
         DropGroup dg{};
-        dg.uid = field->GetInt32();
+        dg.uid = field[idx++].GetInt32();
         for(int i = 0; i < MAX_DROP_GROUP; i++) {
-            dg.drop_item_id[i] = field->GetInt32();
-            dg.drop_percentage[i] = field->GetFloat() * 100000000;
+            dg.drop_item_id[i] = field[idx++].GetInt32();
+            dg.drop_percentage[i] = (int)(float)(field[idx++].GetFloat() * 100000000);
         }
         _dropTemplateStore[dg.uid] = dg;
         ++count;
@@ -399,15 +400,19 @@ bool ObjectMgr::LoadSkillResource()
         base.probability_inc_by_slv = field[idx++].GetInt32();
         base.hit_bonus = field[idx++].GetInt16();
         base.hit_bonus_per_enhance = field[idx++].GetInt16();
+        base.percentage = field[idx++].GetInt16();
         base.hate_mod = field[idx++].GetFloat();
         base.hate_basic = field[idx++].GetInt16();
         base.hate_per_skl = field[idx++].GetFloat();
         base.hate_per_enhance = field[idx++].GetFloat();
         base.critical_bonus = field[idx++].GetInt32();
         base.critical_bonus_per_skl = field[idx++].GetInt32();
-        for (float &i : base.var) {
-            i = field[idx++].GetFloat();
+        for(int i = 0; i < 20; i++) {
+            base.var[i] = field[idx++].GetFloat();
         }
+        /*for (float &i : base.var) {
+            i = field[idx++].GetFloat();
+        }*/
         idx += 2;
         base.is_projectile = field[idx++].GetInt16();
         base.projectile_speed = field[idx++].GetFloat();

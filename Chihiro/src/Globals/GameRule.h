@@ -13,9 +13,15 @@ public:
     static int GetItemLevelLimit(int item_rank);
     static int GetItemRecommendModTable(int item_rank);
     static int GetRankLevel(int rank);
+    static float GetItemDropRate();
+    static void SetItemDropRate(float _itemDropRate);
+    static float GetGoldDropRate();
+    static void SetGoldDropRate(float goldDropRate);
     static float GetItemValue(float, int, int, int, int);
     static float GetPickableRange();
 private:
+    static float _itemDropRate;
+    static float _GoldDropRate;
     static int _modtable[];
 };
 

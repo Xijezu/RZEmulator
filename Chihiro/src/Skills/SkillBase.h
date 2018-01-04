@@ -2,6 +2,7 @@
 #define PROJECT_SKILLBASE_H
 
 #include "Common.h"
+#include "ItemFields.h"
 
 enum SkillState : short {
     ST_Fire          = 0,
@@ -304,6 +305,7 @@ enum EffectType : int {
 // Data           :     constant 0x754E, Constant, Type: int, EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL
 // Data           :     constant 0x7725, Constant, Type: int, EF_RESURRECTION_WITH_RECOVER
     RemoveStateGroup                            = 30601,
+    EF_WEAPON_TRAINING                          = 31001,
 // Data           :     constant 0x7919, Constant, Type: int, EF_WEAPON_TRAINING
 // Data           :     constant 0x791A, Constant, Type: int, EF_AMPLIFY_BASE_ATTRIBUTE_OLD
 // Data           :     constant 0x791B, Constant, Type: int, EF_AMPLIFY_EXT_ATTRIBUTE
@@ -340,6 +342,8 @@ struct SkillBase {
             result = this->m_need_jp[49];
         return result;
     }
+
+    bool IsUseableWeapon(ItemClass cl);
 
     uint GetCastDelay(int skill_lv, int enhance)
     {

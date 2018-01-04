@@ -28,6 +28,7 @@ Unit::~Unit()
 {
     for (auto& sk : m_vSkillList) {
         delete sk;
+        sk = nullptr;
     }
     m_vSkillList.clear();
 }
@@ -63,7 +64,7 @@ void Unit::Update(uint32 p_time)
 
 void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit)
 {
-    pEnterPct << (uint32_t) 0;// pUnit->GetUInt32Value(UNIT_FIELD_STATUS); // TODO: status
+    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_STATUS);
     pEnterPct << pUnit->GetOrientation();
     pEnterPct << (int32_t) pUnit->GetHealth();
     pEnterPct << (int32_t) pUnit->GetMaxHealth();
@@ -334,7 +335,7 @@ void Unit::CalculateStat()
     calcAttribute(m_Attribute);
     // TODO onAfterCalcAttrivuteByStat -> Nonexistant
     applyItemEffect();
-    // TODO ApplyPassiveSkillEffect
+    applyPassiveSkillEffect();
     // TODO applyStateEffect
     // TODO applyPassiveSkillAmplifyEffect
     // TODO this.onApplyAttributeAdjustment
@@ -367,12 +368,15 @@ void Unit::applyItemEffect()
     if (curItem != nullptr && curItem->m_pItemBase != nullptr)
         m_Attribute.nAttackRange = curItem->m_pItemBase->range;
 
+    std::vector<int> ref_list{ };
     for (int i = 0; i < 24; i++) {
         curItem = GetWornItem((ItemWearType) i);
         if (curItem != nullptr && curItem->m_pItemBase != nullptr) {
-            if (true) { // TODO TranslateWearPosition
+            auto iwt = (ItemWearType)i;
+            if (TranslateWearPosition(iwt, curItem, &ref_list)) {
                 float    fItemRatio = 1.0f;
-                // TODO fItemRatio = 0.4f
+                if(curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
+                    fItemRatio = 0.40000001f;
 
                 for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
                     if (curItem->m_pItemBase->base_type[ol] != 0) {
@@ -587,14 +591,14 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
 
 void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
 {
-    float result;
-    float item_var_penalty;
+    float result{};
+    float item_var_penalty{};
 
     Player* p{nullptr};
     if(GetSubType() == ST_Player)
         p = dynamic_cast<Player*>(this);
 
-    auto  tpl = sObjectMgr->GetItemBase(pItem->m_nItemID);
+    auto  tpl = sObjectMgr->GetItemBase((uint)pItem->m_Instance.Code);
     if (tpl == nullptr)
         return;
 
@@ -830,10 +834,12 @@ void Unit::applyStatByItem()
 {
     std::vector<int> ref_list{ };
 
-    for (auto& item : m_anWear) {
+    for(int i1 = 0; i1 < 24; ++i1) {
+        Item* item = m_anWear[i1];
         if (item != nullptr) {
+            auto iwt = (ItemWearType)i1;
             if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
-                if (true) { // TODO TranslateWearPosition
+                if (TranslateWearPosition(iwt, item, &ref_list)) { // TODO TranslateWearPosition
                     for (int j = 0; j < 4; j++) {
                         short ot = item->m_pItemBase->opt_type[j];
                         auto  bs = (uint) item->m_pItemBase->opt_var[0][j];
@@ -1013,14 +1019,14 @@ Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
         int      nPrevLevel = GetBaseSkillLevel(skill_id);
         if (nPrevLevel == 0) {
             nSkillUID = sWorld->GetSkillIndex();
-            pSkill    = new Skill(this, nSkillUID, skill_id);
+            pSkill    = new Skill{this, nSkillUID, skill_id};
+            m_vSkillList.emplace_back(pSkill);
         } else {
             pSkill    = GetSkill(skill_id);
             nSkillUID = pSkill == nullptr ? 0 : pSkill->m_nSkillUID;
         }
         if (pSkill != nullptr) {
             pSkill->m_nSkillLevel = skill_level;
-            m_vSkillList.emplace_back(pSkill);
 
             onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
         }
@@ -1140,8 +1146,10 @@ void Unit::processAttack()
 
     if (GetNextAttackableTime() <= t) {
         auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
-        if (GetHealth() == 0)
-            return; // Cancel Attack
+        if (GetHealth() == 0) {
+            CancelAttack();
+            return;
+        }
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
@@ -1154,8 +1162,10 @@ void Unit::processAttack()
                     player = summon->GetMaster();
             }
 
-            if (player != nullptr)
+            if (player != nullptr) {
+                Messages::SendHPMPMessage(player, enemy, 0, 0, true);
                 Messages::SendCantAttackMessage(player, player->GetHandle(), player->GetTargetHandle(), TS_RESULT_NOT_EXIST);
+            }
             EndAttack();
             return;
         }
@@ -1726,4 +1736,206 @@ void Unit::CancelAttack()
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
     SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+}
+
+bool Unit::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList)
+{
+    bool result;
+    if(item->GetWearType() != ItemWearType::WearCantWear && item->IsWearable()) {
+        int elevel = m_nUnitExpertLevel;
+        int level = GetLevel();
+        if(m_nUnitExpertLevel <= level)
+            elevel = level;
+        result = (item->GetLevelLimit() <= elevel) && ((item->m_pItemBase->use_min_level == 0 || level >= item->m_pItemBase->use_min_level)
+                                                      && (item->m_pItemBase->use_max_level == 0 || level <= item->m_pItemBase->use_max_level));
+    } else {
+        result = false;
+    }
+    return result;
+}
+
+uint16_t Unit::putonItem(ItemWearType pos, Item *item)
+{
+    m_anWear[pos] = item;
+    item->m_Instance.nWearInfo = pos;
+    item->m_bIsNeedUpdateToDB = true;
+    // Binded target
+    if(GetSubType() == ST_Player) {
+        auto p = dynamic_cast<Player*>(this);
+        p->SendItemWearInfoMessage(item, this);
+    }
+    return 0;
+}
+
+ushort Unit::Puton(ItemWearType pos, Item *item)
+{
+    if(item->m_Instance.nWearInfo != ItemWearType::WearCantWear)
+        return 0;
+
+    std::vector<int> vOverlapItemList{ };
+    if(!TranslateWearPosition(pos, item, &vOverlapItemList))
+        return 0;
+
+    for(int& s : vOverlapItemList) {
+        putoffItem((ItemWearType)s);
+        if(m_anWear[s] != nullptr)
+            return 0;
+    }
+    return putonItem(pos, item);
+}
+
+uint16_t Unit::putoffItem(ItemWearType pos)
+{
+    auto item = m_anWear[pos];
+
+    item->m_Instance.nWearInfo = ItemWearType::WearNone;
+    item->m_bIsNeedUpdateToDB = true;
+    // Binded Target
+    m_anWear[pos] = nullptr;
+    if(GetSubType() == ST_Player) {
+        auto p = dynamic_cast<Player*>(this);
+        p->SendItemWearInfoMessage(item, this);
+    }
+    // Todo: Summon
+    return 0;
+}
+
+ushort Unit::Putoff(ItemWearType pos)
+{
+    int i;
+
+    if(pos == ItemWearType::WearTwoHand)
+        pos = ItemWearType::WearWeapon;
+    if(pos == ItemWearType::WearTwoFingerRing)
+        pos = ItemWearType::WearRing;
+    if(pos >= 24 || pos < 0)
+        return 5;
+    ItemWearType abspos = GetAbsoluteWearPos(pos);
+    if(abspos == ItemWearType::WearCantWear)
+        return 5;
+    if(pos != ItemWearType::WearBagSlot)
+        return putoffItem(abspos);
+
+    // TODO: Bag
+}
+
+ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
+{
+    ItemWearType result = pos;
+    if(m_anWear[pos] == nullptr)
+        result = ItemWearType::WearCantWear;
+    return result;
+}
+
+void Unit::applyPassiveSkillEffect(Skill *skill)
+{
+    float atk = 0;
+    switch(skill->m_SkillBase->effect_type) {
+        case EffectType::WeaponMastery: {
+            auto weapon = GetWornItem(ItemWearType::WearWeapon);
+            if (weapon == nullptr)
+                return;
+
+            if (skill->m_SkillBase->id == SkillId::AdvWeaponExpert)
+                if (weapon->GetItemRank() < 2)
+                    return;
+            atk = (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
+            m_Attribute.nAttackPointRight += atk;
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                m_Attribute.nAttackPointLeft += atk;
+
+            m_Attribute.nAttackSpeed += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
+            m_Attribute.nMagicPoint += (skill->m_SkillBase->var[6] + (skill->m_SkillBase->var[7] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
+        }
+            break;
+        case EffectType::IncreaseBaseAttribute: {
+            atk = (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nAttackPointRight += atk;
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                m_Attribute.nAttackPointLeft += atk;
+
+            m_Attribute.nDefence      += (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nMagicPoint   += (skill->m_SkillBase->var[2] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nMagicDefence += (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+
+            atk = (skill->m_SkillBase->var[6] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nAccuracyRight += atk;
+            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                m_Attribute.nAccuracyLeft += atk;
+            m_Attribute.nMagicAccuracy += (skill->m_SkillBase->var[7] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+        }
+            break;
+        case EffectType::IncreaseHPMP: {
+            SetMaxHealth((uint) (GetMaxHealth() + skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
+            SetMaxMana((uint) (GetMaxMana() + skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
+        }
+            break;
+        case EffectType::EF_WEAPON_TRAINING: {
+            m_Attribute.nAttackSpeedRight += (skill->m_SkillBase->var[3] * 100 * skill->m_nSkillLevel);
+        }
+        break;
+        default:
+            //MX_LOG_DEBUG("entities.unit", "Unknown SKill Effect Type Unit::applyPassiveSkillEffect: %u", skill->m_SkillBase->id);
+            break;
+    }
+
+    // SPECIAL CASES
+    switch(skill->m_nSkillID) {
+        case 1202: // Defense Practice
+            m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            break;
+        default:
+            break;
+    }
+}
+
+void Unit::applyPassiveSkillEffect()
+{
+    for(auto& s : m_vSkillList) {
+        // yes, is_passive == 0 to get passive skills.. Gala :shrug:
+        if(s != nullptr && s->m_SkillBase != nullptr && s->m_SkillBase->is_passive == 0) {
+            bool r = s->m_SkillBase->vf_shield_only == 0 ? s->m_SkillBase->IsUseableWeapon(GetWeaponClass()) : IsWearShield();
+            if(s->m_SkillBase->vf_is_not_need_weapon != 0 || r)
+                applyPassiveSkillEffect(s);
+        }
+    }
+}
+
+ItemClass Unit::GetWeaponClass()
+{
+    ItemClass result = ItemClass::ClassEtc;
+    auto itemRight = GetWornItem(ItemWearType::WearRightHand);
+
+    if (itemRight != nullptr)
+    {
+        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        {
+            Item* itemLeft = GetWornItem(ItemWearType::WearLeftHand);
+            result = (ItemClass)itemRight->m_pItemBase->iclass;
+            if (itemRight->m_pItemBase->iclass == ItemClass::ClassOneHandSword && itemLeft->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
+                return ItemClass::ClassDoubleSword;
+            if (itemRight->m_pItemBase->iclass == ItemClass::ClassDagger && itemLeft->m_pItemBase->iclass == ItemClass::ClassDagger)
+                return ItemClass::ClassDoubleDagger;
+            if (itemRight->m_pItemBase->iclass== ItemClass::ClassOneHandAxe && itemLeft->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+                return ItemClass::ClassDoubleAxe;
+        }
+        result = (ItemClass)itemRight->m_pItemBase->iclass;
+    }
+    return result;
+}
+
+bool Unit::IsWearShield()
+{
+    bool result{false};
+    auto item = GetWornItem(ItemWearType::WearShield);
+    if(item != nullptr)
+        result = item->m_pItemBase->iclass == ItemClass::ClassShield;
+    else
+        result = false;
+    return result;
+}
+
+float Unit::GetItemChance() const
+{
+    return m_Attribute.nItemChance;
 }

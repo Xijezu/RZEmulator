@@ -616,12 +616,24 @@ bool WorldSession::onChatRequest(XPacket *_packet)
             sScriptingMgr->RunString(_player, request.szMsg.substr(5));
         } else if(tokenizer[0] == "/suicide"s) {
             World::StopNow(SHUTDOWN_EXIT_CODE);
-        } else if (tokenizer[0] == "/loc"s) {
-            _player->ChangeLocation(_player->GetPositionX(), _player->GetPositionY(), false, false);
+        } else if (tokenizer[0] == "/position"s) {
+            std::string msg = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)_player->GetPositionX(), (int)_player->GetPositionY(), _player->GetLayer());
+            Messages::SendChatMessage(30, "@SYSTEM", _player, msg);
         } else if(tokenizer[0] == "/calc"s) {
             _player->CalculateStat();
         } else if(tokenizer[0] == "/battle"s) {
             //sWorld->BroadcastStatusMessage(dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(_player->GetTargetHandle())));
+        } else if(tokenizer[0] == "/doitfaggot"s) {
+            sArRegion->DoEachVisibleRegion((uint)_player->GetPositionX() / g_nRegionSize, (uint)(_player->GetPositionY() / g_nRegionSize), _player->GetLayer(),
+                                           [=](ArRegion* region) {
+                                               region->DoEachMovableObject(
+                                                       [=](WorldObject* obj) {
+                                                           if(obj->GetSubType() == ST_Mob) {
+                                                               dynamic_cast<Monster*>(obj)->ForceKill(_player);
+                                                           }
+                                                       }
+                                               );
+                                           });
         }
         return true;
     }
@@ -663,9 +675,6 @@ bool WorldSession::onPutOnItem(XPacket *_packet)
     auto item_handle   = _packet->read<uint>();
     auto target_handle = _packet->read<uint>();
 
-    if (position == WearTwoHand)
-        position = WearWeapon;
-
     //if (_player->isAlive()) {
     if (true) {
         Item *ci = sMemoryPool->FindItem(item_handle);
@@ -676,7 +685,7 @@ bool WorldSession::onPutOnItem(XPacket *_packet)
                 return true;
             }
 
-            if (_player->putonItem((ItemWearType) position, ci) == 0) {
+            if (_player->Puton((ItemWearType) position, ci) == 0) {
                 _player->CalculateStat();
                 Messages::SendStatInfo(_player, _player);
                 Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
@@ -695,8 +704,6 @@ bool WorldSession::onPutOffItem(XPacket *_packet)
     auto position      = _packet->read<uint8_t>();
     auto target_handle = _packet->read<uint>();
 
-    if (position == WearTwoHand)
-        position = WearWeapon;
 
     //if(!_player->isAlive())
     if (false)
@@ -706,7 +713,7 @@ bool WorldSession::onPutOffItem(XPacket *_packet)
     if (curitem == nullptr) {
         Messages::SendResult(_player, TS_CS_PUTOFF_ITEM, 1, 0);
     } else {
-        uint16_t por = _player->putoffItem((ItemWearType) position);
+        uint16_t por = _player->Putoff((ItemWearType) position);
         _player->CalculateStat();
         Messages::SendStatInfo(_player, _player);
         Messages::SendResult(_player, _packet->GetPacketID(), 0, 0);
@@ -974,6 +981,8 @@ bool WorldSession::onJobLevelUp(XPacket *pRecvPct)
     Messages::SendPropertyMessage(_player, cr, "job_level", cr->GetCurrentJLv());
     Messages::SendPropertyMessage(_player, cr, "jp", cr->GetJP());
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
+    _player->CalculateStat();
+    Messages::SendStatInfo(_player, cr);
     return true;
 }
 
@@ -1002,6 +1011,9 @@ bool WorldSession::onLearnSkill(XPacket *pRecvPct)
         if(result == TS_RESULT_SUCCESS)
         {
             target->RegisterSkill(skill_id, currentLevel, 0, jobID);
+            // TODO: Hack
+            _player->CalculateStat();
+            Messages::SendStatInfo(_player, _player);
         }
         Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
     //}
@@ -1061,7 +1073,7 @@ bool WorldSession::onEquipSummon(XPacket *pRecvPct)
                 if(summon != nullptr && !summon->IsInWorld()) {
                     for(int k = 0; k < 24; ++k) {
                         if(summon->GetWornItem((ItemWearType)k) != nullptr)
-                            summon->putoffItem((ItemWearType)k);
+                            summon->Putoff((ItemWearType)k);
                     }
                 }
             }

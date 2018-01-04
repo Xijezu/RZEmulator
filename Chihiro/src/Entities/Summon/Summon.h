@@ -24,14 +24,7 @@ public:
 
     void OnUpdate() override;
 
-    void applyJobLevelBonus() override
-    {};
-
-    uint16_t putonItem(ItemWearType, Item *) override
-    {};
-
-    uint16_t putoffItem(ItemWearType) override
-    {};
+    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
 
     int m_nSummonInfo{ };
     int m_nCardUID{ };

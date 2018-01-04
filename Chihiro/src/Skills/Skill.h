@@ -11,7 +11,7 @@ class Unit;
 class Skill {
 public:
     Skill() = delete;
-    Skill(Unit* pOwner, int _uid, int _id);
+    Skill(Unit* pOwner, uint64 _uid, int _id);
     static void DB_InsertSkill(Unit*,uint,uint,uint,uint,uint);
     static void DB_UpdateSkill(Unit*,uint,uint);
 
@@ -19,11 +19,12 @@ public:
     void ProcSkill();
     bool Cancel();
 
-    int m_nSkillUID;
+    uint64 m_nSkillUID;
     Unit* m_pOwner{nullptr};
     int m_nSummonID;
     int m_nSkillID;
     int m_nSkillLevel;
+    int m_nSkillLevelAdd{0};
     int cool_time;
 
     SkillBase* m_SkillBase{nullptr};

@@ -8,6 +8,7 @@
 #include "XPacket.h"
 #include "DatabaseEnv.h"
 #include "Messages.h"
+#include "GameRule.h"
 
 Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level, int enhance,
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
@@ -148,4 +149,24 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 void Item::PendFreeItem(Item *pItem)
 {
     sMemoryPool->DeleteItem(pItem->GetHandle(), true);
+}
+
+int Item::GetLevelLimit()
+{
+    return GameRule::GetItemLevelLimit(m_pItemBase->rank);
+}
+
+bool Item::IsBow()
+{
+    return m_pItemBase->iclass == ItemClass::ClassHeavyBow || m_pItemBase->iclass == ItemClass::ClassLightBow;
+}
+
+bool Item::IsCrossBow()
+{
+    return m_pItemBase->iclass == ItemClass::ClassCrossBow;
+}
+
+int Item::GetItemRank() const
+{
+    return m_pItemBase->rank;
 }

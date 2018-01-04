@@ -47,6 +47,7 @@ public:
     bool RemoveItemFromWorld(Item* pItem);
     void RemoveObjectFromWorld(WorldObject* obj);
     void MonsterDropItemToWorld(Unit* pUnit, Item* pItem);
+	bool checkDrop(Unit* pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
 
     // Item
     uint procAddItem(Player* pClient, Item* pItem, bool bIsPartyProcess);

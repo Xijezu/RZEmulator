@@ -72,6 +72,10 @@ public:
     void DBInsert();
 
     ItemWearType GetWearType();
+    int GetLevelLimit();
+    int GetItemRank() const;
+    bool IsBow();
+    bool IsCrossBow();
 
     void SetOwnerInfo(uint, int, int);
     void SetPickupOrder(const ItemPickupOrder& order);

@@ -271,3 +271,8 @@ void MemoryPoolMgr::DeleteNPC(uint handle, bool bNeedToDelete)
         m_hsMisc.erase(handle);
     }
 }
+
+Item *MemoryPoolMgr::AllocGold(uint64 gold, GenerateCode gcode)
+{
+    return Item::AllocItem(0, 0, gold, gcode, 0, 0, 0, 0, 0, 0, 0, 0);
+}
