@@ -36,8 +36,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
-    SetMaxHealth(mb->hp);
-    SetMaxMana(mb->mp);
+    CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
     SetLevel(mb->level);
@@ -88,7 +87,6 @@ int Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damag
 void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
     Unit::onDead(pFrom, decreaseEXPOnDead);
-    //SetFlag(UNIT_FIELD_STATUS, MonsterStatus::MS_Dead);
     SetStatus(MonsterStatus::MS_Dead);
 
     std::vector<VirtualParty> vPartyContribute{};
@@ -328,7 +326,7 @@ void Monster::SetStatus(MonsterStatus status)
             //ResetTriggerCondition();
         if(m_nStatus != status) {
             m_nStatus = status;
-            //Messages::BroadcastStatusMessage(this);
+            Messages::BroadcastStatusMessage(this);
         }
     }
 }
@@ -390,13 +388,13 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
     }
 
     if(player != nullptr && player->IsInWorld()) {
-        auto ni = Item::AllocItem(0, code, count, GenerateCode::ByMonster, level, 0, 0, 0, 0, 0, 0, 0);
+        auto ni = Item::AllocItem(0, code, count, GenerateCode::ByMonster, level, -1, -1, 0, 0, 0, 0, 0);
         if(ni == nullptr)
             return;
         ni->SetPickupOrder(pPriority.PickupOrder);
         ni->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
         ni->SetLayer(GetLayer());
-        //ni->AddNoise(rand32(), rand32(), 18);
+        ni->AddNoise(rand32(), rand32(), 9);
 
         if((uint)nFlagIndex <= 0x1F)
             ni->m_Instance.Flag |= (uint)(1 << (nFlagIndex & 0x1F));
@@ -460,7 +458,29 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
     gi->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
     gi->SetLayer(GetLayer());
 
-    gi->AddNoise(rand32(), rand32(), 18);
+    gi->AddNoise(rand32(), rand32(), 9);
     gi->SetPickupOrder(pPriority.PickupOrder);
     sWorld->MonsterDropItemToWorld(this, gi);
+}
+
+void Monster::onApplyAttributeAdjustment()
+{
+    if(m_Base == nullptr)
+        return;
+
+    SetMaxHealth(GetMaxHealth() + m_Base->hp);
+    SetMaxMana(GetMaxMana() + m_Base->mp);
+    m_Attribute.nAttackPointRight += m_Base->attacK_point;
+    m_Attribute.nMagicPoint += m_Base->magic_point;
+    m_Attribute.nDefence += m_Base->defence;
+    m_Attribute.nMagicDefence += m_Base->magic_defence;
+    m_Attribute.nAttackSpeedRight += m_Base->attack_speed;
+    m_Attribute.nAttackSpeedLeft += m_Base->attack_speed;
+    m_Attribute.nCastingSpeed += m_Base->magic_speed;
+    m_Attribute.nAccuracyRight += m_Base->accuracy;
+    m_Attribute.nAccuracyLeft += m_Base->accuracy;
+    m_Attribute.nMagicAccuracy += m_Base->magic_accuracy;
+    m_Attribute.nAvoid += m_Base->avoid;
+    m_Attribute.nMagicAvoid += m_Base->magic_avoid;
+
 }

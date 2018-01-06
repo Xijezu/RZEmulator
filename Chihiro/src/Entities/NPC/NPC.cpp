@@ -71,6 +71,8 @@ bool NPC::HasStartableQuest(Player *player)
 
     for(auto& ql : m_vQuestLink_Start) {
         auto b = sObjectMgr->GetQuestBase(ql->code);
+        if(b == nullptr)
+            continue;
         auto qt = b->nType;
         if(qt == QuestType::QT_RandomKillIndividual || qt == QuestType::QT_RandomCollect) {
             if(player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code)) {

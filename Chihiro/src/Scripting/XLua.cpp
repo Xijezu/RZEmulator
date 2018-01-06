@@ -509,6 +509,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
             // get summon
         } else {
             m_pUnit->CalculateStat();
+            Messages::SendStatInfo(dynamic_cast<Player*>(m_pUnit), m_pUnit);
         }
     }
     return level;

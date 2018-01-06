@@ -340,7 +340,7 @@ bool WorldSession::onMoveRequest(XPacket *pRecvPct)
     Position wayPoint{ };
 
     uint ct = sWorld->GetArTime();
-    speed = 25;
+    speed = (int)_player->GetMoveSpeed() / 7;
     auto mover = dynamic_cast<Unit *>(_player);
 
     if (handle == 0 || handle == _player->GetHandle()) {
@@ -619,6 +619,8 @@ bool WorldSession::onChatRequest(XPacket *_packet)
         } else if (tokenizer[0] == "/position"s) {
             std::string msg = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)_player->GetPositionX(), (int)_player->GetPositionY(), _player->GetLayer());
             Messages::SendChatMessage(30, "@SYSTEM", _player, msg);
+        } else if(tokenizer[0] == "/status"s) {
+            Messages::SendChatMessage(30, "@SYSTEM", _player, std::to_string(_player->GetInt32Value(UNIT_FIELD_STATUS)));
         } else if(tokenizer[0] == "/calc"s) {
             _player->CalculateStat();
         } else if(tokenizer[0] == "/battle"s) {
@@ -843,11 +845,11 @@ bool WorldSession::onBuyItem(XPacket *pRecvPct)
             }
 
             if (bJoinable) {
-                auto item = Item::AllocItem(0, mt.code, buy_count, GenerateCode::ByMarket, 0, 0, 0, 0, 0, 0, 0, 0);
+                auto item = Item::AllocItem(0, mt.code, buy_count, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
                 _player->PushItem(item, buy_count, false);
             } else {
                 for (int i = 0; i < buy_count; i++) {
-                    auto item = Item::AllocItem(0, mt.code, 1, GenerateCode::ByMarket, 0, 0, 0, 0, 0, 0, 0, 0);
+                    auto item = Item::AllocItem(0, mt.code, 1, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
                     _player->PushItem(item, buy_count, false);
                 }
             }

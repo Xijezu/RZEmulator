@@ -15,6 +15,7 @@ struct DropGroup {
     float drop_percentage[MAX_DROP_GROUP];
 };
 
+
 struct LevelResourceTemplate {
     int level{};
     int64 normal_exp{};

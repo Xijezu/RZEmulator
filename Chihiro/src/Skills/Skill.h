@@ -33,9 +33,9 @@ public:
     void broadcastSkillMessage(int rx1, int ry1, int rx2, int ry2, uint8 layer, int cost_hp, int cost_mp, int nType);
 
     // For processing skill
+    uint8 m_nRequestedSkillLevel;
 private:
     Position m_targetPosition{};
-    uint8 m_nRequestedSkillLevel;
     uint m_nCastingDelay;
     uint16 m_nErrorCode;
     uint m_hTarget;

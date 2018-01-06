@@ -1,0 +1,129 @@
+#ifndef PROJECT_STATEBASE_H
+#define PROJECT_STATEBASE_H
+
+#include "Common.h"
+
+enum AttributeFlag {
+    AF_ERASE_ON_DEAD           = 0x1,
+    AF_ERASE_ON_LOGOUT         = 0x2,
+    AF_TIME_DECREASE_ON_LOGOUT = 0x4,
+    AF_NOT_ACTABLE_TO_BOSS     = 0x8,
+    AF_AF_NOT_ERASABLE         = 0x10,
+    AF_ERASE_ON_REQUEST        = 0x20,
+    AF_ERASE_ON_DAMAGED        = 0x40,
+    AF_ERASE_ON_RESURRECT      = 0x80,
+};
+
+enum StateCode {
+    SC_NONE                                = 0x000,
+    SC_INC_ITEM_CHANCE                     = 0x3FC,
+    SC_HUNTING_CREATURE_CARD               = 0x803,
+    SC_INC_BLOCK_CHANCE                    = 0x3FD,
+    SC_ADD_ENERGY                          = 0x1198,
+    SC_STAMINA_SAVE                        = 0xFA3,
+    SC_HAVOC_BURST                         = 0x1195,
+    SC_FRENZY                              = 0x1197,
+    SC_BLESS_OF_GODDESS                    = 0x119E,
+    SC_STIGMA_OF_CRIME                     = 0x11A0,
+    SC_NEMESIS_FOR_AUTO                    = 0x176D,
+    SC_NEMESIS                             = 0x176F,
+    SC_SLEEP                               = 0x1775,
+    SC_STUN                                = 0x1776,
+    SC_HOLD                                = 0x1777,
+    SC_FEAR                                = 0x1778,
+    SC_FROZEN                              = 0x1779,
+    SC_SEAL                                = 0xF4236,
+    SC_SHINE_WALL                          = 0xF4237,
+    SC_STONECURSED                         = 0x177C,
+    SC_MUTE                                = 0x177D,
+    SC_HIDE                                = 0x1780,
+    SC_FALL_FROM_SUMMON                    = 0x2329,
+    SC_GAIA_MEMBER_SHIP                    = 0x232C,
+    SC_PCBANG_MEMBER_SHIP                  = 0x232D,
+    SC_PCBANG_PREMIUM_MEMBER_SHIP          = 0x232E,
+    SC_BURNING_STYLE                       = 0x317F,
+    SC_DUSK_STYLE                          = 0x3181,
+    SC_AGILE_STYLE                         = 0x3180,
+    SC_SQUALL_OF_ARROW                     = 0x3186,
+    SC_FROZEN_SNARE                        = 0x32CB,
+    SC_EARTH_RESTRICTION                   = 0x32DF,
+    SC_NIGHTMARE                           = 0x3521,
+    SC_PASS_DAMAGE                         = 0x36BC,
+    SC_PET_SHOVELING_REWARD_INC_MOVE_SPEED = 0x3A98,
+    SC_PET_SHOVELING_REWARD_DEC_MOVE_SPEED = 0x3A99,
+    SC_PET_SHOVELING_REWARD_INC_STR_INT    = 0x3A9A,
+    SC_PET_SHOVELING_REWARD_DEC_STR_INT    = 0x3A9B,
+    SC_PET_SHOVELING_REWARD_INC_AGI_DEX    = 0x3A9C,
+    SC_PET_SHOVELING_REWARD_DEC_AGI_DEX    = 0x3A9D,
+    SC_PET_SHOVELING_REWARD_INC_VIT        = 0x3A9E,
+    SC_PET_SHOVELING_REWARD_DEC_VIT        = 0x3A9F,
+    SC_LIGHTNING_FORCE_CONGESTION          = 0x27E5C,
+    SC_FUSION_WITH_SUMMON                  = 0x280A1,
+    SC_SUMMON_FORM                         = 0x280A2,
+};
+
+enum StateType {
+    SG_NORMAL     = 0x0,
+    SG_DUPLICATE  = 0x1,
+    SG_DEPENDENCE = 0x2,
+};
+
+enum StateGroup {
+    GROUP_NONE          = 0x0,
+    GROUP_PHYSICAL_BOMB = 0x65,
+    GROUP_MAGICAL_BOMB  = 0x66,
+    GROUP_ASSASSIN      = 0xC9,
+    GROUP_RIDING        = 0x12D,
+    GROUP_MAGIC         = 0x191,
+    GROUP_SKILL         = 0x192,
+    GROUP_POISON        = 0x193,
+    GROUP_CURSE         = 0x194,
+    GROUP_DISEASE       = 0x195,
+    GROUP_WOUND         = 0x196,
+};
+
+enum StateBaseEffect {
+    SEF_NONE                                     = 0x0,
+    SEF_PHYSICAL_STATE_DAMAGE                    = 0x1,
+    SEF_PHYSICAL_IGNORE_DEFENCE_STATE_DAMAGE     = 0x2,
+    SEF_MAGICAL_STATE_DAMAGE                     = 0x3,
+    SEF_MAGICAL_IGNORE_RESIST_STATE_DAMAGE       = 0x4,
+    SEF_PHYSICAL_IGNORE_DEFENCE_PER_STATE_DAMAGE = 0x6,
+    SEF_HEAL_HP_BY_MAGIC                         = 0xB,
+    SEF_HEAL_MP_BY_MAGIC                         = 0xC,
+    SEF_HEAL_SP_BY_MAGIC                         = 0xD,
+    SEF_HEAL_HP_BY_ITEM                          = 0x15,
+    SEF_HEAL_MP_BY_ITEM                          = 0x16,
+    SEF_HEAL_SP_BY_ITEM                          = 0x17,
+    SEF_HEAL_HPMP_BY_ITEM                        = 0x18,
+    SEF_HEAL_HPMP_PER_BY_ITEM                    = 0x19,
+    SEF_POISON                                   = 0x33,
+    SEF_VENOM                                    = 0x34,
+    SEF_BLOODY                                   = 0x35,
+    SEF_SERIOUS_BLOODY                           = 0x36,
+};
+
+struct StateTemplate {
+    int state_id;
+    int text_id;
+    int tooltip_id;
+    uint8 is_harmful;
+    int state_time_type;
+    int state_group;
+    int duplicate_group[3]{0};
+    uint8 uf_avatar;
+    uint8 uf_summon;
+    uint8 uf_monster;
+    int base_effect_id;
+    int fire_interval;
+    int elemental_type;
+    float amplify_base;
+    float amplify_per_skl;
+    int add_damage_base;
+    int add_damage_per_skl;
+    int effect_type;
+    float value[20]{0};
+};
+
+
+#endif // PROJECT_STATEBASE_H

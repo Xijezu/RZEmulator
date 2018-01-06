@@ -4,15 +4,17 @@
 #include "Common.h"
 #include "DatabaseTemplates.h"
 #include <unordered_map>
-#include <Item/Item.h>
-#include <Player/Player.h>
 #include "QuadTreeMapInfo.h"
 #include "Dynamic/UnorderedMap.h"
 #include "SkillBase.h"
 #include "Monster.h"
 #include "NPCBase.h"
+#include "StateBase.h"
 #include "QuestBase.h"
 
+class Player;
+class Item;
+class Monster;
 class NPC;
 
 struct Waypoint {
@@ -42,6 +44,7 @@ public:
     typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
     typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
     typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
+    typedef UNORDERED_MAP<uint, StateTemplate>                  StateTemplateContainer;
 
     bool LoadStatResource();
     bool LoadJobResource();
@@ -54,6 +57,7 @@ public:
     bool LoadQuestResource();
     bool LoadQuestLinkResource();
     bool LoadDropGroupResource();
+    bool LoadStateResource();
     bool LoadMarketResource();
     bool LoadWorldLocation();
     bool LoadSkillResource();
@@ -82,6 +86,7 @@ public:
     std::vector<MarketInfo>* const GetMarketInfo(const std::string&);
     QuestBaseServer* const GetQuestBase(int code);
     QuestLink* const GetQuestLink(int code, int start_id);
+    StateTemplate* const GetStateInfo(int code);
     bool checkQuestTypeFlag(QuestType type, int flag);
 
     int GetNeedJpForJobLevelUp(uint, uint);
@@ -118,6 +123,7 @@ private:
     QuestResourceTemplateContainer  _questTemplateStore;
     QuestLinkTemplateContainer      _questLinkStore;
     NPCTemplateContainer            _npcTemplateStore;
+    StateTemplateContainer          _stateTemplateStore;
 
     ushort isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level);
     void RegisterSkillTree(SkillTreeBase base);

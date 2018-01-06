@@ -189,35 +189,35 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
 
 void Unit::incParameter2(uint nBitset, float fValue)
 {
-    /*
+
     if ((nBitset & 1) != 0)
     {
-        this.m_Resist.nResist[0] += (short)fValue;
+        m_Resist.nResist[0] += (short)fValue;
     }
     if ((nBitset & 2) != 0)
     {
-        this.m_Resist.nResist[1] += (short)fValue;
+        m_Resist.nResist[1] += (short)fValue;
     }
     if ((nBitset & 4) != 0)
     {
-        this.m_Resist.nResist[2] += (short)fValue;
+        m_Resist.nResist[2] += (short)fValue;
     }
     if ((nBitset & 8) != 0)
     {
-        this.m_Resist.nResist[3] += (short)fValue;
+        m_Resist.nResist[3] += (short)fValue;
     }
     if ((nBitset & 0x10) != 0)
     {
-        this.m_Resist.nResist[4] += (short)fValue;
+        m_Resist.nResist[4] += (short)fValue;
     }
     if ((nBitset & 0x20) != 0)
     {
-        this.m_Resist.nResist[5] += (short)fValue;
+        m_Resist.nResist[5] += (short)fValue;
     }
     if ((nBitset & 0x40) != 0)
     {
-        this.m_Resist.nResist[6] += (short)fValue;
-    }
+        m_Resist.nResist[6] += (short)fValue;
+    }/*
     if ((nBitset & 0x200000) != 0)
     {
         this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeNone, fValue));
@@ -252,13 +252,13 @@ void Unit::incParameter2(uint nBitset, float fValue)
     {
         this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
         this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
-    }
+    }*/
     if ((nBitset & 0x10000000) != 0)
-        this.m_Attribute.nCriticalPower += fValue;
+        m_Attribute.nCriticalPower += fValue;
     if ((nBitset & 0x20000000) != 0)
-        this.m_StatusFlag |= StatusFlags.HPRegenStopped;
+        SetFlag(UNIT_FIELD_STATUS, StatusFlags::HPRegenStopped);
     if ((nBitset & 0x40000000) != 0)
-        this.m_StatusFlag |= StatusFlags.MPRegenStopped;*/
+        SetFlag(UNIT_FIELD_STATUS, StatusFlags::MPRegenStopped);
 }
 
 void Unit::CalculateStat()
@@ -294,10 +294,10 @@ void Unit::CalculateStat()
 
     m_cStatByState.Reset(0);
     m_StatAmplifier.Reset(0.0f);
-    m_cAtributeByState.Reset(0);
-    //m_AttributeAplifier.Reset(0);
+    m_AttributeByState.Reset(0);
+    m_AttributeAmplifier.Reset(0);
     m_Attribute.Reset(0);
-    //m_Resist.Reset(0);
+    m_Resist.Reset(0);
     m_ResistAmplifier.Reset(0.0f);
 
     auto basestat = sObjectMgr->GetStatInfo(GetUInt32Value(UNIT_FIELD_JOB));
@@ -306,19 +306,20 @@ void Unit::CalculateStat()
     // TODO checkAdditionalItemEffect(); -> Nonexistant
     applyStatByItem();
     applyJobLevelBonus();
-    stateStat.Copy(*basestat);
-    /*m_cStatByState.strength += (m_cStat.strength - stateStat.strength);
+    stateStat.Copy(m_cStat);
+    applyStatByState();
+    m_cStatByState.strength += (m_cStat.strength - stateStat.strength);
     m_cStatByState.vital += (m_cStat.vital - stateStat.vital);
     m_cStatByState.dexterity += (m_cStat.dexterity - stateStat.dexterity);
     m_cStatByState.agility += (m_cStat.agility - stateStat.agility);
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
-    m_cStatByState.luck += (m_cStat.luck - stateStat.luck);*/
+    m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
     // TODO onApplyStat -> Beltslots
     // TODO amplifyStatByItem -> Nonexistant
     stateStat.Copy(m_cStat);
     getAmplifiedStatByAmplifier(stateStat);
-    // TODO amplifyStatByState();
+    amplifyStatByState();
     getAmplifiedStatByAmplifier(m_cStat);
     m_cStatByState.strength += (m_cStat.strength - stateStat.strength);
     m_cStatByState.vital += (m_cStat.vital - stateStat.vital);
@@ -328,6 +329,7 @@ void Unit::CalculateStat()
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
     // TODO onAfterApplyStat -> Nonexistant
+    finalizeStat();
     float b1  = GetLevel();
     float fcm = 1.0f;
     SetMaxHealth((uint32_t) (GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
@@ -336,13 +338,40 @@ void Unit::CalculateStat()
     // TODO onAfterCalcAttrivuteByStat -> Nonexistant
     applyItemEffect();
     applyPassiveSkillEffect();
-    // TODO applyStateEffect
+    stateAttr.Copy(m_Attribute);
+    applyStateEffect();
+    m_AttributeByState.nAttackPointRight += (m_Attribute.nAttackPointRight - stateAttr.nAttackPointRight);
+    m_AttributeByState.nAttackPointLeft += (m_Attribute.nAttackPointLeft - stateAttr.nAttackPointLeft);
+    m_AttributeByState.nCritical += (m_Attribute.nCritical - stateAttr.nCritical);
+    m_AttributeByState.nDefence += (m_Attribute.nDefence - stateAttr.nDefence);
+    m_AttributeByState.nBlockDefence += (m_Attribute.nBlockDefence - stateAttr.nBlockDefence);
+    m_AttributeByState.nMagicPoint += (m_Attribute.nMagicPoint - stateAttr.nMagicPoint);
+    m_AttributeByState.nMagicDefence += (m_Attribute.nMagicDefence - stateAttr.nMagicDefence);
+    m_AttributeByState.nAccuracyRight += (m_Attribute.nAccuracyRight - stateAttr.nAccuracyRight);
+    m_AttributeByState.nAccuracyLeft += (m_Attribute.nAccuracyLeft- stateAttr.nAccuracyLeft);
+    m_AttributeByState.nMagicAccuracy += (m_Attribute.nMagicAccuracy - stateAttr.nMagicAccuracy);
+    m_AttributeByState.nAvoid += (m_Attribute.nAvoid - stateAttr.nAvoid);
+    m_AttributeByState.nMagicAvoid += (m_Attribute.nMagicAvoid - stateAttr.nMagicAvoid);
+    m_AttributeByState.nBlockChance += (m_Attribute.nBlockChance - stateAttr.nBlockChance);
+    m_AttributeByState.nMoveSpeed += (m_Attribute.nMoveSpeed - stateAttr.nMoveSpeed);
+    m_AttributeByState.nAttackSpeedRight += (m_Attribute.nAttackSpeedRight - stateAttr.nAttackSpeedRight);
+    m_AttributeByState.nAttackSpeedLeft += (m_Attribute.nAttackSpeedLeft - stateAttr.nAttackSpeedLeft);
+    m_AttributeByState.nDoubleAttackRatio += (m_Attribute.nDoubleAttackRatio - stateAttr.nDoubleAttackRatio);
+    m_AttributeByState.nAttackRange += (m_Attribute.nAttackRange - stateAttr.nAttackRange);
+    m_AttributeByState.nMaxWeight += (m_Attribute.nMaxWeight - stateAttr.nMaxWeight);
+    m_AttributeByState.nCastingSpeed += (m_Attribute.nCastingSpeed - stateAttr.nCastingSpeed);
+    m_AttributeByState.nCoolTimeSpeed += (m_Attribute.nCoolTimeSpeed - stateAttr.nCoolTimeSpeed);
+    m_AttributeByState.nHPRegenPercentage += (m_Attribute.nHPRegenPercentage - stateAttr.nHPRegenPercentage);
+    m_AttributeByState.nHPRegenPoint += (m_Attribute.nHPRegenPoint - stateAttr.nHPRegenPoint);
+    m_AttributeByState.nMPRegenPercentage += (m_Attribute.nMPRegenPercentage - stateAttr.nMPRegenPercentage);
+    m_AttributeByState.nMPRegenPoint += (m_Attribute.nMPRegenPoint - stateAttr.nMPRegenPoint);
     // TODO applyPassiveSkillAmplifyEffect
-    // TODO this.onApplyAttributeAdjustment
-    // TODO this.getAmplifiedAttributeByAmplifier(stateAttr);
-    // TODO this.applyStateAmplifyEffect();
-    // TODO this.getAmplifiedAttributeByAmplifier(m_Attribute);
-    // TODO this.applyDoubleWeaponEffect();
+    onApplyAttributeAdjustment();
+    stateAttr.Copy(m_Attribute);
+    getAmplifiedAttributeByAmplifier(stateAttr);
+    applyStateAmplifyEffect();
+    getAmplifiedAttributeByAmplifier(m_Attribute);
+    applyDoubeWeaponEffect();
     SetMaxHealth((uint32_t) (GetInt32Value(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth());
     SetMaxMana((uint32_t) (GetInt32Value(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana());
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
@@ -351,6 +380,7 @@ void Unit::CalculateStat()
     // TODO this.onCompleteCalculateStat();
     SetHealth(GetHealth());
     SetMana(GetMana());
+    onModifyStatAndAttribute();
     if (IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
     } else {
@@ -362,12 +392,223 @@ void Unit::CalculateStat()
     }
 }
 
+void Unit::amplifyStatByState()
+{
+    if(m_vStateList.empty())
+        return;
+
+    std::vector<std::pair<int,int>> vDecreaseList{};
+    for(auto& s : m_vStateList) {
+        if(s.GetEffectType() == 84) {// Strong Spirit?
+            auto nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            for(int i = 2; i < 11; ++i) {
+                if(s.GetValue(i) == 0.0f) {
+                    break;
+                    vDecreaseList.emplace_back(std::make_pair<int,int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                }
+            }
+        }
+    }
+    for(auto& s :  m_vStateList) {
+        uint16 nOriginalLevel[3]{0};
+
+        for (int i = 0; i < 3; i++)
+            nOriginalLevel[i] = s.m_nLevel[i];
+        for(auto& rp : vDecreaseList) {
+            if(rp.first == (int)s.m_nCode) {
+//                             *(v1 + 44) = 0;
+//                             *(v1 + 48) = 0;
+//                             *(v1 + 52) = 0;
+//                             *(v1 + 100) = 0;
+//                             do
+//                             {
+//                                 v17 = *(v1 + *(v1 + 100) + 40)
+//                                     - LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y);
+//                                 *(v1 + *(v1 + 100) + 52) = v17;
+//                                 if ( v17 < 0 )
+//                                 {
+//                                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y) = -v17;
+//                                     *(v1 + *(v1 + 100) + 52) = 0;
+//                                 }
+//                                 *(v1 + 100) -= 4;
+//                             }
+//                             while ( *(v1 + 100) >= -8 );
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 44);
+//                             HIWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 48);
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end_time) = *(v1 + 52);
+//                             break;
+            }
+        }
+
+        if(s.GetLevel() != 0 && s.GetEffectType() == 2) {
+            // format is 0 = bitset, 1 = base, 2 = add per level
+            ampParameter((uint) s.GetValue(0), (int) (s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(3), (int) (s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(12), (int) (s.GetValue(13) + (s.GetValue(14) + s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(15), (int) (s.GetValue(16) + (s.GetValue(17) + s.GetLevel())), true);
+        }
+        for(int i = 0; i < 3; i++)
+            s.m_nLevel[i] = nOriginalLevel[i];
+    }
+}
+
+void Unit::applyState(State &state)
+{
+    int effectType = state.GetEffectType();
+
+    switch (effectType) {
+        case 0:
+            switch (state.m_nCode) {
+                case StateCode::SC_SLEEP:
+                case StateCode::SC_STUN:
+                    //this.m_StatusFlag &= ~(StatusFlags.Movable|StatusFlags.MagicCastable|StatusFlags.ItemUsable);
+
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case 1:
+            incParameter((uint) state.GetValue(0), (int) (state.GetValue(1) + (state.GetValue(2) * state.GetLevel())), false);
+            incParameter((uint) state.GetValue(3), (int) (state.GetValue(4) + (state.GetValue(5) + state.GetLevel())), true);
+            incParameter2((uint) state.GetValue(6), (int) (state.GetValue(7) + (state.GetValue(8) + state.GetLevel())));
+            incParameter2((uint) state.GetValue(9), (int) (state.GetValue(10) + (state.GetValue(11) + state.GetLevel())));
+            incParameter((uint) state.GetValue(12), (int) (state.GetValue(13) + (state.GetValue(14) + state.GetLevel())), true);
+            incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) + state.GetLevel())), true);
+            break;
+
+    }
+}
+
+void Unit::applyStateEffect()
+{
+    if(m_vStateList.empty())
+        return;
+
+    std::vector<std::pair<int,int>> vDecreaseList{};
+    for(auto& s : m_vStateList) {
+        if(s.GetEffectType() == 84) {// Strong Spirit?
+            auto nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            for(int i = 2; i < 11; ++i) {
+                if(s.GetValue(i) == 0.0f) {
+                    break;
+                    vDecreaseList.emplace_back(std::make_pair<int,int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                }
+            }
+        }
+    }
+    for(auto& s :  m_vStateList) {
+        uint16 nOriginalLevel[3]{0};
+
+        for (int i = 0; i < 3; i++)
+            nOriginalLevel[i] = s.m_nLevel[i];
+        for(auto& rp : vDecreaseList) {
+            if(rp.first == (int)s.m_nCode) {
+//                             *(v1 + 44) = 0;
+//                             *(v1 + 48) = 0;
+//                             *(v1 + 52) = 0;
+//                             *(v1 + 100) = 0;
+//                             do
+//                             {
+//                                 v17 = *(v1 + *(v1 + 100) + 40)
+//                                     - LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y);
+//                                 *(v1 + *(v1 + 100) + 52) = v17;
+//                                 if ( v17 < 0 )
+//                                 {
+//                                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y) = -v17;
+//                                     *(v1 + *(v1 + 100) + 52) = 0;
+//                                 }
+//                                 *(v1 + 100) -= 4;
+//                             }
+//                             while ( *(v1 + 100) >= -8 );
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 44);
+//                             HIWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 48);
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end_time) = *(v1 + 52);
+//                             break;
+            }
+        }
+
+        if(s.GetLevel() != 0) {
+            applyState(s);
+        }
+        for(int i = 0; i < 3; i++)
+            s.m_nLevel[i] = nOriginalLevel[i];
+    }
+}
+
+void Unit::applyStatByState()
+{
+    if(m_vStateList.empty())
+        return;
+
+    std::vector<std::pair<int,int>> vDecreaseList{};
+    for(auto& s : m_vStateList) {
+        if(s.GetEffectType() == 84) {// Strong Spirit?
+            auto nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            for(int i = 2; i < 11; ++i) {
+                if(s.GetValue(i) == 0.0f) {
+                    break;
+                    vDecreaseList.emplace_back(std::make_pair<int,int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                }
+            }
+        }
+    }
+    for(auto& s :  m_vStateList) {
+        uint16 nOriginalLevel[3]{0};
+
+        for (int i = 0; i < 3; i++)
+            nOriginalLevel[i] = s.m_nLevel[i];
+        for(auto& rp : vDecreaseList) {
+            if(rp.first == (int)s.m_nCode) {
+//                             *(v1 + 44) = 0;
+//                             *(v1 + 48) = 0;
+//                             *(v1 + 52) = 0;
+//                             *(v1 + 100) = 0;
+//                             do
+//                             {
+//                                 v17 = *(v1 + *(v1 + 100) + 40)
+//                                     - LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y);
+//                                 *(v1 + *(v1 + 100) + 52) = v17;
+//                                 if ( v17 < 0 )
+//                                 {
+//                                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y) = -v17;
+//                                     *(v1 + *(v1 + 100) + 52) = 0;
+//                                 }
+//                                 *(v1 + 100) -= 4;
+//                             }
+//                             while ( *(v1 + 100) >= -8 );
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 44);
+//                             HIWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 48);
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end_time) = *(v1 + 52);
+//                             break;
+            }
+        }
+
+        if(s.GetLevel() != 0) {
+            if(s.GetEffectType() == 1) {
+                // format is 0 = bitset, 1 = base, 2 = add per level
+                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
+                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
+                incParameter((uint)s.GetValue(12), (int)(s.GetValue(13) + (s.GetValue(14) + s.GetLevel())), true);
+                incParameter((uint)s.GetValue(15), (int)(s.GetValue(16) + (s.GetValue(17) + s.GetLevel())), true);
+            } else if(s.GetEffectType() == 3 && IsWearShield()) {
+                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
+                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
+            }
+        }
+        for(int i = 0; i < 3; i++)
+            s.m_nLevel[i] = nOriginalLevel[i];
+    }
+}
+
+
 void Unit::applyItemEffect()
 {
     Item *curItem = GetWornItem(ItemWearType::WearWeapon);
     if (curItem != nullptr && curItem->m_pItemBase != nullptr)
         m_Attribute.nAttackRange = curItem->m_pItemBase->range;
 
+    m_nUnitExpertLevel = 0;
     std::vector<int> ref_list{ };
     for (int i = 0; i < 24; i++) {
         curItem = GetWornItem((ItemWearType) i);
@@ -589,18 +830,147 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
     }
 }
 
+void Unit::getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute)
+{
+    attribute.nCritical += (m_AttributeAmplifier.fCritical * attribute.nCritical);
+    attribute.nCriticalPower += (m_AttributeAmplifier.fCriticalPower * attribute.nCriticalPower);
+    attribute.nAttackPointRight += (m_AttributeAmplifier.fAttackPointRight * attribute.nAttackPointRight);
+    attribute.nAttackPointLeft += (m_AttributeAmplifier.fAttackPointLeft * attribute.nAttackPointLeft);
+    attribute.nDefence += (m_AttributeAmplifier.fDefence * attribute.nDefence);
+    attribute.nBlockDefence += (m_AttributeAmplifier.fBlockDefence * attribute.nBlockDefence);
+    attribute.nMagicPoint += (m_AttributeAmplifier.fMagicPoint * attribute.nMagicPoint);
+    attribute.nMagicDefence += (m_AttributeAmplifier.fMagicDefence * attribute.nMagicDefence);
+    attribute.nAccuracyRight += (m_AttributeAmplifier.fAccuracyRight * attribute.nAccuracyRight);
+    attribute.nAccuracyLeft += (m_AttributeAmplifier.fAccuracyLeft * attribute.nAccuracyLeft);
+    attribute.nMagicAccuracy += (m_AttributeAmplifier.fMagicAccuracy * attribute.nMagicAccuracy);
+    attribute.nAvoid += (m_AttributeAmplifier.fAvoid * attribute.nAvoid);;
+    attribute.nMagicAvoid += (m_AttributeAmplifier.fMagicAvoid * attribute.nMagicAvoid);
+    attribute.nBlockChance += (m_AttributeAmplifier.fBlockChance * attribute.nBlockChance);
+    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+        attribute.nMoveSpeed += (m_AttributeAmplifier.fMoveSpeed * attribute.nMoveSpeed);
+
+    attribute.nAttackSpeed += (m_AttributeAmplifier.fAttackSpeed * attribute.nAttackSpeed);
+    attribute.nAttackRange += (m_AttributeAmplifier.fAttackRange * attribute.nAttackRange);
+    attribute.nMaxWeight += (short)(m_AttributeAmplifier.fMaxWeight * attribute.nMaxWeight);
+    attribute.nCastingSpeed += (short)(m_AttributeAmplifier.fCastingSpeed * attribute.nCastingSpeed);
+    attribute.nCoolTimeSpeed += (m_AttributeAmplifier.fCoolTimeSpeed * attribute.nCoolTimeSpeed);
+    attribute.nItemChance += (m_AttributeAmplifier.fItemChance * attribute.nItemChance);
+    attribute.nHPRegenPercentage += (m_AttributeAmplifier.fHPRegenPercentage * attribute.nHPRegenPercentage);
+    attribute.nHPRegenPoint += (m_AttributeAmplifier.fHPRegenPoint * attribute.nHPRegenPoint);
+    attribute.nMPRegenPercentage += (m_AttributeAmplifier.fMPRegenPercentage * attribute.nMPRegenPercentage);
+    attribute.nMPRegenPoint += (m_AttributeAmplifier.fMPRegenPoint * attribute.nMPRegenPoint);
+    attribute.nAttackSpeedRight += (m_AttributeAmplifier.fAttackSpeedRight * attribute.nAttackSpeedRight);
+    attribute.nAttackSpeedLeft += (m_AttributeAmplifier.fAttackSpeedLeft * attribute.nAttackSpeedLeft);
+    attribute.nDoubleAttackRatio += (m_AttributeAmplifier.fDoubleAttackRatio * attribute.nDoubleAttackRatio);
+    attribute.nStunResistance += (m_AttributeAmplifier.fStunResistance * attribute.nStunResistance);
+    attribute.nMoveSpeedDecreaseResistance += (m_AttributeAmplifier.fMoveSpeedDecreaseResistance * attribute.nMoveSpeedDecreaseResistance);
+    attribute.nHPAdd += (m_AttributeAmplifier.fHPAdd * attribute.nHPAdd);
+    attribute.nMPAdd += (m_AttributeAmplifier.fMPAdd * attribute.nMPAdd);
+    attribute.nHPAddByItem += (m_AttributeAmplifier.fHPAddByItem * attribute.nHPAddByItem);
+    attribute.nMPAddByItem += (m_AttributeAmplifier.fMPAddByItem * attribute.nMPAddByItem);
+}
+
+void Unit::applyStateAmplifyEffect()
+{
+    if(m_vStateList.empty())
+        return;
+
+    std::vector<std::pair<int,int>> vDecreaseList{};
+    for(auto& s : m_vStateList) {
+        if(s.GetEffectType() == 84) {// Strong Spirit?
+            auto nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            for(int i = 2; i < 11; ++i) {
+                if(s.GetValue(i) == 0.0f) {
+                    break;
+                    vDecreaseList.emplace_back(std::make_pair<int,int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                }
+            }
+        }
+    }
+    for(auto& s :  m_vStateList) {
+        uint16 nOriginalLevel[3]{0};
+
+        for (int i = 0; i < 3; i++)
+            nOriginalLevel[i] = s.m_nLevel[i];
+        for(auto& rp : vDecreaseList) {
+            if(rp.first == (int)s.m_nCode) {
+//                             *(v1 + 44) = 0;
+//                             *(v1 + 48) = 0;
+//                             *(v1 + 52) = 0;
+//                             *(v1 + 100) = 0;
+//                             do
+//                             {
+//                                 v17 = *(v1 + *(v1 + 100) + 40)
+//                                     - LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y);
+//                                 *(v1 + *(v1 + 100) + 52) = v17;
+//                                 if ( v17 < 0 )
+//                                 {
+//                                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y) = -v17;
+//                                     *(v1 + *(v1 + 100) + 52) = 0;
+//                                 }
+//                                 *(v1 + 100) -= 4;
+//                             }
+//                             while ( *(v1 + 100) >= -8 );
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 44);
+//                             HIWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 48);
+//                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end_time) = *(v1 + 52);
+//                             break;
+            }
+        }
+
+        if(s.GetLevel() != 0) {
+            applyStateAmplify(s);
+        }
+        for(int i = 0; i < 3; i++)
+            s.m_nLevel[i] = nOriginalLevel[i];
+    }
+}
+
+void Unit::applyStateAmplify(State &state)
+{
+    int effectType = state.GetEffectType();
+    int level = state.GetLevel();
+    if (effectType != 0)
+    {
+        if (effectType == 2)
+        {
+            ampParameter((uint)state.GetValue(0),(state.GetValue(1) + (state.GetValue(2) * level)),false);
+            ampParameter((uint)state.GetValue(3),(state.GetValue(4) + (state.GetValue(5) * level)),false);
+            ampParameter2((uint)state.GetValue(6),(state.GetValue(7) + (state.GetValue(8) * level)));
+            ampParameter2((uint)state.GetValue(9),(state.GetValue(10) + (state.GetValue(11) * level)));
+            ampParameter((uint)state.GetValue(12),(state.GetValue(13) + (state.GetValue(14) * level)),false);
+            ampParameter((uint)state.GetValue(15),(state.GetValue(16) + (state.GetValue(17) * level)),false);
+        }
+    }
+    else
+    {
+        if (state.m_nCode == StateCode::SC_SQUALL_OF_ARROW)
+        {
+            if(state.GetValue(1) == 0.0f)
+                SetFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+            else
+                ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+
+            if ((int)GetWeaponClass() == (int)state.GetValue(0))
+            {
+                m_AttributeAmplifier.fAttackSpeedRight += state.GetValue(2) + (state.GetValue(3) * level);
+                if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                {
+                    m_AttributeAmplifier.fAttackSpeedLeft += state.GetValue(2) + (state.GetValue(3) * level);
+                }
+            }
+        }
+    }
+}
+
+
 void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
 {
-    float result{};
     float item_var_penalty{};
 
     Player* p{nullptr};
     if(GetSubType() == ST_Player)
         p = dynamic_cast<Player*>(this);
-
-    auto  tpl = sObjectMgr->GetItemBase((uint)pItem->m_Instance.Code);
-    if (tpl == nullptr)
-        return;
 
     if (type == 14)
         item_var_penalty = var1;
@@ -609,9 +979,8 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
 
     if (type != 14) {
         if (pItem != nullptr && bIsBaseVar) {
-            item_var_penalty += (float) (var2 * (float) tpl->level);
-            result           = var1;
-            item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int) var1, GetLevel(), tpl->rank, pItem->m_Instance.nLevel);
+            item_var_penalty += (float) (var2 * (float) (pItem->m_Instance.nLevel - 1));
+            item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int) var1, GetLevel(), pItem->GetItemRank(), pItem->m_Instance.nLevel);
         }
         // TODO m_fItemMod = item_var_penalty
     }
@@ -762,26 +1131,26 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
         v = (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
         attribute.nAttackPointRight += v;
     } else {
-        v = (2.8f * m_cStat.strength) + (fcm * b1);
+        v = (2.0f * m_cStat.strength) + (fcm * b1);
         attribute.nAttackPointRight += v;
         if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             attribute.nAttackPointLeft += v;// ((2 * this.m_Stat.strength) * fcm + bl);
     }
 
     attribute.nMagicPoint += ((2 * m_cStat.intelligence) + (fcm * b1));
-    attribute.nItemChance += (m_cStat.luck * 0.2f);
-    attribute.nDefence += ((1.6f * m_cStat.vital) + (fcm * b1));
-    attribute.nMagicDefence += ((2 * m_cStat.mentality) + (fcm + b1));
+    attribute.nItemChance += (m_cStat.luck * 0.2000000029802322f);
+    attribute.nDefence += ((2.0f * m_cStat.vital) + (fcm * b1));
+    attribute.nMagicDefence += ((2.0f * m_cStat.mentality) + (fcm * b1));
     attribute.nMaxWeight += 10 * (GetLevel() + m_cStat.strength);
-    attribute.nAccuracyRight += ((m_cStat.dexterity) * 0.5f + (fcm + b1));
+    attribute.nAccuracyRight += ((m_cStat.dexterity) * 0.5f * fcm + b1);
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
-        attribute.nAccuracyLeft += ((m_StatAmplifier.dexterity) * 0.5f) + (fcm + b1);
+        attribute.nAccuracyLeft += ((m_StatAmplifier.dexterity) * 0.5f * fcm + b1);
     attribute.nMagicAccuracy += ((m_cStat.mentality * 0.4f + m_cStat.dexterity * 0.1f) * fcm + b1);
     attribute.nAvoid += (m_cStat.agility * 0.5f * fcm + b1);
     attribute.nMagicAvoid += (m_cStat.mentality * 0.5f * fcm + b1);
-    attribute.nAttackSpeedRight += (100 + (m_cStat.agility * 0.1f));
+    attribute.nAttackSpeedRight += 100; /*(100 + (m_cStat.agility * 0.1f));*/
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
-        attribute.nAttackSpeedLeft += ((this->m_cStat.dexterity) * 0.5f + (fcm + b1));
+        attribute.nAttackSpeedLeft += 100;/*((this->m_cStat.dexterity) * 0.5f + (fcm + b1));*/
     if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
         attribute.nMoveSpeed += (120 * fcm);
     attribute.nCastingSpeed += (100 * fcm);
@@ -790,7 +1159,7 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     attribute.nHPRegenPercentage += d1;
     attribute.nHPRegenPoint += ((2 * fcm * b1) + 48.0f);
     attribute.nMPRegenPercentage += d1;
-    attribute.nMPRegenPoint += ((2 * fcm * b1) + 48.0f + (4.1f * m_cStat.mentality));
+    attribute.nMPRegenPoint += ((2 * fcm * b1) + 48.0f); // + (4.1f * m_cStat.mentality));
     if (attribute.nAttackRange == 0)
         attribute.nAttackRange = 50;
 }
@@ -1163,7 +1532,7 @@ void Unit::processAttack()
             }
 
             if (player != nullptr) {
-                Messages::SendHPMPMessage(player, enemy, 0, 0, true);
+                //Messages::SendHPMPMessage(player, enemy, 0, 0, true);
                 Messages::SendCantAttackMessage(player, player->GetHandle(), player->GetTargetHandle(), TS_RESULT_NOT_EXIST);
             }
             EndAttack();
@@ -1247,7 +1616,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
     int nAttackCount = 1;
     if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
         nAttackCount = 2;
-    if (rand32() % 100 < m_Attribute.nDoubleAttackRatio) {
+    if (((uint)rand32() % 100) < m_Attribute.nDoubleAttackRatio) {
         bIsDoubleAttack = true;
         nAttackCount *= 2;
     }
@@ -1316,10 +1685,10 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     else
         nTargetGroup = 9;
 
-    if(true) {
-        bRange = false;
-    } else {
+    if(false) {
         bRange = true;
+    } else {
+        bRange = false;
     }
 
     // Do damage reduce
@@ -1334,6 +1703,8 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
         d = DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     }
     result.SetDamage(d);
+
+    result.target_hp = GetHealth();
     return result;
 }
 
@@ -1355,7 +1726,8 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
         fCritical += damage_advantage->fCritical - 1.0f;
     }
 
-    auto result        = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus, fCritical + 1.0f, critical_bonus + nCritical, nFlag);
+    auto result = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus, fCritical + 1.0f, critical_bonus + nCritical, nFlag);
+
     if (!result.bMiss) {
         if (damage_penalty != nullptr) {
             result.nDamage += damage_penalty->nDamage;
@@ -1416,6 +1788,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
         auto nPrevMP = pFrom->GetMana();
 
         Messages::BroadcastHPMPMessage(pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, false);
+
         if(GetSubType() == ST_Player) {
             Messages::SendHPMPMessage(dynamic_cast<Player *>(this), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
         } else if(GetSubType() == ST_Summon) {
@@ -1520,12 +1893,11 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         fDefAdjust = nDamagea;
         if(GetSubType() != ST_SkillProp) {
             if((nFlag & 4) == 0) {
-                if(bIsPhysicalDamage) {
+                if (bIsPhysicalDamage) {
                     nDefence = pTarget->m_Attribute.nDefence;
                     // TODO Shield
-                } else {
-                    if(bIsMagicalDamage)
-                        nDefence = pTarget->m_Attribute.nMagicDefence;
+                } else if (bIsMagicalDamage) {
+                    nDefence = pTarget->m_Attribute.nMagicDefence;
                 }
             }
             float nDamageb = 1.0f - 0.4f * nDefence / nDamagea;
@@ -1548,13 +1920,11 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     }
 
     fDefAdjustb = (fDefAdjust + nRandomDamage);
-    if(!bIsAdditionalDamage) {
-        if((nFlag & 0x10) == 0) {
-            int cd = 0; // GetCriticalDamage
-            if(cd != 0) {
-                fDefAdjustb += cd;
-                result.bCritical = true;
-            }
+    if(!bIsAdditionalDamage && (nFlag & 0x10) == 0) {
+        int cd = 0; // GetCriticalDamage
+        if (cd != 0) {
+            fDefAdjustb += cd;
+            result.bCritical = true;
         }
     }
     if((damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand) && HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
@@ -1938,4 +2308,147 @@ bool Unit::IsWearShield()
 float Unit::GetItemChance() const
 {
     return m_Attribute.nItemChance;
+}
+
+void Unit::applyDoubeWeaponEffect()
+{
+    float fAddPerLevel{0};
+    Skill* skill{nullptr};
+
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    {
+        return;
+    }
+    m_Attribute.nAttackSpeed = m_Attribute.nAttackSpeedRight;
+    m_AttributeByState.nAttackSpeed= m_AttributeByState.nAttackSpeedRight;
+}
+
+uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
+{
+    SetFlag(UNIT_FIELD_STATUS, StatusFlags::NeedToUpdateState);
+    auto stateInfo = sObjectMgr->GetStateInfo(code);
+    if (stateInfo == nullptr) {
+        return TS_RESULT_NOT_EXIST;
+    }
+    if (GetHealth() == 0 && (stateInfo->state_time_type & 0x81) != 0)
+        return TS_RESULT_NOT_ACTABLE;
+
+    if ((stateInfo->state_time_type & 8) != 0 && GetSubType() == ST_Mob && false /* Connector/AutoTrap */) {
+        return TS_RESULT_LIMIT_TARGET;
+    } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL
+               && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != 104) {
+        if (stateInfo->effect_type != 82 || stateInfo->value[0] == 0.0f && stateInfo->value[1] == 0.0f
+                                            && stateInfo->value[2] == 0.0f && stateInfo->value[3] == 0.0f)
+
+    }*/
+    if(code == StateCode::SC_FEAR)
+        ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
+
+    auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
+    int base_damage = 0;
+    if(pCaster != nullptr && stateInfo->base_effect_id > 0) {
+        // DAMAGES WOHOOOOOOOO
+    }
+
+    bool bNotErasable = ((stateInfo->state_time_type >> 4) & 1) != 0;
+    std::vector<uint16> vDeleteStateUID{};
+    bool bAlreadyExist{false};
+
+    for(auto& s : m_vStateList) {
+        if(code == s.m_nCode) {
+            bAlreadyExist = true;
+        } else {
+            bool bf = false;
+            for(int i = 0; i < 3; ++i) {
+                if(s.IsDuplicatedGroup(stateInfo->duplicate_group[i])) {
+                    bf = true;
+                    break;
+                }
+            }
+            if(!bf)
+                continue;
+        }
+        if(bNotErasable != (((s.GetTimeType() >> 4 ) & 1 ) != 0)) {
+            if(bNotErasable)
+                return TS_RESULT_ALREADY_EXIST;
+            vDeleteStateUID.emplace_back(s.m_nUID);
+        } else {
+            if(s.GetLevel() > level)
+                return TS_RESULT_ALREADY_EXIST;
+
+            if(s.GetLevel() == level) {
+                uint et = s.m_nEndTime[1];
+                if(s.m_nEndTime[0] > et)
+                    et = s.m_nEndTime[0];
+                if(et > end_time)
+                    return TS_RESULT_ALREADY_EXIST;
+            }
+            if(code != s.m_nCode)
+                vDeleteStateUID.emplace_back(s.m_nUID);
+        }
+    }
+
+    for(auto& id : vDeleteStateUID) {
+        for(int i = (int)m_vStateList.size() - 1; i >= 0; --i) {
+            State s = m_vStateList[i];
+            if(id == s.m_nUID) {
+                m_vStateList.erase(m_vStateList.begin() + i);
+                CalculateStat();
+                break;
+            }
+        }
+    }
+    if(bAlreadyExist) {
+        for(auto& s : m_vStateList) {
+            if(code == s.m_nCode) {
+                s.AddState(type, caster, (uint16)level, start_time, end_time, base_damage, bIsAura);
+                CalculateStat();
+                onUpdateState(s, false);
+                onAfterAddState(s);
+                break;
+            }
+        }
+    } else {
+        m_nCurrentStateUID++;
+        State ns{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, false, nStateValue, std::move(szStateValue)};
+        m_vStateList.emplace_back(ns);
+        CalculateStat();
+
+        onUpdateState(ns, false);
+        if(GetSubType() == ST_Mob && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
+            if(m_Attribute.nAttackRange < 84)
+                m_Attribute.nAttackRange = 83;
+        }
+        onAfterAddState(ns);
+    }
+    return TS_RESULT_SUCCESS;
+}
+
+void Unit::onAfterAddState(State)
+{
+    procMoveSpeedChange();
+}
+
+void Unit::procMoveSpeedChange()
+{
+    std::vector<Position> vMovePos{};
+
+    if(bIsMoving && IsInWorld()) {
+        uint ct = sWorld->GetArTime();
+        auto pos = GetCurrentPosition(ct);
+        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
+            if(speed != m_Attribute.nMoveSpeed / 7) {
+                 for(auto mi : ends)
+                     vMovePos.emplace_back(mi.end);
+                sWorld->SetMultipleMove(this, pos, vMovePos, (uint8)(m_Attribute.nMoveSpeed / 7), true, ct, true);
+            }
+        } else {
+            sWorld->SetMove(this, pos, pos, 0, true, ct, true);
+        }
+    }
+}
+
+void Unit::onUpdateState(State state, bool bIsExpire)
+{
+    Messages::BroadcastStateMessage(this, state, bIsExpire);
 }

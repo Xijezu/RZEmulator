@@ -1,8 +1,8 @@
 //
 // Created by xijezu on 17.12.17.
 //
-
 #include "GameRule.h"
+#include "Common.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
 float GameRule::_itemDropRate = 1.0f;
@@ -18,20 +18,28 @@ float GameRule::GetItemValue(float item_current_value, int item_rank_value, int 
     //return f1 * ilp;
 }
 
+// NO TOUCH, IS WORK! NO TOUCH IF NO BROKE
 float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_level)
 {
-    float result      = 1;
+    float result      = 0;
     int   recommended = GetItemRecommendedLevel(item_rank, item_level);
     int   limit       = GetItemLevelLimit(item_rank);
 
     if (item_level == 1 || creature_level < limit || creature_level >= recommended) {
-        result = 1;
+        result = 10000;
     } else {
-        float n = (float) (recommended - limit);
-        result = (float) (recommended - creature_level);
-        result *= n;
+        int64 B = 500ll;
+
+        int64 n       = 10000ll * (recommended - limit);                                        // 0
+        int64 resulta = 10000ll * (recommended - creature_level);                        // 0
+        resulta /= n;
+
+        int64 v6 = (item_level) * B;
+        B = 10000 - v6;
+        int64 v8 = 10000 - (resulta * B);
+        result = v8;
     }
-    return result;
+    return result / 10000;
 }
 
 int GameRule::GetItemRecommendModTable(int item_rank)
@@ -70,6 +78,8 @@ int GameRule::GetRankLevel(int rank)
             return 150;
         case 8:
             return 180;
+        default:
+            return 0;
     }
 
     return 0;

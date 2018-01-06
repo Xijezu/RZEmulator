@@ -233,6 +233,7 @@ public:
 
     MonsterDeleteHandler* m_pDeleteHandler{nullptr};
 protected:
+    void onApplyAttributeAdjustment() override;
     int onDamage(Unit* pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
     void onDead(Unit* pFrom, bool decreaseEXPOnDead) override;
     void processDead(uint t);//override;

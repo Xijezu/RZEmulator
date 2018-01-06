@@ -22,6 +22,7 @@
 #include "ObjectMgr.h"
 #include "MemPool.h"
 #include "ClientPackets.h"
+#include "SkillFunctor.h"
 
 Skill::Skill(Unit *pOwner, uint64 _uid, int _id) : m_nErrorCode(0)
 {
@@ -201,6 +202,10 @@ void Skill::ProcSkill()
         DoSummon();
     else if(m_SkillBase->id == 4002)
         DoUnsummon();
+    else if(m_SkillBase->effect_type == EffectType::AddState) {
+        FireSkillStateSkillFunctor fn{};
+        fn.onCreature(this, sWorld->GetArTime(), m_pOwner, dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(m_hTarget)));
+    }
 
 
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),

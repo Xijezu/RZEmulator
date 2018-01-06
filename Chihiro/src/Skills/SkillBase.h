@@ -345,6 +345,18 @@ struct SkillBase {
 
     bool IsUseableWeapon(ItemClass cl);
 
+    int GetStateSecond(int skill_lv, int enhance_lv)
+    {
+        return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
+    }
+
+    int GetStateLevel(int skill_lv, int enhance_lv)
+    {
+        return (int) (state_level_base
+                      + (state_level_per_enhance * enhance_lv)
+                      + (state_level_per_skl * skill_lv));
+    }
+
     uint GetCastDelay(int skill_lv, int enhance)
     {
         return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));

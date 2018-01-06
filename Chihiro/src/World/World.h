@@ -67,7 +67,6 @@ public:
 
     void Broadcast(uint, uint, uint, uint, uint8, XPacket);
     void Broadcast(uint, uint, uint8, XPacket);
-	void BroadcastStatusMessage(Unit* unit);
 	uint GetArTime();
 
 	void Update(uint);

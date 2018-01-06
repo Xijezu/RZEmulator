@@ -22,7 +22,9 @@
 #include "Skill.h"
 #include "NPC.h"
 #include "MemPool.h"
+#include "ArRegion.h"
 #include "ObjectMgr.h"
+#include "State.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -83,7 +85,7 @@ void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
     statPct.Reset();
     statPct << (uint32_t) pUnit->GetHandle();
     pUnit->m_cStatByState.WriteToPacket(statPct);
-    pUnit->m_cAtributeByState.WriteToPacket(statPct);
+    pUnit->m_AttributeByState.WriteToPacket(statPct);
     statPct << (uint8_t) 1;
     pPlayer->SendPacket(statPct);
 }
@@ -276,8 +278,10 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     packet << (int32_t) socket[3];
     // Prior to Epic 6 we have to use 2 dummy socket slots.
     // Can you imagine how much time I wasted on this?
+#if EPIC < 6
     packet << (int32_t) 0;
     packet << (int32_t) 0;
+#endif // EPIC < 6
     packet << (int32_t) item->m_Instance.tExpire;
 
     packet << (int16_t) item->m_Instance.nWearInfo;
@@ -503,8 +507,9 @@ void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, 
 uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 {
     uint v2{0};
-    if(pObj->GetSubType() != ST_Player) {
-        if(pObj->GetSubType() == ST_NPC) {
+
+    switch(pObj->GetSubType()) {
+        case ST_NPC: {
             auto npc = dynamic_cast<NPC*>(pObj);
             if(npc->HasFinishableQuest(pClient))
                 v2 |= 0x400;
@@ -513,7 +518,17 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
             else if(npc->HasInProgressQuest(pClient))
                 v2 |= 0x200;
         }
+        break;
+        case ST_Mob: {
+            auto monster = dynamic_cast<Monster*>(pObj);
+            if(monster->GetStatus() == 4)
+                v2 |= 0x100;
+        }
+        break;
+        default:
+            break;
     }
+
     return v2;
 }
 
@@ -524,7 +539,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
     std::string strTrigger{};
     if(true) {
         int progress = 0;
-        int type = 7;
+        int type = 3;
 
         if(text != 0) {
             progress = npc->GetProgressFromTextID(code, text);
@@ -553,8 +568,8 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
                 type = 8;
             }
         }
-        pPlayer->SetDialogTitle("Guide Arocel", type);
-        std::string buf = string_format("QUEST|%u|%u", code, textID);
+        pPlayer->SetDialogTitle("Guide Arocel", QuestType::QT_KillIndividual);
+        std::string buf = string_format("QUEST|%u|%u|0", code, textID);
         pPlayer->SetDialogText(buf);
         auto rQuestBase = sObjectMgr->GetQuestBase(code);
 
@@ -589,4 +604,71 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
         }
         pPlayer->AddDialogMenu(strButton, strTrigger);
     }
+}
+
+void Messages::SendQuestList(Player *pPlayer)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket questPct(TS_SC_QUEST_LIST);
+    int cnt = 0;
+    questPct << cnt;
+
+    pPlayer->SendPacket(questPct);
+}
+
+void Messages::BroadcastStatusMessage(WorldObject *obj)
+{
+    if(obj == nullptr)
+        return;
+
+    sArRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                                   (uint)(obj->GetPositionY() / g_nRegionSize),
+                                   obj->GetLayer(),
+                                   [&obj](ArRegion* rgn) {
+                                       rgn->DoEachClient([&obj](WorldObject* client) {
+                                           if(client != nullptr) {
+                                               XPacket pct(TS_SC_STATUS_CHANGE);
+                                               pct << obj->GetHandle();
+                                               pct << GetStatusCode(obj, dynamic_cast<Player*>(client));
+                                               dynamic_cast<Player *>(client)->SendPacket(pct);
+                                           }
+                                       });
+                                   });
+}
+
+void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
+{
+    XPacket statePct(TS_SC_STATE);
+    statePct << pUnit->GetHandle();
+    statePct << (uint16)pState.m_nUID;
+    statePct << (int)pState.m_nCode;
+
+    if(bIsCancel) {
+        statePct << (uint16)0;
+        statePct << (uint32)0;
+        statePct << (uint32)0;
+    } else {
+        statePct << (uint16)pState.GetLevel();
+        uint t{};
+        if(!pState.m_bAura) {
+            t = pState.m_nEndTime[0];
+            if(t <= pState.m_nEndTime[1])
+                t = pState.m_nEndTime[1];
+            statePct << t;
+        } else {
+            statePct << (int)-1;
+        }
+
+        t = pState.m_nStartTime[1];
+        if(pState.m_nStartTime[0] > t)
+            t = pState.m_nStartTime[0];
+        statePct << t;
+    }
+
+    statePct << pState.m_nStateValue;
+    statePct.fill(pState.m_szStateValue, 32);
+
+    sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), statePct);
 }

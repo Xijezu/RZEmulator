@@ -460,25 +460,6 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
 
     pPlayer->AddEXP(exp, jp, false);
 }
-
-void World::BroadcastStatusMessage(Unit *unit)
-{
-    if(unit == nullptr)
-        return;
-    XPacket packet(TS_SC_STATUS_CHANGE);
-    packet << unit->GetHandle();
-    packet << 0; // Get Status Message
-
-    sArRegion->DoEachVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize),
-                                   (uint)(unit->GetPositionY() / g_nRegionSize),
-                                   unit->GetLayer(),
-                                   [&packet](ArRegion* rgn) {
-                                       rgn->DoEachClient([&packet](WorldObject* obj) {
-                                           dynamic_cast<Player*>(obj)->SendPacket(packet);
-                                       });
-                                   });
-}
-
 void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {
     if(pUnit == nullptr || pItem == nullptr)
@@ -568,7 +549,7 @@ int World::ShowQuestMenu(Player *pPlayer)
                 else if(*m_QuestProgress == 2)
                     qpid = linkInfo->nEndTextID;
                 szBuf = string_format("quest_info( %u, %u )", linkInfo->code, qpid);
-                szButtonName = string_format("QUEST|%u|%u", qbs->nQuestTextID, m_QuestProgress);
+                szButtonName = string_format("QUEST|%u|%u", qbs->nQuestTextID, *m_QuestProgress);
                 pPlayer->AddDialogMenu(szButtonName, szBuf);
             }
         };

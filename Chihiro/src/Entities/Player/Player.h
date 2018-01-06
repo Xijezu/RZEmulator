@@ -112,6 +112,8 @@ public:
     bool IsMagician();
     bool IsSummoner();
 
+    float GetMoveSpeed() const;
+
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
 
     // Quest start
@@ -150,6 +152,7 @@ protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
     void onExpChange() override;
     void onCantAttack(uint target, uint t) override;
+    void onModifyStatAndAttribute() override;
 
 private:
     WorldSession *m_session{nullptr};

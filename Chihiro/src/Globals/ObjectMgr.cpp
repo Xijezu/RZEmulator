@@ -24,6 +24,8 @@ bool ObjectMgr::InitGameContent()
         return false;
     if (!LoadJobLevelBonus())
         return false;
+    if(!LoadStateResource())
+        return false;
     if(!LoadQuestResource() || !LoadQuestLinkResource())
         return false;
     if (!LoadJobResource())
@@ -575,6 +577,51 @@ bool ObjectMgr::LoadLevelResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Leveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
+
+bool ObjectMgr::LoadStateResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM StateResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stat templates. Table `StateResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field        *field = result->Fetch();
+        int idx = 0;
+        StateTemplate state{ };
+        state.state_id = field[idx++].GetInt32();
+        state.text_id = field[idx++].GetInt32();
+        state.tooltip_id = field[idx++].GetInt32();
+        state.is_harmful = field[idx++].GetUInt8();
+        state.state_time_type = field[idx++].GetInt32();
+        state.state_group = field[idx++].GetInt32();
+        for(auto& dg : state.duplicate_group)
+            dg = field[idx++].GetInt32();
+        state.uf_avatar = field[idx++].GetUInt8();
+        state.uf_summon = field[idx++].GetUInt8();
+        state.uf_monster = field[idx++].GetUInt8();
+        state.base_effect_id = field[idx++].GetInt32();
+        state.fire_interval = field[idx++].GetInt32();
+        state.elemental_type = field[idx++].GetInt32();
+        state.amplify_base = field[idx++].GetFloat();
+        state.amplify_per_skl = field[idx++].GetFloat();
+        state.add_damage_base = field[idx++].GetInt32();
+        state.add_damage_per_skl = field[idx++].GetInt32();
+        state.effect_type = field[idx++].GetInt32();
+        for(auto& val : state.value)
+            val = field[idx++].GetFloat();
+
+        _stateTemplateStore[state.state_id] = state;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u States in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 
 bool ObjectMgr::LoadStatResource()
 {
@@ -1420,5 +1467,12 @@ QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
         if(l.code == code && (l.nStartTextID == start_id || start_id == 0))
             return &l;
     }
+    return nullptr;
+}
+
+StateTemplate *const ObjectMgr::GetStateInfo(int code)
+{
+    if(_stateTemplateStore.count(code) == 1)
+        return &_stateTemplateStore[code];
     return nullptr;
 }

@@ -259,12 +259,12 @@ bool Player::ReadSkillList(int)
     SetSkill(-1, 6019, 20, 0);
     SetSkill(-1, 6020, 20, 0);
     SetSkill(-1, 6021, 20, 0);
-    SetSkill(-2, 6901, 20, 0);
+    /*SetSkill(-2, 6901, 20, 0);
     SetSkill(-2, 6902, 20, 0);
     SetSkill(-2, 6903, 20, 0);
     SetSkill(-2, 6904, 20, 0);
     SetSkill(-2, 6905, 20, 0);
-    SetSkill(-2, 6906, 20, 0);
+    SetSkill(-2, 6906, 20, 0);*/
     SetSkill(-1, 6022, 20, 0);
     SetSkill(-1, 6023, 20, 0);
     SetSkill(-1, 6024, 20, 0);
@@ -446,6 +446,7 @@ void Player::SendLoginProperties()
     sWorld->AddSession(m_session);
     CalculateStat();
     // Login();
+    Messages::SendQuestList(this);
     for(auto summon: m_vSummonList) {
         Messages::SendAddSummonMessage(this, summon);
     }
@@ -1610,4 +1611,14 @@ void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestPro
 Quest *Player::FindQuest(int code)
 {
     return m_QuestManager.FindQuest(code);
+}
+
+float Player::GetMoveSpeed() const
+{
+    return m_Attribute.nMoveSpeed;
+}
+
+void Player::onModifyStatAndAttribute()
+{
+    Messages::SendStatInfo(this, this);
 }

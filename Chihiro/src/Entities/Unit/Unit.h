@@ -8,6 +8,7 @@
 #include "Utilities/EventProcessor.h"
 #include "CreatureAttribute.h"
 #include "DamageTemplate.h"
+#include "State.h"
 
 class XPacket;
 class Item;
@@ -72,6 +73,11 @@ enum DamageFlag : int {
 
 
 class Unit : public WorldObject {
+    friend class Messages;
+    friend class Skill;
+    friend class Player;
+    friend class XLua;
+    friend class WorldSession;
 public:
     virtual ~Unit();
 
@@ -129,7 +135,7 @@ public:
     { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
     uint GetAttackInterval() const
-    { return (uint)(100.0f / m_Attribute.nAttackSpeedRight * 115.0f); }
+    { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); }
 
     Damage CalcDamage(Unit* pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
 
@@ -245,34 +251,27 @@ public:
     ItemClass GetWeaponClass();
     bool IsWearShield();
 
-    ExpertMod                        m_Expert[10]{};
-    CreatureStat                     m_cStat{ };
-    CreatureStat                     m_cStatByState{ };
-    CreatureAtributeServer           m_Attribute{ };
-    CreatureAtributeServer           m_cAtributeByState{ };
-    CreatureStatAmplifier            m_StatAmplifier{ };
-    CreatureAttributeAmplifier       m_AttributeAmplifier{ };
-    CreatureElementalResist          m_Resist{};
-    CreatureElementalResistAmplifier m_ResistAmplifier{ };
-    int m_nUnitExpertLevel{0};
-
+    uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue);
 // 	GameObject* GetGameObject(uint32 spellId) const;
 // 	void AddGameObject(GameObject* gameObj);
 // 	void RemoveGameObject(GameObject* gameObj, bool del);
 // 	void RemoveGameObject(uint32 spellid, bool del);
 // 	void RemoveAllGameObjects();
     explicit Unit(bool isWorldObject);
-    Item       *m_anWear[Item::MAX_ITEM_WEAR]{ };
-    std::vector<Skill*> m_vSkillList;
-    uint m_nMovableTime{0};
-
-    Skill* m_castingSkill{nullptr};
-
-    float m_nRegenHP{}, m_fRegenMP{};
 protected:
     void applyStatByItem();
     virtual void applyJobLevelBonus() { };
+    virtual void onModifyStatAndAttribute() { };
     void applyPassiveSkillEffect();
+    void applyStatByState();
+    void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
+    void amplifyStatByState();
+    void applyState(State &state);
+    void applyStateEffect();
+    void applyStateAmplifyEffect();
+    void applyStateAmplify(State& state);
+    void applyDoubeWeaponEffect();
+    virtual void onApplyAttributeAdjustment() { };
     virtual void applyPassiveSkillEffect(Skill* skill);
     void getAmplifiedStatByAmplifier(CreatureStat &);
     void finalizeStat();
@@ -295,14 +294,36 @@ protected:
     virtual void onDead(Unit* pFrom, bool decreaseEXPOnDead);
     void processAttack();
     void broadcastAttackMessage(Unit* pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
-    //UNORDERED_MAP<int, Item> m_anWear;
     uint m_nLastUpdatedTime{};
-    DeathState _deathState;
+    void onAfterAddState(State);
+    void onUpdateState(State state, bool bIsExpire);
+    void procMoveSpeedChange();
     void processPendingMove();
+    std::vector<State> m_vStateList{};
     uint32 m_unitTypeMask;
 //	typedef std::list<GameObject*> GameObjectList;
 //	GameObjectList m_gameObj;
+
+    ExpertMod                        m_Expert[10]{};
+    CreatureStat                     m_cStat{ };
+    CreatureStat                     m_cStatByState{ };
+    CreatureAtributeServer           m_Attribute{ };
+    CreatureAtributeServer           m_AttributeByState{ };
+    CreatureStatAmplifier            m_StatAmplifier{ };
+    CreatureAttributeAmplifier       m_AttributeAmplifier{ };
+    CreatureElementalResist          m_Resist{};
+    CreatureElementalResistAmplifier m_ResistAmplifier{ };
+
+    std::vector<Skill*> m_vSkillList;
+
+    Item  *m_anWear[Item::MAX_ITEM_WEAR]{nullptr};
+    uint m_nMovableTime{0};
+    int m_nUnitExpertLevel{0};
+    Skill* m_castingSkill{nullptr};
+
+    float m_nRegenHP{}, m_fRegenMP{};
 private:
+    uint m_nCurrentStateUID{0};
     void incParameter(uint nBitset, float nValue, bool bStat);
     void incParameter2(uint nBitset, float fValue);
     void ampParameter2(uint nBitset, float fValue);

@@ -11,6 +11,7 @@ class Item;
 class XPacket;
 struct MarketInfo;
 class WorldObject;
+class State;
 
 struct scramble_map {
     scramble_map()
@@ -83,9 +84,12 @@ public:
     static void SendWearInfo(Player*,Unit*);
     static void BroadcastHPMPMessage(Unit*,int,float,bool);
     static void BroadcastLevelMsg(Unit*);
+    static void BroadcastStatusMessage(WorldObject* obj);
+    static void BroadcastStateMessage(Unit* pUnit, State &pState, bool bIsCancel);
     static void SendWarpMessage(Player*);
     static void SendCantAttackMessage(Player*,uint,uint,int);
     static void SendQuestInformation(Player* pPlayer, int code, int text);
+    static void SendQuestList(Player* pPlayer);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

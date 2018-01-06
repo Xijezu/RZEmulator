@@ -14,14 +14,42 @@ Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
 {
     Item *item = sMemoryPool->AllocItem();
+    if(item == nullptr)
+        return nullptr;
+
+    item->m_pItemBase = sObjectMgr->GetItemBase((uint)code);
 
     item->m_Instance.UID          = uid;
     item->m_Instance.Code         = code;
     item->m_Instance.nCount       = cnt;
-    item->m_Instance.nLevel       = level;
-    item->m_Instance.GenerateInfo = info;
-    item->m_Instance.Flag         = flag;
-    item->m_Instance.nEnhance     = enhance;
+
+    // Workaround for gold :^)
+    if(item->m_pItemBase != nullptr) {
+
+        if (level == -1)
+            item->m_Instance.nLevel = item->m_pItemBase->level;
+        else
+            item->m_Instance.nLevel = level;
+        if (item->m_Instance.nLevel <= 0)
+            item->m_Instance.nLevel = 1;
+
+        item->m_Instance.GenerateInfo = info;
+        item->m_Instance.Flag         = flag;
+
+        if (enhance == -1)
+            item->m_Instance.nEnhance = item->m_pItemBase->enhance;
+        else
+            item->m_Instance.nEnhance = enhance;
+
+        if (item->m_pItemBase->group == 10 && item->m_Instance.nEnhance == 0)
+            item->m_Instance.nEnhance = 1;
+
+        if (flag == -1)
+            item->m_Instance.Flag = item->m_pItemBase->status_flag;
+        else
+            item->m_Instance.Flag = flag;
+    }
+
     item->m_Instance.OwnerHandle  = 0;
     item->m_Instance.nOwnerUID    = 0;
     item->m_Instance.Socket[0] = socket_0;
@@ -29,8 +57,6 @@ Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level
     item->m_Instance.Socket[2] = socket_2;
     item->m_Instance.Socket[3] = socket_3;
     item->m_Instance.tExpire = remain_time;
-
-    item->m_pItemBase = sObjectMgr->GetItemBase(item->m_Instance.Code);
 
     return item;
 }
