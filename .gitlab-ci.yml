@@ -17,7 +17,7 @@ before_script:
   - apt-get -y install libace-dev
   - apt-get -y install libncurses5-dev
   - apt-get -y install build-essential autoconf libtool make cmake git-core g++
-  - apt-get -y install lua liblua liblua-dev
+  - apt-get -y install lua5.2 liblua5.2 liblua5.2-dev
   - apt-get -y install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
 
 build:
