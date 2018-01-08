@@ -12,8 +12,6 @@
  #     compiler: gcc
  #     sudo: required
 
-language: cpp
-
 branches:
   only:
     - master
