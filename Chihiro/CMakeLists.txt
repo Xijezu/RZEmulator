@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.0.2)
 project(Chihiro)
 
 file(GLOB_RECURSE sources_Entities src/Entities/*.cpp src/Entities/*.h)
