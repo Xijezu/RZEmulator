@@ -12,13 +12,22 @@
  #     compiler: gcc
  #     sudo: required
 before_script:
+
+  - add-apt-repository ppa:george-edison55/cmake-3.x -y
+  - add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.9 main' -y
+  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -y -
   - apt-get update -qq
-  - apt-get -y install clang
+  - apt-get -y install clang-3.9
   - apt-get -y install libace-dev
   - apt-get -y install libncurses5-dev
   - apt-get -y install build-essential autoconf libtool make cmake git-core g++
   - apt-get -y install lua5.2 liblua5.2 liblua5.2-dev
   - apt-get -y install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+  - if [ "$CXX" = "clang++" ]; then apt-get -y install -qq libstdc++-6-dev; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.9" CC="clang-3.9"; fi
+  - if [ "$CXX" = "g++" ]; then apt-get -y install -qq g++-6; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
 
 build:
     script:
