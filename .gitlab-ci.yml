@@ -34,8 +34,9 @@ before_install:
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-6; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
 
-script:
-  - mkdir build
-  - cd build
-  - cmake ../ -G "CodeBlocks - Unix Makefiles"
-  - cmake --build --target all -- -j8
+build:
+    script:
+      - mkdir build
+      - cd build
+      - cmake ../ -G "CodeBlocks - Unix Makefiles"
+      - cmake --build --target all -- -j8
