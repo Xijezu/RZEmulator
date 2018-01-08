@@ -1,16 +1,16 @@
-matrix:
-  include:
+#matrix:
+#  include:
   # ENABLE AFTER ACE 6.4.3 is available.
     #- os: linux
     #  dist: trusty
     #  sudo: required
     #  compiler: clang
-    - os: linux
-      sudo: required
-      dist: trusty
-      group: deprecated-2017Q4
-      compiler: gcc
-      sudo: required
+ #   - os: linux
+ #     sudo: required
+ #     dist: trusty
+ #     group: deprecated-2017Q4
+ #     compiler: gcc
+ #     sudo: required
 
 language: cpp
 
