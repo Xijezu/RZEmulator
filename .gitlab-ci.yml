@@ -13,11 +13,11 @@
  #     sudo: required
 before_script:
   - apt-get update -qq
-  - apt-get install clang
-  - apt-get install libace-dev
-  - apt-get install libncurses5-dev
-  - apt-get install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar g++
-  - apt-get install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+  - apt-get -y install clang
+  - apt-get -y install libace-dev
+  - apt-get -y install libncurses5-dev
+  - apt-get -y install build-essential autoconf libtool make cmake git-core patch wget links zip unzip unrar g++
+  - apt-get -y install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
 
 build:
     script:
