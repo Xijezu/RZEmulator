@@ -2,6 +2,7 @@
 #define __AR_REGION_H
 
 #include "Common.h"
+#include "SharedMutex.h"
 
 class WorldObject;
 class Player;
@@ -32,6 +33,7 @@ protected:
     svObjects m_vStatic;
     svObjects m_vMovable;
     svObjects m_vClient;
+    //MX_SHARED_MUTEX i_lock;
 };
 
 //////////////////////////////////////////////////////////////////////////

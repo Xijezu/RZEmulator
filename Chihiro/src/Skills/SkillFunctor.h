@@ -4,6 +4,7 @@
 #include "Common.h"
 #include "Skill.h"
 #include "Player.h"
+#include "GameRule.h"
 
 struct SkillTargetFunctor {
     virtual void onCreature(Skill* pSkill, uint t, Unit* pCaster, Unit* pTarget) = 0;
@@ -16,13 +17,16 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor {
         bool bResult = true;
         if (pSkill->m_SkillBase->is_harmful != 0) {
             if (pSkill->m_SkillBase->id >= 6008 && pSkill->m_SkillBase->id <= 6010) {
+                if(GameRule::GetChipLevelLimit(pSkill->m_nRequestedSkillLevel) >= pTarget->GetLevel()) {
+                    chanceRes = 1;
+                } else {
+                    chanceRes = (10 * (GameRule::GetChipLevelLimit(pSkill->m_nRequestedSkillLevel) - pTarget->GetLevel() + 10 )) - ((uint)rand32() % 100);
+                }
+            } else if (pSkill->m_SkillBase->effect_type >= 301 && pSkill->m_SkillBase->effect_type <= 309) {
+                //chanceRes = (int)((pCaster->m_Attribute.nMagicAccuracy - pCaster->m_Attribute.nMagicAvoid))
                 chanceRes = 1;
             } else {
-                if (pSkill->m_SkillBase->effect_type >= 301 && pSkill->m_SkillBase->effect_type <= 309) {
-                    //chanceRes = (int)((pCaster->m_Attribute.nMagicAccuracy - pCaster->m_Attribute.nMagicAvoid))
-                } else {
-
-                }
+                chanceRes = (pSkill->m_SkillBase->probability_on_hit + pSkill->m_nRequestedSkillLevel * pSkill->m_SkillBase->probability_inc_by_slv);
             }
         }
         if(chanceRes <= 0) {
@@ -68,6 +72,24 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor {
                                                     nLevel, t, end_time, false, 0, "") == 0;
                 }
                     break;
+                default:
+                    if(pSkill->m_SkillBase->effect_type != 701 && pSkill->m_SkillBase->effect_type != 702) {
+                        if((!pCaster->GetHandle() != pTarget->GetHandle()
+                        || pSkill->m_SkillBase->effect_type != 121
+                        && pSkill->m_SkillBase->effect_type != 221
+                        && pSkill->m_SkillBase->effect_type != 235
+                        && pSkill->m_SkillBase->effect_type != 266
+                        && pSkill->m_SkillBase->effect_type != 30002))
+                            bResult = pTarget->AddState((StateType) pSkill->m_SkillBase->state_type, (StateCode) pSkill->m_SkillBase->state_id,
+                                                        pCaster->GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, 0),
+                                                        t, end_time, false, 0, "") == 0;
+                    }
+                    break;
+            }
+            if(pSkill->m_SkillBase->id >= 6008 && pSkill->m_SkillBase->id <= 6010) {
+                if(pTarget->GetSubType() == ST_Mob) {
+                    dynamic_cast<Monster*>(pTarget)->AddHate(pCaster->GetHandle(), 1, true, true);
+                }
             }
         }
     }

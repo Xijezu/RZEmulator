@@ -1,8 +1,6 @@
 #include "ArRegion.h"
 #include "Object.h"
 #include "Player.h"
-#include "Unit.h"
-#include "NPC.h"
 
 void ArRegionContainer::InitRegionSystem(uint32 width, uint32 height)
 {
@@ -158,51 +156,66 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
 
 void ArRegion::AddObject(WorldObject *obj)
 {
-    if (obj->GetObjType() == OBJ_MOVABLE) {
-        m_vMovable[obj->GetHandle()] = obj;
-    } else if (obj->GetObjType() == OBJ_CLIENT)
-        m_vClient[obj->GetHandle()] = obj;
-    else if (obj->GetObjType() == OBJ_STATIC)
-        m_vStatic[obj->GetHandle()] = obj;
-    obj->_region = this;
-    //obj->bIsInWorld = true;
-    obj->AddToWorld();
+    {
+        //MX_UNIQUE_GUARD writeGuard(i_lock);
+        if (obj->GetObjType() == OBJ_MOVABLE) {
+            m_vMovable[obj->GetHandle()] = obj;
+        } else if (obj->GetObjType() == OBJ_CLIENT)
+            m_vClient[obj->GetHandle()] = obj;
+        else if (obj->GetObjType() == OBJ_STATIC)
+            m_vStatic[obj->GetHandle()] = obj;
+        obj->_region = this;
+        //obj->bIsInWorld = true;
+        obj->AddToWorld();
+    }
 }
 
 void ArRegion::RemoveObject(WorldObject *obj)
 {
-    if (obj->GetObjType() == OBJ_MOVABLE)
-        m_vMovable.erase(obj->GetHandle());
-    else if (obj->GetObjType() == OBJ_CLIENT)
-        m_vClient.erase(obj->GetHandle());
-    else if (obj->GetObjType() == OBJ_STATIC)
-        m_vStatic.erase(obj->GetHandle());
-    obj->_region = nullptr;
-    obj->RemoveFromWorld();
+    {
+        //MX_UNIQUE_GUARD writeGuard(i_lock);
+        if (obj->GetObjType() == OBJ_MOVABLE)
+            m_vMovable.erase(obj->GetHandle());
+        else if (obj->GetObjType() == OBJ_CLIENT)
+            m_vClient.erase(obj->GetHandle());
+        else if (obj->GetObjType() == OBJ_STATIC)
+            m_vStatic.erase(obj->GetHandle());
+        obj->_region = nullptr;
+        obj->RemoveFromWorld();
+    }
 }
 
 uint ArRegion::DoEachClient(const std::function<void(Unit *)> &fn)
 {
-    for(auto& obj : this->m_vClient) {
-        if(obj.second != nullptr && obj.second->IsInWorld())
-            fn(dynamic_cast<Unit*>(obj.second));
-        //fn.run(dynamic_cast<Unit*>(obj.second));
+    {
+        //MX_SHARED_GUARD readGuard(i_lock);
+        for (auto &obj : this->m_vClient) {
+            if (obj.second != nullptr && obj.second->IsInWorld())
+                fn(dynamic_cast<Unit *>(obj.second));
+            //fn.run(dynamic_cast<Unit*>(obj.second));
+        }
     }
 }
 
 void ArRegion::DoEachMovableObject(const std::function<void(WorldObject *)> &fn)
 {
-    for (auto &obj : m_vMovable) {
-        if (obj.second != nullptr)
-            fn(obj.second);
+    {
+//        MX_SHARED_GUARD readGuard(i_lock);
+        for (auto &obj : m_vMovable) {
+            if (obj.second != nullptr)
+                fn(obj.second);
+        }
     }
 }
 
 void ArRegion::DoEachStaticObject(const std::function<void(WorldObject *)> &fn)
 {
-    for (auto &obj : m_vStatic) {
-        if (obj.second != nullptr)
-            fn(obj.second);
+    {
+//        MX_SHARED_GUARD readGuard(i_lock);
+        for (auto &obj : m_vStatic) {
+            if (obj.second != nullptr)
+                fn(obj.second);
+        }
     }
 }
 

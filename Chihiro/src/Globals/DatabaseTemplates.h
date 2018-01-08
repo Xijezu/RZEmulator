@@ -10,8 +10,6 @@
 struct DropGroup {
     int uid;
     int drop_item_id[MAX_DROP_GROUP];
-    int drop_min_count[MAX_DROP_GROUP];
-    int drop_max_count[MAX_DROP_GROUP];
     float drop_percentage[MAX_DROP_GROUP];
 };
 

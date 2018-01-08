@@ -10,7 +10,7 @@
 #include "Messages.h"
 #include "GameRule.h"
 
-Item *Item::AllocItem(long uid, int code, long cnt, GenerateCode info, int level, int enhance,
+Item *Item::AllocItem(uint64 uid, int code, uint64 cnt, GenerateCode info, int level, int enhance,
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
 {
     Item *item = sMemoryPool->AllocItem();
@@ -174,7 +174,7 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 
 void Item::PendFreeItem(Item *pItem)
 {
-    sMemoryPool->DeleteItem(pItem->GetHandle(), true);
+    sMemoryPool->RemoveObject(pItem, true);
 }
 
 int Item::GetLevelLimit()

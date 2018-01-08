@@ -313,3 +313,8 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<in
 {
     return Unit::TranslateWearPosition(pos, item, ItemList);
 }
+
+CreatureStat *Summon::GetBaseStat() const
+{
+    return sObjectMgr->GetStatInfo((uint)m_tSummonBase->stat_id);
+}

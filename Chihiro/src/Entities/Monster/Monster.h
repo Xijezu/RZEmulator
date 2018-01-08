@@ -30,6 +30,18 @@ struct HateTag {
     int  nLastMaxHate;
 };
 
+struct HateModifierTag {
+    HateModifierTag(uint _uid, int _hate)
+    {
+        uid   = _uid;
+        nHate = _hate;
+    }
+
+    uint uid;
+    int  nHate;
+};
+
+
 enum MonsterFlag : uint16 {
     MF_FIRST_ATTACK = 0,
     MF_GROUP_FIRST_ATTACK,
@@ -138,7 +150,7 @@ struct MonsterBase {
     int   chaos_min[2];
     int   chaos_max[2];
     int   drop_item_id[10];
-    float drop_percentage[10];
+    int   drop_percentage[10];
     int   drop_min_count[10];
     int   drop_max_count[10];
     int   drop_min_level[10];
@@ -204,14 +216,23 @@ struct DamageTag {
 };
 
 class Monster : public Unit {
+    friend class World;
 public:
 
     static void EnterPacket(XPacket& pEnterPct, Monster* monster, Player* pPlayer);
+    static void DeleteThis(Monster* monster)
+    {
+        delete monster;
+        monster = nullptr;
+    }
 
     explicit Monster(uint handle, MonsterBase* mb);
     ~Monster() = default;
 
     void Update(uint) override;
+    void OnUpdate() override;
+    bool StartAttack(uint target, bool bNeedFastReaction) override;
+    void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
 
     MonsterBase* GetBase() const
     { return m_Base; }
@@ -229,15 +250,58 @@ public:
     { return m_nStatus; }
 
     void SetStatus(MonsterStatus status);
+    void SetTamer(uint handle, int nTamingSkillLevel);
     void ForceKill(Player* byPlayer);
+
+    int GetCreatureGroup() const;// override;
+    bool IsEnvironmentMonster() const;
+    bool IsBattleMode() const;// override;
+    bool IsBossMonster() const;
+    bool IsDungeonConnector() const;
+    bool IsAgent() const;
+    bool IsAutoTrap() const;
+    bool IsNonAttacker() const;
+    float GetChaseRange() const;
+    float GetFirstAttackRange();
+    bool IsFirstAttacker() const;
+    bool IsGroupFirstAttacker() const;
+    uint GetTamer() const;
+    bool IsCastRevenger() const;
+    bool IsBattleRevenger() const;
+    int GetMonsterGroup() const;
+    int GetTameItemCode() const;
+    int GetTameCode() const;
+    float GetTamePercentage() const;
+    int GetMonsterID() const;
+    CreatureStat* GetBaseStat() const override ;
+    int GetRace() const override;
+
+    int AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMonster);
 
     MonsterDeleteHandler* m_pDeleteHandler{nullptr};
 protected:
+    HateTag* getHateTag(uint handle, uint t);
+    HateTag* addHate(uint handle, int nHate);
+    bool removeFromHateList(uint handle);
+
+    void processWalk(uint t);
+    void processMove(uint t);
+    void processFirstAttack(uint t);
+    void FindAttackablePosition(Position& myPosition, Position& enemyPosition, float distance, float gap);
+    void getMovePosition (Position& newPos);
+    Position getNonDuplicateAttackPos(Unit* pEnemy);
+
+    void onBeforeCalculateStat() override;
     void onApplyAttributeAdjustment() override;
+    void comeBackHome(bool bInvincible);
     int onDamage(Unit* pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
     void onDead(Unit* pFrom, bool decreaseEXPOnDead) override;
     void processDead(uint t);//override;
 private:
+    void findNextEnemy();
+    void AI_processAttack(uint t);
+    void AI_processAttack(Unit* pEnemy, uint t);
+
     DamageTag* addDamage(uint handle, int nDamage);
     DamageTag* getDamageTag(uint handle, uint t);
     void calcPartyContribute(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
@@ -249,16 +313,28 @@ private:
 
     std::vector<DamageTag> m_vDamageList{};
     std::vector<HateTag> m_vHateList{};
+    std::vector<HateModifierTag> m_vHateModifierByState{};
 
+    Position m_pRespawn{};
     MonsterBase* m_Base{nullptr};
 
+    float m_nLastEnemyDistance;
+    int m_nLastTrackTime;
+
+    bool m_bComeBackHome;
+    uint m_nLastHateUpdateTime;
     // Attack related
+    bool m_bNeedToFindEnemy{false};
     uint m_hFirstAttacker;
     uint m_nFirstAttackTime;
     uint m_nTotalDamage;
+    int m_nMaxHate;
+    uint m_hEnemy;
     // Taming related
+    int m_nTamingSkillLevel;
     uint m_hTamer;
     int m_nTamedTime;
+    bool m_bTamedSuccess;
 
     MonsterStatus m_nStatus;
 };

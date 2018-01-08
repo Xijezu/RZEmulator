@@ -1203,6 +1203,7 @@ Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool 
         mob->SetCurrentXY(x, y);
         mob->SetLayer(0);
         mob->m_pDeleteHandler = pDeleteHandler;
+        mob->SetRespawnPosition({(float)x, (float)y, 0});
         sWorld->AddMonsterToWorld(mob);
     }
     return mob;

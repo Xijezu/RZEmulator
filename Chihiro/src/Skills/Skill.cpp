@@ -68,6 +68,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 
     if(m_SkillBase->effect_type == EffectType::ET_Summon || m_nSkillID == 4001) {
         m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
+    } else if(m_SkillBase->id == SkillId::CreatureTaming) {
+        m_nErrorCode = PrepareTaming(nSkillLevel, handle, pos, current_time);
     }
     auto m_nOriginalDelay = delay;
     if(delay == 0xffffffff) {
@@ -101,9 +103,10 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     return TS_RESULT_SUCCESS;
 }
 
-int Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
+uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr ||  item->m_pItemBase == nullptr
        || item->m_pItemBase->group != ItemGroup::SummonCard
        || item->m_Instance.OwnerHandle != m_pOwner->GetHandle()) {
@@ -202,9 +205,12 @@ void Skill::ProcSkill()
         DoSummon();
     else if(m_SkillBase->id == 4002)
         DoUnsummon();
+    else if(m_SkillBase->id == SkillId::CreatureTaming)
+        DoTaming();
     else if(m_SkillBase->effect_type == EffectType::AddState) {
         FireSkillStateSkillFunctor fn{};
-        fn.onCreature(this, sWorld->GetArTime(), m_pOwner, dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(m_hTarget)));
+        //fn.onCreature(this, sWorld->GetArTime(), m_pOwner, dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(m_hTarget)));
+        fn.onCreature(this, sWorld->GetArTime(), m_pOwner, sMemoryPool->GetObjectInWorld<Unit>(m_hTarget));
     }
 
 
@@ -263,4 +269,42 @@ void Skill::DoUnsummon()
 bool Skill::Cancel()
 {
     return true;
+}
+
+uint Skill::GetSkillEnhance() const
+{
+    return m_nEnhance;
+}
+
+uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time)
+{
+    if(m_pOwner->GetSubType() != ST_Player)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto player = dynamic_cast<Player*>(m_pOwner);
+    auto monster = sMemoryPool->GetObjectInWorld<Monster>(handle);
+    if(monster == nullptr)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto nTameItemCode = monster->GetTameItemCode();
+    if(nTameItemCode == 0 || monster->GetTamer() != 0)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto item = player->FindItem((uint)nTameItemCode, FlagBits::FB_Summon, false);
+    if(item == nullptr)
+        return TS_RESULT_NOT_ACTABLE;
+    if(player->m_hTamingTarget != 0)
+        return TS_RESULT_ALREADY_TAMING;
+}
+
+void Skill::DoTaming()
+{
+    auto pTarget = sMemoryPool->GetObjectInWorld<Monster>(m_hTarget);
+    if(pTarget == nullptr || pTarget->GetSubType() != ST_Mob || m_pOwner->GetSubType() != ST_Player)
+        return;
+
+    bool bResult = sWorld->SetTamer(pTarget, dynamic_cast<Player*>(m_pOwner), m_nRequestedSkillLevel);
+    if(bResult) {
+        pTarget->AddHate(m_pOwner->GetHandle(), 1, true, true);
+    }
 }

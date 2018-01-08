@@ -106,6 +106,7 @@ public:
 
 	bool onBuyItem(XPacket *);
 	bool onSellItem(XPacket *);
+	bool onUseItem(XPacket*);
 
 	bool onSkill(XPacket *);
 	bool onAttackRequest(XPacket* );

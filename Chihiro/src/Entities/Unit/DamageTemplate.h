@@ -4,6 +4,17 @@
 #include "Common.h"
 
 
+struct HateModifier {
+    // Function       :     public void StructCreature::HateModifier::HateModifier(int, int, float, int)
+    bool  bIsApplyToPhysicalSkill;
+    bool  bIsApplyToMagicalSkill;
+    bool  bIsApplyToPhysicalAttack;
+    bool  bIsApplyToHarmful;
+    bool  bIsApplyToHelpful;
+    float fAmpValue;
+    int   nIncValue;
+};
+
 enum AFlag : int
 {
     AF_PerfectBlock = 1,

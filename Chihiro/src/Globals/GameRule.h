@@ -19,7 +19,9 @@ public:
     static void SetGoldDropRate(float goldDropRate);
     static float GetItemValue(float, int, int, int, int);
     static float GetPickableRange();
+    static int GetChipLevelLimit(int idx);
 private:
+    static int _chipLevelLimit[];
     static float _itemDropRate;
     static float _GoldDropRate;
     static int _modtable[];

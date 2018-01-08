@@ -41,7 +41,7 @@ Player::~Player()
         return;
 
     for (auto &t : m_lInventory) {
-        sMemoryPool->DeleteItem(t.second->GetHandle(), true);
+        Item::PendFreeItem(t.second);
         t.second = nullptr;
     }
     m_lInventory.clear();
@@ -49,7 +49,7 @@ Player::~Player()
     for(auto &t : m_vSummonList) {
         if(t->IsInWorld())
             sWorld->RemoveObjectFromWorld(t);
-        sMemoryPool->DeleteSummon(t->GetHandle(), true);
+        sMemoryPool->RemoveObject(t, true);
         t = nullptr;
     }
     m_vSummonList.clear();
@@ -507,7 +507,6 @@ void Player::SendJobInfo()
         SendPropertyMessage(formatString("jlv_%d", i), GetPrevJobLv(i));
     }
 }
-
 void Player::SendWearInfo()
 {
     XPacket packet(TS_SC_WEAR_INFO);
@@ -1570,7 +1569,7 @@ bool Player::IsStartableQuest(int code, bool bForQuestMark)
         return false;
     int fgid = qbs->nLimitFavorGroupID;
     if(fgid == 999) {
-        auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(GetLastContactLong("npc")));
+        auto npc = sMemoryPool->GetObjectInWorld<NPC>(GetLastContactLong("npc"));
 
         if(npc != nullptr)
             fgid = npc->m_pBase->id;
@@ -1621,4 +1620,72 @@ float Player::GetMoveSpeed() const
 void Player::onModifyStatAndAttribute()
 {
     Messages::SendStatInfo(this, this);
+}
+
+uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
+{
+    uint ct = sWorld->GetArTime();
+    if(pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || pItem->m_pItemBase->cool_time_group != 0
+        && false/*m_nItemCoolTime[pItem->m_pItemBase->cool_time_group] > ct*/)
+        return TS_RESULT_COOL_TIME;
+    // Weight
+    // Ride IDX
+    if(pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
+        return TS_RESULT_LIMIT_MAX;
+    if(pItem->m_pItemBase->use_min_level <= GetLevel()) {
+        if(pTarget == nullptr)
+            return TS_RESULT_SUCCESS;
+
+        if(pItem->m_pItemBase->target_max_level != 0 && pItem->m_pItemBase->target_max_level < pTarget->GetLevel())
+            return TS_RESULT_LIMIT_MAX;
+        if(pItem->m_pItemBase->target_min_level <= pTarget->GetLevel())
+            return TS_RESULT_SUCCESS;
+    }
+    return TS_RESULT_LIMIT_MIN;
+}
+
+uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter)
+{
+    if(pTarget == nullptr)
+        pTarget = this;
+    if(pItem->m_Instance.nCount < 1)
+        return TS_RESULT_NOT_ENOUGH_ITEM; // NOT_ACTABLE?
+
+
+    uint16  result{0};
+    for(int i = 0; i < Item::MAX_OPTION_NUMBER; ++i) {
+        if(pItem->m_pItemBase->base_type[i] != 0) {
+            result = pTarget->onItemUseEffect(this, pItem, pItem->m_pItemBase->base_type[i], pItem->m_pItemBase->base_var[i][0], pItem->m_pItemBase->base_var[i][1], szParameter);
+            if(result != TS_RESULT_SUCCESS)
+                return result;
+        }
+
+        if(pItem->m_pItemBase->opt_type[i] != 0) {
+            result = pTarget->onItemUseEffect(this, pItem, pItem->m_pItemBase->opt_type[i], pItem->m_pItemBase->opt_var[i][0], pItem->m_pItemBase->opt_var[i][1], szParameter);
+            if(result != TS_RESULT_SUCCESS)
+                return result;
+        }
+
+    }
+}
+
+CreatureStat *Player::GetBaseStat() const
+{
+    uint stat_id = 0;
+    auto job = sObjectMgr->GetJobInfo(GetCurrentJob());
+    if(job != nullptr)
+        stat_id = job->stat_id;
+    return sObjectMgr->GetStatInfo(stat_id);
+}
+
+Item *Player::FindItem(uint code, uint flag, bool bFlag)
+{
+    for(auto& i : m_lInventory) {
+        bool isFlagged = (flag & i.second->m_Instance.Flag) != 0;
+        if(i.second->m_Instance.Code == code) {
+            if(bFlag == isFlagged)
+                return i.second;
+        }
+    }
+    return nullptr;
 }

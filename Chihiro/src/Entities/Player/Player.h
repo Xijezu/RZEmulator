@@ -74,6 +74,7 @@ public:
     Item *FindItemByCode(int);
     Item *FindItemBySID(uint64_t);
     Item *FindItemByHandle(uint32_t);
+    Item* FindItem(uint code, uint flag, bool bFlag);
     void PushItem(Item *, int, bool);
     void PopItem(Item*,bool);
 
@@ -124,8 +125,12 @@ public:
     void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) override ;
     void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) override;
     Quest* FindQuest(int code);
+    CreatureStat* GetBaseStat() const override;
 
     ushort_t ChangeGold(long);
+
+    uint16 IsUseableItem(Item* pItem, Unit* pTarget);
+    uint16 UseItem(Item* pItem, Unit* pTarget, const std::string& szParameter);
 
     void SendPacket(XPacket& pPacket);
 
@@ -147,7 +152,7 @@ public:
     TimeSynch m_TS{200,2,10};
 
     Summon* m_pMainSummon{nullptr};
-
+    uint m_hTamingTarget{};
 protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
     void onExpChange() override;

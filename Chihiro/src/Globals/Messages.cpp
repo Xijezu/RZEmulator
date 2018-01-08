@@ -25,6 +25,7 @@
 #include "ArRegion.h"
 #include "ObjectMgr.h"
 #include "State.h"
+#include "Quest.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -142,18 +143,18 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szK
 
 void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, std::string szTitle, std::string szText, std::string szMenu)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket dialogPct(TS_SC_DIALOG);
     dialogPct << type;
     dialogPct << npc_handle;
-    dialogPct << (int16_t)szTitle.length();
-    dialogPct << (int16_t)szText.length();
-    dialogPct << (int16_t)szMenu.length();
-    dialogPct.fill(szTitle, 0);
-    dialogPct.fill(szText,0);
-    dialogPct.fill(szMenu,0);
+    dialogPct << (int16_t) szTitle.length();
+    dialogPct << (int16_t) szText.length();
+    dialogPct << (int16_t) szMenu.length();
+    dialogPct.WriteString(szTitle);
+    dialogPct.WriteString(szText);
+    dialogPct.WriteString(szMenu);
     pPlayer->SendPacket(dialogPct);
 }
 
@@ -534,7 +535,8 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 
 void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
 {
-    auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc")));
+    //auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc")));
+    auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     std::string strButton{};
     std::string strTrigger{};
     if(true) {
@@ -568,9 +570,15 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
                 type = 8;
             }
         }
-        pPlayer->SetDialogTitle("Guide Arocel", QuestType::QT_KillIndividual);
-        std::string buf = string_format("QUEST|%u|%u|0", code, textID);
-        pPlayer->SetDialogText(buf);
+
+        // /run function get_quest_progress() return 0 end
+        pPlayer->SetDialogTitle("Guide Arocel", 3);
+        //pPlayer->SetDialogText(string_format("|%u|%u", code, textID));
+        pPlayer->AddDialogMenu("START", string_format("start_quest( %u, %u )", code, textID));
+        pPlayer->AddDialogMenu("REJECT", "NULL");
+        return;
+
+
         auto rQuestBase = sObjectMgr->GetQuestBase(code);
 
         if(progress != 0) {
@@ -597,8 +605,9 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
                 strTrigger = "";
             }
         } else {
+            // /run function get_quest_progress() return 0 end
             strTrigger = string_format("start_quest( %u, %u )", code, textID);
-            pPlayer->AddDialogMenu("START", strTrigger);
+            pPlayer->AddDialogMenu("ACCEPT", strTrigger);
             strTrigger = "";
             strButton = "REJECT";
         }
@@ -612,8 +621,20 @@ void Messages::SendQuestList(Player *pPlayer)
         return;
 
     XPacket questPct(TS_SC_QUEST_LIST);
-    int cnt = 0;
+    QuestManager manager{};
+    uint16 cnt = 1;
     questPct << cnt;
+    questPct << 1010;
+    questPct << 90301311;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
+    questPct << 0;
 
     pPlayer->SendPacket(questPct);
 }
@@ -671,4 +692,36 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
     statePct.fill(pState.m_szStateValue, 32);
 
     sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), statePct);
+}
+
+void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode)
+{
+    if(pPlayer == nullptr || pMonster == nullptr)
+        return;
+
+    XPacket tamePct(TS_SC_TAMING_INFO);
+    tamePct << (uint8)mode;
+    tamePct << pPlayer->GetHandle();
+    tamePct << pMonster->GetHandle();
+
+    sWorld->Broadcast((uint)(pMonster->GetPositionX() / g_nRegionSize), (uint)(pMonster->GetPositionY() / g_nRegionSize), pMonster->GetLayer(), tamePct);
+
+    std::string chatMsg{};
+    switch(mode) {
+        case 0:
+            chatMsg = string_format("TAMING_START|%s|", "Random Monster");
+            break;
+
+        case 1:
+        case 3:
+            chatMsg = string_format("TAMING_FAILED|%s|", "Random Monster");
+            break;
+        case 2:
+            chatMsg = string_format("TAMING_SUCCESS|%s|", "Random Monster");
+            break;
+        default:
+            return;
+    }
+
+    SendChatMessage(100, "@SYSTEM", pPlayer, chatMsg);
 }

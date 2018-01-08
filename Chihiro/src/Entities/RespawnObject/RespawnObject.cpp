@@ -102,7 +102,8 @@ void RespawnObject::Update(uint diff)
         if(!m_vRespawnedMonster.empty())
             h = m_vRespawnedMonster.back();
 
-        auto mob = dynamic_cast<Monster*>(sMemoryPool->getPtrFromId(h));
+        //auto mob = dynamic_cast<Monster*>(sMemoryPool->getPtrFromId(h));
+        auto mob = sMemoryPool->GetObjectInWorld<Monster>(h);
         if(mob == nullptr || mob->GetSubType() != ST_Mob)
             mob = nullptr;
         if(mob == nullptr || mob->m_pDeleteHandler != this) {

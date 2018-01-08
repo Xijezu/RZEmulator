@@ -7,6 +7,7 @@
 class Unit;
 class Player;
 class Summon;
+class Monster;
 class Item;
 class XPacket;
 struct MarketInfo;
@@ -86,6 +87,7 @@ public:
     static void BroadcastLevelMsg(Unit*);
     static void BroadcastStatusMessage(WorldObject* obj);
     static void BroadcastStateMessage(Unit* pUnit, State &pState, bool bIsCancel);
+    static void BroadcastTamingMessage(Player* pPlayer, Monster* pMonster, int mode);
     static void SendWarpMessage(Player*);
     static void SendCantAttackMessage(Player*,uint,uint,int);
     static void SendQuestInformation(Player* pPlayer, int code, int text);

@@ -48,6 +48,9 @@ public:
     void RemoveObjectFromWorld(WorldObject* obj);
     void MonsterDropItemToWorld(Unit* pUnit, Item* pItem);
 	bool checkDrop(Unit* pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
+	bool ProcTame(Monster* pMonster);
+	void ClearTamer(Monster* pMonster, bool bBroadcastMsg);
+	bool SetTamer(Monster* pMonster, Player* pPlayer, int nSkillLevel);
 
 	// Quest?
 	int ShowQuestMenu(Player* pPlayer);

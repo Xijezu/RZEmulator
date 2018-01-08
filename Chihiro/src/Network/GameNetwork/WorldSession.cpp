@@ -107,7 +107,8 @@ const GameHandler packetHandler[] =
                                   {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
                                   {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
                                   {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
-                                  {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem}
+                                  {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
+                                  {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem}
                           };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -466,7 +467,8 @@ bool WorldSession::onReturnToLobby(XPacket *pRecvPct)
     if (_player != nullptr) {
         _player->LogoutNow(2);
         _player->Save(false);
-        sMemoryPool->DeletePlayer(_player->GetHandle(), true);
+        //sMemoryPool->DeletePlayer(_player->GetHandle(), true);
+        sMemoryPool->RemoveObject(_player, true);
         _player = nullptr;
     }
     if(pRecvPct != nullptr)
@@ -679,7 +681,8 @@ bool WorldSession::onPutOnItem(XPacket *_packet)
 
     //if (_player->isAlive()) {
     if (true) {
-        Item *ci = sMemoryPool->FindItem(item_handle);
+        //Item *ci = sMemoryPool->FindItem(item_handle);
+        auto ci = sMemoryPool->GetObjectInWorld<Item>(item_handle);
 
         if (ci != nullptr) {
             if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == nullptr) {
@@ -757,7 +760,8 @@ bool WorldSession::onContact(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint32_t>();
-    auto npc    = dynamic_cast<NPC *>(sMemoryPool->getPtrFromId(handle));
+    //auto npc    = dynamic_cast<NPC *>(sMemoryPool->getPtrFromId(handle));
+    auto npc = sMemoryPool->GetObjectInWorld<NPC>(handle);
 
     if (npc != nullptr) {
         _player->SetLastContact("npc", handle);
@@ -782,7 +786,8 @@ bool WorldSession::onDialog(XPacket *pRecvPct)
         }
     }
 
-    auto npc = dynamic_cast<NPC *>(sMemoryPool->getPtrFromId(_player->GetLastContactLong("npc")));
+    //auto npc = dynamic_cast<NPC *>(sMemoryPool->getPtrFromId(_player->GetLastContactLong("npc")));
+    auto npc = sMemoryPool->GetObjectInWorld<NPC>(_player->GetLastContactLong("npc"));
     if (npc == nullptr) {
         MX_LOG_TRACE("scripting", "onDialog: NPC not found!");
         return false;
@@ -918,7 +923,8 @@ bool WorldSession::onQuery(XPacket *pRecvPct)
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint>();
 
-    WorldObject* obj = sMemoryPool->getPtrFromId(handle);
+    //WorldObject* obj = sMemoryPool->getPtrFromId(handle);
+    auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(handle);
     if(obj != nullptr) {
         if(!sArRegion->IsVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                 (uint)(obj->GetPositionY() / g_nRegionSize),
@@ -1207,7 +1213,8 @@ bool WorldSession::onSkill(XPacket *pRecvPct)
     }
     /// @todo isCastable
     if(target != 0) {
-        pTarget = dynamic_cast<WorldObject*>(sMemoryPool->getPtrFromId(target));
+        //pTarget = dynamic_cast<WorldObject*>(sMemoryPool->getPtrFromId(target));
+        pTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target);
         if(pTarget == nullptr) {
             Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_EXIST);
             return false;
@@ -1275,7 +1282,8 @@ bool WorldSession::onAttackRequest(XPacket *pRecvPct)
         return false;
     }
 
-    auto pTarget = sMemoryPool->getPtrFromId(target);
+    //auto pTarget = sMemoryPool->getPtrFromId(target);
+    auto pTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target);
     if(pTarget == nullptr){
         // Todo same as above
         Messages::SendCantAttackMessage(_player, handle, target, TS_RESULT_NOT_EXIST);
@@ -1320,7 +1328,8 @@ bool WorldSession::onTakeItem(XPacket *pRecvPct)
 
     uint ct = sWorld->GetArTime();
 
-    auto item = dynamic_cast<Item*>(sMemoryPool->getPtrFromId(item_handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getPtrFromId(item_handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(item_handle);
     if(item == nullptr || !item->IsInWorld()) {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
         return false;
@@ -1381,4 +1390,73 @@ bool WorldSession::onTakeItem(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
     }
     return false;
+}
+
+bool WorldSession::onUseItem(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto item_handle = pRecvPct->read<uint>();
+    auto target_handle = pRecvPct->read<uint>();
+    auto szParameter = pRecvPct->ReadString(32);
+
+    uint ct = sWorld->GetArTime();
+
+    auto item = _player->FindItemByHandle(item_handle);
+    if(item == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle()) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+        return false;
+    }
+
+    if(item->m_pItemBase->type != ItemType::TypeUse && false /*!item->IsUsingItem()*/) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+        return false;
+    }
+
+    if((item->m_pItemBase->flaglist[FLAG_MOVE] == 0 && _player->IsMoving(ct))) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item_handle);
+        return false;
+    }
+
+    // IsUsableSecroute
+
+    // IsUsableraid
+
+    // Eventmap
+
+    uint16 nResult = _player->IsUseableItem(item, nullptr);
+    if(nResult != TS_RESULT_SUCCESS) {
+        /*if(nResult == TS_RESULT_COOL_TIME)
+            Messages::SendItemCoolTimeInfo(player);*/
+
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
+        return false;
+    }
+
+    if(item->m_pItemBase->flaglist[FLAG_TARGET_USE] == 0) {
+        nResult = _player->UseItem(item, nullptr, szParameter);
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
+        if(nResult != 0)
+            return false;
+    } else {
+        //auto unit = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(target_handle));
+        auto unit = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
+        if(unit == nullptr || unit->GetHandle() == 0) {
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+            return false;
+        }
+        nResult = _player->IsUseableItem(item, unit);
+        if(nResult == TS_RESULT_SUCCESS) {
+            nResult = _player->UseItem(item, unit, szParameter);
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
+        }
+
+        if(nResult != TS_RESULT_SUCCESS)
+            return false;
+    }
+
+    XPacket resPct(TS_SC_USE_ITEM_RESULT);
+    resPct << item_handle;
+    resPct << target_handle;
+    _player->SendPacket(resPct);
+    return true;
 }

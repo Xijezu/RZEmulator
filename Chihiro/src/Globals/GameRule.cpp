@@ -5,6 +5,7 @@
 #include "Common.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
+int GameRule::_chipLevelLimit[8] = {0, 20, 50, 80, 100, 120, 150, 180};
 float GameRule::_itemDropRate = 1.0f;
 float GameRule::_GoldDropRate = 1.0f;
 
@@ -124,4 +125,9 @@ float GameRule::GetGoldDropRate()
 void GameRule::SetGoldDropRate(float goldDropRate)
 {
     _GoldDropRate = goldDropRate;
+}
+
+int GameRule::GetChipLevelLimit(int idx)
+{
+    return _chipLevelLimit[idx];
 }

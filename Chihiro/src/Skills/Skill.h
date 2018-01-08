@@ -18,6 +18,7 @@ public:
     int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
     void ProcSkill();
     bool Cancel();
+    uint GetSkillEnhance() const;
 
     uint64 m_nSkillUID;
     Unit* m_pOwner{nullptr};
@@ -37,6 +38,7 @@ public:
 private:
     Position m_targetPosition{};
     uint m_nCastingDelay;
+    uint m_nEnhance{};
     uint16 m_nErrorCode;
     uint m_hTarget;
     uint m_nCastTime;
@@ -46,7 +48,9 @@ protected:
 private:
     void DoSummon();
     void DoUnsummon();
-    int PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
+    void DoTaming();
+    uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
+    uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos,  uint current_time);
 };
 
 

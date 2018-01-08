@@ -534,6 +534,7 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> _to, uint8_t _speed, ui
 void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time)
 {
     double v9{ }, v10{ }, lengtha{ }, lengthb{ };
+
     ends.clear();
     speed = _speed;
     uint st = _start_time;
@@ -542,8 +543,8 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
 
     start_time = st;
     proc_time  = st;
-    float X = _to.m_positionX;
-    float Y = _to.m_positionY;
+    float X = _to.GetPositionX() - GetPositionX();
+    float Y = _to.GetPositionY()- GetPositionY();
     SetDirection(_to);
     lengtha = sqrt(Y * Y + X * X);
     lengthb = speed;
@@ -552,8 +553,9 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     if((start_time & 0x80000000) != 0)
         v10 = v10 + 4294967300.0f;
 
-    MoveInfo mi(_to, start_time);
+    MoveInfo mi{_to, start_time};
     mi.end_time = (uint)(v9+v10);
+    
     ends.emplace_back(mi);
     bIsMoving = true;
 }

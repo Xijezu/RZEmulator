@@ -300,9 +300,12 @@ void Unit::CalculateStat()
     m_Resist.Reset(0);
     m_ResistAmplifier.Reset(0.0f);
 
-    auto basestat = sObjectMgr->GetStatInfo(GetUInt32Value(UNIT_FIELD_JOB));
-    m_cStat.Copy(*basestat);
-    // TODO onBeforeCalculateStat(); -> Reset in Player
+    auto statptr = GetBaseStat();
+    CreatureStat basestat{};
+    if(statptr != nullptr)
+        basestat.Copy(*statptr);
+    m_cStat.Copy(basestat);
+    onBeforeCalculateStat(); // TODO: Reset in Player
     // TODO checkAdditionalItemEffect(); -> Nonexistant
     applyStatByItem();
     applyJobLevelBonus();
@@ -442,10 +445,10 @@ void Unit::amplifyStatByState()
 
         if(s.GetLevel() != 0 && s.GetEffectType() == 2) {
             // format is 0 = bitset, 1 = base, 2 = add per level
-            ampParameter((uint) s.GetValue(0), (int) (s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
-            ampParameter((uint) s.GetValue(3), (int) (s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
-            ampParameter((uint) s.GetValue(12), (int) (s.GetValue(13) + (s.GetValue(14) + s.GetLevel())), true);
-            ampParameter((uint) s.GetValue(15), (int) (s.GetValue(16) + (s.GetValue(17) + s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(0), (int) (s.GetValue(1) + (s.GetValue(2) * s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(3), (int) (s.GetValue(4) + (s.GetValue(5) * s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(12), (int) (s.GetValue(13) + (s.GetValue(14) * s.GetLevel())), true);
+            ampParameter((uint) s.GetValue(15), (int) (s.GetValue(16) + (s.GetValue(17) * s.GetLevel())), true);
         }
         for(int i = 0; i < 3; i++)
             s.m_nLevel[i] = nOriginalLevel[i];
@@ -457,7 +460,7 @@ void Unit::applyState(State &state)
     int effectType = state.GetEffectType();
 
     switch (effectType) {
-        case 0:
+        case StateBaseEffect::SEF_MISC:
             switch (state.m_nCode) {
                 case StateCode::SC_SLEEP:
                 case StateCode::SC_STUN:
@@ -468,13 +471,13 @@ void Unit::applyState(State &state)
                     break;
             }
             break;
-        case 1:
+        case StateBaseEffect::SEF_PARAMETER_INC:
             incParameter((uint) state.GetValue(0), (int) (state.GetValue(1) + (state.GetValue(2) * state.GetLevel())), false);
-            incParameter((uint) state.GetValue(3), (int) (state.GetValue(4) + (state.GetValue(5) + state.GetLevel())), true);
-            incParameter2((uint) state.GetValue(6), (int) (state.GetValue(7) + (state.GetValue(8) + state.GetLevel())));
-            incParameter2((uint) state.GetValue(9), (int) (state.GetValue(10) + (state.GetValue(11) + state.GetLevel())));
-            incParameter((uint) state.GetValue(12), (int) (state.GetValue(13) + (state.GetValue(14) + state.GetLevel())), true);
-            incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) + state.GetLevel())), true);
+            incParameter((uint) state.GetValue(3), (int) (state.GetValue(4) + (state.GetValue(5) * state.GetLevel())), false);
+            incParameter2((uint) state.GetValue(6), (int) (state.GetValue(7) + (state.GetValue(8) * state.GetLevel())));
+            incParameter2((uint) state.GetValue(9), (int) (state.GetValue(10) + (state.GetValue(11) * state.GetLevel())));
+            incParameter((uint) state.GetValue(12), (int) (state.GetValue(13) + (state.GetValue(14) * state.GetLevel())), false);
+            incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) * state.GetLevel())), false);
             break;
 
     }
@@ -587,10 +590,10 @@ void Unit::applyStatByState()
         if(s.GetLevel() != 0) {
             if(s.GetEffectType() == 1) {
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
-                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
-                incParameter((uint)s.GetValue(12), (int)(s.GetValue(13) + (s.GetValue(14) + s.GetLevel())), true);
-                incParameter((uint)s.GetValue(15), (int)(s.GetValue(16) + (s.GetValue(17) + s.GetLevel())), true);
+                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) * s.GetLevel())), true);
+                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) * s.GetLevel())), true);
+                incParameter((uint)s.GetValue(12), (int)(s.GetValue(13) + (s.GetValue(14) * s.GetLevel())), true);
+                incParameter((uint)s.GetValue(15), (int)(s.GetValue(16) + (s.GetValue(17) * s.GetLevel())), true);
             } else if(s.GetEffectType() == 3 && IsWearShield()) {
                 incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
                 incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
@@ -932,7 +935,7 @@ void Unit::applyStateAmplify(State &state)
     int level = state.GetLevel();
     if (effectType != 0)
     {
-        if (effectType == 2)
+        if (effectType == StateBaseEffect::SEF_PARAMETER_AMP)
         {
             ampParameter((uint)state.GetValue(0),(state.GetValue(1) + (state.GetValue(2) * level)),false);
             ampParameter((uint)state.GetValue(3),(state.GetValue(4) + (state.GetValue(5) * level)),false);
@@ -1208,7 +1211,7 @@ void Unit::applyStatByItem()
         if (item != nullptr) {
             auto iwt = (ItemWearType)i1;
             if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
-                if (TranslateWearPosition(iwt, item, &ref_list)) { // TODO TranslateWearPosition
+                if (TranslateWearPosition(iwt, item, &ref_list)) {
                     for (int j = 0; j < 4; j++) {
                         short ot = item->m_pItemBase->opt_type[j];
                         auto  bs = (uint) item->m_pItemBase->opt_var[0][j];
@@ -1273,6 +1276,17 @@ void Unit::OnUpdate()
         RemoveFlag(UNIT_FIELD_STATUS, NeedToCalculateStat);
     }
     this->regenHPMP(ct);
+
+    if(IsInWorld()) {
+        if(!m_vStateList.empty() && m_nLastStateProcTime + 100 < ct) {
+            //procStateDamage(ct);
+            //procState(ct);
+            if(ClearExpiredState(ct)) {
+                CalculateStat();
+                m_nLastStateProcTime = ct;
+            }
+        }
+    }
 }
 
 void Unit::regenHPMP(uint t)
@@ -1429,7 +1443,8 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     if (pSkill == nullptr || pSkill->m_SkillBase == nullptr/* current casting skill || using storage */)
         return TS_RESULT_NOT_ACTABLE;
 
-    auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
+    //auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
+    auto pSkillTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target_handle);
     /// Checking here if return feather due to nullptrs
     // Return feather
     if (pSkillTarget == nullptr && nSkillID == 6020 && GetSubType() == ST_Player /* && IsInSiegeOrRaidDungeon*/)
@@ -1514,7 +1529,8 @@ void Unit::processAttack()
     Player *player{nullptr};
 
     if (GetNextAttackableTime() <= t) {
-        auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
+        //auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
+        auto enemy = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
         if (GetHealth() == 0) {
             CancelAttack();
             return;
@@ -1669,6 +1685,13 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         }
         ++i;
     } while (i < nAttackCount);
+    if(pTarget->GetSubType() == ST_Mob) {
+        auto mob = dynamic_cast<Monster*>(pTarget);
+        auto hm = GetHateMod(3, true);
+        nHate = (int)((float)(nHate + hm.second) * hm.first);
+
+        mob->AddHate(GetHandle(), nHate, true, true);
+    }
 }
 
 DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
@@ -1826,8 +1849,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     auto nDamagea = int(pTarget->m_Expert[GetCreatureGroup()].fAvoid * nDamagec + nDamagec);
 
     float fDefAdjustb{0}, fDefAdjustc{0}, fDefAdjust{0};
-
-    bool bIsPhysicalDamage   = damage_type == DamageType::NormalPhysical || damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::StatePhysical || damage_type == DamageType::NormalPhysicalSkill;
+    bool bIsPhysicalDamage   = damage_type == DamageType::NormalPhysical || damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::StatePhysical || damage_type ==DamageType::NormalPhysicalSkill;
     bool bIsMagicalDamage    = damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical;
     bool bIsAdditionalDamage = damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand || damage_type == DamageType::AdditionalLeftHand;
     bool bIsLeftHandDamage   = damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::AdditionalLeftHand;
@@ -1836,42 +1858,39 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     int nAccuracy{0};
     int nPercentage{0};
 
-    if ((nFlag & 2) == 0 && bIsAdditionalDamage && !bDefAdjust) {
+    if ((nFlag & 2) == 0 && bIsPhysicalDamage && !bDefAdjust) {
         if (bIsLeftHandDamage)
-            nAccuracy = m_Attribute.nAccuracyLeft;
+            nAccuracy = (int)m_Attribute.nAccuracyLeft;
         else
-            nAccuracy = m_Attribute.nAccuracyRight;
+            nAccuracy = (int)m_Attribute.nAccuracyRight;
 
         nPercentage     = 2 * ((44 - pTarget->GetLevel()) + GetLevel());
         if (nPercentage < 10)
             nPercentage = 10;
 
         nPercentage = (int) (nAccuracy / pTarget->m_Attribute.nAvoid * (float) nPercentage + 7.0f + accuracy_bonus);
-        nAccuracy   = pTarget->m_Attribute.nAvoid;
-        //                 if (Globals.GetRandomInt32() % 100 > nPercentage)
-//                 {
-//                     result.bMiss = true;
-//                     result.nDamage = 0;
-//                     return result;
-//                 }
+        //nAccuracy   = (int)pTarget->m_Attribute.nAvoid;
+        if((uint)rand32() % 100 > nPercentage) {
+            result.bMiss = true;
+            result.nDamage = 0;
+            return result;
+        }
     }
 
     if((nFlag & 2) == 0 && bIsMagicalDamage && !bDefAdjust) {
         nAccuracy = 2 * ((44 - pTarget->GetLevel()) + GetLevel());
+        nPercentage =(int)(m_Attribute.nMagicAccuracy / pTarget->m_Attribute.nMagicAvoid * nAccuracy + 7.0f + accuracy_bonus);
         if(nAccuracy < 10)
             nAccuracy = 10;
-//        if (Globals.GetRandomInt32() % 100 > (this.m_Attribute.nMagicAccuracy / pTarget.m_Attribute.nMagicAvoid * nAccuracy + 7.0f + accuracy_bonus))
-//        {
-//        LABEL_105:
-//                     result.bMiss = true;
-// //        LABEL_6:
-//                     result.nDamage = 0;
-//                     return result;
-//        }
+        if((uint)rand32() % 100 > nPercentage) {
+            result.bMiss = true;
+            result.nDamage = 0;
+            return result;
+        }
     }
 
     int nRandomDamage = 0;
-    int nDefence = 0;
+    float nDefence = 0;
     if(bIsAdditionalDamage && bDefAdjust) {
         float fDefAdjusta = 1.0f;
         if(bIsMagicalDamage && (m_Attribute.nMagicPoint < pTarget->m_Attribute.nMagicDefence)) {
@@ -1938,6 +1957,13 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     result.nDamage = (int)(nDamaged * fDefAdjustb);
     result.nResistedDamage = fDefAdjustb - result.nDamage;
 
+    if(bIsPhysicalDamage && pTarget->GetStateByEffectType(SEF_FORCE_CHIP) != nullptr)
+        result.nDamage *= 2;
+    else if(bIsMagicalDamage && pTarget->GetStateByEffectType(SEF_SOUL_CHIP) != nullptr)
+        result.nDamage *= 2;
+    else if(pTarget->GetStateByEffectType(SEF_LUNAR_CHIP) != nullptr)
+        result.nDamage *= 2;
+
     if((pTarget->GetSubType() == ST_Player || pTarget->GetSubType() == ST_Summon) && GetHandle() != pTarget->GetHandle()) {
         if(GetSubType() == ST_Player)
             result.nDamage = (int)((float)result.nDamage * 1 /*PVPRateForPlayer*/);
@@ -1956,7 +1982,7 @@ uint Unit::GetCreatureGroup()
             return 9;
         case ST_Mob: {
             auto monster = dynamic_cast<Monster *>(this);
-            return monster != nullptr ? (uint) monster->GetBase()->monster_group : 0;
+            return monster != nullptr ? (uint) monster->GetBase()->grp : 0;
         }
         case ST_Summon:
             return 9;
@@ -2055,7 +2081,8 @@ void Unit::EndAttack()
     uint ct = sWorld->GetArTime();
 
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
-        auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
+        //auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
+        auto target = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
         if(GetSubType() == ST_Player || GetSubType() == ST_Summon) {
             if(target != nullptr)
                 broadcastAttackMessage(target, info, 0, 0, false, false, true, false);
@@ -2102,7 +2129,7 @@ void Unit::CancelAttack()
 {
     AttackInfo info[4]{};
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
-        this->broadcastAttackMessage(dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle())), info, 0, 0, false, false, false, true);
+        this->broadcastAttackMessage(sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
     SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
@@ -2344,7 +2371,8 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     if(code == StateCode::SC_FEAR)
         ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
 
-    auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
+    //auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
+    auto pCaster = sMemoryPool->GetObjectInWorld<Unit>(caster);
     int base_damage = 0;
     if(pCaster != nullptr && stateInfo->base_effect_id > 0) {
         // DAMAGES WOHOOOOOOOO
@@ -2451,4 +2479,71 @@ void Unit::procMoveSpeedChange()
 void Unit::onUpdateState(State state, bool bIsExpire)
 {
     Messages::BroadcastStateMessage(this, state, bIsExpire);
+}
+
+uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, float var2, const std::string &szParameter)
+{
+    uint16 result{TS_RESULT_ACCESS_DENIED};
+    uint target_handle{0};
+    Position pos{};
+    switch(type) {
+        case 5:
+            target_handle = GetHandle();
+            if(var1 == 6020.0f || var1 == 6021.0f )
+                target_handle = pItem->GetHandle();
+            pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
+            return (uint16)pCaster->CastSkill((int)var1, (int)var2, target_handle, pos, GetLayer(), true);
+        default:
+            result = TS_RESULT_UNKNOWN;
+        break;
+    }
+    return result;
+}
+
+State *Unit::GetStateByEffectType(int effectType) const
+{
+    for (int i = 0; i < m_vStateList.size(); i++) {
+        if (m_vStateList[i].GetEffectType() == effectType)
+            return (State*)&m_vStateList[i];
+    }
+    return nullptr;
+}
+
+std::pair<float, int> Unit::GetHateMod(int nHateModType, bool bIsHarmful)
+{
+    float fAmpValue = 1.0f;
+    int nIncValue = 0;
+
+    for(auto& hm : m_vHateMod) {
+        if(bIsHarmful) {
+            if(!hm.bIsApplyToHarmful)
+                continue;
+        } else {
+            if(!hm.bIsApplyToHelpful)
+                continue;
+        }
+
+        if((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 33 && hm.bIsApplyToPhysicalAttack)) {
+            fAmpValue += hm.fAmpValue;
+            nIncValue += hm.nIncValue;
+        }
+    }
+    return {fAmpValue, nIncValue};
+}
+
+bool Unit::ClearExpiredState(uint t)
+{
+    bool bDeleted{false};
+    for(int i = 0; i < m_vStateList.size(); i++) {
+        uint et = m_vStateList[i].m_nEndTime[1];
+        if(m_vStateList[i].m_nEndTime[0] > et)
+            et = m_vStateList[i].m_nEndTime[0];
+        if(et < t) {
+            //RemoveState(it);
+            Messages::BroadcastStateMessage(this, m_vStateList[i], true);
+            m_vStateList.erase(m_vStateList.begin() + i);
+            bDeleted = true;
+        }
+    }
+    return bDeleted;
 }

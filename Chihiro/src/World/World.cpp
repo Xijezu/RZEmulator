@@ -12,6 +12,7 @@
 #include "MemPool.h"
 #include "GameRule.h"
 #include "NPC.h"
+#include "Skill.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -171,9 +172,9 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
 
     if(bAbsoluteMove) {
         if(obj->bIsMoving && obj->IsInWorld()) {
-            oldPos = *dynamic_cast<Position*>(obj);
+            oldPos = obj->GetPosition();
             obj->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
-            curPos2 = *dynamic_cast<Position*>(obj);
+            curPos2 = obj->GetPosition();
             onMoveObject(obj, oldPos, curPos2);
             enterProc(obj, (uint)(oldPos.GetPositionX() / g_nRegionSize), (uint)(oldPos.GetPositionY() / g_nRegionSize));
             obj->SetMove(newPos, speed, t);
@@ -316,6 +317,7 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
 
 void World::Update(uint diff)
 {
+    MemoryPoolMgr::instance();
     for (auto& session : m_sessions) {
         if (session.second != nullptr && session.second->GetPlayer() != nullptr) {
             session.second->GetPlayer()->Update(diff);
@@ -486,14 +488,12 @@ bool World::RemoveItemFromWorld(Item *pItem)
 
 uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 {
-    uint item_handle = 0;
+    uint item_handle = pItem->GetHandle();
     int code = pItem->m_Instance.Code;
     if(code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY) {
         pItem->m_Instance.nIdx = 0;
         pItem->m_bIsNeedUpdateToDB = true;
         pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
-        if(pItem != nullptr)
-            item_handle = pItem->GetHandle();
     }
     return item_handle;
 }
@@ -516,11 +516,8 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 
 bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
 {
-    float fMod;
-    float fCreatureCardMod;
-
-    fCreatureCardMod = 1.0f;
-    fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
+    float fCreatureCardMod = 1.0f;
+    float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0)
     {
         if (sObjectMgr->GetItemBase(code)->group == 13)
@@ -528,14 +525,15 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
         /*if (sObjectMgr->GetItemBase(code)->flaglist[FLAG_QUEST] != 0)
             fDropRatePenalty = 1.0f;*/
     }
-
-    return (percentage * 1) * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod >= irand(1, 0x5F5E100u);
+    auto perc = percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod;
+    auto rand = irand(1, 0x5F5E100u);
+    return perc >= rand ;
 }
 
 int World::ShowQuestMenu(Player *pPlayer)
 {
-    auto obj = sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc"));
-    auto npc = dynamic_cast<NPC*>(obj);
+    //auto obj = sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc"));
+    auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if(npc != nullptr) {
         int* m_QuestProgress = new int{0};
         auto functor = [=](Player* pPlayer, QuestLink* linkInfo) {
@@ -562,4 +560,98 @@ int World::ShowQuestMenu(Player *pPlayer)
         delete m_QuestProgress;
     }
     return 0;
+}
+
+bool World::ProcTame(Monster *pMonster)
+{
+    if(pMonster->GetTamer() == 0)
+        return false;
+
+    auto player = sMemoryPool->GetObjectInWorld<Player>(pMonster->GetTamer());
+    if(player == nullptr || player->GetHealth() == 0) {
+        Messages::BroadcastTamingMessage(nullptr, pMonster, 3);
+        return false;
+    }
+
+    int nTameItemCode = pMonster->GetTameItemCode();
+    if(pMonster->GetExactDist2d(player) > 500.0f || nTameItemCode == 0) {
+        ClearTamer(pMonster, false);
+        Messages::BroadcastTamingMessage(player, pMonster, 3);
+        return false;
+    }
+
+    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, true);
+    if(pItem == nullptr) {
+        MX_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
+        ClearTamer(pMonster, false);
+        Messages::BroadcastTamingMessage(player, pMonster, 3);
+        return false;
+    }
+
+    /*
+     * Technically there is a taming penalty added to the game.
+     * However, since I'm not interested in having bs mechanics, I wont add it.
+     * lPenalty = 0.05f * (float)((20 - pMonster->GetLevel()) + player->GetLevel());
+     * lPenalty is multiplied with the TamePercentage here
+     */
+    float fTameProbability = pMonster->GetTamePercentage();
+    auto pSkill = player->GetSkill(SkillId::CreatureTaming);
+    if(pSkill == nullptr) {
+        // really, you shouldn't get here. If you do, you fucked up somewhere.
+        ClearTamer(pMonster, false);
+        Messages::BroadcastTamingMessage(player, pMonster, 3);
+        return false;
+    }
+
+    fTameProbability *= (((pSkill->m_SkillBase->var[1] * pSkill->GetSkillEnhance()) + (pSkill->m_SkillBase->var[0] * pMonster->m_nTamingSkillLevel) + 1) * 1000000);
+    MX_LOG_INFO("taming", "You have a success rate of %f percent.", fTameProbability / 1000000);
+    if(fTameProbability < irand(1, 1000000))
+    {
+        player->Erase(pItem, 1, true);
+        ClearTamer(pMonster, false);
+        Messages::BroadcastTamingMessage(player, pMonster, 3);
+        return false;
+    }
+
+    pItem->m_Instance.Flag = (pItem->m_Instance.Flag & 0xDFFFFFFF) | 0x80000000;
+    pItem->DBUpdate();
+    Messages::SendItemMessage(player, pItem);
+    Messages::BroadcastTamingMessage(player, pMonster, 2);
+    ClearTamer(pMonster, false);
+}
+
+void World::ClearTamer(Monster *pMonster, bool bBroadcastMsg)
+{
+    uint tamer = pMonster->GetTamer();
+    if(tamer != 0) {
+        if(bBroadcastMsg)
+            Messages::BroadcastTamingMessage(nullptr, pMonster, 1);
+
+        auto player = sMemoryPool->GetObjectInWorld<Player>(tamer);
+        if(player != nullptr) {
+            player->m_hTamingTarget = 0;
+        }
+    }
+    pMonster->SetTamer(0, 0);
+}
+
+bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
+{
+    if( pPlayer == nullptr || pPlayer->m_hTamingTarget != 0 || pMonster == nullptr)
+        return false;
+
+    int tameCode = pMonster->GetTameItemCode();
+    if (pMonster->GetHealth() == pMonster->GetMaxHealth()
+        && pMonster->GetTamer() == 0
+        && tameCode != 0) {
+        auto card = pPlayer->FindItem(tameCode, FlagBits::FB_Summon, false);
+        if(card != nullptr) {
+            pMonster->SetTamer(pPlayer->GetHandle(), nSkillLevel);
+            pPlayer->m_hTamingTarget = pMonster->GetHandle();
+            card->m_Instance.Flag |= 0x20000000;
+            Messages::BroadcastTamingMessage(pPlayer, pMonster, 0);
+            return true;
+        }
+    }
+    return false;
 }

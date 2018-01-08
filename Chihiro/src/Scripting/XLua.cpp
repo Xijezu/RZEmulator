@@ -183,7 +183,8 @@ int XLua::SCRIPT_GetNPCID()
     if (player == nullptr)
         return -1;
 
-    auto t = sMemoryPool->getMiscPtrFromId(player->GetLastContactLong("npc"));
+    auto t = sMemoryPool->GetObjectInWorld<WorldObject>(player->GetLastContactLong("npc"));
+    //sMemoryPool->getMiscPtrFromId(player->GetLastContactLong("npc"));
     if(t != nullptr)  {
         return t->GetUInt32Value(UNIT_FIELD_UID);
     }
@@ -480,7 +481,8 @@ int XLua::SCRIPT_GetWearItemHandle(int index)
 
 int XLua::SCRIPT_GetItemLevel(uint handle)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr)
         return 0;
     return item->m_Instance.nLevel;
@@ -488,7 +490,8 @@ int XLua::SCRIPT_GetItemLevel(uint handle)
 
 int XLua::SCRIPT_GetItemEnhance(uint handle)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr)
         return 0;
     return item->m_Instance.nEnhance;
@@ -498,7 +501,8 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 {
     if(level > 255)
         return 0;
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr)
         return 0;
     item->m_Instance.nLevel = level;
@@ -517,7 +521,8 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 
 int XLua::SCRIPT_GetItemRank(uint handle)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr || item->m_pItemBase == nullptr)
         return 0;
     return item->m_pItemBase->rank;
@@ -526,7 +531,8 @@ int XLua::SCRIPT_GetItemRank(uint handle)
 
 int XLua::SCRIPT_GetItemPrice(uint handle)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr || item->m_pItemBase == nullptr)
         return 0;
     return item->m_pItemBase->price;
@@ -543,7 +549,8 @@ int XLua::SCRIPT_GetItemNameID(int code)
 
 int XLua::SCRIPT_GetItemCode(uint handle)
 {
-    auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
+    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if(item == nullptr)
         return 0;
     return item->m_Instance.Code;
@@ -618,6 +625,7 @@ void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
         if(mob == nullptr)
             return;
         mob->SetCurrentXY(x, y);
+        mob->SetRespawnPosition({(float)(x + irand(-10, 10)), (float)(y + irand(-10, 10)), 0});
         sWorld->AddMonsterToWorld(mob);
     }
 }
@@ -636,7 +644,8 @@ int XLua::SCRIPT_GetCreatureHandle(int idx)
 
 void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object value)
 {
-    auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    //auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    auto summon = sMemoryPool->GetObjectInWorld<Summon>((uint)handle);
     if(summon == nullptr && handle < 6 && handle > 0) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(player != nullptr) {
@@ -674,7 +683,8 @@ void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object valu
 
 sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
 {
-    auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    //auto summon = dynamic_cast<Summon*>(sMemoryPool->getSummonPtrFromId(handle));
+    auto summon = sMemoryPool->GetObjectInWorld<Summon>((uint)handle);
     if(summon == nullptr && handle < 6 && handle > 0) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(player != nullptr) {

@@ -16,6 +16,7 @@ public:
     static void DB_UpdateSummon(Player*,Summon*);
     static void EnterPacket(XPacket &, Summon *, Player* pPlayer);
 
+    CreatureStat* GetBaseStat() const override;
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
     int32_t GetSummonCode();
