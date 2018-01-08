@@ -129,7 +129,6 @@ template<class T>
 void MemoryPoolMgr::_update()
 {
 //    MX_SHARED_GUARD readGuard(*HashMapHolder<T>::GetLock());
-    HashMapHolder<T>::MapType::iterator iter;
     for (auto &obj : HashMapHolder<T>::GetContainer()) {
         if (obj.second == nullptr) {
             continue;
