@@ -141,7 +141,7 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
 void ArRegion::addObject(WorldObject *obj, svObjects *objContainer)
 {
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        //MX_UNIQUE_GUARD writeGuard(i_lock);
         objContainer->insert({obj->GetHandle(), obj});
         obj->AddToWorld();
         obj->_region = this;
@@ -150,7 +150,7 @@ void ArRegion::addObject(WorldObject *obj, svObjects *objContainer)
 void ArRegion::removeObject(WorldObject *obj, svObjects *objContainer)
 {
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        //MX_UNIQUE_GUARD writeGuard(i_lock);
         objContainer->erase(obj->GetHandle());
         obj->_region = nullptr;
         obj->RemoveFromWorld();
