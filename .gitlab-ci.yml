@@ -1,37 +1,29 @@
-#matrix:
-#  include:
-  # ENABLE AFTER ACE 6.4.3 is available.
-    #- os: linux
-    #  dist: trusty
-    #  sudo: required
-    #  compiler: clang
- #   - os: linux
- #     sudo: required
- #     dist: trusty
- #     group: deprecated-2017Q4
- #     compiler: gcc
- #     sudo: required
-before_script:
-
-  - add-apt-repository ppa:george-edison55/cmake-3.x -y
-  - add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.9 main' -y
-  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -y -
-  - apt-get update -qq
-  - apt-get -y install clang-3.9
-  - apt-get -y install libace-dev
-  - apt-get -y install libncurses5-dev
-  - apt-get -y install build-essential autoconf libtool make cmake git-core g++
-  - apt-get -y install lua5.2 liblua5.2 liblua5.2-dev
-  - apt-get -y install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
-  - if [ "$CXX" = "clang++" ]; then apt-get -y install -qq libstdc++-6-dev; fi
-  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.9" CC="clang-3.9"; fi
-  - if [ "$CXX" = "g++" ]; then apt-get -y install -qq g++-6; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
+# This file is a template, and might need editing before it works on your project.
+# use the official gcc image, based on debian
+# can use verions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+image: gcc
 
 build:
-    script:
-      - mkdir build
-      - cd build
-      - cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" ..
-      - cmake --build . --target all -- -j8
+  stage: build
+  # instead of calling g++ directly you can also use some build toolkit like make
+  # install the necessary build tools when needed
+  # before_script: 
+  #   - apt update && apt -y install make autoconf 
+  before_script:
+    - apt-get update -qq
+    - apt-get -y install clang-3.9
+    - apt-get -y install libace-dev
+    - apt-get -y install libncurses5-dev
+    - apt-get -y install build-essential autoconf libtool make cmake git-core g++
+    - apt-get -y install lua5.2 liblua5.2 liblua5.2-dev
+    - apt-get -y install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+  script: 
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j8
+  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+  # cache:
+  #   paths:
+  #     - "*.o"
