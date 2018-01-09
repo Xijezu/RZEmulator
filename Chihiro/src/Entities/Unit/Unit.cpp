@@ -71,10 +71,8 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player* pPlayer)
     pEnterPct << (int32_t) pUnit->GetMana();
     pEnterPct << (int32_t) pUnit->GetMaxMana();
     pEnterPct << (int32_t) pUnit->GetLevel();
-    pEnterPct << (uint8_t) 0;
-    pUnit->GetUInt32Value(UNIT_FIELD_RACE);
-    pEnterPct << (uint32_t) 0;
-    pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
+    pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
+    pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
     pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) == 1 ? 1 : 0);
     pEnterPct << (int32_t) 0;
 }
@@ -1212,7 +1210,7 @@ void Unit::applyStatByItem()
             auto iwt = (ItemWearType)i1;
             if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
                 if (TranslateWearPosition(iwt, item, ref_list)) {
-                    for (int j = 0; j < 4; j += 1) {
+                    for (int j = 0; j < 4; j++) {
                         short ot = item->m_pItemBase->opt_type[j];
                         auto  bs = (uint) item->m_pItemBase->opt_var[j][0];
                         auto  fv = (int) item->m_pItemBase->opt_var[j][1];

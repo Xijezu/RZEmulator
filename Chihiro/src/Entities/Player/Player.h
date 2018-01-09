@@ -1,6 +1,7 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
+#include "XPacket.h"
 #include "Common.h"
 #include "Entities/Unit/Unit.h"
 #include "Item/Item.h"
@@ -134,7 +135,7 @@ public:
     uint16 IsUseableItem(Item* pItem, Unit* pTarget);
     uint16 UseItem(Item* pItem, Unit* pTarget, const std::string& szParameter);
 
-    void SendPacket(XPacket& pPacket);
+    void SendPacket(XPacket pPacket);
 
     WorldSession& GetSession() const
     { return *m_session; }

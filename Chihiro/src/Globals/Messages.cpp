@@ -732,10 +732,11 @@ void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderNa
     chatPct.fill(szSenderName, 21);
     chatPct << (int16)szString.length();
     chatPct << (uint8)chatType;
-    chatPct.WriteString(szString);
-    chatPct << (uint8)0;
+    chatPct.fill(szString, szString.length()+1);
 
-    Player::DoEachPlayer([&chatPct](Player* pPlayer) { pPlayer->SendPacket(chatPct); });
+    Player::DoEachPlayer([=](Player* pPlayer) {
+        pPlayer->SendPacket(chatPct);
+    });
     auto sender = Player::FindPlayer(szSenderName);
     if(sender != nullptr)
         Messages::SendResult(sender, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);

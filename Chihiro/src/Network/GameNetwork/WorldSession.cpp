@@ -634,14 +634,6 @@ bool WorldSession::onChatRequest(XPacket *_packet)
         default:
             break;
     }
-
-    if (request.type == 4) {
-        // Global Chat Message
-        Messages::SendGlobalChatMessage(_player->GetPermission() > 0 ? 6 : 4, _player->GetName(), request.szMsg, 0);
-        return true;
-    } else if (request.type == 0) {
-        return true;
-    }
 }
 
 bool WorldSession::onLogoutTimerRequest(XPacket *pRecvPct)

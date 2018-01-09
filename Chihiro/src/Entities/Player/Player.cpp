@@ -1088,8 +1088,9 @@ void Player::RemoveAllSummonFromWorld()
     }
 }
 
-void Player::SendPacket(XPacket &pPacket)
+void Player::SendPacket(XPacket pPacket)
 {
+
     if(m_session != nullptr) {
         if(m_session->GetSocket() != nullptr) {
             m_session->GetSocket()->SendPacket(pPacket);
