@@ -25,7 +25,7 @@ public:
 
     void OnUpdate() override;
 
-    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
+    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;
 
     int m_nSummonInfo{ };
     int m_nCardUID{ };

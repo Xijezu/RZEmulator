@@ -1,4 +1,4 @@
-#include "Unit/Unit.h"
+#include "Unit.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "GameRule.h"
@@ -617,7 +617,7 @@ void Unit::applyItemEffect()
         curItem = GetWornItem((ItemWearType) i);
         if (curItem != nullptr && curItem->m_pItemBase != nullptr) {
             auto iwt = (ItemWearType)i;
-            if (TranslateWearPosition(iwt, curItem, &ref_list)) {
+            if (TranslateWearPosition(iwt, curItem, ref_list)) {
                 float    fItemRatio = 1.0f;
                 if(curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
                     fItemRatio = 0.40000001f;
@@ -629,7 +629,7 @@ void Unit::applyItemEffect()
                 }
 
                 for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
-                    if (curItem->m_pItemBase->opt_var[ol] != 0) {
+                    if (curItem->m_pItemBase->opt_type[ol] != 0) {
                         onItemWearEffect(curItem, false, curItem->m_pItemBase->opt_type[ol], curItem->m_pItemBase->opt_var[ol][0], curItem->m_pItemBase->opt_var[ol][1], fItemRatio);
                     }
                 }
@@ -1208,14 +1208,14 @@ void Unit::applyStatByItem()
 
     for(int i1 = 0; i1 < 24; ++i1) {
         Item* item = m_anWear[i1];
-        if (item != nullptr) {
+        if (item != nullptr && item->m_pItemBase != nullptr) {
             auto iwt = (ItemWearType)i1;
             if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
-                if (TranslateWearPosition(iwt, item, &ref_list)) {
-                    for (int j = 0; j < 4; j++) {
+                if (TranslateWearPosition(iwt, item, ref_list)) {
+                    for (int j = 0; j < 4; j += 1) {
                         short ot = item->m_pItemBase->opt_type[j];
-                        auto  bs = (uint) item->m_pItemBase->opt_var[0][j];
-                        auto  fv = (int) item->m_pItemBase->opt_var[1][j];
+                        auto  bs = (uint) item->m_pItemBase->opt_var[j][0];
+                        auto  fv = (int) item->m_pItemBase->opt_var[j][1];
                         if (ot == 96)
                             incParameter(bs, fv, true);
                     }
@@ -2135,7 +2135,7 @@ void Unit::CancelAttack()
     SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
 }
 
-bool Unit::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList)
+bool Unit::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
 {
     bool result;
     if(item->GetWearType() != ItemWearType::WearCantWear && item->IsWearable()) {
@@ -2170,7 +2170,7 @@ ushort Unit::Puton(ItemWearType pos, Item *item)
         return 0;
 
     std::vector<int> vOverlapItemList{ };
-    if(!TranslateWearPosition(pos, item, &vOverlapItemList))
+    if(!TranslateWearPosition(pos, item, vOverlapItemList))
         return 0;
 
     for(int& s : vOverlapItemList) {

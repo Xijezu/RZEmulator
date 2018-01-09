@@ -117,7 +117,7 @@ public:
 
     float GetMoveSpeed() const;
 
-    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>* ItemList) override;
+    bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;
 
     // Quest start
     bool IsInProgressQuest(int code);

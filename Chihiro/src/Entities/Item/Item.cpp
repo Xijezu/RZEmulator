@@ -63,6 +63,8 @@ Item *Item::AllocItem(uint64 uid, int code, uint64 cnt, GenerateCode info, int l
 
 ItemWearType Item::GetWearType()
 {
+    if(m_pItemBase == nullptr)
+        return ItemWearType::WearNone;
     return (ItemWearType) m_pItemBase->wear_type;
 }
 

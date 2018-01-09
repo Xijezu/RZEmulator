@@ -68,7 +68,7 @@ bool ObjectMgr::LoadItemResource()
     uint32 count = 0;
     do {
         Field        *fields = result->Fetch();
-        ItemTemplate itemTemplate;
+        ItemTemplate itemTemplate{};
 
         itemTemplate.id               = fields[0].GetInt32();
         itemTemplate.type             = fields[1].GetInt32();
@@ -126,6 +126,7 @@ bool ObjectMgr::LoadItemResource()
             itemTemplate._enhance[i][2] = fields[y++].GetFloat();
             itemTemplate._enhance[i][3] = fields[y++].GetFloat();
         }
+
         itemTemplate.skill_id        = fields[86].GetInt32();
         itemTemplate.state_id        = fields[87].GetInt32();
         itemTemplate.state_level     = fields[88].GetInt32();

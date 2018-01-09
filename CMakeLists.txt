@@ -11,6 +11,10 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH 0)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 
+if(CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
+    add_definitions(-fno-delete-null-pointer-checks)
+endif()
+
 # build in Release-mode by default if not explicitly set
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")

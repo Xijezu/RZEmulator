@@ -1184,7 +1184,7 @@ void Player::onCantAttack(uint target, uint t)
     }
 }
 
-bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *vpOverlappItemList)
+bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> &vpOverlappItemList)
 {
     if (!Unit::TranslateWearPosition(pos, pItem, vpOverlappItemList))
         return false;
@@ -1211,9 +1211,9 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         if (pItem->m_pItemBase->group == ItemGroup::Bullet) {
             item1 = m_anWear[0];
             if (item1 == nullptr
-                || item1->m_pItemBase->iclass != ItemClass::ClassCrossBow
-                || item1->m_pItemBase->iclass != ItemClass::ClassLightBow
-                || item1->m_pItemBase->iclass != ItemClass::ClassHeavyBow)
+                ||  (item1->m_pItemBase->iclass != ItemClass::ClassCrossBow
+                    && item1->m_pItemBase->iclass != ItemClass::ClassLightBow
+                    && item1->m_pItemBase->iclass != ItemClass::ClassHeavyBow))
                 return false;
         }
         if (pItem->m_pItemBase->group == ItemGroup::Weapon) {
@@ -1234,6 +1234,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         }
     }
     if (pos == ItemWearType::WearDecoShield) {
+
         if (pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandSword
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandSword
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoDagger
@@ -1254,9 +1255,9 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 && item1->m_pItemBase->iclass != ItemClass::ClassDagger
                 && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
                 || item2 == nullptr
-                || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
-                || item2->m_pItemBase->iclass != ItemClass::ClassDagger
-                || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
+                && item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                && item2->m_pItemBase->iclass != ItemClass::ClassDagger
+                && item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
                 || m_anWear[14] == nullptr) { // TODO: PassiveSkill
                 pos = ItemWearType::WearDecoWeapon;
             }
@@ -1378,17 +1379,17 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     if(pos >= 24 || pos < 0)
         return false;
 
-    if(vpOverlappItemList != nullptr) {
+    if(!vpOverlappItemList.empty()) {
         if(m_anWear[pos] != nullptr)
-            vpOverlappItemList->emplace_back(pos);
+            vpOverlappItemList.emplace_back(pos);
         if(pItem->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
             if(m_anWear[1] != nullptr) {
                 if (!pItem->IsBow() && !pItem->IsCrossBow()
                     || m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet) {
-                    vpOverlappItemList->emplace_back(1);
+                    vpOverlappItemList.emplace_back(1);
                 }
                 if(m_anWear[15] != nullptr) {
-                    vpOverlappItemList->emplace_back(15);
+                    vpOverlappItemList.emplace_back(15);
                 }
             }
         }
@@ -1396,9 +1397,9 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             item1 = m_anWear[15];
             if(item1 != nullptr) {
                 if(pItem->m_pItemBase->iclass == ItemClass::ClassShield && item1->m_pItemBase->iclass != ItemClass::ClassDecoShield)
-                    vpOverlappItemList->emplace_back(15);
+                    vpOverlappItemList.emplace_back(15);
                 if(item1->m_pItemBase->iclass == ItemClass::ClassDecoShield)
-                    vpOverlappItemList->emplace_back(15);
+                    vpOverlappItemList.emplace_back(15);
             }
         }
         item1 = m_anWear[0];
@@ -1406,19 +1407,19 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             if(item1->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
                 if(pos == ItemWearType::WearShield) {
                     if(!item1->IsBow() && !item1->IsCrossBow() || pItem->m_pItemBase->group != ItemGroup::Bullet)
-                        vpOverlappItemList->emplace_back(0);
+                        vpOverlappItemList.emplace_back(0);
                 }
             }
         }
 
         if(m_anWear[10] != nullptr && pItem->GetWearType() == ItemWearType::WearTwoFingerRing)
-            vpOverlappItemList->emplace_back(10);
+            vpOverlappItemList.emplace_back(10);
 
         item1 = m_anWear[9];
         if(item1 != nullptr) {
             if(item1->GetWearType() == ItemWearType::WearTwoFingerRing) {
                 if(pItem->GetWearType() == ItemWearType::WearRing)
-                    vpOverlappItemList->emplace_back(9);
+                    vpOverlappItemList.emplace_back(9);
             }
         }
     }

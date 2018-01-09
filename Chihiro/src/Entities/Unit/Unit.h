@@ -183,7 +183,7 @@ public:
     void CalculateStat();
     // Event handler
     EventProcessor _Events;
-    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList);
+    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
     Item *GetWornItem(ItemWearType);
     ushort Puton(ItemWearType pos, Item *item);
     ushort Putoff(ItemWearType pos);
