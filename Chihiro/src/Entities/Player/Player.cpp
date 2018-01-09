@@ -330,7 +330,7 @@ bool Player::ReadEquipItem()
             if(item != nullptr && unit != nullptr) {
                 if(unit->m_anWear[wear_info] == nullptr) {
                     auto iwt = (ItemWearType)wear_info;
-                    if(TranslateWearPosition(iwt, item, &indices)) {
+                    if(TranslateWearPosition(iwt, item, indices)) {
                         unit->m_anWear[wear_info] = item;
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
                         item->m_bIsNeedUpdateToDB = true;
