@@ -327,7 +327,7 @@ void World::Update(uint diff)
     }
     for(auto& ro : m_vRespawnList) {
         ro->Update(diff);
-        m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
+        //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
 
     sMemoryPool->Update(diff);
@@ -654,4 +654,40 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
         }
     }
     return false;
+}
+
+void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
+{
+    SkillResult sr{};
+    sr.type = (int)SR_ResultType::SRT_Result;
+    sr.hTarget = handle;
+    sr.result.bResult = bIsSuccess;
+    sr.result.success_type = nSuccessType;
+    pvList.emplace_back(sr);
+}
+
+void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle)
+{
+    SkillResult sr{};
+    sr.type = type;
+
+    sr.hTarget = handle;
+    sr.damage.damage_type = damageType;
+
+    sr.damage.flag = 0;
+    if(damageInfo.bCritical)
+        sr.damage.flag = 1;
+    if(damageInfo.bBlock)
+        sr.damage.flag |= 4;
+    if(damageInfo.bMiss)
+        sr.damage.flag |= 2;
+    if(damageInfo.bPerfectBlock)
+        sr.damage.flag |= 8;
+
+    sr.damage.damage = damageInfo.nDamage;
+    sr.damage.target_hp = damageInfo.target_hp;
+    for(int i = 0; i < 7; i++)
+        sr.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
+
+    pvList.emplace_back(sr);
 }

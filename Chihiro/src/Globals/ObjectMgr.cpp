@@ -1201,7 +1201,7 @@ Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool 
     auto mob = sMemoryPool->AllocMonster(id);
     if(mob != nullptr) {
         mob->SetCurrentXY(x, y);
-        mob->SetLayer(0);
+        mob->SetLayer(layer);
         mob->m_pDeleteHandler = pDeleteHandler;
         mob->SetRespawnPosition({(float)x, (float)y, 0});
         sWorld->AddMonsterToWorld(mob);
@@ -1476,4 +1476,16 @@ StateTemplate *const ObjectMgr::GetStateInfo(int code)
     if(_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];
     return nullptr;
+}
+bool ObjectMgr::IsBlocked(float x, float y)
+{
+    if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
+        return true;
+    //if(GameRule.bIsNoCollisionCheck)
+    if(false)
+        return false;
+    return g_qtBlockInfo.Collision({x, y});
+}
+ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
+{
 }

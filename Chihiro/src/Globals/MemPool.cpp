@@ -103,8 +103,38 @@ void MemoryPoolMgr::Destroy()
     _unload<Summon>();
 }
 
-void MemoryPoolMgr::Update(uint diff)
-{
+void MemoryPoolMgr::Update(uint diff) {
+    // First deleting all things in the remove list
+    while (!i_objectsToRemove.empty()) {
+        std::set<WorldObject *>::iterator itr = i_objectsToRemove.begin();
+        WorldObject *obj = *itr;
+
+        if (obj->IsInWorld())
+            obj->RemoveFromWorld();
+
+        switch (obj->GetSubType()) {
+            case ST_Player:
+                RemoveObject((Player *)obj);
+                break;
+            case ST_Mob:
+                RemoveObject((Monster *)obj);
+                break;
+            case ST_Summon:
+                RemoveObject((Summon *)obj);
+                break;
+            case ST_Object: // In this case item
+                RemoveObject((Item *)obj);
+                break;
+            default:
+                RemoveObject(obj);
+                break;
+        }
+
+        delete obj;
+
+        i_objectsToRemove.erase(itr);
+    }
+
     _update<Player>();
     _update<Monster>();
     _update<WorldObject>();
@@ -128,11 +158,18 @@ void MemoryPoolMgr::_unload()
 template<class T>
 void MemoryPoolMgr::_update()
 {
-//    MX_SHARED_GUARD readGuard(*HashMapHolder<T>::GetLock());
-    for (auto &obj : HashMapHolder<T>::GetContainer()) {
-        if (obj.second == nullptr) {
-            continue;
+    {
+        MX_SHARED_GUARD readGuard(*HashMapHolder<T>::GetLock());
+        typename HashMapHolder<T>::MapType const& m = HashMapHolder<T>::GetContainer();
+        for (typename HashMapHolder<T>::MapType::const_iterator iter = m.begin(); iter != m.end(); ++iter) {
+            if (iter->second == nullptr) {
+                continue;
+            }
+            iter->second->Update(0);
         }
-        obj.second->Update(0);
     }
+}
+void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
+{
+    i_objectsToRemove.insert(obj);
 }

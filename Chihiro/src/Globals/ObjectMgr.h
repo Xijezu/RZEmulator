@@ -26,7 +26,7 @@ struct Waypoint {
 
 class ObjectMgr {
 public:
-    ObjectMgr() = default;
+    ObjectMgr();
     ~ObjectMgr() = default;
 
     typedef UNORDERED_MAP<uint32, ItemTemplate>                 ItemTemplateContainer;
@@ -101,12 +101,14 @@ public:
 
     ushort IsLearnableSkill(Unit *, uint, int, int &);
     int GetLocationID(float x, float y) const;
+    bool IsBlocked(float x, float y);
 
     int g_currentLocationId{0};
 
     UNORDERED_MAP<int,Waypoint> g_vWayPoint{};
     //UNORDERED_MAP<int,MonsterRespawnInfo> g_vRespawnInfo{};
     std::vector<MonsterRespawnInfo> g_vRespawnInfo{};
+    X2D::QuadTreeMapInfo g_qtBlockInfo;
 private:
     JobResourceTemplateContainer    _jobTemplateStore;
     ItemTemplateContainer           _itemTemplateStore;

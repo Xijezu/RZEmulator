@@ -19,12 +19,13 @@ struct RespawnInfo : public MonsterRespawnInfo {
 
 class RespawnObject : public MonsterDeleteHandler{
 public:
-    RespawnObject(MonsterRespawnInfo rh);
+    explicit RespawnObject(MonsterRespawnInfo rh);
     ~RespawnObject() = default;
 
     void onMonsterDelete(Monster* mob) override;
     void Update(uint diff);
 
+private:
     RespawnInfo info;
     uint m_nMaxRespawnNum;
     std::vector<uint> m_vRespawnedMonster;

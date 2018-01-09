@@ -19,6 +19,8 @@ class XPacket;
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 const int g_nRegionSize = 180;
+const int g_nMapWidth = 700000;
+const int g_nMapHeight = 1000000;
 
 class World
 {
@@ -51,6 +53,10 @@ public:
 	bool ProcTame(Monster* pMonster);
 	void ClearTamer(Monster* pMonster, bool bBroadcastMsg);
 	bool SetTamer(Monster* pMonster, Player* pPlayer, int nSkillLevel);
+
+	// skills
+	void AddSkillDamageResult(std::vector<SkillResult>& pvList, bool bIsSuccess, int nSuccessType, uint handle);
+	void AddSkillDamageResult(std::vector<SkillResult>& pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle);
 
 	// Quest?
 	int ShowQuestMenu(Player* pPlayer);

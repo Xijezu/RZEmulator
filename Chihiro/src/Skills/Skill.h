@@ -46,11 +46,18 @@ private:
 protected:
     void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
 private:
-    void DoSummon();
-    void DoUnsummon();
-    void DoTaming();
+    std::vector<SkillResult> m_vResultList{};
+    void FireSkill(Unit* pTarget, bool bIsSuccess);
     uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
     uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos,  uint current_time);
+
+    // I'm sorry, I'm copying retail code here
+    void SINGLE_PHYSICAL_DAMAGE(Unit* pTarget);
+    void SINGLE_MAGICAL_DAMAGE(Unit* pTarget);
+
+    void DO_SUMMON();
+    void DO_UNSUMMON();
+    void CREATURE_TAMING();
 };
 
 

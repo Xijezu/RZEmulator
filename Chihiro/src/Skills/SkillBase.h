@@ -4,6 +4,54 @@
 #include "Common.h"
 #include "ItemFields.h"
 
+enum SR_ResultType : int
+{
+    SRT_Damage = 0,
+    SRT_MagicDamage = 1,
+    SRT_DamageWithKnockBack = 2,
+    SRT_Result = 10,
+    SRT_AddHP = 20,
+    SRT_AddMP = 21,
+    SRT_AddHPMPSP = 22,
+    SRT_Rebirth = 23,
+    SRT_Rush = 30,
+    SRT_NotUse = 100,
+};
+
+struct SkillDamage {
+    uint8 type;
+    uint hTarget;
+    int target_hp;
+    uint8 damage_type;
+    int damage;
+    int flag;
+    uint16 elemental_damage[7]{};
+};
+
+struct AddHPType {
+    uint8 type;
+    uint hTarget;
+    int target_hp;
+    int nIncHP;
+};
+
+struct SR_Result {
+    bool bResult;
+    int success_type;
+};
+
+struct SkillResult {
+    uint8 type;
+    uint hTarget;
+
+    // Damage
+    int target_hp;
+    uint8 damage_type;
+    SR_Result result;
+    SkillDamage damage;
+    AddHPType addHPType;
+};
+
 enum SkillState : short {
     ST_Fire          = 0,
     ST_Casting       = 1,
@@ -348,6 +396,10 @@ struct SkillBase {
     int GetStateSecond(int skill_lv, int enhance_lv)
     {
         return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
+    }
+
+    int GetHitBonus(int enhance, int level_diff) const {
+        return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
     }
 
     int GetStateLevel(int skill_lv, int enhance_lv)

@@ -413,8 +413,11 @@ bool WorldSession::onMoveRequest(XPacket *pRecvPct)
         return false;
 
     Position cp = vMoveInfo.back();
-    // TODO if(QuadTree stuff)
-    // TODO if(IsBlocked)
+    if(sObjectMgr->IsBlocked(cp.GetPositionX(), cp.GetPositionY())) {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
+        return false;
+    }
+
 
     if (_player->IsInWorld())
     {

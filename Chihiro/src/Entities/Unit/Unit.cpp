@@ -2547,3 +2547,36 @@ bool Unit::ClearExpiredState(uint t)
     }
     return bDeleted;
 }
+
+int Unit::GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) const
+{
+    float v4{1};
+    float v5 = m_Attribute.nAttackPointRight;
+
+    // TODO: ElementalStateMod
+
+    return (int)(v5 * v4);
+}
+
+DamageInfo Unit::DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
+{
+    DamageInfo result{};
+    auto d = DealMagicalDamage(pFrom, (float)nDamage, elemental_type, 0, critical_bonus, nFlag, nullptr, nullptr);
+    result.SetDamage(d);
+    result.target_hp = GetHealth();
+    return result;
+}
+
+DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
+{
+    DamageInfo result{};
+    auto d = DealPhysicalDamage(pFrom, (float)nDamage, elemental_type, 0, critical_bonus, nFlag, nullptr, nullptr);
+    result.SetDamage(d);
+    result.target_hp = GetHealth();
+    return result;
+}
+
+Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+{
+    return DealDamage(pFrom, nDamage, type, DamageType::NormalMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}

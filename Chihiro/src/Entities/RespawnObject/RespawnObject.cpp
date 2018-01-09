@@ -28,98 +28,47 @@ RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo(rh))
 
 void RespawnObject::Update(uint diff)
 {
+    /// No need to update anything
+    if(info.count >= m_nMaxRespawnNum)
+        return;
+
     uint ct = sWorld->GetArTime();
-    uint try_cnt = ct;
-    int nCountToDelete = 0;
-    Monster* monster{nullptr};
-    if(info.count < m_nMaxRespawnNum) {
-        if(lastDeadTime != 0 && lastDeadTime + info.interval > ct)
-            return;
-        int respawn_count = info.inc;
-        if(info.inc >= m_nMaxRespawnNum - info.count)
-            respawn_count = m_nMaxRespawnNum - info.count;
 
-        bool bFirstRegen = false;
-        if(lastDeadTime == 0) {
-            lastDeadTime = ct;
-            respawn_count = m_nMaxRespawnNum;
-            bFirstRegen = true;
-        }
-        if(respawn_count > 0) {
-            try_cnt = 0;
-            nCountToDelete = 0;
-            while(true) {
-                int x = irand((int)info.left, (int)info.right);
-                int y = irand((int)info.top, (int)info.bottom);
-                if(bFirstRegen) {
-                    if(nCountToDelete == 0)
-                    {
-                        ++try_cnt;
-                        if(try_cnt > 0x1F4)
-                            break;
-                    }
-                }
-                monster = nullptr;
-                /// TODO: IsBlocked
-                if(true) {
-                    monster = sObjectMgr->RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
-                }
-                if(monster != nullptr) {
-                    if(info.dungeon_id != 0) {
-                        //monster.m_nDungeonId = info.dungeon_id;
-                    }
-                     m_vRespawnedMonster.emplace_back(monster->GetHandle());
-                    info.count++;
-                    nCountToDelete++;
-                    if(nCountToDelete >= respawn_count)
-                        break;
-                }
-                break;
+    /// Only update based on spawn rates (each X seconds after dead)
+    if(lastDeadTime != 0 && lastDeadTime + info.interval > ct)
+        return;
+
+    int respawn_count = m_nMaxRespawnNum - info.count;
+
+    if(lastDeadTime == 0) {
+        lastDeadTime = ct;
+        respawn_count = m_nMaxRespawnNum;
+    }
+
+    /// Do we need a respawn?
+    if(respawn_count > 0) {
+        while (true) {
+            /// Generate random respawn coordinates based on a rectangle
+            int x = irand((int)info.left, (int)info.right);
+            int y = irand((int)info.top, (int)info.bottom);
+
+            /// Generate monster if not blocked
+            Monster* monster{nullptr};
+            if (!sObjectMgr->IsBlocked(x, y)) {
+                monster = sObjectMgr->RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
             }
-            return;
+            /// Put it to the list when it's not blocked
+            if (monster != nullptr) {
+                if (info.dungeon_id != 0) {
+                    //monster.m_nDungeonId = info.dungeon_id;
+                }
+                m_vRespawnedMonster.emplace_back(monster->GetHandle());
+                info.count++;
+            }
+            /// And finally break if we reached our respawn count
+            if (info.count >= respawn_count)
+                break;
         }
-        if(info.count != m_nMaxRespawnNum)
-            return;
-    }
-    if(info.dungeon_id != 0 || info.way_point_id != 0)
-        return;
-    if(m_nMaxRespawnNum == info.prespawn_count)
-        return;
-    if(m_nMaxRespawnNum < info.prespawn_count) {
-        m_nMaxRespawnNum = info.prespawn_count;
-        sWorld->m_vRespawnList.emplace_back(this);
-        return;
-    }
-    if(lastDeadTime == 0 || info.interval + lastDeadTime + 18000 > ct)
-        return;
-
-    nCountToDelete = (int)(m_nMaxRespawnNum - info.prespawn_count);
-    if(m_nMaxRespawnNum == info.prespawn_count) {
-        return;
-    }
-    while(true) {
-        uint h = 0;
-        if(!m_vRespawnedMonster.empty())
-            h = m_vRespawnedMonster.back();
-
-        //auto mob = dynamic_cast<Monster*>(sMemoryPool->getPtrFromId(h));
-        auto mob = sMemoryPool->GetObjectInWorld<Monster>(h);
-        if(mob == nullptr || mob->GetSubType() != ST_Mob)
-            mob = nullptr;
-        if(mob == nullptr || mob->m_pDeleteHandler != this) {
-            m_nMaxRespawnNum--;
-            info.count--;
-            nCountToDelete--;
-            m_vRespawnedMonster.erase(std::remove(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), h), m_vRespawnedMonster.end());
-        } else {
-            m_nMaxRespawnNum--;
-            info.count--;
-            nCountToDelete--;
-            m_vRespawnedMonster.erase(std::remove(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), h), m_vRespawnedMonster.end());
-
-            mob->m_pDeleteHandler = nullptr;
-        }
-        return;
     }
 }
 
@@ -127,18 +76,13 @@ void RespawnObject::onMonsterDelete(Monster *mob)
 {
     if(mob == nullptr)
         return;
-    bool bNeedToRespawn{false};
 
-    if(std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle()) != m_vRespawnedMonster.end()) {
-        m_vRespawnedMonster.erase(std::remove(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle()), m_vRespawnedMonster.end());
-        //m_ndelete mob;
-
+    auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
+    if(pos != m_vRespawnedMonster.end()) {
+        MX_LOG_INFO("loading", "Deleted monster %u[%u] at [%f, %f]", info.monster_id, mob->GetHandle(), mob->GetPositionX(), mob->GetPositionY());
+        m_vRespawnedMonster.erase(pos);
+        mob->m_pDeleteHandler = nullptr;
         lastDeadTime = sWorld->GetArTime();
-        bNeedToRespawn = info.count-- <= m_nMaxRespawnNum;
-
-        if(m_nMaxRespawnNum < info.max_num)
-            m_nMaxRespawnNum++;
-        if(bNeedToRespawn)
-            sWorld->m_vRespawnList.emplace_back(this);
+        info.count--;
     }
 }

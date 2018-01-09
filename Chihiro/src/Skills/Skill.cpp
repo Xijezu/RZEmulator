@@ -23,6 +23,7 @@
 #include "MemPool.h"
 #include "ClientPackets.h"
 #include "SkillFunctor.h"
+#include "Messages.h"
 
 Skill::Skill(Unit *pOwner, uint64 _uid, int _id) : m_nErrorCode(0)
 {
@@ -60,6 +61,7 @@ void Skill::DB_UpdateSkill(Unit *pUnit, uint skill_uid, uint skill_level)
 
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
 {
+    m_vResultList.clear();
     auto current_time = sWorld->GetArTime();
     uint delay = 0xffffffff;
 
@@ -71,6 +73,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     } else if(m_SkillBase->id == SkillId::CreatureTaming) {
         m_nErrorCode = PrepareTaming(nSkillLevel, handle, pos, current_time);
     }
+
     auto m_nOriginalDelay = delay;
     if(delay == 0xffffffff) {
         delay = m_SkillBase->GetCastDelay(nSkillLevel,0);
@@ -139,8 +142,7 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
     return TS_RESULT_SUCCESS;
 }
 
-void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
-{
+void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     pct << (uint16)m_SkillBase->id;
     pct << (uint8)m_nRequestedSkillLevel;
     pct << (uint32)m_pOwner->GetHandle();
@@ -155,10 +157,10 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     pct << (int)m_pOwner->GetHealth();
     pct << (int16)m_pOwner->GetMana();
 
-    if(nType != SkillState::ST_Fire) {
-        if(nType <= SkillState::ST_Fire)
+    if (nType != SkillState::ST_Fire) {
+        if (nType <= SkillState::ST_Fire)
             return;
-        if(nType <= SkillState::ST_CastingUpdate || nType == SkillState::ST_Complete) {
+        if (nType <= SkillState::ST_CastingUpdate || nType == SkillState::ST_Complete) {
             pct << (uint32)(m_nFireTime - m_nCastTime);
             pct << (uint16)m_nErrorCode;
             pct << (uint8)0;
@@ -166,19 +168,40 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
             pct << (uint8)0;
             return;
         }
-        if(nType == SkillState::ST_Cancel) {
+        if (nType == SkillState::ST_Cancel) {
             pct << (uint8)0;
             return;
         }
-        if(nType != SkillState::ST_RegionFire)
+        if (nType != SkillState::ST_RegionFire)
             return;
     }
 
     pct << (uint8)0;
     pct << (float)0;
-    pct << (uint8)0;
-    pct << (uint8)0;
-    pct << (uint16)0;
+    pct << (uint8)1;
+    pct << (uint8)1;
+    pct << (uint16)m_vResultList.size();
+
+    if (!m_vResultList.empty()) {
+        for (auto &sr : m_vResultList) {
+            switch (sr.type) {
+                case SR_ResultType::SRT_Damage:
+                case SR_ResultType::SRT_MagicDamage:
+                    pct << (uint8)sr.type;
+                    pct << sr.hTarget;
+                    pct << sr.damage.target_hp;
+                    pct << sr.damage.damage_type;
+                    pct << sr.damage.damage;
+                    pct << sr.damage.flag;
+                    for (uint16 i : sr.damage.elemental_damage)
+                        pct << i;
+                    //pct.fill("", 13);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
 
 void Skill::broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType)
@@ -201,18 +224,7 @@ void Skill::ProcSkill()
         return;
     m_pOwner->m_castingSkill = nullptr;
 
-    if(m_SkillBase->id == 4001)
-        DoSummon();
-    else if(m_SkillBase->id == 4002)
-        DoUnsummon();
-    else if(m_SkillBase->id == SkillId::CreatureTaming)
-        DoTaming();
-    else if(m_SkillBase->effect_type == EffectType::AddState) {
-        FireSkillStateSkillFunctor fn{};
-        //fn.onCreature(this, sWorld->GetArTime(), m_pOwner, dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(m_hTarget)));
-        fn.onCreature(this, sWorld->GetArTime(), m_pOwner, sMemoryPool->GetObjectInWorld<Unit>(m_hTarget));
-    }
-
+    FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), true);
 
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
@@ -220,10 +232,52 @@ void Skill::ProcSkill()
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
                           0, 0, 5);
-
 }
 
-void Skill::DoSummon()
+void Skill::FireSkill(Unit *pTarget, bool bIsSuccess)
+{
+    bool bHandled{true};
+    switch(m_SkillBase->effect_type) {
+        case EffectType::ET_Summon:
+            DO_SUMMON();
+            break;
+        case EffectType::Unsummon:
+            DO_UNSUMMON();
+            break;
+        case EffectType::AddState: {
+            FireSkillStateSkillFunctor fn{ };
+            fn.onCreature(this, sWorld->GetArTime(), m_pOwner, sMemoryPool->GetObjectInWorld<Unit>(m_hTarget));
+        }
+            break;
+        case EffectType::MagicSingleDamage:
+        case EffectType::MagicSingleDamageAddRandomState:
+            SINGLE_MAGICAL_DAMAGE(pTarget);
+            break;
+        case 30001:// EffectType::PhysicalSingleDamage
+            SINGLE_PHYSICAL_DAMAGE(pTarget);
+            break;
+        default:
+            bHandled = false;
+            break;
+    }
+
+    if(!bHandled) {
+        switch(m_SkillBase->id) {
+            case SkillId::CreatureTaming:
+                CREATURE_TAMING();
+                break;
+            default:
+                auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
+                MX_LOG_INFO("skill", result.c_str());
+                if(m_pOwner->GetSubType() == ST_Player)
+                    Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Player*>(m_pOwner), result);
+                break;
+        }
+    }
+}
+
+
+void Skill::DO_SUMMON()
 {
     auto player = dynamic_cast<Player*>(m_pOwner);
     if(player == nullptr)
@@ -245,7 +299,7 @@ void Skill::DoSummon()
 
 }
 
-void Skill::DoUnsummon()
+void Skill::DO_UNSUMMON()
 {
     auto player = dynamic_cast<Player*>(m_pOwner);
     if(player == nullptr)
@@ -297,7 +351,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
         return TS_RESULT_ALREADY_TAMING;
 }
 
-void Skill::DoTaming()
+void Skill::CREATURE_TAMING()
 {
     auto pTarget = sMemoryPool->GetObjectInWorld<Monster>(m_hTarget);
     if(pTarget == nullptr || pTarget->GetSubType() != ST_Mob || m_pOwner->GetSubType() != ST_Player)
@@ -307,4 +361,45 @@ void Skill::DoTaming()
     if(bResult) {
         pTarget->AddHate(m_pOwner->GetHandle(), 1, true, true);
     }
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
+{
+    if(pTarget == nullptr || m_pOwner == nullptr)
+        return;
+
+    if(m_SkillBase->effect_type == PhysicalSingleDamageRush || m_SkillBase->effect_type == PhysicalSingleDamageRushKnockback)
+    {
+
+    }
+    bool v10 = m_SkillBase->is_physical_act != 0;
+    auto attack_point = m_pOwner->GetAttackPointRight((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+    auto nDamage = (int)(attack_point
+                         * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
+                         + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+
+    auto damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental,
+                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
+                                                   m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
+
+    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
+}
+
+void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
+{
+    if(pTarget == nullptr || m_pOwner == nullptr)
+        return;
+
+    bool v10 = m_SkillBase->is_physical_act != 0;
+    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+    auto magic_point = m_pOwner->m_Attribute.nMagicPoint;
+    auto nDamage = (int)(magic_point
+                         * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
+                         + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+
+    auto damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental,
+                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
+                                                   m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
+
+    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
 }

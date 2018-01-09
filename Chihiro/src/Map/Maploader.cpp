@@ -49,9 +49,13 @@ bool Maploader::LoadMapContent()
                 std::string strScriptFileName = seamlessWorldInfo.GetScriptFileName(i, y);
 
                 if(!strLocationFileName.empty()) {
-                    MX_LOG_INFO("server.worldserver", "Loading Script: %s", strScriptFileName.c_str());
-
                     LoadScriptFile(("Resource/NewMap/"s+strScriptFileName), i, y, fMapLength);
+
+                    std::string strAttributeFileName = seamlessWorldInfo.GetAttributePolygonFileName(i,y);
+
+                    if(!strAttributeFileName.empty()) {
+                        LoadAttributeFile(("Resource/NewMap/"s+strAttributeFileName), i, y, fAttrLen, fMapLength);
+                    }
                 }
             }
         }
@@ -141,6 +145,43 @@ void Maploader::LoadLocationFile(std::string szFilename, int x, int y, float fAt
         }
     }
 }
+
+void Maploader::LoadAttributeFile(std::string szFilename, int x, int y, float fAttrLen, float fMapLength)
+{
+    std::transform(szFilename.end()-12, szFilename.end(), szFilename.end()-12, tolower);
+    std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
+    infile.seekg(0,std::ios::end);
+    int size = infile.tellg();
+    infile.seekg(0,std::ios::beg);
+    if(size == -1)
+        return;
+
+    ByteBuffer buffer{};
+    buffer.resize(size);
+    infile.read(reinterpret_cast<char*>(&buffer[0]), size);
+    infile.close();
+
+    auto total_entries = buffer.read<int>();
+    float sx = x * fMapLength;
+    float sy = y * fMapLength;
+
+    for(int i = 0; i < total_entries; ++i)
+    {
+        auto nPointCount = buffer.read<int>();
+
+        std::vector<X2D::Pointf> points{};
+        for(int p = 0; p < nPointCount; ++p)
+        {
+            X2D::Pointf pt{};
+            pt.x = sx + ((float)buffer.read<int>() * fAttrLen);
+            pt.y = sy +((float)buffer.read<int>() * fAttrLen);
+            points.emplace_back(pt);
+        }
+        X2D::PolygonF pg{points};
+        sObjectMgr->g_qtBlockInfo.Add({points, 0, 0});
+    }
+}
+
 
 void Maploader::LoadScriptFile(std::string szFilename, int x, int y, float fMapLength)
 {

@@ -61,6 +61,7 @@ public:
     Summon *AllocSummon(uint);
     Monster* AllocMonster(uint idx);
     Summon *AllocNewSummon(Player*,Item*);
+    void AddToDeleteList(WorldObject* obj);
 
     void Destroy();
     void Update(uint diff);
@@ -68,6 +69,7 @@ public:
 private:
     template<class T> void _unload();
     template<class T> void _update();
+    std::set<WorldObject*> i_objectsToRemove{};
 
     uint32_t m_nMiscTop{0x20000001};
     uint32_t m_nMonsterTop{0x40000001};

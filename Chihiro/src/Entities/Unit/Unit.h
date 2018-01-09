@@ -111,20 +111,25 @@ public:
     }
     void regenHPMP(uint t);
     uint32 HasUnitTypeMask(uint32 mask) const { return mask & m_unitTypeMask; }
+
     /// BATTLE START
     void Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
     void EndAttack();
     uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
     uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
-    virtual float GetScale() const { return 1.0f; }
-    virtual float GetSize() const { return 1.0f; }
     float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
     float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
-    uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); }
+    uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
+
+
     Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
     Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
+    Damage DealMagicalDamage(Unit* pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
+
+    DamageInfo DealMagicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
+    DamageInfo DealPhysicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead);
     /// BATTLE END
 
@@ -145,7 +150,13 @@ public:
         SetUInt64Value(UNIT_FIELD_EXP, exp);
         onExpChange();
     }
+
+    // eh
+    int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) const;
+
     // Getters
+    virtual float GetScale() const { return 1.0f; }
+    virtual float GetSize() const { return 1.0f; }
     uint32_t GetLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
     virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
     uint32 GetHealth() const { return GetUInt32Value(UNIT_FIELD_HEALTH); }

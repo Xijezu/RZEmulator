@@ -38,7 +38,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
-    SetStatus(MonsterStatus::MS_Normal);
+    m_nStatus = MonsterStatus::MS_Normal;
     SetLevel((uint8)mb->level);
     CalculateStat();
     SetHealth(GetMaxHealth());
@@ -328,8 +328,8 @@ void Monster::processDead(uint t)
     if(GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t) {
         if(IsInWorld())
             sWorld->RemoveObjectFromWorld(this);
-        sMemoryPool->RemoveObject(this, true);
-        Monster::DeleteThis(this);
+        //sMemoryPool->RemoveObject(this, true);
+        sMemoryPool->AddToDeleteList(this);
     }
 }
 

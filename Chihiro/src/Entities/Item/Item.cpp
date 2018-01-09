@@ -174,7 +174,8 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 
 void Item::PendFreeItem(Item *pItem)
 {
-    sMemoryPool->RemoveObject(pItem, true);
+    //sMemoryPool->RemoveObject(pItem, true);
+    sMemoryPool->AddToDeleteList(pItem);
 }
 
 int Item::GetLevelLimit()

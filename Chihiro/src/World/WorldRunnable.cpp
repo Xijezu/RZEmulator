@@ -42,6 +42,7 @@ void WorldRunnable::run()
         uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
 
         sWorld->Update(diff);
+        realPrevTime = realCurrTime;
 
         if (diff <= WORLD_SLEEP_CONST + prevSleepTime) {
             prevSleepTime = WORLD_SLEEP_CONST + prevSleepTime - diff;
