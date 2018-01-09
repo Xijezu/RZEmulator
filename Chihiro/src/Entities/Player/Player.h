@@ -17,6 +17,8 @@ public:
     ~Player() override;
 
     static void EnterPacket(XPacket &, Player *, Player*);
+    static void DoEachPlayer(const std::function<void (Player*)>& fn);
+    static Player* FindPlayer(const std::string& szName);
 
     int32 GetPermission()
     { return GetInt32Value(UNIT_FIELD_PERMISSION); }

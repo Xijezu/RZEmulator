@@ -725,3 +725,33 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
 
     SendChatMessage(100, "@SYSTEM", pPlayer, chatMsg);
 }
+
+void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderName, const std::string &szString, uint len)
+{
+    XPacket chatPct(TS_SC_CHAT);
+    chatPct.fill(szSenderName, 21);
+    chatPct << (int16)szString.length();
+    chatPct << (uint8)chatType;
+    chatPct.WriteString(szString);
+    chatPct << (uint8)0;
+
+    Player::DoEachPlayer([&chatPct](Player* pPlayer) { pPlayer->SendPacket(chatPct); });
+    auto sender = Player::FindPlayer(szSenderName);
+    if(sender != nullptr)
+        Messages::SendResult(sender, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
+}
+
+void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::string &szMessage, uint len)
+{
+    auto p = sMemoryPool->GetObjectInWorld<Player>(handle);
+    if(p != nullptr) {
+        XPacket result(TS_SC_CHAT_LOCAL);
+        result << (uint32)handle;
+        result << (uint8)szMessage.length();
+        result << (uint8)nChatType;
+        result.WriteString(szMessage);
+        result << (uint8)0;
+        sWorld->Broadcast((uint)(p->GetPositionX() / g_nRegionSize), (uint)(p->GetPositionY() / g_nRegionSize), p->GetLayer(), result);
+        Messages::SendResult(p, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
+    }
+}

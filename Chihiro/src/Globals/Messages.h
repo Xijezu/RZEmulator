@@ -92,6 +92,8 @@ public:
     static void SendCantAttackMessage(Player*,uint,uint,int);
     static void SendQuestInformation(Player* pPlayer, int code, int text);
     static void SendQuestList(Player* pPlayer);
+    static void SendGlobalChatMessage(int chatType, const std::string& szSenderName, const std::string& szString, uint len);
+    static void SendLocalChatMessage(int nChatType, uint handle, const std::string& szMessage, uint len);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

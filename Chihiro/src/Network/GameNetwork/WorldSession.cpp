@@ -32,6 +32,8 @@
 #include "ObjectMgr.h"
 #include "Skill.h"
 #include "GameRule.h"
+#include "AllowedCommandInfo.h"
+
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket *socket) : _socket(socket)
 {
@@ -612,61 +614,34 @@ bool WorldSession::onChatRequest(XPacket *_packet)
     MX_LOG_INFO("network", "%s", request.szMsg.c_str());
 
     if (request.type != 3 && request.szMsg[0] == 47) {
-        Tokenizer tokenizer(request.szMsg, ' ');
-        if (tokenizer[0] == "/warp"s) {
-            _player->PendWarp((float) std::stoi(tokenizer[1], nullptr, 0), (float) std::stoi(tokenizer[2], nullptr, 0), 0);
-        } else if (tokenizer[0] == "/save"s) {
-            _player->Save(false);
-        } else if (tokenizer[0] == "/run"s) {
-            sScriptingMgr->RunString(_player, request.szMsg.substr(5));
-        } else if(tokenizer[0] == "/suicide"s) {
-            World::StopNow(SHUTDOWN_EXIT_CODE);
-        } else if (tokenizer[0] == "/position"s) {
-            std::string msg = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)_player->GetPositionX(), (int)_player->GetPositionY(), _player->GetLayer());
-            Messages::SendChatMessage(30, "@SYSTEM", _player, msg);
-        } else if(tokenizer[0] == "/status"s) {
-            Messages::SendChatMessage(30, "@SYSTEM", _player, std::to_string(_player->GetInt32Value(UNIT_FIELD_STATUS)));
-        } else if(tokenizer[0] == "/calc"s) {
-            _player->CalculateStat();
-        } else if(tokenizer[0] == "/battle"s) {
-            //sWorld->BroadcastStatusMessage(dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(_player->GetTargetHandle())));
-        } else if(tokenizer[0] == "/doitfaggot"s) {
-            sArRegion->DoEachVisibleRegion((uint)_player->GetPositionX() / g_nRegionSize, (uint)(_player->GetPositionY() / g_nRegionSize), _player->GetLayer(),
-                                           [=](ArRegion* region) {
-                                               region->DoEachMovableObject(
-                                                       [=](WorldObject* obj) {
-                                                           if(obj->GetSubType() == ST_Mob) {
-                                                               dynamic_cast<Monster*>(obj)->ForceKill(_player);
-                                                           }
-                                                       }
-                                               );
-                                           });
-        }
+        sAllowedCommandInfo->Run(_player, request.szMsg);
         return true;
+    }
+
+    switch(request.type) {
+        // local chat message: msg
+        case 0:
+            Messages::SendLocalChatMessage(0, _player->GetHandle(), request.szMsg, 0);
+            break;
+        // Ad chat message: $msg
+        case 2:
+            Messages::SendGlobalChatMessage(2, _player->GetName(), request.szMsg, 0);
+            break;
+        // Global chat message: !msg
+        case 4:
+            Messages::SendGlobalChatMessage(_player->GetPermission() > 0 ? 6 : 4, _player->GetName(), request.szMsg, 0);
+            break;
+        default:
+            break;
     }
 
     if (request.type == 4) {
         // Global Chat Message
+        Messages::SendGlobalChatMessage(_player->GetPermission() > 0 ? 6 : 4, _player->GetName(), request.szMsg, 0);
+        return true;
     } else if (request.type == 0) {
-        // Local Message
-        XPacket result(TS_SC_CHAT_LOCAL);
-        result << (uint32_t) _player->GetHandle();
-        result << (uint8_t) request.len;
-        result << (uint8_t) request.type;
-        result << std::string((char *) request.szMsg.data());
-        GetSocket()->SendPacket(result);
-        return true;
-    } else if (request.type == 3) {
-        // Whisper
-        return true;
-    } else if (request.type == 2) {
-        // Guild
-        return true;
-    } else if (request.type == 1) {
-        // party
         return true;
     }
-
 }
 
 bool WorldSession::onLogoutTimerRequest(XPacket *pRecvPct)

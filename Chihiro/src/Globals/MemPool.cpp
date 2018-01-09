@@ -173,3 +173,6 @@ void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
 {
     i_objectsToRemove.insert(obj);
 }
+const HashMapHolder<Player>::MapType &MemoryPoolMgr::GetPlayers() {
+    return HashMapHolder<Player>::GetContainer();
+}

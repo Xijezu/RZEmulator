@@ -65,7 +65,8 @@ public:
 
     void Destroy();
     void Update(uint diff);
-
+    // when using this, you must use the HashMapHolders lock!
+    const HashMapHolder<Player>::MapType &GetPlayers();
 private:
     template<class T> void _unload();
     template<class T> void _update();

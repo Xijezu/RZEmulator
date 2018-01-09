@@ -10,6 +10,8 @@
 #include "Skill.h"
 #include "ArRegion.h"
 #include "NPC.h"
+#include "MemPool.h"
+#include "SharedMutex.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1686,6 +1688,29 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
             if(bFlag == isFlagged)
                 return i.second;
         }
+    }
+    return nullptr;
+}
+
+void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
+{
+    MX_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType const& m = sMemoryPool->GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        if(itr->second != nullptr)
+            fn(itr->second);
+    }
+}
+
+Player* Player::FindPlayer(const std::string &szName)
+{
+    MX_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType const& m = sMemoryPool->GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        if(itr->second->GetName() == szName)
+            return itr->second;
     }
     return nullptr;
 }
