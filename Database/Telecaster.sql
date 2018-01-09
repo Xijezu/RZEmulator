@@ -2,7 +2,7 @@
 -- Host:                         192.168.0.12
 -- Server Version:               10.1.23-MariaDB-9+deb9u1 - Raspbian 9.0
 -- Server Betriebssystem:        debian-linux-gnueabihf
--- HeidiSQL Version:             9.4.0.5174
+-- HeidiSQL Version:             9.5.0.5196
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -11,377 +11,688 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Exportiere Daten aus Tabelle Telecaster.Alliance: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `Alliance` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Alliance` ENABLE KEYS */;
 
--- Exportiere Daten aus Tabelle Telecaster.AllowedCommandsForPermission: ~198 rows (ungefähr)
-/*!40000 ALTER TABLE `AllowedCommandsForPermission` DISABLE KEYS */;
-INSERT INTO `AllowedCommandsForPermission` (`sid`, `permission`, `command`, `parameter`) VALUES
-	(1, 1, 'suicide', ''),
-	(2, 1, 'set_huntaholic_point', ''),
-	(3, 1, 'show_huntaholic_lobby_window', ''),
-	(4, 1, 'exit_huntaholic_lobby', ''),
-	(5, 1, 'warp_to_huntaholic_lobby', ''),
-	(6, 1, 'show_auction_window', ''),
-	(7, 1, 'reset_summon_skill', ''),
-	(8, 1, 'creature_name_change_box', ''),
-	(9, 1, 'get_creature_name_id', ''),
-	(10, 1, 'set_continuous_play_time', ''),
-	(11, 1, 'set_pcbang_user', ''),
-	(12, 1, 'donation_reward', ''),
-	(13, 1, 'show_donation_prop', ''),
-	(14, 1, 'update_gold_chaos', ''),
-	(15, 1, 'get_local_info', ''),
-	(16, 1, 'open_popup_and_set_size', ''),
-	(17, 1, 'open_popup', ''),
-	(18, 1, 'open_url', ''),
-	(19, 1, 'clear_auto_account', ''),
-	(20, 1, 'set_auto_account', ''),
-	(21, 1, 'set_auto_user', ''),
-	(22, 1, 'find_npc', ''),
-	(23, 1, 'get_server_category', ''),
-	(24, 1, 'warp_to_revive_position', ''),
-	(25, 1, 'recall_feather', ''),
-	(26, 1, 'set_way_point_speed', ''),
-	(27, 1, 'set_way_point_type', ''),
-	(28, 1, 'add_way_point', ''),
-	(29, 1, 'draw_tax_chaos', ''),
-	(30, 1, 'draw_tax', ''),
-	(31, 1, 'get_tax_chaos_amount', ''),
-	(32, 1, 'get_tax_amount', ''),
-	(33, 1, 'set_tax_rate', ''),
-	(34, 1, 'get_tax_rate', ''),
-	(35, 1, 'get_dungeon_relation', ''),
-	(36, 1, 'get_own_guild_name', ''),
-	(37, 1, 'get_guild_block_time', ''),
-	(38, 1, 'set_guild_block_time', ''),
-	(39, 1, 'is_guild_leader', ''),
-	(40, 1, 'update_guild_info', ''),
-	(41, 1, 'show_channel_set', ''),
-	(42, 1, 'equip_summon_card', ''),
-	(43, 1, 'get_summon_name_id', ''),
-	(44, 1, 'get_layer_of_channel', ''),
-	(45, 1, 'get_user_count_in_channel', ''),
-	(46, 1, 'get_max_channel_num', ''),
-	(47, 1, 'get_min_channel_num', ''),
-	(48, 1, 'get_proper_channel_num', ''),
-	(49, 1, 'creature_learn_skill', ''),
-	(50, 1, 'call_lc_In', ''),
-	(51, 1, 'creature_evolution', ''),
-	(52, 1, 'get_npc_handle', ''),
-	(53, 1, 'get_npc_id', ''),
-	(54, 1, 'check_valid_alliance_name', ''),
-	(55, 1, 'destroy_alliance', ''),
-	(56, 1, 'create_alliance', ''),
-	(57, 1, 'check_valid_guild_name', ''),
-	(58, 1, 'force_promote_guild_leader', ''),
-	(59, 1, 'force_change_guild_name', ''),
-	(60, 1, 'show_alliance_create', ''),
-	(61, 1, 'show_guild_create', ''),
-	(62, 1, 'destroy_guild', ''),
-	(63, 1, 'create_guild', ''),
-	(64, 1, 'get_user_count_near', ''),
-	(65, 1, 'open_storage', ''),
-	(66, 1, 'get_creature_handle', ''),
-	(67, 1, 'get_string', ''),
-	(68, 1, 'get_env', ''),
-	(69, 1, 'set_env', ''),
-	(70, 1, 'remove_cstate', ''),
-	(71, 1, 'add_cstate', ''),
-	(72, 1, 'remove_state', ''),
-	(73, 1, 'get_state_level', ''),
-	(74, 1, 'add_state', ''),
-	(75, 1, 'is_changeable_job', ''),
-	(76, 1, 'message', ''),
-	(77, 1, 'sconv', ''),
-	(78, 1, 'show_creature_dialog', ''),
-	(79, 1, 'get_base_skill_level', ''),
-	(80, 1, 'learn_creature_all_skill', ''),
-	(81, 1, 'learn_all_skill', ''),
-	(82, 1, 'learn_skill', ''),
-	(83, 1, 'refresh', ''),
-	(84, 1, 'gametime', ''),
-	(85, 1, 'open_market', ''),
-	(86, 1, 'get_monster_id', ''),
-	(87, 1, 'set_next_attackable_time', ''),
-	(88, 1, 'monster_skill_cast', ''),
-	(89, 1, 'respawn_near_monster', ''),
-	(90, 1, 'save', ''),
-	(91, 1, 'delete_block_account', ''),
-	(92, 1, 'shutdown', ''),
-	(93, 1, 'saveall', ''),
-	(94, 1, 'setspeed', ''),
-	(95, 1, 'get_siege_dungeon_id', ''),
-	(96, 1, 'get_own_dungeon_id', ''),
-	(97, 1, 'clear_dungeon_core_guardian', ''),
-	(98, 1, 'change_dungeon_owner', ''),
-	(99, 1, 'drop_dungeon_owner_ship', ''),
-	(100, 1, 'enter_dungeon', ''),
-	(101, 1, 'request_dungeon_raid', ''),
-	(102, 1, 'change_tactical_position_owner', ''),
-	(103, 1, 'show_dungeon_stone', ''),
-	(104, 1, 'respawn_guardian_object', ''),
-	(105, 1, 'is_in_siege_dungeon', ''),
-	(106, 1, 'recall_player', ''),
-	(107, 1, 'whisper', ''),
-	(108, 1, 'kill_target', ''),
-	(109, 1, 'kill', ''),
-	(110, 1, 'raid_respawn_rare_mob', ''),
-	(111, 1, 'raid_respawn', ''),
-	(112, 1, 'respawn_roaming_mob', ''),
-	(113, 1, 'respawn_rare_mob', ''),
-	(114, 1, 'respawn_guardian', ''),
-	(115, 1, 'respawn', ''),
-	(116, 1, 'add_npc_to_world', ''),
-	(117, 1, 'add_npc', ''),
-	(118, 1, 'env', ''),
-	(119, 1, 'force_unregister_account', ''),
-	(120, 1, 'kick', ''),
-	(121, 1, 'get_last_accept_quest', ''),
-	(122, 1, 'get_quest_progress', ''),
-	(123, 1, 'quest_info', ''),
-	(124, 1, 'end_quest', ''),
-	(125, 1, 'force_start_quest', ''),
-	(126, 1, 'start_quest', ''),
-	(127, 1, 'dlg_text_without_quest_menu', ''),
-	(128, 1, 'quest_text_without_quest_menu', ''),
-	(129, 1, 'dlg_show', ''),
-	(130, 1, 'dlg_menu', ''),
-	(131, 1, 'dlg_text', ''),
-	(132, 1, 'dlg_title', ''),
-	(133, 1, 'get_max_alliance_member_count', ''),
-	(135, 1, 'is_alliance_leader', ''),
-	(136, 1, 'set_pk_mode', ''),
-	(137, 1, 'del_flag', ''),
-	(138, 1, 'set_flag', ''),
-	(139, 1, 'get_flag', ''),
-	(140, 1, 'emcv', ''),
-	(141, 1, 'gmcv', ''),
-	(142, 1, 'gcv', ''),
-	(143, 1, 'smcv', ''),
-	(144, 1, 'scv', ''),
-	(145, 1, 'change_creature_name', ''),
-	(146, 1, 'get_creature_value', ''),
-	(147, 1, 'set_creature_value', ''),
-	(148, 1, 'get_all_value', ''),
-	(149, 1, 'ev', ''),
-	(150, 1, 'sv', ''),
-	(151, 1, 'av', ''),
-	(152, 1, 'gv', ''),
-	(153, 1, 'echo_value', ''),
-	(154, 1, 'set_value', ''),
-	(155, 1, 'add_value', ''),
-	(156, 1, 'get_value', ''),
-	(157, 1, 'supply_event_item', ''),
-	(158, 1, 'stop_event_supply', ''),
-	(159, 1, 'start_event_supply', ''),
-	(160, 1, 'refresh_event_supply', ''),
-	(161, 1, 'event_supply', ''),
-	(162, 1, 'stop_event_drop', ''),
-	(163, 1, 'start_event_drop', ''),
-	(164, 1, 'refresh_event_drop', ''),
-	(165, 1, 'event_drop', ''),
-	(166, 1, 'show_soulstone_repair_window', ''),
-	(167, 1, 'get_max_item_soulstone_endurance', ''),
-	(168, 1, 'get_item_soulstone_endurance', ''),
-	(169, 1, 'show_soulstone_craft_window', ''),
-	(170, 1, 'get_wear_item_handle', ''),
-	(171, 1, 'get_item_name_id', ''),
-	(172, 1, 'get_item_name_by_code', ''),
-	(173, 1, 'set_socket_info', ''),
-	(174, 1, 'get_socket_info', ''),
-	(175, 1, 'set_item_endurance', ''),
-	(176, 1, 'get_item_endurance', ''),
-	(177, 1, 'get_item_price', ''),
-	(178, 1, 'get_item_rank', ''),
-	(179, 1, 'get_item_enhance', ''),
-	(180, 1, 'set_item_enhance', ''),
-	(181, 1, 'set_item_level', ''),
-	(182, 1, 'get_item_level', ''),
-	(183, 1, 'get_item_code', ''),
-	(184, 1, 'get_item_name', ''),
-	(185, 1, 'get_item_handle', ''),
-	(186, 1, 'has_item', ''),
-	(187, 1, 'insert_gold', ''),
-	(188, 1, 'drop_gold', ''),
-	(189, 1, 'drop_item', ''),
-	(190, 1, 'find_item', ''),
-	(191, 1, 'is_erasable_item', ''),
-	(192, 1, 'delete_item', ''),
-	(193, 1, 'insert_item', ''),
-	(194, 1, 'notice', ''),
-	(195, 1, 'warp', ''),
-	(196, 1, 'invisible', ''),
-	(197, 1, 'add_state', ''),
-	(199, 1, 'regenerate', ''),
-	(200, 1, 'block', '');
-/*!40000 ALTER TABLE `AllowedCommandsForPermission` ENABLE KEYS */;
+-- Exportiere Datenbank Struktur für Telecaster
+DROP DATABASE IF EXISTS `Telecaster`;
+CREATE DATABASE IF NOT EXISTS `Telecaster` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+USE `Telecaster`;
 
--- Exportiere Daten aus Tabelle Telecaster.Auction: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `Auction` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Auction` ENABLE KEYS */;
+-- Exportiere Struktur von Tabelle Telecaster.Alliance
+DROP TABLE IF EXISTS `Alliance`;
+CREATE TABLE IF NOT EXISTS `Alliance` (
+  `sid` int(11) NOT NULL,
+  `lead_guild_id` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `max_alliance_cnt` int(11) NOT NULL,
+  `name_changed` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `UQ__Alliance__72E12F1B5ECA0095` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.AutoAuctionRegistrationInfo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `AutoAuctionRegistrationInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `AutoAuctionRegistrationInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.AllowedCommandsForPermission
+DROP TABLE IF EXISTS `AllowedCommandsForPermission`;
+CREATE TABLE IF NOT EXISTS `AllowedCommandsForPermission` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `permission` int(11) NOT NULL,
+  `command` varchar(32) NOT NULL,
+  `parameter` varchar(32) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Character: ~29 rows (ungefähr)
-/*!40000 ALTER TABLE `Character` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Character` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Auction
+DROP TABLE IF EXISTS `Auction`;
+CREATE TABLE IF NOT EXISTS `Auction` (
+  `sid` int(11) NOT NULL,
+  `item_id` bigint(20) NOT NULL,
+  `seller_id` int(11) NOT NULL,
+  `seller_name` varchar(31) NOT NULL,
+  `is_secroute_only` char(1) NOT NULL,
+  `end_time` datetime NOT NULL,
+  `instant_purchase_price` bigint(20) NOT NULL,
+  `registration_tax` bigint(20) NOT NULL,
+  `bidder_list` varchar(1152) NOT NULL,
+  `highest_bidding_price` bigint(20) NOT NULL,
+  `highest_bidder_id` int(11) NOT NULL,
+  `highest_bidder_name` varchar(31) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Check_Aplname_Proc: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `Check_Aplname_Proc` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Check_Aplname_Proc` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.AutoAuctionRegistrationInfo
+DROP TABLE IF EXISTS `AutoAuctionRegistrationInfo`;
+CREATE TABLE IF NOT EXISTS `AutoAuctionRegistrationInfo` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `auto_auction_id` int(11) NOT NULL,
+  `scheduled_register_time` datetime NOT NULL,
+  `registered_time` datetime NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Denials: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `Denials` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Denials` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Character
+DROP TABLE IF EXISTS `Character`;
+CREATE TABLE IF NOT EXISTS `Character` (
+  `sid` int(11) NOT NULL,
+  `name` varchar(61) NOT NULL,
+  `account` varchar(60) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `slot` int(11) NOT NULL,
+  `x` int(11) NOT NULL,
+  `y` int(11) NOT NULL,
+  `z` int(11) NOT NULL,
+  `layer` int(11) NOT NULL,
+  `race` int(11) NOT NULL,
+  `sex` int(11) NOT NULL,
+  `exp` bigint(20) NOT NULL,
+  `last_decreased_exp` bigint(20) NOT NULL DEFAULT '0',
+  `lv` int(11) NOT NULL,
+  `hp` int(11) NOT NULL,
+  `mp` int(11) NOT NULL,
+  `stamina` int(11) NOT NULL,
+  `havoc` int(11) NOT NULL DEFAULT '0',
+  `jlv` int(11) NOT NULL,
+  `jp` int(11) NOT NULL,
+  `total_jp` int(11) DEFAULT NULL,
+  `job_0` int(11) DEFAULT NULL,
+  `job_1` int(11) DEFAULT NULL,
+  `job_2` int(11) DEFAULT NULL,
+  `jlv_0` int(11) DEFAULT NULL,
+  `jlv_1` int(11) DEFAULT NULL,
+  `jlv_2` int(11) DEFAULT NULL,
+  `immoral_point` decimal(18,4) NOT NULL,
+  `cha` int(11) NOT NULL,
+  `pkc` int(11) NOT NULL,
+  `dkc` int(11) NOT NULL DEFAULT '0',
+  `huntaholic_point` int(11) NOT NULL DEFAULT '0',
+  `create_time` datetime NOT NULL,
+  `delete_time` datetime DEFAULT NULL,
+  `login_time` datetime NOT NULL,
+  `logout_time` datetime NOT NULL,
+  `login_count` int(11) NOT NULL,
+  `play_time` int(11) NOT NULL,
+  `belt_00` bigint(20) NOT NULL,
+  `belt_01` bigint(20) NOT NULL,
+  `belt_02` bigint(20) NOT NULL,
+  `belt_03` bigint(20) NOT NULL,
+  `belt_04` bigint(20) NOT NULL,
+  `belt_05` bigint(20) NOT NULL,
+  `permission` int(11) NOT NULL,
+  `skin_color` int(11) NOT NULL DEFAULT '0',
+  `model_00` int(11) NOT NULL,
+  `model_01` int(11) NOT NULL,
+  `model_02` int(11) NOT NULL,
+  `model_03` int(11) NOT NULL,
+  `model_04` int(11) NOT NULL,
+  `job` int(11) NOT NULL,
+  `gold` bigint(20) NOT NULL,
+  `party_id` int(11) NOT NULL,
+  `guild_id` int(11) NOT NULL DEFAULT '0',
+  `prev_guild_id` int(11) NOT NULL,
+  `flag_list` varchar(1000) NOT NULL,
+  `client_info` varchar(4096) NOT NULL,
+  `job_depth` tinyint(3) unsigned NOT NULL,
+  `summon_0` int(11) NOT NULL,
+  `summon_1` int(11) NOT NULL,
+  `summon_2` int(11) NOT NULL,
+  `summon_3` int(11) NOT NULL,
+  `summon_4` int(11) NOT NULL,
+  `summon_5` int(11) NOT NULL,
+  `main_summon` int(11) NOT NULL DEFAULT '0',
+  `sub_summon` int(11) NOT NULL DEFAULT '0',
+  `remain_summon_time` int(11) NOT NULL DEFAULT '0',
+  `pet` int(11) NOT NULL DEFAULT '0',
+  `chaos` int(11) NOT NULL,
+  `adv_chat_count` int(11) NOT NULL,
+  `name_changed` int(11) NOT NULL,
+  `auto_used` int(11) NOT NULL,
+  `guild_block_time` bigint(20) NOT NULL,
+  `pkmode` tinyint(3) unsigned NOT NULL,
+  `otp_value` int(11) NOT NULL,
+  `otp_date` datetime NOT NULL,
+  `chat_block_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `UQ__Character__0AD2A005` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='utf8mb4_general_ci';
 
--- Exportiere Daten aus Tabelle Telecaster.Dungeon: ~11 rows (ungefähr)
-/*!40000 ALTER TABLE `Dungeon` DISABLE KEYS */;
-INSERT INTO `Dungeon` (`dungeon_id`, `owner_guild_id`, `raid_guild_id`, `best_raid_time`, `last_dungeon_siege_finish_time`, `last_dungeon_raid_wrap_up_time`, `tax_rate`) VALUES
-	(121000, 0, 0, -1, 1367204403, 1369433809, 5),
-	(122000, 0, 0, -1, 1367204404, 1369433809, 5),
-	(123000, 0, 0, -1, 1367204405, 1369433809, 5),
-	(130000, 0, 0, -1, 0, 1369433809, 5),
-	(130300, 0, 0, -1, 0, 1369433809, 5),
-	(130400, 0, 0, -1, 0, 1369433809, 5),
-	(130500, 0, 0, -1, 1367208001, 1369433809, 5),
-	(130600, 0, 0, -1, 1367204402, 1369433809, 5),
-	(130700, 0, 0, -1, 1367200801, 1369433809, 5),
-	(130800, 0, 0, -1, 0, 1369433809, 5),
-	(130900, 0, 0, -1, 1367200802, 1369433809, 5);
-/*!40000 ALTER TABLE `Dungeon` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Check_Aplname_Proc
+DROP TABLE IF EXISTS `Check_Aplname_Proc`;
+CREATE TABLE IF NOT EXISTS `Check_Aplname_Proc` (
+  `log_date` datetime NOT NULL,
+  `SESSION` varchar(30) NOT NULL,
+  `SYS_USER` varchar(30) NOT NULL,
+  `APL_NAME` varchar(60) NOT NULL,
+  `HOST_NAME` varchar(30) NOT NULL,
+  `HOST_ID` varchar(30) NOT NULL,
+  `sid` bigint(20) NOT NULL,
+  `gold` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.DungeonRaidRecord: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `DungeonRaidRecord` DISABLE KEYS */;
-/*!40000 ALTER TABLE `DungeonRaidRecord` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Denials
+DROP TABLE IF EXISTS `Denials`;
+CREATE TABLE IF NOT EXISTS `Denials` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` varchar(50) NOT NULL,
+  `denial_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`sid`),
+  KEY `IDX_Denials_Friend_Id` (`denial_id`,`owner_id`),
+  KEY `IDX_Denials_Owner_Id` (`owner_id`,`denial_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.DungeonRaidRecord_Log: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `DungeonRaidRecord_Log` DISABLE KEYS */;
-/*!40000 ALTER TABLE `DungeonRaidRecord_Log` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Dungeon
+DROP TABLE IF EXISTS `Dungeon`;
+CREATE TABLE IF NOT EXISTS `Dungeon` (
+  `dungeon_id` int(11) NOT NULL,
+  `owner_guild_id` int(11) NOT NULL,
+  `raid_guild_id` int(11) NOT NULL,
+  `best_raid_time` int(11) NOT NULL,
+  `last_dungeon_siege_finish_time` int(11) NOT NULL,
+  `last_dungeon_raid_wrap_up_time` int(11) NOT NULL,
+  `tax_rate` int(11) NOT NULL,
+  PRIMARY KEY (`dungeon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.EventAreaEnterCount: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `EventAreaEnterCount` DISABLE KEYS */;
-/*!40000 ALTER TABLE `EventAreaEnterCount` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.DungeonRaidRecord
+DROP TABLE IF EXISTS `DungeonRaidRecord`;
+CREATE TABLE IF NOT EXISTS `DungeonRaidRecord` (
+  `dungeon_id` int(11) NOT NULL,
+  `guild_id` int(11) NOT NULL,
+  `raid_time` int(11) NOT NULL,
+  `record` int(11) NOT NULL,
+  PRIMARY KEY (`dungeon_id`,`guild_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.EventItemDropInfo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `EventItemDropInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `EventItemDropInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.DungeonRaidRecord_Log
+DROP TABLE IF EXISTS `DungeonRaidRecord_Log`;
+CREATE TABLE IF NOT EXISTS `DungeonRaidRecord_Log` (
+  `log_date` datetime NOT NULL,
+  `dungeon_id` int(11) NOT NULL,
+  `guild_id` int(11) NOT NULL,
+  `raid_time` int(11) NOT NULL,
+  `record` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.EventItemSupplyInfo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `EventItemSupplyInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `EventItemSupplyInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.EventAreaEnterCount
+DROP TABLE IF EXISTS `EventAreaEnterCount`;
+CREATE TABLE IF NOT EXISTS `EventAreaEnterCount` (
+  `player_id` int(11) NOT NULL,
+  `event_area_id` int(11) NOT NULL,
+  `enter_count` int(11) NOT NULL,
+  PRIMARY KEY (`player_id`,`event_area_id`),
+  KEY `IDX_EventAreaEnterCount_Player_Id` (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Favor: ~11 rows (ungefähr)
-/*!40000 ALTER TABLE `Favor` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Favor` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.EventItemDropInfo
+DROP TABLE IF EXISTS `EventItemDropInfo`;
+CREATE TABLE IF NOT EXISTS `EventItemDropInfo` (
+  `sid` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `remain_time` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
+  `count` int(11) NOT NULL,
+  `total_count` int(11) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Friends: ~8 rows (ungefähr)
-/*!40000 ALTER TABLE `Friends` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Friends` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.EventItemSupplyInfo
+DROP TABLE IF EXISTS `EventItemSupplyInfo`;
+CREATE TABLE IF NOT EXISTS `EventItemSupplyInfo` (
+  `sid` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `min_count` int(11) NOT NULL,
+  `max_count` int(11) NOT NULL,
+  `flag` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `left_count` int(11) NOT NULL,
+  `total_count` int(11) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.GlobalVariable: ~1 rows (ungefähr)
-/*!40000 ALTER TABLE `GlobalVariable` DISABLE KEYS */;
-/*!40000 ALTER TABLE `GlobalVariable` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Favor
+DROP TABLE IF EXISTS `Favor`;
+CREATE TABLE IF NOT EXISTS `Favor` (
+  `owner_id` int(11) NOT NULL,
+  `favor_id` int(11) NOT NULL,
+  `favor` int(11) NOT NULL,
+  PRIMARY KEY (`owner_id`,`favor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Guild: ~1 rows (ungefähr)
-/*!40000 ALTER TABLE `Guild` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Guild` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Friends
+DROP TABLE IF EXISTS `Friends`;
+CREATE TABLE IF NOT EXISTS `Friends` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` varchar(50) NOT NULL,
+  `friend_id` varchar(50) NOT NULL,
+  PRIMARY KEY (`sid`),
+  KEY `IDX_Friends_Friend_Id` (`friend_id`,`owner_id`),
+  KEY `IDX_Friends_Owner_Id` (`owner_id`,`friend_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.HuntaholicInfo: ~1 rows (ungefähr)
-/*!40000 ALTER TABLE `HuntaholicInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `HuntaholicInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.GlobalVariable
+DROP TABLE IF EXISTS `GlobalVariable`;
+CREATE TABLE IF NOT EXISTS `GlobalVariable` (
+  `name` varchar(128) NOT NULL,
+  `value` varchar(1024) NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.HuntaholicRanking: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `HuntaholicRanking` DISABLE KEYS */;
-/*!40000 ALTER TABLE `HuntaholicRanking` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Guild
+DROP TABLE IF EXISTS `Guild`;
+CREATE TABLE IF NOT EXISTS `Guild` (
+  `sid` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `leader_id` int(11) NOT NULL,
+  `raid_leader_id` int(11) NOT NULL DEFAULT '0',
+  `notice` varchar(255) NOT NULL,
+  `icon` varchar(255) NOT NULL,
+  `icon_size` int(11) NOT NULL,
+  `name_changed` int(11) NOT NULL,
+  `dungeon_id` int(11) NOT NULL,
+  `dungeon_block_time` bigint(20) DEFAULT '0',
+  `gold` bigint(20) NOT NULL,
+  `chaos` int(11) NOT NULL,
+  `alliance_id` int(11) NOT NULL,
+  `alliance_block_time` bigint(20) NOT NULL,
+  `donation_point` int(11) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `UQ__Guild__6B24EA82` (`leader_id`),
+  UNIQUE KEY `UQ__Guild__6A30C649` (`name`),
+  UNIQUE KEY `IDX_Guild_GuildName` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Item: ~1.804 rows (ungefähr)
-/*!40000 ALTER TABLE `Item` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Item` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.HuntaholicInfo
+DROP TABLE IF EXISTS `HuntaholicInfo`;
+CREATE TABLE IF NOT EXISTS `HuntaholicInfo` (
+  `huntaholic_id` int(11) DEFAULT NULL,
+  `next_settling_time` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.ItemCoolTime: ~16 rows (ungefähr)
-/*!40000 ALTER TABLE `ItemCoolTime` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ItemCoolTime` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.HuntaholicRanking
+DROP TABLE IF EXISTS `HuntaholicRanking`;
+CREATE TABLE IF NOT EXISTS `HuntaholicRanking` (
+  `huntaholic_id` int(11) DEFAULT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `LAST_MONTH_SCORE` bigint(20) DEFAULT NULL,
+  `this_month_score` bigint(20) DEFAULT NULL,
+  `total_score` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.ItemKeeping: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `ItemKeeping` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ItemKeeping` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Item
+DROP TABLE IF EXISTS `Item`;
+CREATE TABLE IF NOT EXISTS `Item` (
+  `sid` bigint(20) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `summon_id` int(11) NOT NULL,
+  `auction_id` int(11) NOT NULL DEFAULT '0',
+  `keeping_id` int(11) NOT NULL DEFAULT '0',
+  `idx` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `cnt` bigint(20) NOT NULL,
+  `level` int(11) NOT NULL,
+  `enhance` int(11) NOT NULL,
+  `endurance` int(11) NOT NULL,
+  `flag` int(11) NOT NULL,
+  `gcode` int(11) NOT NULL,
+  `wear_info` int(11) DEFAULT NULL,
+  `socket_0` int(11) NOT NULL,
+  `socket_1` int(11) NOT NULL,
+  `socket_2` int(11) NOT NULL,
+  `socket_3` int(11) NOT NULL,
+  `socket_4` int(11) NOT NULL,
+  `socket_5` int(11) NOT NULL,
+  `remain_time` int(11) NOT NULL,
+  `elemental_effect_type` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `elemental_effect_expire_time` datetime NOT NULL,
+  `elemental_effect_attack_point` int(11) NOT NULL DEFAULT '0',
+  `elemental_effect_magic_point` int(11) NOT NULL DEFAULT '0',
+  `create_time` datetime NOT NULL,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`sid`),
+  KEY `IDX_Item_Account_Id_Owner_Id_Auction_Id_Keeping_Id` (`account_id`,`owner_id`,`auction_id`,`keeping_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.PaidItem: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `PaidItem` DISABLE KEYS */;
-/*!40000 ALTER TABLE `PaidItem` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.ItemCoolTime
+DROP TABLE IF EXISTS `ItemCoolTime`;
+CREATE TABLE IF NOT EXISTS `ItemCoolTime` (
+  `owner_id` int(11) NOT NULL,
+  `cool_time_00` int(11) NOT NULL,
+  `cool_time_01` int(11) NOT NULL,
+  `cool_time_02` int(11) NOT NULL,
+  `cool_time_03` int(11) NOT NULL,
+  `cool_time_04` int(11) NOT NULL,
+  `cool_time_05` int(11) NOT NULL,
+  `cool_time_06` int(11) NOT NULL,
+  `cool_time_07` int(11) NOT NULL,
+  `cool_time_08` int(11) NOT NULL,
+  `cool_time_09` int(11) NOT NULL,
+  `cool_time_10` int(11) NOT NULL,
+  `cool_time_11` int(11) NOT NULL,
+  `cool_time_12` int(11) NOT NULL,
+  `cool_time_13` int(11) NOT NULL,
+  `cool_time_14` int(11) NOT NULL,
+  `cool_time_15` int(11) NOT NULL,
+  `cool_time_16` int(11) NOT NULL,
+  `cool_time_17` int(11) NOT NULL,
+  `cool_time_18` int(11) NOT NULL,
+  `cool_time_19` int(11) NOT NULL,
+  PRIMARY KEY (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Party: ~2 rows (ungefähr)
-/*!40000 ALTER TABLE `Party` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Party` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.ItemKeeping
+DROP TABLE IF EXISTS `ItemKeeping`;
+CREATE TABLE IF NOT EXISTS `ItemKeeping` (
+  `sid` int(11) NOT NULL,
+  `item_id` bigint(20) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `expiration_time` datetime NOT NULL,
+  `keeping_type` int(11) NOT NULL,
+  `related_auction_id` int(11) NOT NULL,
+  `related_item_code` int(11) NOT NULL,
+  `related_item_enhance` int(11) NOT NULL,
+  `related_item_level` int(11) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Pet: ~4 rows (ungefähr)
-/*!40000 ALTER TABLE `Pet` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Pet` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.PaidItem
+DROP TABLE IF EXISTS `PaidItem`;
+CREATE TABLE IF NOT EXISTS `PaidItem` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) DEFAULT NULL,
+  `avatar_id` int(11) DEFAULT NULL,
+  `avatar_name` varchar(61) DEFAULT NULL,
+  `item_code` int(11) DEFAULT NULL,
+  `item_count` int(11) DEFAULT NULL,
+  `rest_item_count` int(11) DEFAULT NULL,
+  `bought_time` datetime DEFAULT NULL,
+  `valid_time` datetime DEFAULT NULL,
+  `server_name` varchar(30) DEFAULT NULL,
+  `taken_avatar_id` int(11) DEFAULT NULL,
+  `taken_avatar_name` varchar(61) DEFAULT NULL,
+  `taken_server_name` varchar(30) DEFAULT NULL,
+  `taken_time` datetime DEFAULT NULL,
+  `taken_account_id` int(11) DEFAULT NULL,
+  `confirmed` int(11) DEFAULT NULL,
+  `confirmed_time` date DEFAULT NULL,
+  `isCancel` tinyint(3) unsigned DEFAULT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Quest: ~12 rows (ungefähr)
-/*!40000 ALTER TABLE `Quest` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Quest` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Party
+DROP TABLE IF EXISTS `Party`;
+CREATE TABLE IF NOT EXISTS `Party` (
+  `sid` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `leader_id` int(11) NOT NULL,
+  `share_mode` int(11) NOT NULL,
+  `attack_team` int(11) NOT NULL,
+  `lead_party_id` int(11) NOT NULL,
+  PRIMARY KEY (`sid`),
+  UNIQUE KEY `UQ__Party__6FE99F9F` (`leader_id`),
+  UNIQUE KEY `UQ__Party__6EF57B66` (`name`),
+  UNIQUE KEY `IDX_Party_PartyName` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.RandomQuestInfo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `RandomQuestInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `RandomQuestInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Pet
+DROP TABLE IF EXISTS `Pet`;
+CREATE TABLE IF NOT EXISTS `Pet` (
+  `sid` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `cage_uid` bigint(20) NOT NULL,
+  `code` int(11) NOT NULL,
+  `name` varchar(18) NOT NULL,
+  `name_changed` int(11) NOT NULL,
+  `cool_time_01` int(11) NOT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.RankingInfo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `RankingInfo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `RankingInfo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Quest
+DROP TABLE IF EXISTS `Quest`;
+CREATE TABLE IF NOT EXISTS `Quest` (
+  `owner_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `start_id` int(11) DEFAULT NULL,
+  `status1` int(11) NOT NULL,
+  `status2` int(11) NOT NULL,
+  `status3` int(11) NOT NULL,
+  `progress` int(11) NOT NULL,
+  PRIMARY KEY (`owner_id`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.RankingScore: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `RankingScore` DISABLE KEYS */;
-/*!40000 ALTER TABLE `RankingScore` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.RandomQuestInfo
+DROP TABLE IF EXISTS `RandomQuestInfo`;
+CREATE TABLE IF NOT EXISTS `RandomQuestInfo` (
+  `owner_id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `key1` int(11) NOT NULL,
+  `key2` int(11) NOT NULL,
+  `key3` int(11) NOT NULL,
+  `value1` int(11) NOT NULL,
+  `value2` int(11) NOT NULL,
+  `value3` int(11) NOT NULL,
+  `is_dropped` tinyint(3) unsigned NOT NULL,
+  PRIMARY KEY (`owner_id`,`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.ScheduledCommand: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `ScheduledCommand` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ScheduledCommand` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.RankingInfo
+DROP TABLE IF EXISTS `RankingInfo`;
+CREATE TABLE IF NOT EXISTS `RankingInfo` (
+  `ranking_id` int(11) NOT NULL,
+  `next_settling_time` datetime NOT NULL,
+  PRIMARY KEY (`ranking_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.SecurityNo: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `SecurityNo` DISABLE KEYS */;
-/*!40000 ALTER TABLE `SecurityNo` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.RankingScore
+DROP TABLE IF EXISTS `RankingScore`;
+CREATE TABLE IF NOT EXISTS `RankingScore` (
+  `ranking_id` int(11) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `score` decimal(18,4) NOT NULL,
+  `is_valid` tinyint(1) NOT NULL,
+  PRIMARY KEY (`ranking_id`,`owner_id`),
+  KEY `IDX_RankingScore_Ranking_Id` (`ranking_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Skill: ~428 rows (ungefähr)
-/*!40000 ALTER TABLE `Skill` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Skill` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.ScheduledCommand
+DROP TABLE IF EXISTS `ScheduledCommand`;
+CREATE TABLE IF NOT EXISTS `ScheduledCommand` (
+  `sid` int(11) NOT NULL,
+  `scheduled_time` datetime NOT NULL,
+  `command` varchar(255) NOT NULL,
+  `is_launched` char(1) NOT NULL,
+  `launched_time` datetime NOT NULL DEFAULT '9999-12-31 00:00:00',
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.State: ~71 rows (ungefähr)
-/*!40000 ALTER TABLE `State` DISABLE KEYS */;
-/*!40000 ALTER TABLE `State` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.SecurityNo
+DROP TABLE IF EXISTS `SecurityNo`;
+CREATE TABLE IF NOT EXISTS `SecurityNo` (
+  `account_id` int(11) NOT NULL,
+  `security_no` varchar(31) NOT NULL,
+  KEY `IDX_SecurityNo_Account_Id` (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.Summon: ~17 rows (ungefähr)
-/*!40000 ALTER TABLE `Summon` DISABLE KEYS */;
-/*!40000 ALTER TABLE `Summon` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Skill
+DROP TABLE IF EXISTS `Skill`;
+CREATE TABLE IF NOT EXISTS `Skill` (
+  `sid` int(11) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `summon_id` int(11) NOT NULL,
+  `skill_id` int(11) NOT NULL,
+  `skill_level` int(11) NOT NULL,
+  `cool_time` int(11) NOT NULL,
+  PRIMARY KEY (`sid`),
+  KEY `IDX_Skill_Owner_Id_Summon_Id` (`owner_id`,`summon_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.TBLSTATS: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `TBLSTATS` DISABLE KEYS */;
-/*!40000 ALTER TABLE `TBLSTATS` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.State
+DROP TABLE IF EXISTS `State`;
+CREATE TABLE IF NOT EXISTS `State` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL,
+  `summon_id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `level_1` smallint(6) NOT NULL,
+  `level_2` smallint(6) NOT NULL,
+  `level_3` smallint(6) NOT NULL,
+  `duration_1` int(11) NOT NULL,
+  `duration_2` int(11) NOT NULL,
+  `duration_3` int(11) NOT NULL,
+  `remain_time_1` int(11) NOT NULL,
+  `remain_time_2` int(11) NOT NULL,
+  `remain_time_3` int(11) NOT NULL,
+  `base_damage_1` int(11) NOT NULL,
+  `base_damage_2` int(11) NOT NULL,
+  `base_damage_3` int(11) NOT NULL,
+  `remain_fire_time` int(11) NOT NULL,
+  `state_value` int(11) NOT NULL,
+  `state_string_value` varchar(32) NOT NULL,
+  `enable` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`sid`),
+  KEY `IX_State` (`owner_id`,`summon_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.tb_character_job_lv_log: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `tb_character_job_lv_log` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tb_character_job_lv_log` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.Summon
+DROP TABLE IF EXISTS `Summon`;
+CREATE TABLE IF NOT EXISTS `Summon` (
+  `sid` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `card_uid` bigint(20) NOT NULL,
+  `exp` bigint(20) NOT NULL,
+  `jp` int(11) NOT NULL,
+  `last_decreased_exp` bigint(20) NOT NULL DEFAULT '0',
+  `name` varchar(64) NOT NULL,
+  `transform` int(11) NOT NULL,
+  `lv` int(11) NOT NULL,
+  `jlv` int(11) NOT NULL,
+  `max_level` int(11) NOT NULL DEFAULT '0',
+  `fp` int(11) NOT NULL,
+  `prev_level_01` int(11) NOT NULL DEFAULT '0',
+  `prev_level_02` int(11) NOT NULL DEFAULT '0',
+  `prev_id_01` int(11) NOT NULL DEFAULT '0',
+  `prev_id_02` int(11) NOT NULL DEFAULT '0',
+  `sp` int(11) NOT NULL,
+  `hp` int(11) NOT NULL,
+  `mp` int(11) NOT NULL,
+  PRIMARY KEY (`sid`),
+  KEY `IDX_Summon_Account_Id` (`account_id`),
+  KEY `IDX_Summon_Card_Uid` (`card_uid`),
+  KEY `IDX_Summon_Owner_Id` (`owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.tb_event_333: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `tb_event_333` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tb_event_333` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.TBLSTATS
+DROP TABLE IF EXISTS `TBLSTATS`;
+CREATE TABLE IF NOT EXISTS `TBLSTATS` (
+  `OwnerName` varchar(160) NOT NULL,
+  `TableName` varchar(160) NOT NULL,
+  `IndexName` varchar(160) NOT NULL DEFAULT 'ALL',
+  `CurrentValue` tinyint(3) unsigned DEFAULT NULL,
+  `OldValue` tinyint(3) unsigned DEFAULT '0',
+  `LastModDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.tb_temp_0504: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `tb_temp_0504` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tb_temp_0504` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.tb_character_job_lv_log
+DROP TABLE IF EXISTS `tb_character_job_lv_log`;
+CREATE TABLE IF NOT EXISTS `tb_character_job_lv_log` (
+  `log_date` varchar(10) NOT NULL,
+  `job` int(11) NOT NULL,
+  `lv` int(11) NOT NULL,
+  `total_cnt` int(11) NOT NULL,
+  `cnt` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.TRIG_Character_BankGold: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `TRIG_Character_BankGold` DISABLE KEYS */;
-/*!40000 ALTER TABLE `TRIG_Character_BankGold` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.tb_event_333
+DROP TABLE IF EXISTS `tb_event_333`;
+CREATE TABLE IF NOT EXISTS `tb_event_333` (
+  `sid` int(11) NOT NULL AUTO_INCREMENT,
+  `code` int(11) NOT NULL,
+  `character_id` int(11) DEFAULT NULL,
+  `name` varchar(50) DEFAULT NULL,
+  `account_id` int(11) DEFAULT NULL,
+  `account` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Exportiere Daten aus Tabelle Telecaster.TRIG_Character_Gold: ~0 rows (ungefähr)
-/*!40000 ALTER TABLE `TRIG_Character_Gold` DISABLE KEYS */;
-/*!40000 ALTER TABLE `TRIG_Character_Gold` ENABLE KEYS */;
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.tb_temp_0504
+DROP TABLE IF EXISTS `tb_temp_0504`;
+CREATE TABLE IF NOT EXISTS `tb_temp_0504` (
+  `account_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.TRIG_Character_BankGold
+DROP TABLE IF EXISTS `TRIG_Character_BankGold`;
+CREATE TABLE IF NOT EXISTS `TRIG_Character_BankGold` (
+  `log_date` datetime NOT NULL,
+  `SESSION` varchar(30) NOT NULL,
+  `SYS_USER` varchar(30) NOT NULL,
+  `APL_NAME` varchar(60) NOT NULL,
+  `HOST_NAME` varchar(30) DEFAULT NULL,
+  `HOST_ID` varchar(30) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `Prev_Bank_gold` bigint(20) NOT NULL,
+  `Bank_gold` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Struktur von Tabelle Telecaster.TRIG_Character_Gold
+DROP TABLE IF EXISTS `TRIG_Character_Gold`;
+CREATE TABLE IF NOT EXISTS `TRIG_Character_Gold` (
+  `log_date` datetime NOT NULL,
+  `SESSION` varchar(30) NOT NULL,
+  `SYS_USER` varchar(30) NOT NULL,
+  `APL_NAME` varchar(60) NOT NULL,
+  `HOST_NAME` varchar(30) NOT NULL,
+  `HOST_ID` varchar(30) DEFAULT NULL,
+  `account_id` int(11) NOT NULL,
+  `account` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `Prev_gold` bigint(20) NOT NULL,
+  `gold` bigint(20) NOT NULL,
+  `Login_time` datetime NOT NULL,
+  `Logout_time` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Daten Export vom Benutzer nicht ausgewählt
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
