@@ -13,7 +13,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 
 # build in Release-mode by default if not explicitly set
 if( NOT CMAKE_BUILD_TYPE )
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 find_package(ACE REQUIRED)
@@ -27,7 +27,6 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Database
                     ${CMAKE_SOURCE_DIR}/shared/Dynamic
                     ${CMAKE_SOURCE_DIR}/shared/Threading
-
                     ${CMAKE_SOURCE_DIR}/shared/Debugging
                     ${CMAKE_SOURCE_DIR}/shared/Encryption
                     ${CMAKE_SOURCE_DIR}/shared/Lists
@@ -39,7 +38,7 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${LUA_INCLUDE_DIR}
                     ${MYSQL_INCLUDE_DIR})
 
-file(GLOB_RECURSE SHARED_SRC shared/*.cpp ${ace_STAT_SRCS} ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol/sol.hpp)
+file(GLOB_RECURSE SHARED_SRC shared/*.cpp ${ace_STAT_SRCS} )
 
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)
