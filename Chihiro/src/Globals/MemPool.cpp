@@ -131,6 +131,7 @@ void MemoryPoolMgr::Update(uint diff) {
         }
 
         delete obj;
+        *&obj = nullptr;
         i_objectsToRemove.erase(itr);
     }
 

@@ -48,6 +48,9 @@ bool XLua::InitializeLua()
     m_pState.set_function("dlg_menu", &XLua::SCRIPT_DialogMenu, this);
     m_pState.set_function("dlg_show", &XLua::SCRIPT_DialogShow, this);
     m_pState.set_function("open_market", &XLua::SCRIPT_ShowMarket, this);
+    m_pState.set_function("get_quest_progress", &XLua::SCRIPT_GetQuestProgress, this);
+    m_pState.set_function("get_own_dungeon_id", &XLua::SCRIPT_GetOwnDungeonID, this);
+    m_pState.set_function("get_siege_dungeon_id", &XLua::SCRIPT_GetSiegeDungeonID, this);
     // Getters
     m_pState.set_function("get_local_info", &XLua::SCRIPT_GetLocalFlag, this);
     m_pState.set_function("get_value", &XLua::SCRIPT_GetValue, this);
@@ -741,4 +744,19 @@ void XLua::SCRIPT_QuestInfo(int code, sol::variadic_args args)
     if(args.size() > 1)
         textID = args[0].get<int>();
     Messages::SendQuestInformation(player, code, textID);
+}
+
+int XLua::SCRIPT_GetQuestProgress()
+{
+    return 255;
+}
+
+int XLua::SCRIPT_GetOwnDungeonID()
+{
+    return 0;
+}
+
+int XLua::SCRIPT_GetSiegeDungeonID()
+{
+    return 0;
 }

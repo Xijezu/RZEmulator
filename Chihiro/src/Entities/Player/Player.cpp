@@ -1668,7 +1668,11 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
             if(result != TS_RESULT_SUCCESS)
                 return result;
         }
+    }
 
+    if(result == TS_RESULT_SUCCESS)
+    {
+        Erase(pItem, 1, false);
     }
 }
 

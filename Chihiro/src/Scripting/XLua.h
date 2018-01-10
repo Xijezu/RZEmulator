@@ -46,6 +46,11 @@ private:
     void SCRIPT_DialogTextWithoutQuestMenu(std::string);
     void SCRIPT_DialogMenu(std::string, std::string);
     void SCRIPT_DialogShow();
+    int SCRIPT_GetQuestProgress();
+
+    // Teleporter
+    int SCRIPT_GetOwnDungeonID();
+    int SCRIPT_GetSiegeDungeonID();
 
     // Values
     int SCRIPT_GetLocalFlag();

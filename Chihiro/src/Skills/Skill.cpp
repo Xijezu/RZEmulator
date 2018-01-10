@@ -65,8 +65,10 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     auto current_time = sWorld->GetArTime();
     uint delay = 0xffffffff;
 
-    if(current_time + this->cool_time > current_time)
+    if(!CheckCoolTime(current_time))
+    {
         return TS_RESULT_COOL_TIME;
+    }
 
     if(m_SkillBase->effect_type == EffectType::ET_Summon || m_nSkillID == 4001) {
         m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
@@ -224,7 +226,14 @@ void Skill::ProcSkill()
         return;
     m_pOwner->m_castingSkill = nullptr;
 
-    FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), true);
+    bool bIsSuccess = false;
+    FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), bIsSuccess);
+    if(bIsSuccess)
+    {
+        SetRemainCoolTime(GetSkillCoolTime());
+        Player* pOwner = m_pOwner->GetSubType() == ST_Summon ? ((Summon*)m_pOwner)->GetMaster() : (Player*)m_pOwner;
+        Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
+    }
 
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
@@ -234,7 +243,7 @@ void Skill::ProcSkill()
                           0, 0, 5);
 }
 
-void Skill::FireSkill(Unit *pTarget, bool bIsSuccess)
+void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
 {
     bool bHandled{true};
     switch(m_SkillBase->effect_type) {
@@ -274,6 +283,7 @@ void Skill::FireSkill(Unit *pTarget, bool bIsSuccess)
                 break;
         }
     }
+    bIsSuccess = bHandled;
 }
 
 
@@ -402,4 +412,28 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
                                                    m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
 
     sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
+}
+
+bool Skill::CheckCoolTime(uint t) const
+{
+    return m_nNextCoolTime < t;
+}
+
+uint Skill::GetSkillCoolTime() const
+{
+    int l{0};
+    if(m_SkillBase == nullptr)
+        return 0;
+
+    if (m_pOwner->GetSubType() == ST_Summon)
+        l = m_nRequestedSkillLevel;
+    else
+        l = m_nEnhance;
+
+    return (uint)(m_pOwner->GetCoolTimeSpeed() * m_pOwner->GetCoolTimeMod((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0) * m_SkillBase->GetCoolTime(l));
+}
+
+void Skill::SetRemainCoolTime(uint time)
+{
+    m_nNextCoolTime = time + sWorld->GetArTime();
 }

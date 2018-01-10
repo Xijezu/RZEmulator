@@ -153,7 +153,10 @@ public:
 
     // eh
     int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) const;
-
+    float GetCoolTimeSpeed() const { return m_Attribute.nCoolTimeSpeed / 100.0f; }
+    float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const { return 1.0f; }
+    uint GetRemainCoolTime(int skill_id) const;
+    uint GetTotalCoolTime(int skill_id) const;
     // Getters
     virtual float GetScale() const { return 1.0f; }
     virtual float GetSize() const { return 1.0f; }

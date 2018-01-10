@@ -9,6 +9,7 @@ class XPacket;
 class Unit;
 
 class Skill {
+    friend class Unit;
 public:
     Skill() = delete;
     Skill(Unit* pOwner, uint64 _uid, int _id);
@@ -19,6 +20,11 @@ public:
     void ProcSkill();
     bool Cancel();
     uint GetSkillEnhance() const;
+
+    bool CheckCoolTime(uint t) const;
+    uint GetSkillCoolTime() const;
+    void SetRemainCoolTime(uint time);
+
 
     uint64 m_nSkillUID;
     Unit* m_pOwner{nullptr};
@@ -39,15 +45,16 @@ private:
     Position m_targetPosition{};
     uint m_nCastingDelay;
     uint m_nEnhance{};
-    uint16 m_nErrorCode;
-    uint m_hTarget;
-    uint m_nCastTime;
-    uint m_nFireTime;
+    uint16 m_nErrorCode{};
+    uint m_hTarget{};
+    uint m_nCastTime{};
+    uint m_nNextCoolTime{};
+    uint m_nFireTime{};
 protected:
     void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
 private:
     std::vector<SkillResult> m_vResultList{};
-    void FireSkill(Unit* pTarget, bool bIsSuccess);
+    void FireSkill(Unit* pTarget, bool &bIsSuccess);
     uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos,  uint current_time);
     uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos,  uint current_time);
 

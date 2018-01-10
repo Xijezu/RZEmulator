@@ -69,56 +69,55 @@ public:
     WorldSocket *GetSocket() const
     { return _socket != nullptr ? _socket : nullptr; }
 
-    bool HandleNullPacket(XPacket *)
-    { return true; }
+    void HandleNullPacket(XPacket *){ }
 
     // Client-Auth & Logout
-    bool onAuthResult(XPacket *);
-    bool onAccountWithAuth(XPacket *);
-    bool onCharacterList(XPacket *);
-    bool onLogin(XPacket *);
-    bool onReturnToLobby(XPacket *);
-    bool onLogoutTimerRequest(XPacket *);
+    void onAuthResult(XPacket *);
+    void onAccountWithAuth(XPacket *);
+    void onCharacterList(XPacket *);
+    void onLogin(XPacket *);
+    void onReturnToLobby(XPacket *);
+    void onLogoutTimerRequest(XPacket *);
     // Game itself
-    bool onCharacterName(XPacket *);
-    bool onCreateCharacter(XPacket *);
-	bool onDeleteCharacter(XPacket *);
-    bool onChatRequest(XPacket *);
+    void onCharacterName(XPacket *);
+    void onCreateCharacter(XPacket *);
+	void onDeleteCharacter(XPacket *);
+    void onChatRequest(XPacket *);
 
-    bool onMoveRequest(XPacket *);
-    bool onRegionUpdate(XPacket *);
-	bool onChangeLocation(XPacket *);
-	bool onQuery(XPacket *);
-	bool onUpdate(XPacket *);
-    bool onTimeSync(XPacket *);
-    bool onGameTime(XPacket *);
-	bool onSetProperty(XPacket *);
+    void onMoveRequest(XPacket *);
+    void onRegionUpdate(XPacket *);
+	void onChangeLocation(XPacket *);
+	void onQuery(XPacket *);
+	void onUpdate(XPacket *);
+    void onTimeSync(XPacket *);
+    void onGameTime(XPacket *);
+	void onSetProperty(XPacket *);
 
-	bool onJobLevelUp(XPacket *);
-    bool onLearnSkill(XPacket *);
+	void onJobLevelUp(XPacket *);
+    void onLearnSkill(XPacket *);
 
-    bool onPutOnItem(XPacket *);
-    bool onPutOffItem(XPacket *);
-	bool onEquipSummon(XPacket *);
+    void onPutOnItem(XPacket *);
+    void onPutOffItem(XPacket *);
+	void onEquipSummon(XPacket *);
 
-    bool onContact(XPacket *);
-	bool onDialog(XPacket *);
+    void onContact(XPacket *);
+	void onDialog(XPacket *);
 
-	bool onBuyItem(XPacket *);
-	bool onSellItem(XPacket *);
-	bool onUseItem(XPacket*);
+	void onBuyItem(XPacket *);
+	void onSellItem(XPacket *);
+	void onUseItem(XPacket*);
 
-	bool onSkill(XPacket *);
-	bool onAttackRequest(XPacket* );
-	bool onCancelAction(XPacket* );
-	bool onTakeItem(XPacket*);
+	void onSkill(XPacket *);
+	void onAttackRequest(XPacket* );
+	void onCancelAction(XPacket* );
+	void onTakeItem(XPacket*);
 
-    bool onGetSummonSetupInfo(XPacket *);
+    void onGetSummonSetupInfo(XPacket *);
 
     void _SendResultMsg(uint16, uint16, int);
     std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 private:
-    bool checkCharacterName(std::string);
+    bool checkCharacterName(const std::string&);
     WorldSocket *_socket{nullptr};
     XRC4Cipher _rc4encode{ };
     XRC4Cipher _rc4decode{ };

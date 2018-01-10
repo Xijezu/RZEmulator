@@ -20,6 +20,7 @@
 #include "Messages.h"
 #include "Scripting/XLua.h"
 #include "MemPool.h"
+#include "ArRegion.h"
 
 typedef struct AllowedCommands {
     std::string szCommand;
@@ -35,7 +36,9 @@ const GameHandler commandHandler[] =
                 { "/battle", false, &AllowedCommandInfo::onBattleMode },
                 { "/notice", true, &AllowedCommandInfo::onCheatNotice },
                 { "/plist", false, &AllowedCommandInfo::onCheatParty },
-                { "/suicide", true, &AllowedCommandInfo::onCheatSuicide }
+                { "/suicide", true, &AllowedCommandInfo::onCheatSuicide },
+                { "/doit", true, &AllowedCommandInfo::onCheatKillAll },
+                { "/regenerate", true, &AllowedCommandInfo::onCheatRespawn }
         };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
@@ -94,4 +97,34 @@ void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
 void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &/*szMessage*/)
 {
     World::StopNow(SHUTDOWN_EXIT_CODE);
+}
+
+void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
+{
+/*    sArRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer(),
+                                   [=](ArRegion* region) {
+                                       region->DoEachMovableObject(
+                                               [=](WorldObject* obj) {
+                                                   if(obj->GetSubType() == ST_Mob) {
+                                                       dynamic_cast<Monster*>(obj)->ForceKill(pClient);
+                                                   }
+                                               }
+                                       );
+                                   });*/
+    // Causes deadlock
+
+}
+
+void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string& str)
+{
+    int cnt = 1;
+    Tokenizer tokens(str, ' ');
+    if(tokens.size() < 1)
+        return;
+    auto i = std::stoi(tokens[0]);
+    if(tokens.size() == 2)
+        cnt = std::stoi(tokens[1]);
+    auto pos = pClient->GetCurrentPosition(sWorld->GetArTime());
+    auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(),i, cnt);
+    sScriptingMgr->RunString(pClient, res);
 }

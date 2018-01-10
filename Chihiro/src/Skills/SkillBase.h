@@ -414,6 +414,11 @@ struct SkillBase {
         return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
     }
 
+    uint GetCoolTime(int enhance) const
+    {
+        return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
+    }
+
     int m_need_jp[50]{ };
 
     int     id{ };

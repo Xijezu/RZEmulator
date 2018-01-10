@@ -576,7 +576,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, true);
+    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, false);
     if(pItem == nullptr) {
         MX_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
         ClearTamer(pMonster, false);
@@ -682,6 +682,7 @@ void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, u
 
     sr.damage.damage = damageInfo.nDamage;
     sr.damage.target_hp = damageInfo.target_hp;
+    sr.damage.hTarget = handle;
     for(int i = 0; i < 7; i++)
         sr.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
 

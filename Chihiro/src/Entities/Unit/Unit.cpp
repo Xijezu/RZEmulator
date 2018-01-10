@@ -2579,3 +2579,21 @@ Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, i
 {
     return DealDamage(pFrom, nDamage, type, DamageType::NormalMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
+
+uint Unit::GetRemainCoolTime(int skill_id) const
+{
+    uint ct = sWorld->GetArTime();
+    auto sk = GetSkill(skill_id);
+    if(sk == nullptr || sk->m_nNextCoolTime < ct)
+        return 0;
+    return sk->m_nNextCoolTime - ct;
+}
+
+uint Unit::GetTotalCoolTime(int skill_id) const
+{
+    auto sk = GetSkill(skill_id);
+    if (sk == nullptr)
+        return 0;
+    else
+        return sk->GetSkillCoolTime();
+}

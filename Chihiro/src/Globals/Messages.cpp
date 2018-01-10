@@ -171,9 +171,9 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
                 continue;
             skillPct << (int32_t) t->m_nSkillID;
             skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->m_nSkillID);
-            skillPct << (int8_t) t->m_nSkillLevel;
-            skillPct << (uint32_t) 0;
-            skillPct << (uint32_t) 0;
+            skillPct << (int8_t) pUnit->GetCurrentSkillLevel(t->m_nSkillID);
+            skillPct << (uint32_t) pUnit->GetTotalCoolTime(t->m_nSkillID);
+            skillPct << (uint32_t) pUnit->GetRemainCoolTime(t->m_nSkillID);
         }
     }else {
         auto skill = pUnit->GetSkill(skill_id);
@@ -182,10 +182,10 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (ushort)1; // Size
         skillPct << (uint8_t)0; // reset | modification_type?
         skillPct << (int)skill_id;
-        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill->m_nSkillLevel);
-        skillPct << (int8_t)skill->m_nSkillLevel;
-        skillPct << (uint32_t) 0;
-        skillPct << (uint32_t) 0;
+        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill_id);
+        skillPct << (int8_t) pUnit->GetCurrentSkillLevel(skill_id);
+        skillPct << (uint32_t) pUnit->GetTotalCoolTime(skill_id);
+        skillPct << (uint32_t) pUnit->GetRemainCoolTime(skill_id);
     }
     pPlayer->SendPacket(skillPct);
 }
