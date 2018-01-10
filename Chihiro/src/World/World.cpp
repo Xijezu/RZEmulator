@@ -86,23 +86,20 @@ WorldSession* World::FindSession(uint32 id) const
 }
 
 /// Remove a given session
-bool World::RemoveSession(uint32 id)
-{
-    if(m_sessions.count(id) == 1)
-    {
-        m_sessions.erase(id);
-        return true;
+bool World::RemoveSession(uint32 id) {
+    ///- Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
+    SessionMap::const_iterator itr = m_sessions.find(id);
+
+    if (itr != m_sessions.end() && itr->second) {
+        itr->second->KickPlayer();
     }
-    return false;
+
+    return true;
 }
 
 void World::AddSession(WorldSession* s)
 {
-	if(s == nullptr)
-		return;
-    if(m_sessions.count(s->GetAccountId()) == 0) {
-        m_sessions.insert({ (uint32)s->GetAccountId(), s });
-    }
+    addSessQueue.add(s);
 }
 
 uint64 World::GetItemIndex()
@@ -153,7 +150,9 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
 		pUnit->SetMultipleMove(newPos, speed, t);
 
 		if(bBroadcastMove) {
-			sArRegion->DoEachVisibleRegion((uint) (pUnit->GetPositionX() / g_nRegionSize), (uint) (pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(),
+			sArRegion->DoEachVisibleRegion((uint) (pUnit->GetPositionX() / g_nRegionSize),
+                                           (uint) (pUnit->GetPositionY() / g_nRegionSize),
+                                           pUnit->GetLayer(),
 										   [=](ArRegion *region) {
 											   region->DoEachClient([=](WorldObject *obj) {
 												   Messages::SendMoveMessage(dynamic_cast<Player *>(obj), pUnit);
@@ -317,20 +316,17 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
 
 void World::Update(uint diff)
 {
-    MemoryPoolMgr::instance();
-    for (auto& session : m_sessions) {
-        if (session.second != nullptr && session.second->GetPlayer() != nullptr) {
-            session.second->GetPlayer()->Update(diff);
-        } else {
-            m_sessions.erase(session.first);
-        }
-    }
+    ///- Add new sessions
+    WorldSession* sess = nullptr;
+    while(addSessQueue.next(sess))
+        AddSession_(sess);
+
+    sMemoryPool->Update(diff);
+
     for(auto& ro : m_vRespawnList) {
         ro->Update(diff);
         //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
-
-    sMemoryPool->Update(diff);
 }
 
 void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
@@ -690,4 +686,18 @@ void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, u
         sr.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
 
     pvList.emplace_back(sr);
+}
+
+void World::AddSession_(WorldSession *s)
+{
+    ASSERT(s);
+
+    if(!RemoveSession(s->GetAccountId()))
+    {
+        s->KickPlayer();
+        delete s;
+        return;
+    }
+
+    m_sessions[s->GetAccountId()] = s;
 }

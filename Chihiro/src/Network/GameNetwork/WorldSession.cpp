@@ -59,6 +59,9 @@ void WorldSession::OnClose()
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
     onReturnToLobby(nullptr);
+    sWorld->RemoveSession(GetAccountId());
+    _rc4decode.Clear();
+    _rc4encode.Clear();
 }
 
 enum eStatus {
@@ -262,6 +265,7 @@ bool WorldSession::onAuthResult(XPacket *pGamePct)
         _isAuthed    = true;
         _accountId   = result->nAccountID;
         _accountName = result->account;
+        sWorld->AddSession(this);
     }
     _SendResultMsg(TS_CS_ACCOUNT_WITH_AUTH, result->result, 0);
     return true;
@@ -275,8 +279,7 @@ bool WorldSession::onLogin(XPacket *pRecvPct)
     _player = sMemoryPool->AllocPlayer();
     _player->SetSession(this);
     if (!_player->ReadCharacter(result->szName, _accountId)) {
-        delete _player;
-        _player = nullptr;
+        _player->DeleteThis();
         return false;
     }
 
@@ -468,13 +471,12 @@ bool WorldSession::onMoveRequest(XPacket *pRecvPct)
 
 bool WorldSession::onReturnToLobby(XPacket *pRecvPct)
 {
-    sWorld->RemoveSession(GetAccountId());
+    //sWorld->RemoveSession(GetAccountId());
     if (_player != nullptr) {
         _player->LogoutNow(2);
         _player->Save(false);
         //sMemoryPool->DeletePlayer(_player->GetHandle(), true);
-        sMemoryPool->RemoveObject(_player, true);
-        _player = nullptr;
+        _player->DeleteThis();
     }
     if(pRecvPct != nullptr)
         _SendResultMsg(pRecvPct->GetPacketID(), 0, 0);

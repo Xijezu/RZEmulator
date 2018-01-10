@@ -1504,6 +1504,7 @@ void Unit::onAttackAndSkillProcess()
 
 bool Unit::StartAttack(uint target, bool bNeedFastReaction)
 {
+    MX_LOG_INFO("unit", "Start attack: %d", sWorld->GetArTime());
     bool result{false};
     if(GetHealth() == 0) {
         result = false;

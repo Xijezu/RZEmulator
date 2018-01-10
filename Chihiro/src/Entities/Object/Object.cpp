@@ -16,6 +16,7 @@ Object::Object()
     _valuesCount   = 0;
 
     m_inWorld       = false;
+    m_bDeleteRequest= false;
     m_objectUpdated = false;
 }
 

@@ -19,7 +19,7 @@ Item *MemoryPoolMgr::AllocItem()
     p->m_nHandle = m_nItemTop++;
     p->SetUInt32Value(UNIT_FIELD_HANDLE, p->m_nHandle);
     //m_hsItem.insert(std::pair<uint, Item *>(p->m_nHandle, p));
-    HashMapHolder<Item>::Insert(p);
+    AddObject(p);
     return p;
 }
 
@@ -131,13 +131,26 @@ void MemoryPoolMgr::Update(uint diff) {
         }
 
         delete obj;
-
         i_objectsToRemove.erase(itr);
     }
 
-    _update<Player>();
-    _update<Monster>();
-    _update<WorldObject>();
+    ///- Add new sessions
+    WorldObject* sess = nullptr;
+    while(addUpdateQueue.next(sess))
+        i_objectsToUpdate[sess->GetHandle()] = sess;
+
+    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr !=  i_objectsToUpdate.end(); itr = next) {
+        next = itr;
+        ++next;
+
+        itr->second->Update(0);
+        if(itr->second->IsDeleteRequested())
+        {
+            AddToDeleteList(itr->second);
+            i_objectsToUpdate.erase(itr->second->GetHandle());
+            continue;
+        }
+    }
 }
 
 Item *MemoryPoolMgr::AllocGold(uint64 gold, GenerateCode gcode)
@@ -149,8 +162,10 @@ template<class T>
 void MemoryPoolMgr::_unload()
 {
     MX_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());
-    for(auto& obj : HashMapHolder<T>::GetContainer()) {
-        RemoveObject(obj.second, true);
+    auto container = HashMapHolder<T>::GetContainer();
+    for(auto& obj : container) {
+        container.erase(obj.second->GetHandle());
+        delete obj.second;
     }
     HashMapHolder<T>::GetContainer().clear();
 }
@@ -158,21 +173,13 @@ void MemoryPoolMgr::_unload()
 template<class T>
 void MemoryPoolMgr::_update()
 {
-    {
-        MX_SHARED_GUARD readGuard(*HashMapHolder<T>::GetLock());
-        typename HashMapHolder<T>::MapType const& m = HashMapHolder<T>::GetContainer();
-        for (typename HashMapHolder<T>::MapType::const_iterator iter = m.begin(); iter != m.end(); ++iter) {
-            if (iter->second == nullptr) {
-                continue;
-            }
-            iter->second->Update(0);
-        }
-    }
+
 }
 void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
 {
     i_objectsToRemove.insert(obj);
 }
+
 const HashMapHolder<Player>::MapType &MemoryPoolMgr::GetPlayers() {
     return HashMapHolder<Player>::GetContainer();
 }

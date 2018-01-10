@@ -328,7 +328,7 @@ void Monster::processDead(uint t)
         if(IsInWorld())
             sWorld->RemoveObjectFromWorld(this);
         //sMemoryPool->RemoveObject(this, true);
-        sMemoryPool->AddToDeleteList(this);
+        DeleteThis();
     }
 }
 

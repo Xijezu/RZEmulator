@@ -220,12 +220,6 @@ class Monster : public Unit {
 public:
 
     static void EnterPacket(XPacket& pEnterPct, Monster* monster, Player* pPlayer);
-    static void DeleteThis(Monster* monster)
-    {
-        delete monster;
-        monster = nullptr;
-    }
-
     explicit Monster(uint handle, MonsterBase* mb);
     ~Monster() = default;
 

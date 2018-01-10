@@ -7,7 +7,6 @@
 class WorldObject;
 class Player;
 class Unit;
-class NPC;
 
 #define REGION_BLOCK_COUNT  100
 #define AR_REGION_SIZE      180

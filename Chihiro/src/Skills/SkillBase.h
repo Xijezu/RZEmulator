@@ -66,7 +66,7 @@ enum TargetType : short {
     Target                           = 1,
     RegionWithTarget                 = 2,
     RegionWithoutTarget              = 3,
-    Region                           = 4,
+    TT_Region                        = 4,
     TargetExceptCaster               = 6,
     Party                            = 21,
     Guild                            = 22,

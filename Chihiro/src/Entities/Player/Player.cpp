@@ -445,7 +445,6 @@ void Player::SendPropertyMessage(std::string key, int64 value)
 
 void Player::SendLoginProperties()
 {
-    sWorld->AddSession(m_session);
     CalculateStat();
     // Login();
     Messages::SendQuestList(this);
@@ -1134,7 +1133,7 @@ void Player::PopItem(Item *pItem, bool bSkipUpdateToDB)
 
     m_lInventory.erase(pItem->m_Instance.nIdx);
 
-    delete pItem;
+    sMemoryPool->AddToDeleteList(pItem);
 }
 
 void Player::DoSummon(Summon* pSummon, Position pPosition)

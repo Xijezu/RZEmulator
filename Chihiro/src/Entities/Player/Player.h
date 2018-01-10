@@ -3,7 +3,7 @@
 
 #include "XPacket.h"
 #include "Common.h"
-#include "Entities/Unit/Unit.h"
+#include "Object.h"
 #include "Item/Item.h"
 #include "Summon/Summon.h"
 #include "WorldLocation.h"

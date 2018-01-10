@@ -99,6 +99,9 @@ private:
 	uint64_t s_nItemIndex{0};
 	const uint startTime;
 
+	void AddSession_(WorldSession* s);
+	ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue{};
+
 	void onMoveObject(WorldObject* pUnit, Position oldPos, Position newPos);
     bool onSetMove(WorldObject* pObject, Position curPos, Position lastpos);
 	void enterProc(WorldObject* pUint, uint prx, uint pry);

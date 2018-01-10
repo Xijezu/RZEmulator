@@ -374,14 +374,14 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
 
     if(pUnit->ends.size() < 2000) {
         XPacket movePct(TS_SC_MOVE);
-        movePct << (uint32_t)sWorld->GetArTime();
+        movePct << (uint32_t)pUnit->lastStepTime;
         movePct << (uint32)pUnit->GetHandle();
         movePct << (uint8_t)pUnit->GetLayer();
         movePct << (uint8_t)pUnit->speed;
         movePct << (uint16)pUnit->ends.size();
         for(auto& pos : pUnit->ends) {
-            movePct << (float)pos.end.m_positionX;
-            movePct << (float)pos.end.m_positionY;
+            movePct << pos.end.GetPositionX();
+            movePct << pos.end.GetPositionY();
         }
         pPlayer->SendPacket(movePct);
     }
@@ -573,11 +573,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
 
         // /run function get_quest_progress() return 0 end
         pPlayer->SetDialogTitle("Guide Arocel", 3);
-        //pPlayer->SetDialogText(string_format("|%u|%u", code, textID));
-        pPlayer->AddDialogMenu("START", string_format("start_quest( %u, %u )", code, textID));
-        pPlayer->AddDialogMenu("REJECT", "NULL");
-        return;
-
+        pPlayer->SetDialogText(string_format("QUEST|%u|%u", code, textID));
 
         auto rQuestBase = sObjectMgr->GetQuestBase(code);
 
@@ -622,19 +618,8 @@ void Messages::SendQuestList(Player *pPlayer)
 
     XPacket questPct(TS_SC_QUEST_LIST);
     QuestManager manager{};
-    uint16 cnt = 1;
+    uint16 cnt = 0;
     questPct << cnt;
-    questPct << 1010;
-    questPct << 90301311;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
-    questPct << 0;
 
     pPlayer->SendPacket(questPct);
 }

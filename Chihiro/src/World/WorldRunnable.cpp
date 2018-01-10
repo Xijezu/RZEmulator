@@ -33,6 +33,7 @@ void WorldRunnable::run()
     uint32 realPrevTime = getMSTime();
 
     uint32 prevSleepTime = 0;
+    World::m_worldLoopCounter = 0;
 
     // is Stopped event
     while (!World::IsStopped()) {

@@ -152,11 +152,9 @@ void ArRegion::removeObject(WorldObject *obj, svObjects *objContainer)
 {
     {
         MX_UNIQUE_GUARD writeGuard(i_lock);
-        MX_LOG_INFO("region", "ArRegion::removeObject: Trying to get mutex");
         objContainer->erase(obj->GetHandle());
         obj->_region = nullptr;
         obj->RemoveFromWorld();
-        MX_LOG_INFO("region", "ArRegion::removeObject: Releasing mutex");
     }
 }
 
@@ -169,10 +167,10 @@ void ArRegion::AddObject(WorldObject *obj)
         if (obj->GetObjType() == OBJ_MOVABLE) {
             //m_vMovable[obj->GetHandle()] = obj;
             addObject(obj, &m_vMovable);
-        } else if (obj->GetObjType() == OBJ_CLIENT)
+        } else if (obj->GetObjType() == OBJ_CLIENT) {
             //m_vClient[obj->GetHandle()] = obj;
             addObject(obj, &m_vClient);
-        else if (obj->GetObjType() == OBJ_STATIC)
+        }else if (obj->GetObjType() == OBJ_STATIC)
             //m_vStatic[obj->GetHandle()] = obj;
             addObject(obj, &m_vStatic);
 //        obj->_region = this;
@@ -188,10 +186,10 @@ void ArRegion::RemoveObject(WorldObject *obj) {
         if (obj->GetObjType() == OBJ_MOVABLE)
             //m_vMovable.erase(obj->GetHandle());
             removeObject(obj, &m_vMovable);
-        else if (obj->GetObjType() == OBJ_CLIENT)
+        else if (obj->GetObjType() == OBJ_CLIENT) {
             //m_vClient.erase(obj->GetHandle());
             removeObject(obj, &m_vClient);
-        else if (obj->GetObjType() == OBJ_STATIC)
+        }else if (obj->GetObjType() == OBJ_STATIC)
             //m_vStatic.erase(obj->GetHandle());
             removeObject(obj, &m_vStatic);
     }

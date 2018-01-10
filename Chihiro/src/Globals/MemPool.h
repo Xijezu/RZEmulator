@@ -10,12 +10,14 @@
 #include "SharedMutex.h"
 #include "HashMapHolder.h"
 
+typedef UNORDERED_MAP<uint32, WorldObject*> UpdateMap;
+
 class MemoryPoolMgr {
 private:
-    MemoryPoolMgr() = default;
+    /*MemoryPoolMgr() = default;
     ~MemoryPoolMgr() = default;
     MemoryPoolMgr(const MemoryPoolMgr&);
-    MemoryPoolMgr& operator=(const MemoryPoolMgr&);
+    MemoryPoolMgr& operator=(const MemoryPoolMgr&);*/
 public:
     static MemoryPoolMgr* instance()
     {
@@ -50,6 +52,8 @@ public:
     template<class T> void AddObject(T* object)
     {
         HashMapHolder<T>::Insert(object);
+        if(object->GetSubType() != ST_Object)
+            addUpdateQueue.add(object);
     }
 
 
@@ -71,6 +75,9 @@ private:
     template<class T> void _unload();
     template<class T> void _update();
     std::set<WorldObject*> i_objectsToRemove{};
+    ACE_Based::LockedQueue<WorldObject*, ACE_Thread_Mutex> addUpdateQueue{};
+
+    UpdateMap i_objectsToUpdate{};
 
     uint32_t m_nMiscTop{0x20000001};
     uint32_t m_nMonsterTop{0x40000001};
@@ -80,5 +87,5 @@ private:
     uint32_t m_nItemTop{0x00000001};
 };
 
-#define sMemoryPool MemoryPoolMgr::instance() //ACE_Singleton<MemoryPoolMgr, ACE_Null_Mutex>::instance()
+#define sMemoryPool ACE_Singleton<MemoryPoolMgr, ACE_Thread_Mutex>::instance()
 #endif //MEMORYPOOL_H

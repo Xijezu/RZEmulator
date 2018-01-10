@@ -115,6 +115,10 @@ public:
     bool IsInWorld() const
     { return m_inWorld; }
 
+    bool IsDeleteRequested() const
+    { return m_bDeleteRequest; }
+
+    void DeleteThis() { m_bDeleteRequest = true; }
     virtual void AddToWorld();
 
     virtual void RemoveFromWorld();
@@ -307,6 +311,7 @@ protected:
     SubType  _subType;
 private:
     bool m_inWorld;
+    bool m_bDeleteRequest;
 
     // for output helpful error messages from asserts
     bool PrintIndexError(uint32 index, bool set) const;
@@ -492,6 +497,7 @@ struct Position {
         return string_format("Position: X: %u, Y: %u, Layer: %u", GetPositionX(), GetPositionY(), GetLayer());
     }
 };
+
 
 class ArMoveVector : public Position {
 public:
