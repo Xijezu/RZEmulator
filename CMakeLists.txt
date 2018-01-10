@@ -30,6 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Configuration
                     ${CMAKE_SOURCE_DIR}/shared/Database
                     ${CMAKE_SOURCE_DIR}/shared/Dynamic
+                    ${CMAKE_SOURCE_DIR}/shared/Dynamic/LinkedReference
                     ${CMAKE_SOURCE_DIR}/shared/Threading
                     ${CMAKE_SOURCE_DIR}/shared/Debugging
                     ${CMAKE_SOURCE_DIR}/shared/Encryption

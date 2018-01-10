@@ -212,11 +212,10 @@ DamageTag* Monster::addDamage(uint handle, int nDamage)
     return tag;
 }
 
-DamageTag* Monster::getDamageTag(uint handle, uint t)
-{
+DamageTag* Monster::getDamageTag(uint handle, uint t) {
     if (m_vDamageList.empty())
         return nullptr;
-    for (unsigned long i = m_vDamageList.size() - 1; i >= 0; --i) {
+    for (uint i = 0; i < m_vDamageList.size(); i++) {
         DamageTag *dt = &m_vDamageList[i];
         if (dt->uid == handle) {
             if (t != 0)

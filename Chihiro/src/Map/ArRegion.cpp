@@ -129,7 +129,8 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
 
     for (uint x = left; x <= right; ++x) {
         for (uint y = top; y < bottom; ++y) {
-            if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0) {
+            if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0)
+            {
                 auto region = GetRegion(x, y, layer);
                 if (region != nullptr)
                     fn(region);
@@ -141,7 +142,7 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
 void ArRegion::addObject(WorldObject *obj, svObjects *objContainer)
 {
     {
-        //MX_UNIQUE_GUARD writeGuard(i_lock);
+        MX_UNIQUE_GUARD writeGuard(i_lock);
         objContainer->insert({obj->GetHandle(), obj});
         obj->AddToWorld();
         obj->_region = this;
@@ -150,10 +151,12 @@ void ArRegion::addObject(WorldObject *obj, svObjects *objContainer)
 void ArRegion::removeObject(WorldObject *obj, svObjects *objContainer)
 {
     {
-        //MX_UNIQUE_GUARD writeGuard(i_lock);
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        MX_LOG_INFO("region", "ArRegion::removeObject: Trying to get mutex");
         objContainer->erase(obj->GetHandle());
         obj->_region = nullptr;
         obj->RemoveFromWorld();
+        MX_LOG_INFO("region", "ArRegion::removeObject: Releasing mutex");
     }
 }
 
@@ -194,22 +197,21 @@ void ArRegion::RemoveObject(WorldObject *obj) {
     }
 }
 uint ArRegion::DoEachClient(const std::function<void(Unit *)> &fn) {
-    //MX_SHARED_GUARD readGuard(i_lock);
+    MX_SHARED_GUARD readGuard(i_lock);
     for (auto &obj : this->m_vClient) {
         if (obj.second != nullptr && obj.second->IsInWorld())
             fn(dynamic_cast<Unit *>(obj.second));
-        //fn.run(dynamic_cast<Unit*>(obj.second));
     }
 }
 void ArRegion::DoEachMovableObject(const std::function<void(WorldObject *)> &fn) {
-    //MX_SHARED_GUARD readGuard(i_lock);
+    MX_SHARED_GUARD readGuard(i_lock);
     for (auto &obj : m_vMovable) {
         if (obj.second != nullptr)
             fn(obj.second);
     }
 }
 void ArRegion::DoEachStaticObject(const std::function<void(WorldObject *)> &fn) {
-    //MX_SHARED_GUARD readGuard(i_lock);
+    MX_SHARED_GUARD readGuard(i_lock);
     for (auto &obj : m_vStatic) {
         if (obj.second != nullptr)
             fn(obj.second);

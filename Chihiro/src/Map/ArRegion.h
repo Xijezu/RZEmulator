@@ -100,5 +100,5 @@ private:
     uint32 m_nRegionBlockHeight{};
 };
 
-#define sArRegion ACE_Singleton<ArRegionContainer, ACE_Null_Mutex>::instance()
+#define sArRegion ACE_Singleton<ArRegionContainer, ACE_Thread_Mutex>::instance()
 #endif // __AR_REGION_H

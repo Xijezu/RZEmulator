@@ -84,11 +84,6 @@ int main(int argc, char **argv)
 
 	sWorld->InitWorld();
 
-	///-Launch WorldRunnable thread
-	ACE_Based::Thread worldThread(new WorldRunnable);
-	worldThread.setPriority(ACE_Based::Highest);
-
-
 	ACE_INET_Addr auth_addr(sConfigMgr->GetIntDefault("AuthServer.Port", 4502), sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1").c_str());
 	if (sAuthNetwork->InitializeNetwork(auth_addr) != 0)
 	{
@@ -105,6 +100,11 @@ int main(int argc, char **argv)
 		return -1;
 		// go down and shutdown the server
 	}
+
+    ///-Launch WorldRunnable thread
+    ACE_Based::Thread worldThread(new WorldRunnable);
+    worldThread.setPriority(ACE_Based::Highest);
+
 	// maximum counter for next ping
 	uint32 numLoops = 30 * (MINUTE * 1000000 / 100000);
 	uint32 loopCounter = 0;

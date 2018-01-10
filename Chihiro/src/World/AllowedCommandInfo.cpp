@@ -35,6 +35,7 @@ const GameHandler commandHandler[] =
                 { "/battle", false, &AllowedCommandInfo::onBattleMode },
                 { "/notice", true, &AllowedCommandInfo::onCheatNotice },
                 { "/plist", false, &AllowedCommandInfo::onCheatParty },
+                { "/suicide", true, &AllowedCommandInfo::onCheatSuicide }
         };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
@@ -89,4 +90,8 @@ void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
                 (*this.*i.handler)(pClient,"");
         }
     }
+}
+void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &/*szMessage*/)
+{
+    World::StopNow(SHUTDOWN_EXIT_CODE);
 }

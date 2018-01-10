@@ -422,8 +422,8 @@ void World::AddMonsterToWorld(Monster *pMonster)
 
 void World::KickAll()
 {
-    for(auto& itr : m_sessions) {
-        itr.second->KickPlayer();
+    for(SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr) {
+        itr->second->KickPlayer();
     }
 }
 
