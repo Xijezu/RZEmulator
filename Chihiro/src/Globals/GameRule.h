@@ -20,6 +20,7 @@ public:
     static float GetItemValue(float, int, int, int, int);
     static float GetPickableRange();
     static int GetChipLevelLimit(int idx);
+    static int GetMaxLevel() { return 150; }
 private:
     static int _chipLevelLimit[];
     static float _itemDropRate;

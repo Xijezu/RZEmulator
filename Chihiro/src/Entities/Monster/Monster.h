@@ -301,6 +301,7 @@ private:
     void calcPartyContribute(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
     void procEXP(Unit* pKiller, std::vector<VirtualParty>& vPartyContribute);
     void procDropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty);
+    void procQuest(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute);
     void procDropGold(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty);
     void dropItem(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex);
     void dropItemGroup(Position pos, Unit* pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex);

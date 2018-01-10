@@ -14,12 +14,19 @@ class WorldSession;
 
 class Player : public Unit, public QuestEventHandler {
 public:
+    friend class Messages;
+
     explicit Player(uint32);
     ~Player() override;
 
     static void EnterPacket(XPacket &, Player *, Player*);
     static void DoEachPlayer(const std::function<void (Player*)>& fn);
     static Player* FindPlayer(const std::string& szName);
+
+    int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
+    void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
+    void UpdateQuestStatusByMonsterKill(int monster_id);
+    void GetQuestByMonster(int monster_id, std::vector<Quest*> &vQuest, int type);
 
     int32 GetPermission()
     { return GetInt32Value(UNIT_FIELD_PERMISSION); }
@@ -41,6 +48,7 @@ public:
     bool ReadSummonList(int);
     bool ReadEquipItem();
     bool ReadSkillList(int);
+    bool ReadQuestList();
 
     // Warping
     void PendWarp(int x, int y, uint8_t layer);
@@ -156,11 +164,19 @@ public:
 
     Summon* m_pMainSummon{nullptr};
     uint m_hTamingTarget{};
+    void StartQuest(int code, int nStartQuestID, bool bForce);
+    void EndQuest(int code, int nRewardID, bool bForce);
+    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
+    int GetQuestProgress(int nQuestID);
 protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
     void onExpChange() override;
     void onCantAttack(uint target, uint t) override;
     void onModifyStatAndAttribute() override;
+
+    void onStartQuest(Quest* pQuest);
+    void updateQuestStatus(Quest* pQuest);
+    void onEndQuest(Quest* pQuest);
 
 private:
     WorldSession *m_session{nullptr};

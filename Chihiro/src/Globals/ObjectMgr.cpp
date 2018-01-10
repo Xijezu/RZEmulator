@@ -299,7 +299,7 @@ bool ObjectMgr::LoadQuestResource()
         for (int &i : q.nForeQuest) {
             i = field[idx++].GetInt32();
         }
-        q.bForceCheckType = field[idx++].GetUInt8() == 1;
+        q.bForceCheckType = field[idx++].GetUInt8() != 0;
         q.strAcceptScript = field[idx++].GetString();
         q.strClearScript = field[idx++].GetString();
         q.strScript = field[idx].GetString();

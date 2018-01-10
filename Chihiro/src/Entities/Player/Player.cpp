@@ -12,6 +12,7 @@
 #include "NPC.h"
 #include "MemPool.h"
 #include "SharedMutex.h"
+#include "GameRule.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -27,6 +28,8 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
     _subType  = ST_Player;
     _objType  = OBJ_CLIENT;
     _valuesCount = BATTLE_FIELD_END;
+
+    m_QuestManager.m_pHandler = this;
 
     _InitValues();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
@@ -166,7 +169,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
             m_pMainSummon = GetSummon(mainSummon);
         }
 
-        if(!ReadEquipItem() || !ReadSkillList(GetInt32Value(UNIT_FIELD_UID)))
+        if(!ReadEquipItem() || !ReadSkillList(GetInt32Value(UNIT_FIELD_UID)) || !ReadQuestList())
             return false;
 
         CalculateStat();
@@ -221,6 +224,37 @@ bool Player::ReadItemList(int sid)
     }
     return true;
 }
+
+
+bool Player::ReadQuestList()
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_QUEST);
+    stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
+    if(PreparedQueryResult result = CharacterDatabase.Query(stmt))
+    {
+        do {
+            Field* fields = result->Fetch();
+            int idx = 0;
+            int nID = fields[idx++].GetInt32();
+            int Code = fields[idx++].GetInt32();
+            int nStartID = fields[idx++].GetInt32();
+            int nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
+            for (int &nStatu : nStatus)
+                nStatu = fields[idx++].GetInt32();
+            auto progress = (QuestProgress)fields[idx].GetInt32();
+            auto q = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
+            if(!m_QuestManager.AddQuest(q))
+            {
+                delete q;
+                MX_LOG_ERROR("entities.player", "Player::ReadQuestList: Failed to alloc Quest!");
+                return false;
+            }
+        }
+        while(result->NextRow());
+    }
+    return true;
+}
+
 
 bool Player::ReadSkillList(int)
 {
@@ -655,7 +689,7 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
             // Weight modifier
         }
         // UpdateWeight
-        // UpdateQuest
+//        UpdateQuestStatusByItemUpgrade();
         result = 0;
     }
     return result;
@@ -1207,33 +1241,40 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         return false;
 
     Item *item1{nullptr}, *item2{nullptr};
-    if (pos == ItemWearType::WearShield) {
-        if (pItem->m_pItemBase->group == ItemGroup::Bullet) {
+    if (pos == ItemWearType::WearShield)
+    {
+        if (pItem->m_pItemBase->group == ItemGroup::Bullet)
+        {
             item1 = m_anWear[0];
             if (item1 == nullptr
-                ||  (item1->m_pItemBase->iclass != ItemClass::ClassCrossBow
+                || (item1->m_pItemBase->iclass != ItemClass::ClassCrossBow
                     && item1->m_pItemBase->iclass != ItemClass::ClassLightBow
                     && item1->m_pItemBase->iclass != ItemClass::ClassHeavyBow))
                 return false;
         }
-        if (pItem->m_pItemBase->group == ItemGroup::Weapon) {
+        if (pItem->m_pItemBase->group == ItemGroup::Weapon)
+        {
             item1 = m_anWear[0];
             if (item1 == nullptr)
                 return false;
 
-            if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandSword && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandSword) {
+            if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandSword && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
+            {
                 // TODO: Check for PassiveSkill
                 pos = ItemWearType::WearWeapon;
-            } else if (item1->m_pItemBase->iclass == ItemClass::ClassDagger && pItem->m_pItemBase->iclass == ItemClass::ClassDagger) {
+            } else if (item1->m_pItemBase->iclass == ItemClass::ClassDagger && pItem->m_pItemBase->iclass == ItemClass::ClassDagger)
+            {
                 // TODO: Check for PassiveSkill
                 pos = ItemWearType::WearWeapon;
-            } else if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe) {
+            } else if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+            {
                 // TODO: CheckForPassiveSkill
                 pos = ItemWearType::WearWeapon;
             }
         }
     }
-    if (pos == ItemWearType::WearDecoShield) {
+    if (pos == ItemWearType::WearDecoShield)
+    {
 
         if (pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandSword
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandSword
@@ -1247,7 +1288,8 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoCrossBow
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandStaff
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandStaff
-            || pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe) {
+            || pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+        {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
             if (item1 != nullptr
@@ -1255,17 +1297,20 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 && item1->m_pItemBase->iclass != ItemClass::ClassDagger
                 && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
                 || item2 == nullptr
-                && item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
-                && item2->m_pItemBase->iclass != ItemClass::ClassDagger
-                && item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
-                || m_anWear[14] == nullptr) { // TODO: PassiveSkill
+                   && item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                   && item2->m_pItemBase->iclass != ItemClass::ClassDagger
+                   && item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
+                || m_anWear[14] == nullptr)
+            { // TODO: PassiveSkill
                 pos = ItemWearType::WearDecoWeapon;
             }
-        } else {
+        } else
+        {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
             if (item1 != nullptr && item1->m_pItemBase->iclass != ItemClass::ClassShield
-                || item2 != nullptr && item2->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
+                || item2 != nullptr && item2->m_pItemBase->wear_type == ItemWearType::WearTwoHand)
+            {
                 return false;
             }
         }
@@ -1275,26 +1320,34 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     if (pos == ItemWearType::WearTwoFingerRing)
         pos = ItemWearType::WearRing;
     item1   = m_anWear[9];
-    if (item1 != nullptr) {
+    if (item1 != nullptr)
+    {
         if (item1->GetWearType() != ItemWearType::WearTwoFingerRing && pItem->GetWearType() == ItemWearType::WearRing)
             pos = ItemWearType::WearSecondRing;
     }
-    if (pos == ItemWearType::WearBagSlot) {
+    if (pos == ItemWearType::WearBagSlot)
+    {
         item1 = m_anWear[23];
-        if (item1 != nullptr) {
-            if (item1->m_Instance.Code != pItem->m_Instance.Code) {
+        if (item1 != nullptr)
+        {
+            if (item1->m_Instance.Code != pItem->m_Instance.Code)
+            {
                 int nCurrentVarIdx = -1;
 
-                for (int i = 0; i < 4; ++i) {
-                    if (item1->m_pItemBase->opt_type[i] == 20) {
+                for (int i               = 0; i < 4; ++i)
+                {
+                    if (item1->m_pItemBase->opt_type[i] == 20)
+                    {
                         nCurrentVarIdx = i;
                         break;
                     }
                 }
-                int nCurrentVarIdx2 = -1;
+                int      nCurrentVarIdx2 = -1;
 
-                for (int i = 0; i < 4; ++i) {
-                    if (pItem->m_pItemBase->opt_type[i] == 20) {
+                for (int i = 0; i < 4; ++i)
+                {
+                    if (pItem->m_pItemBase->opt_type[i] == 20)
+                    {
                         nCurrentVarIdx2 = i;
                         break;
                     }
@@ -1309,13 +1362,16 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             }
         }
     }
-    if (pos != ItemWearType::WearDecoWeapon && pos != ItemWearType::WearDecoShield) {
+    if (pos != ItemWearType::WearDecoWeapon && pos != ItemWearType::WearDecoShield)
+    {
 
-    } else {
+    } else
+    {
         item1 = m_anWear[pos != ItemWearType::WearDecoWeapon ? 1 : 0];
-        if(item1 == nullptr || (int)item1->m_pItemBase->iclass > (int)ItemClass::ClassShield)
+        if (item1 == nullptr || (int)item1->m_pItemBase->iclass > (int)ItemClass::ClassShield)
             return false;
-        switch(item1->m_pItemBase->iclass) {
+        switch (item1->m_pItemBase->iclass)
+        {
             case ItemClass::ClassShield:
                 if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoShield)
                     return false;
@@ -1357,70 +1413,78 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                     return false;
                 break;
             case ItemClass::ClassCrossBow:
-                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoCrossBow)
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoCrossBow)
                     return false;
                 break;
             case ItemClass::ClassOneHandStaff:
-                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandStaff)
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandStaff)
                     return false;
                 break;
             case ItemClass::ClassTwoHandStaff:
-                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandStaff)
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoTwoHandStaff)
                     return false;
                 break;
             case ItemClass::ClassOneHandAxe:
-                if(pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandAxe)
+                if (pItem->m_pItemBase->iclass != ItemClass::ClassDecoOneHandAxe)
                     return false;
                 break;
             default:
                 return false;
         }
     }
-    if(pos >= 24 || pos < 0)
+    if (pos >= 24 || pos < 0)
         return false;
 
-    if(!vpOverlappItemList.empty()) {
-        if(m_anWear[pos] != nullptr)
-            vpOverlappItemList.emplace_back(pos);
-        if(pItem->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
-            if(m_anWear[1] != nullptr) {
-                if (!pItem->IsBow() && !pItem->IsCrossBow()
-                    || m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet) {
-                    vpOverlappItemList.emplace_back(1);
-                }
-                if(m_anWear[15] != nullptr) {
-                    vpOverlappItemList.emplace_back(15);
-                }
+    if (m_anWear[pos] != nullptr)
+        vpOverlappItemList.emplace_back(pos);
+    if (pItem->m_pItemBase->wear_type == ItemWearType::WearTwoHand)
+    {
+        if (m_anWear[1] != nullptr)
+        {
+            if (!pItem->IsBow() && !pItem->IsCrossBow() || m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet)
+            {
+                vpOverlappItemList.emplace_back(1);
+            }
+            if (m_anWear[15] != nullptr)
+            {
+                vpOverlappItemList.emplace_back(15);
             }
         }
-        if(pos == ItemWearType::WearShield) {
-            item1 = m_anWear[15];
-            if(item1 != nullptr) {
-                if(pItem->m_pItemBase->iclass == ItemClass::ClassShield && item1->m_pItemBase->iclass != ItemClass::ClassDecoShield)
-                    vpOverlappItemList.emplace_back(15);
-                if(item1->m_pItemBase->iclass == ItemClass::ClassDecoShield)
-                    vpOverlappItemList.emplace_back(15);
+    }
+    if (pos == ItemWearType::WearShield)
+    {
+        item1 = m_anWear[15];
+        if (item1 != nullptr)
+        {
+            if (pItem->m_pItemBase->iclass == ItemClass::ClassShield && item1->m_pItemBase->iclass != ItemClass::ClassDecoShield)
+                vpOverlappItemList.emplace_back(15);
+            if (item1->m_pItemBase->iclass == ItemClass::ClassDecoShield)
+                vpOverlappItemList.emplace_back(15);
+        }
+    }
+    item1   = m_anWear[0];
+    if (item1 != nullptr)
+    {
+        if (item1->m_pItemBase->wear_type == ItemWearType::WearTwoHand)
+        {
+            if (pos == ItemWearType::WearShield)
+            {
+                if (!item1->IsBow() && !item1->IsCrossBow() || pItem->m_pItemBase->group != ItemGroup::Bullet)
+                    vpOverlappItemList.emplace_back(0);
             }
         }
-        item1 = m_anWear[0];
-        if(item1 != nullptr) {
-            if(item1->m_pItemBase->wear_type == ItemWearType::WearTwoHand) {
-                if(pos == ItemWearType::WearShield) {
-                    if(!item1->IsBow() && !item1->IsCrossBow() || pItem->m_pItemBase->group != ItemGroup::Bullet)
-                        vpOverlappItemList.emplace_back(0);
-                }
-            }
-        }
+    }
 
-        if(m_anWear[10] != nullptr && pItem->GetWearType() == ItemWearType::WearTwoFingerRing)
-            vpOverlappItemList.emplace_back(10);
+    if (m_anWear[10] != nullptr && pItem->GetWearType() == ItemWearType::WearTwoFingerRing)
+        vpOverlappItemList.emplace_back(10);
 
-        item1 = m_anWear[9];
-        if(item1 != nullptr) {
-            if(item1->GetWearType() == ItemWearType::WearTwoFingerRing) {
-                if(pItem->GetWearType() == ItemWearType::WearRing)
-                    vpOverlappItemList.emplace_back(9);
-            }
+    item1 = m_anWear[9];
+    if (item1 != nullptr)
+    {
+        if (item1->GetWearType() == ItemWearType::WearTwoFingerRing)
+        {
+            if (pItem->GetWearType() == ItemWearType::WearRing)
+                vpOverlappItemList.emplace_back(9);
         }
     }
     return true;
@@ -1549,11 +1613,8 @@ bool Player::IsInProgressQuest(int code)
 bool Player::IsStartableQuest(int code, bool bForQuestMark)
 {
     auto qbs = sObjectMgr->GetQuestBase(code);
-    if (qbs->nLimitLevel - GetLevel() > 4
-        || qbs->nLimitJobLevel > GetCurrentJLv()
-        || bForQuestMark
-           && qbs->nLimitIndication != 0
-           && GetLevel() - qbs->nLimitLevel > 12)
+    //if (qbs->nLimitLevel - GetLevel() > 4 || qbs->nLimitJobLevel > GetCurrentJLv() || bForQuestMark  && qbs->nLimitIndication != 0  && GetLevel() - qbs->nLimitLevel > 12)
+    if(false)
         return false;
 
     if (qbs->nLimitJob != 0) {
@@ -1602,7 +1663,16 @@ bool Player::CheckFinishableQuestAndGetQuestStruct(int code)
 
 void Player::onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus)
 {
+    if(quest->IsFinishable())
+    {
+        if(quest->m_QuestBase->nEndType == 2)
+        {
+            //EndQuest(quest->m_QuestBase->nCode, 0, false);
+        }
 
+        Messages::SendNPCStatusInVisibleRange(this);
+    }
+    Messages::SendQuestStatus(this, quest);
 }
 
 void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress)
@@ -1718,4 +1788,273 @@ Player* Player::FindPlayer(const std::string &szName)
             return itr->second;
     }
     return nullptr;
+}
+
+void Player::StartQuest(int code, int nStartQuestID, bool bForce)
+{
+    auto rQuestBase = sObjectMgr->GetQuestBase(code);
+    if(rQuestBase == nullptr)
+        return;
+
+    if(m_QuestManager.m_vActiveQuest.size() >= 20)
+    {
+        auto str = string_format("START|FAIL|QUEST_NUMBER_EXCEED|%d", rQuestBase->nQuestTextID);
+        Messages::SendQuestMessage(120, this, str);
+        return;
+    }
+
+    if(!bForce && !IsStartableQuest(code, false))
+    {
+        auto str = string_format("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
+        Messages::SendQuestMessage(120, this, str);
+        return;
+    }
+
+    bool bHasRandomQuest = false;
+    if(Quest::IsRandomQuest(code) && m_QuestManager.HasRandomQuestInfo(code))
+        bHasRandomQuest = true;
+    if(m_QuestManager.StartQuest(code, nStartQuestID))
+    {
+        auto q = m_QuestManager.FindQuest(code);
+        if(q == nullptr)
+        {
+            return;
+        }
+
+        onStartQuest(q);
+        Quest::DB_Insert(this, q);
+
+        if(!Quest::IsRandomQuest(q->m_Instance.Code))
+        {
+            auto str = string_format("START|SUCCESS|%d", rQuestBase->nCode);
+            Messages::SendQuestMessage(120, this, str);
+            Messages::SendQuestList(this);
+            if(!q->m_QuestBase->strAcceptScript.empty())
+            {
+                sScriptingMgr->RunString(this, q->m_QuestBase->strAcceptScript);
+            }
+            return;
+        }
+    }
+
+    auto str = string_format("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
+    Messages::SendQuestMessage(120, this, str);
+}
+
+void Player::onStartQuest(Quest *pQuest)
+{
+    updateQuestStatus(pQuest);
+    Messages::SendNPCStatusInVisibleRange(this);
+}
+
+void Player::onEndQuest(Quest *pQuest)
+{
+    m_QuestManager.PopFromActiveQuest(pQuest);
+    Messages::SendNPCStatusInVisibleRange(this);
+}
+
+void Player::updateQuestStatus(Quest *pQuest)
+{
+    int nMaxItemCollectTypeCount = 0;
+    int nItemCode = 0;
+
+    QuestType qt = pQuest->m_QuestBase->nType;
+    if(qt == QuestType::QT_Collect || qt == QuestType::QT_HuntItem || qt == QuestType::QT_HuntItemFromAnyMonsters)
+    {
+        switch(qt)
+        {
+            case QuestType::QT_Collect:
+                nMaxItemCollectTypeCount = 2;
+                break;
+            case QuestType::QT_HuntItemFromAnyMonsters:
+            case QuestType ::QT_HuntItem:
+                nMaxItemCollectTypeCount = 3;
+                break;
+            default:
+                break;
+        }
+
+        for(int i = 0; i < nMaxItemCollectTypeCount; ++i)
+        {
+            nItemCode = pQuest->GetValue(2 * i);
+            if(nItemCode != 0)
+            {
+                auto item = FindItemByCode(nItemCode);
+                if(item != nullptr)
+                {
+                    m_QuestManager.UpdateQuestStatusByItemCount(nItemCode, item->m_Instance.nCount);
+                }
+            }
+        }
+    }
+    if(qt == QuestType::QT_LearnSkill)
+    {
+        m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(0), GetBaseSkillLevel(pQuest->GetValue(0)));
+        m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(2), GetBaseSkillLevel(pQuest->GetValue(2)));
+        m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(4), GetBaseSkillLevel(pQuest->GetValue(4)));
+    }
+    if(qt == QuestType::QT_JobLevel)
+    {
+        m_QuestManager.UpdateQuestStatusByJobLevel(GetJobDepth(), GetCurrentJLv());
+    }
+    if(qt == QuestType::QT_Parameter)
+    {
+        m_QuestManager.UpdateQuestStatusByParameter(99, GetUInt32Value(UNIT_FIELD_STATUS));
+    }
+}
+
+void Player::UpdateQuestStatusByMonsterKill(int monster_id)
+{
+    m_QuestManager.UpdateQuestStatusByMonsterKill(monster_id);
+}
+
+void Player::GetQuestByMonster(int monster_id, std::vector<Quest *> &vQuest, int type)
+{
+    m_QuestManager.GetRelatedQuestByMonster(monster_id, vQuest, type);
+}
+
+void Player::EndQuest(int code, int nRewardID, bool bForce)
+{
+    Quest *q{nullptr};
+    if (!CheckFinishableQuestAndGetQuestStruct(code, q, bForce))
+    {
+        Messages::SendQuestMessage(120, this, "END|FAIL|0");
+        return;
+    }
+    auto  nPrevGold = GetGold();
+    float fMod{0.0f};
+    if (Quest::IsRandomQuest(q->m_Instance.Code))
+    {
+        int i                        = 0;
+        int nMaxItemCollectTypeCount = 3;
+        do
+        {
+            fMod += (float)(q->GetRandomValue(i++) * q->GetValue(nMaxItemCollectTypeCount)) / 100.0f;
+            nMaxItemCollectTypeCount += 4;
+        } while (nMaxItemCollectTypeCount <= 15);
+    } else
+    {
+        fMod = 1.0f;
+    }
+
+    auto res = ChangeGold((long)(q->m_QuestBase->nGold * fMod) + GetGold());
+    if (res != TS_RESULT_SUCCESS)
+    {
+        Messages::SendQuestMessage(120, this, string_format("END|TOO_MUCH_MONEY|%d", res));
+        return;
+    }
+    if (m_QuestManager.EndQuest(q))
+    {
+        auto str = string_format("END|EXP|%d|%d|%d|%d", q->m_Instance.Code, q->m_QuestBase->nEXP, q->m_QuestBase->nJP, q->m_QuestBase->nGold);
+        Messages::SendQuestMessage(120, this, str);
+
+        auto nRewardEXP = q->m_QuestBase->nEXP;
+        if (GameRule::GetMaxLevel() > 0)
+        {
+            if (q->m_QuestBase->nEXP + GetEXP() >= sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1))
+            {
+                if (GetEXP() < sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1))
+                {
+                    nRewardEXP = (uint64)sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1) - GetEXP();
+                } else
+                {
+                    nRewardEXP = 0;
+                }
+            }
+        }
+
+        auto nRewardJP = (uint)((float)q->m_QuestBase->nJP * fMod);
+        if (nRewardEXP > 0)
+        {
+            // @todo: max JP
+        }
+
+        AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
+        // @todo: favor
+
+        if (q->m_QuestBase->nType == QuestType::QT_Collect || q->m_QuestBase->nType == QuestType::QT_HuntItem || q->m_QuestBase->nType == QuestType::QT_HuntItemFromAnyMonsters)
+        {
+            int      nItemCode{0};
+            for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QT_Collect) ? 6 : 3); ++i)
+            {
+                nItemCode = q->GetValue(2 * i);
+                if (nItemCode != 0)
+                {
+                    auto pItem = FindItemByCode(nItemCode);
+                    if (pItem != nullptr)
+                        Erase(pItem, (uint64)q->GetValue((2 * i) + 1), false);
+                }
+            }
+        }
+
+        if (q->m_QuestBase->DefaultReward.nItemCode != 0)
+        {
+            auto pItem = Item::AllocItem(0, q->m_QuestBase->DefaultReward.nItemCode, (uint64)(q->m_QuestBase->DefaultReward.nQuantity * fMod), GenerateCode::ByQuest,
+                                         q->m_QuestBase->DefaultReward.nLevel < 1 ? 1 : q->m_QuestBase->DefaultReward.nLevel, -1, -1, 0, 0, 0, 0, 0);
+
+            PushItem(pItem, pItem->m_Instance.nCount, false);
+
+            Messages::SendQuestMessage(120, this, string_format("END|REWARD|%d", pItem->m_Instance.Code));
+        }
+        if(nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
+        {
+            auto reward = q->m_QuestBase->OptionalReward[nRewardID];
+            auto pItem  = Item::AllocItem(0, reward.nItemCode, (uint64)(reward.nQuantity * fMod), GenerateCode::ByQuest,
+                                          reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
+
+            PushItem(pItem, pItem->m_Instance.nCount, false);
+            Messages::SendQuestMessage(120, this, string_format("END|REWARD|%d", pItem->m_Instance.Code));
+        }
+        //if(q->m_QuestBase->nIsMagicPointQuest != 0)
+            //UpdateQuestByQuestEnd(q);
+
+        // DB_Insert is a "REPLACE INSERT", it acts like an Update in this case
+        Quest::DB_Insert(this, q);
+        onEndQuest(q);
+        Messages::SendQuestList(this);
+        if(!q->m_QuestBase->strClearScript.empty())
+            sScriptingMgr->RunString(this, q->m_QuestBase->strClearScript);
+        Save(false);
+    }
+    else
+    {
+        if(ChangeGold(nPrevGold) != TS_RESULT_SUCCESS)
+        {
+            MX_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nPrevGold);
+        }
+        Messages::SendQuestMessage(120, this, "END|FAIL|0");
+    }
+}
+
+bool Player::CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce)
+{
+    auto q1 = m_QuestManager.FindQuest(code);
+    if(q1 != nullptr && (q1->IsFinishable() || bForce))
+    {
+        pQuest = q1;
+        return true;
+    }
+    else
+    {
+        pQuest = nullptr;
+        return false;
+    }
+}
+
+int Player::GetQuestProgress(int nQuestID)
+{
+    if (m_QuestManager.IsStartableQuest(nQuestID))
+    {
+        return 0;
+    } else if (m_QuestManager.IsFinishedQuest(nQuestID))
+    {
+        return 255;
+    } else
+    {
+        auto q = m_QuestManager.FindQuest(nQuestID);
+        if (q != nullptr)
+            return q->IsFinishable() ? 2 : 1;
+        else
+            return -1;
+    }
 }

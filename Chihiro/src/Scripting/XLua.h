@@ -46,7 +46,9 @@ private:
     void SCRIPT_DialogTextWithoutQuestMenu(std::string);
     void SCRIPT_DialogMenu(std::string, std::string);
     void SCRIPT_DialogShow();
-    int SCRIPT_GetQuestProgress();
+    int SCRIPT_GetQuestProgress(int);
+    void SCRIPT_StartQuest(int, int);
+    void SCRIPT_EndQuest(int, int, sol::variadic_args);
 
     // Teleporter
     int SCRIPT_GetOwnDungeonID();

@@ -69,24 +69,29 @@ bool NPC::HasStartableQuest(Player *player)
     bool bHasProgressRandom{false};
     bool isstart{false};
 
-    for(auto& ql : m_vQuestLink_Start) {
+    for (auto &ql : m_vQuestLink_Start)
+    {
         auto b = sObjectMgr->GetQuestBase(ql->code);
-        if(b == nullptr)
+        if (b == nullptr)
             continue;
         auto qt = b->nType;
-        if(qt == QuestType::QT_RandomKillIndividual || qt == QuestType::QT_RandomCollect) {
-            if(player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code)) {
+        if (qt == QuestType::QT_RandomKillIndividual || qt == QuestType::QT_RandomCollect)
+        {
+            if (player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code))
+            {
                 bHasProgressRandom = true;
-            } else {
-                if(player->IsStartableQuest(ql->code, true))
+            } else
+            {
+                if (player->IsStartableQuest(ql->code, true))
                     isstart = true;
             }
-        } else {
-            if(player->IsStartableQuest(ql->code, true))
+        } else
+        {
+            if (player->IsStartableQuest(ql->code, true))
                 return true;
         }
     }
-    if(isstart && !bHasProgressRandom)
+    if (isstart && !bHasProgressRandom)
         return true;
 
     return false;

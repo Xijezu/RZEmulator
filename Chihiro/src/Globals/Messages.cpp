@@ -533,79 +533,109 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
     return v2;
 }
 
-void Messages::SendQuestInformation(Player *pPlayer, int code, int text)
+void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int ttype)
 {
     //auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc")));
-    auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     std::string strButton{};
     std::string strTrigger{};
-    if(true) {
-        int progress = 0;
-        int type = 3;
+    int i = 0;
+    int type = 3;
 
-        if(text != 0) {
+    auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
+    if(npc == nullptr)
+    {
+
+    }
+    if(true /*npc != nullptr*/)
+    {
+        int progress = 0;
+        if (text != 0)
+        {
             progress = npc->GetProgressFromTextID(code, text);
-            if(progress == 1)
+            if (progress == 1)
                 type = 7;
-            if(progress == 2)
+            if (progress == 2)
                 type = 8;
-        } else {
-            if(pPlayer->IsStartableQuest(code, false))
+        }
+        else
+        {
+            if (pPlayer->IsStartableQuest(code, false))
                 progress = 0;
             else
                 progress = pPlayer->IsFinishableQuest(code) ? 2 : 1;
         }
-        Quest* q = pPlayer->FindQuest(code);
-        int textID = text;
-        if(textID == 0)
+        Quest *q     = pPlayer->FindQuest(code);
+        int   textID = text;
+        if (textID == 0)
             textID = npc != nullptr ? npc->GetQuestTextID(code, progress) : q->m_Instance.nStartID;
-        if(npc == nullptr) {
-            if(q->m_QuestBase->nEndType != 1 || progress != 2) {
-                type = 7;
+        if (npc == nullptr)
+        {
+            if (q->m_QuestBase->nEndType != 1 || progress != 2)
+            {
+                type     = 7;
                 progress = 1;
-            } else {
-                QuestLink* l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
-                if(l != nullptr && l->nEndTextID != 0)
+            } else
+            {
+                QuestLink *l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
+                if (l != nullptr && l->nEndTextID != 0)
                     textID = l->nEndTextID;
-                type = 8;
+                type       = 8;
             }
         }
 
         // /run function get_quest_progress() return 0 end
-        pPlayer->SetDialogTitle("Guide Arocel", 3);
+#if EPIC >= 5
+        pPlayer->SetDialogTitle("Guide Arocel", type);
+#else
+        pPlayer->SetDialogTitle("Guide Arocel", 0);
+#endif
         pPlayer->SetDialogText(string_format("QUEST|%u|%u", code, textID));
 
         auto rQuestBase = sObjectMgr->GetQuestBase(code);
 
-        if(progress != 0) {
-            if(pPlayer->IsFinishableQuest(code)) {
-                int i = 0;
-                for(i = 0; i < 3; i++) {
-                    if(rQuestBase->OptionalReward[i].nItemCode == 0)
+        if (progress != 0)
+        {
+            if (pPlayer->IsFinishableQuest(code))
+            {
+                for (i = 0; i < MAX_OPTIONAL_REWARD; i++)
+                {
+                    if (rQuestBase->OptionalReward[i].nItemCode == 0)
                         break;
 
                     strTrigger = string_format("end_quest( %u, %u )", code, i);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
                 }
-                if(i != 0) {
-                    strButton = "REWARD";
+                if (i != 0)
+                {
+                    strButton  = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
-                } else {
-                    strTrigger = string_format("end_quest( %u, -1 )", code);
+                } else
+                {
+#if EPIC <= 4
+                    ///- Hack for epic 4, use proper workaround instead @todo
+                    pPlayer->AddDialogMenu("Confirm", string_format("end_quest(%u, -1)", code));
+                    return;
+#else
+                    strTrigger = string_format("end_quest( %u, %u )", code, i);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
-                    strButton = "REWARD";
+                    strButton  = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
+#endif
                 }
-            } else {
-                strButton = "OK";
+            }
+            else
+            {
+                strButton  = "OK";
                 strTrigger = "";
             }
-        } else {
+        }
+        else
+        {
             // /run function get_quest_progress() return 0 end
             strTrigger = string_format("start_quest( %u, %u )", code, textID);
-            pPlayer->AddDialogMenu("ACCEPT", strTrigger);
+            pPlayer->AddDialogMenu("START", strTrigger);
             strTrigger = "";
-            strButton = "REJECT";
+            strButton  = "REJECT";
         }
         pPlayer->AddDialogMenu(strButton, strTrigger);
     }
@@ -617,10 +647,35 @@ void Messages::SendQuestList(Player *pPlayer)
         return;
 
     XPacket questPct(TS_SC_QUEST_LIST);
-    QuestManager manager{};
-    uint16 cnt = 0;
-    questPct << cnt;
+    questPct << (uint16)pPlayer->GetActiveQuestCount();
 
+    /* FUNCTOR BEGIN */
+    auto functor = [&questPct](Quest* pQuest) {
+        questPct << pQuest->m_Instance.Code;
+        questPct << pQuest->m_Instance.nStartID;
+        if(Quest::IsRandomQuest(pQuest->m_Instance.Code))
+        {
+            questPct << pQuest->GetRandomKey(0);
+            questPct << pQuest->GetRandomValue(0);
+            questPct << pQuest->GetRandomKey(1);
+            questPct << pQuest->GetRandomValue(1);
+            questPct << pQuest->GetRandomKey(2);
+            questPct << pQuest->GetRandomValue(2);
+        }
+        else
+        {
+           for(int i = 0; i < 6; ++i)
+           {
+               questPct << pQuest->m_QuestBase->nValue[i];
+           }
+        }
+        for(int i = 0; i < 3; ++i)
+        {
+            questPct << pQuest->m_Instance.nStatus[i];
+        }
+    };
+    /* FUNCTOR END */
+    pPlayer->DoEachActiveQuest(functor);
     pPlayer->SendPacket(questPct);
 }
 
@@ -740,4 +795,35 @@ void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::strin
         sWorld->Broadcast((uint)(p->GetPositionX() / g_nRegionSize), (uint)(p->GetPositionY() / g_nRegionSize), p->GetLayer(), result);
         Messages::SendResult(p, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
     }
+}
+
+void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::string &szString)
+{
+    SendChatMessage(nChatType, "@QUEST", pTarget, szString);
+}
+
+void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
+{
+    sArRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
+                                   (uint)(pPlayer->GetPositionY() / g_nRegionSize),
+                                   pPlayer->GetLayer(),
+                                   [&pPlayer](ArRegion *rgn) {
+                                       rgn->DoEachMovableObject([&pPlayer](WorldObject *obj) {
+                                           XPacket pct(TS_SC_STATUS_CHANGE);
+                                           pct << obj->GetHandle();
+                                           pct << Messages::GetStatusCode(obj, pPlayer);
+                                           pPlayer->SendPacket(pct);
+                                       });
+                                   });
+}
+
+void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
+{
+    XPacket questPct(TS_SC_QUEST_STATUS);
+    questPct << pQuest->m_Instance.Code;
+    for(int i = 0; i < 3; ++i)
+    {
+        questPct << pQuest->m_Instance.nStatus[i];
+    }
+    pPlayer->SendPacket(questPct);
 }

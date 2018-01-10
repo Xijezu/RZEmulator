@@ -17,8 +17,10 @@
 
 #include "Quest.h"
 #include "ObjectMgr.h"
+#include "DatabaseEnv.h"
+#include "Player.h"
 
-Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, int *status, QuestProgress progress, int nStartID)
+Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const int *status, QuestProgress progress, int nStartID)
 {
     auto result = new Quest{};
     if(result != nullptr) {
@@ -33,7 +35,7 @@ Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, int *sta
         result->m_Instance.nID = nID;
         result->m_Instance.nStartID = nStartID;
         result->m_Instance.Code = code;
-        for(int i = 0; i < 6; ++i) {
+        for(int i = 0; i < MAX_QUEST_STATUS; ++i) {
             result->m_Instance.nStatus[i] = status[i];
         }
         result->m_Instance.nProgress = progress;
@@ -244,4 +246,18 @@ bool Quest::IsFinishable() const
             break;
     }
     return false;
+}
+
+void Quest::DB_Insert(Player* pPlayer, Quest *pQuest)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_QUEST);
+    stmt->setInt32(0, pPlayer->GetUInt32Value(UNIT_FIELD_UID));
+    stmt->setInt32(1, pQuest->m_Instance.nID);
+    stmt->setInt32(2, pQuest->m_Instance.Code);
+    stmt->setInt32(3, pQuest->m_Instance.nStartID);
+    stmt->setInt32(4, pQuest->m_Instance.nStatus[0]);
+    stmt->setInt32(5, pQuest->m_Instance.nStatus[1]);
+    stmt->setInt32(6, pQuest->m_Instance.nStatus[2]);
+    stmt->setInt32(7, pQuest->m_Instance.nProgress);
+    CharacterDatabase.Execute(stmt);
 }

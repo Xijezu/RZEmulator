@@ -54,7 +54,7 @@ bool QuestManager::AddQuest(Quest *quest)
             return false;
         }
         m_hsFinishedQuest.emplace(nQuestCode, true);
-        return false;
+        return true;
     }
     if(Quest::IsRandomQuest(quest->m_Instance.Code)) {
 //                 v27 = (int)&v3->m_vRandomQuestInfo;
@@ -370,27 +370,34 @@ void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> 
 
 void QuestManager::UpdateQuestStatusByItemCount(int code, uint64 count)
 {
-    std::vector<Quest*> vQuestList{};
-    int i{0};
+    std::vector<Quest *> vQuestList{ };
+    int                  i{0};
 
     GetRelatedQuestByItem(code, vQuestList, 6168);
 
-    for(auto& q : vQuestList) {
-        if(Quest::IsRandomQuest(q->m_QuestBase->nCode)) {
-            for(i = 0; i < 6; ++i) {
-                if(q->GetRandomKey(6) == code) {
+    for (auto &q : vQuestList)
+    {
+        if (Quest::IsRandomQuest(q->m_QuestBase->nCode))
+        {
+            for (i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+            {
+                if (q->GetRandomKey(6) == code)
+                {
                     auto qv = q->GetRandomValue(i);
-                    if(count > qv)
+                    if (count > qv)
                         count = (uint64)qv;
                     q->UpdateStatus(i, (int)count);
                     return;
                 }
             }
-        } else {
-            for(i = 0; i < 6; ++i) {
-                if(q->GetValue(2 * i) == code) {
+        } else
+        {
+            for (i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+            {
+                if (q->GetValue(2 * i) == code)
+                {
                     auto qv = q->GetValue((2 * i) + 1);
-                    if(count > qv)
+                    if (count > qv)
                         count = (uint64)qv;
                     q->UpdateStatus(i, (int)count);
                     return;
@@ -433,6 +440,8 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
                         q->IncStatus(0, 1);
                     else if(q->GetRandomKey(2) == nMonsterID && q->GetStatus(1) < q->GetRandomValue(2))
                         q->IncStatus(0, 1);
+                    break;
+                default:
                     break;
             }
         }
@@ -532,7 +541,7 @@ bool QuestManager::IsStartableQuest(int code)
             }
         } else if (id != 0 && !IsFinishedQuest(id)) {
             return false;
-        }
+        } else return true;
     }
     return res;
 }

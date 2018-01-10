@@ -40,5 +40,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_ADD_SKILL, "INSERT INTO Skill VALUES (?,?,?,?,?,?);", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_UPD_SKILL, "UPDATE Skill SET skill_level = ?, cool_time = ? WHERE owner_id = ? AND sid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_SUMMON, "INSERT INTO Summon VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_ADD_QUEST, "REPLACE INTO Quest VALUES(?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_GET_QUEST, "SELECT id, code, start_id, status1, status2, status3, progress FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_UPD_SUMMON, "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?, exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?, prev_level_01 = ?, prev_level_02 = ?, prev_id_01 = ?, prev_id_02 = ?, hp = ?, mp = ? WHERE sid = ?;", CONNECTION_ASYNC);
 }

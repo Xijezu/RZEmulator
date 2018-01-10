@@ -155,7 +155,10 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
             procDropItem(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
         }
 
+
         // TODO: OnDeath script
+
+        procQuest(pos, pFrom, Priority, vPartyContribute);
     }
 }
 
@@ -1037,4 +1040,37 @@ void Monster::SetTamer(uint handle, int nTamingSkillLevel)
 uint Monster::GetTamer() const
 {
     return m_hTamer;
+}
+
+void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute)
+{
+    std::vector<Quest*> vQuestList{};
+    std::vector<Player*> vPlayer{};
+
+    if(!vPartyContribute.empty())
+    {
+        if(vPartyContribute.front().hPlayer != 0)
+        {
+            auto player = sMemoryPool->GetObjectInWorld<Player>(vPartyContribute.front().hPlayer);
+            if(player != nullptr)
+                vPlayer.emplace_back(player);
+        } // else do party @todo
+        for(auto& p : vPlayer)
+        {
+            p->UpdateQuestStatusByMonsterKill(m_Base->id);
+            vQuestList.clear();
+            p->GetQuestByMonster(m_Base->id, vQuestList, 4112);
+
+            for(auto& q : vQuestList)
+            {
+                if(q != nullptr && q->m_QuestBase->nDropGroupID != 0)
+                {
+                    if(!q->IsFinishable())
+                    {
+                        dropItemGroup(pos, pKiller, pPriority, vPartyContribute, q->m_QuestBase->nDropGroupID, 1, 1, -1);
+                    }
+                }
+            }
+        }
+    }
 }

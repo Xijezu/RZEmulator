@@ -5,6 +5,7 @@
 #include "QuestBase.h"
 
 class Quest;
+class Player;
 struct QuestEventHandler {
     virtual void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) = 0;
     virtual void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) = 0;
@@ -12,8 +13,9 @@ struct QuestEventHandler {
 
 class Quest {
 public:
-    static Quest* AllocQuest(QuestEventHandler* handler, int nID, int code, int status[], QuestProgress progress, int nStartID);
+    static Quest* AllocQuest(QuestEventHandler* handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
     static bool IsRandomQuest(int code);
+    static void DB_Insert(Player* pPlayer, Quest* pQuest);
 
     Quest() = default;
     ~Quest() = default;

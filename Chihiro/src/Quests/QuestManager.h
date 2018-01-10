@@ -6,6 +6,7 @@
 
 class QuestManager {
 public:
+    friend class Player;
     QuestManager() = default;
     ~QuestManager() = default;
 

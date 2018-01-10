@@ -90,6 +90,8 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_creature_handle", &XLua::SCRIPT_GetCreatureHandle, this);
     m_pState.set_function("creature_evolution", &XLua::SCRIPT_CreatureEvolution, this);
     m_pState.set_function("quest_info", &XLua::SCRIPT_QuestInfo, this);
+    m_pState.set_function("start_quest", &XLua::SCRIPT_StartQuest, this);
+    m_pState.set_function("end_quest", &XLua::SCRIPT_EndQuest, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -116,9 +118,12 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     if (szLua == "0")
         return true;
 
-    try {
+    try
+    {
         m_pState.script(szLua);
-    } catch (std::exception &ex) {
+    }
+    catch (std::exception &ex)
+    {
         Messages::SendChatMessage(50, "@SCRIPT", dynamic_cast<Player *>(m_pUnit), ex.what());
         MX_LOG_ERROR("scripting", ex.what());
     }
@@ -741,14 +746,17 @@ void XLua::SCRIPT_QuestInfo(int code, sol::variadic_args args)
     if(player == nullptr)
         return;
     int textID = 0;
-    if(args.size() > 1)
+    if(args.size() >= 1)
         textID = args[0].get<int>();
-    Messages::SendQuestInformation(player, code, textID);
+    Messages::SendQuestInformation(player, code, textID, 0);
 }
 
-int XLua::SCRIPT_GetQuestProgress()
+int XLua::SCRIPT_GetQuestProgress(int quest)
 {
-    return 255;
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player == nullptr)
+        return -1;
+    return player->GetQuestProgress(quest);
 }
 
 int XLua::SCRIPT_GetOwnDungeonID()
@@ -759,4 +767,28 @@ int XLua::SCRIPT_GetOwnDungeonID()
 int XLua::SCRIPT_GetSiegeDungeonID()
 {
     return 0;
+}
+
+void XLua::SCRIPT_StartQuest(int code, int nStartID)
+{
+    if(code != 0 && nStartID != 0)
+    {
+        auto player = dynamic_cast<Player*>(m_pUnit);
+        if(player == nullptr)
+            return;
+        player->StartQuest(code, nStartID, false);
+    }
+}
+
+void XLua::SCRIPT_EndQuest(int quest_id, int reward_id, sol::variadic_args args)
+{
+    auto player = dynamic_cast<Player*>(m_pUnit);
+    if(player == nullptr)
+        return;
+
+    bool bForce{false};
+    if(args.size() != 0 && args[0].get_type() == sol::type::boolean)
+        bForce = args[0].get<bool>();
+
+    player->EndQuest(quest_id, reward_id, bForce);
 }
