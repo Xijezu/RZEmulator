@@ -43,6 +43,22 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
+
+    m_nLastEnemyDistance = 0.0f;
+    m_nLastTrackTime = 0;
+    m_bComeBackHome = false;
+    m_nLastHateUpdateTime = 0;
+    m_bNeedToFindEnemy = false;
+    m_hFirstAttacker = 0;
+    m_nFirstAttackTime = 0;
+    m_nTotalDamage = 0;
+    m_nMaxHate = 0;
+    m_hEnemy = 0;
+
+    m_nTamingSkillLevel = 0;
+    m_hTamer = 0;
+    m_nTamedTime = 0;
+    m_bTamedSuccess = false;
 }
 
 void Monster::EnterPacket(XPacket &pEnterPct, Monster *monster, Player* pPlayer)
