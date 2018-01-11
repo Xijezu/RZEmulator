@@ -1,0 +1,13 @@
+UPDATE MonsterResource SET taming_id = 2201, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_turtle%';     
+UPDATE MonsterResource SET taming_id = 2101, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_chichen%';    
+UPDATE MonsterResource SET taming_id = 2301, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_panthera%';   
+UPDATE MonsterResource SET taming_id = 1801, taming_percentage = 0.25, taming_exp_mod = 2.00 WHERE model LIKE '%aion_yeti%';        
+UPDATE MonsterResource SET taming_id = 1021, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%spirit_water_pixi%';
+UPDATE MonsterResource SET taming_id = 1011, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%spirit_fiery_pixi%';
+UPDATE MonsterResource SET taming_id = 2401, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%undead_skelfight%'; 
+UPDATE MonsterResource SET taming_id = 2501, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%ain_orc%';      
+UPDATE MonsterResource SET taming_id = 1301, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%spirit_seiren%';
+UPDATE MonsterResource SET taming_id = 1901, taming_percentage = 0.07, taming_exp_mod = 1.50 WHERE model LIKE '%beast_salaman%';
+UPDATE MonsterResource SET taming_id = 1201, taming_percentage = 0.07, taming_exp_mod = 1.50 WHERE model LIKE '%ain_hawkman%';  
+UPDATE MonsterResource SET taming_id = 1701, taming_percentage = 0.02, taming_exp_mod = 1.50 WHERE model LIKE '%ain_horseman%'; 
+UPDATE MonsterResource SET taming_id = 1201, taming_percentage = 0.02, taming_exp_mod = 1.50 WHERE model LIKE '%ain_angel%';    
