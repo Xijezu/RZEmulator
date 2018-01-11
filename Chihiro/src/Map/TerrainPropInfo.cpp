@@ -45,7 +45,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
     int line_num = 0;
     int nCurrentCategory = 0;
 
-    for(auto s : TextLines) {
+    for(const auto& s : TextLines) {
         Tokenizer lines(s, '=');
         if(lines.size() < 2)
             continue;

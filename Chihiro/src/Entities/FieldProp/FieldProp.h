@@ -9,20 +9,23 @@ struct FieldPropDeleteHandler
 };
 
 class Player;
+class XPacket;
+
 class FieldProp : public WorldObject
 {
+    friend class Skill;
 	friend class FieldPropManager;
 public:
 	FieldProp() = delete;
+	static void EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
 	static FieldProp* Create(FieldPropDeleteHandler* propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint lifeTime);
 	bool IsUsable(Player*) const;
-	bool Cast() const;
-	bool UseProp(Player*) const;
+	bool Cast();
+	bool UseProp(Player*);
 	uint GetCastingDelay() const;
 
 private:
 	FieldProp(FieldPropDeleteHandler* propDeleteHandler, FieldPropRespawnInfo pPropInfo);
-	~FieldProp() = default;
 
 	uint m_nRegenTime;
 	FieldPropDeleteHandler* m_pDeleteHandler;

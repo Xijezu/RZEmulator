@@ -13,6 +13,7 @@
 #include "GameRule.h"
 #include "NPC.h"
 #include "Skill.h"
+#include "FieldPropManager.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -321,6 +322,7 @@ void World::Update(uint diff)
     while(addSessQueue.next(sess))
         AddSession_(sess);
 
+    sFieldPropManager->Update(diff);
     sMemoryPool->Update(diff);
 
     for(auto& ro : m_vRespawnList) {

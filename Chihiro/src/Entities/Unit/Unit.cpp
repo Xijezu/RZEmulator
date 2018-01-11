@@ -1397,7 +1397,7 @@ Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
 
         onExpChange();
 
-        uint64_t nSkillUID  = 0;
+        int64 nSkillUID  = 0;
         int      nPrevLevel = GetBaseSkillLevel(skill_id);
         if (nPrevLevel == 0) {
             nSkillUID = sWorld->GetSkillIndex();
@@ -1490,7 +1490,10 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     bool isInRange{false};
     //if(sObjectMgr->GetSkillBase(nSkillID).cast_range == -1)
     //isInRange = enemy_distance < (12*m_Attribute.nAttackRange) / 100f
-    int  res                 = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
+
+    int res = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
+
+    return res;
 }
 
 void Unit::onAttackAndSkillProcess()
@@ -2614,4 +2617,14 @@ void Unit::SetEXP(uint exp)
     SetUInt64Value(UNIT_FIELD_EXP, exp);
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
         onExpChange();
+}
+
+bool Unit::IsWornByCode(int code) const
+{
+    for(auto& i : m_anWear)
+    {
+        if(i != nullptr && i->m_pItemBase != nullptr && i->m_pItemBase->id == code)
+            return true;
+    }
+    return false;
 }

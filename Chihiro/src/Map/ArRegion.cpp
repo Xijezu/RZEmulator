@@ -1,6 +1,7 @@
 #include "ArRegion.h"
 #include "Object.h"
 #include "Player.h"
+#include "World.h"
 
 void ArRegionContainer::InitRegionSystem(uint32 width, uint32 height) {
     m_nMapWidth = width;
@@ -13,7 +14,8 @@ void ArRegionContainer::InitRegionSystem(uint32 width, uint32 height) {
 bool ArRegionContainer::IsValidRegion(uint32 rx, uint32 ry, uint32 layer) {
     return rx < m_nRegionWidth && ry < m_nRegionHeight && layer < 256;
 }
-uint32 ArRegionContainer::IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint32 _ry) {
+uint32 ArRegionContainer::IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint32 _ry) const
+{
     uint32 result = 0;
     uint32 cx = _rx - rx + 3;
     uint32 cy = _ry - ry + 3;
@@ -21,6 +23,7 @@ uint32 ArRegionContainer::IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint
         result = s_Matrix[cx + (7 * cy)];
     return result;
 }
+
 ArRegion *ArRegionContainer::GetRegion(WorldObject *pObject) {
     return GetRegion((uint32)pObject->GetPositionX() / AR_REGION_SIZE, (uint32)pObject->GetPositionY() / AR_REGION_SIZE, pObject->GetLayer());
 }
@@ -137,6 +140,17 @@ void ArRegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint r
             }
         }
     }
+}
+
+uint32 ArRegionContainer::IsVisibleRegion(const WorldObject *obj1, const WorldObject *obj2) const
+{
+    if(obj1 == nullptr || obj2 == nullptr)
+        return 0;
+
+    return IsVisibleRegion((uint)(obj1->GetPositionX() / g_nRegionSize),
+                           (uint)(obj1->GetPositionY() / g_nRegionSize),
+                           (uint)(obj2->GetPositionX() / g_nRegionSize),
+                           (uint)(obj2->GetPositionY() / g_nRegionSize));
 }
 
 void ArRegion::addObject(WorldObject *obj, svObjects *objContainer)

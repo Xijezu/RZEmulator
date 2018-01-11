@@ -25,32 +25,61 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int l
     if(propTemplate == nullptr)
         return;
 
-    m_vRespawnInfo.emplace_back(prop);
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        m_vRespawnInfo.emplace_back(prop);
 
-    FieldPropRegenInfo ri = FieldPropRegenInfo{0, (uint)lifeTime};
-    ri.pRespawnInfo = prop;
-    m_vRespawnList.emplace_back(ri);
+        FieldPropRegenInfo ri = FieldPropRegenInfo{0, (uint)lifeTime};
+        ri.pRespawnInfo = prop;
+        m_vRespawnList.emplace_back(ri);
+    }
 }
 
 void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
-    FieldPropRespawnInfo info{};
+    FieldPropRespawnInfo info{prop};
     int nPropID = prop.nPropID;
     FieldPropTemplate* propTemplate = sObjectMgr->GetFieldPropBase(nPropID);
     if(propTemplate == nullptr)
         return;
 
-    info.nPropID = nPropID;
-    info.layer = 0; // Layer management
-    m_vRespawnInfo.emplace_back(info);
-    FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld->GetArTime(), propTemplate->nLifeTime};
-    ri.pRespawnInfo = info;
-    m_vRespawnList.emplace_back(ri);
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        info.nPropID = nPropID;
+        info.layer   = 0; // Layer management
+        m_vRespawnInfo.emplace_back(info);
+        FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld->GetArTime(), propTemplate->nLifeTime};
+        ri.pRespawnInfo = info;
+        m_vRespawnList.emplace_back(ri);
+    }
 }
 
+/*
+ * Do **not** delete the pointer here, this function is called
+ * before the fieldprop gets deleted by the MemoryPool class!!!
+ *
+ */
 void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 {
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        for (int i = 0; i < m_vExpireObject.size(); i++)
+        {
+            auto fp = m_vExpireObject[i];
+            if (fp->GetHandle() == prop->GetHandle())
+            {
+                m_vExpireObject.erase(m_vExpireObject.begin() + i);
+            }
+        }
+    }
 
+    if(!prop->m_PropInfo.bOnce)
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld->GetArTime(), prop->nLifeTime};
+        ri.pRespawnInfo = prop->m_PropInfo;
+        m_vRespawnList.emplace_back(ri);
+    }
 }
 
 void FieldPropManager::Update(uint/* diff*/)
@@ -59,40 +88,47 @@ void FieldPropManager::Update(uint/* diff*/)
     std::vector<FieldPropRegenInfo> vRegenInfo{};
     std::vector<FieldProp*> vDeleteList{};
 
-    for(int i = 0; i < m_vRespawnInfo.size(); ++i) {
-        FieldPropRegenInfo regen = m_vRespawnList[i];
-        if(regen.nLifeTime < ct) {
-            vRegenInfo.emplace_back(regen);
-            m_vRespawnList.erase(m_vRespawnList.begin() + i);
-        }
-    }
-
-    if(!vRegenInfo.empty())
+    // "Critical section" for lock (yeah, I prefer those)
     {
-        for(auto& rg : vRegenInfo)
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        for (int i = 0; i < m_vRespawnList.size(); ++i)
         {
-            FieldProp* pProp = FieldProp::Create(this, rg.pRespawnInfo, rg.nLifeTime);
-            if(pProp->nLifeTime != 0)
+            FieldPropRegenInfo regen = m_vRespawnList[i];
+            if (regen.tNextRegen < ct)
             {
-                m_vExpireObject.emplace_back(pProp);
+                vRegenInfo.emplace_back(regen);
+                m_vRespawnList.erase(m_vRespawnList.begin() + i);
             }
         }
-    }
 
-    for(auto& fp : m_vExpireObject)
-    {
-        if(fp->m_nRegenTime + fp->nLifeTime < ct)
-            vDeleteList.emplace_back(fp);
-    }
-
-    if(!vDeleteList.empty())
-    {
-        for(auto& fp : vDeleteList) {
-            if(fp->IsInWorld() && ! fp->IsDeleteRequested())
+        if (!vRegenInfo.empty())
+        {
+            for (auto &rg : vRegenInfo)
             {
-                sWorld->RemoveObjectFromWorld(fp);
-                fp->DeleteThis();
+                FieldProp *pProp = FieldProp::Create(this, rg.pRespawnInfo, rg.nLifeTime);
+                if (pProp->nLifeTime != 0)
+                {
+                    m_vExpireObject.emplace_back(pProp);
+                }
             }
         }
-    }
+
+        for (auto &fp : m_vExpireObject)
+        {
+            if (fp->m_nRegenTime + fp->nLifeTime < ct)
+                vDeleteList.emplace_back(fp);
+        }
+
+        if (!vDeleteList.empty())
+        {
+            for (auto &fp : vDeleteList)
+            {
+                if (fp->IsInWorld() && !fp->IsDeleteRequested())
+                {
+                    sWorld->RemoveObjectFromWorld(fp);
+                    fp->DeleteThis();
+                }
+            }
+        }
+    } //- Lock end
 }

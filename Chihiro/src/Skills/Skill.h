@@ -12,9 +12,9 @@ class Skill {
     friend class Unit;
 public:
     Skill() = delete;
-    Skill(Unit* pOwner, uint64 _uid, int _id);
-    static void DB_InsertSkill(Unit*,uint,uint,uint,uint,uint);
-    static void DB_UpdateSkill(Unit*,uint,uint);
+    Skill(Unit* pOwner, int64 _uid, int _id);
+    static void DB_InsertSkill(Unit*,int64,uint,uint,uint,uint);
+    static void DB_UpdateSkill(Unit*,int64,uint);
 
     int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
     void ProcSkill();
@@ -26,7 +26,7 @@ public:
     void SetRemainCoolTime(uint time);
 
 
-    uint64 m_nSkillUID;
+    int64 m_nSkillUID;
     Unit* m_pOwner{nullptr};
     int m_nSummonID;
     int m_nSkillID;
@@ -61,6 +61,8 @@ private:
     // I'm sorry, I'm copying retail code here
     void SINGLE_PHYSICAL_DAMAGE(Unit* pTarget);
     void SINGLE_MAGICAL_DAMAGE(Unit* pTarget);
+
+    void ACTIVATE_FIELD_PROP();
 
     void DO_SUMMON();
     void DO_UNSUMMON();

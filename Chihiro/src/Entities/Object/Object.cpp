@@ -6,6 +6,7 @@
 #include "Messages.h"
 #include "Monster.h"
 #include "NPC.h"
+#include "FieldPropManager.h"
 
 Object::Object()
 {
@@ -366,6 +367,10 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
             break;
         case ST_Object:
             Item::EnterPacket(packet, dynamic_cast<Item*>(this));
+            break;
+        case ST_FieldProp:
+            FieldProp::EnterPacket(packet, dynamic_cast<FieldProp*>(this), pPlayer);
+            break;
         default:
             break;
     }

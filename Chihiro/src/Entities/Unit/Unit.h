@@ -173,6 +173,7 @@ public:
     void SetMove(Position _to, uint8 _speed, uint _start_time);
     void CalculateStat();
     // Event handler
+    bool IsWornByCode(int code) const;
     EventProcessor _Events;
     virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
     Item *GetWornItem(ItemWearType);
@@ -209,7 +210,7 @@ protected:
     ///- Gets overwritten in player for Beltslots and Max Chaos
     virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
     State *GetStateByEffectType(int effectType) const;
-    virtual void onRegisterSkill(int, int, int, int) {};
+    virtual void onRegisterSkill(int64, int, int, int) {};
     virtual void onExpChange() {};
     virtual void onJobLevelUp() { };
     virtual void onAttackAndSkillProcess();

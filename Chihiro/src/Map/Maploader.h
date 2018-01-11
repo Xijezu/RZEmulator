@@ -60,9 +60,10 @@ public:
 private:
     void SetDefaultLocation(int x, int y, float fMapLength, int LocationId);
     void RegisterMapLocationInfo(MapLocationInfo location_info);
-    void LoadLocationFile(std::string szFilename, int x, int y, float fAttrLen, float fMapLength);
-    void LoadScriptFile(std::string szFilename, int x, int y, float fMapLength);
-    void LoadAttributeFile(std::string szFileName, int x, int y, float fAttrLen, float fMapLength);
+    void LoadLocationFile(const std::string& szFilename, int x, int y, float fAttrLen, float fMapLength);
+    void LoadScriptFile(const std::string& szFilename, int x, int y, float fMapLength);
+    void LoadAttributeFile(const std::string& szFileName, int x, int y, float fAttrLen, float fMapLength);
+    void LoadFieldPropFile(const std::string& szFileName, int x, int y, float fAttrLen, float fMapLength);
     void LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLength);
     void LoadRegionScriptInfo(ByteBuffer &buffer);
 

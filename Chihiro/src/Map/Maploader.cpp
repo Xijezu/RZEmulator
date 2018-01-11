@@ -19,15 +19,18 @@
 #include "ObjectMgr.h"
 #include "Scripting/XLua.h"
 #include <fstream>
+#include "FieldPropManager.h"
 
 bool Maploader::LoadMapContent()
 {
-    if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false)) {
+    if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false))
+    {
         MX_LOG_FATAL("server.worldserver", "TerrainSeamlessWorld.cfg read error !");
         return false;
     }
 
-    if(!propInfo.Initialize("terrainpropinfo.cfg")) {
+    if (!propInfo.Initialize("terrainpropinfo.cfg"))
+    {
         MX_LOG_FATAL("server.worldserver", "TerrainPropInfo.cfg read error !");
         return false;
     }
@@ -35,27 +38,43 @@ bool Maploader::LoadMapContent()
     int y = 0;
     fTileSize  = seamlessWorldInfo.m_fTileLength;
     fMapLength = seamlessWorldInfo.m_nSegmentCountPerMap * seamlessWorldInfo.m_fTileLength * seamlessWorldInfo.m_nTileCountPerSegment;
-    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y) {
-        for (int i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i) {
+    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y)
+    {
+        for (int i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i)
+        {
             std::string strLocationFileName = seamlessWorldInfo.GetLocationFileName(i, y);
 
-            if (strLocationFileName.length() != 0) {
+            if (strLocationFileName.length() != 0)
+            {
                 int wid = seamlessWorldInfo.GetWorldID(i, y);
-                if (wid != -1) {
+                if (wid != -1)
+                {
                     SetDefaultLocation(i, y, fMapLength, wid);
                 }
-                LoadLocationFile(("Resource/NewMap/"s+strLocationFileName), i, y, fAttrLen, fMapLength);
+
+                std::transform(strLocationFileName.begin(), strLocationFileName.end(), strLocationFileName.begin(), tolower);
+                LoadLocationFile(("Resource/NewMap/"s + strLocationFileName), i, y, fAttrLen, fMapLength);
 
                 std::string strScriptFileName = seamlessWorldInfo.GetScriptFileName(i, y);
+                if (!strScriptFileName.empty())
+                {
+                    std::transform(strScriptFileName.begin(), strScriptFileName.end(), strScriptFileName.begin(), tolower);
+                    LoadScriptFile(("Resource/NewMap/"s + strScriptFileName), i, y, fMapLength);
 
-                if(!strLocationFileName.empty()) {
-                    LoadScriptFile(("Resource/NewMap/"s+strScriptFileName), i, y, fMapLength);
+                    std::string strAttributeFileName = seamlessWorldInfo.GetAttributePolygonFileName(i, y);
 
-                    std::string strAttributeFileName = seamlessWorldInfo.GetAttributePolygonFileName(i,y);
-
-                    if(!strAttributeFileName.empty()) {
-                        LoadAttributeFile(("Resource/NewMap/"s+strAttributeFileName), i, y, fAttrLen, fMapLength);
+                    if (!strAttributeFileName.empty())
+                    {
+                        std::transform(strAttributeFileName.begin(), strAttributeFileName.end(), strAttributeFileName.begin(), tolower);
+                        LoadAttributeFile(("Resource/NewMap/"s + strAttributeFileName), i, y, fAttrLen, fMapLength);
                     }
+                }
+
+                std::string strPropFileName = seamlessWorldInfo.GetFieldPropFileName(i, y);
+                if (!strPropFileName.empty())
+                {
+                    std::transform(strPropFileName.begin(), strPropFileName.end(), strPropFileName.begin(), tolower);
+                    LoadFieldPropFile(("Resource/NewMap/"s + strPropFileName), i, y, fAttrLen, fMapLength);
                 }
             }
         }
@@ -85,23 +104,21 @@ void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
     g_qtLocationInfo->Add(std::move(location_info));
 }
 
-void Maploader::LoadLocationFile(std::string szFilename, int x, int y, float fAttrLen, float fMapLength)
+void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
     int nCharSize;
     LocationInfoHeader lih{};
     int nPolygonCount;
     int nPointCount;
 
-    std::transform(szFilename.end()-12, szFilename.end(), szFilename.end()-12, tolower);
-
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-    int size = infile.tellg();
+    auto size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
     ByteBuffer buffer{};
-    buffer.resize(size);
+    buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char*>(&buffer[0]), size);
     infile.close();
 
@@ -115,14 +132,14 @@ void Maploader::LoadLocationFile(std::string szFilename, int x, int y, float fAt
 
         nCharSize = buffer.read<int>();
         if(nCharSize > 1) {
-            buffer.read_skip(nCharSize);
+            buffer.read_skip((size_t)nCharSize);
         }
         nCharSize = buffer.read<int>();
         sObjectMgr->g_currentLocationId = 0;
         if(nCharSize <= 1)
             continue;
 
-        auto script = buffer.ReadString(nCharSize);
+        auto script = buffer.ReadString((uint)nCharSize);
         sScriptingMgr->RunString(script);
         if(sObjectMgr->g_currentLocationId == 0)
             continue;
@@ -146,18 +163,17 @@ void Maploader::LoadLocationFile(std::string szFilename, int x, int y, float fAt
     }
 }
 
-void Maploader::LoadAttributeFile(std::string szFilename, int x, int y, float fAttrLen, float fMapLength)
+void Maploader::LoadAttributeFile(const std::string&  szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
-    std::transform(szFilename.end()-12, szFilename.end(), szFilename.end()-12, tolower);
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-    int size = infile.tellg();
+    auto size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
 
     ByteBuffer buffer{};
-    buffer.resize(size);
+    buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char*>(&buffer[0]), size);
     infile.close();
 
@@ -183,19 +199,18 @@ void Maploader::LoadAttributeFile(std::string szFilename, int x, int y, float fA
 }
 
 
-void Maploader::LoadScriptFile(std::string szFilename, int x, int y, float fMapLength)
+void Maploader::LoadScriptFile(const std::string&  szFilename, int x, int y, float fMapLength)
 {
     NfsHeader header{};
 
-    std::transform(szFilename.end()-12, szFilename.end(), szFilename.end()-12, tolower);
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-    int size = infile.tellg();
+    auto size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
     ByteBuffer buffer{};
-    buffer.resize(size);
+    buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char*>(&buffer[0]), size);
     infile.close();
 
@@ -235,7 +250,7 @@ void Maploader::LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLengt
         sr.bottom = (fTileSize * (float)buffer.read<int>()) + sy;
         auto nLength = buffer.read<int>();
         if(nLength > 0)
-            sr.szName = buffer.ReadString(nLength);
+            sr.szName = buffer.ReadString((uint)nLength);
 
         m_vRegionList.emplace_back(sr);
     }
@@ -243,29 +258,33 @@ void Maploader::LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLengt
 
 void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
 {
-    auto nScriptCount = buffer.read<int>();
-    for(int i = 0; i < nScriptCount; ++i) {
-        std::string szBox{};
-        std::string szRight{};
-        std::string szTop{};
-        std::string szLeft{};
-        std::string szBottom{};
-        ScriptRegionInfo ri{};
+    auto     nScriptCount = buffer.read<int>();
+    for (int i            = 0; i < nScriptCount; ++i)
+    {
+        std::string szBox{ };
+        std::string szRight{ };
+        std::string szTop{ };
+        std::string szLeft{ };
+        std::string szBottom{ };
+
+        ScriptRegionInfo ri{ };
         ri.nRegionIndex = buffer.read<int>();
         ri.nRegionIndex += nCurrentRegionIdx;
         ScriptRegion sr = m_vRegionList[ri.nRegionIndex];
-        szRight = std::to_string(sr.right);
-        szTop = std::to_string(sr.top);
-        szLeft = std::to_string(sr.left);
+        szRight  = std::to_string(sr.right);
+        szTop    = std::to_string(sr.top);
+        szLeft   = std::to_string(sr.left);
         szBottom = std::to_string(sr.bottom);
-        szBox = string_format("%s,%s,%s,%s", szLeft.c_str(),szTop.c_str(),szRight.c_str(),szBottom.c_str());
-        auto nFunctionCount = buffer.read<int>();
-        for(int x = 0; x < nFunctionCount; ++x) {
-            ScriptTag nt{};
+        szBox    = string_format("%s,%s,%s,%s", szLeft.c_str(), szTop.c_str(), szRight.c_str(), szBottom.c_str());
+        auto     nFunctionCount = buffer.read<int>();
+        for (int x              = 0; x < nFunctionCount; ++x)
+        {
+            ScriptTag nt{ };
             nt.nTrigger = buffer.read<int>();
             auto cc = buffer.read<int>();
-            if(cc > 0) {
-                nt.strFunction = buffer.ReadString(cc);
+            if (cc > 0)
+            {
+                nt.strFunction = buffer.ReadString((uint)cc);
                 string_replace(nt.strFunction, "#LEFT", szLeft);
                 string_replace(nt.strFunction, "#TOP", szTop);
                 string_replace(nt.strFunction, "#RIGHT", szRight);
@@ -289,4 +308,48 @@ bool Maploader::InitMapInfo()
         }
     }
     return true;
+}
+
+void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, float/* fAttrLen*/, float fMapLength)
+{
+    std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
+    infile.seekg(0, std::ios::end);
+    auto size = infile.tellg();
+    infile.seekg(0, std::ios::beg);
+    if (size == -1)
+        return;
+    ByteBuffer buffer{ };
+    buffer.resize((size_t)size);
+    infile.read(reinterpret_cast<char *>(&buffer[0]), size);
+    infile.close();
+
+    buffer.read_skip(18); // Sign
+    int version = buffer.read<int>();  // Version
+
+    auto  total_entries = buffer.read<int>();
+    float rx            = x * fMapLength;
+    float ry            = y * fMapLength;
+
+    for (int i = 0; i < total_entries; ++i)
+    {
+        FieldPropRespawnInfo sr{ };
+        sr.nPropID  = buffer.read<int>();
+        sr.x        = buffer.read<float>() + rx;
+        sr.y        = buffer.read<float>() + ry;
+        sr.fZOffset = buffer.read<float>();
+        sr.fRotateX = buffer.read<float>();
+        sr.fRotateY = buffer.read<float>();
+        sr.fRotateZ = buffer.read<float>();
+        sr.fScaleX  = buffer.read<float>();
+        sr.fScaleY  = buffer.read<float>();
+        sr.fScaleZ  = buffer.read<float>();
+
+        sr.layer = 0;
+        sr.bOnce = false;
+        if (version == 2)
+            buffer.read_skip(7);
+        else
+            buffer.read_skip(2);
+        sFieldPropManager->RegisterFieldProp(sr);
+    }
 }

@@ -313,12 +313,12 @@ bool Player::ReadSkillList(int)
     SetSkill(-1, 6019, 20, 0);
     SetSkill(-1, 6020, 20, 0);
     SetSkill(-1, 6021, 20, 0);
-    /*SetSkill(-2, 6901, 20, 0);
+    SetSkill(-2, 6901, 20, 0);
     SetSkill(-2, 6902, 20, 0);
     SetSkill(-2, 6903, 20, 0);
     SetSkill(-2, 6904, 20, 0);
     SetSkill(-2, 6905, 20, 0);
-    SetSkill(-2, 6906, 20, 0);*/
+    SetSkill(-2, 6906, 20, 0);
     SetSkill(-1, 6022, 20, 0);
     SetSkill(-1, 6023, 20, 0);
     SetSkill(-1, 6024, 20, 0);
@@ -828,7 +828,7 @@ void Player::ShowDialog()
     }
 }
 
-bool Player::IsValidTrigger(std::string szTrigger)
+bool Player::IsValidTrigger(const std::string& szTrigger)
 {
     Tokenizer tokenizer(m_szDialogMenu, '\t');
     for(auto s : tokenizer)
@@ -968,9 +968,9 @@ void Player::OnUpdate()
     Unit::OnUpdate();
 }
 
-void Player::onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level)
+void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
 {
-    auto sb = sObjectMgr->GetSkillBase(skill_id);
+    auto sb = sObjectMgr->GetSkillBase((uint)skill_id);
     if(sb->id != 0 && sb->is_valid == 2)
         return;
     if(prev_level != 0) {

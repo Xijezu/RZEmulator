@@ -357,7 +357,7 @@ bool ObjectMgr::LoadFieldPropResource()
         propTemplate.nUseCount    = field[idx++].GetInt32();
         propTemplate.nRegenTime   = field[idx++].GetUInt32() * 100;
         propTemplate.nLifeTime    = field[idx++].GetUInt32() * 100;
-        idx++; // casting range
+        idx+= 2; // casting range & target_fx_size
         propTemplate.nMinLevel = field[idx++].GetInt32();
         propTemplate.nMaxLevel = field[idx++].GetInt32();
         int limit_deva     = field[idx++].GetUInt8();
@@ -384,7 +384,8 @@ bool ObjectMgr::LoadFieldPropResource()
             i.min_level = field[idx++].GetInt32();
             i.max_level = field[idx++].GetInt32();
         }
-        propTemplate.strScript        = field[idx].GetString();
+
+        propTemplate.strScript = field[idx].GetString();
 
         propTemplate.nLimit = 0;
         if (limit_asura != 0)

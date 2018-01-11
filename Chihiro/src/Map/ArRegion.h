@@ -71,7 +71,8 @@ public :
 
     void InitRegionSystem(uint32 width, uint32 height);
     bool IsValidRegion(uint32 rx, uint32 ry, uint32 layer);
-    uint32 IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint32 _ry);
+    uint32 IsVisibleRegion(uint32 rx, uint32 ry, uint32 _rx, uint32 _ry) const;
+    uint32 IsVisibleRegion(const WorldObject* obj1, const WorldObject* obj2) const;
     ArRegion *GetRegion(WorldObject *pObject);
     ArRegion *GetRegion(uint32 rx, uint32 ry, uint32 layer);
     void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, std::function<void (ArRegion*)> fn);

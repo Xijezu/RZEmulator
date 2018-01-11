@@ -19,21 +19,31 @@ public:
     explicit Player(uint32);
     ~Player() override;
 
+    /* ****************** STATIC FUNCTIONS ****************** */
     static void EnterPacket(XPacket &, Player *, Player*);
     static void DoEachPlayer(const std::function<void (Player*)>& fn);
     static Player* FindPlayer(const std::string& szName);
+    /* ****************** STATIC END ****************** */
 
     /* ****************** QUEST ****************** */
-    int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
     void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
-    bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
     void UpdateQuestStatusByMonsterKill(int monster_id);
     void GetQuestByMonster(int monster_id, std::vector<Quest*> &vQuest, int type);
     void StartQuest(int code, int nStartQuestID, bool bForce);
     void EndQuest(int code, int nRewardID, bool bForce);
-    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
-    int GetQuestProgress(int nQuestID);
     void UpdateQuestStatusByItemUpgrade();
+    void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) override ;
+    void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) override;
+    int GetQuestProgress(int nQuestID);
+    int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
+    bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
+    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
+    bool IsInProgressQuest(int code);
+    bool IsStartableQuest(int code, bool bForQuestMark);
+    bool IsFinishableQuest(int code);
+    bool CheckFinishableQuestAndGetQuestStruct(int code);
+    Quest* FindQuest(int code);
+    /* ****************** QUEST END ****************** */
 
     int GetPermission() { return GetInt32Value(UNIT_FIELD_PERMISSION); }
     uint64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
@@ -41,21 +51,21 @@ public:
     int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
 
     uint GetJobDepth();
+    std::string GetFlag(const std::string& flag) { return m_lFlagList[flag]; }
 
-    // Database stuff
+    /* ****************** DATABASE ****************** */
     bool ReadCharacter(std::string, int);
     bool ReadItemList(int);
     bool ReadSummonList(int);
     bool ReadEquipItem();
     bool ReadSkillList(int);
     bool ReadQuestList();
+    /* ****************** DATABASE END ****************** */
 
     // Warping
     void PendWarp(int x, int y, uint8_t layer);
 
-    std::string GetFlag(std::string flag) { return m_lFlagList[flag]; }
-
-    void SetFlag(std::string key, std::string value) { m_lFlagList[key] = value; }
+    void SetFlag(const std::string& key, std::string value) { m_lFlagList[key] = std::move(value); }
 
     // Network
     void SendPropertyMessage(std::string key, std::string value);
@@ -103,10 +113,11 @@ public:
     void SetDialogText(std::string);
     void AddDialogMenu(std::string, std::string);
     void ClearDialogMenu();
-    bool IsFixedDialogTrigger(std::string szTrigger) { return false; }
+    bool IsFixedDialogTrigger(const std::string& szTrigger) { return false; }
     bool HasDialog() { return !m_szDialogTitle.empty(); }
     void ShowDialog();
-    bool IsValidTrigger(std::string);
+    bool IsValidTrigger(const std::string&);
+    /* ****************** DIALOG END ****************** */
 
     void onChangeProperty(std::string, int);
 
@@ -122,14 +133,6 @@ public:
 
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;
 
-    // Quest start
-    bool IsInProgressQuest(int code);
-    bool IsStartableQuest(int code, bool bForQuestMark);
-    bool IsFinishableQuest(int code);
-    bool CheckFinishableQuestAndGetQuestStruct(int code);
-    void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) override ;
-    void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) override;
-    Quest* FindQuest(int code);
     CreatureStat* GetBaseStat() const override;
 
     ushort_t ChangeGold(long);
@@ -160,7 +163,7 @@ public:
     int GetMaxChaos() const;
     void AddChaos(int chaos);
 protected:
-    void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
+    void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
     void onExpChange() override;
     void onJobLevelUp() override;
