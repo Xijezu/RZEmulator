@@ -2628,3 +2628,9 @@ bool Unit::IsWornByCode(int code) const
     }
     return false;
 }
+
+void Unit::SetCurrentJLv(int jlv)
+{
+    SetInt32Value(UNIT_FIELD_JLV, jlv);
+    onJobLevelUp();
+}

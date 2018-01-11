@@ -130,7 +130,7 @@ public:
     void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, lvl); }
     void SetCurrentJob(uint job) { SetUInt32Value(UNIT_FIELD_JOB, job); }
     void SetJP(int jp);
-    void SetCurrentJLv(int jlv) { SetInt32Value(UNIT_FIELD_JLV, jlv); }
+    void SetCurrentJLv(int jlv);
     void SetSkill(int, int, int, int);
     void SetHealth(uint32);
     void SetMana(uint32);

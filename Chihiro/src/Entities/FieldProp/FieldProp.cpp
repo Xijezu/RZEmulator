@@ -44,22 +44,28 @@ bool FieldProp::IsUsable(Player *pPlayer) const
     if(pPlayer->GetLevel() > m_pFieldPropBase->nMaxLevel)
         return false;
 
+    bool bResult = true;
     // Class checks
-    if ((m_pFieldPropBase->nLimit & 0x800) != 0 && pPlayer->IsHunter())
-        return false;
-    if ((m_pFieldPropBase->nLimit & 0x400) != 0 && pPlayer->IsFighter())
-        return false;
-    if ((m_pFieldPropBase->nLimit & 0x1000) != 0 && pPlayer->IsMagician())
-        return false;
-    if ((m_pFieldPropBase->nLimit & 0x2000) != 0 && pPlayer->IsSummoner())
+    if ((m_pFieldPropBase->nLimit & 0x800) != 0 && !pPlayer->IsHunter())
+        bResult = true;
+    if ((m_pFieldPropBase->nLimit & 0x400) != 0 && !pPlayer->IsFighter())
+        bResult = true;
+    if ((m_pFieldPropBase->nLimit & 0x1000) != 0 && !pPlayer->IsMagician())
+        bResult = true;
+    if ((m_pFieldPropBase->nLimit & 0x2000) != 0 && !pPlayer->IsSummoner())
+        bResult = true;
+    if(!bResult)
         return false;
 
     // Race checks
-    if(pPlayer->GetRace() != 3 || (m_pFieldPropBase->nLimit & 0x10) == 0)
-        return false;
-    if(pPlayer->GetRace() != 4 || (m_pFieldPropBase->nLimit & 4) == 0)
-        return false;
-    if(pPlayer->GetRace() != 5 || (m_pFieldPropBase->nLimit & 8) == 0)
+    bResult = false;
+    if(pPlayer->GetRace() != 3 || (m_pFieldPropBase->nLimit & 0x10) != 0)
+        bResult = true;
+    if(pPlayer->GetRace() != 4 || (m_pFieldPropBase->nLimit & 4) != 0)
+        bResult = true;
+    if(pPlayer->GetRace() != 5 || (m_pFieldPropBase->nLimit & 8) != 0)
+        bResult = true;
+    if(!bResult)
         return false;
 
     // Job check

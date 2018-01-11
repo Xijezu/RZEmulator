@@ -81,17 +81,22 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         case EffectType::RegionHealByFieldProp:
         case EffectType::AreaAffectHealByHieldProp:
         {
-            if(m_pOwner->GetSubType() == ST_Player) {
+            m_nErrorCode = TS_RESULT_NOT_ACTABLE;
+            if(m_pOwner->GetSubType() == ST_Player)
+            {
                 auto pProp = sMemoryPool->GetObjectInWorld<FieldProp>(handle);
                 if(pProp != nullptr && pProp->m_pFieldPropBase->nActivateSkillID == m_SkillBase->id )
                 {
                     if(pProp->m_nUseCount >= 1 && pProp->IsUsable(dynamic_cast<Player*>(m_pOwner)))
                     {
                         delay = pProp->GetCastingDelay();
+                        m_nErrorCode = TS_RESULT_SUCCESS;
                     }
                 }
             }
         }
+            break;
+        default:
             break;
     } // END SWITCH
 
