@@ -11,6 +11,7 @@
 #include "NPCBase.h"
 #include "StateBase.h"
 #include "QuestBase.h"
+#include "FieldPropBase.h"
 
 class Player;
 class Item;
@@ -42,6 +43,7 @@ public:
     typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
     typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
     typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
+    typedef UNORDERED_MAP<int, FieldPropTemplate>               FieldPropTemplateContainer;
     typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
     typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
     typedef UNORDERED_MAP<uint, StateTemplate>                  StateTemplateContainer;
@@ -57,6 +59,7 @@ public:
     bool LoadQuestResource();
     bool LoadQuestLinkResource();
     bool LoadDropGroupResource();
+    bool LoadFieldPropResource();
     bool LoadStateResource();
     bool LoadMarketResource();
     bool LoadWorldLocation();
@@ -83,6 +86,7 @@ public:
     JobResourceTemplate* const GetJobInfo(uint job_id);
     SummonResourceTemplate* const GetSummonBase(uint idx);
     MonsterBase* const GetMonsterInfo(uint idx);
+    FieldPropTemplate* const GetFieldPropBase(int idx);
     std::vector<MarketInfo>* const GetMarketInfo(const std::string&);
     QuestBaseServer* const GetQuestBase(int code);
     QuestLink* const GetQuestLink(int code, int start_id);
@@ -125,6 +129,7 @@ private:
     QuestResourceTemplateContainer  _questTemplateStore;
     QuestLinkTemplateContainer      _questLinkStore;
     NPCTemplateContainer            _npcTemplateStore;
+    FieldPropTemplateContainer      _fieldPropTemplateStore;
     StateTemplateContainer          _stateTemplateStore;
 
     ushort isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level);

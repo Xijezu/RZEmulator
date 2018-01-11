@@ -22,6 +22,8 @@ bool ObjectMgr::InitGameContent()
         return false;
     if (!LoadDropGroupResource() || !LoadMonsterResource())
         return false;
+    if(!LoadFieldPropResource())
+        return false;
     if (!LoadJobLevelBonus())
         return false;
     if(!LoadStateResource())
@@ -327,6 +329,88 @@ bool ObjectMgr::LoadQuestResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
+
+
+bool ObjectMgr::LoadFieldPropResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM FieldPropResource;");
+    if (!result)
+    {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `FieldPropResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field *field = result->Fetch();
+        int   idx    = 0;
+
+        FieldPropTemplate propTemplate{ };
+        propTemplate.nPropID     = field[idx++].GetUInt32();
+        propTemplate.nPropTextID = field[idx++].GetInt32();
+        idx++; // tooltip_id
+        propTemplate.nType        = field[idx++].GetInt32();
+        propTemplate.nLocalFlag   = field[idx++].GetInt32();
+        propTemplate.nCastingTime = field[idx++].GetUInt32() * 100;
+        propTemplate.nUseCount    = field[idx++].GetInt32();
+        propTemplate.nRegenTime   = field[idx++].GetUInt32() * 100;
+        propTemplate.nLifeTime    = field[idx++].GetUInt32() * 100;
+        idx++; // casting range
+        propTemplate.nMinLevel = field[idx++].GetInt32();
+        propTemplate.nMaxLevel = field[idx++].GetInt32();
+        int limit_deva     = field[idx++].GetUInt8();
+        int limit_asura    = field[idx++].GetUInt8();
+        int limit_gaia     = field[idx++].GetUInt8();
+        int limit_fighter  = field[idx++].GetUInt8();
+        int limit_hunter   = field[idx++].GetUInt8();
+        int limit_magician = field[idx++].GetUInt8();
+        int limit_summoner = field[idx++].GetUInt8();
+        propTemplate.nLimitJobID = field[idx++].GetInt32();
+        for (int i = 0; i < 2; i++)
+        {
+            propTemplate.nActivateID[i]       = field[idx++].GetInt32();
+            propTemplate.nActivateValue[i][0] = field[idx++].GetInt32();
+            propTemplate.nActivateValue[i][1] = field[idx++].GetInt32();
+        }
+        propTemplate.nActivateSkillID = field[idx++].GetInt32();
+        for (auto &i : propTemplate.drop_info)
+        {
+            i.code      = field[idx++].GetInt32();
+            i.ratio     = (int)(field[idx++].GetFloat() * 100000000);
+            i.min_count = field[idx++].GetInt32();
+            i.max_count = field[idx++].GetInt32();
+            i.min_level = field[idx++].GetInt32();
+            i.max_level = field[idx++].GetInt32();
+        }
+        propTemplate.strScript        = field[idx].GetString();
+
+        propTemplate.nLimit = 0;
+        if (limit_asura != 0)
+            propTemplate.nLimit |= 8;
+        if (limit_gaia != 0)
+            propTemplate.nLimit |= 0x10;
+        if (limit_deva != 0)
+            propTemplate.nLimit |= 4;
+        if (limit_hunter != 0)
+            propTemplate.nLimit |= 0x800;
+        if (limit_fighter != 0)
+            propTemplate.nLimit |= 0x400;
+        if (limit_magician != 0)
+            propTemplate.nLimit |= 0x1000;
+        if (limit_summoner != 0)
+            propTemplate.nLimit |= 0x2000;
+
+        _fieldPropTemplateStore[propTemplate.nPropID] = propTemplate;
+
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u FieldProps in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 
 bool ObjectMgr::LoadQuestLinkResource()
 {
@@ -1489,4 +1573,11 @@ bool ObjectMgr::IsBlocked(float x, float y)
 }
 ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
 {
+}
+
+FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
+{
+    if(_fieldPropTemplateStore.count(idx) == 1)
+        return &_fieldPropTemplateStore[idx];
+    return nullptr;
 }
