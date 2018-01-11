@@ -105,7 +105,7 @@ bool QuestManager::StartQuest(int code, int nStartID)
     if(code == 0 || FindQuest(code) != nullptr)
         return false;
     int qid = allocQuestID();
-    int tmp[6]{0};
+    int tmp[MAX_QUEST_STATUS]{0};
     auto q = Quest::AllocQuest(m_pHandler, qid, code, tmp, QuestProgress::QP_InProgress, nStartID);
     if(Quest::IsRandomQuest(q->m_Instance.Code)) {
 //                 v12 = v4->m_vRandomQuestInfo._Myfirst;
@@ -523,27 +523,31 @@ void QuestManager::PopFromActiveQuest(Quest *pQuest)
 bool QuestManager::IsStartableQuest(int code)
 {
     bool res{false};
-    if(FindQuest(code) != nullptr)
+    if (FindQuest(code) != nullptr)
         return false;
     auto qbs = sObjectMgr->GetQuestBase(code);
-    if(qbs == nullptr)
+    if (qbs == nullptr)
         return false;
-    if(!qbs->bIsRepeatable && IsFinishedQuest(code))
+    if (!qbs->bIsRepeatable && IsFinishedQuest(code))
         return false;
-    res = true;
-    if(qbs->bForceCheckType)
-        res = false;
-    for (int &id : qbs->nForeQuest) {
-        if (qbs->bForceCheckType) {
-            if (id != 0) {
-                if (IsFinishedQuest(id))
-                    return true;
-            }
-        } else if (id != 0 && !IsFinishedQuest(id)) {
-            return false;
-        } else return true;
+
+/*    if (qbs->bForceCheckType)
+        res = false;*/
+    if(qbs->nForeQuest[0] == 0) {
+        return true;
     }
-    return res;
+    else
+    {
+        for (int &id : qbs->nForeQuest)
+        {
+            if (id != 0 && IsFinishedQuest(id))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    ACE_NOTREACHED(return false);
 }
 
 void QuestManager::SetDropFlagToRandomQuestInfo(int code)

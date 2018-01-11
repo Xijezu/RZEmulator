@@ -14,17 +14,18 @@ public:
     static int GetItemRecommendModTable(int item_rank);
     static int GetRankLevel(int rank);
     static float GetItemDropRate();
-    static void SetItemDropRate(float _itemDropRate);
     static float GetGoldDropRate();
-    static void SetGoldDropRate(float goldDropRate);
+    static float GetChaosDropRate();
     static float GetItemValue(float, int, int, int, int);
     static float GetPickableRange();
     static int GetChipLevelLimit(int idx);
     static int GetMaxLevel() { return 150; }
+    static int GetIntValueByRandomInt(double fValue);
 private:
     static int _chipLevelLimit[];
     static float _itemDropRate;
     static float _GoldDropRate;
+    static float _chaosDropRate;
     static int _modtable[];
 };
 

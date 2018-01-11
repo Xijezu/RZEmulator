@@ -853,7 +853,8 @@ void WorldSession::onDeleteCharacter(XPacket *pRecvPct)
     stmt->setString(0, name);
     stmt->setInt32(1, _accountId);
     CharacterDatabase.Execute(stmt);
-    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
+    // Send result message with WorldSession, player is not set yet
+    Messages::SendResult(this, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
 }
 
 void WorldSession::onChangeLocation(XPacket *pRecvPct)
@@ -954,12 +955,10 @@ void WorldSession::onJobLevelUp(XPacket *pRecvPct)
     } else {
         // Summon
     }
+
     _player->Save(true);
     Messages::SendPropertyMessage(_player, cr, "job_level", cr->GetCurrentJLv());
-    Messages::SendPropertyMessage(_player, cr, "jp", cr->GetJP());
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
-    _player->CalculateStat();
-    Messages::SendStatInfo(_player, cr);
 }
 
 void WorldSession::onLearnSkill(XPacket *pRecvPct)
@@ -1333,10 +1332,16 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     }
 
     // Quest Item Check TODO
+    if(item->IsQuestItem() && !_player->IsTakeableQuestItem(item->m_Instance.Code))
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+        return;
+    }
 
-    auto     drop_duration = ct - item->m_nDropTime;
-    int      ry            = 3000;
-    for (int i             = 0; i < 3; i++)
+    auto drop_duration = ct - item->m_nDropTime;
+    int  ry            = 3000;
+
+    for (int i = 0; i < 3; i++)
     {
         if (item->m_pPickupOrder.hPlayer[i] == 0 && item->m_pPickupOrder.nPartyID[i] == 0)
             break;

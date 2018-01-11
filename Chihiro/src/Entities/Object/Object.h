@@ -96,8 +96,9 @@ enum EUnitFields {
     UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0047, // Size: 1
     UNIT_FIELD_UID                   = 0x0048, // Size: 1
     UNIT_FIELD_EXP                   = 0x0049, // Size: 2
-    UNIT_FIELD_DEAD_TIME             = 0x004B,
-    UNIT_END                   = 0x004C
+    UNIT_FIELD_DEAD_TIME             = 0x004B, // Size: 1
+    UNIT_FIELD_MAX_CHAOS             = 0x004C, // Size: 1
+    UNIT_END                         = 0x004D
 };
 
 enum EBattleFields {

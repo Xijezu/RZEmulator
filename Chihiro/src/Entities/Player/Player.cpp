@@ -191,7 +191,7 @@ bool Player::ReadItemList(int sid)
         do {
             Field *fields     = result->Fetch();
             int   i           = 0;
-            int   uid         = fields[i++].GetInt32();
+            uint64 uid         = fields[i++].GetUInt64();
             int   idx         = fields[i++].GetInt32();
             int   code        = fields[i++].GetInt32();
             int64 cnt         = fields[i++].GetInt64();
@@ -211,7 +211,7 @@ bool Player::ReadItemList(int sid)
 
             if(code != 0) {
 
-                item->m_Instance.nWearInfo     = (ItemWearType) fields[i++].GetInt32();
+                item->m_Instance.nWearInfo     = (ItemWearType) fields[i].GetInt32();
                 item->m_Instance.nOwnSummonUID = summon_id;
                 item->m_Instance.OwnerHandle   = GetHandle();
                 item->m_Instance.nIdx          = inv;
@@ -228,29 +228,41 @@ bool Player::ReadItemList(int sid)
 
 bool Player::ReadQuestList()
 {
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_QUEST);
-    stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
-    if(PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
-        do {
-            Field* fields = result->Fetch();
-            int idx = 0;
-            int nID = fields[idx++].GetInt32();
-            int Code = fields[idx++].GetInt32();
-            int nStartID = fields[idx++].GetInt32();
-            int nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
-            for (int &nStatu : nStatus)
-                nStatu = fields[idx++].GetInt32();
-            auto progress = (QuestProgress)fields[idx].GetInt32();
-            auto q = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
-            if(!m_QuestManager.AddQuest(q))
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_QUEST);
+        stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+        {
+            do
             {
-                delete q;
-                MX_LOG_ERROR("entities.player", "Player::ReadQuestList: Failed to alloc Quest!");
-                return false;
-            }
+                Field    *fields                   = result->Fetch();
+                int      idx                       = 0;
+                int      nID                       = fields[idx++].GetInt32();
+                int      Code                      = fields[idx++].GetInt32();
+                int      nStartID                  = fields[idx++].GetInt32();
+                int      nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
+                for (int &nStatu : nStatus)
+                    nStatu        = fields[idx++].GetInt32();
+                auto     progress = (QuestProgress)fields[idx].GetInt32();
+                auto     q        = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
+                if (!m_QuestManager.AddQuest(q))
+                {
+                    delete q;
+                    MX_LOG_ERROR("entities.player", "Player::ReadQuestList: Failed to alloc Quest!");
+                    return false;
+                }
+            } while (result->NextRow());
         }
-        while(result->NextRow());
+    }
+
+    {
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_MAX_QUEST_ID);
+        stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+        {
+            int idx = result->Fetch()[0].GetInt32();
+            m_QuestManager.SetMaxQuestID(idx);
+        }
     }
     return true;
 }
@@ -479,6 +491,7 @@ void Player::SendPropertyMessage(std::string key, int64 value)
 
 void Player::SendLoginProperties()
 {
+    Unit::SetFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete);
     CalculateStat();
     // Login();
     Messages::SendQuestList(this);
@@ -494,7 +507,7 @@ void Player::SendLoginProperties()
 
     SendWearInfo();
     SendGoldChaosMessage();
-    SendPropertyMessage("chaos", (int64) GetUInt32Value(UNIT_FIELD_CHAOS));
+    SendPropertyMessage("chaos", (int64) GetChaos());
     Messages::SendLevelMessage(this, this);
     Messages::SendEXPMessage(this, this);
     SendJobInfo();
@@ -836,8 +849,8 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
 
     // In this case gold
     if(pItem->m_Instance.Code == 0) {
-        long nPrevGoldAmount = GetGold();
-        long gold = GetGold() + pItem->m_Instance.nCount;
+        uint64 nPrevGoldAmount = GetGold();
+        uint64 gold = GetGold() + pItem->m_Instance.nCount;
         if(ChangeGold(gold) != 0) {
             // Log
         }
@@ -855,6 +868,7 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
         if(i != nullptr) {
             i->m_Instance.nCount += count;
             i->m_bIsNeedUpdateToDB = !bSkipUpdateToDB;
+            m_QuestManager.UpdateQuestStatusByItemCount(i->m_Instance.Code, i->m_Instance.nCount);
             Messages::SendItemMessage(this, i);
             return;
         }
@@ -874,6 +888,7 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
         pItem->DBInsert();
     }
     m_lInventory[m_lInventory.size()] = pItem;
+    m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, pItem->m_Instance.nCount);
     Messages::SendItemMessage(this, pItem);
 }
 
@@ -951,7 +966,8 @@ void Player::onRegisterSkill(int skillUID, int skill_id, int prev_level, int ski
     } else {
         Skill::DB_InsertSkill(this, skillUID, this->GetUInt32Value(UNIT_FIELD_UID), 0, skill_id, skill_level);
     }
-    Messages::SendPropertyMessage(this, this, "jp", GetJP());
+    m_QuestManager.UpdateQuestStatusBySkillLevel(skill_id, skill_level);
+    //Messages::SendPropertyMessage(this, this, "jp", GetJP());
     Messages::SendSkillList(this,this,skill_id);
 }
 
@@ -1693,6 +1709,7 @@ float Player::GetMoveSpeed() const
 void Player::onModifyStatAndAttribute()
 {
     Messages::SendStatInfo(this, this);
+    Messages::SendPropertyMessage(this, this, "max_chaos", GetMaxChaos());
 }
 
 uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
@@ -1899,8 +1916,9 @@ void Player::updateQuestStatus(Quest *pQuest)
     }
     if(qt == QuestType::QT_Parameter)
     {
-        m_QuestManager.UpdateQuestStatusByParameter(99, GetUInt32Value(UNIT_FIELD_STATUS));
+        m_QuestManager.UpdateQuestStatusByParameter(99, GetChaos());
     }
+    UpdateQuestStatusByItemUpgrade();
 }
 
 void Player::UpdateQuestStatusByMonsterKill(int monster_id)
@@ -2056,5 +2074,80 @@ int Player::GetQuestProgress(int nQuestID)
             return q->IsFinishable() ? 2 : 1;
         else
             return -1;
+    }
+}
+
+void Player::onJobLevelUp()
+{
+    Messages::SendPropertyMessage(this, this, "job_level", GetCurrentJLv());
+    m_QuestManager.UpdateQuestStatusByJobLevel(GetJobDepth(), GetCurrentJLv());
+}
+
+void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
+{
+    switch(type)
+    {
+        case 26:
+            // @todo: set max beltslot
+            break;
+        case 27:
+            if((pItem->m_Instance.Flag & FlagBits::FB_NonChaosStone) == 0)
+                SetInt32Value(UNIT_FIELD_MAX_CHAOS, (int)(var1 + pItem->m_pItemBase->level * var2));
+            break;
+        default:
+            Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
+            break;
+    }
+}
+
+int Player::GetMaxChaos() const
+{
+    return GetInt32Value(UNIT_FIELD_MAX_CHAOS);
+}
+
+void Player::AddChaos(int chaos)
+{
+    SetInt32Value(UNIT_FIELD_CHAOS, GetChaos() + chaos);
+    if(GetChaos() > GetMaxChaos())
+        SetInt32Value(UNIT_FIELD_CHAOS, GetMaxChaos());
+    if(GetChaos() < 0)
+        SetInt32Value(UNIT_FIELD_CHAOS, 0);
+    m_QuestManager.UpdateQuestStatusByParameter(99, GetChaos());
+    Messages::SendPropertyMessage(this, this, "chaos", GetChaos());
+}
+
+int Player::GetChaos() const
+{
+    return GetInt32Value(UNIT_FIELD_CHAOS);
+}
+
+void Player::UpdateQuestStatusByItemUpgrade()
+{
+    std::vector<Quest *> vQuestList{ };
+    m_QuestManager.GetRelatedQuest(vQuestList, 64);
+    for (auto &q : vQuestList)
+    {
+        for (int i = 0; i < MAX_VALUE_NUMBER / 2; i+=2)
+        {
+            int level = q->GetValue(i + 1);
+            if (level > 0)
+            {
+                int id = q->GetValue(i);
+                if (id < 24)
+                {
+                    auto item = GetWornItem((ItemWearType)id);
+                    if (item != nullptr)
+                    {
+                        int qv = item->m_Instance.nLevel;
+                        if (level > qv)
+                            level = qv;
+                        q->UpdateStatus(i / 2, level);
+                    } else
+                    {
+                        q->UpdateStatus(i / 2, 0);
+                    }
+                }
+            }
+        }
     }
 }

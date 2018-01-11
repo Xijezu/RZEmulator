@@ -3,11 +3,13 @@
 //
 #include "GameRule.h"
 #include "Common.h"
+#include "Util.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
 int GameRule::_chipLevelLimit[8] = {0, 20, 50, 80, 100, 120, 150, 180};
 float GameRule::_itemDropRate = 1.0f;
 float GameRule::_GoldDropRate = 1.0f;
+float GameRule::_chaosDropRate = 1.0f;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
 {
@@ -112,22 +114,26 @@ float GameRule::GetItemDropRate()
     return _itemDropRate;
 }
 
-void GameRule::SetItemDropRate(float _itemDropRate)
-{
-    GameRule::_itemDropRate = _itemDropRate;
-}
-
 float GameRule::GetGoldDropRate()
 {
     return _GoldDropRate;
 }
 
-void GameRule::SetGoldDropRate(float goldDropRate)
-{
-    _GoldDropRate = goldDropRate;
-}
 
 int GameRule::GetChipLevelLimit(int idx)
 {
     return _chipLevelLimit[idx];
+}
+
+float GameRule::GetChaosDropRate()
+{
+    return _chaosDropRate;
+}
+
+int GameRule::GetIntValueByRandomInt(double fValue)
+{
+    double result = fValue +1;
+    if(((uint)rand32() % 100) / 100.0 + fValue >= fValue)
+        result = fValue;
+    return (int)result;
 }

@@ -137,7 +137,7 @@ public:
     // Setters
     void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, lvl); }
     void SetCurrentJob(uint job) { SetUInt32Value(UNIT_FIELD_JOB, job); }
-    void SetJP(int jp) { SetInt32Value(UNIT_FIELD_JOBPOINT, jp); }
+    void SetJP(int jp);
     void SetCurrentJLv(int jlv) { SetInt32Value(UNIT_FIELD_JLV, jlv); }
     void SetSkill(int, int, int, int);
     void SetHealth(uint32);
@@ -145,11 +145,7 @@ public:
     void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
     void SetMaxMana(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_MANA, val); };
     void SetFullHealth() { SetHealth(GetMaxHealth()); }
-    void SetEXP(uint exp)
-    {
-        SetUInt64Value(UNIT_FIELD_EXP, exp);
-        onExpChange();
-    }
+    void SetEXP(uint exp);
 
     // eh
     int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) const;
@@ -218,11 +214,12 @@ protected:
     void finalizeStat();
     void calcAttribute(CreatureAtributeServer &attribute);
     void applyItemEffect();
-    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1,
-            float var2, float fRatio);
+    ///- Gets overwritten in player for Beltslots and Max Chaos
+    virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
     State *GetStateByEffectType(int effectType) const;
     virtual void onRegisterSkill(int, int, int, int) {};
     virtual void onExpChange() {};
+    virtual void onJobLevelUp() { };
     virtual void onAttackAndSkillProcess();
     virtual void onCantAttack(uint target, uint t) {};
     virtual uint16_t putonItem(ItemWearType pos, Item *item);

@@ -25,6 +25,7 @@ public:
 
     int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
     void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
+    bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
     void UpdateQuestStatusByMonsterKill(int monster_id);
     void GetQuestByMonster(int monster_id, std::vector<Quest*> &vQuest, int type);
 
@@ -168,9 +169,15 @@ public:
     void EndQuest(int code, int nRewardID, bool bForce);
     bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
     int GetQuestProgress(int nQuestID);
+    void UpdateQuestStatusByItemUpgrade();
+    int GetChaos() const;
+    int GetMaxChaos() const;
+    void AddChaos(int chaos);
 protected:
     void onRegisterSkill(int skillUID, int skill_id, int prev_level, int skill_level) override;
+    void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
     void onExpChange() override;
+    void onJobLevelUp() override;
     void onCantAttack(uint target, uint t) override;
     void onModifyStatAndAttribute() override;
 

@@ -81,7 +81,6 @@ Item *Unit::GetWornItem(ItemWearType idx)
 {
     if ((uint) idx >= Item::MAX_ITEM_WEAR || idx < 0)
         return nullptr;
-
     return m_anWear[idx];
 }
 
@@ -1396,6 +1395,8 @@ Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
         if (GetJP() < 0)
             SetJP(0);
 
+        onExpChange();
+
         uint64_t nSkillUID  = 0;
         int      nPrevLevel = GetBaseSkillLevel(skill_id);
         if (nPrevLevel == 0) {
@@ -2114,7 +2115,8 @@ void Unit::AddEXP(uint64 exp, uint jp, bool bApplyStanima)
     SetUInt64Value(UNIT_FIELD_EXP, GetEXP() + exp);
     SetUInt32Value(UNIT_FIELD_JOBPOINT, GetJP() + jp);
     // SetTotalJP
-    onExpChange();
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+        onExpChange();
 }
 
 void Unit::CancelSkill()
@@ -2596,4 +2598,20 @@ uint Unit::GetTotalCoolTime(int skill_id) const
         return 0;
     else
         return sk->GetSkillCoolTime();
+}
+
+void Unit::SetJP(int jp)
+{
+    if(jp < 0)
+        jp = 0;
+    SetInt32Value(UNIT_FIELD_JOBPOINT, jp);
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+        onExpChange();
+}
+
+void Unit::SetEXP(uint exp)
+{
+    SetUInt64Value(UNIT_FIELD_EXP, exp);
+    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+        onExpChange();
 }

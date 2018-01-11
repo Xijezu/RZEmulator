@@ -134,21 +134,21 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
             cl = 0;
 
         auto fDropRatePenalty = 1.0f;
-        /*cl -= GetLevel();
+        cl -= GetLevel();
         if(cl >= 5) {
             fDropRatePenalty     = 1.0f - (float) pow(cl - 3, 2.0f) * 0.02f;
             if (fDropRatePenalty < 0.0f)
                 fDropRatePenalty = 0.0f;
-        }*/
+        }
 
         float fChaosDropRateBonus = 1.0f;
         float fItemDropRateBonus = 1.0f;
         float fGoldDropRateBonus = 1.0f;
 
         auto player = dynamic_cast<Player*>(pFrom);
-        //procDropChaos(pFrom, Priority, vPartyContribute, fDropRatePenalty, fChaosDropRateBonus);
-        //if(pFrom->GetSubType() == ST_Player && player->GetInt32Value(UNIT_FIELD_CHAOS) < 1)
-            //sWorld->addChaos(this, player, 1.0f);
+        procDropChaos(pFrom, Priority, vPartyContribute, fDropRatePenalty);
+        if(pFrom->GetSubType() == ST_Player && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
+            sWorld->addChaos(this, player, 1.0f);
 
         if(m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
             procDropGold(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
@@ -156,9 +156,8 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
         }
 
 
-        // TODO: OnDeath script
 
-        procQuest(pos, pFrom, Priority, vPartyContribute);
+        // TODO: OnDeath script
     }
 }
 
@@ -349,22 +348,27 @@ void Monster::SetStatus(MonsterStatus status)
 
 void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty)
 {
-    long item_count;
-    for(int i = 0; i < 10; ++i) {
-        if(m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], (int)m_Base->drop_percentage[i], fDropRatePenalty, 1)) {
+    long     item_count;
+    for (int i = 0; i < 10; ++i)
+    {
+        if (m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], (int)m_Base->drop_percentage[i], fDropRatePenalty, 1))
+        {
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
-            if(item_count < m_Base->drop_min_count[i]) {
+            if (item_count < m_Base->drop_min_count[i])
+            {
                 MX_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
-            } else {
+            } else
+            {
                 int level = irand(m_Base->drop_min_level[i], m_Base->drop_max_level[i]);
-                int code = m_Base->drop_item_id[i];
-                if(code >= 0)
+                int code  = m_Base->drop_item_id[i];
+                if (code >= 0)
                     dropItem(pos, pKiller, pPriority, vPartyContribute, code, item_count, level, false, -1);
                 else
                     dropItemGroup(pos, pKiller, pPriority, vPartyContribute, code, item_count, level, -1);
             }
         }
     }
+    procQuest(pos, pKiller, pPriority, vPartyContribute);
 }
 
 void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex)
@@ -1071,6 +1075,30 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
                     }
                 }
             }
+        }
+    }
+}
+
+void Monster::procDropChaos(Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
+{
+    float fChance = m_Base->chaos_drop_percentage * GameRule::GetChaosDropRate() * fDropRatePenalty;
+    auto rnd = (uint)rand32();
+    float chaos = rnd % 100;
+
+    if(chaos >= fChance)
+        return;
+
+    chaos = irand(m_Base->chaos_min[0], m_Base->chaos_max[0]);
+    for(auto& vp : vPartyContribute)
+    {
+        float fSharedChaos = vp.fContribute * chaos;
+        if(vp.hPlayer == 0)
+        {
+            //sWorld->addChaos(this, vp.nPartyID, fSharedChaos);
+        } else {
+            auto p = sMemoryPool->GetObjectInWorld<Player>(vp.hPlayer);
+            if(p != nullptr)
+                sWorld->addChaos(this, p, fSharedChaos);
         }
     }
 }

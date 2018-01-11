@@ -702,3 +702,30 @@ void World::AddSession_(WorldSession *s)
 
     m_sessions[s->GetAccountId()] = s;
 }
+
+void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
+{
+    if(pPlayer == nullptr || pCorpse == nullptr || pPlayer->GetChaos() >= pPlayer->GetMaxChaos())
+        return;
+
+    uint ct = GetArTime();
+    Position playerPos = pPlayer->GetCurrentPosition(ct);
+    Position corpsePos = pCorpse->GetCurrentPosition(ct);
+    if(corpsePos.GetExactDist2d(&playerPos) <= 500.0f)
+    {
+        int nChaos = GameRule::GetIntValueByRandomInt(chaos);
+
+        if(chaos > 0.0f)
+        {
+            XPacket chaosPct(TS_SC_GET_CHAOS);
+            chaosPct << pPlayer->GetHandle();
+            chaosPct << pCorpse->GetHandle();
+            chaosPct << nChaos;
+            chaosPct << (uint8)0; // bonus type
+            chaosPct << (uint8)0; // bonus percent
+            chaosPct << (uint)0;  // bonus
+            sWorld->Broadcast((uint)(pCorpse->GetPositionX() / g_nRegionSize), (uint)(pCorpse->GetPositionY() / g_nRegionSize), pCorpse->GetLayer(), chaosPct);
+            pPlayer->AddChaos(nChaos);
+        }
+    }
+}

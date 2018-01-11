@@ -68,6 +68,7 @@ public:
     static void PendFreeItem(Item* pItem);
 
     bool IsWearable();
+    bool IsQuestItem() const { if(m_pItemBase== nullptr) return false; return m_pItemBase->flaglist[FLAG_QUEST] != 0; }
     void DBUpdate();
     void DBInsert();
 

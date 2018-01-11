@@ -63,6 +63,7 @@ public:
 
     // Item
     uint procAddItem(Player* pClient, Item* pItem, bool bIsPartyProcess);
+	void addChaos(Unit* pCorpse, Player* pPlayer, float chaos);
 
 	// Warping
 	void WarpBegin(Player*);

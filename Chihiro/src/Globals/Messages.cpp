@@ -26,6 +26,7 @@
 #include "ObjectMgr.h"
 #include "State.h"
 #include "Quest.h"
+#include "WorldSession.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -345,7 +346,7 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
     }
 }
 
-void Messages::SendResult(Player *pPlayer, uint16_t nMsg, uint16 nResult, uint16 nValue)
+void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 nValue)
 {
     if(pPlayer == nullptr)
         return;
@@ -353,9 +354,23 @@ void Messages::SendResult(Player *pPlayer, uint16_t nMsg, uint16 nResult, uint16
     XPacket packet(CSPACKETS::TS_SC_RESULT);
     packet << nMsg;
     packet << nResult;
-    packet << (uint32_t)nValue;
+    packet << nValue;
     pPlayer->SendPacket(packet);
 }
+
+
+void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResult, uint32 nValue)
+{
+    if(worldSession == nullptr)
+        return;
+
+    XPacket packet(CSPACKETS::TS_SC_RESULT);
+    packet << nMsg;
+    packet << nResult;
+    packet << nValue;
+    worldSession->GetSocket()->SendPacket(packet);
+}
+
 
 void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool bAbsolute)
 {
@@ -616,7 +631,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                     pPlayer->AddDialogMenu("Confirm", string_format("end_quest(%u, -1)", code));
                     return;
 #else
-                    strTrigger = string_format("end_quest( %u, %u )", code, i);
+                    strTrigger = string_format("end_quest( %u, -1 )", code);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
                     strButton  = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
@@ -821,9 +836,9 @@ void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {
     XPacket questPct(TS_SC_QUEST_STATUS);
     questPct << pQuest->m_Instance.Code;
-    for(int i = 0; i < 3; ++i)
+    for (int nStatu : pQuest->m_Instance.nStatus)
     {
-        questPct << pQuest->m_Instance.nStatus[i];
+        questPct << nStatu;
     }
     pPlayer->SendPacket(questPct);
 }

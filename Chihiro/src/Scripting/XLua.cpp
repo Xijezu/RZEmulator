@@ -516,6 +516,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
     item->m_Instance.nLevel = level;
     item->m_bIsNeedUpdateToDB = true;
     Messages::SendItemMessage(dynamic_cast<Player*>(m_pUnit), item);
+    dynamic_cast<Player*>(m_pUnit)->UpdateQuestStatusByItemUpgrade();
     if(item->m_Instance.nWearInfo != WearNone) {
         if(item->m_Instance.OwnSummonHandle != 0) {
             // get summon

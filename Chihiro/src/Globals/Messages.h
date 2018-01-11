@@ -10,6 +10,7 @@ class Summon;
 class Monster;
 class Item;
 class XPacket;
+class WorldSession;
 struct MarketInfo;
 class WorldObject;
 class State;
@@ -79,7 +80,8 @@ public:
     static void SendItemDestroyMessage(Player*, Item*);
     static void SendSkillCastFailMessage(Player*, uint caster, uint target, uint16 skill_id, uint8 skill_level, Position pos, int error_code);
     static void SendGameTime(Player *);
-    static void SendResult(Player *, uint16_t, uint16_t, uint16_t);
+    static void SendResult(Player *, uint16, uint16, uint32);
+    static void SendResult(WorldSession* worldSession, uint16, uint16, uint32);
     static void sendEnterMessage(Player *, WorldObject *, bool);
     static void SendMoveMessage(Player *, Unit *);
     static void SendTimeSynch(Player*);
