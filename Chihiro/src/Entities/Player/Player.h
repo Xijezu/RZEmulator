@@ -23,23 +23,22 @@ public:
     static void DoEachPlayer(const std::function<void (Player*)>& fn);
     static Player* FindPlayer(const std::string& szName);
 
+    /* ****************** QUEST ****************** */
     int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
     void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
     bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
     void UpdateQuestStatusByMonsterKill(int monster_id);
     void GetQuestByMonster(int monster_id, std::vector<Quest*> &vQuest, int type);
+    void StartQuest(int code, int nStartQuestID, bool bForce);
+    void EndQuest(int code, int nRewardID, bool bForce);
+    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
+    int GetQuestProgress(int nQuestID);
+    void UpdateQuestStatusByItemUpgrade();
 
-    int32 GetPermission()
-    { return GetInt32Value(UNIT_FIELD_PERMISSION); }
-
-    int32 GetGold()
-    { return GetInt32Value(UNIT_FIELD_GOLD); }
-
-    int32 GetPartyID()
-    { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
-
-    int32 GetGuildID()
-    { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
+    int GetPermission() { return GetInt32Value(UNIT_FIELD_PERMISSION); }
+    uint64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
+    int GetPartyID() { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
+    int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
 
     uint GetJobDepth();
 
@@ -54,11 +53,9 @@ public:
     // Warping
     void PendWarp(int x, int y, uint8_t layer);
 
-    std::string GetFlag(std::string flag)
-    { return m_lFlagList[flag]; }
+    std::string GetFlag(std::string flag) { return m_lFlagList[flag]; }
 
-    void SetFlag(std::string key, std::string value)
-    { m_lFlagList[key] = value; }
+    void SetFlag(std::string key, std::string value) { m_lFlagList[key] = value; }
 
     // Network
     void SendPropertyMessage(std::string key, std::string value);
@@ -97,7 +94,7 @@ public:
     void SendItemWearInfoMessage(Item* item, Unit *u);
     void ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast);
 
-    // Dialog Relevant
+    /* ****************** DIALOG ****************** */
     void SetLastContact(std::string, uint32_t);
     void SetLastContact(std::string, std::string);
     std::string GetLastContactStr(std::string);
@@ -106,16 +103,12 @@ public:
     void SetDialogText(std::string);
     void AddDialogMenu(std::string, std::string);
     void ClearDialogMenu();
-
-    bool HasDialog()
-    { return m_szDialogTitle.length() > 0; }
-
+    bool IsFixedDialogTrigger(std::string szTrigger) { return false; }
+    bool HasDialog() { return !m_szDialogTitle.empty(); }
     void ShowDialog();
     bool IsValidTrigger(std::string);
-    void onChangeProperty(std::string, int);
 
-    bool IsFixedDialogTrigger(std::string szTrigger)
-    { return false; }
+    void onChangeProperty(std::string, int);
 
     void DoSummon(Summon* pSummon, Position pPosition);
     void DoUnSummon(Summon* pSummon);
@@ -149,11 +142,9 @@ public:
     WorldSession& GetSession() const
     { return *m_session; }
 
-    void SetClientInfo(std::string value)
-    { m_szClientInfo = value; }
+    void SetClientInfo(std::string value) { m_szClientInfo = value; }
 
-    void SetSession(WorldSession *session)
-    { m_session = session; }
+    void SetSession(WorldSession *session) { m_session = session; }
 
     void applyJobLevelBonus() override;
 
@@ -165,11 +156,6 @@ public:
 
     Summon* m_pMainSummon{nullptr};
     uint m_hTamingTarget{};
-    void StartQuest(int code, int nStartQuestID, bool bForce);
-    void EndQuest(int code, int nRewardID, bool bForce);
-    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
-    int GetQuestProgress(int nQuestID);
-    void UpdateQuestStatusByItemUpgrade();
     int GetChaos() const;
     int GetMaxChaos() const;
     void AddChaos(int chaos);

@@ -547,8 +547,8 @@ void Player::SendLoginProperties()
 void Player::SendGoldChaosMessage()
 {
     XPacket packet(TS_SC_GOLD_UPDATE);
-    packet << GetUInt64Value(UNIT_FIELD_GOLD);
-    packet << GetInt32Value(UNIT_FIELD_CHAOS);
+    packet << GetGold();
+    packet << GetChaos();
     SendPacket(packet);
 }
 
@@ -1303,7 +1303,6 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     }
     if (pos == ItemWearType::WearDecoShield)
     {
-
         if (pItem->m_pItemBase->iclass == ItemClass::ClassDecoOneHandSword
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoTwoHandSword
             || pItem->m_pItemBase->iclass == ItemClass::ClassDecoDagger
@@ -1320,14 +1319,14 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
-            if (item1 != nullptr
-                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+            if ((item1 != nullptr 
+                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword 
                 && item1->m_pItemBase->iclass != ItemClass::ClassDagger
-                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
-                || item2 == nullptr
-                   && item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
-                   && item2->m_pItemBase->iclass != ItemClass::ClassDagger
-                   && item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe
+                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe ) 
+                || (item2 == nullptr
+                   || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                   || item2->m_pItemBase->iclass != ItemClass::ClassDagger
+                   || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)
                 || m_anWear[14] == nullptr)
             { // TODO: PassiveSkill
                 pos = ItemWearType::WearDecoWeapon;

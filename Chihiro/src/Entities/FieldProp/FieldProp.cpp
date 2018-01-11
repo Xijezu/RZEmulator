@@ -12,7 +12,7 @@ FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPro
     return fp;
 }
 
-bool FieldProp::IsUsable(Player *) const
+bool FieldProp::IsUsable(Player *pPlayer) const
 {
     return false;
 }
@@ -22,7 +22,7 @@ bool FieldProp::Cast() const
     return false;
 }
 
-bool FieldProp::UseProp(Player *) const
+bool FieldProp::UseProp(Player * pPlayer) const
 {
     return false;
 }
@@ -34,5 +34,9 @@ uint FieldProp::GetCastingDelay() const
 
 FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : WorldObject(true)
 {
+    _mainType = MT_StaticObject;
+    _subType  = ST_FieldProp;
+    _objType  = OBJ_STATIC;
 
+    m_pDeleteHandler = propDeleteHandler;
 }
