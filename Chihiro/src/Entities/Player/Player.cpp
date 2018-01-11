@@ -58,6 +58,12 @@ Player::~Player()
         t = nullptr;
     }
     m_vSummonList.clear();
+
+    for(auto &q : m_QuestManager.m_vActiveQuest) {
+        Quest::DB_Insert(this, q);
+        delete q;
+    }
+    m_QuestManager.m_vActiveQuest.clear();
 }
 
 void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player* pReceiver)
@@ -627,6 +633,12 @@ void Player::Save(bool bOnlyPlayer)
             if(summon == nullptr)
                 continue;
             Summon::DB_UpdateSummon(this, summon);
+        }
+
+        for(auto& q : m_QuestManager.m_vActiveQuest) {
+            if(q == nullptr)
+                continue;
+            Quest::DB_Insert(this, q);
         }
     }
 }

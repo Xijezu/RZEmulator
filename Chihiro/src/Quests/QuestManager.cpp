@@ -54,6 +54,7 @@ bool QuestManager::AddQuest(Quest *quest)
             return false;
         }
         m_hsFinishedQuest.emplace(nQuestCode, true);
+        delete quest;
         return true;
     }
     if(Quest::IsRandomQuest(quest->m_Instance.Code)) {
