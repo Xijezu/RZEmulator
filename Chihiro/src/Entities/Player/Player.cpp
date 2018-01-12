@@ -1640,14 +1640,15 @@ bool Player::IsInProgressQuest(int code)
 bool Player::IsStartableQuest(int code, bool bForQuestMark)
 {
     auto qbs = sObjectMgr->GetQuestBase(code);
-    //if (qbs->nLimitLevel - GetLevel() > 4 || qbs->nLimitJobLevel > GetCurrentJLv() || bForQuestMark  && qbs->nLimitIndication != 0  && GetLevel() - qbs->nLimitLevel > 12)
-    if(false)
+    if ((qbs->nLimitLevel - (int)GetLevel() > 4 || qbs->nLimitJobLevel > GetCurrentJLv()) || (bForQuestMark && qbs->nLimitIndication != 0 && (int)GetLevel() - qbs->nLimitLevel > 12))
         return false;
 
-    if (qbs->nLimitJob != 0) {
+    if (qbs->nLimitJob != 0)
+    {
         if (qbs->nLimitJob != GetCurrentJob())
             return false;
-    } else {
+    } else
+    {
         if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0)
             && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0)
             && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0)
@@ -1659,10 +1660,11 @@ bool Player::IsStartableQuest(int code, bool bForQuestMark)
         && (GetRace() != 5 || (qbs->LimitFlag & 4) == 0))
         return false;
     int fgid = qbs->nLimitFavorGroupID;
-    if(fgid == 999) {
+    if (fgid == 999)
+    {
         auto npc = sMemoryPool->GetObjectInWorld<NPC>(GetLastContactLong("npc"));
 
-        if(npc != nullptr)
+        if (npc != nullptr)
             fgid = npc->m_pBase->id;
         else
             fgid = 0;

@@ -91,10 +91,8 @@ bool NPC::HasStartableQuest(Player *player)
                 return true;
         }
     }
-    if (isstart && !bHasProgressRandom)
-        return true;
+    return isstart && !bHasProgressRandom;
 
-    return false;
 }
 
 bool NPC::HasFinishableQuest(Player *player)
