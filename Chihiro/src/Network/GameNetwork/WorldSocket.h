@@ -79,13 +79,19 @@ typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
  * notification.
  *
  */
+
+template<class T>
+class WorldSocketMgr;
+
+
+template<class T>
 class WorldSocket : public WorldHandler
 {
 public:
     WorldSocket (void);
     virtual ~WorldSocket (void);
 
-    friend class WorldSocketMgr;
+    friend class WorldSocketMgr<T>;
 
     /// Mutex type used for various synchronizations.
     typedef ACE_Thread_Mutex LockType;

@@ -48,7 +48,7 @@ struct LobbyCharacterInfo {
 // Handle the player network
 class WorldSession {
 public:
-    explicit WorldSession(WorldSocket *socket);
+    explicit WorldSession(WorldSocket<WorldSession> *socket);
     virtual ~WorldSession();
 
     // Accept & Close handler
@@ -67,7 +67,7 @@ public:
     Player *GetPlayer() const
     { return _player != nullptr ? _player : nullptr; }
 
-    WorldSocket *GetSocket() const
+    WorldSocket<WorldSession> *GetSocket() const
     { return _socket != nullptr ? _socket : nullptr; }
 
     void HandleNullPacket(XPacket *){ }
@@ -119,7 +119,7 @@ public:
     std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 private:
     bool checkCharacterName(const std::string&);
-    WorldSocket *_socket{nullptr};
+    WorldSocket<WorldSession> *_socket{nullptr};
     XRC4Cipher _rc4encode{ };
     XRC4Cipher _rc4decode{ };
 

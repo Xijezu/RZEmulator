@@ -35,7 +35,7 @@
 #include "AllowedCommandInfo.h"
 
 // Constructo - give it a socket
-WorldSession::WorldSession(WorldSocket *socket) : _socket(socket)
+WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
 {
     _rc4decode.SetKey("}h79q~B%al;k'y $E");
     _rc4encode.SetKey("}h79q~B%al;k'y $E");

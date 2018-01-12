@@ -7,16 +7,20 @@
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
 
+template<class T>
 class WorldSocket;
+class WorldSession;
+template <class T>
 class ReactorRunnable;
 class ACE_Event_Handler;
 
 /// Manages all sockets connected to peers and network threads
+template<class T>
 class WorldSocketMgr
 {
 public:
-    friend class WorldSocket;
-    friend class ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>;
+    friend class WorldSocket<T>;
+    friend class ACE_Singleton<WorldSocketMgr<T>, ACE_Thread_Mutex>;
 
     /// Start network, listen at address:port .
     int StartNetwork(ACE_UINT16 port, const char* address);
@@ -28,7 +32,7 @@ public:
     void Wait();
 
 private:
-    int OnSocketOpen(WorldSocket* sock);
+    int OnSocketOpen(WorldSocket<T>* sock);
 
     int StartReactiveIO(ACE_UINT16 port, const char* address);
 
@@ -36,7 +40,7 @@ private:
     WorldSocketMgr();
     virtual ~WorldSocketMgr();
 
-    ReactorRunnable* m_NetThreads;
+    ReactorRunnable<T>* m_NetThreads;
     size_t m_NetThreadsCount;
 
     int m_SockOutKBuff;
@@ -46,6 +50,6 @@ private:
     class WorldSocketAcceptor* m_Acceptor;
 };
 
-#define sWorldSocketMgr ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>::instance()
+#define sWorldSocketMgr ACE_Singleton<WorldSocketMgr<WorldSession>, ACE_Thread_Mutex>::instance()
 
 #endif

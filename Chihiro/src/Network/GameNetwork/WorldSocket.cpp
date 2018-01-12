@@ -30,20 +30,11 @@
 #include "DatabaseEnv.h"
 #include "WorldSocketMgr.h"
 
-#if defined(__GNUC__)
-#pragma pack(1)
-#else
-#pragma pack(push, 1)
-#endif
+template class WorldSocket<WorldSession>;
 
-#if defined(__GNUC__)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
-WorldSocket::WorldSocket (void): WorldHandler(),
-                                 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
+template<class T>
+WorldSocket<T>::WorldSocket (void): WorldHandler(),
+                                 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(nullptr),
                                  m_RecvWPct(0), m_RecvPct(), m_Header(sizeof(TS_MESSAGE)),
                                  m_WorldHeader(sizeof(TS_MESSAGE)), m_OutBuffer(0),
                                  m_OutBufferSize(65536), m_OutActive(false),
@@ -59,7 +50,8 @@ WorldSocket::WorldSocket (void): WorldHandler(),
     msg_queue()->low_water_mark(8 * 1024 * 1024);
 }
 
-WorldSocket::~WorldSocket (void)
+template<class T>
+WorldSocket<T>::~WorldSocket (void)
 {
     delete m_RecvWPct;
 
@@ -71,12 +63,14 @@ WorldSocket::~WorldSocket (void)
     peer().close();
 }
 
-bool WorldSocket::IsClosed (void) const
+template<class T>
+bool WorldSocket<T>::IsClosed (void) const
 {
     return closing_;
 }
 
-void WorldSocket::CloseSocket (void)
+template<class T>
+void WorldSocket<T>::CloseSocket (void)
 {
     {
         ACE_GUARD (LockType, Guard, m_OutBufferLock);
@@ -101,12 +95,14 @@ void WorldSocket::CloseSocket (void)
     }
 }
 
-const std::string& WorldSocket::GetRemoteAddress (void) const
+template<class T>
+const std::string& WorldSocket<T>::GetRemoteAddress (void) const
 {
     return m_Address;
 }
 
-int WorldSocket::SendPacket(XPacket& pct)
+template<class T>
+int WorldSocket<T>::SendPacket(XPacket& pct)
 {
     ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
 
@@ -164,17 +160,20 @@ int WorldSocket::SendPacket(XPacket& pct)
     return 0;
 }
 
-long WorldSocket::AddReference (void)
+template<class T>
+long WorldSocket<T>::AddReference (void)
 {
     return static_cast<long> (add_reference());
 }
 
-long WorldSocket::RemoveReference (void)
+template<class T>
+long WorldSocket<T>::RemoveReference (void)
 {
     return static_cast<long> (remove_reference());
 }
 
-int WorldSocket::open (void *a)
+template<class T>
+int WorldSocket<T>::open (void *a)
 {
     ACE_UNUSED_ARG (a);
 
@@ -212,7 +211,7 @@ int WorldSocket::open (void *a)
     }
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN(m_Session, WorldSession(this), -1);
+    ACE_NEW_RETURN(m_Session, T(this), -1);
 
     // reactor takes care of the socket from now on
     remove_reference();
@@ -220,7 +219,8 @@ int WorldSocket::open (void *a)
     return 0;
 }
 
-int WorldSocket::close (u_long)
+template<class T>
+int WorldSocket<T>::close (u_long)
 {
     shutdown();
 
@@ -231,7 +231,8 @@ int WorldSocket::close (u_long)
     return 0;
 }
 
-int WorldSocket::handle_input (ACE_HANDLE)
+template<class T>
+int WorldSocket<T>::handle_input (ACE_HANDLE)
 {
     if (closing_)
         return -1;
@@ -267,7 +268,8 @@ int WorldSocket::handle_input (ACE_HANDLE)
     ACE_NOTREACHED(return -1);
 }
 
-int WorldSocket::handle_output (ACE_HANDLE)
+template<class T>
+int WorldSocket<T>::handle_output (ACE_HANDLE)
 {
     ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
 
@@ -313,7 +315,8 @@ int WorldSocket::handle_output (ACE_HANDLE)
     ACE_NOTREACHED (return 0);
 }
 
-int WorldSocket::handle_output_queue (GuardType& g)
+template<class T>
+int WorldSocket<T>::handle_output_queue (GuardType& g)
 {
     if (msg_queue()->is_empty())
         return cancel_wakeup_output(g);
@@ -374,7 +377,8 @@ int WorldSocket::handle_output_queue (GuardType& g)
     ACE_NOTREACHED(return -1);
 }
 
-int WorldSocket::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
+template<class T>
+int WorldSocket<T>::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
 {
     // Critical section
     {
@@ -397,7 +401,8 @@ int WorldSocket::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
     return 0;
 }
 
-int WorldSocket::Update (void)
+template<class T>
+int WorldSocket<T>::Update (void)
 {
     if (closing_)
         return -1;
@@ -419,7 +424,8 @@ int WorldSocket::Update (void)
     return ret;
 }
 
-int WorldSocket::handle_input_header (void)
+template<class T>
+int WorldSocket<T>::handle_input_header (void)
 {
     ACE_ASSERT(m_RecvWPct == NULL);
     ACE_ASSERT(m_WorldHeader.length() == sizeof(TS_MESSAGE));
@@ -451,8 +457,8 @@ int WorldSocket::handle_input_header (void)
     return 0;
 }
 
-
-int WorldSocket::handle_input_payload (void)
+template<class T>
+int WorldSocket<T>::handle_input_payload (void)
 {
     // set errno properly here on error !!!
     // now have a header and payload
@@ -476,7 +482,8 @@ int WorldSocket::handle_input_payload (void)
     return ret;
 }
 
-int WorldSocket::handle_input_missing_data (void)
+template<class T>
+int WorldSocket<T>::handle_input_missing_data (void)
 {
     char buf[4096];
 
@@ -557,7 +564,8 @@ int WorldSocket::handle_input_missing_data (void)
     return size_t(n) == recv_size ? 1 : 2;
 }
 
-int WorldSocket::cancel_wakeup_output (GuardType& g)
+template<class T>
+int WorldSocket<T>::cancel_wakeup_output (GuardType& g)
 {
     if (!m_OutActive)
         return 0;
@@ -577,7 +585,8 @@ int WorldSocket::cancel_wakeup_output (GuardType& g)
     return 0;
 }
 
-int WorldSocket::schedule_wakeup_output (GuardType& g)
+template<class T>
+int WorldSocket<T>::schedule_wakeup_output (GuardType& g)
 {
     if (m_OutActive)
         return 0;
@@ -596,7 +605,8 @@ int WorldSocket::schedule_wakeup_output (GuardType& g)
     return 0;
 }
 
-int WorldSocket::ProcessIncoming(XPacket* new_pct)
+template<class T>
+int WorldSocket<T>::ProcessIncoming(XPacket* new_pct)
 {
     ACE_ASSERT (new_pct);
 

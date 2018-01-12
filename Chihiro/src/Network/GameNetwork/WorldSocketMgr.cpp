@@ -38,6 +38,7 @@
 * network threads, and assigning connections from acceptor thread
 * to other network threads
 */
+template<class T>
 class ReactorRunnable : protected ACE_Task_Base {
 public:
 
@@ -94,7 +95,7 @@ public:
         return static_cast<long> (m_Connections.value());
     }
 
-    int AddSocket(WorldSocket *sock)
+    int AddSocket(WorldSocket<T> *sock)
     {
         std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
@@ -120,8 +121,8 @@ protected:
         if (m_NewSockets.empty())
             return;
 
-        for (SocketSet::const_iterator i = m_NewSockets.begin(); i != m_NewSockets.end(); ++i) {
-            WorldSocket *sock = (*i);
+        for (typename SocketSet::const_iterator i = m_NewSockets.begin(); i != m_NewSockets.end(); ++i) {
+            WorldSocket<T> *sock = (*i);
 
             if (sock->IsClosed()) {
                 sock->RemoveReference();
@@ -139,7 +140,7 @@ protected:
 
         ACE_ASSERT (m_Reactor);
 
-        SocketSet::iterator i, t;
+        typename SocketSet::iterator i, t;
 
         while (!m_Reactor->reactor_event_loop_done()) {
             // dont be too smart to move this outside the loop
@@ -172,7 +173,7 @@ protected:
 
 private:
     typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicInt;
-    typedef std::set<WorldSocket *>              SocketSet;
+    typedef std::set<WorldSocket<T> *>              SocketSet;
 
     ACE_Reactor *m_Reactor;
     AtomicInt m_Connections;
@@ -184,7 +185,10 @@ private:
     std::mutex m_NewSockets_Lock;
 };
 
-WorldSocketMgr::WorldSocketMgr() :
+template class WorldSocketMgr<WorldSession>;
+
+template<class T>
+WorldSocketMgr<T>::WorldSocketMgr() :
         m_NetThreads(0),
         m_NetThreadsCount(0),
         m_SockOutKBuff(-1),
@@ -193,14 +197,15 @@ WorldSocketMgr::WorldSocketMgr() :
         m_Acceptor(0)
 {}
 
-WorldSocketMgr::~WorldSocketMgr()
+template<class T>
+WorldSocketMgr<T>::~WorldSocketMgr()
 {
     delete[] m_NetThreads;
     delete m_Acceptor;
 }
 
-int
-WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char *address)
+template<class T>
+int WorldSocketMgr<T>::StartReactiveIO(ACE_UINT16 port, const char *address)
 {
     m_UseNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
 
@@ -213,7 +218,7 @@ WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char *address)
 
     m_NetThreadsCount = static_cast<size_t> (num_threads + 1);
 
-    m_NetThreads = new ReactorRunnable[m_NetThreadsCount];
+    m_NetThreads = new ReactorRunnable<T>[m_NetThreadsCount];
 
     MX_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
 
@@ -242,8 +247,8 @@ WorldSocketMgr::StartReactiveIO(ACE_UINT16 port, const char *address)
     return 0;
 }
 
-int
-WorldSocketMgr::StartNetwork(ACE_UINT16 port, const char *address)
+template<class T>
+int WorldSocketMgr<T>::StartNetwork(ACE_UINT16 port, const char *address)
 {
     if (!sLog->ShouldLog("misc", LOG_LEVEL_DEBUG))
         ACE_Log_Msg::instance()->priority_mask(LM_ERROR, ACE_Log_Msg::PROCESS);
@@ -254,8 +259,8 @@ WorldSocketMgr::StartNetwork(ACE_UINT16 port, const char *address)
     return 0;
 }
 
-void
-WorldSocketMgr::StopNetwork()
+template<class T>
+void WorldSocketMgr<T>::StopNetwork()
 {
     if (m_Acceptor) {
         m_Acceptor->close();
@@ -269,8 +274,8 @@ WorldSocketMgr::StopNetwork()
     Wait();
 }
 
-void
-WorldSocketMgr::Wait()
+template<class T>
+void WorldSocketMgr<T>::Wait()
 {
     if (m_NetThreadsCount != 0) {
         for (size_t i = 0; i < m_NetThreadsCount; ++i)
@@ -278,8 +283,8 @@ WorldSocketMgr::Wait()
     }
 }
 
-int
-WorldSocketMgr::OnSocketOpen(WorldSocket *sock)
+template<class T>
+int WorldSocketMgr<T>::OnSocketOpen(WorldSocket<T> *sock)
 {
     // set some options here
     if (m_SockOutKBuff >= 0) {
