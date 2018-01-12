@@ -83,7 +83,6 @@ typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
 template<class T>
 class WorldSocketMgr;
 
-
 template<class T>
 class WorldSocket : public WorldHandler
 {
