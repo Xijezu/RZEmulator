@@ -79,7 +79,6 @@ void RespawnObject::onMonsterDelete(Monster *mob)
 
     auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
     if(pos != m_vRespawnedMonster.end()) {
-        MX_LOG_INFO("loading", "Deleted monster %u[%u] at [%f, %f]", info.monster_id, mob->GetHandle(), mob->GetPositionX(), mob->GetPositionY());
         m_vRespawnedMonster.erase(pos);
         mob->m_pDeleteHandler = nullptr;
         lastDeadTime = sWorld->GetArTime();

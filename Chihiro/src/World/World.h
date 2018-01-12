@@ -40,6 +40,7 @@ public:
 	WorldSession* FindSession(uint32 id) const;
 	void AddSession(WorldSession* s);
 	bool RemoveSession(uint32 id);
+	void UpdateSessions(uint diff);
 	void KickAll();
 
 	void AddObjectToWorld(WorldObject* obj);

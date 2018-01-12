@@ -39,6 +39,10 @@ WorldSession::WorldSession(WorldSocket *socket) : _socket(socket)
 {
     _rc4decode.SetKey("}h79q~B%al;k'y $E");
     _rc4encode.SetKey("}h79q~B%al;k'y $E");
+    if(socket)
+    {
+        socket->AddReference();
+    }
 }
 
 // Close patch file descriptor before leaving
@@ -59,7 +63,7 @@ void WorldSession::OnClose()
     if (_accountName.length() > 0)
         sAuthNetwork->SendLogoutToAuth(_accountName);
     onReturnToLobby(nullptr);
-    sWorld->RemoveSession(GetAccountId());
+    //sWorld->RemoveSession(GetAccountId());
     _rc4decode.Clear();
     _rc4encode.Clear();
 }
@@ -1456,4 +1460,18 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     resPct << item_handle;
     resPct << target_handle;
     _player->SendPacket(resPct);
+}
+
+bool WorldSession::Update(uint diff)
+{
+    if(_socket && _socket->IsClosed())
+    {
+        _socket->RemoveReference();
+        _socket = nullptr;
+    }
+
+    if(!_socket)
+        return false;
+
+    return true;
 }

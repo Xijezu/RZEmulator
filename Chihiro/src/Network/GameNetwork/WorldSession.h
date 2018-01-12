@@ -55,6 +55,7 @@ public:
     //void OnAccept() override;
     void OnClose();
 	void KickPlayer();
+	bool Update(uint diff);
 
     //void Decrypt(void *, size_t, bool/* =false */) override;
     //void Encrypt(void *, size_t, bool/* =false */) override;

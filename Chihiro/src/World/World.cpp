@@ -317,10 +317,7 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
 
 void World::Update(uint diff)
 {
-    ///- Add new sessions
-    WorldSession* sess = nullptr;
-    while(addSessQueue.next(sess))
-        AddSession_(sess);
+    UpdateSessions(diff);
 
     sFieldPropManager->Update(diff);
     sMemoryPool->Update(diff);
@@ -330,6 +327,34 @@ void World::Update(uint diff)
         //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
 }
+
+void World::UpdateSessions(uint diff)
+{
+    ///- Add new sessions
+    WorldSession* sess = nullptr;
+    while(addSessQueue.next(sess))
+        AddSession_(sess);
+
+    ///- Then send an update signal to remaining ones
+    for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+
+        ///- and remove not active sessions from the list
+        WorldSession* pSession = itr->second;
+
+        if (!pSession->Update(diff))    // As interval = 0
+        {
+            /*if (!RemoveQueuedPlayer(itr->second) && itr->second && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
+                m_disconnects[itr->second->GetAccountId()] = time(NULL);*/
+            //RemoveQueuedPlayer(pSession);
+            m_sessions.erase(itr);
+            delete pSession;
+        }
+    }
+}
+
 
 void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
 {
@@ -731,3 +756,4 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
         }
     }
 }
+
