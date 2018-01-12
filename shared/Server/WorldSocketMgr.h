@@ -1,17 +1,19 @@
 #ifndef PROJECT_WORLDSOCKETMGR_H
 #define PROJECT_WORLDSOCKETMGR_H
 
-
-
 #include <ace/Basic_Types.h>
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
 
-template<class T>
-class WorldSocket;
+template<class T> class WorldSocket;
+template<class T> class ReactorRunnable;
+template<class T> class WorldSocketAcceptor;
+
+// All the sessions
 class WorldSession;
-template <class T>
-class ReactorRunnable;
+class AuthGameSession;
+class AuthClientSession;
+
 class ACE_Event_Handler;
 
 /// Manages all sockets connected to peers and network threads
@@ -47,9 +49,14 @@ private:
     int m_SockOutUBuff;
     bool m_UseNoDelay;
 
-    class WorldSocketAcceptor* m_Acceptor;
+     WorldSocketAcceptor<T>* m_Acceptor;
 };
 
-#define sWorldSocketMgr ACE_Singleton<WorldSocketMgr<WorldSession>, ACE_Thread_Mutex>::instance()
+#ifdef IS_MONONOKE
+    #define sAuthSocketMgr ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()
+    #define sGameSocketMgr ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()
+#else
+    #define sWorldSocketMgr ACE_Singleton<WorldSocketMgr<WorldSession>, ACE_Thread_Mutex>::instance()
+#endif
 
 #endif

@@ -20,7 +20,6 @@
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "GameNetwork/ClientPackets.h"
-#include "../../../../Mononoke/src/Server/AuthGame/AuthGamePackets.h"
 #include "AuthNetwork.h"
 #include "MemPool.h"
 #include "Messages.h"
@@ -73,13 +72,13 @@ enum eStatus {
     STATUS_AUTHED
 };
 
-typedef struct GameHandler {
+typedef struct AuthGameSession {
     uint16_t cmd;
     uint8_t  status;
     void (WorldSession::*handler)(XPacket *);
 } GameHandler;
 
-const GameHandler packetHandler[] =
+const AuthGameSession packetHandler[] =
                           {
                                   {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
                                   {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
@@ -120,7 +119,7 @@ const GameHandler packetHandler[] =
                                   {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem}
                           };
 
-const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
+const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
 
 /// Handler for incoming packets
 void WorldSession::ProcessIncoming(XPacket *pRecvPct)
@@ -262,14 +261,17 @@ std::vector<LobbyCharacterInfo> WorldSession::_PrepareCharacterList(uint32 accou
 
 void WorldSession::onAuthResult(XPacket *pGamePct)
 {
-    AG_CLIENT_LOGIN *result = ((AG_CLIENT_LOGIN *) (pGamePct)->contents());
-    if (result->result == TS_RESULT_SUCCESS) {
+    pGamePct->read_skip(7);
+    auto szAccount = pGamePct->ReadString(61);
+    auto nAccountID = pGamePct->read<uint>();
+    auto result = pGamePct->read<uint16>();
+    if (result == TS_RESULT_SUCCESS) {
         _isAuthed    = true;
-        _accountId   = result->nAccountID;
-        _accountName = result->account;
+        _accountId   = nAccountID;
+        _accountName = szAccount;
         sWorld->AddSession(this);
     }
-    _SendResultMsg(TS_CS_ACCOUNT_WITH_AUTH, result->result, 0);
+    _SendResultMsg(TS_CS_ACCOUNT_WITH_AUTH, result, 0);
 }
 
 void WorldSession::onLogin(XPacket *pRecvPct)

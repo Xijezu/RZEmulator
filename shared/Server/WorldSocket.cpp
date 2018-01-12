@@ -22,16 +22,20 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Reactor.h>
 #include <ace/Auto_Ptr.h>
-
 #include "WorldSocket.h"
 #include "XPacket.h"
-#include "WorldSession.h"
-#include "World.h"
 #include "DatabaseEnv.h"
 #include "WorldSocketMgr.h"
 
-template class WorldSocket<WorldSession>;
-
+#ifdef IS_MONONOKE
+    #include "AuthClientSession.h"
+    #include "AuthGameSession.h"
+    template class WorldSocket<AuthClientSession>;
+    template class WorldSocket<AuthGameSession>;
+#else
+    #include "WorldSession.h"
+    template class WorldSocket<WorldSession>;
+#endif
 template<class T>
 WorldSocket<T>::WorldSocket (void): WorldHandler(),
                                  m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(nullptr),
@@ -186,7 +190,7 @@ int WorldSocket<T>::open (void *a)
     m_OutActive = true;
 
     // Hook for the manager.
-    if (sWorldSocketMgr->OnSocketOpen(this) == -1)
+    if(ACE_Singleton<WorldSocketMgr<T>, ACE_Thread_Mutex>::instance()->OnSocketOpen(this) == -1)
         return -1;
 
     // Allocate the buffer.
@@ -210,8 +214,11 @@ int WorldSocket<T>::open (void *a)
         return -1;
     }
 
-    // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN(m_Session, T(this), -1);
+    {
+        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+        // NOTE ATM the socket is single-threaded, have this in mind ...
+        ACE_NEW_RETURN(m_Session, T(this), -1);
+    }
 
     // reactor takes care of the socket from now on
     remove_reference();
@@ -247,14 +254,14 @@ int WorldSocket<T>::handle_input (ACE_HANDLE)
                 return Update();                           // interesting line, isn't it ?
             }
 
-            MX_LOG_DEBUG("network", "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
+            MX_LOG_TRACE("network", "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
 
             errno = ECONNRESET;
             return -1;
         }
         case 0:
         {
-            MX_LOG_DEBUG("network", "WorldSocket::handle_input: Peer has closed connection");
+            MX_LOG_TRACE("network", "WorldSocket::handle_input: Peer has closed connection");
 
             errno = ECONNRESET;
             return -1;
@@ -393,7 +400,8 @@ int WorldSocket<T>::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
     // Critical section
     {
         ACE_GUARD_RETURN (LockType, Guard, m_SessionLock, -1);
-
+        if(m_Session)
+            m_Session->OnClose();
         m_Session = NULL;
     }
 
@@ -435,10 +443,9 @@ int WorldSocket<T>::handle_input_header (void)
 
 
     if (header.size > 10236) {
-        Player *_player = m_Session ? m_Session->GetPlayer() : NULL;
-        MX_LOG_ERROR("network", "WorldSocket::handle_input_header(): client (account: %u, char [Name: %s]) sent malformed packet (size: %d, cmd: %d)",
+        MX_LOG_INFO("network", "WorldSocket::handle_input_header(): client (account: %u, char [Name: %s]) sent malformed packet (size: %d, cmd: %d)",
                      m_Session ? m_Session->GetAccountId() : 0,
-                     _player ? _player->GetName() : "<none>",
+                     m_Session ? m_Session->GetAccountName().c_str() : "<none>",
                      header.size, header.id);
 
         errno = EINVAL;
@@ -613,8 +620,6 @@ int WorldSocket<T>::ProcessIncoming(XPacket* new_pct)
     // manage memory ;)
     ACE_Auto_Ptr<XPacket> aptr(new_pct);
 
-    int packet_id = new_pct->GetPacketID();
-
     if (closing_)
         return -1;
 
@@ -629,7 +634,7 @@ int WorldSocket<T>::ProcessIncoming(XPacket* new_pct)
     {
         {
             ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
-            if (!m_Session) {
+            if (m_Session == nullptr) {
                 MX_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed packet_id = %u", uint32(new_pct->GetPacketID()));
                 return -1;
             }
@@ -646,7 +651,6 @@ int WorldSocket<T>::ProcessIncoming(XPacket* new_pct)
     {
         MX_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %d from client %s, accountid=%i. Disconnected client.",
                      new_pct->GetPacketID(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
-        new_pct->hexlike();
         return -1;
     }
 

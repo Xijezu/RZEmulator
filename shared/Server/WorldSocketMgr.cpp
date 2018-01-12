@@ -32,7 +32,6 @@
 #include "WorldSocket.h"
 #include "WorldSocketAcceptor.h"
 
-
 /**
 * This is a helper class to WorldSocketMgr, that manages
 * network threads, and assigning connections from acceptor thread
@@ -149,7 +148,6 @@ protected:
 
             if (m_Reactor->run_reactor_event_loop(interval) == -1)
                 break;
-
             AddNewSockets();
 
             for (i = m_Sockets.begin(); i != m_Sockets.end();) {
@@ -185,7 +183,12 @@ private:
     std::mutex m_NewSockets_Lock;
 };
 
-template class WorldSocketMgr<WorldSession>;
+#ifdef IS_MONONOKE
+    template class WorldSocketMgr<AuthClientSession>;
+    template class WorldSocketMgr<AuthGameSession>;
+#else
+    template class WorldSocketMgr<WorldSession>;
+#endif
 
 template<class T>
 WorldSocketMgr<T>::WorldSocketMgr() :
@@ -232,7 +235,7 @@ int WorldSocketMgr<T>::StartReactiveIO(ACE_UINT16 port, const char *address)
         return -1;
     }
 
-    m_Acceptor = new WorldSocketAcceptor;
+    m_Acceptor = new WorldSocketAcceptor<T>;
 
     ACE_INET_Addr listen_addr(port, address);
 

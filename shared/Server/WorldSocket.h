@@ -36,9 +36,12 @@
 #include "Common.h"
 #include "XRc4Cipher.h"
 
+template<class T>class WorldSocketMgr;
 class ACE_Message_Block;
 class XPacket;
 class WorldSession;
+class AuthClientSession;
+class AuthGameSession;
 
 /// Handler that can communicate over stream sockets.
 typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
@@ -79,9 +82,6 @@ typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
  * notification.
  *
  */
-
-template<class T>
-class WorldSocketMgr;
 
 template<class T>
 class WorldSocket : public WorldHandler
@@ -172,7 +172,7 @@ private:
     LockType m_SessionLock;
 
     /// Session to which received packets are routed
-    WorldSession* m_Session;
+    T* m_Session;
 
     /// here are stored the fragments of the received data
     XPacket* m_RecvWPct;

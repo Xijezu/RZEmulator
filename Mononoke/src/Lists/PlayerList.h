@@ -17,43 +17,73 @@
 #ifndef __PLAYERLIST_H_
 #define __PLAYERLIST_H_
 #include "Common.h"
+#include "SharedMutex.h"
 
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
-
-// Storage object for a game
+class AuthClientSession;
+// Storage object for a player
 struct Player
 {
-	uint32 account_id;
-	std::string login_name;
-	bool block;
-	uint32 last_login_server_idx;
-	bool isInGame;
-	uint64 one_time_key;
+	Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
+			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), pSession(nullptr)
+	{
+	}
+	uint32 nAccountID;
+	std::string szLoginName;
+	bool bIsBlocked;
+	uint32 nLastServerIDX;
+	bool bIsInGame;
+	bool bKickNextLogin;
+	uint64 nOneTimeKey;
+	AuthClientSession* pSession;
 };
 
 /// Storage object for the list of players on the server
 class PlayerList
 {
 public:
-	typedef std::map<std::string, Player> PlayerMap;
+	typedef std::map<std::string, Player*> PlayerMap;
 
-	PlayerList() {}
-	~PlayerList() {}
+	PlayerList() = default;
+	~PlayerList() = default;
 
-	void AddPlayer(const Player NewPlayer) { m_players[NewPlayer.login_name] = NewPlayer; }
-	void RemovePlayer(std::string key) { if (contains(key)) m_players.erase(key); }
-	void UpdatePlayer(const Player player)
-	{ 
-		if (contains(player.login_name)) 
-			m_players[player.login_name] = player; 
+	void AddPlayer(Player* pNewPlayer)
+	{
+		// Adds a player to the list
+		{
+			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			m_players[pNewPlayer->szLoginName] = pNewPlayer;
+		}
 	}
-	PlayerMap GetMap() const { return m_players; }
 
-	uint32 size() const { return m_players.size(); }
-	bool contains(std::string idx) const { return m_players.count(idx) == 1 ? true : false; }
+	void RemovePlayer(const std::string& szAccount)
+	{
+		// Removes a player from the list
+		{
+			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			if (m_players.count(szAccount) == 1)
+				m_players.erase(szAccount);
+		}
+	}
+
+	MX_SHARED_MUTEX *GetGuard()
+	{
+		return &i_lock;
+	}
+
+	// You need to use the mutex while working with the map!
+	PlayerMap GetMap() const
+	{
+		return m_players;
+	}
+
+	Player* GetPlayer(const std::string& szAccount)
+	{
+		if(m_players.count(szAccount) == 1)
+			return m_players[szAccount];
+		return nullptr;
+	}
 private:
+	MX_SHARED_MUTEX i_lock;
 	PlayerMap m_players;                                  ///< Internal map of players
 };
 

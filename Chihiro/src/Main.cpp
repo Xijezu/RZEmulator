@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	uint16 worldPort = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+	uint16 worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 	std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
 	//WorldSockAcceptor acceptor;
 	if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)

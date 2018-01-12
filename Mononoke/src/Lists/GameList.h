@@ -19,45 +19,69 @@
 #define _GAMELIST_H
 
 #include "Common.h"
-
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/INET_Addr.h>
+#include "SharedMutex.h"
 
 // Storage object for a game
 struct Game
 {
-	uint16_t server_idx;
-	std::string server_name;
-	std::string server_screenshot_url;
-	bool is_adult_server;
-	std::string server_ip;
-	int32_t server_port;
+	Game() : nIDX(0), szName(), szSSU(), bIsAdultServer(false), szIP(), nPort(0) { }
+	uint16 nIDX;
+	std::string szName;
+	std::string szSSU;
+	bool bIsAdultServer;
+	std::string szIP;
+	int nPort;
 };
 
 /// Storage object for the list of realms on the server
 class GameList
 {
 public:
-    typedef std::map<int32_t, Game> GameMap;
+	typedef std::map<uint, Game*> GameMap;
 
-    GameList() {}
-    ~GameList() {}
+	GameList() = default;
+	~GameList() = default;
 
-    void AddGame(const Game NewRealm) { m_games[NewRealm.server_idx] = NewRealm; }
-	void RemoveGame(int32_t key) { if(contains(key)) m_games.erase(key); }
-	GameMap GetMap() const { return m_games; }
+	void AddGame(Game *pNewGame)
+	{
+		// Adds a game to the list
+		{
+			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			m_games[pNewGame->nIDX] = pNewGame;
+		}
+	}
 
-	GameMap::const_iterator begin() const { return m_games.begin(); }
-	GameMap::const_iterator end() const { return m_games.end(); }
-    uint32 size() const { return m_games.size(); }
-	bool contains(int32_t idx) const { return m_games.count(idx) == 1 ? true : false; }
+	void RemoveGame(const uint nIDX)
+	{
+		// Removes a game from the list
+		{
+			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			if (m_games.count(nIDX) == 1)
+				m_games.erase(nIDX);
+		}
+	}
+
+	MX_SHARED_MUTEX *GetGuard()
+	{
+		return &i_lock;
+	}
+
+	// You need to use the mutex while working with the map!
+	GameMap* GetMap()
+	{
+		return &m_games;
+	}
+
+	Game *GetGame(const uint nIDX)
+	{
+		if (m_games.count(nIDX) == 1)
+			return m_games[nIDX];
+		return nullptr;
+	}
 
 private:
-
-	GameMap m_games;                                  ///< Internal map of realms
-    uint32   m_UpdateInterval;
-    time_t   m_NextUpdateTime;
+	MX_SHARED_MUTEX i_lock{};
+	GameMap         m_games;
 };
 
 #define sGameMapList ACE_Singleton<GameList, ACE_Null_Mutex>::instance()

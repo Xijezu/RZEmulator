@@ -28,7 +28,7 @@ typedef struct AllowedCommands {
     void (AllowedCommandInfo::*handler)(Player*,const std::string&);
 } GameHandler;
 
-const GameHandler commandHandler[] =
+const AllowedCommands commandHandler[] =
         {
                 { "/run", true, &AllowedCommandInfo::onRunScript },
                 { "/sitdown", false, &AllowedCommandInfo::onCheatSitdown },

@@ -22,36 +22,36 @@
 #define _GAMESOCKET_H
 
 #include "Common.h"
-#include "Server/XSocket.h"
-#include "Lists/GameList.h"
+#include "GameList.h"
+
+template<class T> class WorldSocket;
+class XPacket;
 
 // Handle login commands
-class GameHandler: public XSocket::Session
+class AuthGameSession
 {
 public:
-    explicit GameHandler(XSocket& socket);
-    virtual ~GameHandler() = default;
+	typedef WorldSocket<AuthGameSession> GameSocket;
+	explicit AuthGameSession(GameSocket *pSocket);
+	~AuthGameSession();
 
 	// Network handlers
-    virtual void OnAccept();
-    virtual void OnClose();
+	void OnClose();
+	void ProcessIncoming(XPacket *);
 
-    // Leave empty for game server session, this one doesn't use encryption
-	virtual void Decrypt(void*, size_t, bool/* =false */) { };
-	virtual void Encrypt(void*, size_t, bool/* =false */) { };
+	// Packet handlers
+	void HandleGameLogin(XPacket *);
+	void HandleClientLogin(XPacket *);
+	void HandleClientLogout(XPacket *);
+	void HandleClientKickFailed(XPacket *);
 
-	virtual void ProcessIncoming(XPacket*);
-
-    // Packet handlers
-    bool HandleGameLogin(XPacket*);
-	bool HandleClientLogin(XPacket*);
-	bool HandleClientLogout(XPacket*);
-	bool HandleClientKickFailed(XPacket*);
+	int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
+	std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
 
 private:
-	XSocket& _socket;
-	Game _game{};
-	bool _isAuthed{false};
+	GameSocket *m_pSocket;
+	Game       *m_pGame;
+	bool       m_bIsAuthed;
 };
 
 #endif // _GAMESOCKET_H

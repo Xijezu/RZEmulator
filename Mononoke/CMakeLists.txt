@@ -1,15 +1,13 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(Mononoke)
 
-#set(CMAKE_CXX_STANDARD 11)
+add_definitions(-DIS_MONONOKE)
 
-find_package (Threads)
-find_package(MYSQL REQUIRED)
-find_package(ACE REQUIRED)
-
-include_directories(src
-                    src/Lists
-                    src/Server
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Lists
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthClient
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthGame
                     ${MYSQL_INCLUDE_DIR})
 
 file(GLOB_RECURSE SOURCE_FILES src/*.*)

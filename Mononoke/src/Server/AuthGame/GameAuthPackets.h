@@ -14,12 +14,7 @@
 #pragma pack(push, 1)
 #endif
 
-enum GAPACKETS {
-    TS_GA_LOGIN              = 20001,
-    TS_GA_CLIENT_LOGIN       = 20010,
-    TS_GA_CLIENT_LOGOUT      = 20012,
-    TS_GA_CLIENT_KICK_FAILED = 20014
-};
+
 
 typedef struct TS_GA_LOGIN : public TS_MESSAGE {
     uint16_t server_idx;

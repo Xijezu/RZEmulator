@@ -278,24 +278,8 @@ enum CSPACKETS {
     TS_SC_REQUEST_SECURITY_NO                       = 9004,
     TS_CS_SECURITY_NO                               = 9005,
     TS_CS_PING                                      = 9999,
-    TS_AC_RESULT                                    = 10000,
     TS_CS_OPEN_ITEM_SHOP                            = 10000,
     TS_SC_OPEN_ITEM_SHOP                            = 10001,
-    TS_CA_VERSION                                   = 10001,
-    TS_AC_RESULT_WITH_STRING                        = 10002,
-    TS_SC_COMMERCIAL_STORAGE_INFO                   = 10003,
-    TS_SC_COMMERCIAL_STORAGE_LIST                   = 10004,
-    TS_CS_TAKEOUT_COMMERCIAL_ITEM                   = 10005,
-    TS_CA_ACCOUNT                                   = 10010,
-    TS_CA_OTP_ACCOUNT                               = 10011,
-    TS_CA_IMBC_ACCOUNT                              = 10012,
-    TS_AC_ACCOUNT_NAME                              = 10014,
-    TS_CA_SERVER_LIST                               = 10021,
-    TS_AC_SERVER_LIST                               = 10022,
-    TS_CA_SELECT_SERVER                             = 10023,
-    TS_AC_SELECT_SERVER                             = 10024,
-    TS_AC_UPDATE_PENDING_TIME                       = 10025,
-    TS_CA_DISTRIBUTION_INFO                         = 10026
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform

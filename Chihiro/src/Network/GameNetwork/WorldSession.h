@@ -64,6 +64,9 @@ public:
     uint32 GetAccountId() const
     { return _accountId; }
 
+	std::string GetAccountName() const
+	{ return _player != nullptr ? _player->GetName() : "<null>"; }
+
     Player *GetPlayer() const
     { return _player != nullptr ? _player : nullptr; }
 
