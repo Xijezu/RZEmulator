@@ -1509,14 +1509,16 @@ void Unit::onAttackAndSkillProcess()
 
 bool Unit::StartAttack(uint target, bool bNeedFastReaction)
 {
-    MX_LOG_INFO("unit", "Start attack: %d", sWorld->GetArTime());
     bool result{false};
-    if(GetHealth() == 0) {
+    if (GetHealth() == 0)
+    {
         result = false;
-    } else {
+    }
+    else
+    {
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
         SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
-        if(bNeedFastReaction)
+        if (bNeedFastReaction)
             onAttackAndSkillProcess();
         result = true;
     }
@@ -1526,32 +1528,38 @@ bool Unit::StartAttack(uint target, bool bNeedFastReaction)
 void Unit::processAttack()
 {
     uint t = sWorld->GetArTime();
-    if (false /*IsAttackable()*/)
+    if (GetHealth() == 0 /*IsAttackable()*/)
         return;
-
 
     Player *player{nullptr};
 
-    if (GetNextAttackableTime() <= t) {
+    if (GetNextAttackableTime() <= t)
+    {
         //auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
         auto enemy = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
-        if (GetHealth() == 0) {
+        if (GetHealth() == 0)
+        {
             CancelAttack();
             return;
         }
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
-        if (enemy == nullptr || enemy->GetHealth() == 0) {
-            if (GetSubType() == ST_Player) {
+        if (enemy == nullptr || enemy->GetHealth() == 0)
+        {
+            if (GetSubType() == ST_Player)
+            {
                 player = dynamic_cast<Player *>(this);
-            } else if (GetSubType() == ST_Summon) {
+            }
+            else if (GetSubType() == ST_Summon)
+            {
                 auto summon = dynamic_cast<Summon *>(this);
                 if (this != nullptr)
                     player = summon->GetMaster();
             }
 
-            if (player != nullptr) {
+            if (player != nullptr)
+            {
                 //Messages::SendHPMPMessage(player, enemy, 0, 0, true);
                 Messages::SendCantAttackMessage(player, player->GetHandle(), player->GetTargetHandle(), TS_RESULT_NOT_EXIST);
             }
@@ -1559,15 +1567,20 @@ void Unit::processAttack()
             return;
         }
 
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack)) {
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack))
+        {
             enemy->OnUpdate();
             RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
         }
 
-        if (enemy->GetHealth() == 0) {
-            if (GetSubType() == ST_Player) {
+        if (enemy->GetHealth() == 0)
+        {
+            if (GetSubType() == ST_Player)
+            {
                 player = dynamic_cast<Player *>(this);
-            } else if (GetSubType() == ST_Summon) {
+            }
+            else if (GetSubType() == ST_Summon)
+            {
                 auto summon = dynamic_cast<Summon *>(this);
                 if (this != nullptr)
                     player = summon->GetMaster();
@@ -1596,24 +1609,30 @@ void Unit::processAttack()
 
         uint attack_interval = GetAttackInterval();
         auto attInt          = GetAttackInterval();
-        if (attack_range < real_distance) {
+        if (attack_range < real_distance)
+        {
             onCantAttack(enemy->GetHandle(), t);
             return;
         }
-        int next_mode  = 0;
+        int next_mode = 0;
         // If Bow/Crossbow
-        if (false) {
+        if (false)
+        {
 
-        } else {
+        }
+        else
+        {
             next_mode = 0;
         }
-        if (next_mode == 0) {
+        if (next_mode == 0)
+        {
             m_nMovableTime = attInt + t;
             Attack(enemy, t, attack_interval, Damages, _bDoubleAttack);
         }
         SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
 
-        if(next_mode != 1) {
+        if (next_mode != 1)
+        {
             int delay = (int)(10 * (GetNextAttackableTime() - t));
             broadcastAttackMessage(enemy, Damages, (int)(10 * attInt), delay, _bDoubleAttack, next_mode == 1, false, false);
         }
@@ -1674,17 +1693,18 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         }
 
         arDamage[i].nDamage            = prev_target_hp - pTarget->GetHealth();
-        arDamage[i].mp_damage          = prev_target_mp - pTarget->GetMana();
+        arDamage[i].mp_damage          = (uint16)(prev_target_mp - pTarget->GetMana());
         arDamage[i].attacker_damage    = (short) (prev_hp - GetHealth());
         arDamage[i].attacker_mp_damage = (short) (prev_mp - GetMana());
         arDamage[i].target_hp          = pTarget->GetHealth();
-        arDamage[i].target_mp          = pTarget->GetMana();
+        arDamage[i].target_mp          = (uint16)pTarget->GetMana();
         arDamage[i].attacker_hp        = GetHealth();
-        arDamage[i].attacker_mp        = GetMana();
+        arDamage[i].attacker_mp        = (uint16)GetMana();
 
         nHate += arDamage[i].nDamage;
 
-        if (!arDamage[i].bMiss) {
+        if (!arDamage[i].bMiss)
+        {
             // Set Havoc TODO
         }
         ++i;
