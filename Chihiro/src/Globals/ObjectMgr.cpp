@@ -9,6 +9,7 @@
 #include "Monster.h"
 #include "Maploader.h"
 #include "NPC.h"
+#include "DungeonManager.h"
 
 bool ObjectMgr::InitGameContent()
 {
@@ -35,6 +36,8 @@ bool ObjectMgr::InitGameContent()
     if(!LoadSummonLevelResource())
         return false;
     if (!LoadSummonResource())
+        return false;
+    if(!LoadDungeonResource())
         return false;
     if (!LoadSkillResource() || !LoadSkillJP())
         return false;
@@ -220,7 +223,7 @@ bool ObjectMgr::LoadMonsterResource()
         }
         for(y = 0; y < 10; y++) {
             base.drop_item_id[y] = field[idx++].GetInt32();
-            base.drop_percentage[y] = (int)(float)(field[idx++].GetFloat() * 100000000);
+            base.drop_percentage[y] = (int)(field[idx++].GetFloat() * 100000000);
             base.drop_min_count[y] = field[idx++].GetInt32();
             base.drop_max_count[y] = field[idx++].GetInt32();
             base.drop_min_level[y] = field[idx++].GetInt32();
@@ -435,7 +438,7 @@ bool ObjectMgr::LoadQuestLinkResource()
         ql.bLF_End = field[idx++].GetUInt8() == 1;
         ql.nStartTextID = field[idx++].GetInt32();
         ql.nInProgressTextID = field[idx++].GetInt32();
-        ql.nEndTextID = field[idx++].GetInt32();
+        ql.nEndTextID = field[idx].GetInt32();
 
         _questLinkStore.emplace_back(ql);
 
@@ -464,7 +467,7 @@ bool ObjectMgr::LoadDropGroupResource()
         dg.uid = field[idx++].GetInt32();
         for(int i = 0; i < MAX_DROP_GROUP; i++) {
             dg.drop_item_id[i] = field[idx++].GetInt32();
-            dg.drop_percentage[i] = (int)(float)(field[idx++].GetFloat() * 100000000);
+            dg.drop_percentage[i] = (int)(field[idx++].GetFloat() * 100000000);
         }
         _dropTemplateStore[dg.uid] = dg;
         ++count;
@@ -621,12 +624,10 @@ bool ObjectMgr::LoadSkillResource()
         base.hate_per_enhance = field[idx++].GetFloat();
         base.critical_bonus = field[idx++].GetInt32();
         base.critical_bonus_per_skl = field[idx++].GetInt32();
-        for(int i = 0; i < 20; i++) {
-            base.var[i] = field[idx++].GetFloat();
-        }
-        /*for (float &i : base.var) {
+        for (float &i : base.var)
+        {
             i = field[idx++].GetFloat();
-        }*/
+        }
         idx += 2;
         base.is_projectile = field[idx++].GetInt16();
         base.projectile_speed = field[idx++].GetFloat();
@@ -638,6 +639,70 @@ bool ObjectMgr::LoadSkillResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Skilltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     return true;
 }
+
+bool ObjectMgr::LoadDungeonResource()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM DungeonResource;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field        *field = result->Fetch();
+        int idx = 0;
+        DungeonTemplate base{};
+        base.id = field[idx++].GetInt32();
+        idx+=2;
+        int start_pos_x = field[idx++].GetInt32();
+        int start_pos_y = field[idx++].GetInt32();
+        base.raid_start_pos = Position{(float)start_pos_x, (float)start_pos_y};
+        int defense_pos_x = field[idx++].GetInt32();
+        int defense_pos_y = field[idx++].GetInt32();
+        base.siege_defense_pos = Position{(float)defense_pos_x, (float)defense_pos_y};
+        base.connector_id = field[idx++].GetInt32();
+        int connector_x = field[idx++].GetInt32();
+        int connector_y = field[idx++].GetInt32();
+        base.connector_pos = Position{(float)connector_x, (float)connector_y};
+        idx++;
+        base.core_id = field[idx++].GetInt32();
+        int core_pos_x = field[idx++].GetInt32();
+        int core_pos_y = field[idx++].GetInt32();
+        base.core_pos = Position{(float)core_pos_x, (float)core_pos_y};
+        base.core_offset_x = field[idx++].GetFloat();
+        base.core_offset_y = field[idx++].GetFloat();
+        base.core_offset_z = field[idx++].GetFloat();
+        base.core_around_x = field[idx++].GetFloat();
+        base.core_around_y = field[idx++].GetFloat();
+        base.core_around_z = field[idx++].GetFloat();
+        base.core_scale_x = field[idx++].GetFloat();
+        base.core_scale_y = field[idx++].GetFloat();
+        base.core_scale_z = field[idx++].GetFloat();
+        base.core_is_lock_height = field[idx++].GetUInt8() != 0;
+        base.core_lock_height = field[idx++].GetFloat();
+        for(auto& boss : base.boss_id)
+            boss = field[idx++].GetInt32();
+        base.raid_start_time = field[idx++].GetInt32();
+        base.raid_end_time = field[idx++].GetInt32();
+        base.start_time = field[idx++].GetInt32();
+        base.end_time = field[idx++].GetInt32();
+        int seamless_x = field[idx++].GetInt32();
+        int seamless_y = field[idx++].GetInt32();
+        base.max_guild_party = field[idx++].GetInt32();
+        idx++;
+        base.max_raid_party = field[idx].GetInt32();
+        base.box.begin = {seamless_x * g_fMapLength, seamless_y * g_fMapLength};
+        base.box.end = {(seamless_x + 1) * g_fMapLength, (seamless_y + 1) * g_fMapLength};
+        sDungeonManager->RegisterDungeonTemplate(base);
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
 
 bool ObjectMgr::LoadLevelResource()
 {
@@ -1024,7 +1089,7 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
     CreatureStat stat{ };
     if (depth >= 0) {
         for (int i = 0; i < 4; i++) {
-            if (_jobBonusStore.count(jobs[i])) {
+            if (_jobBonusStore.count((uint)jobs[i])) {
                 auto jlb = _jobBonusStore[jobs[i]];
 
                 float v1 = (levels[i] - 20);

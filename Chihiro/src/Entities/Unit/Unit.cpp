@@ -51,6 +51,7 @@ void Unit::RemoveFromWorld()
 
 void Unit::CleanupsBeforeDelete(bool finalCleanup)
 {
+
 }
 
 void Unit::Update(uint32 p_time)
@@ -732,7 +733,7 @@ void Unit::ampParameter2(uint nBitset, float fValue)
 void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
 {
 
-    if (bStat) {
+     if (bStat) {
         if ((nBitset & 1) != 0) {
             m_StatAmplifier.strength += fValue;
         }
@@ -2490,14 +2491,46 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
     uint16 result{TS_RESULT_ACCESS_DENIED};
     uint target_handle{0};
     Position pos{};
+    std::string error{};
+    uint ct = sWorld->GetArTime();
+
+    auto pPlayer = dynamic_cast<Player*>(pCaster);
+
     switch(type) {
-        case 5:
+        case 5: // Skillcast (e.g. Force/Soul Chips)
             target_handle = GetHandle();
             if(var1 == 6020.0f || var1 == 6021.0f )
                 target_handle = pItem->GetHandle();
             pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
             return (uint16)pCaster->CastSkill((int)var1, (int)var2, target_handle, pos, GetLayer(), true);
+        case 6:
+        {
+            if (GetSubType() != ST_Player)
+            {
+                AddState(StateType::SG_NORMAL, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
+                         pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");
+                return TS_RESULT_SUCCESS;
+            }
+            auto state = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
+            if (state == nullptr)
+                return TS_RESULT_NOT_ACTABLE;
+            if (state->effect_type != 200)
+            {
+                if (pItem->m_pItemBase->state_id == 4003)
+                {
+                    // @todo: stanima saver
+                }
+                AddState(StateType::SG_NORMAL, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
+                         pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");
+                return TS_RESULT_SUCCESS;
+            }
+            result = TS_RESULT_ACCESS_DENIED;
+        }
+            break;
         default:
+            error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
+            MX_LOG_ERROR("entites.unit", error.c_str());
+            Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player*>(pCaster), error);
             result = TS_RESULT_UNKNOWN;
         break;
     }
@@ -2633,4 +2666,15 @@ void Unit::SetCurrentJLv(int jlv)
 {
     SetInt32Value(UNIT_FIELD_JLV, jlv);
     onJobLevelUp();
+}
+
+int Unit::Heal(int hp)
+{
+    if(/*IsMagicImmune()*/ false)
+    {
+        return 0;
+    }
+    int heal = (int)GetFloatValue(UNIT_FIELD_HEAL_RATIO) * hp;
+    AddHealth(heal);
+    return heal;
 }

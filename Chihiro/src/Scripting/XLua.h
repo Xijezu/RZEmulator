@@ -51,6 +51,7 @@ private:
     void SCRIPT_EndQuest(int, int, sol::variadic_args);
 
     // Teleporter
+    void SCRIPT_EnterDungeon(int);
     int SCRIPT_GetOwnDungeonID();
     int SCRIPT_GetSiegeDungeonID();
 

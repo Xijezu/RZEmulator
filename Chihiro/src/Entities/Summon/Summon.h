@@ -10,7 +10,7 @@ class Summon : public Unit {
 public:
     static Summon *AllocSummon(Player *, uint);
     explicit Summon(uint, uint);
-    ~Summon() = default;
+    ~Summon();
 
     static void DB_InsertSummon(Player*,Summon*);
     static void DB_UpdateSummon(Player*,Summon*);

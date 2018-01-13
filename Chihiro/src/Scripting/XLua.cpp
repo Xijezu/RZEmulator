@@ -21,6 +21,7 @@
 #include "ObjectMgr.h"
 #include "MemPool.h"
 #include "World.h"
+#include "DungeonManager.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -92,6 +93,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("quest_info", &XLua::SCRIPT_QuestInfo, this);
     m_pState.set_function("start_quest", &XLua::SCRIPT_StartQuest, this);
     m_pState.set_function("end_quest", &XLua::SCRIPT_EndQuest, this);
+    m_pState.set_function("enter_dungeon", &XLua::SCRIPT_EnterDungeon, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -792,4 +794,13 @@ void XLua::SCRIPT_EndQuest(int quest_id, int reward_id, sol::variadic_args args)
         bForce = args[0].get<bool>();
 
     player->EndQuest(quest_id, reward_id, bForce);
+}
+
+void XLua::SCRIPT_EnterDungeon(int nDungeonID)
+{
+    auto pos = sDungeonManager->GetRaidStartPosition(nDungeonID);
+    if(pos.GetPositionX() != 0 && pos.GetPositionY() != 0)
+    {
+        dynamic_cast<Player*>(m_pUnit)->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
+    }
 }

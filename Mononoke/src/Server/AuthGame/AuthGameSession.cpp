@@ -20,7 +20,6 @@
 #include "WorldSocket.h"
 #include "XPacket.h"
 
-#include "AuthGame/GameAuthPackets.h"
 #include "AuthGame/AuthGameSession.h"
 
 // Constructor - set the default server name to <null>, also give it a socket

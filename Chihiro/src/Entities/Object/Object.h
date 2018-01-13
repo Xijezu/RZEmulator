@@ -120,8 +120,8 @@ public:
     { return m_bDeleteRequest; }
 
     void DeleteThis() { m_bDeleteRequest = true; }
-    virtual void AddToWorld();
 
+    virtual void AddToWorld();
     virtual void RemoveFromWorld();
 
     uint32 GetHandle() const

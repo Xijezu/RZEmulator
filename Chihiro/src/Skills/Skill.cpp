@@ -90,6 +90,9 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
                     if(pProp->m_nUseCount >= 1 && pProp->IsUsable(dynamic_cast<Player*>(m_pOwner)))
                     {
                         delay = pProp->GetCastingDelay();
+                        if (sArRegion->IsVisibleRegion(m_pOwner, pProp) == 0)
+                            return TS_RESULT_NOT_ACTABLE;
+                        pProp->Cast();
                         m_nErrorCode = TS_RESULT_SUCCESS;
                     }
                 }
@@ -104,15 +107,6 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     if (m_SkillBase->id == SkillId::CreatureTaming)
     {
         m_nErrorCode = PrepareTaming(nSkillLevel, handle, pos, current_time);
-    }
-
-    // Check for fieldprop usage
-    if (m_SkillBase->effect_type == EffectType::ActivateFieldProp || m_SkillBase->effect_type == EffectType::RegionHealByFieldProp || m_SkillBase->effect_type == EffectType::AreaAffectHealByHieldProp)
-    {
-        auto fp = sMemoryPool->GetObjectInWorld<FieldProp>(handle);
-        if (fp == nullptr || sArRegion->IsVisibleRegion(m_pOwner, fp) == 0)
-            return TS_RESULT_NOT_ACTABLE;
-        fp->Cast();
     }
 
     auto m_nOriginalDelay = delay;
@@ -199,8 +193,8 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     pct << m_targetPosition.GetPositionZ();
     pct << (uint8)m_targetPosition.GetLayer();
     pct << (uint8)nType;
-    pct << (int16)cost_hp;
-    pct << (int16)cost_mp;
+    pct << (int16)50;//cost_hp;
+    pct << (int16)75;//cost_mp;
     pct << (int)m_pOwner->GetHealth();
     pct << (int16)m_pOwner->GetMana();
 
@@ -210,9 +204,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
         if (nType <= SkillState::ST_CastingUpdate || nType == SkillState::ST_Complete) {
             pct << (uint32)(m_nFireTime - m_nCastTime);
             pct << (uint16)m_nErrorCode;
-            pct << (uint8)0;
-            pct << (uint8)0;
-            pct << (uint8)0;
+            pct.fill("", 3);
             return;
         }
         if (nType == SkillState::ST_Cancel) {
@@ -231,19 +223,27 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
 
     if (!m_vResultList.empty()) {
         for (auto &sr : m_vResultList) {
+            // Odd fixed padding for the skill result
+            auto wpos = pct.wpos();
+            pct.fill("", m_vResultList.size() * 45);
+            pct.wpos(wpos);
+
+            pct << (uint8)sr.type;
+            pct << (uint)sr.damage.hTarget;
+
             switch (sr.type) {
                 case SR_ResultType::SRT_Damage:
                 case SR_ResultType::SRT_MagicDamage:
-                    pct << (uint8)sr.type;
-                    pct << sr.hTarget;
                     pct << sr.damage.target_hp;
                     pct << sr.damage.damage_type;
                     pct << sr.damage.damage;
                     pct << sr.damage.flag;
                     for (uint16 i : sr.damage.elemental_damage)
                         pct << i;
-                    //pct.fill("", 13);
                     break;
+                case SR_ResultType::SRT_AddHP:
+                    pct << sr.damage.target_hp;
+                    pct << sr.addHPType.nIncHP;
                 default:
                     break;
             }
@@ -312,6 +312,9 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
             break;
         case EffectType::ActivateFieldProp:
             ACTIVATE_FIELD_PROP();
+            break;
+        case 501:
+            HEALING_SKILL_FUNCTOR(pTarget);
             break;
         default:
             bHandled = false;
@@ -493,4 +496,30 @@ void Skill::ACTIVATE_FIELD_PROP()
     {
         sWorld->AddSkillDamageResult(m_vResultList, fp->UseProp(dynamic_cast<Player*>(m_pOwner)), 0, 0);
     }
+}
+
+void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
+{
+    if (pTarget == nullptr || m_pOwner == nullptr)
+        return;
+
+    bool v10           = m_SkillBase->is_physical_act != 0;
+    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+    auto magic_point   = m_pOwner->m_Attribute.nMagicPoint;
+    auto target_max_hp = pTarget->GetMaxHealth();
+
+    auto heal = magic_point *
+                (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel))
+                + m_SkillBase->var[2] + (m_SkillBase->var[3] * m_nRequestedSkillLevel) + (m_nEnhance * m_SkillBase->var[6])
+                + target_max_hp * (m_SkillBase->var[4] + (m_SkillBase->var[5] * m_nRequestedSkillLevel) + m_SkillBase->var[7] * m_nRequestedSkillLevel);
+
+    heal = pTarget->Heal((int)heal);
+
+    SkillResult skillResult{};
+    skillResult.type = SR_ResultType::SRT_AddHP;
+    skillResult.damage.hTarget = pTarget->GetHandle();
+    skillResult.damage.target_hp = pTarget->GetHealth();
+    skillResult.addHPType.nIncHP = (int)heal;
+    m_vResultList.emplace_back(skillResult);
+    //sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
 }

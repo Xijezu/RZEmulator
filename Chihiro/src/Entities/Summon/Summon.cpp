@@ -318,3 +318,11 @@ CreatureStat *Summon::GetBaseStat() const
 {
     return sObjectMgr->GetStatInfo((uint)m_tSummonBase->stat_id);
 }
+
+Summon::~Summon()
+{
+    if(IsInWorld())
+    {
+        sWorld->RemoveObjectFromWorld(this);
+    }
+}

@@ -66,6 +66,7 @@ public:
     bool LoadSkillResource();
     bool LoadLevelResource();
     bool LoadSkillTreeResource();
+    bool LoadDungeonResource();
     bool LoadSkillJP();
     bool InitGameContent();
 

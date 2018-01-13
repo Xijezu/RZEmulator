@@ -123,8 +123,6 @@ public:
 private:
     bool checkCharacterName(const std::string&);
     WorldSocket<WorldSession> *_socket{nullptr};
-    XRC4Cipher _rc4encode{ };
-    XRC4Cipher _rc4decode{ };
 
     uint32      _accountId{ };
     std::string _accountName{ };

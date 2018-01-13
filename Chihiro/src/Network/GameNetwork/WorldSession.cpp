@@ -36,8 +36,6 @@
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
 {
-    _rc4decode.SetKey("}h79q~B%al;k'y $E");
-    _rc4encode.SetKey("}h79q~B%al;k'y $E");
     if(socket)
     {
         socket->AddReference();
@@ -47,24 +45,16 @@ WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
 // Close patch file descriptor before leaving
 WorldSession::~WorldSession()
 {
-    _rc4decode.Clear();
-    _rc4encode.Clear();
+    if(_player)
+        onReturnToLobby(nullptr);
 }
 
-// Accept the connection - function itself not used here because we're only interested in the game server data itself
-/*void WorldSession::OnAccept()
-{
-
-}
-*/
 void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork->SendClientLogoutToAuth(_accountName);
-    onReturnToLobby(nullptr);
-    //sWorld->RemoveSession(GetAccountId());
-    _rc4decode.Clear();
-    _rc4encode.Clear();
+    if(_player)
+        onReturnToLobby(nullptr);
 }
 
 enum eStatus {
@@ -485,13 +475,13 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
 void WorldSession::onReturnToLobby(XPacket *pRecvPct)
 {
-    //sWorld->RemoveSession(GetAccountId());
     if (_player != nullptr)
     {
         _player->LogoutNow(2);
         _player->Save(false);
-        //sMemoryPool->DeletePlayer(_player->GetHandle(), true);
+        _player->CleanupsBeforeDelete();
         _player->DeleteThis();
+        _player = nullptr;
     }
     if (pRecvPct != nullptr)
         _SendResultMsg(pRecvPct->GetPacketID(), 0, 0);
@@ -1430,7 +1420,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     uint16 nResult = _player->IsUseableItem(item, nullptr);
     if(nResult != TS_RESULT_SUCCESS) {
         /*if(nResult == TS_RESULT_COOL_TIME)
-            Messages::SendItemCoolTimeInfo(player);*/
+            Messages::SendItemCoolTimeInfo(_player);*/
 
         Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
         return;

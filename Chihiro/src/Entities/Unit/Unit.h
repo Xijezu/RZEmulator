@@ -123,6 +123,8 @@ public:
     DamageInfo DealMagicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead);
+
+    int Heal(int hp);
     /// BATTLE END
 
     void AddUnitTypeMask(uint32 mask) { m_unitTypeMask |= mask; }

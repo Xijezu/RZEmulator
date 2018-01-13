@@ -234,10 +234,6 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 
 void World::AddObjectToWorld(WorldObject *obj)
 {
-    auto region = sArRegion->GetRegion(obj);
-    if (region == nullptr)
-        return;
-
     sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize), (uint) (obj->GetPositionY() / g_nRegionSize), obj->GetLayer(),
                                    [=](ArRegion *rgn) {
                                        rgn->DoEachClient([=](Unit *client) { // enterProc
@@ -261,7 +257,7 @@ void World::AddObjectToWorld(WorldObject *obj)
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
                                        });
                                    });
-    region->AddObject(obj);
+    sArRegion->GetRegion(obj)->AddObject(obj);
 }
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
@@ -279,8 +275,6 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
-    // Get Region
-    auto    region = sArRegion->GetRegion(obj);
     // Create & set leave packet
     XPacket leavePct(TS_SC_LEAVE);
     leavePct << obj->GetHandle();
@@ -295,9 +289,8 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
                                            }
                                        });
                                    });
-    // Finally, remove object from map
-    if (region != nullptr)
-        region->RemoveObject(obj);
+
+    sArRegion->GetRegion(obj)->RemoveObject(obj);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -319,7 +312,6 @@ void World::Update(uint diff)
 {
     UpdateSessions(diff);
 
-    sFieldPropManager->Update(diff);
     sMemoryPool->Update(diff);
 
     for(auto& ro : m_vRespawnList) {

@@ -62,6 +62,8 @@ private:
     void SINGLE_PHYSICAL_DAMAGE(Unit* pTarget);
     void SINGLE_MAGICAL_DAMAGE(Unit* pTarget);
 
+    void HEALING_SKILL_FUNCTOR(Unit* pTarget);
+
     void ACTIVATE_FIELD_PROP();
 
     void DO_SUMMON();

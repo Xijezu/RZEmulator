@@ -18,6 +18,7 @@ public:
 
     explicit Player(uint32);
     ~Player() override;
+    void CleanupsBeforeDelete();
 
     /* ****************** STATIC FUNCTIONS ****************** */
     static void EnterPacket(XPacket &, Player *, Player*);

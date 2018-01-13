@@ -5,6 +5,7 @@
 #include "MemPool.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "FieldPropManager.h"
 
 template class HashMapHolder<Player>;
 template class HashMapHolder<WorldObject>;
@@ -129,13 +130,12 @@ void MemoryPoolMgr::Update(uint diff) {
                 RemoveObject(obj);
                 break;
         }
-
+        i_objectsToRemove.erase(itr);
         delete obj;
         *&obj = nullptr;
-        i_objectsToRemove.erase(itr);
     }
 
-    ///- Add new sessions
+    ///- Add new update objects
     WorldObject* sess = nullptr;
     while(addUpdateQueue.next(sess))
         i_objectsToUpdate[sess->GetHandle()] = sess;
@@ -152,6 +152,8 @@ void MemoryPoolMgr::Update(uint diff) {
             continue;
         }
     }
+
+    sFieldPropManager->Update(diff);
 }
 
 Item *MemoryPoolMgr::AllocGold(uint64 gold, GenerateCode gcode)
@@ -171,11 +173,6 @@ void MemoryPoolMgr::_unload()
     HashMapHolder<T>::GetContainer().clear();
 }
 
-template<class T>
-void MemoryPoolMgr::_update()
-{
-
-}
 void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
 {
     i_objectsToRemove.insert(obj);

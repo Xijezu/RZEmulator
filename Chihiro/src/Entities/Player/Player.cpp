@@ -41,21 +41,24 @@ Player::~Player()
         sWorld->RemoveObjectFromWorld(m_pSubSummon);
         m_pSubSummon = nullptr;
     }*/
+}
 
-    if(!IsInWorld())
-        return;
+void Player::CleanupsBeforeDelete()
+{
+    if(IsInWorld())
+    {
+        RemoveAllSummonFromWorld();
+        sWorld->RemoveObjectFromWorld(this);
+    }
 
     for (auto &t : m_lInventory) {
         Item::PendFreeItem(t.second);
-        t.second = nullptr;
     }
     m_lInventory.clear();
 
     for(auto &t : m_vSummonList) {
-        if(t->IsInWorld())
-            sWorld->RemoveObjectFromWorld(t);
-        sMemoryPool->RemoveObject(t, true);
-        t = nullptr;
+        if(t != nullptr)
+            t->DeleteThis();
     }
     m_vSummonList.clear();
 
@@ -94,7 +97,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         SetInt32Value(UNIT_FIELD_PARTY_ID, (*result)[3].GetInt32());
         SetInt32Value(UNIT_FIELD_GUILD_ID, (*result)[4].GetInt32());
         Relocate((float) (*result)[5].GetInt32(), (float) (*result)[6].GetInt32(), (float) (*result)[7].GetInt32(), 0);
-        SetLayer((*result)[8].GetInt32());
+        SetLayer((*result)[8].GetUInt8());
         SetInt32Value(UNIT_FIELD_RACE, (*result)[9].GetInt32());
         SetInt32Value(UNIT_FIELD_SEX, (*result)[10].GetInt32());
         SetInt32Value(UNIT_FIELD_LEVEL, (*result)[11].GetInt32());
@@ -1132,8 +1135,8 @@ void Player::ClearDialogMenu()
 void Player::LogoutNow(int callerIdx)
 {
     if(IsInWorld()) {
-        RemoveAllSummonFromWorld();
-        sWorld->RemoveObjectFromWorld(this);
+        //RemoveAllSummonFromWorld();
+        //sWorld->RemoveObjectFromWorld(this);
     }
     Save(false);
 }
@@ -2164,3 +2167,4 @@ void Player::UpdateQuestStatusByItemUpgrade()
         }
     }
 }
+

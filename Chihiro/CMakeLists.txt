@@ -6,6 +6,7 @@ file(GLOB_RECURSE sources_Skills src/Skills/*.cpp src/Skills/*.h)
 file(GLOB_RECURSE sources_Scripting src/Scripting/*.cpp src/Scripting/*.h)
 file(GLOB_RECURSE sources_X2D src/X2D/*.cpp src/X2D/*.h)
 file(GLOB_RECURSE sources_Quests src/Quests/*.cpp src/Quests/*.h)
+file(GLOB_RECURSE sources_Dungeons src/Dungeons/*.cpp src/Dungeons/*.h)
 file(GLOB_RECURSE sources_Globals src/Globals/*.cpp src/Globals/*.h)
 file(GLOB_RECURSE sources_Map src/Map/*.cpp src/Map/*.h)
 file(GLOB_RECURSE sources_Network src/Network/*.cpp src/Network/*.h)
@@ -17,6 +18,7 @@ set(SOURCE_FILES ${sources_Entities}
                  ${sources_X2D}
                  ${sources_Quests}
                  ${sources_Globals}
+                 ${sources_Dungeons}
                  ${sources_Map}
                  ${sources_Skills}
                  ${sources_Network}
@@ -35,6 +37,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Player
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Unit
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Globals
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Dungeons
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Map
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Item
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/X2D

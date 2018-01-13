@@ -44,27 +44,27 @@ bool FieldProp::IsUsable(Player *pPlayer) const
     if(pPlayer->GetLevel() > m_pFieldPropBase->nMaxLevel)
         return false;
 
-    bool bResult = false;
+    bool bResult = true;
+
     // Class checks
-    if ((m_pFieldPropBase->nLimit & 0x800) != 0 && !pPlayer->IsHunter())
-        bResult = true;
-    if ((m_pFieldPropBase->nLimit & 0x400) != 0 && !pPlayer->IsFighter())
-        bResult = true;
-    if ((m_pFieldPropBase->nLimit & 0x1000) != 0 && !pPlayer->IsMagician())
-        bResult = true;
-    if ((m_pFieldPropBase->nLimit & 0x2000) != 0 && !pPlayer->IsSummoner())
-        bResult = true;
+    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Hunter) != 0 && !pPlayer->IsHunter())
+        bResult = false;
+    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Fighter) != 0 && !pPlayer->IsFighter())
+        bResult = false;
+    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Magician) != 0 && !pPlayer->IsMagician())
+        bResult = false;
+    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Summoner) != 0 && !pPlayer->IsSummoner())
+        bResult = false;
     if(!bResult)
         return false;
 
     // Race checks
-    bResult = false;
-    if(pPlayer->GetRace() != 3 || (m_pFieldPropBase->nLimit & 0x10) != 0)
-        bResult = true;
-    if(pPlayer->GetRace() != 4 || (m_pFieldPropBase->nLimit & 4) != 0)
-        bResult = true;
-    if(pPlayer->GetRace() != 5 || (m_pFieldPropBase->nLimit & 8) != 0)
-        bResult = true;
+    if(pPlayer->GetRace() != 3 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Gaia) != 0)
+        bResult = false;
+    if(pPlayer->GetRace() != 4 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Deva) != 0)
+        bResult = false;
+    if(pPlayer->GetRace() != 5 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Asura) != 0)
+        bResult = false;
     if(!bResult)
         return false;
 
@@ -112,6 +112,7 @@ bool FieldProp::Cast()
 
 bool FieldProp::UseProp(Player * pPlayer)
 {
+    m_bIsCasting = false;
     //int oldUseCount = m_nUseCount;
     if(m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
     {
