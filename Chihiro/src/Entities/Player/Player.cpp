@@ -244,16 +244,18 @@ bool Player::ReadQuestList()
         {
             do
             {
-                Field    *fields                   = result->Fetch();
-                int      idx                       = 0;
-                int      nID                       = fields[idx++].GetInt32();
-                int      Code                      = fields[idx++].GetInt32();
-                int      nStartID                  = fields[idx++].GetInt32();
-                int      nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
+                Field *fields                   = result->Fetch();
+                int   idx                       = 0;
+                int   nID                       = fields[idx++].GetInt32();
+                int   Code                      = fields[idx++].GetInt32();
+                int   nStartID                  = fields[idx++].GetInt32();
+                int   nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
+
                 for (int &nStatu : nStatus)
-                    nStatu        = fields[idx++].GetInt32();
-                auto     progress = (QuestProgress)fields[idx].GetInt32();
-                auto     q        = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
+                    nStatu = fields[idx++].GetInt32();
+
+                auto progress = (QuestProgress)fields[idx].GetInt32();
+                auto q        = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
                 if (!m_QuestManager.AddQuest(q))
                 {
                     delete q;
@@ -873,7 +875,7 @@ bool Player::IsValidTrigger(const std::string& szTrigger)
     return false;
 }
 
-ushort_t Player::ChangeGold(long nGold)
+ushort Player::ChangeGold(uint64 nGold)
 {
     if(nGold != GetGold()) {
         if(nGold > MAX_GOLD_FOR_INVENTORY)
@@ -886,7 +888,7 @@ ushort_t Player::ChangeGold(long nGold)
     return TS_RESULT_SUCCESS;
 }
 
-void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
+void Player::PushItem(Item *pItem, uint64 count, bool bSkipUpdateToDB)
 {
     if(pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID)) {
         MX_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
@@ -897,8 +899,9 @@ void Player::PushItem(Item *pItem, int count, bool bSkipUpdateToDB)
     if(pItem->m_Instance.Code == 0) {
         uint64 nPrevGoldAmount = GetGold();
         uint64 gold = GetGold() + pItem->m_Instance.nCount;
-        if(ChangeGold(gold) != 0) {
-            // Log
+        if(ChangeGold(gold) != 0)
+        {
+            MX_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
         }
         Item::PendFreeItem(pItem);
         return;

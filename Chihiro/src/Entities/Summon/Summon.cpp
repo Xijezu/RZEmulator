@@ -52,6 +52,7 @@ Summon* Summon::AllocSummon(Player * pMaster, uint pCode)
 {
     Summon* summon = sMemoryPool->AllocSummon(pCode);
     summon->m_pMaster = pMaster;
+    return summon;
 }
 
 void Summon::SetSummonInfo(int idx)

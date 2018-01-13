@@ -477,7 +477,7 @@ void Monster::ForceKill(Player *byPlayer)
 
 void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
 {
-    long gold;
+    uint64 gold;
     int tax;
     int nGuildID;
     Player* player{nullptr};
@@ -485,7 +485,7 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
     if(rand32() % 100 >= m_Base->gold_drop_percentage * fDropRatePenalty)
         return;
 
-    gold = irand(m_Base->gold_min[0], m_Base->gold_max[0]);
+    gold = (uint64)irand(m_Base->gold_min[0], m_Base->gold_max[0]);
     if(gold < 0)
         gold = 1;
 

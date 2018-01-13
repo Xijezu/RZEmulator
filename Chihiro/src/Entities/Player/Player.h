@@ -95,7 +95,7 @@ public:
     Item *FindItemBySID(uint64_t);
     Item *FindItemByHandle(uint32_t);
     Item* FindItem(uint code, uint flag, bool bFlag);
-    void PushItem(Item *, int, bool);
+    void PushItem(Item *, uint64, bool);
     void PopItem(Item*,bool);
 
     bool Erase(Item*,uint64,bool);
@@ -137,7 +137,7 @@ public:
 
     CreatureStat* GetBaseStat() const override;
 
-    ushort_t ChangeGold(long);
+    ushort ChangeGold(uint64);
 
     uint16 IsUseableItem(Item* pItem, Unit* pTarget);
     uint16 UseItem(Item* pItem, Unit* pTarget, const std::string& szParameter);

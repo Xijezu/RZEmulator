@@ -2591,10 +2591,16 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
     Position pos{};
     std::string error{};
     uint ct = sWorld->GetArTime();
+    uint prev_hp;
 
     auto pPlayer = dynamic_cast<Player*>(pCaster);
 
     switch(type) {
+        case 1:
+            prev_hp = GetHealth();
+            Heal((int)var1);
+            Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
+            return TS_RESULT_SUCCESS;
         case 5: // Skillcast (e.g. Force/Soul Chips)
             target_handle = GetHandle();
             if(var1 == 6020.0f || var1 == 6021.0f )
