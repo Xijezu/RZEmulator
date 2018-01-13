@@ -406,6 +406,10 @@ void Skill::DO_UNSUMMON()
 
 bool Skill::Cancel()
 {
+    Init();
+    broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
+                          (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
+                          0, 0, SkillState::ST_Cancel);
     return true;
 }
 
@@ -473,18 +477,18 @@ void Skill::CREATURE_TAMING()
 
 void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
 {
-    if(pTarget == nullptr || m_pOwner == nullptr)
+    if (pTarget == nullptr || m_pOwner == nullptr)
         return;
 
-    if(m_SkillBase->effect_type == PhysicalSingleDamageRush || m_SkillBase->effect_type == PhysicalSingleDamageRushKnockback)
+    if (m_SkillBase->effect_type == PhysicalSingleDamageRush || m_SkillBase->effect_type == PhysicalSingleDamageRushKnockback)
     {
 
     }
-    bool v10 = m_SkillBase->is_physical_act != 0;
+    bool v10          = m_SkillBase->is_physical_act != 0;
     auto attack_point = m_pOwner->GetAttackPointRight((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
-    auto nDamage = (int)(attack_point
-                         * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
-                         + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+    auto nDamage      = (int)(attack_point
+                              * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
+                              + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
 
     auto damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental,
                                                    m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
