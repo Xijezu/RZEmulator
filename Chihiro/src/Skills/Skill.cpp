@@ -36,7 +36,26 @@ Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0)
     m_nSummonID = 0;
     m_nSkillLevel = 0;
     m_SkillBase = sObjectMgr->GetSkillBase(m_nSkillID);
+    Init();
 }
+
+void Skill::Init()
+{
+    m_nErrorCode = 0;
+    /*m_Status = 0;*/
+    m_nCastTime = 0;
+    m_nCastingDelay = 0;
+    m_nFireTime = 0;
+    m_nRequestedSkillLevel = 0;
+    m_hTarget = 0;
+    /*m_nCurrentFire = 0;
+    m_nTotalFire = 0;*/
+    m_nTargetCount = 1;
+    m_nFireCount = 1;
+    m_targetPosition.Relocate(0, 0, 0, 0);
+    m_targetPosition.SetLayer(0);
+}
+
 
 void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, uint owner_uid, uint summon_uid, uint skill_id, uint skill_level)
 {
@@ -135,8 +154,10 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
                               (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
                               0, 0, 1);
-    } else
+    }
+    else
     {
+        Init();
         broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
                               (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
                               0, 0, 5);
@@ -286,6 +307,8 @@ void Skill::ProcSkill()
     broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
                           (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
                           0, 0, 5);
+
+    Init();
 }
 
 void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
@@ -386,6 +409,30 @@ bool Skill::Cancel()
     return true;
 }
 
+bool Skill::CheckCoolTime(uint t) const
+{
+    return m_nNextCoolTime < t;
+}
+
+uint Skill::GetSkillCoolTime() const
+{
+    int l{0};
+    if(m_SkillBase == nullptr)
+        return 0;
+
+    if (m_pOwner->GetSubType() == ST_Summon)
+        l = m_nRequestedSkillLevel;
+    else
+        l = m_nEnhance;
+
+    return (uint)(m_pOwner->GetCoolTimeSpeed() * m_pOwner->GetCoolTimeMod((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0) * m_SkillBase->GetCoolTime(l));
+}
+
+void Skill::SetRemainCoolTime(uint time)
+{
+    m_nNextCoolTime = time + sWorld->GetArTime();
+}
+
 uint Skill::GetSkillEnhance() const
 {
     return m_nEnhance;
@@ -463,30 +510,6 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
                                                    m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
 
     sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
-}
-
-bool Skill::CheckCoolTime(uint t) const
-{
-    return m_nNextCoolTime < t;
-}
-
-uint Skill::GetSkillCoolTime() const
-{
-    int l{0};
-    if(m_SkillBase == nullptr)
-        return 0;
-
-    if (m_pOwner->GetSubType() == ST_Summon)
-        l = m_nRequestedSkillLevel;
-    else
-        l = m_nEnhance;
-
-    return (uint)(m_pOwner->GetCoolTimeSpeed() * m_pOwner->GetCoolTimeMod((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0) * m_SkillBase->GetCoolTime(l));
-}
-
-void Skill::SetRemainCoolTime(uint time)
-{
-    m_nNextCoolTime = time + sWorld->GetArTime();
 }
 
 void Skill::ACTIVATE_FIELD_PROP()

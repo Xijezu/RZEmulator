@@ -11,6 +11,7 @@ class Unit;
 class Skill {
     friend class Unit;
 public:
+    friend struct SkillTargetFunctor;
     Skill() = delete;
     Skill(Unit* pOwner, int64 _uid, int _id);
     static void DB_InsertSkill(Unit*,int64,uint,uint,uint,uint);
@@ -50,8 +51,11 @@ private:
     uint m_nCastTime{};
     uint m_nNextCoolTime{};
     uint m_nFireTime{};
+    uint m_nTargetCount;
+    uint m_nFireCount;
 protected:
     void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
+    void Init();
 private:
     std::vector<SkillResult> m_vResultList{};
     void FireSkill(Unit* pTarget, bool &bIsSuccess);

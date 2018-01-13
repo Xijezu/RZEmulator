@@ -116,8 +116,10 @@ public:
 
     Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
+    DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
     Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
+    Damage DealPhysicalLeftHandDamage(Unit* pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage);
     Damage DealMagicalDamage(Unit* pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
 
     DamageInfo DealMagicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
@@ -253,6 +255,7 @@ protected:
 private:
     bool ClearExpiredState(uint t);
     uint m_nCurrentStateUID{0};
+    int m_nDoubleWeaponMasteryLevel{0};
     void incParameter(uint nBitset, float nValue, bool bStat);
     void incParameter2(uint nBitset, float fValue);
     void ampParameter2(uint nBitset, float fValue);

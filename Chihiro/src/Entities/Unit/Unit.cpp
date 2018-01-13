@@ -1660,7 +1660,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         // TODO Crit
 
         if (attack_interval != 0)
-            di;
+            di = pTarget->DealPhysicalNormalLeftHandDamage(this, m_Attribute.nAttackPointLeft, ElementalType::TypeNone, 0, crit, 0);
         else
             di = pTarget->DealPhysicalNormalDamage(this, m_Attribute.nAttackPointRight, ElementalType::TypeNone, 0, crit, 0);
         arDamage[i].SetDamageInfo(di);
@@ -1698,19 +1698,33 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
     }
 }
 
-DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
+DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
 {
     DamageInfo result{};
-    int nTargetGroup{0};
-    bool bRange;
+    int nTargetGroup = pFrom->GetCreatureGroup();
     int damage{};
     StateMod damageReduceByState{};
 
+    // Do damage reduce
 
-    if(GetSubType() == ST_Mob)
-        nTargetGroup = dynamic_cast<Monster*>(this)->GetBase()->monster_group;
-    else
-        nTargetGroup = 9;
+    if(nDamage < 0)
+        nDamage = 0;
+
+    Damage d = DealPhysicalLeftHandDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
+    result.SetDamage(d);
+
+    result.target_hp = GetHealth();
+    return result;
+}
+
+
+DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
+{
+    DamageInfo result{};
+    int nTargetGroup = pFrom->GetCreatureGroup();
+    bool bRange;
+    int damage{};
+    StateMod damageReduceByState{};
 
     if(false) {
         bRange = true;
@@ -1840,6 +1854,11 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 Damage Unit::DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage)
 {
     DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}
+
+Damage Unit::DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod* damage_advantage)
+{
+    DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysicalLeftHand, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag)
@@ -2019,6 +2038,18 @@ int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
 
 void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack)
 {
+    uint8 attack_count = 1;
+    if(bEndAttack || bCancelAttack)
+        attack_count = 0;
+
+    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
+    {
+        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            attack_count *= 2;
+        if(bIsDoubleAttack)
+            attack_count *= 2;
+    }
+
     XPacket pct(TS_SC_ATTACK_EVENT);
     pct << GetHandle();
     if(pTarget != nullptr)
@@ -2033,7 +2064,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         if(bIsDoubleAttack)
             attack_flag = AttackFlag::AF_DoubleAttack;
         if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
-            attack_flag |= AttackFlag ::AF_DoubleWeapon;
+            attack_flag |= AttackFlag::AF_DoubleWeapon;
         // If bow / CrossBow
     }
 
@@ -2047,10 +2078,6 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
 
     pct << attack_action;
     pct << attack_flag;
-
-    uint8 attack_count = 1;
-    if(bEndAttack || bCancelAttack)
-        attack_count = 0;
 
     pct << attack_count;
     for(int i = 0; i < attack_count; ++i) {
@@ -2069,7 +2096,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         for(auto& ed : arDamage[i].elemental_damage) {
             pct << (uint16)ed;
         }
-        pct << (int)arDamage[i].target_hp;
+        pct << arDamage[i].target_hp;
         pct << (uint16)arDamage[i].target_mp;
         pct << (uint16)arDamage[i].attacker_damage;
         pct << (uint16)arDamage[i].attacker_mp_damage;
@@ -2189,6 +2216,8 @@ ushort Unit::Puton(ItemWearType pos, Item *item)
 uint16_t Unit::putoffItem(ItemWearType pos)
 {
     auto item = m_anWear[pos];
+    if(item == nullptr)
+        return TS_RESULT_ACCESS_DENIED;
 
     item->m_Instance.nWearInfo = ItemWearType::WearNone;
     item->m_bIsNeedUpdateToDB = true;
@@ -2345,14 +2374,57 @@ float Unit::GetItemChance() const
 void Unit::applyDoubeWeaponEffect()
 {
     float fAddPerLevel{0};
-    Skill* skill{nullptr};
+    Skill *skill{nullptr};
 
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
     {
-        return;
+        auto pSlot0 = GetWornItem(ItemWearType::WearWeapon);
+        auto pSlot1 = GetWornItem(ItemWearType::WearShield);
+        if(pSlot0 != nullptr || pSlot1 != nullptr)
+        {
+            int skillLevel = 1;
+            if (pSlot1->m_pItemBase->iclass == ItemClass::ClassOneHandSword
+                && pSlot0->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
+            {
+                skill = GetSkill((int)SkillId::DualSwordExpert);
+            }
+            else if (pSlot1->m_pItemBase->iclass == ItemClass::ClassDagger
+                     && pSlot0->m_pItemBase->iclass == ItemClass::ClassDagger)
+            {
+                skill = GetSkill((int)SkillId::TwinBladeExpert);
+            }
+            else if (pSlot1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe
+                     && pSlot0->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+            {
+                skill = GetSkill((int)SkillId::TwinAxeExpert);
+            }
+            if(skill != nullptr)
+                skillLevel = skill->m_nSkillLevel + skill->m_nSkillLevelAdd;
+
+            m_nDoubleWeaponMasteryLevel = skillLevel;
+            m_Attribute.nAttackSpeedRight *= (0.75f+((float)skillLevel*0.005f));
+            m_Attribute.nAttackSpeedLeft *= (0.75f+((float)skillLevel*0.005f));
+            m_Attribute.nAttackSpeed = (m_Attribute.nAttackSpeedLeft+m_Attribute.nAttackSpeedRight) * 0.5f;
+            m_AttributeByState.nAttackSpeedRight *= (0.75f+((float)skillLevel*0.005f));
+            m_AttributeByState.nAttackSpeedLeft *= (0.75f+((float)skillLevel*0.005f));
+            m_AttributeByState.nAttackSpeed = (m_AttributeByState.nAttackSpeedLeft+m_AttributeByState.nAttackSpeedRight) * 0.5f;
+
+            m_Attribute.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
+            m_Attribute.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
+            m_AttributeByState.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
+            m_AttributeByState.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
+
+            m_Attribute.nAttackPointRight *= (0.9f+((float)skillLevel*0.01f));
+            m_Attribute.nAttackPointLeft *= (0.44f+((float)skillLevel*0.02f));
+            /*m_nAttackPointRightWithoutWeapon *= (0.9f + ((float)skillLevel * 0.01f));
+            m_nAttackPointRightWithoutWeapon *= (0.44f + ((float)skillLevel * 0.02f));*/
+            m_AttributeByState.nAttackPointRight *= (0.9f + ((float)skillLevel * 0.01f));
+            m_AttributeByState.nAttackPointLeft *= (0.44f + ((float)skillLevel * 0.02f));
+            return;
+        }
     }
     m_Attribute.nAttackSpeed = m_Attribute.nAttackSpeedRight;
-    m_AttributeByState.nAttackSpeed= m_AttributeByState.nAttackSpeedRight;
+    m_AttributeByState.nAttackSpeed = m_AttributeByState.nAttackSpeedRight;
 }
 
 uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
@@ -2678,3 +2750,6 @@ int Unit::Heal(int hp)
     AddHealth(heal);
     return heal;
 }
+
+
+

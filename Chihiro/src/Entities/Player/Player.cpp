@@ -203,7 +203,7 @@ bool Player::ReadItemList(int sid)
             uint64 uid         = fields[i++].GetUInt64();
             int   idx         = fields[i++].GetInt32();
             int   code        = fields[i++].GetInt32();
-            int64 cnt         = fields[i++].GetInt64();
+            uint64 cnt         = fields[i++].GetUInt64();
             int   gcode       = fields[i++].GetInt32();
             int   level       = fields[i++].GetInt32();
             int   enhance     = fields[i++].GetInt32();
@@ -366,32 +366,41 @@ bool Player::ReadEquipItem()
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_EQUIP_ITEM);
     stmt->setInt32(0, GetInt32Value(UNIT_FIELD_UID));
-    if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
-        do {
-            Field *fields = result->Fetch();
-            uint32_t sid = fields[0].GetUInt32();
-            int summon_id = fields[1].GetInt32();
-            int idx = fields[2].GetInt32();
-            int wear_info = idx;
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+    {
+        do
+        {
+            Field    *fields   = result->Fetch();
+            uint32_t sid       = fields[0].GetUInt32();
+            int      summon_id = fields[1].GetInt32();
+            int      idx       = fields[2].GetInt32();
+            int      wear_info = idx;
 
-            Unit* unit = nullptr;
-            if(summon_id == 0) {
+            Unit *unit = nullptr;
+            if (summon_id == 0)
+            {
                 unit = this;
-            } else {
+            }
+            else
+            {
                 unit = GetSummon(summon_id);
             }
-            Item* item = FindItemBySID(sid);
+            Item *item = FindItemBySID(sid);
             std::vector<int> indices{ };
-            if(item != nullptr && unit != nullptr) {
-                if(unit->m_anWear[wear_info] == nullptr) {
+            if (item != nullptr && unit != nullptr)
+            {
+                if (unit->m_anWear[wear_info] == nullptr)
+                {
                     auto iwt = (ItemWearType)wear_info;
-                    if(TranslateWearPosition(iwt, item, indices)) {
+                    if (TranslateWearPosition(iwt, item, indices))
+                    {
                         unit->m_anWear[wear_info] = item;
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
-                        item->m_bIsNeedUpdateToDB = true;
-                        if(unit->GetSubType() == ST_Summon) {
+                        item->m_bIsNeedUpdateToDB  = true;
+                        if (unit->GetSubType() == ST_Summon)
+                        {
                             item->m_Instance.OwnSummonHandle = unit->GetHandle();
-                            item->m_Instance.nOwnSummonUID = (int)unit->GetInt32Value(UNIT_FIELD_UID);
+                            item->m_Instance.nOwnSummonUID   = (int)unit->GetInt32Value(UNIT_FIELD_UID);
                         }
                     }
                 }
@@ -725,17 +734,35 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
 
 uint16_t Player::putoffItem(ItemWearType pos)
 {
-    if (pos > Item::MAX_ITEM_WEAR || pos < 0)
-        return TS_RESULT_ACCESS_DENIED;
+    auto item = m_anWear[(int)pos];
+    if(item == nullptr)
+        return 1;
 
-    Item *item = m_anWear[pos];
-    if (item != nullptr) {
-        item->m_Instance.nWearInfo = ItemWearType::WearNone;
-        item->m_bIsNeedUpdateToDB  = true;
-        m_anWear[pos] = nullptr;
-        SendItemWearInfoMessage(item, this);
+    switch(pos)
+    {
+        case ItemWearType::WearArmulet:
+            if(GetChaos() != 0)
+                return TS_RESULT_ACCESS_DENIED;
+            break;
+        case ItemWearType::WearShield:
+            if(m_anWear[1]->m_pItemBase->group == 1)
+                RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon);
+            if(m_anWear[15] != nullptr)
+                putoffItem(ItemWearType::WearDecoShield);
+            break;
+        case ItemWearType::WearWeapon:
+            if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                putoffItem(ItemWearType::WearShield);
+            putoffItem(ItemWearType::WearDecoShield);
+            break;
+        case ItemWearType::WearDecoWeapon:
+            if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon) && m_anWear[15] != nullptr)
+                putoffItem(ItemWearType::WearDecoShield);
+            break;
+        default:
+            break;
     }
-    return TS_RESULT_SUCCESS;
+    return Unit::putoffItem(pos);
 }
 
 void Player::SendItemWearInfoMessage(Item* item, Unit *u)
@@ -1291,16 +1318,18 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
 
             if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandSword && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
             {
-                // TODO: Check for PassiveSkill
-                pos = ItemWearType::WearWeapon;
-            } else if (item1->m_pItemBase->iclass == ItemClass::ClassDagger && pItem->m_pItemBase->iclass == ItemClass::ClassDagger)
+                if (GetCurrentSkillLevel(1181) < 1 && GetCurrentSkillLevel(61010) < 1)
+                    pos = ItemWearType::WearWeapon;
+            }
+            else if (item1->m_pItemBase->iclass == ItemClass::ClassDagger && pItem->m_pItemBase->iclass == ItemClass::ClassDagger)
             {
-                // TODO: Check for PassiveSkill
-                pos = ItemWearType::WearWeapon;
-            } else if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+                if (GetCurrentSkillLevel(61010) < 1)
+                    pos = ItemWearType::WearWeapon;
+            }
+            else if (item1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe && pItem->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
             {
-                // TODO: CheckForPassiveSkill
-                pos = ItemWearType::WearWeapon;
+                if (GetCurrentSkillLevel(61015) < 1)
+                    pos = ItemWearType::WearWeapon;
             }
         }
     }
@@ -1322,15 +1351,18 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
-            if ((item1 != nullptr 
-                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword 
-                && item1->m_pItemBase->iclass != ItemClass::ClassDagger
-                && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe ) 
+            if ((item1 != nullptr
+                 && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                 && item1->m_pItemBase->iclass != ItemClass::ClassDagger
+                 && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)
                 || (item2 == nullptr
-                   || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
-                   || item2->m_pItemBase->iclass != ItemClass::ClassDagger
-                   || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)
-                || m_anWear[14] == nullptr)
+                    || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
+                    || item2->m_pItemBase->iclass != ItemClass::ClassDagger
+                    || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)
+                || m_anWear[14] == nullptr
+                || GetCurrentSkillLevel(1181) < 1
+                   && GetCurrentSkillLevel(61010) < 1
+                   && GetCurrentSkillLevel(61015) < 1)
             { // TODO: PassiveSkill
                 pos = ItemWearType::WearDecoWeapon;
             }
@@ -1471,7 +1503,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     {
         if (m_anWear[1] != nullptr)
         {
-            if (!pItem->IsBow() && !pItem->IsCrossBow() || m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet)
+            if ((!pItem->IsBow() && !pItem->IsCrossBow()) || (m_anWear[1]->m_pItemBase->group != ItemGroup::Bullet))
             {
                 vpOverlappItemList.emplace_back(1);
             }
