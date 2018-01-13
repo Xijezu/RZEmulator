@@ -66,7 +66,7 @@ public:
     // Warping
     void PendWarp(int x, int y, uint8_t layer);
 
-    void SetFlag(const std::string& key, std::string value) { m_lFlagList[key] = std::move(value); }
+    void SetFlag(const std::string& key, std::string value);
 
     // Network
     void SendPropertyMessage(std::string key, std::string value);
@@ -121,6 +121,7 @@ public:
     /* ****************** DIALOG END ****************** */
 
     void onChangeProperty(std::string, int);
+    Position GetLastTownPosition();
 
     void DoSummon(Summon* pSummon, Position pPosition);
     void DoUnSummon(Summon* pSummon);

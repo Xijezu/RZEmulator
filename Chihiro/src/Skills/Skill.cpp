@@ -348,6 +348,12 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
         switch(m_SkillBase->id) {
             case SkillId::CreatureTaming:
                 CREATURE_TAMING();
+                bHandled = true;
+                break;
+            case SkillId::Return:
+            case SkillId::TownPortal:
+                TOWN_PORTAL();
+                bHandled = true;
                 break;
             default:
                 auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
@@ -550,4 +556,17 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
     skillResult.addHPType.nIncHP = (int)heal;
     m_vResultList.emplace_back(skillResult);
     //sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
+}
+
+void Skill::TOWN_PORTAL()
+{
+    if(m_pOwner->GetSubType() == ST_Player)
+    {
+        auto pPlayer = dynamic_cast<Player*>(m_pOwner);
+
+        auto pos = pPlayer->GetLastTownPosition();
+        pPlayer->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
+        pos = pPlayer->GetCurrentPosition(sWorld->GetArTime());
+        pPlayer->SetMove(pos, 0, 0);
+    }
 }

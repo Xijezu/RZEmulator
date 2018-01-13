@@ -335,7 +335,7 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
     if (args.size() != 2)
         return;
 
-    player->SetFlag(args[0], args[1]);
+    player->SetFlag(args[0].get<std::string>(), args[1].get<std::string>());
 }
 
 void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)

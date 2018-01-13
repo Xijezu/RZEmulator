@@ -70,6 +70,7 @@ private:
 
     void ACTIVATE_FIELD_PROP();
 
+    void TOWN_PORTAL();
     void DO_SUMMON();
     void DO_UNSUMMON();
     void CREATURE_TAMING();

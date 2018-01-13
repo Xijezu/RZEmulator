@@ -632,7 +632,11 @@ void Player::Save(bool bOnlyPlayer)
     stmt->setInt32(i++, 0); // Pet
     stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_CHAOS));
     stmt->setString(i++, m_szClientInfo);
-    stmt->setInt32(i++, GetInt32Value(UNIT_FIELD_UID));
+    std::string flaglist{};
+    for(auto& flag : m_lFlagList)
+        flaglist.append(string_format("%s:%s\n", flag.first.c_str(), flag.second.c_str()));
+    stmt->setString(i++, flaglist);
+    stmt->setInt32(i, GetInt32Value(UNIT_FIELD_UID));
     CharacterDatabase.Execute(stmt);
 
     if(!bOnlyPlayer) {
@@ -2198,5 +2202,35 @@ void Player::UpdateQuestStatusByItemUpgrade()
             }
         }
     }
+}
+
+Position Player::GetLastTownPosition()
+{
+    Position pos{ };
+    pos.m_positionX = std::stof(GetFlag("rx"));
+    pos.m_positionY = std::stof(GetFlag("ry"));
+    if (pos.GetPositionX() == 0 || pos.GetPositionY() == 0)
+    {
+        switch (GetRace())
+        {
+            case 0:
+                pos.Relocate(irand(0, 100) + 6625, irand(0, 100) + 6980);
+                break;
+            case 1:
+                pos.Relocate(irand(0, 100) + 116799, irand(0, 100) + 58205);
+                break;
+            case 2:
+                pos.Relocate(irand(0, 100) + 153513, irand(0, 100) + 77203);
+                break;
+            default:
+                break;
+        }
+    }
+    return pos;
+}
+
+void Player::SetFlag(const std::string &key, std::string value)
+{
+    m_lFlagList[key] = std::move(value);
 }
 
