@@ -4,6 +4,7 @@
 #include "WorldSocket.h"
 #include "XPacket.h"
 #include "WorldSession.h"
+#include "World.h"
 
 GameAuthSession::GameAuthSession(AuthSocket* socket) : m_pSocket(socket)
 {
@@ -74,9 +75,14 @@ void GameAuthSession::HandleClientLoginResult(XPacket *pRecvPct)
 	}
 }
 
-void GameAuthSession::HandleClientKick(XPacket *)
+void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 {
-
+    auto szPlayer = pRecvPct->ReadString(61);
+    auto player = Player::FindPlayer(szPlayer);
+    if(player != nullptr)
+    {
+        player->GetSession().KickPlayer();
+    }
 }
 
 void GameAuthSession::AccountToAuth(WorldSession* pSession, const std::string& szLoginName, uint64 nOneTimeKey)
@@ -105,7 +111,12 @@ void GameAuthSession::OnClose()
 
 void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 {
-
+    auto result = pRecvPct->read<uint16>();
+    if(result != TS_RESULT_SUCCESS)
+    {
+        MX_LOG_ERROR("network", "Authserver refused login! Shutting down...");
+        World::StopNow(ERROR_EXIT_CODE);
+    }
 }
 
 void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
