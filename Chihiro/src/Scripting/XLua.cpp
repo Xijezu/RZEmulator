@@ -94,6 +94,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("start_quest", &XLua::SCRIPT_StartQuest, this);
     m_pState.set_function("end_quest", &XLua::SCRIPT_EndQuest, this);
     m_pState.set_function("enter_dungeon", &XLua::SCRIPT_EnterDungeon, this);
+    m_pState.set_function("warp_to_revive_position", &XLua::SCRIPT_WarpToRevivePosition, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -803,4 +804,21 @@ void XLua::SCRIPT_EnterDungeon(int nDungeonID)
     {
         dynamic_cast<Player*>(m_pUnit)->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
     }
+}
+
+int XLua::SCRIPT_LearnAllSkill()
+{
+
+}
+
+void XLua::SCRIPT_WarpToRevivePosition(sol::variadic_args)
+{
+    auto player = dynamic_cast<Player *>(m_pUnit);
+    if (player == nullptr)
+        return;
+
+    auto revive_pos = player->GetLastTownPosition();
+
+    player->PendWarp((int)revive_pos.GetPositionX(), (int)revive_pos.GetPositionY(), 0);
+    player->SetMove(player->GetCurrentPosition(sWorld->GetArTime()), 0, 0);
 }

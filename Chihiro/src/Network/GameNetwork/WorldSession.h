@@ -112,6 +112,7 @@ public:
 	void onUseItem(XPacket*);
 
 	void onSkill(XPacket *);
+	void onRevive(XPacket*);
 	void onAttackRequest(XPacket* );
 	void onCancelAction(XPacket* );
 	void onTakeItem(XPacket*);

@@ -78,6 +78,7 @@ private:
 
     std::string SCRIPT_GetFlag(std::string);
     void SCRIPT_SetFlag(sol::variadic_args args);
+    void SCRIPT_WarpToRevivePosition(sol::variadic_args);
 
     sol::object SCRIPT_GetEnv(std::string);
     void SCRIPT_ShowMarket(std::string);
