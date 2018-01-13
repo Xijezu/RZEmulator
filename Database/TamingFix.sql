@@ -10,4 +10,4 @@ UPDATE MonsterResource SET taming_id = 1301, taming_percentage = 0.25, taming_ex
 UPDATE MonsterResource SET taming_id = 1901, taming_percentage = 0.07, taming_exp_mod = 1.50 WHERE model LIKE '%beast_salaman%';
 UPDATE MonsterResource SET taming_id = 1201, taming_percentage = 0.07, taming_exp_mod = 1.50 WHERE model LIKE '%ain_hawkman%';  
 UPDATE MonsterResource SET taming_id = 1701, taming_percentage = 0.02, taming_exp_mod = 1.50 WHERE model LIKE '%ain_horseman%'; 
-UPDATE MonsterResource SET taming_id = 1201, taming_percentage = 0.02, taming_exp_mod = 1.50 WHERE model LIKE '%ain_angel%';    
+UPDATE MonsterResource SET taming_id = 2001, taming_percentage = 0.02, taming_exp_mod = 1.50 WHERE model LIKE '%ain_angel%';
