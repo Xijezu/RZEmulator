@@ -22,38 +22,47 @@
 #define _GAMESOCKET_H
 
 #include "Common.h"
-#include "GameList.h"
 
 template<class T> class WorldSocket;
 class XPacket;
+class WorldSession;
 
 // Handle login commands
-class AuthGameSession
+class GameAuthSession
 {
 public:
-	typedef WorldSocket<AuthGameSession> GameSocket;
-	explicit AuthGameSession(GameSocket *pSocket);
-	~AuthGameSession();
+	typedef WorldSocket<GameAuthSession> AuthSocket;
+	typedef UNORDERED_MAP<std::string, WorldSession*> AuthQueue;
+	explicit GameAuthSession(AuthSocket *pSocket);
+	~GameAuthSession();
 
 	// Network handlers
 	void OnClose();
 	void ProcessIncoming(XPacket *);
 
 	// Packet handlers
-	void HandleGameLogin(XPacket *);
-	void HandleClientLogin(XPacket *);
-	void HandleClientLogout(XPacket *);
-	void HandleClientKickFailed(XPacket *);
+	void HandleGameLoginResult(XPacket *);
+	void HandleClientLoginResult(XPacket *);
+	void HandleClientKick(XPacket *);
 
-    void KickPlayer(Player* pPlayer);
+    void SendGameLogin();
+	void AccountToAuth(WorldSession* pSession, const std::string& szLoginName, uint64 nOneTimeKey);
+    void ClientLogoutToAuth(const std::string& account);
 
-	int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
-	std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
+
+    int GetAccountId() const;
+	std::string GetAccountName();
 
 private:
-	GameSocket *m_pSocket;
-	Game       *m_pGame;
-	bool       m_bIsAuthed;
+	AuthQueue  m_queue;
+	AuthSocket *m_pSocket;
+
+	uint16 m_nGameIDX;
+	std::string m_szGameName;
+	std::string m_szGameSSU;
+	bool m_bGameIsAdultServer;
+	std::string m_szGameIP;
+	int m_nGamePort;
 };
 
 #endif // _GAMESOCKET_H

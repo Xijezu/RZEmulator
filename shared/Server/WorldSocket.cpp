@@ -34,7 +34,9 @@
     template class WorldSocket<AuthGameSession>;
 #else
     #include "WorldSession.h"
+    #include "GameAuthSession.h"
     template class WorldSocket<WorldSession>;
+    template class WorldSocket<GameAuthSession>;
 #endif
 template<class T>
 WorldSocket<T>::WorldSocket (void): WorldHandler(),

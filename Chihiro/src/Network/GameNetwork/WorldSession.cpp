@@ -60,7 +60,7 @@ WorldSession::~WorldSession()
 void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
-        sAuthNetwork->SendLogoutToAuth(_accountName);
+        sAuthNetwork->SendClientLogoutToAuth(_accountName);
     onReturnToLobby(nullptr);
     //sWorld->RemoveSession(GetAccountId());
     _rc4decode.Clear();

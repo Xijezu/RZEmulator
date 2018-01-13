@@ -84,6 +84,7 @@ int main(int argc, char **argv)
 
 	sWorld->InitWorld();
 
+	ACE_Singleton<WorldSocketMgr<GameAuthSession>, ACE_Thread_Mutex>::instance()->StartNetwork(0, "0.0.0.0");
 	ACE_INET_Addr auth_addr(sConfigMgr->GetIntDefault("AuthServer.Port", 4502), sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1").c_str());
 	if (sAuthNetwork->InitializeNetwork(auth_addr) != 0)
 	{

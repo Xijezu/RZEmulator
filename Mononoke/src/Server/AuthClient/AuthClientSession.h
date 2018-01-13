@@ -51,8 +51,6 @@ public:
     AuthSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
 private:
     AuthSocket *_socket{nullptr};
-    XRC4Cipher _rc4encode{ };
-    XRC4Cipher _rc4decode{ };
     XDes _desCipther{};
 
     Player*     m_pPlayer{nullptr};

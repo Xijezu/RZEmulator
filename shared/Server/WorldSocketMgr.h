@@ -11,6 +11,7 @@ template<class T> class WorldSocketAcceptor;
 
 // All the sessions
 class WorldSession;
+class GameAuthSession;
 class AuthGameSession;
 class AuthClientSession;
 

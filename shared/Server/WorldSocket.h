@@ -39,7 +39,9 @@
 template<class T>class WorldSocketMgr;
 class ACE_Message_Block;
 class XPacket;
+
 class WorldSession;
+class GameAuthSession;
 class AuthClientSession;
 class AuthGameSession;
 
@@ -102,6 +104,9 @@ public:
     /// Close the socket.
     void CloseSocket(void);
 
+    /// Return the session
+    T* GetSession() { return m_Session; }
+
     /// Get address of connected peer.
     const std::string& GetRemoteAddress(void) const;
 
@@ -155,7 +160,6 @@ private:
     /// @param new_pct received packet, note that you need to delete it.
     int ProcessIncoming(XPacket* new_pct);
 private:
-    void SendAuthResponseError(uint8);
     /// Time in which the last ping was received
     ACE_Time_Value m_LastPingTime;
 

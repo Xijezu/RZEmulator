@@ -22,13 +22,12 @@
 #include "GameList.h"
 #include "XPacket.h"
 #include "Encryption/MD5.h"
-
+#include "AuthGameSession.h"
 
 // Constructo - give it a socket
-AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket)
+AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket), m_pPlayer(nullptr)
 {
     _desCipther.Init("MERONG");
-    MX_LOG_INFO("auth", "AuthClientSession::AuthClientSession");
     if(_socket)
     {
         _socket->AddReference();
@@ -38,20 +37,20 @@ AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket)
 // Close patch file descriptor before leaving
 AuthClientSession::~AuthClientSession()
 {
-    MX_LOG_INFO("auth", "AuthClientSession::~AuthClientSession");
     if(_socket)
         _socket->RemoveReference();
 }
 
-// Accept the connection - function itself not used here because we're only interested in the game server data itself
-/*void WorldSession::OnAccept()
-{
-
-}
-*/
 void AuthClientSession::OnClose()
 {
-
+    if (m_pPlayer == nullptr)
+        return;
+    auto g = sPlayerMapList->GetPlayer(m_pPlayer->szLoginName);
+    if (g != nullptr && g->nAccountID == m_pPlayer->nAccountID && !g->bIsInGame)
+    {
+        sPlayerMapList->RemovePlayer(g->szLoginName);
+        delete m_pPlayer;
+    }
 }
 
 enum eStatus {
@@ -120,12 +119,13 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
     stmt->setString(1, szPassword);
     if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt))
     {
-        m_pPlayer = new Player{};
+        m_pPlayer = new Player{ };
         m_pPlayer->nAccountID     = (*dbResult)[0].GetUInt32();
         m_pPlayer->szLoginName    = (*dbResult)[1].GetString();
         m_pPlayer->nLastServerIDX = (*dbResult)[2].GetUInt32();
         m_pPlayer->bIsBlocked     = (*dbResult)[3].GetBool();
         m_pPlayer->bIsInGame      = false;
+
         if (m_pPlayer->bIsBlocked)
         {
             SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
@@ -135,23 +135,15 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
         auto pOldPlayer = sPlayerMapList->GetPlayer(m_pPlayer->szLoginName);
         if (pOldPlayer != nullptr)
         {
-            if (pOldPlayer->bKickNextLogin)
+            if (pOldPlayer->bIsInGame)
             {
-                // @todo: Send kick packet to gameserver
-                sPlayerMapList->RemovePlayer(pOldPlayer->szLoginName);
-                delete pOldPlayer;
-            } else
-            {
-                if (pOldPlayer->bIsInGame)
-                {
-                    pOldPlayer->bKickNextLogin = true;
-                    SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
-                    return;
-                } else
-                {
-                    sPlayerMapList->RemovePlayer(pOldPlayer->szLoginName);
-                }
+                auto game = sGameMapList->GetGame((uint)pOldPlayer->nGameIDX);
+                if(game != nullptr && game->m_pSession != nullptr)
+                    game->m_pSession->KickPlayer(pOldPlayer);
             }
+            SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
+            sPlayerMapList->RemovePlayer(pOldPlayer->szLoginName);
+            delete pOldPlayer;
         }
 
         _isAuthed = true;
@@ -165,7 +157,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
 void AuthClientSession::HandleVersion(XPacket *pRecvPct)
 {
     auto version = pRecvPct->read<std::string>();
-    MX_LOG_DEBUG("network", "[Version] Client version is %s", version.c_str());
+    MX_LOG_TRACE("network", "[Version] Client version is %s", version.c_str());
 }
 
 void AuthClientSession::HandleServerList(XPacket *)
@@ -187,13 +179,15 @@ void AuthClientSession::HandleServerList(XPacket *)
     _socket->SendPacket(packet);
 }
 
-void AuthClientSession::HandleSelectServer(XPacket *)
+void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
 {
+    m_pPlayer->nGameIDX = pRecvPct->read<uint16>();
     m_pPlayer->nOneTimeKey = ((uint64) rand32()) * rand32() * rand32() * rand32();
     m_pPlayer->bIsInGame = true;
+    bool bExist = sGameMapList->GetGame((uint)m_pPlayer->nGameIDX) != 0;
     XPacket packet(TS_AC_SELECT_SERVER);
-    packet << (uint16) 0;
-    packet << (int64) m_pPlayer->nOneTimeKey;
+    packet << (uint16) (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
+    packet << (int64) (bExist ? m_pPlayer->nOneTimeKey : 0);
     packet << (uint32) 0;
     _socket->SendPacket(packet);
 }

@@ -123,6 +123,7 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
     m_pGame->bIsAdultServer = pGamePct->read<bool>() != 0;
     m_pGame->szIP = pGamePct->ReadString(16);
     m_pGame->nPort = pGamePct->read<int>();
+    m_pGame->m_pSession = this;
 
     auto pGame = sGameMapList->GetGame(m_pGame->nIDX);
 
@@ -181,10 +182,31 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
 
 void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
 {
-    GA_CLIENT_LOGOUT *packet = ((GA_CLIENT_LOGOUT *) pGamePct->contents());
+    auto szPlayer = pGamePct->ReadString(61);
+    auto p = sPlayerMapList->GetPlayer(szPlayer);
+    if(p != nullptr) {
+        sPlayerMapList->RemovePlayer(szPlayer);
+        delete p;
+    }
 }
 
 void AuthGameSession::HandleClientKickFailed(XPacket *pGamePct)
 {
-    GA_CLIENT_KICK_FAILED *packet = ((GA_CLIENT_KICK_FAILED *) pGamePct->contents());
+    auto szPlayer = pGamePct->ReadString(61);
+    auto p = sPlayerMapList->GetPlayer(szPlayer);
+    if(p != nullptr)
+    {
+        sPlayerMapList->RemovePlayer(szPlayer);
+        delete p;
+    }
+}
+
+void AuthGameSession::KickPlayer(Player *pPlayer)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket kickPct(TS_AG_KICK_CLIENT);
+    kickPct.fill(pPlayer->szLoginName, 61);
+    m_pSocket->SendPacket(kickPct);
 }

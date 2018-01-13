@@ -171,7 +171,7 @@ protected:
 
 private:
     typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicInt;
-    typedef std::set<WorldSocket<T> *>              SocketSet;
+    typedef std::set<WorldSocket<T> *>           SocketSet;
 
     ACE_Reactor *m_Reactor;
     AtomicInt m_Connections;
@@ -188,6 +188,7 @@ private:
     template class WorldSocketMgr<AuthGameSession>;
 #else
     template class WorldSocketMgr<WorldSession>;
+    template class WorldSocketMgr<GameAuthSession>;
 #endif
 
 template<class T>
@@ -237,11 +238,15 @@ int WorldSocketMgr<T>::StartReactiveIO(ACE_UINT16 port, const char *address)
 
     m_Acceptor = new WorldSocketAcceptor<T>;
 
-    ACE_INET_Addr listen_addr(port, address);
+    if(port != 0)
+    {
+        ACE_INET_Addr listen_addr(port, address);
 
-    if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1) {
-        MX_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
-        return -1;
+        if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1)
+        {
+            MX_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
+            return -1;
+        }
     }
 
     for (size_t i = 0; i < m_NetThreadsCount; ++i)
@@ -290,11 +295,13 @@ template<class T>
 int WorldSocketMgr<T>::OnSocketOpen(WorldSocket<T> *sock)
 {
     // set some options here
-    if (m_SockOutKBuff >= 0) {
+    if (m_SockOutKBuff >= 0)
+    {
         if (sock->peer().set_option(SOL_SOCKET,
                                     SO_SNDBUF,
-                                    (void *) &m_SockOutKBuff,
-                                    sizeof(int)) == -1 && errno != ENOTSUP) {
+                                    (void *)&m_SockOutKBuff,
+                                    sizeof(int)) == -1 && errno != ENOTSUP)
+        {
             MX_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
             return -1;
         }
@@ -303,11 +310,13 @@ int WorldSocketMgr<T>::OnSocketOpen(WorldSocket<T> *sock)
     static const int ndoption = 1;
 
     // Set TCP_NODELAY.
-    if (m_UseNoDelay) {
+    if (m_UseNoDelay)
+    {
         if (sock->peer().set_option(ACE_IPPROTO_TCP,
                                     TCP_NODELAY,
-                                    (void *) &ndoption,
-                                    sizeof(int)) == -1) {
+                                    (void *)&ndoption,
+                                    sizeof(int)) == -1)
+        {
             MX_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror(errno));
             return -1;
         }

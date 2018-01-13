@@ -24,7 +24,7 @@ class AuthClientSession;
 struct Player
 {
 	Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
-			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), pSession(nullptr)
+			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1)
 	{
 	}
 	uint32 nAccountID;
@@ -34,7 +34,7 @@ struct Player
 	bool bIsInGame;
 	bool bKickNextLogin;
 	uint64 nOneTimeKey;
-	AuthClientSession* pSession;
+	int nGameIDX;
 };
 
 /// Storage object for the list of players on the server
@@ -71,9 +71,9 @@ public:
 	}
 
 	// You need to use the mutex while working with the map!
-	PlayerMap GetMap() const
+	PlayerMap* GetMap()
 	{
-		return m_players;
+		return &m_players;
 	}
 
 	Player* GetPlayer(const std::string& szAccount)

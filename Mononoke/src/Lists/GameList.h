@@ -20,17 +20,18 @@
 
 #include "Common.h"
 #include "SharedMutex.h"
-
+class AuthGameSession;
 // Storage object for a game
 struct Game
 {
-	Game() : nIDX(0), szName(), szSSU(), bIsAdultServer(false), szIP(), nPort(0) { }
+	Game() : nIDX(0), szName(), szSSU(), bIsAdultServer(false), szIP(), nPort(0), m_pSession(nullptr) { }
 	uint16 nIDX;
 	std::string szName;
 	std::string szSSU;
 	bool bIsAdultServer;
 	std::string szIP;
 	int nPort;
+	AuthGameSession *m_pSession;
 };
 
 /// Storage object for the list of realms on the server
