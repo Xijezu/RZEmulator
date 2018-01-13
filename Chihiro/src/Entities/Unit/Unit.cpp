@@ -1853,13 +1853,19 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 
 Damage Unit::DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage)
 {
-    DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod* damage_advantage)
 {
-    DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysicalLeftHand, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysicalLeftHand, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
+
+Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+{
+    return DealDamage(pFrom, nDamage, type, DamageType::NormalMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}
+
 
 Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag)
 {
@@ -2683,11 +2689,6 @@ DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType
     result.SetDamage(d);
     result.target_hp = GetHealth();
     return result;
-}
-
-Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
-{
-    return DealDamage(pFrom, nDamage, type, DamageType::NormalMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 uint Unit::GetRemainCoolTime(int skill_id) const

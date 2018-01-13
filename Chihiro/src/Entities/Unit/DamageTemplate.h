@@ -53,7 +53,7 @@ struct Damage {
 
 struct DamageInfo : public Damage {
     // Function       :     public void StructCreature::_DAMAGE_INFO::_DAMAGE_INFO()
-    void SetDamage(Damage damage)
+    void SetDamage(const Damage& damage)
     {
         nDamage       = damage.nDamage;
         bCritical     = damage.bCritical;
@@ -68,7 +68,7 @@ struct DamageInfo : public Damage {
 
 struct AttackInfo : public DamageInfo {
     // Function       :     public void StructCreature::_ATTACK_INFO::_ATTACK_INFO()
-    void SetDamageInfo(DamageInfo damage_info)
+    void SetDamageInfo(const DamageInfo& damage_info)
     {
         SetDamage(damage_info);
         elemental_damage[0] = damage_info.elemental_damage[0];
