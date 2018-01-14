@@ -63,6 +63,18 @@ void AuthGameSession::OnClose()
     auto g = sGameMapList->GetGame(m_pGame->nIDX);
     if(g != nullptr && g->szName == m_pGame->szName)
     {
+        {
+            MX_UNIQUE_GUARD writeGuard(*sPlayerMapList->GetGuard());
+            auto map = sPlayerMapList->GetMap();
+            for(auto& player : *map)
+            {
+                if(player.second->nGameIDX == g->nIDX)
+                {
+                    map->erase(player.second->szLoginName);
+                    delete player.second;
+                }
+            }
+        }
         sGameMapList->RemoveGame(g->nIDX);
         MX_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
     }
