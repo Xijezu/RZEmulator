@@ -44,4 +44,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_GET_QUEST, "SELECT id, code, start_id, status1, status2, status3, progress FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_UPD_SUMMON, "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?, exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?, prev_level_01 = ?, prev_level_02 = ?, prev_id_01 = ?, prev_id_02 = ?, hp = ?, mp = ? WHERE sid = ?;", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_MAX_QUEST_ID, "SELECT MAX(id) AS id FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHARACTER_REP_ITEMCOOLTIME, "REPLACE INTO ItemCoolTime VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_GET_ITEMCOOLTIME, "SELECT * FROM ItemCoolTime WHERE owner_id = ?", CONNECTION_SYNCH);
 }

@@ -26,9 +26,11 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject), m_unitTypeMask(0)
 
 Unit::~Unit()
 {
-    for (auto& sk : m_vSkillList) {
-        delete sk;
-        sk = nullptr;
+    uint ct = sWorld->GetArTime();
+    for (auto& skill : m_vSkillList) {
+        Skill::DB_UpdateSkill(this, skill->m_nSkillUID, skill->m_nSkillLevel, skill->m_nNextCoolTime < ct ? 0 : skill->m_nNextCoolTime - ct);
+        delete skill;
+        skill = nullptr;
     }
     m_vSkillList.clear();
 }
@@ -1426,10 +1428,10 @@ int Unit::GetCurrentSkillLevel(int skill_id) const
 void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
 {
     auto skill = new Skill(this, skill_uid, skill_id);
-    skill->m_nSkillID    = skill_id;
-    skill->m_nSkillLevel = skill_level;
-    skill->m_nSkillUID   = skill_uid;
-    skill->cool_time     = remain_cool_time;
+    skill->m_nSkillID      = skill_id;
+    skill->m_nSkillLevel   = skill_level;
+    skill->m_nSkillUID     = skill_uid;
+    skill->m_nNextCoolTime = remain_cool_time + sWorld->GetArTime();
     m_vSkillList.emplace_back(skill);
 }
 

@@ -153,7 +153,8 @@ bool Player::ReadCharacter(std::string _name, int _race)
         {
             return false;
         }*/
-        if (!ReadItemList(GetInt32Value(UNIT_FIELD_UID)) || !ReadSummonList(GetInt32Value(UNIT_FIELD_UID))) {
+        if (!ReadItemList(GetInt32Value(UNIT_FIELD_UID))  || !ReadItemCoolTimeList(GetInt32Value(UNIT_FIELD_UID))
+            || !ReadSummonList(GetInt32Value(UNIT_FIELD_UID))) {
             return false;
         }
 
@@ -232,6 +233,25 @@ bool Player::ReadItemList(int sid)
     }
     return true;
 }
+
+bool Player::ReadItemCoolTimeList(int uid)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_ITEMCOOLTIME);
+    stmt->setInt32(0, uid);
+    uint ct = sWorld->GetArTime();
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
+        do {
+            Field *fields     = result->Fetch();
+            int idx = 1;
+            for(auto& cd : m_nItemCooltime)
+            {
+                cd = fields[idx++].GetInt32() + ct;
+            }
+        } while (result->NextRow());
+    }
+    return true;
+}
+
 
 
 bool Player::ReadQuestList()
@@ -524,6 +544,7 @@ void Player::SendLoginProperties()
     }
 
     Messages::SendItemList(this, false);
+    Messages::SendItemCoolTimeInfo(this);
     Messages::SendCreatureEquipMessage(this, false);
 
     Messages::SendSkillList(this, this, -1);
@@ -650,6 +671,9 @@ void Player::Save(bool bOnlyPlayer)
             if(item.second->m_bIsNeedUpdateToDB)
                 item.second->DBUpdate();
         }
+
+        // REPLACE query - acts as insert & update
+        DB_ItemCoolTime(this);
 
         for(auto& summon : m_vSummonList) {
             if(summon == nullptr)
@@ -1012,16 +1036,19 @@ void Player::OnUpdate()
 void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
 {
     auto sb = sObjectMgr->GetSkillBase((uint)skill_id);
-    if(sb->id != 0 && sb->is_valid == 2)
+    if (sb->id != 0 && sb->is_valid == 2)
         return;
-    if(prev_level != 0) {
-        Skill::DB_UpdateSkill(this,skillUID,skill_level);
-    } else {
+    if (prev_level != 0)
+    {
+        Skill::DB_UpdateSkill(this, skillUID, skill_level, GetRemainCoolTime(skill_id));
+    }
+    else
+    {
         Skill::DB_InsertSkill(this, skillUID, this->GetUInt32Value(UNIT_FIELD_UID), 0, skill_id, skill_level);
     }
     m_QuestManager.UpdateQuestStatusBySkillLevel(skill_id, skill_level);
     //Messages::SendPropertyMessage(this, this, "jp", GetJP());
-    Messages::SendSkillList(this,this,skill_id);
+    Messages::SendSkillList(this, this, skill_id);
 }
 
 void Player::onExpChange()
@@ -2243,3 +2270,22 @@ void Player::SetFlag(const std::string &key, std::string value)
     m_lFlagList[key] = std::move(value);
 }
 
+void Player::DB_ItemCoolTime(Player * pPlayer)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    uint8 idx = 0;
+    int cool_down = 0;
+    uint ct = sWorld->GetArTime();
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_ITEMCOOLTIME);
+    stmt->setInt32(idx++, pPlayer->GetUInt32Value(UNIT_FIELD_UID));
+    for(auto& cd : pPlayer->m_nItemCooltime)
+    {
+        cool_down = cd - ct;
+        if(cool_down < 0)
+            cool_down = 0;
+        stmt->setInt32(idx++, cool_down);
+    }
+    CharacterDatabase.Execute(stmt);
+}

@@ -25,6 +25,7 @@ public:
     static void EnterPacket(XPacket &, Player *, Player*);
     static void DoEachPlayer(const std::function<void (Player*)>& fn);
     static Player* FindPlayer(const std::string& szName);
+    static void DB_ItemCoolTime(Player*);
     /* ****************** STATIC END ****************** */
 
     /* ****************** QUEST ****************** */
@@ -58,6 +59,7 @@ public:
     /* ****************** DATABASE ****************** */
     bool ReadCharacter(std::string, int);
     bool ReadItemList(int);
+    bool ReadItemCoolTimeList(int);
     bool ReadSummonList(int);
     bool ReadEquipItem();
     bool ReadSkillList(int);

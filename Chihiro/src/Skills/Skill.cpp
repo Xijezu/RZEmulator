@@ -69,11 +69,11 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, uint owner_uid, uint sum
     CharacterDatabase.Execute(stmt);
 }
 
-void Skill::DB_UpdateSkill(Unit *pUnit, int64 skill_uid, uint skill_level)
+void Skill::DB_UpdateSkill(Unit *pUnit, int64 skill_uid, uint skill_level, uint cooltime)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_SKILL);
     stmt->setInt32(0, skill_level);
-    stmt->setInt32(1, 0); // cool_time
+    stmt->setInt32(1, cooltime); // cool_time
     auto uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
     stmt->setInt32(2, uid);
     stmt->setInt64(3, skill_uid);

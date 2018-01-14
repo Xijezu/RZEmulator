@@ -289,7 +289,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << _player->GetPositionZ();
     packet << (uint8) _player->GetLayer();
     packet << (uint32) _player->GetOrientation();
-    packet << (uint32) sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    packet << (uint32) g_nRegionSize;
     packet << (uint32)_player->GetHealth();
     packet << (uint16) _player->GetMana();
     packet << (uint32)_player->GetMaxHealth();

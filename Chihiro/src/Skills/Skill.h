@@ -15,7 +15,7 @@ public:
     Skill() = delete;
     Skill(Unit* pOwner, int64 _uid, int _id);
     static void DB_InsertSkill(Unit*,int64,uint,uint,uint,uint);
-    static void DB_UpdateSkill(Unit*,int64,uint);
+    static void DB_UpdateSkill(Unit*,int64,uint,uint);
 
     int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
     void ProcSkill();
