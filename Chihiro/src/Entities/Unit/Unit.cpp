@@ -2038,21 +2038,9 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     return result;
 }
 
-uint Unit::GetCreatureGroup()
+uint Unit::GetCreatureGroup() const
 {
-    switch(_subType) {
-        case ST_Player:
-            return 9;
-        case ST_Mob: {
-            auto monster = dynamic_cast<Monster *>(this);
-            return monster != nullptr ? (uint) monster->GetBase()->grp : 0;
-        }
-        case ST_Summon:
-            return 9;
-        default:
-            return 0;
-    }
-    ACE_NOTREACHED(return 0);
+    return 0;
 }
 
 int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)

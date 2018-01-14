@@ -17,6 +17,7 @@ public:
     static void EnterPacket(XPacket &, Summon *, Player* pPlayer);
 
     CreatureStat* GetBaseStat() const override;
+    uint GetCreatureGroup() const override { return 9; }
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
     int32_t GetSummonCode();

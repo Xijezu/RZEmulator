@@ -1774,7 +1774,7 @@ uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint ct = sWorld->GetArTime();
     if(pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || pItem->m_pItemBase->cool_time_group != 0
-        && false/*m_nItemCoolTime[pItem->m_pItemBase->cool_time_group] > ct*/)
+        && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct)
         return TS_RESULT_COOL_TIME;
     // Weight
     // Ride IDX
@@ -1817,6 +1817,8 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 
     if(result == TS_RESULT_SUCCESS)
     {
+        m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld->GetArTime() + (pItem->m_pItemBase->cool_time * 100);
+        Messages::SendItemCoolTimeInfo(this);
         Erase(pItem, 1, false);
     }
     return result;

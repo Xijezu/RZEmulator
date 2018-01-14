@@ -852,3 +852,20 @@ void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
     }
     pPlayer->SendPacket(questPct);
 }
+
+void Messages::SendItemCoolTimeInfo(Player *pPlayer)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    uint ct = sWorld->GetArTime();
+    XPacket coolTimePct(TS_SC_ITEM_COOL_TIME);
+    for (unsigned int coolTime : pPlayer->m_nItemCooltime)
+    {
+        int cool_time = coolTime - ct;
+        if(cool_time < 0)
+            cool_time = 0;
+        coolTimePct << cool_time;
+    }
+    pPlayer->SendPacket(coolTimePct);
+}

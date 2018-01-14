@@ -100,6 +100,7 @@ public:
     static void SendQuestMessage(int nChatType, Player* pTarget, const std::string& szString);
     static void SendNPCStatusInVisibleRange(Player* pPlayer);
     static void SendQuestStatus(Player* pPlayer, Quest *pQuest);
+    static void SendItemCoolTimeInfo(Player* pPlayer);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

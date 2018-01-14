@@ -166,7 +166,7 @@ public:
     float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
     float GetItemChance() const;
     uint64 GetEXP() const { return GetUInt64Value(UNIT_FIELD_EXP); }
-    uint GetCreatureGroup();
+    virtual uint GetCreatureGroup() const;
     void AddHealth(int hp) { SetHealth(GetHealth() + hp); }
     void AddMana(int mp) { SetMana(GetMana() + mp); }
     virtual void AddEXP(uint64 exp, uint jp, bool bApplyStanima);

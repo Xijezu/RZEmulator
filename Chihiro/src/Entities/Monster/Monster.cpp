@@ -692,8 +692,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             if (m_nLastTrackTime + 50 < t) {
                 m_nLastTrackTime = t;
                 track_distance   = (((float) irand(0, 9) / 100.0f) + 1.0f);
-                if (true) { // GameContent::IsBlocked
-                    sWorld->SetMove(this, GetCurrentPosition(t), targetPosition, (uint8) ((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld->GetArTime(), true);
+                if (!sObjectMgr->IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()))
+                { // GameContent::IsBlocked
+                    sWorld->SetMove(this, GetCurrentPosition(t), targetPosition, (uint8)((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld->GetArTime(), true);
                 }
             }
             return;
@@ -705,11 +706,12 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         return;
     }
 
-    if(!pEnemy->IsMoving(t) && (GetStatus() == MonsterStatus::MS_Tracking && irand(0,99) < 5)) {
+    if(!pEnemy->IsMoving(t) && (GetStatus() == MonsterStatus::MS_Tracking && irand(0,99) < 5))
+    {
         auto attack_pos = getNonDuplicateAttackPos(pEnemy);
         SetStatus(MonsterStatus::MS_FindAttackPos);
-        if (true) // !IsBlocked && Movable()
-            sWorld->SetMove(this, myPosition, attack_pos, (uint8) (m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
+        if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY())) // !IsBlocked && Movable()
+            sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
         return;
     }
 
@@ -751,7 +753,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         SetStatus(MonsterStatus::MS_Tracking);
 }
 
-int Monster::GetCreatureGroup() const
+uint Monster::GetCreatureGroup() const
 {
     return m_Base->grp;
 }

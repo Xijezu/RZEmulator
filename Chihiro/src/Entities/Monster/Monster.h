@@ -247,7 +247,7 @@ public:
     void SetTamer(uint handle, int nTamingSkillLevel);
     void ForceKill(Player* byPlayer);
 
-    int GetCreatureGroup() const;// override;
+    uint GetCreatureGroup() const override;
     bool IsEnvironmentMonster() const;
     bool IsBattleMode() const;// override;
     bool IsBossMonster() const;

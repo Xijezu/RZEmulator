@@ -11,6 +11,7 @@
 #include "QuestManager.h"
 class WorldSession;
 
+#define MAX_ITEM_COOLTIME_GROUP 20
 
 class Player : public Unit, public QuestEventHandler {
 public:
@@ -136,6 +137,7 @@ public:
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;
 
     CreatureStat* GetBaseStat() const override;
+    uint GetCreatureGroup() const override { return 9; }
 
     ushort ChangeGold(uint64);
 
@@ -180,6 +182,8 @@ private:
     WorldSession *m_session{nullptr};
     std::string  m_szAccount;
     QuestManager m_QuestManager{};
+
+    uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 
     UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
     UNORDERED_MAP<std::string, std::string> m_hsContact{ };
