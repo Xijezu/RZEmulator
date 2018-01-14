@@ -462,6 +462,11 @@ bool Player::ReadSummonList(int UID)
             summon->m_nTransform = transform;
             summon->CalculateStat();
             Item* card = FindItemBySID(card_uid);
+            if(card == nullptr)
+            {
+                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: , SummonUID: %d]", card_uid, sid);
+                summon->DeleteThis();
+            }
             if(card != nullptr) {
                 card->m_pSummon = summon;
                 card->m_Instance.Socket[0] = sid;
@@ -475,8 +480,8 @@ bool Player::ReadSummonList(int UID)
                 summon.m_nSP = sp;
                 summon.m_nHP = hp;
                 summon.m_fMP = mp;*/
+                m_vSummonList.push_back(summon);
             }
-            m_vSummonList.push_back(summon);
         } while (result->NextRow());
     }
     return true;

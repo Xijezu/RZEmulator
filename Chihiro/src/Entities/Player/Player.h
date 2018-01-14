@@ -153,7 +153,7 @@ public:
 
     void applyJobLevelBonus() override;
 
-    UNORDERED_MAP<long, Item *>             m_lInventory;
+    std::map<uint64, Item *>             m_lInventory;
     Item                                    *m_aBindSummonCard[6]{nullptr};
     WorldLocation *m_WorldLocation{nullptr};
     int m_nWorldLocationId{0};

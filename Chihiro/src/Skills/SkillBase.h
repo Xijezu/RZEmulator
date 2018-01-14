@@ -416,6 +416,7 @@ struct SkillBase {
 
     uint GetCoolTime(int enhance) const
     {
+        return 0;
         return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
     }
 

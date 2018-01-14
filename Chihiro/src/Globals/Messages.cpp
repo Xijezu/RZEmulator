@@ -321,7 +321,7 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
         ulong idx   = 0;
         if (count != 0) {
             do {
-                XPacket packet(CSPACKETS::TS_SC_INVENTORY);
+                XPacket packet(TS_SC_INVENTORY);
                 auto    lcnt   = idx;
                 ulong    mcount = 200;
                 if (count - idx <= 200)

@@ -595,7 +595,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, false);
+    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, true);
     if(pItem == nullptr) {
         MX_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
         ClearTamer(pMonster, false);
@@ -664,7 +664,7 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
         if(card != nullptr) {
             pMonster->SetTamer(pPlayer->GetHandle(), nSkillLevel);
             pPlayer->m_hTamingTarget = pMonster->GetHandle();
-            card->m_Instance.Flag |= 0x20000000;
+            card->m_Instance.Flag |= FlagBits::FB_Taming;
             Messages::BroadcastTamingMessage(pPlayer, pMonster, 0);
             return true;
         }
