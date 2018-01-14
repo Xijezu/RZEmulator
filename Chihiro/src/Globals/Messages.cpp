@@ -505,7 +505,15 @@ void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint targe
     skillPct << pos.GetPositionY();
     skillPct << pos.GetPositionZ();
     skillPct << pos.GetLayer();
-
+    skillPct << (uint8)1; // Type: Casting
+    skillPct << (uint16)0; // costHP
+    skillPct << (uint16)0; // costMP
+    skillPct << (uint)0;  // Target HP
+    skillPct << (uint16)0; // Target MP
+    skillPct << (uint)0; // filler
+    skillPct << (uint16)error_code;
+    skillPct.fill("", 3);
+    pPlayer->SendPacket(skillPct);
 }
 
 void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, int reason)

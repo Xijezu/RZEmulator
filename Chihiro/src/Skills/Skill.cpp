@@ -163,7 +163,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
                               0, 0, 5);
     }
 
-    return TS_RESULT_SUCCESS;
+    return m_nErrorCode;
 }
 
 uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
@@ -214,8 +214,8 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     pct << m_targetPosition.GetPositionZ();
     pct << (uint8)m_targetPosition.GetLayer();
     pct << (uint8)nType;
-    pct << (int16)50;//cost_hp;
-    pct << (int16)75;//cost_mp;
+    pct << (int16)cost_hp;
+    pct << (int16)cost_mp;
     pct << (int)m_pOwner->GetHealth();
     pct << (int16)m_pOwner->GetMana();
 
