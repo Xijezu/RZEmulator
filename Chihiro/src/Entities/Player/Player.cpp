@@ -1712,6 +1712,9 @@ bool Player::IsInProgressQuest(int code)
 bool Player::IsStartableQuest(int code, bool bForQuestMark)
 {
     auto qbs = sObjectMgr->GetQuestBase(code);
+    if(qbs == nullptr)
+        return false;
+
     if ((qbs->nLimitLevel - (int)GetLevel() > 4 || qbs->nLimitJobLevel > GetCurrentJLv()) || (bForQuestMark && qbs->nLimitIndication != 0 && (int)GetLevel() - qbs->nLimitLevel > 12))
         return false;
 
@@ -1752,14 +1755,8 @@ bool Player::IsFinishableQuest(int code)
 
 bool Player::CheckFinishableQuestAndGetQuestStruct(int code)
 {
-    bool result{false};
     auto q1 = m_QuestManager.FindQuest(code);
-    if(q1 != nullptr && q1->IsFinishable())  {
-        result = true;
-    } else {
-        result = false;
-    }
-    return result;
+    return q1 != nullptr && q1->IsFinishable();
 }
 
 void Player::onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus)

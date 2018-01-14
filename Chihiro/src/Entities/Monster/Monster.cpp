@@ -447,6 +447,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
     std::map<int, long> mapDropItem{};
     long nItemCount;
     int nItemID;
+
     for(int i = 0; i < count; ++i) {
         nItemID = nDropGroupID;
         nItemCount = 1;
