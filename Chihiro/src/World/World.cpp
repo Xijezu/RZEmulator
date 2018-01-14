@@ -21,7 +21,7 @@ ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
 
 World::World() : startTime(getMSTime())
 {
-    srand((unsigned int)time(NULL));
+    srand((unsigned int)time(nullptr));
 }
 
 
