@@ -47,7 +47,7 @@ private:
     void SCRIPT_DialogMenu(std::string, std::string);
     void SCRIPT_DialogShow();
     int SCRIPT_GetQuestProgress(int);
-    void SCRIPT_StartQuest(int, int);
+    void SCRIPT_StartQuest(int, sol::variadic_args);
     void SCRIPT_EndQuest(int, int, sol::variadic_args);
 
     // Teleporter
@@ -74,7 +74,7 @@ private:
     uint SCRIPT_InsertItem(sol::variadic_args);
 
     sol::object SCRIPT_GetValue(std::string);
-    void SCRIPT_SetValue(std::string,int64);
+    void SCRIPT_SetValue(std::string,sol::variadic_args);
 
     std::string SCRIPT_GetFlag(std::string);
     void SCRIPT_SetFlag(sol::variadic_args args);

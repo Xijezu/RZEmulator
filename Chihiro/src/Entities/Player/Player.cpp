@@ -2040,7 +2040,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         fMod = 1.0f;
     }
 
-    auto res = ChangeGold((long)(q->m_QuestBase->nGold * fMod) + GetGold());
+    auto res = ChangeGold((uint64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
         Messages::SendQuestMessage(120, this, string_format("END|TOO_MUCH_MONEY|%d", res));

@@ -305,7 +305,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     if(m_pUnit->GetSubType() == ST_Player) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
-            return return_object(player->GetGold());
+            return return_object((int64)player->GetGold());
         } else if(szKey == "guild_id") {
             return return_object(player->GetInt32Value(UNIT_FIELD_GUILD_ID));
         } else if(szKey == "permission") {
@@ -339,61 +339,61 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
     player->SetFlag(args[0].get<std::string>(), args[1].get<std::string>());
 }
 
-void XLua::SCRIPT_SetValue(std::string szKey, int64 nValue)
+void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
 {
     if (m_pUnit == nullptr)
         return;
 
     if (szKey == "race") {
-        m_pUnit->SetInt32Value(UNIT_FIELD_RACE, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int>());
     } else if (szKey == "job") {
-        m_pUnit->SetCurrentJob(nValue);
+        m_pUnit->SetCurrentJob(args[0].get<uint>());
     } else if (szKey == "level" || szKey == "lv") {
-        m_pUnit->SetEXP(sObjectMgr->GetNeedExp(nValue));
+        m_pUnit->SetEXP((uint)sObjectMgr->GetNeedExp(args[0].get<uint>()));
     } else if (szKey == "job_level" || szKey == "jlv") {
-        m_pUnit->SetCurrentJLv(nValue);
+        m_pUnit->SetCurrentJLv(args[0].get<int>());
     } else if(szKey == "x") {
-        m_pUnit->Relocate(nValue, m_pUnit->GetPositionY());
+        m_pUnit->Relocate(args[0].get<int>(), m_pUnit->GetPositionY());
     } else if(szKey == "y") {
-        m_pUnit->Relocate(m_pUnit->GetPositionX(), nValue);
+        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int>());
     } else if (szKey == "stamina" || szKey == "stanima") { // I do that typo all the time /shrug
-        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int>());
     } else if (szKey == "jp") {
-        m_pUnit->SetJP(nValue);
-        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "jp", nValue);
+        m_pUnit->SetJP(args[0].get<int>());
+        Messages::SendPropertyMessage(dynamic_cast<Player*>(m_pUnit), m_pUnit, "jp", args[0].get<int>());
     } else if(szKey == "hp") {
-        m_pUnit->SetHealth(nValue);
-        Messages::BroadcastHPMPMessage(m_pUnit, nValue, 0, false);
+        m_pUnit->SetHealth(args[0].get<uint>());
+        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint>(), 0, false);
     } else if(szKey == "mp") {
-        m_pUnit->SetMana(nValue);
-        Messages::BroadcastHPMPMessage(m_pUnit,0,  nValue, false);
+        m_pUnit->SetMana(args[0].get<uint>());
+        Messages::BroadcastHPMPMessage(m_pUnit,0,  args[0].get<uint>(), false);
     } else if(szKey == "job_0")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint>());
     else if(szKey == "job_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint>());
     else if(szKey == "job_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint>());
     else if(szKey == "jlv_0")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint>());
     else if(szKey == "jlv_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 1, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 1, args[0].get<uint>());
     else if(szKey == "jlv_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 2, nValue);
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 2, args[0].get<uint>());
 
     if(m_pUnit->GetSubType() == ST_Player) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
-            player->SetUInt64Value(UNIT_FIELD_GOLD, nValue);
+            player->ChangeGold(args[0].get<uint64>());
         } else if(szKey == "permission") {
-            player->SetInt32Value(UNIT_FIELD_PERMISSION, nValue);
+            player->SetInt32Value(UNIT_FIELD_PERMISSION, args[0].get<uint>());
         } else if(szKey == "chaos") {
-            player->SetInt32Value(UNIT_FIELD_CHAOS, nValue);
+            player->SetInt32Value(UNIT_FIELD_CHAOS, args[0].get<uint>());
             player->SendGoldChaosMessage();
         }
     }
     auto player = dynamic_cast<Player*>(m_pUnit);
     if(player != nullptr)
-        player->onChangeProperty(szKey, nValue);
+        player->onChangeProperty(szKey, args[0].get<int>());
 }
 
 sol::object XLua::SCRIPT_GetEnv(std::string szKey)
@@ -773,14 +773,20 @@ int XLua::SCRIPT_GetSiegeDungeonID()
     return 0;
 }
 
-void XLua::SCRIPT_StartQuest(int code, int nStartID)
+void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
 {
-    if(code != 0 && nStartID != 0)
+    if(code != 0 && args.size() > 1)
     {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(player == nullptr)
             return;
-        player->StartQuest(code, nStartID, false);
+
+        bool bForce = false;
+        int nStartID = args[0].get<int>();
+        if(args.size() == 2)
+            bForce = args[1].get<bool>();
+
+        player->StartQuest(code, nStartID, bForce);
     }
 }
 
