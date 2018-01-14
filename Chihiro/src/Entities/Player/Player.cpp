@@ -196,10 +196,10 @@ bool Player::ReadItemList(int sid)
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_ITEMLIST);
     stmt->setInt32(0, sid);
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
-        int j = 0, inv = 0;
         do {
             Field *fields     = result->Fetch();
-            int   i           = 0;
+            int i = 0, invIdx = 0;
+
             uint64 uid         = fields[i++].GetUInt64();
             int   idx         = fields[i++].GetInt32();
             int   code        = fields[i++].GetInt32();
@@ -219,15 +219,14 @@ bool Player::ReadItemList(int sid)
                                         socket_0, socket_1, socket_2, socket_3, remain_time);
 
             if(code != 0) {
-
                 item->m_Instance.nWearInfo     = (ItemWearType) fields[i].GetInt32();
                 item->m_Instance.nOwnSummonUID = summon_id;
                 item->m_Instance.OwnerHandle   = GetHandle();
-                item->m_Instance.nIdx          = inv;
+                item->m_Instance.nIdx          = invIdx++;
                 item->m_pSummon = nullptr;
-                item->m_bIsNeedUpdateToDB      = inv != idx;
+                item->m_bIsNeedUpdateToDB      = invIdx != idx;
                 item->m_Instance.nOwnerUID     = sid;
-                m_lInventory[j++] = item;
+                m_lInventory[item->GetHandle()] = item;
             }
         } while (result->NextRow());
     }
@@ -936,7 +935,7 @@ void Player::PushItem(Item *pItem, uint64 count, bool bSkipUpdateToDB)
     if(!bSkipUpdateToDB) {
         pItem->DBInsert();
     }
-    m_lInventory[m_lInventory.size()] = pItem;
+    m_lInventory[pItem->GetHandle()] = pItem;
     m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, pItem->m_Instance.nCount);
     Messages::SendItemMessage(this, pItem);
 }
@@ -1230,9 +1229,8 @@ void Player::PopItem(Item *pItem, bool bSkipUpdateToDB)
     if(!bSkipUpdateToDB)
         pItem->DBUpdate();
 
-    m_lInventory.erase(pItem->m_Instance.nIdx);
-
-    pItem->DeleteThis();
+    m_lInventory.erase(pItem->GetHandle());
+    Item::PendFreeItem(pItem);
 }
 
 void Player::DoSummon(Summon* pSummon, Position pPosition)

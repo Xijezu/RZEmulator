@@ -604,6 +604,7 @@ bool World::ProcTame(Monster *pMonster)
     }
 
     /*
+     *
      * Technically there is a taming penalty added to the game.
      * However, since I'm not interested in having bs mechanics, I wont add it.
      * lPenalty = 0.05f * (float)((20 - pMonster->GetLevel()) + player->GetLevel());

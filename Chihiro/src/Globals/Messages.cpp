@@ -329,13 +329,15 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
 
                 packet << (uint16_t) mcount;
 
+                auto iter = pPlayer->m_lInventory.begin();
+
                 auto ltotal = idx + mcount;
                 if (idx < ltotal) {
                     do {
                         if (bIsStorage)
                             continue;
                         else
-                            fillItemInfo(packet, pPlayer->m_lInventory[lcnt]);
+                            fillItemInfo(packet, iter++->second);
                         ++lcnt;
                     } while (lcnt < ltotal);
                 }
