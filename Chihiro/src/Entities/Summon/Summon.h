@@ -30,7 +30,7 @@ public:
     int m_nSummonInfo{ };
     int m_nCardUID{ };
     int m_nTransform{ };
-    Item* m_pItem;
+    Item* m_pItem{nullptr};
     void SetSummonInfo(int);
     bool DoEvolution();
     uint8_t m_cSlotIdx{};

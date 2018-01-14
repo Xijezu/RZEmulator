@@ -111,7 +111,7 @@ void MemoryPoolMgr::Update(uint diff) {
         WorldObject *obj = *itr;
 
         if (obj->IsInWorld())
-            obj->RemoveFromWorld();
+            sWorld->RemoveObjectFromWorld(obj);
 
         switch (obj->GetSubType()) {
             case ST_Player:
@@ -132,7 +132,7 @@ void MemoryPoolMgr::Update(uint diff) {
         }
         i_objectsToRemove.erase(itr);
         delete obj;
-        *&obj = nullptr;
+        //*&obj = nullptr;
     }
 
     ///- Add new update objects

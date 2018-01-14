@@ -10,7 +10,7 @@ struct FieldPropRegenInfo {
     {
         tNextRegen = t;
         nLifeTime = lt;
-        pRespawnInfo = FieldPropRespawnInfo{};
+        pRespawnInfo = {};
     }
     FieldPropRespawnInfo pRespawnInfo;
     uint tNextRegen;
@@ -24,7 +24,6 @@ public:
     void RegisterFieldProp(FieldPropRespawnInfo prop);
     void onFieldPropDelete(FieldProp* prop) override;
     void Update(uint diff);
-
 private:
     std::vector<FieldPropRespawnInfo> m_vRespawnInfo{};
     std::vector<FieldPropRegenInfo> m_vRespawnList{};

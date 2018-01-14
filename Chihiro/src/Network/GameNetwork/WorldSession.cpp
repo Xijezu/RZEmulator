@@ -773,7 +773,7 @@ void WorldSession::onDialog(XPacket *pRecvPct)
 void WorldSession::onBuyItem(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
-    auto item_code = pRecvPct->read<int>();
+    auto item_code = pRecvPct->read<uint>();
     auto buy_count = pRecvPct->read<uint16_t>();
 
     auto szMarketName = _player->GetLastContactStr("market");
@@ -822,8 +822,10 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
             if (bJoinable) {
                 auto item = Item::AllocItem(0, mt.code, buy_count, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
                 _player->PushItem(item, buy_count, false);
-            } else {
-                for (int i = 0; i < buy_count; i++) {
+            } else
+            {
+                for (int i = 0; i < buy_count; i++)
+                {
                     auto item = Item::AllocItem(0, mt.code, 1, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
                     _player->PushItem(item, buy_count, false);
                 }
@@ -1390,24 +1392,30 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 void WorldSession::onUseItem(XPacket *pRecvPct)
 {
     pRecvPct->read_skip(7);
-    auto item_handle = pRecvPct->read<uint>();
+    auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
-    auto szParameter = pRecvPct->ReadString(32);
+    auto szParameter   = pRecvPct->ReadString(32);
 
     uint ct = sWorld->GetArTime();
 
     auto item = _player->FindItemByHandle(item_handle);
-    if(item == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle()) {
+    if (item == nullptr || item->m_Instance.OwnerHandle != _player->GetHandle())
+    {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+        MX_LOG_TRACE("network", "onUseItem: Not own item!!!");
         return;
     }
 
-    if(item->m_pItemBase->type != ItemType::TypeUse && false /*!item->IsUsingItem()*/) {
+    if (item->m_pItemBase->type != ItemType::TypeUse && false /*!item->IsUsingItem()*/)
+    {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+        MX_LOG_TRACE("network", "onUseItem: Not usable");
         return;
     }
 
-    if((item->m_pItemBase->flaglist[FLAG_MOVE] == 0 && _player->IsMoving(ct))) {
+    if ((item->m_pItemBase->flaglist[FLAG_MOVE] == 0 && _player->IsMoving(ct)))
+    {
+        MX_LOG_TRACE("network", "onUseItem: Not usable while moving");
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item_handle);
         return;
     }
@@ -1419,36 +1427,47 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     // Eventmap
 
     uint16 nResult = _player->IsUseableItem(item, nullptr);
-    if(nResult != TS_RESULT_SUCCESS) {
+    if (nResult != TS_RESULT_SUCCESS)
+    {
         /*if(nResult == TS_RESULT_COOL_TIME)
             Messages::SendItemCoolTimeInfo(_player);*/
-
+        MX_LOG_TRACE("network", "onUseItem: Not usable item: %d", nResult);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
         return;
     }
 
-    if(item->m_pItemBase->flaglist[FLAG_TARGET_USE] == 0) {
+    if (item->m_pItemBase->flaglist[FLAG_TARGET_USE] == 0)
+    {
         nResult = _player->UseItem(item, nullptr, szParameter);
+        MX_LOG_TRACE("network", "onUseItem: nResult: %d", nResult);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
-        if(nResult != 0)
+        if (nResult != 0)
             return;
-    } else {
+    }
+    else
+    {
         //auto unit = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(target_handle));
         auto unit = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
-        if(unit == nullptr || unit->GetHandle() == 0) {
+        if (unit == nullptr || unit->GetHandle() == 0)
+        {
             Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
             return;
         }
         nResult = _player->IsUseableItem(item, unit);
-        if(nResult == TS_RESULT_SUCCESS) {
+        if (nResult == TS_RESULT_SUCCESS)
+        {
             nResult = _player->UseItem(item, unit, szParameter);
             Messages::SendResult(_player, pRecvPct->GetPacketID(), nResult, item_handle);
         }
 
-        if(nResult != TS_RESULT_SUCCESS)
+        if (nResult != TS_RESULT_SUCCESS)
+        {
+            MX_LOG_TRACE("network", "onItemUse: IsUseableItem failed: %d", nResult);
             return;
+        }
     }
 
+    MX_LOG_TRACE("network", "onItemUse: Final nResult: %d", nResult);
     XPacket resPct(TS_SC_USE_ITEM_RESULT);
     resPct << item_handle;
     resPct << target_handle;

@@ -1232,7 +1232,7 @@ void Player::PopItem(Item *pItem, bool bSkipUpdateToDB)
 
     m_lInventory.erase(pItem->m_Instance.nIdx);
 
-    sMemoryPool->AddToDeleteList(pItem);
+    pItem->DeleteThis();
 }
 
 void Player::DoSummon(Summon* pSummon, Position pPosition)
@@ -1816,6 +1816,7 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
     {
         Erase(pItem, 1, false);
     }
+    return result;
 }
 
 CreatureStat *Player::GetBaseStat() const

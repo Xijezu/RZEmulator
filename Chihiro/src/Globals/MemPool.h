@@ -65,7 +65,6 @@ public:
     Summon *AllocSummon(uint);
     Monster* AllocMonster(uint idx);
     Summon *AllocNewSummon(Player*,Item*);
-    void AddToDeleteList(WorldObject* obj);
 
     void Destroy();
     void Update(uint diff);
@@ -73,6 +72,7 @@ public:
     const HashMapHolder<Player>::MapType &GetPlayers();
 private:
     template<class T> void _unload();
+    void AddToDeleteList(WorldObject* obj);
     std::set<WorldObject*> i_objectsToRemove{};
     ACE_Based::LockedQueue<WorldObject*, ACE_Thread_Mutex> addUpdateQueue{};
 

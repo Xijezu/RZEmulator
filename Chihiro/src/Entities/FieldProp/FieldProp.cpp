@@ -27,7 +27,6 @@ FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPro
     fp->SetCurrentXY(pPropInfo.x, pPropInfo.y);
     fp->m_PropInfo.layer = pPropInfo.layer;
     sWorld->AddObjectToWorld(fp);
-    MX_LOG_TRACE("objects", "Adding FieldProp [X: %f, Y: %f, Layer: %d]: %d", fp->GetPositionX(),fp->GetPositionY(), fp->GetLayer(), fp->m_pFieldPropBase->nPropID);
     return fp;
 }
 

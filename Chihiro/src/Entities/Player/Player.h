@@ -147,7 +147,7 @@ public:
     WorldSession& GetSession() const
     { return *m_session; }
 
-    void SetClientInfo(std::string value) { m_szClientInfo = value; }
+    void SetClientInfo(const std::string& value) { m_szClientInfo = value; }
 
     void SetSession(WorldSession *session) { m_session = session; }
 

@@ -63,7 +63,7 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 {
     {
         MX_UNIQUE_GUARD writeGuard(i_lock);
-        for (int i = 0; i < m_vExpireObject.size(); i++)
+        for (int        i = 0; i < m_vExpireObject.size(); i++)
         {
             auto fp = m_vExpireObject[i];
             if (fp->GetHandle() == prop->GetHandle())
@@ -71,14 +71,13 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
                 m_vExpireObject.erase(m_vExpireObject.begin() + i);
             }
         }
-    }
 
-    if(!prop->m_PropInfo.bOnce)
-    {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
-        FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld->GetArTime(), prop->nLifeTime};
-        ri.pRespawnInfo = prop->m_PropInfo;
-        m_vRespawnList.emplace_back(ri);
+        if (!prop->m_PropInfo.bOnce)
+        {
+            FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld->GetArTime(), prop->nLifeTime};
+            ri.pRespawnInfo = prop->m_PropInfo;
+            m_vRespawnList.emplace_back(ri);
+        }
     }
 }
 
