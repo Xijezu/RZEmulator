@@ -147,6 +147,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     m_nCastTime           = current_time;
     m_nFireTime           = current_time + delay;
 
+    auto error_code = m_nErrorCode;
+
     if (m_nErrorCode == TS_RESULT_SUCCESS)
     {
         m_nRequestedSkillLevel = (uint8)nSkillLevel;
@@ -163,7 +165,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
                               0, 0, 5);
     }
 
-    return m_nErrorCode;
+    return error_code;
 }
 
 uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
@@ -457,26 +459,22 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
     auto monster = sMemoryPool->GetObjectInWorld<Monster>(handle);
     if(monster == nullptr)
     {
-        MX_LOG_TRACE("entities", "Skill::PrepareTaming: Monster not found");
         return TS_RESULT_NOT_ACTABLE;
     }
 
     auto nTameItemCode = monster->GetTameItemCode();
     if(nTameItemCode == 0 || monster->GetTamer() != 0)
     {
-        MX_LOG_TRACE("entities", "Monster has no item code [%d] or Tamer [%d] already set!", nTameItemCode, monster->GetTamer());
         return TS_RESULT_NOT_ACTABLE;
     }
 
     auto item = player->FindItem((uint)nTameItemCode, FlagBits::FB_Summon, false);
     if(item == nullptr)
     {
-        MX_LOG_TRACE("entities", "FindItem: nTameItemCode [%d] not found!", nTameItemCode);
         return TS_RESULT_NOT_ACTABLE;
     }
     if(player->m_hTamingTarget != 0)
     {
-        MX_LOG_TRACE("entities", "Already taming!!!");
         return TS_RESULT_ALREADY_TAMING;
     }
     return TS_RESULT_SUCCESS;
