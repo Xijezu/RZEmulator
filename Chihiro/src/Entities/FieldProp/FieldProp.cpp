@@ -161,7 +161,7 @@ uint FieldProp::GetCastingDelay() const
     return m_pFieldPropBase != nullptr ? m_pFieldPropBase->nCastingTime : 0;
 }
 
-FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : WorldObject(true)
+FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : Unit(true)
 {
     _mainType = MT_StaticObject;
     _subType  = ST_FieldProp;

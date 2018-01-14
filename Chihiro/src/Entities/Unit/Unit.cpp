@@ -1446,7 +1446,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
         return TS_RESULT_NOT_ACTABLE;
 
     //auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
-    auto pSkillTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target_handle);
+    auto pSkillTarget = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
     /// Checking here if return feather due to nullptrs
     // Return feather
     if (pSkillTarget == nullptr && nSkillID == 6020 && GetSubType() == ST_Player /* && IsInSiegeOrRaidDungeon*/)
@@ -1485,7 +1485,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
     Position t               = (pSkillTarget->GetCurrentPosition(ct));
     float    target_distance = (GetCurrentPosition(ct).GetExactDist2d(&t) - GetUnitSize() * 0.5f);
-    float    enemy_distance  = target_distance - (pSkillTarget->GetSubType() == ST_FieldProp ? 12 : dynamic_cast<Unit*>(pSkillTarget)->GetUnitSize() * 0.5f);
+    float    enemy_distance  = target_distance - (pSkillTarget->GetUnitSize() * 0.5f);
     float    range_mod       = 1.2f;
     if (pSkillTarget->bIsMoving)
     {
@@ -1505,8 +1505,8 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     if(!isInRange)
         return TS_RESULT_TOO_FAR;
 
-    /*if(pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
-        return TS_RESULT_NOT_ACTABLE;*/
+    if(pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
+        return TS_RESULT_NOT_ACTABLE;
 
     int res = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
 

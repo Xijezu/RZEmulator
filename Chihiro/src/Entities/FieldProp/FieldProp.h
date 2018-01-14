@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "FieldPropBase.h"
-#include "Object.h"
+#include "Unit.h"
 
 class FieldProp;
 struct FieldPropDeleteHandler
@@ -11,7 +11,7 @@ struct FieldPropDeleteHandler
 class Player;
 class XPacket;
 
-class FieldProp : public WorldObject
+class FieldProp : public Unit
 {
     friend class Skill;
 	friend class FieldPropManager;
