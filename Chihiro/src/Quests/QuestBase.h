@@ -86,7 +86,7 @@ struct QuestBase {
     int       nFavor;
     uint64    nEXP;
     int       nJP;
-    uint64    nGold;
+    int64     nGold;
     Reward    DefaultReward;
     Reward    OptionalReward[MAX_OPTIONAL_REWARD];
     int       nForeQuest[MAX_FOREQUEST];

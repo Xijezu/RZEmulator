@@ -292,7 +292,7 @@ bool ObjectMgr::LoadQuestResource()
         q.nFavor = field[idx++].GetInt32();
         q.nEXP = field[idx++].GetUInt64();
         q.nJP = field[idx++].GetInt32();
-        q.nGold = field[idx++].GetUInt64();
+        q.nGold = field[idx++].GetInt64();
         q.DefaultReward.nItemCode = field[idx++].GetInt32();
         q.DefaultReward.nLevel = field[idx++].GetInt32();
         q.DefaultReward.nQuantity = field[idx++].GetInt32();
