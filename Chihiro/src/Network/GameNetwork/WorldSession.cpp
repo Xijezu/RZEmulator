@@ -996,7 +996,7 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
             target->RegisterSkill(skill_id, currentLevel, 0, jobID);
             // TODO: Hack
             _player->CalculateStat();
-            Messages::SendStatInfo(_player, _player);
+            Messages::SendStatInfo(_player, target);
         }
         Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
     //}

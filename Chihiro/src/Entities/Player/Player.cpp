@@ -2044,7 +2044,8 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         fMod = 1.0f;
     }
-
+    auto t = (int64)(q->m_QuestBase->nGold * fMod) + GetGold();
+    Messages::SendChatMessage(30, "@SYSTEM", this, string_format("Prev: %d, fMod: %f, New: %d", nPrevGold, fMod, t));
     auto res = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
