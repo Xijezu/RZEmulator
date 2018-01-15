@@ -315,10 +315,7 @@ bool Player::ReadSkillList(Unit* pUnit)
             auto  skill_id    = fields[3].GetInt32();
             auto  skill_level = fields[4].GetInt32();
             auto  cool_time   = fields[5].GetInt32();
-            if (summon_id == 0)
-                SetSkill(sid, skill_id, skill_level, cool_time);
-
-
+            pUnit->SetSkill(sid, skill_id, skill_level, cool_time);
         } while (result->NextRow());
     }
     if(pUnit->IsPlayer())
@@ -551,7 +548,8 @@ void Player::SendLoginProperties()
     CalculateStat();
     // Login();
     Messages::SendQuestList(this);
-    for(auto summon: m_vSummonList) {
+    for(auto& summon: m_vSummonList)
+    {
         Messages::SendAddSummonMessage(this, summon);
     }
 

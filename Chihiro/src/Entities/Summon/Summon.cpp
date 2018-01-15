@@ -23,6 +23,7 @@
 #include "World.h"
 #include "ClientPackets.h"
 #include "ArRegion.h"
+#include "Skill.h"
 // static
 void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player* pPlayer)
 {
@@ -203,8 +204,12 @@ void Summon::onExpChange()
             if (need == 0 || need > GetEXP())
                 break;
             ++level;
-            if (level > oblv)  /// @todo add max level reached
+            if(GetLevel() < level)
+            {
                 ++jp;
+                if (level > oblv)  /// @todo add max level reached
+                    ++jp;
+            }
         } while (level < oblv);
     }
     if (m_pMaster != nullptr)
@@ -326,4 +331,43 @@ Summon::~Summon()
     {
         sWorld->RemoveObjectFromWorld(this);
     }
+}
+
+void Summon::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
+{
+    Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
+    Messages::SendSkillList(GetMaster(), this, skill_id);
+}
+
+void Summon::Update(uint diff)
+{
+    if (!IsInWorld())
+        return;
+
+    uint ct = sWorld->GetArTime();
+    if (GetHealth() == 0)
+    {
+        if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 6000 < ct)
+        {
+            GetMaster()->DoUnSummon(this);
+        }
+    }
+
+    if (bIsMoving && IsInWorld())
+    {
+        processWalk(ct);
+        return;
+    }
+    if (GetTargetHandle() != 0 || m_castingSkill != nullptr)
+    {
+        onAttackAndSkillProcess();
+        return;
+    }
+
+    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+    {
+        processPendingMove();
+    }
+
+    Unit::Update(diff);
 }

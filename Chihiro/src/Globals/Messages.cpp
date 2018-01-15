@@ -111,6 +111,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     SendHPMPMessage(pPlayer, pSummon, pSummon->GetHealth(), pSummon->GetMana(), false);
     SendLevelMessage(pPlayer, pSummon);
     SendEXPMessage(pPlayer, pSummon);
+    SendSkillList(pPlayer, pSummon, -1);
     // SendSPMessage(pPlayer, pSummon);
 }
 

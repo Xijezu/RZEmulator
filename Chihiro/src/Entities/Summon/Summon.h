@@ -26,6 +26,7 @@ public:
     { return m_pMaster; }
 
     void OnUpdate() override;
+    void Update(uint/*diff*/) override;
 
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;
 
@@ -37,6 +38,7 @@ public:
     bool DoEvolution();
     uint8_t m_cSlotIdx{};
 protected:
+    void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void processWalk(uint t);
     void onExpChange() override;
 private:
