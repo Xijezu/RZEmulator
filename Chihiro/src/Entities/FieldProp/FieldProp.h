@@ -11,7 +11,7 @@ struct FieldPropDeleteHandler
 class Player;
 class XPacket;
 
-class FieldProp : public Unit
+class FieldProp : public WorldObject
 {
     friend class Skill;
 	friend class FieldPropManager;

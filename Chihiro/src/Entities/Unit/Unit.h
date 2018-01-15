@@ -109,7 +109,6 @@ public:
     void EndAttack();
     uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
     uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
-    float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
     float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
     uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
 
@@ -150,8 +149,6 @@ public:
     uint GetRemainCoolTime(int skill_id) const;
     uint GetTotalCoolTime(int skill_id) const;
     // Getters
-    virtual float GetScale() const { return 1.0f; }
-    virtual float GetSize() const { return 1.0f; }
     uint32_t GetLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
     virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
     uint32 GetHealth() const { return GetUInt32Value(UNIT_FIELD_HEALTH); }

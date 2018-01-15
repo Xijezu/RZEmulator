@@ -834,6 +834,8 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
             XPacket resultPct(TS_SC_NPC_TRADE_INFO);
             resultPct << (uint8_t) 0;
             resultPct << item_code;
+            resultPct << (uint64)buy_count;
+            resultPct << (uint64)nTotalPrice;
 #if EPIC > 4
             resultPct << (int64) mt.huntaholic_ratio;
 #endif
@@ -1135,12 +1137,20 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
         return;
     }
+    if(_player->GetGold() + sell_count * nPrice < 0)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
+        return;
+    }
+    auto code = item->m_Instance.Code;
     if(!_player->Erase(item, sell_count, false)) {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
         return;
     }
-    auto nPrevGold = _player->GetGold();
+    uint64 nPrevGold = _player->GetGold();
+    uint64 nNewGold = _player->GetGold() + sell_count * nPrice;
     if(_player->ChangeGold(_player->GetGold() + sell_count * nPrice) != 0) {
+        MX_LOG_TRACE("entities", "Sold [%d]x [%d] for a total of %d gold [Prev: %d, New: %d]", sell_count, code, sell_count * nPrice, nPrevGold, nNewGold);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
         return;
     }
@@ -1148,7 +1158,7 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item->m_Instance.Code);
     XPacket tradePct(TS_SC_NPC_TRADE_INFO);
     tradePct << (uint8)1;
-    tradePct << item->m_pItemBase->name_id;
+    tradePct << code;
     tradePct << (int64)sell_count;
     tradePct << (int64)sell_count * nPrice;
     tradePct << (uint)_player->GetLastContactLong("npc");

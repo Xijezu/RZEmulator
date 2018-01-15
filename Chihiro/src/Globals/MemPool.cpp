@@ -40,7 +40,7 @@ Player *MemoryPoolMgr::AllocPlayer()
 
 Summon *MemoryPoolMgr::AllocSummon(uint pCode)
 {
-    auto summon = new Summon(0, pCode);
+    auto summon = new Summon{0, pCode};
     summon->SetInt32Value(UNIT_FIELD_HANDLE, m_nSummonTop++);
     AddObject(summon);
     return summon;

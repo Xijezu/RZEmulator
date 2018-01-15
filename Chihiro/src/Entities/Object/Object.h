@@ -551,6 +551,9 @@ public:
     bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
     bool Step(uint tm) override;
 
+    virtual float GetScale() const { return 1.0f; }
+    virtual float GetSize() const { return 1.0f; }
+    float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
 
     void SendEnterMsg(Player *);
     void AddNoise(int, int, int);
