@@ -922,7 +922,7 @@ ushort Player::ChangeGold(int64 nGold)
             return TS_RESULT_TOO_MUCH_MONEY;
         if(nGold < 0)
             return TS_RESULT_TOO_CHEAP;
-        SetUInt64Value(UNIT_FIELD_GOLD, (uint64)nGold);
+        SetUInt64Value(UNIT_FIELD_GOLD, (int32)nGold);
         SendGoldChaosMessage();
     }
     return TS_RESULT_SUCCESS;
@@ -2044,8 +2044,6 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         fMod = 1.0f;
     }
-    auto t = (int64)(q->m_QuestBase->nGold * fMod) + GetGold();
-    Messages::SendChatMessage(30, "@SYSTEM", this, string_format("Prev: %d, fMod: %f, New: %d", nPrevGold, fMod, t));
     auto res = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {

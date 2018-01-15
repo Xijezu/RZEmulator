@@ -70,7 +70,7 @@ enum EUnitFields {
     UNIT_FIELD_SKIN_COLOR            = 0x001B, // Size: 1
     UNIT_FIELD_SUMMON                = 0x001C, // Size: 6
     UNIT_FIELD_BELT                  = 0x0023, // Size: 6
-    UNIT_FIELD_GOLD                  = 0x0029, // Size: 1
+    UNIT_FIELD_MAX_CHAOS             = 0x0029, // Size: 1
     UNIT_FIELD_CHAOS                 = 0x002A, // Size: 1
     UNIT_FIELD_ACTIVE_SUMMON         = 0x002B, // Size: 1
     UNIT_FIELD_REMAIN_SUMMON_TIME    = 0x002D, // Size: 1
@@ -97,8 +97,8 @@ enum EUnitFields {
     UNIT_FIELD_UID                   = 0x0048, // Size: 1
     UNIT_FIELD_EXP                   = 0x0049, // Size: 2
     UNIT_FIELD_DEAD_TIME             = 0x004B, // Size: 1
-    UNIT_FIELD_MAX_CHAOS             = 0x004C, // Size: 1
-    UNIT_END                         = 0x004D
+    UNIT_FIELD_GOLD                  = 0x004C, // Size: 2
+    UNIT_END                         = 0x004E
 };
 
 enum EBattleFields {
