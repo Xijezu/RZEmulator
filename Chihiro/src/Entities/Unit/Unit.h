@@ -148,6 +148,9 @@ public:
     float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const { return 1.0f; }
     uint GetRemainCoolTime(int skill_id) const;
     uint GetTotalCoolTime(int skill_id) const;
+    uint GetBowAttackInterval() { return (uint)((float)GetAttackInterval() * (1.0f - m_fBowInterval)); }
+    uint GetBowInterval() { return (uint)((float)GetAttackInterval() * m_fBowInterval); }
+
     // Getters
     uint32_t GetLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
     virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
@@ -210,6 +213,7 @@ protected:
     void finalizeStat();
     void calcAttribute(CreatureAtributeServer &attribute);
     void applyItemEffect();
+    int64 GetBulletCount() const;
     ///- Gets overwritten in player for Beltslots and Max Chaos
     virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
     State *GetStateByEffectType(int effectType) const;
@@ -249,9 +253,11 @@ protected:
     Item *m_anWear[Item::MAX_ITEM_WEAR]{nullptr};
     uint m_nMovableTime{0};
     int m_nUnitExpertLevel{0};
+    int m_nNextAttackMode{0};
     Skill *m_castingSkill{nullptr};
     float m_nRegenHP{ }, m_fRegenMP{ };
 private:
+    float m_fBowInterval{0};
     bool ClearExpiredState(uint t);
     uint m_nCurrentStateUID{0};
     int m_nDoubleWeaponMasteryLevel{0};

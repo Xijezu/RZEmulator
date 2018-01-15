@@ -2296,3 +2296,18 @@ bool Player::IsUsingCrossBow() const
 {
     return m_anWear[0] != nullptr ? m_anWear[0]->IsCrossBow() : false;
 }
+
+bool Player::EraseBullet(int64 count)
+{
+    auto item = GetWornItem(ItemWearType::WearShield);
+    if(item != nullptr && item->m_pItemBase->group == ItemGroup::Bullet && item->m_Instance.nCount >= count)
+    {
+        int64 nc = item->m_Instance.nCount - count;
+        m_QuestManager.UpdateQuestStatusByItemCount(item->m_Instance.Code, nc);
+        if(item->m_Instance.nCount == count)
+            Putoff(ItemWearType::WearShield);
+
+        return Erase(item, count, false);
+    }
+    return false;
+}

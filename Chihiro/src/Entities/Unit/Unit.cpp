@@ -7,6 +7,7 @@
 #include "Skill.h"
 #include "MemPool.h"
 #include "Item.h"
+#include "ArRegion.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1129,11 +1130,12 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     float fcm                  = 1.0f;
     float d1                   = (fcm * 5.0f);
 
-    if (false) {
-        // isUsingBow | IsUsingCrossBow
+    if (IsUsingBow() || IsUsingCrossBow()) {
         v = (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
         attribute.nAttackPointRight += v;
-    } else {
+    }
+    else
+    {
         v = (2.0f * m_cStat.strength) + (fcm * b1);
         attribute.nAttackPointRight += v;
         if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
@@ -1533,20 +1535,20 @@ void Unit::onAttackAndSkillProcess()
 
 bool Unit::StartAttack(uint target, bool bNeedFastReaction)
 {
-    bool result{false};
     if (GetHealth() == 0)
     {
-        result = false;
+        return false;
     }
     else
     {
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
         SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
+        if((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
+            m_nNextAttackMode = 1;
         if (bNeedFastReaction)
             onAttackAndSkillProcess();
-        result = true;
+        return true;
     }
-    return result;
 }
 
 void Unit::processAttack()
@@ -1559,6 +1561,16 @@ void Unit::processAttack()
 
     if (GetNextAttackableTime() <= t)
     {
+        if((IsUsingCrossBow() || IsUsingBow()) && IsPlayer())
+        {
+            auto bullets = GetBulletCount();
+            if(bullets < 1)
+            {
+                EndAttack();
+                return;
+            }
+        }
+
         //auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
         auto enemy = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
         if (GetHealth() == 0)
@@ -1569,7 +1581,7 @@ void Unit::processAttack()
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
-        if (enemy == nullptr || enemy->GetHealth() == 0)
+        if (enemy == nullptr || enemy->GetHealth() == 0 || sArRegion->IsVisibleRegion(this, enemy) == 0)
         {
             if (IsPlayer())
             {
@@ -1638,11 +1650,32 @@ void Unit::processAttack()
             onCantAttack(enemy->GetHandle(), t);
             return;
         }
-        int next_mode = 0;
+        int next_mode = m_nNextAttackMode;
         // If Bow/Crossbow
-        if (false)
+        if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
         {
+            if(m_nNextAttackMode == 1)
+            {
+                attInt = (uint)(GetBowAttackInterval()  * 0.8f);
+                SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, attInt + t);
+                m_nNextAttackMode = 0;
+                SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
 
+                bool bFormChanged = HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged);
+                if(bFormChanged)
+                {
+                    // @todo: form changed
+                }
+                if(!bFormChanged || next_mode != 1)
+                {
+                    auto delay = (int)(10 * (GetNextAttackableTime() - t));
+                    broadcastAttackMessage(enemy, Damages, (int)(10 * attInt), delay, _bDoubleAttack, next_mode == 1, false, false);
+                }
+                return;
+            }
+            attInt = (uint)(GetBowAttackInterval() * 0.2f);
+            attack_interval = attInt + GetBowInterval();
+            m_nNextAttackMode = 1;
         }
         else
         {
@@ -1650,6 +1683,11 @@ void Unit::processAttack()
         }
         if (next_mode == 0)
         {
+            if((IsUsingCrossBow() || IsUsingBow()) && IsPlayer())
+            {
+                player = dynamic_cast<Player*>(this);
+                player->EraseBullet(1);
+            }
             m_nMovableTime = attInt + t;
             Attack(enemy, t, attack_interval, Damages, _bDoubleAttack);
         }
@@ -1670,7 +1708,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
     if (ct == 0)
         ct = sWorld->GetArTime();
 
-    DamageInfo di{};
+    DamageInfo di{ };
 
     SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, attack_interval + ct);
     bIsDoubleAttack = false;
@@ -1679,7 +1717,8 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
     int nAttackCount = 1;
     if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
         nAttackCount = 2;
-    if (((uint)rand32() % 100) < m_Attribute.nDoubleAttackRatio) {
+    if (((uint)rand32() % 100) < m_Attribute.nDoubleAttackRatio)
+    {
         bIsDoubleAttack = true;
         nAttackCount *= 2;
     }
@@ -1688,10 +1727,12 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         return;
 
     int i = 0;
-    do {
+    do
+    {
         attack_interval = 0;
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
-            if (((uint) i & 1) != 0)
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        {
+            if (((uint)i & 1) != 0)
                 attack_interval = 1;
         }
 
@@ -1708,18 +1749,20 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
             di = pTarget->DealPhysicalNormalDamage(this, m_Attribute.nAttackPointRight, ElementalType::TypeNone, 0, crit, 0);
         arDamage[i].SetDamageInfo(di);
 
-        if (arDamage[i].bCritical) {
+        if (arDamage[i].bCritical)
+        {
             // Do Crit calc
         }
 
-        if (!arDamage[i].bMiss) {
+        if (!arDamage[i].bMiss)
+        {
             /// Do more calc TODO
         }
 
         arDamage[i].nDamage            = prev_target_hp - pTarget->GetHealth();
         arDamage[i].mp_damage          = (uint16)(prev_target_mp - pTarget->GetMana());
-        arDamage[i].attacker_damage    = (short) (prev_hp - GetHealth());
-        arDamage[i].attacker_mp_damage = (short) (prev_mp - GetMana());
+        arDamage[i].attacker_damage    = (short)(prev_hp - GetHealth());
+        arDamage[i].attacker_mp_damage = (short)(prev_mp - GetMana());
         arDamage[i].target_hp          = pTarget->GetHealth();
         arDamage[i].target_mp          = (uint16)pTarget->GetMana();
         arDamage[i].attacker_hp        = GetHealth();
@@ -1733,11 +1776,13 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         }
         ++i;
     } while (i < nAttackCount);
-    if(pTarget->IsMonster()) {
-        auto mob = dynamic_cast<Monster*>(pTarget);
-        auto hm = GetHateMod(3, true);
+    if (pTarget->IsMonster())
+    {
+        auto mob = dynamic_cast<Monster *>(pTarget);
+        auto hm  = GetHateMod(3, true);
+        bool usingBow = (IsUsingBow() || IsUsingCrossBow()) && IsPlayer();
         nHate = (int)((float)(nHate + hm.second) * hm.first);
-
+        // @todo hate calc
         mob->AddHate(GetHandle(), nHate, true, true);
     }
 }
@@ -1770,10 +1815,15 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     int damage{};
     StateMod damageReduceByState{};
 
-    if(false) {
+    if((pFrom->IsUsingBow() || pFrom->IsUsingCrossBow()) && pFrom->IsPlayer())
+    {
         bRange = true;
-    } else {
+        // @todo: Damage reduce by state
+    }
+    else
+    {
         bRange = false;
+        // @todo: Damage reduce by state
     }
 
     // Do damage reduce
@@ -1788,6 +1838,10 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
         d = DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     }
     result.SetDamage(d);
+    if(!result.bMiss && !result.bPerfectBlock)
+    {
+        // todo additionaldamageinfo
+    }
 
     result.target_hp = GetHealth();
     return result;
@@ -2103,7 +2157,10 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
             attack_flag = AttackFlag::AF_DoubleAttack;
         if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             attack_flag |= AttackFlag::AF_DoubleWeapon;
-        // If bow / CrossBow
+        if(IsUsingBow() && IsPlayer())
+            attack_flag |= AttackFlag::AF_Bow;
+        if(IsUsingCrossBow() && IsPlayer())
+            attack_flag |= AttackFlag::AF_CrossBow;
     }
 
     uint8 attack_action = AttackAction::AA_Attack;
@@ -2147,8 +2204,11 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
 void Unit::EndAttack()
 {
     AttackInfo info[4]{};
-    uint ct = sWorld->GetArTime();
-
+    if((IsUsingBow() || IsUsingCrossBow()) && IsPlayer() && m_nNextAttackMode == 0)
+    {
+        m_nNextAttackMode = 1;
+        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
+    }
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
         //auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
         auto target = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
@@ -2198,6 +2258,11 @@ void Unit::CancelSkill()
 void Unit::CancelAttack()
 {
     AttackInfo info[4]{};
+    if((IsUsingCrossBow() || IsUsingBow()) && (IsPlayer() && m_nNextAttackMode == 0))
+    {
+        m_nNextAttackMode = 1;
+        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
+    }
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
         this->broadcastAttackMessage(sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
     }
@@ -2788,6 +2853,19 @@ int Unit::Heal(int hp)
     int heal = (int)GetFloatValue(UNIT_FIELD_HEAL_RATIO) * hp;
     AddHealth(heal);
     return heal;
+}
+
+int64 Unit::GetBulletCount() const
+{
+    auto item = m_anWear[ItemWearType::WearShield];
+    if (item != nullptr && item->m_pItemBase->group == ItemGroup::Bullet)
+    {
+        return item->m_Instance.nCount;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 

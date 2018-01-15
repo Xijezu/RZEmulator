@@ -100,6 +100,7 @@ public:
     Item* FindItem(uint code, uint flag, bool bFlag);
     void PushItem(Item *, uint64, bool);
     void PopItem(Item*,bool);
+    bool EraseBullet(int64 count);
 
     bool Erase(Item*,uint64,bool);
     void SetItemCount(Item* pItem, uint64 nc, bool bSkipUpdateToDB);
