@@ -1409,8 +1409,6 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 
 void WorldSession::onUseItem(XPacket *pRecvPct)
 {
-    return;
-
     pRecvPct->read_skip(7);
     auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
@@ -1521,6 +1519,7 @@ void WorldSession::onRevive(XPacket *)
 
 void WorldSession::onDropItem(XPacket * pRecvPct)
 {
+    return;
     pRecvPct->read_skip(7);
     uint target = pRecvPct->read<uint>();
 
