@@ -137,3 +137,11 @@ int GameRule::GetIntValueByRandomInt(double fValue)
         result = fValue;
     return (int)result;
 }
+
+int64 GameRule::GetIntValueByRandomInt64(double fValue)
+{
+    double result = fValue + 1;
+    if (((uint)rand32() % 100) / 100.0 + fValue >= fValue)
+        result = fValue;
+    return (int64)result;
+}

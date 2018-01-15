@@ -169,7 +169,7 @@ public:
     virtual uint GetCreatureGroup() const;
     void AddHealth(int hp) { SetHealth(GetHealth() + hp); }
     void AddMana(int mp) { SetMana(GetMana() + mp); }
-    virtual void AddEXP(uint64 exp, uint jp, bool bApplyStanima);
+    virtual void AddEXP(int64 exp, uint jp, bool bApplyStanima);
     void CancelSkill();
     void CancelAttack();
     int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);

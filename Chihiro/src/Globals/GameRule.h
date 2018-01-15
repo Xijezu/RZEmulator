@@ -5,6 +5,7 @@
 #ifndef PROJECT_GAMERULE_H
 #define PROJECT_GAMERULE_H
 
+#include "Common.h"
 
 class GameRule {
 public:
@@ -21,6 +22,7 @@ public:
     static int GetChipLevelLimit(int idx);
     static int GetMaxLevel() { return 150; }
     static int GetIntValueByRandomInt(double fValue);
+    static int64 GetIntValueByRandomInt64(double fValue);
 private:
     static int _chipLevelLimit[];
     static float _itemDropRate;

@@ -104,6 +104,7 @@ public:
 
     bool Erase(Item*,int64,bool);
     void SetItemCount(Item* pItem, int64 nc, bool bSkipUpdateToDB);
+    void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
     void SendItemWearInfoMessage(Item* item, Unit *u);
@@ -179,6 +180,7 @@ protected:
     void onJobLevelUp() override;
     void onCantAttack(uint target, uint t) override;
     void onModifyStatAndAttribute() override;
+    void applyPassiveSkillEffect(Skill* skill) override;
 
     void onStartQuest(Quest* pQuest);
     void updateQuestStatus(Quest* pQuest);
@@ -188,6 +190,10 @@ private:
     WorldSession *m_session{nullptr};
     std::string  m_szAccount;
     QuestManager m_QuestManager{};
+
+    float m_fDistEXPMod{1.0f};
+    float m_fActiveSummonExpAmp{0.0f};
+    float m_fDeactiveSummonExpAmp{0.0f};
 
     uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 

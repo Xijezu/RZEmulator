@@ -2242,7 +2242,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
         EndAttack();
 }
 
-void Unit::AddEXP(uint64 exp, uint jp, bool bApplyStanima)
+void Unit::AddEXP(int64 exp, uint jp, bool bApplyStanima)
 {
     SetUInt64Value(UNIT_FIELD_EXP, GetEXP() + exp);
     SetUInt32Value(UNIT_FIELD_JOBPOINT, GetJP() + jp);

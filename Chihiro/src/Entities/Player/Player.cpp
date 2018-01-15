@@ -480,6 +480,7 @@ bool Player::ReadSummonList(int UID)
             summon->SetInt32Value(UNIT_FIELD_HEALTH, hp);
             summon->SetInt32Value(UNIT_FIELD_MANA, mp);
             summon->m_nTransform = transform;
+            summon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete);
             summon->CalculateStat();
             Item* card = FindItemBySID(card_uid);
             if(card == nullptr)
@@ -2310,4 +2311,85 @@ bool Player::EraseBullet(int64 count)
         return Erase(item, count, false);
     }
     return false;
+}
+
+void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
+{
+    // @todo immoral
+
+    // @todo summon level exp
+
+    if(exp != 0)
+    {
+        // @todo: stanima saver
+
+        uint ct = sWorld->GetArTime();
+
+        std::vector<Summon*> vDeActiveSummonList{}, vActiveSummonList{};
+
+        for (auto currSummon : m_aBindSummonCard)
+        {
+            if(currSummon != nullptr && currSummon->m_pSummon != nullptr && currSummon->m_pSummon->GetHealth() != 0)
+            {
+                if(!currSummon->m_pSummon->IsInWorld())
+                {
+                    vDeActiveSummonList.emplace_back(currSummon->m_pSummon);
+                }
+                else
+                {
+                    auto pos = currSummon->m_pSummon->GetCurrentPosition(ct);
+                    if(GetExactDist2d(&pos) <= 525.0f)
+                    {
+                        vActiveSummonList.emplace_back(currSummon->m_pSummon);
+                    }
+                }
+            }
+        }
+
+        int64 nActiveSummonEXP = GameRule::GetIntValueByRandomInt64(m_fActiveSummonExpAmp + m_fDistEXPMod * (double)exp);
+        for(auto& sum1 : vActiveSummonList)
+        {
+            if(nActiveSummonEXP != 0 && sum1->GetLevel() < GetLevel())
+            {
+                sum1->AddEXP(nActiveSummonEXP, 0, true);
+            }
+        }
+
+        int64 nDeactiveSummonEXP = GameRule::GetIntValueByRandomInt64((m_fDistEXPMod - 1.0f + m_fDeactiveSummonExpAmp) * (double)exp);
+        for(auto& sum2 : vDeActiveSummonList)
+        {
+            if(nDeactiveSummonEXP != 0 && sum2->GetLevel() < GetLevel())
+            {
+                sum2->AddEXP(nDeactiveSummonEXP, 0, true);
+            }
+        }
+        Unit::AddEXP(exp, jp, true);
+    }
+}
+
+void Player::applyPassiveSkillEffect(Skill *skill)
+{
+    if(skill->m_SkillBase->effect_type != 0)
+    {
+        switch(skill->m_SkillBase->effect_type)
+        {
+            case EffectType::IncreaseSummonHPMPSP:
+                return;
+
+            case EffectType::AmplifySummonHPMPSP:
+                return;
+
+            case EffectType::CreatureAssignmentIncrease:
+                m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+                return;
+            case EffectType::AmplifyExpForSummon:
+                m_fActiveSummonExpAmp += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+                m_fDeactiveSummonExpAmp += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+                return;
+            default:
+                break;
+        }
+    }
+    Unit::applyPassiveSkillEffect(skill);
+
 }
