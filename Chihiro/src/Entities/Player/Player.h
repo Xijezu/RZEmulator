@@ -62,7 +62,7 @@ public:
     bool ReadItemCoolTimeList(int);
     bool ReadSummonList(int);
     bool ReadEquipItem();
-    bool ReadSkillList(int);
+    bool ReadSkillList(Unit*);
     bool ReadQuestList();
     /* ****************** DATABASE END ****************** */
 

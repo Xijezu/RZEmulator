@@ -20,6 +20,7 @@ public:
     uint GetCreatureGroup() const override { return 9; }
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
+    bool IsSummon() const override { return true; }
     int32_t GetSummonCode();
     Player* GetMaster() const
     { return m_pMaster; }

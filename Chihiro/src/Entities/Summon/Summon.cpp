@@ -212,7 +212,7 @@ void Summon::onExpChange()
 
     if (level != 0) {
         if (level != GetLevel()) {
-            long uid = 0;
+            uint64 uid = 0;
             if (m_pItem != nullptr)
                 uid = m_pItem->m_Instance.UID;
             int ljp = 0;

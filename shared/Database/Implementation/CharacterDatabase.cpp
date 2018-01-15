@@ -31,14 +31,14 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_GET_ITEMLIST, "SELECT sid, idx, code, cnt, gcode, level, enhance, flag, summon_id, socket_0, socket_1, socket_2, socket_3, remain_time, wear_info FROM Item WHERE owner_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_UPD_ITEM, "UPDATE `Item` SET owner_id = ?, account_id = ?, summon_id = ?, auction_id = ?, keeping_id = ?, idx = ?, cnt = ?, level = ?, enhance = ?, flag = ?, wear_info = ?, socket_0 = ?, socket_1 = ?, socket_2 = ?, socket_3 = ?, remain_time = ?, update_time = NOW() WHERE sid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_SUMMONLIST, "SELECT sid, account_id, code, card_uid, exp, jp, last_decreased_exp, name, transform, lv, jlv, max_level, fp, prev_level_01, prev_level_02, prev_id_01, prev_id_02, sp, hp, mp FROM Summon WHERE owner_id = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHARACTER_GET_SKILL, "SELECT sid, owner_id, summon_id, skill_id, skill_level, cool_time FROM Skill WHERE owner_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHARACTER_GET_SKILL, "SELECT sid, owner_id, summon_id, skill_id, skill_level, cool_time FROM Skill WHERE owner_id = ? AND summon_id = 0", CONNECTION_SYNCH);
+    PrepareStatement(CHARACTER_GET_SUMMONSKILL, "SELECT sid, owner_id, summon_id, skill_id, skill_level, cool_time FROM Skill WHERE summon_id = ? AND owner_id = 0", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_GET_EQUIP_ITEM, "SELECT sid, summon_id, wear_info FROM Item WHERE account_id = 0 AND owner_id = ? AND auction_id = 0 AND keeping_id = 0 AND wear_info > -1 ORDER BY summon_id, wear_info;", CONNECTION_SYNCH);
     //PrepareStatement(CHARACTER_ADD_ITEM, "INSERT INTO Item     (sid, owner_id, account_id, summon_id, auction_id, keeping_id, idx, code, cnt, level, enhance, endurance, flag, gcode, wear_info, socket_0, socket_1, socket_2, socket_3, socket_4, socket_5, remain_time, elemental_effect_type, elemental_effect_expire_time, elemental_effect_attack_point, elemental_effect_magic_point, create_time, update_time) VALUES(", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_ITEM, "INSERT INTO Item VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_DEFAULT_ITEM, "INSERT INTO Item VALUES(?, ?, 0, 0, 0, 0, 0, ?, 0, 0, 0, 0, 0, 0, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NOW(), NOW())", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_DEL_CHARACTER, "UPDATE `Character` SET name = CONCAT('@' , name , ' ', DATE_FORMAT(NOW(), '%d-%m-%y %H:%i:%s')) WHERE name = ? AND account_id = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHARACTER_ADD_SKILL, "INSERT INTO Skill VALUES (?,?,?,?,?,?);", CONNECTION_ASYNC);
-    PrepareStatement(CHARACTER_UPD_SKILL, "UPDATE Skill SET skill_level = ?, cool_time = ? WHERE owner_id = ? AND sid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_REP_SKILL, "REPLACE INTO Skill VALUES (?,?,?,?,?,?);", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_SUMMON, "INSERT INTO Summon VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_ADD_QUEST, "REPLACE INTO Quest VALUES(?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_QUEST, "SELECT id, code, start_id, status1, status2, status3, progress FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);

@@ -57,26 +57,16 @@ void Skill::Init()
 }
 
 
-void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, uint owner_uid, uint summon_uid, uint skill_id, uint skill_level)
+void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_level, int cool_time)
 {
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_SKILL);
+    auto owner_uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_SKILL);
     stmt->setInt64(0, skillUID);
-    stmt->setInt32(1, owner_uid);
-    stmt->setInt32(2, summon_uid);
+    stmt->setInt32(1, pUnit->GetSubType() == ST_Player ? owner_uid : 0);
+    stmt->setInt32(2, pUnit->GetSubType() == ST_Summon ? owner_uid : 0);
     stmt->setInt32(3, skill_id);
     stmt->setInt32(4, skill_level);
-    stmt->setInt32(5, 0); // cool_time
-    CharacterDatabase.Execute(stmt);
-}
-
-void Skill::DB_UpdateSkill(Unit *pUnit, int64 skill_uid, uint skill_level, uint cooltime)
-{
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_SKILL);
-    stmt->setInt32(0, skill_level);
-    stmt->setInt32(1, cooltime); // cool_time
-    auto uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
-    stmt->setInt32(2, uid);
-    stmt->setInt64(3, skill_uid);
+    stmt->setInt32(5, cool_time);
     CharacterDatabase.Execute(stmt);
 }
 

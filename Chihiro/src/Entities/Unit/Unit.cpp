@@ -28,8 +28,10 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject), m_unitTypeMask(0)
 Unit::~Unit()
 {
     uint ct = sWorld->GetArTime();
-    for (auto& skill : m_vSkillList) {
-        Skill::DB_UpdateSkill(this, skill->m_nSkillUID, skill->m_nSkillLevel, skill->m_nNextCoolTime < ct ? 0 : skill->m_nNextCoolTime - ct);
+
+    for (auto &skill : m_vSkillList)
+    {
+        Skill::DB_InsertSkill(this, skill->m_nSkillUID, skill->m_nSkillID, skill->m_nSkillLevel, skill->m_nNextCoolTime < ct ? 0 : skill->m_nNextCoolTime - ct);
         delete skill;
         skill = nullptr;
     }

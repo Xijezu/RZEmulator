@@ -972,13 +972,20 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
     if(_player == nullptr)
         return;
 
+    auto target = dynamic_cast<Unit*>(_player);
     ushort result = 0;
     int jobID = 0;
     int value = 0;
 
-    auto target = dynamic_cast<Unit*>(_player);
-    if(false /*if creature*/){
-
+    if(_player->GetHandle() != target_handle)
+    {
+        auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+        if(summon == nullptr || !summon->IsSummon() || summon->GetMaster() == nullptr || summon->GetMaster()->GetHandle() != _player->GetHandle())
+        {
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
+            return;
+        }
+        target = summon;
     }
     int currentLevel = target->GetBaseSkillLevel(skill_id)+1;
     //if(skill_level == currentLevel)

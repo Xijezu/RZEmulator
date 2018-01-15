@@ -179,7 +179,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
             m_pMainSummon = GetSummon(mainSummon);
         }
 
-        if(!ReadEquipItem() || !ReadSkillList(GetInt32Value(UNIT_FIELD_UID)) || !ReadQuestList())
+        if(!ReadEquipItem() || !ReadSkillList(this) || !ReadQuestList())
             return false;
 
         CalculateStat();
@@ -298,10 +298,14 @@ bool Player::ReadQuestList()
 }
 
 
-bool Player::ReadSkillList(int)
+bool Player::ReadSkillList(Unit* pUnit)
 {
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_SKILL);
-    stmt->setInt32(0, GetInt32Value(UNIT_FIELD_UID));
+    PreparedStatement *stmt{nullptr};
+    if(pUnit->IsPlayer())
+        stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_SKILL);
+    else
+        stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_SUMMONSKILL);
+    stmt->setInt32(0, pUnit->GetInt32Value(UNIT_FIELD_UID));
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
         do {
             Field *fields     = result->Fetch();
@@ -317,69 +321,70 @@ bool Player::ReadSkillList(int)
 
         } while (result->NextRow());
     }
-
-    SetSkill(-1, 6001, 20, 0);
-    SetSkill(-1, 6002, 20, 0);
-    SetSkill(-1, 6003, 20, 0);
-    SetSkill(-1, 6004, 20, 0);
-    SetSkill(-1, 6005, 20, 0);
-    SetSkill(-1, 6006, 20, 0);
-    SetSkill(-1, 6007, 20, 0);
-    SetSkill(-1, 6008, 20, 0);
-    SetSkill(-1, 6009, 20, 0);
-    SetSkill(-1, 6010, 20, 0);
-    SetSkill(-1, 6013, 20, 0);
-    SetSkill(-1, 6014, 20, 0);
-    SetSkill(-1, 6015, 20, 0);
-    SetSkill(-1, 6016, 20, 0);
-    SetSkill(-1, 6017, 20, 0);
-    SetSkill(-1, 6018, 20, 0);
-    SetSkill(-1, 6019, 20, 0);
-    SetSkill(-1, 6020, 20, 0);
-    SetSkill(-1, 6021, 20, 0);
-    SetSkill(-2, 6901, 20, 0);
-    SetSkill(-2, 6902, 20, 0);
-    SetSkill(-2, 6903, 20, 0);
-    SetSkill(-2, 6904, 20, 0);
-    SetSkill(-2, 6905, 20, 0);
-    SetSkill(-2, 6906, 20, 0);
-    SetSkill(-1, 6022, 20, 0);
-    SetSkill(-1, 6023, 20, 0);
-    SetSkill(-1, 6024, 20, 0);
-    SetSkill(-1, 6025, 20, 0);
-    SetSkill(-1, 6026, 20, 0);
-    SetSkill(-1, 6027, 20, 0);
-    SetSkill(-1, 6028, 20, 0);
-    SetSkill(-1, 6029, 20, 0);
-    SetSkill(-1, 6030, 20, 0);
-    SetSkill(-1, 6031, 20, 0);
-    SetSkill(-1, 6032, 20, 0);
-    SetSkill(-1, 6033, 20, 0);
-    SetSkill(-1, 6034, 20, 0);
-    SetSkill(-1, 6035, 20, 0);
-    SetSkill(-1, 6036, 20, 0);
-    SetSkill(-1, 6037, 20, 0);
-    SetSkill(-1, 6038, 20, 0);
-    SetSkill(-1, 6039, 20, 0);
-    SetSkill(-1, 6040, 20, 0);
-    SetSkill(-1, 6041, 20, 0);
-    SetSkill(-1, 6042, 20, 0);
-    SetSkill(-1, 6043, 20, 0);
-    SetSkill(-1, 6044, 20, 0);
-    SetSkill(-1, 6045, 20, 0);
-    SetSkill(-1, 6046, 20, 0);
-    SetSkill(-1, 6047, 20, 0);
-    SetSkill(-1, 6048, 20, 0);
-    SetSkill(-1, 6049, 20, 0);
-    SetSkill(-1, 6061, 20, 0);
-    SetSkill(-1, 6062, 20, 0);
-    SetSkill(-1, 6063, 20, 0);
-    SetSkill(-1, 6064, 20, 0);
-    SetSkill(-1, 6065, 20, 0);
-    SetSkill(-1, 6066, 20, 0);
-    SetSkill(-1, 10009, 20, 0);
-    SetSkill(-1, 10010, 20, 0);
-
+    if(pUnit->IsPlayer())
+    {
+        SetSkill(-1, 6001, 20, 0);
+        SetSkill(-1, 6002, 20, 0);
+        SetSkill(-1, 6003, 20, 0);
+        SetSkill(-1, 6004, 20, 0);
+        SetSkill(-1, 6005, 20, 0);
+        SetSkill(-1, 6006, 20, 0);
+        SetSkill(-1, 6007, 20, 0);
+        SetSkill(-1, 6008, 20, 0);
+        SetSkill(-1, 6009, 20, 0);
+        SetSkill(-1, 6010, 20, 0);
+        SetSkill(-1, 6013, 20, 0);
+        SetSkill(-1, 6014, 20, 0);
+        SetSkill(-1, 6015, 20, 0);
+        SetSkill(-1, 6016, 20, 0);
+        SetSkill(-1, 6017, 20, 0);
+        SetSkill(-1, 6018, 20, 0);
+        SetSkill(-1, 6019, 20, 0);
+        SetSkill(-1, 6020, 20, 0);
+        SetSkill(-1, 6021, 20, 0);
+        SetSkill(-2, 6901, 20, 0);
+        SetSkill(-2, 6902, 20, 0);
+        SetSkill(-2, 6903, 20, 0);
+        SetSkill(-2, 6904, 20, 0);
+        SetSkill(-2, 6905, 20, 0);
+        SetSkill(-2, 6906, 20, 0);
+        SetSkill(-1, 6022, 20, 0);
+        SetSkill(-1, 6023, 20, 0);
+        SetSkill(-1, 6024, 20, 0);
+        SetSkill(-1, 6025, 20, 0);
+        SetSkill(-1, 6026, 20, 0);
+        SetSkill(-1, 6027, 20, 0);
+        SetSkill(-1, 6028, 20, 0);
+        SetSkill(-1, 6029, 20, 0);
+        SetSkill(-1, 6030, 20, 0);
+        SetSkill(-1, 6031, 20, 0);
+        SetSkill(-1, 6032, 20, 0);
+        SetSkill(-1, 6033, 20, 0);
+        SetSkill(-1, 6034, 20, 0);
+        SetSkill(-1, 6035, 20, 0);
+        SetSkill(-1, 6036, 20, 0);
+        SetSkill(-1, 6037, 20, 0);
+        SetSkill(-1, 6038, 20, 0);
+        SetSkill(-1, 6039, 20, 0);
+        SetSkill(-1, 6040, 20, 0);
+        SetSkill(-1, 6041, 20, 0);
+        SetSkill(-1, 6042, 20, 0);
+        SetSkill(-1, 6043, 20, 0);
+        SetSkill(-1, 6044, 20, 0);
+        SetSkill(-1, 6045, 20, 0);
+        SetSkill(-1, 6046, 20, 0);
+        SetSkill(-1, 6047, 20, 0);
+        SetSkill(-1, 6048, 20, 0);
+        SetSkill(-1, 6049, 20, 0);
+        SetSkill(-1, 6061, 20, 0);
+        SetSkill(-1, 6062, 20, 0);
+        SetSkill(-1, 6063, 20, 0);
+        SetSkill(-1, 6064, 20, 0);
+        SetSkill(-1, 6065, 20, 0);
+        SetSkill(-1, 6066, 20, 0);
+        SetSkill(-1, 10009, 20, 0);
+        SetSkill(-1, 10010, 20, 0);
+    }
     return true;
 }
 
@@ -501,7 +506,13 @@ bool Player::ReadSummonList(int UID)
                 summon.m_nSP = sp;
                 summon.m_nHP = hp;
                 summon.m_fMP = mp;*/
+                if(!ReadSkillList(summon))
+                {
+                    delete summon;
+                    return false;
+                }
                 m_vSummonList.push_back(summon);
+
             }
         } while (result->NextRow());
     }
@@ -1039,14 +1050,7 @@ void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int s
     auto sb = sObjectMgr->GetSkillBase((uint)skill_id);
     if (sb->id != 0 && sb->is_valid == 2)
         return;
-    if (prev_level != 0)
-    {
-        Skill::DB_UpdateSkill(this, skillUID, skill_level, GetRemainCoolTime(skill_id));
-    }
-    else
-    {
-        Skill::DB_InsertSkill(this, skillUID, this->GetUInt32Value(UNIT_FIELD_UID), 0, skill_id, skill_level);
-    }
+    Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
     m_QuestManager.UpdateQuestStatusBySkillLevel(skill_id, skill_level);
     //Messages::SendPropertyMessage(this, this, "jp", GetJP());
     Messages::SendSkillList(this, this, skill_id);
