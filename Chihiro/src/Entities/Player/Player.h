@@ -49,7 +49,7 @@ public:
     /* ****************** QUEST END ****************** */
 
     int GetPermission() { return GetInt32Value(UNIT_FIELD_PERMISSION); }
-    uint64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
+    int64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
     int GetPartyID() { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
     int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
 
@@ -141,7 +141,7 @@ public:
     CreatureStat* GetBaseStat() const override;
     uint GetCreatureGroup() const override { return 9; }
 
-    ushort ChangeGold(uint64);
+    ushort ChangeGold(int64);
 
     uint16 IsUseableItem(Item* pItem, Unit* pTarget);
     uint16 UseItem(Item* pItem, Unit* pTarget, const std::string& szParameter);

@@ -383,7 +383,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     if(m_pUnit->GetSubType() == ST_Player) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
-            player->ChangeGold(args[0].get<uint64>());
+            player->ChangeGold(args[0].get<int64>());
         } else if(szKey == "permission") {
             player->SetInt32Value(UNIT_FIELD_PERMISSION, args[0].get<uint>());
         } else if(szKey == "chaos") {

@@ -903,14 +903,14 @@ bool Player::IsValidTrigger(const std::string& szTrigger)
     return false;
 }
 
-ushort Player::ChangeGold(uint64 nGold)
+ushort Player::ChangeGold(int64 nGold)
 {
     if(nGold != GetGold()) {
         if(nGold > MAX_GOLD_FOR_INVENTORY)
             return TS_RESULT_TOO_MUCH_MONEY;
         if(nGold < 0)
             return TS_RESULT_TOO_CHEAP;
-        SetUInt64Value(UNIT_FIELD_GOLD, nGold);
+        SetUInt64Value(UNIT_FIELD_GOLD, (uint64)nGold);
         SendGoldChaosMessage();
     }
     return TS_RESULT_SUCCESS;
@@ -925,8 +925,8 @@ void Player::PushItem(Item *pItem, uint64 count, bool bSkipUpdateToDB)
 
     // In this case gold
     if(pItem->m_Instance.Code == 0) {
-        uint64 nPrevGoldAmount = GetGold();
-        uint64 gold = GetGold() + pItem->m_Instance.nCount;
+        int64 nPrevGoldAmount = GetGold();
+        int64 gold = GetGold() + pItem->m_Instance.nCount;
         if(ChangeGold(gold) != 0)
         {
             MX_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
@@ -2040,7 +2040,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         fMod = 1.0f;
     }
 
-    auto res = ChangeGold((uint64)(q->m_QuestBase->nGold * fMod) + GetGold());
+    auto res = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
         Messages::SendQuestMessage(120, this, string_format("END|TOO_MUCH_MONEY|%d", res));

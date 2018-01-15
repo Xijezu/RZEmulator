@@ -805,8 +805,8 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                     buy_count = 1;
             }
 
-            auto nTotalPrice = (uint) floor(buy_count * mt.price_ratio);
-            if (nTotalPrice / buy_count != mt.price_ratio || _player->GetGold() < nTotalPrice) {
+            auto nTotalPrice = (int) floor(buy_count * mt.price_ratio);
+            if (nTotalPrice / buy_count != mt.price_ratio || _player->GetGold() < nTotalPrice || nTotalPrice < 0) {
                 Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
                 return;
             }
@@ -1147,8 +1147,8 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
         return;
     }
-    uint64 nPrevGold = _player->GetGold();
-    uint64 nNewGold = _player->GetGold() + sell_count * nPrice;
+    int64 nPrevGold = _player->GetGold();
+    int64 nNewGold = _player->GetGold() + sell_count * nPrice;
     if(_player->ChangeGold(_player->GetGold() + sell_count * nPrice) != 0) {
         MX_LOG_TRACE("entities", "Sold [%d]x [%d] for a total of %d gold [Prev: %d, New: %d]", sell_count, code, sell_count * nPrice, nPrevGold, nNewGold);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
