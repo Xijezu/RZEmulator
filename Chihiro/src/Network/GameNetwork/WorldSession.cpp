@@ -396,7 +396,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
     for (auto &mi : vPctInfo)
     {
-        if (mover->IsPlayer() && false /* CollisionToLine*/)
+        if (mover->IsPlayer() && sObjectMgr->CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
         {
             Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -429,9 +429,11 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
     if (_player->IsInWorld())
     {
+        if(mover->GetTargetHandle() != 0)
+            mover->CancelAttack();
         if (mover->m_nMovableTime <= ct)
         {
-            if (true /* IsActable() && IsMovable() && isInWorld */)
+            if (mover->GetHealth() != 0 && mover->IsInWorld())
             {
                 auto tpos2 = mover->GetCurrentPosition(curr_time);
                 if (!vMoveInfo.empty())
@@ -453,6 +455,8 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                 {
                     if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) >= _player->GetCurrentPosition(ct).GetExactDist2d(&npos))
                     {
+                        if(mover->HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+                            mover->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending);
                         npos.m_positionX = x;
                         npos.m_positionY = y;
                         npos.m_positionZ = 0.0f;
@@ -468,8 +472,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         }
         if (!mover->SetPendingMove(vMoveInfo, (uint8_t)speed))
         {
-            for (auto &i : vMoveInfo)
-                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, 0);
+            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, 0);
             return;
         }
     } // is in world

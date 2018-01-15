@@ -107,6 +107,7 @@ public:
     ushort IsLearnableSkill(Unit *, uint, int, int &);
     int GetLocationID(float x, float y) const;
     bool IsBlocked(float x, float y);
+    bool CollisionToLine(float x1, float y1, float x2, float y2);
 
     int g_currentLocationId{0};
 

@@ -1647,3 +1647,9 @@ FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
         return &_fieldPropTemplateStore[idx];
     return nullptr;
 }
+
+bool ObjectMgr::CollisionToLine(float x1, float y1, float x2, float y2)
+{
+    return g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
+                                                      {x2, y2}});
+}
