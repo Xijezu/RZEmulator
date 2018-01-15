@@ -139,7 +139,7 @@ bool FieldProp::UseProp(Player * pPlayer)
         {
             sScriptingMgr->RunString(pPlayer, m_pFieldPropBase->strScript);
         }
-        if(m_nUseCount == 0)
+        if(m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0)
         {
             sWorld->RemoveObjectFromWorld(this);
             if(m_pDeleteHandler != nullptr)
