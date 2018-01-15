@@ -510,6 +510,8 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
         pItem->m_bIsNeedUpdateToDB = true;
         pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
     }
+    if(pItem != nullptr && pItem->m_Instance.Code != 0)
+        item_handle = pItem->GetHandle();
     return item_handle;
 }
 

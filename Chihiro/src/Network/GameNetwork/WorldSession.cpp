@@ -107,7 +107,8 @@ const AuthGameSession packetHandler[] =
                                       {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
                                       {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
                                       {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
-                                      {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive}
+                                      {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
+                                      {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
                               };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
@@ -1408,6 +1409,8 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 
 void WorldSession::onUseItem(XPacket *pRecvPct)
 {
+    return;
+
     pRecvPct->read_skip(7);
     auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
@@ -1514,4 +1517,19 @@ void WorldSession::onRevive(XPacket *)
         return;
 
     sScriptingMgr->RunString(_player, string_format("revive_in_town(%d)", 0));
+}
+
+void WorldSession::onDropItem(XPacket * pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    uint target = pRecvPct->read<uint>();
+
+    auto item = sMemoryPool->GetObjectInWorld<Item>(target);
+    if(item != nullptr)
+    {
+        item->SetOwnerInfo(0, 0, 0);
+        item->Relocate(_player->GetPosition());
+        sWorld->AddItemToWorld(item);
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
+    }
 }
