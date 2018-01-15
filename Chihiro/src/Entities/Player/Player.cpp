@@ -418,7 +418,7 @@ bool Player::ReadEquipItem()
                         unit->m_anWear[wear_info] = item;
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
                         item->m_bIsNeedUpdateToDB  = true;
-                        if (unit->GetSubType() == ST_Summon)
+                        if (unit->IsSummon())
                         {
                             item->m_Instance.OwnSummonHandle = unit->GetHandle();
                             item->m_Instance.nOwnSummonUID   = (int)unit->GetInt32Value(UNIT_FIELD_UID);
@@ -2285,4 +2285,14 @@ void Player::DB_ItemCoolTime(Player * pPlayer)
         stmt->setInt32(idx++, cool_down);
     }
     CharacterDatabase.Execute(stmt);
+}
+
+bool Player::IsUsingBow() const
+{
+    return m_anWear[0] != nullptr ? m_anWear[0]->IsBow() : false;
+}
+
+bool Player::IsUsingCrossBow() const
+{
+    return m_anWear[0] != nullptr ? m_anWear[0]->IsCrossBow() : false;
 }

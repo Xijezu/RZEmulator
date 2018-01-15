@@ -376,7 +376,7 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
     }
 
     pPlayer->SendPacket(packet);
-    if(GetSubType() == ST_Player)
+    if(IsPlayer())
         Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));
 
 }

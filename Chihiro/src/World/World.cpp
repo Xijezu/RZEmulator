@@ -218,7 +218,7 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 				// BEGIN Send Enter Message to each other
 				if(client->GetHandle() != pUnit->GetHandle()) {
 					Messages::sendEnterMessage(dynamic_cast<Player*>(pUnit), client, false);
-					if(client->GetSubType() == ST_Player) {
+					if(client->IsPlayer()) {
 						Messages::sendEnterMessage(dynamic_cast<Player *>(client), pUnit, false);
 					}
 				}
@@ -240,20 +240,20 @@ void World::AddObjectToWorld(WorldObject *obj)
                                            // BEGIN Send Enter Message to each other
                                            if (client->GetHandle() != obj->GetHandle()) {
                                                // Enter message FROM doEachRegion-Client TO obj
-                                               if (client->IsInWorld() && obj->GetSubType() == ST_Player)
+                                               if (client->IsInWorld() && obj->IsPlayer())
                                                    Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
                                                // Enter message FROM obj TO doEachRegion-Client
-                                               if (client->GetSubType() == ST_Player)
+                                               if (client->IsPlayer())
                                                    Messages::sendEnterMessage(dynamic_cast<Player *>(client), obj, false);
                                            }
                                        });    // END Send Enter Message to each other
 									   /// Sending enter messages of NPCs and pets to the object - if it's an player
                                        rgn->DoEachMovableObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
+                                           if (lbObj->IsInWorld() && obj->IsPlayer())
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
                                        });
                                        rgn->DoEachStaticObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld() && obj->GetSubType() == ST_Player)
+                                           if (lbObj->IsInWorld() && obj->IsPlayer())
                                                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
                                        });
                                    });
@@ -471,7 +471,7 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
             fJP = 0.0f;
 
         auto mob = dynamic_cast<Monster*>(pCorpse);
-        //if(pCorpse->GetSubType() == ST_Mob && mob.m_h)
+        //if(pCorpse->IsMonster() && mob.m_h)
         /// TAMING
     }
 

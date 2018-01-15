@@ -52,7 +52,7 @@ public:
     template<class T> void AddObject(T* object)
     {
         HashMapHolder<T>::Insert(object);
-        if(object->GetSubType() != ST_Object)
+        if(!object->IsItem())
             addUpdateQueue.add(object);
     }
 

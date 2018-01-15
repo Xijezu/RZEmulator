@@ -185,6 +185,8 @@ public:
     bool IsWearShield();
     std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
     virtual CreatureStat *GetBaseStat() const { return nullptr; }
+    virtual bool IsUsingBow() const { return false; }
+    virtual bool IsUsingCrossBow() const { return false;}
     uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue);
     explicit Unit(bool isWorldObject);
 protected:

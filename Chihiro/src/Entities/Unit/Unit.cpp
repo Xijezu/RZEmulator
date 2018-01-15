@@ -387,7 +387,7 @@ void Unit::CalculateStat()
     if (IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
     } else {
-        if (GetSubType() == ST_Summon && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
+        if (IsSummon() && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
             auto s = dynamic_cast<Summon *>(this);
             if(s != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), s, hp, mp, false);
@@ -972,7 +972,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
     float item_var_penalty{};
 
     Player* p{nullptr};
-    if(GetSubType() == ST_Player)
+    if(IsPlayer())
         p = dynamic_cast<Player*>(this);
 
     if (type == 14)
@@ -1255,7 +1255,7 @@ void Unit::processPendingMove()
             if (true) {
                 pos = GetCurrentPosition(ct);
                 sWorld->SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
-                if (GetSubType() == ST_Player) {
+                if (IsPlayer()) {
                     //auto p = dynamic_cast<Player*>(this);
                     /*if (p.m_nRideIdx != 0)
                     {
@@ -1448,7 +1448,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
     //auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
     auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(target_handle);
-    if (obj != nullptr && (obj->GetSubType() != ST_Object && obj->GetSubType() != ST_FieldProp))
+    if (obj != nullptr && (!obj->IsItem() && !obj->IsFieldProp()))
     {
         pSkillTarget = dynamic_cast<Unit *>(obj);
     }
@@ -1456,14 +1456,14 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     switch (pSkill->m_SkillBase->target)
     {
         case TargetType::Master:
-            if (!this->GetSubType() == ST_Summon)
+            if (!IsSummon())
                 return TS_RESULT_NOT_ACTABLE;
             summon = dynamic_cast<Summon *>(this);
             if (summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
         case TargetType::SelfWithMaster:
-            if (!this->GetSubType() == ST_Summon)
+            if (!IsSummon() == ST_Summon)
                 return TS_RESULT_NOT_ACTABLE;
             summon = dynamic_cast<Summon *>(this);
             if (pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
@@ -1480,7 +1480,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     // Return feather
     if (pSkillTarget == nullptr)
     {
-        if(nSkillID == 6020 && GetSubType() == ST_Player /* && IsInSiegeOrRaidDungeon*/)
+        if(nSkillID == 6020 && IsPlayer() /* && IsInSiegeOrRaidDungeon*/)
             return TS_RESULT_NOT_ACTABLE;
     }
     else
@@ -1571,11 +1571,11 @@ void Unit::processAttack()
 
         if (enemy == nullptr || enemy->GetHealth() == 0)
         {
-            if (GetSubType() == ST_Player)
+            if (IsPlayer())
             {
                 player = dynamic_cast<Player *>(this);
             }
-            else if (GetSubType() == ST_Summon)
+            else if (IsSummon())
             {
                 auto summon = dynamic_cast<Summon *>(this);
                 if (this != nullptr)
@@ -1599,11 +1599,11 @@ void Unit::processAttack()
 
         if (enemy->GetHealth() == 0)
         {
-            if (GetSubType() == ST_Player)
+            if (IsPlayer())
             {
                 player = dynamic_cast<Player *>(this);
             }
-            else if (GetSubType() == ST_Summon)
+            else if (IsSummon())
             {
                 auto summon = dynamic_cast<Summon *>(this);
                 if (this != nullptr)
@@ -1733,7 +1733,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         }
         ++i;
     } while (i < nAttackCount);
-    if(pTarget->GetSubType() == ST_Mob) {
+    if(pTarget->IsMonster()) {
         auto mob = dynamic_cast<Monster*>(pTarget);
         auto hm = GetHateMod(3, true);
         nHate = (int)((float)(nHate + hm.second) * hm.first);
@@ -1874,17 +1874,17 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 
         Messages::BroadcastHPMPMessage(pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, false);
 
-        if(GetSubType() == ST_Player) {
+        if(IsPlayer()) {
             Messages::SendHPMPMessage(dynamic_cast<Player *>(this), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
-        } else if(GetSubType() == ST_Summon) {
+        } else if(IsSummon()) {
             auto s = dynamic_cast<Summon*>(this);
             if(s != nullptr && s->GetMaster() != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
         }
 
-        if(pFrom->GetSubType() == ST_Player) {
+        if(pFrom->IsPlayer()) {
             Messages::SendHPMPMessage(dynamic_cast<Player *>(pFrom), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
-        } else if(pFrom->GetSubType() == ST_Summon) {
+        } else if(pFrom->IsSummon()) {
             auto s = dynamic_cast<Summon*>(pFrom);
             if(s != nullptr && s->GetMaster() != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
@@ -1983,7 +1983,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         fDefAdjust = (int)((float)nDamagea * fDefAdjusta);
     } else {
         fDefAdjust = nDamagea;
-        if(GetSubType() != ST_SkillProp) {
+        if(!IsFieldProp()) {
             if((nFlag & 4) == 0) {
                 if (bIsPhysicalDamage) {
                     nDefence = pTarget->m_Attribute.nDefence;
@@ -2037,10 +2037,10 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     else if(pTarget->GetStateByEffectType(SEF_LUNAR_CHIP) != nullptr)
         result.nDamage *= 2;
 
-    if((pTarget->GetSubType() == ST_Player || pTarget->GetSubType() == ST_Summon) && GetHandle() != pTarget->GetHandle()) {
-        if(GetSubType() == ST_Player)
+    if((pTarget->IsPlayer() || pTarget->IsSummon()) && GetHandle() != pTarget->GetHandle()) {
+        if(IsPlayer())
             result.nDamage = (int)((float)result.nDamage * 1 /*PVPRateForPlayer*/);
-        else if(GetSubType() == ST_Summon)
+        else if(IsSummon())
             result.nDamage = (int)((float)result.nDamage * 1 /*PVPRateForSummon*/);
     }
     if(bIsMagicalDamage && !bIsAdditionalDamage && fDefAdjustb < 1)
@@ -2152,7 +2152,7 @@ void Unit::EndAttack()
     if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
         //auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
         auto target = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
-        if(GetSubType() == ST_Player || GetSubType() == ST_Summon) {
+        if(IsPlayer() || IsSummon()) {
             if(target != nullptr)
                 broadcastAttackMessage(target, info, 0, 0, false, false, true, false);
         }
@@ -2171,7 +2171,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     if(bIsMoving && IsInWorld()) {
         pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
         sWorld->SetMove(this, pos, pos, 0, true, sWorld->GetArTime(), true);
-        if(GetSubType() == ST_Player) {
+        if(IsPlayer()) {
             // Ride handle
         }
     }
@@ -2227,7 +2227,7 @@ uint16_t Unit::putonItem(ItemWearType pos, Item *item)
     item->m_Instance.nWearInfo = pos;
     item->m_bIsNeedUpdateToDB = true;
     // Binded target
-    if(GetSubType() == ST_Player) {
+    if(IsPlayer()) {
         auto p = dynamic_cast<Player*>(this);
         p->SendItemWearInfoMessage(item, this);
     }
@@ -2261,7 +2261,7 @@ uint16_t Unit::putoffItem(ItemWearType pos)
     item->m_bIsNeedUpdateToDB = true;
     // Binded Target
     m_anWear[pos] = nullptr;
-    if(GetSubType() == ST_Player) {
+    if(IsPlayer()) {
         auto p = dynamic_cast<Player*>(this);
         p->SendItemWearInfoMessage(item, this);
     }
@@ -2475,7 +2475,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     if (GetHealth() == 0 && (stateInfo->state_time_type & 0x81) != 0)
         return TS_RESULT_NOT_ACTABLE;
 
-    if ((stateInfo->state_time_type & 8) != 0 && GetSubType() == ST_Mob && false /* Connector/AutoTrap */) {
+    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap */) {
         return TS_RESULT_LIMIT_TARGET;
     } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL
                && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != 104) {
@@ -2558,7 +2558,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
         CalculateStat();
 
         onUpdateState(ns, false);
-        if(GetSubType() == ST_Mob && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
+        if(IsMonster() && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
             if(m_Attribute.nAttackRange < 84)
                 m_Attribute.nAttackRange = 83;
         }
@@ -2621,7 +2621,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             return (uint16)pCaster->CastSkill((int)var1, (int)var2, target_handle, pos, GetLayer(), true);
         case 6:
         {
-            if (GetSubType() != ST_Player)
+            if (!IsPlayer())
             {
                 AddState(StateType::SG_NORMAL, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
                          pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");

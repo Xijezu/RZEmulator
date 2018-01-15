@@ -133,6 +133,9 @@ public:
     bool IsFighter();
     bool IsMagician();
     bool IsSummoner();
+    bool IsUsingBow() const override;
+    bool IsUsingCrossBow() const override;
+    bool IsPlayer() const override { return true; }
 
     float GetMoveSpeed() const;
 

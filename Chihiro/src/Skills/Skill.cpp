@@ -101,7 +101,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         case EffectType::AreaAffectHealByHieldProp:
         {
             m_nErrorCode = TS_RESULT_NOT_ACTABLE;
-            if(m_pOwner->GetSubType() == ST_Player)
+            if(m_pOwner->IsPlayer())
             {
                 auto pProp = sMemoryPool->GetObjectInWorld<FieldProp>(handle);
                 if(pProp != nullptr && pProp->m_pFieldPropBase->nActivateSkillID == m_SkillBase->id )
@@ -299,7 +299,7 @@ void Skill::ProcSkill()
     if(bIsSuccess)
     {
         SetRemainCoolTime(GetSkillCoolTime());
-        Player* pOwner = m_pOwner->GetSubType() == ST_Summon ? ((Summon*)m_pOwner)->GetMaster() : (Player*)m_pOwner;
+        Player* pOwner = m_pOwner->IsSummon() ? ((Summon*)m_pOwner)->GetMaster() : (Player*)m_pOwner;
         Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
     }
 
@@ -360,7 +360,7 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
             default:
                 auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
                 MX_LOG_INFO("skill", result.c_str());
-                if(m_pOwner->GetSubType() == ST_Player)
+                if(m_pOwner->IsPlayer())
                     Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Player*>(m_pOwner), result);
                 break;
         }
@@ -432,7 +432,7 @@ uint Skill::GetSkillCoolTime() const
     if(m_SkillBase == nullptr)
         return 0;
 
-    if (m_pOwner->GetSubType() == ST_Summon)
+    if (m_pOwner->IsSummon())
         l = m_nRequestedSkillLevel;
     else
         l = m_nEnhance;
@@ -452,7 +452,7 @@ uint Skill::GetSkillEnhance() const
 
 uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time)
 {
-    if(m_pOwner->GetSubType() != ST_Player)
+    if(!m_pOwner->IsPlayer())
         return TS_RESULT_NOT_ACTABLE;
 
     auto player = dynamic_cast<Player*>(m_pOwner);
@@ -483,7 +483,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
 void Skill::CREATURE_TAMING()
 {
     auto pTarget = sMemoryPool->GetObjectInWorld<Monster>(m_hTarget);
-    if(pTarget == nullptr || pTarget->GetSubType() != ST_Mob || m_pOwner->GetSubType() != ST_Player)
+    if(pTarget == nullptr || !pTarget->IsMonster() || !m_pOwner->IsPlayer())
         return;
 
     bool bResult = sWorld->SetTamer(pTarget, dynamic_cast<Player*>(m_pOwner), m_nRequestedSkillLevel);
@@ -571,7 +571,7 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
 
 void Skill::TOWN_PORTAL()
 {
-    if(m_pOwner->GetSubType() == ST_Player)
+    if(m_pOwner->IsPlayer())
     {
         auto pPlayer = dynamic_cast<Player*>(m_pOwner);
 

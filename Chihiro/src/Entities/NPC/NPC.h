@@ -14,6 +14,7 @@ public:
     NPCStatus GetStatus() const;
     void SetStatus(NPCStatus status);
     int GetNPCID() const;
+    bool IsNPC() const override { return true; }
     bool HasStartableQuest(Player* player);
     bool HasFinishableQuest(Player* player);
     bool HasInProgressQuest(Player* player);

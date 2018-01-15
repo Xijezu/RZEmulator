@@ -23,6 +23,7 @@ public:
 	bool Cast();
 	bool UseProp(Player*);
 	uint GetCastingDelay() const;
+	bool IsFieldProp() const override { return true; }
 
 private:
 	FieldProp(FieldPropDeleteHandler* propDeleteHandler, FieldPropRespawnInfo pPropInfo);

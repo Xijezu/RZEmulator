@@ -87,7 +87,7 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor {
                     break;
             }
             if(pSkill->m_SkillBase->id >= 6008 && pSkill->m_SkillBase->id <= 6010) {
-                if(pTarget->GetSubType() == ST_Mob) {
+                if(pTarget->IsMonster()) {
                     dynamic_cast<Monster*>(pTarget)->AddHate(pCaster->GetHandle(), 1, true, true);
                 }
             }

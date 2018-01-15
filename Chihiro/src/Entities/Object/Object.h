@@ -290,6 +290,13 @@ public:
     virtual bool hasQuest(uint32 /* quest_id */) const
     { return false; }
 
+    virtual bool IsPlayer() const { return false; }
+    virtual bool IsSummon() const { return false; }
+    virtual bool IsMonster() const { return false; }
+    virtual bool IsFieldProp() const { return false; }
+    virtual bool IsItem() const { return false; }
+    virtual bool IsNPC() const { return false; }
+
 protected:
     Object();
 

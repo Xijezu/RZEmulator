@@ -83,7 +83,7 @@ int Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damag
 
     uint ct = sWorld->GetArTime();
 
-    if(pFrom->GetSubType() == ST_Summon) {
+    if(pFrom->IsSummon()) {
         summon = dynamic_cast<Summon*>(pFrom);
         if(summon->GetMaster() != nullptr) {
             player = summon->GetMaster();
@@ -163,7 +163,7 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
         auto player = dynamic_cast<Player*>(pFrom);
         procDropChaos(pFrom, Priority, vPartyContribute, fDropRatePenalty);
-        if(pFrom->GetSubType() == ST_Player && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
+        if(pFrom->IsPlayer() && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
             sWorld->addChaos(this, player, 1.0f);
 
         if(m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
@@ -193,9 +193,9 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
         fMaxDamageAdd = 0.4f;
     }
 
-    if(pKiller->GetSubType() == ST_Summon) {
+    if(pKiller->IsSummon()) {
         player = dynamic_cast<Summon*>(pKiller)->GetMaster();
-    } else if(pKiller->GetSubType() == ST_Player) {
+    } else if(pKiller->IsPlayer()) {
         player = dynamic_cast<Player *>(pKiller);
         if (player != nullptr) {
             hKiller            = player->GetHandle();
@@ -403,10 +403,10 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 
 
             if(cr != nullptr) {
-                if(cr->GetSubType() == ST_Player)
+                if(cr->IsPlayer())
                     player = dynamic_cast<Player*>(cr);
 
-                if(cr->GetSubType() == ST_Summon)
+                if(cr->IsSummon())
                     player = dynamic_cast<Summon*>(cr)->GetMaster();
 
                 if(player != nullptr && player->IsInWorld())
@@ -418,9 +418,9 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
     if(player == nullptr) {
         if(pKiller == nullptr)
             return;
-        if(pKiller->GetSubType() == ST_Player)
+        if(pKiller->IsPlayer())
             player = dynamic_cast<Player*>(pKiller);
-        if(pKiller->GetSubType() == ST_Summon)
+        if(pKiller->IsSummon())
             player = dynamic_cast<Summon*>(pKiller)->GetMaster();
     }
 
@@ -631,7 +631,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if (!IsInWorld() || pEnemy == nullptr)
         return;
 
-    if ((IsNonAttacker() || IsAutoTrap() || IsAgent() && (pEnemy->GetSubType() != ST_Player))
+    if ((IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer())
         || sArRegion->IsVisibleRegion((uint) (pEnemy->GetPositionX() / g_nRegionSize), (uint) (pEnemy->GetPositionY() / g_nRegionSize),
                                       (uint) (GetPositionX() / g_nRegionSize), (uint) (GetPositionY() / g_nRegionSize)) == 0
         || pEnemy->GetLayer() != GetLayer()

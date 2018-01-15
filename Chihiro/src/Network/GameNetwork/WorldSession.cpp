@@ -395,7 +395,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
     for (auto &mi : vPctInfo)
     {
-        if (mover->GetSubType() == ST_Player && false /* CollisionToLine*/)
+        if (mover->IsPlayer() && false /* CollisionToLine*/)
         {
             Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -935,7 +935,7 @@ void WorldSession::onJobLevelUp(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, target);
         return;
     }
-    if(cr->GetSubType() == ST_Player && cr->GetHandle() != _player->GetHandle()) {
+    if(cr->IsPlayer() && cr->GetHandle() != _player->GetHandle()) {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, target);
         return;
     }
@@ -951,7 +951,7 @@ void WorldSession::onJobLevelUp(XPacket *pRecvPct)
     cr->SetJP(cr->GetJP() -jp);
     cr->SetCurrentJLv(cr->GetCurrentJLv() + 1);
     cr->CalculateStat();
-    if(cr->GetSubType() == ST_Player) {
+    if(cr->IsPlayer()) {
         dynamic_cast<Player*>(cr)->Save(true);
     } else {
         // Summon

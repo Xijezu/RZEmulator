@@ -77,6 +77,7 @@ public:
     int GetItemRank() const;
     bool IsBow();
     bool IsCrossBow();
+    bool IsItem() const override { return true; }
 
     void SetOwnerInfo(uint, int, int);
     void SetPickupOrder(const ItemPickupOrder& order);

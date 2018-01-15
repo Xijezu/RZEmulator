@@ -274,7 +274,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     } else if (szKey == "level" || szKey == "lv") {
         return return_object(m_pUnit->GetLevel());
     } else if (szKey == "job_depth") {
-        if (m_pUnit->GetSubType() == ST_Player)
+        if (m_pUnit->IsPlayer())
             return return_object(dynamic_cast<Player *>(m_pUnit)->GetJobDepth());
         else
             return return_object(""s);
@@ -302,7 +302,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     else if(szKey == "jlv2")
         return return_object(m_pUnit->GetPrevJobLv(2));
 
-    if(m_pUnit->GetSubType() == ST_Player) {
+    if(m_pUnit->IsPlayer()) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
             return return_object((int64)player->GetGold());
@@ -380,7 +380,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     else if(szKey == "jlv_2")
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV+ 2, args[0].get<uint>());
 
-    if(m_pUnit->GetSubType() == ST_Player) {
+    if(m_pUnit->IsPlayer()) {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(szKey == "gold") {
             player->ChangeGold(args[0].get<int64>());
@@ -644,7 +644,7 @@ void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
 
 int XLua::SCRIPT_GetCreatureHandle(int idx)
 {
-    if(m_pUnit == nullptr || m_pUnit->GetSubType() != ST_Player)
+    if(m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return 0;
 
     auto player = dynamic_cast<Player*>(m_pUnit);

@@ -255,6 +255,7 @@ public:
     bool IsAgent() const;
     bool IsAutoTrap() const;
     bool IsNonAttacker() const;
+    bool IsMonster() const override { return true; }
     float GetChaseRange() const;
     float GetFirstAttackRange();
     bool IsFirstAttacker() const;
