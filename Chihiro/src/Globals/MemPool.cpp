@@ -156,7 +156,7 @@ void MemoryPoolMgr::Update(uint diff) {
     sFieldPropManager->Update(diff);
 }
 
-Item *MemoryPoolMgr::AllocGold(uint64 gold, GenerateCode gcode)
+Item *MemoryPoolMgr::AllocGold(int64 gold, GenerateCode gcode)
 {
     return Item::AllocItem(0, 0, gold, gcode, -1, -1, -1, 0, 0, 0, 0, 0);
 }

@@ -58,7 +58,7 @@ public:
 
 
     Item *AllocItem();
-    Item *AllocGold(uint64 gold, GenerateCode gcode);
+    Item *AllocGold(int64 gold, GenerateCode gcode);
     void AllocMiscHandle(WorldObject* obj);
     void AllocItemHandle(Item *item);
     Player *AllocPlayer();

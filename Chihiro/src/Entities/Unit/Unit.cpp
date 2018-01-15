@@ -1525,10 +1525,13 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
 void Unit::onAttackAndSkillProcess()
 {
-    if (m_castingSkill != nullptr) {
+    if (m_castingSkill != nullptr)
+    {
         m_castingSkill->ProcSkill();
-    } else {
-        if(GetTargetHandle() != 0)
+    }
+    else
+    {
+        if (GetTargetHandle() != 0)
             processAttack();
     }
 }
@@ -1695,7 +1698,7 @@ void Unit::processAttack()
 
         if (next_mode != 1)
         {
-            int delay = (int)(10 * (GetNextAttackableTime() - t));
+            auto delay = (int)(10 * (GetNextAttackableTime() - t));
             broadcastAttackMessage(enemy, Damages, (int)(10 * attInt), delay, _bDoubleAttack, next_mode == 1, false, false);
         }
         return;

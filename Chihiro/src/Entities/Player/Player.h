@@ -102,8 +102,8 @@ public:
     void PopItem(Item*,bool);
     bool EraseBullet(int64 count);
 
-    bool Erase(Item*,uint64,bool);
-    void SetItemCount(Item* pItem, uint64 nc, bool bSkipUpdateToDB);
+    bool Erase(Item*,int64,bool);
+    void SetItemCount(Item* pItem, int64 nc, bool bSkipUpdateToDB);
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
     void SendItemWearInfoMessage(Item* item, Unit *u);

@@ -1227,7 +1227,7 @@ void Player::SendPacket(XPacket pPacket)
     }
 }
 
-bool Player::Erase(Item *pItem, uint64 count, bool bSkipUpdateToDB)
+bool Player::Erase(Item *pItem, int64 count, bool bSkipUpdateToDB)
 {
     if(FindItemByHandle(pItem->m_nHandle) == nullptr)
         return false;
@@ -1240,12 +1240,12 @@ bool Player::Erase(Item *pItem, uint64 count, bool bSkipUpdateToDB)
     }
 
     // TODO update weight
-    uint64 nc = pItem->m_Instance.nCount - count;
+    int64 nc = pItem->m_Instance.nCount - count;
     SetItemCount(pItem, nc, bSkipUpdateToDB);
     return true;
 }
 
-void Player::SetItemCount(Item *pItem, uint64 nc, bool bSkipUpdateToDB)
+void Player::SetItemCount(Item *pItem, int64 nc, bool bSkipUpdateToDB)
 {
     pItem->m_Instance.nCount = nc;
     Messages::SendItemCountMessage(this, pItem);
