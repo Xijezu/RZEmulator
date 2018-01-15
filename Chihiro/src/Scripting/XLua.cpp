@@ -775,7 +775,7 @@ int XLua::SCRIPT_GetSiegeDungeonID()
 
 void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
 {
-    if(code != 0 && args.size() > 1)
+    if(code != 0 && args.size() >= 1)
     {
         auto player = dynamic_cast<Player*>(m_pUnit);
         if(player == nullptr)
