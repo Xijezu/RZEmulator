@@ -152,6 +152,18 @@ public:
     bool IsValidTrigger(const std::string&);
     /* ****************** DIALOG END ****************** */
 
+    /* ****************** WORLDLOCATION BEGIN ****************** */
+    bool IsInTown();
+// Function       :   public bool StructPlayer::IsInField()
+    bool IsInBattleField();
+    bool IsInEventmap();
+// Function       :   public bool IsUsingTent()
+    bool IsInSiegeOrRaidDungeon();
+    bool IsInSiegeDungeon();
+    bool IsInDungeon();
+    /* ****************** WORLDLOCATION END ****************** */
+
+
     void onChangeProperty(std::string, int);
     Position GetLastTownPosition();
 
@@ -201,6 +213,9 @@ public:
     int GetMaxChaos() const;
     void AddChaos(int chaos);
 protected:
+
+    bool isInLocationType(uint8 nLocationType);
+
     void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
     void onExpChange() override;

@@ -47,7 +47,7 @@ enum WL_SpecLocId : int {
 class WorldLocation {
 public:
     WorldLocation() = default;
-    explicit WorldLocation(const WorldLocation& src);
+    WorldLocation(const WorldLocation& src);
     ~WorldLocation() = default;
 
     uint                  idx{ };

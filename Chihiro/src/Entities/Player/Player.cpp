@@ -13,6 +13,7 @@
 #include "MemPool.h"
 #include "SharedMutex.h"
 #include "GameRule.h"
+#include "DungeonManager.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1004,6 +1005,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
     locPct << (int)m_nWorldLocationId;
     locPct << (int)nl;
     SendPacket(locPct);
+
     if(m_nWorldLocationId != nl) {
         if(m_nWorldLocationId != 0) {
             sWorldLocationMgr->RemoveFromLocation(this);
@@ -2455,7 +2457,11 @@ int Player::AddStamina(int nStamina)
 
 int Player::GetStaminaRegenRate()
 {
-    int result = GetCondition() != 0 ? 100 : 110;
+    int result = 30;
+
+    if(IsInTown())
+        result = GetCondition() != 0 ? 100 : 110;
+
     result += GetInt32Value(UNIT_FIELD_STAMINA_REGEN_BONUS);
     if(GetInt32Value(UNIT_FIELD_STAMINA_REGEN_RATE) != result)
     {
@@ -2541,4 +2547,41 @@ void Player::sendBonusEXPJPMsg()
     }
     SendPacket(bonusPct);
     clearPendingBonusMsg();
+}
+
+bool Player::isInLocationType(uint8 nLocationType)
+{
+    return m_WorldLocation != nullptr && m_WorldLocation->location_type == nLocationType;
+}
+
+bool Player::IsInSiegeDungeon()
+{
+    if (m_WorldLocation == nullptr || m_WorldLocation->location_type != 4 || GetLayer() != 1)
+        return false;
+    return true;
+}
+
+bool Player::IsInDungeon()
+{
+    return sDungeonManager->GetDungeonID(GetPositionX(), GetPositionY()) != 0;
+}
+
+bool Player::IsInSiegeOrRaidDungeon()
+{
+    return sDungeonManager->GetDungeonID(GetPositionX(), GetPositionY()) != 0 && GetLayer() > 1;
+}
+
+bool Player::IsInEventmap()
+{
+    return isInLocationType(7);
+}
+
+bool Player::IsInBattleField()
+{
+    return isInLocationType(5);
+}
+
+bool Player::IsInTown()
+{
+    return isInLocationType(1) || isInLocationType(10);
 }

@@ -110,13 +110,22 @@ void WorldLocationManager::RegisterWorldLocation(uint idx, uint8_t location_type
             return;
         }
     }
+
+    WorldLocation nwl { };
+    nwl.idx = idx;
+    nwl.location_type = location_type;
+    nwl.weather_ratio[weather_id][time_id] = ratio;
+    nwl.weather_change_time = weather_change_time;
+    nwl.shovelable_item = shovelable_item;
+
+    m_vWorldLocation.emplace_back(nwl);
 }
 
 void WorldLocationManager::RegisterMonsterLocation(uint idx, uint monster_id)
 {
     std::vector<uint> ml{ };
 
-    if (m_hsMonsterID.count(idx) == 1) {
+    if (m_hsMonsterID.count(idx) >= 1) {
         ml = m_hsMonsterID[idx];
     } else {
         m_hsMonsterID[idx] = ml;
