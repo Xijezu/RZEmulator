@@ -38,6 +38,8 @@ public:
     bool DoEvolution();
     uint8_t m_cSlotIdx{};
 protected:
+    uint16 putonItem(ItemWearType pos, Item* pItem) override;
+    uint16 putoffItem(ItemWearType pos) override;
     void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void processWalk(uint t);
     void onExpChange() override;

@@ -10,6 +10,8 @@
 #include "Maploader.h"
 #include "NPC.h"
 #include "DungeonManager.h"
+#include "MixManager.h"
+#include "GameRule.h"
 
 bool ObjectMgr::InitGameContent()
 {
@@ -38,6 +40,8 @@ bool ObjectMgr::InitGameContent()
     if (!LoadSummonResource())
         return false;
     if(!LoadDungeonResource())
+        return false;
+    if(!LoadEnhanceResource() || !LoadMixResource())
         return false;
     if (!LoadSkillResource() || !LoadSkillJP())
         return false;
@@ -1029,6 +1033,88 @@ bool ObjectMgr::LoadWorldLocation()
 }
 
 
+
+bool ObjectMgr::LoadEnhanceResource()
+{
+    uint32      oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM EnhanceResource");
+
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field *field = result->Fetch();
+        int idx = 0;
+
+        EnhanceInfo info{};
+        info.nSID = field[idx++].GetInt32();
+        info.Flag = field[idx++].GetUInt32();
+        info.nFailResult = field[idx++].GetUInt8();
+        info.nMaxEnhance = field[idx++].GetInt32();
+        info.nLocalFlag = field[idx++].GetUInt32();
+        info.nNeedItemCode = field[idx++].GetInt32();
+        for(auto& perc : info.fPercentage)
+            perc = field[idx++].GetFloat();
+        if((GameRule::nCurrentLocalFlag & info.nLocalFlag) != 0)
+        {
+            sMixManager->RegisterEnhanceInfo(info);
+        }
+
+        ++count;
+    } while (result->NextRow());
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Enhancetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+bool ObjectMgr::LoadMixResource()
+{
+    uint32      oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT * FROM MixResource");
+
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
+        return false;
+    }
+
+    uint32 count = 0;
+    do {
+        Field *field = result->Fetch();
+        int idx = 0;
+
+        MixBase info{};
+        info.id = field[idx++].GetInt32();
+        info.type = field[idx++].GetInt32();
+        for (int &i : info.value)
+        {
+            i = field[idx++].GetInt32();
+        }
+        info.sub_material_cnt = field[idx++].GetInt32();
+        for(int i = 0; i < MATERIAL_INFO_COUNT; ++i)
+        {
+            info.main_material.type[i] = field[idx++].GetInt32();
+            info.main_material.value[i] = field[idx++].GetInt32();
+        }
+        for (auto &i : info.sub_material)
+        {
+            for(int j = 0; j < MATERIAL_INFO_COUNT; ++j)
+            {
+                i.type[j] = field[idx++].GetInt32();
+                i.value[j] = field[idx++].GetInt32();
+            }
+        }
+        sMixManager->RegisterMixInfo(info);
+
+        ++count;
+    } while (result->NextRow());
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Mixtemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return true;
+}
+
+
+
 bool ObjectMgr::LoadSummonResource()
 {
     uint32      oldMSTime = getMSTime();
@@ -1433,7 +1519,7 @@ void ObjectMgr::UnloadAll()
     _monsterBaseStore.clear();
 }
 
-bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, long &nItemCount)
+bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
 {
     nItemID = 0;
     nItemCount = 1;

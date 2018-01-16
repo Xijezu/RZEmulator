@@ -2330,6 +2330,11 @@ uint16_t Unit::putonItem(ItemWearType pos, Item *item)
         auto p = dynamic_cast<Player*>(this);
         p->SendItemWearInfoMessage(item, this);
     }
+    else if(IsSummon())
+    {
+        auto p = dynamic_cast<Summon*>(this);
+        Messages::SendItemWearInfoMessage(p->GetMaster(), this, item);
+    }
     return 0;
 }
 
@@ -2364,7 +2369,11 @@ uint16_t Unit::putoffItem(ItemWearType pos)
         auto p = dynamic_cast<Player*>(this);
         p->SendItemWearInfoMessage(item, this);
     }
-    // Todo: Summon
+    else if(IsSummon())
+    {
+        auto p = dynamic_cast<Summon*>(this);
+        Messages::SendItemWearInfoMessage(p->GetMaster(), this, item);
+    }
     return 0;
 }
 

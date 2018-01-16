@@ -113,6 +113,7 @@ public:
 
 	void onSkill(XPacket *);
 	void onDropItem(XPacket*);
+	void onMixRequest(XPacket*);
 	void onRevive(XPacket*);
 	void onAttackRequest(XPacket* );
 	void onCancelAction(XPacket* );

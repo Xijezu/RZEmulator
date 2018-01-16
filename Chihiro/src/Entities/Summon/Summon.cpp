@@ -317,7 +317,31 @@ bool Summon::DoEvolution()
 
 bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
 {
-    return Unit::TranslateWearPosition(pos, item, ItemList);
+    if(!Unit::TranslateWearPosition(pos, item, ItemList))
+        return false;
+
+    if((item->m_Instance.Flag & 1) == 0)
+        return false;
+
+    switch(item->m_pItemBase->group)
+    {
+        case ItemGroup::Weapon:
+            pos = ItemWearType::WearWeapon;
+            break;
+        case ItemGroup::Armor:
+            pos = ItemWearType::WearShield;
+            break;
+        default:
+            return false;
+    }
+
+    if(pos > 24 || pos < 0)
+        return false;
+
+    if(m_anWear[pos] != nullptr)
+        ItemList.emplace_back(pos);
+
+    return true;
 }
 
 CreatureStat *Summon::GetBaseStat() const
@@ -370,4 +394,41 @@ void Summon::Update(uint diff)
     }
 
     Unit::Update(diff);
+}
+
+uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
+{
+    uint16 result = TS_RESULT_ACCESS_DENIED;
+    if(GetMaster() != nullptr && GetMaster()->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete) && (pItem->m_Instance.Flag & 1) != 0)
+    {
+        result = Unit::putonItem(pos, pItem);
+        if(result == TS_RESULT_SUCCESS)
+        {
+            pItem->m_Instance.OwnSummonHandle = GetHandle();
+            pItem->m_Instance.nOwnSummonUID = GetUInt32Value(UNIT_FIELD_UID);
+
+            GetMaster()->UpdateQuestStatusByItemUpgrade();
+        }
+    }
+    return result;
+}
+
+uint16 Summon::putoffItem(ItemWearType pos)
+{
+    uint16 result = TS_RESULT_ACCESS_DENIED;
+
+    if(GetMaster() != nullptr && GetMaster()->IsInWorld() && GetMaster()->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    {
+        if(pos < 0 || pos > 24)
+            return TS_RESULT_ACCESS_DENIED;
+
+        if(m_anWear[pos] != nullptr)
+        {
+            m_anWear[pos]->m_Instance.OwnSummonHandle = 0;
+            m_anWear[pos]->m_Instance.nOwnSummonUID = 0;
+
+            result = Unit::putoffItem(pos);
+        }
+    }
+    return result;
 }

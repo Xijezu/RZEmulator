@@ -32,6 +32,7 @@
 #include "Skill.h"
 #include "GameRule.h"
 #include "AllowedCommandInfo.h"
+#include "MixManager.h"
 
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
@@ -96,6 +97,7 @@ const AuthGameSession packetHandler[] =
                                       {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
                                       {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
                                       {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
+                                      {TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
                                       {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
                                       {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
                                       {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
@@ -660,21 +662,38 @@ void WorldSession::onPutOnItem(XPacket *_packet)
     auto item_handle   = _packet->read<uint>();
     auto target_handle = _packet->read<uint>();
 
-    if (_player->GetHealth() != 0) {
+    if (_player->GetHealth() != 0)
+    {
         //Item *ci = sMemoryPool->FindItem(item_handle);
         auto ci = sMemoryPool->GetObjectInWorld<Item>(item_handle);
 
-        if (ci != nullptr) {
-            if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == nullptr) {
+        if (ci != nullptr)
+        {
+            if (!ci->IsWearable() || _player->FindItemBySID(ci->m_Instance.UID) == nullptr)
+            {
                 Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return;
             }
 
-            if (_player->Puton((ItemWearType) position, ci) == 0) {
-                _player->CalculateStat();
-                Messages::SendStatInfo(_player, _player);
+            auto *unit = (Unit *)_player;
+            if (target_handle != 0)
+            {
+                auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+                if (summon == nullptr || summon->GetMaster()->GetHandle() != _player->GetHandle())
+                {
+                    Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
+                    return;
+                }
+                unit = summon;
+            }
+
+            if (unit->Puton((ItemWearType)position, ci) == 0)
+            {
+                unit->CalculateStat();
+                Messages::SendStatInfo(_player, unit);
                 Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
-                if (true) { // TODO: isPlayer()
+                if (unit->IsPlayer())
+                {
                     _player->SendWearInfo();
                 }
             }
@@ -688,20 +707,39 @@ void WorldSession::onPutOffItem(XPacket *_packet)
     auto position      = _packet->read<uint8_t>();
     auto target_handle = _packet->read<uint>();
 
-
     if (_player->GetHealth() == 0)
+    {
         Messages::SendResult(_player, TS_CS_PUTOFF_ITEM, 5, 0);
+        return;
+    }
 
-    Item *curitem = _player->GetWornItem((ItemWearType) position);
-    if (curitem == nullptr) {
+    auto *unit = (Unit *)_player;
+    if (target_handle != 0)
+    {
+        auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+        if (summon == nullptr || summon->GetMaster()->GetHandle() != _player->GetHandle())
+        {
+            Messages::SendResult(_player, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
+            return;
+        }
+        unit = summon;
+    }
+
+    Item *curitem = unit->GetWornItem((ItemWearType)position);
+    if (curitem == nullptr)
+    {
         Messages::SendResult(_player, TS_CS_PUTOFF_ITEM, 1, 0);
-    } else {
-        uint16_t por = _player->Putoff((ItemWearType) position);
-        _player->CalculateStat();
-        Messages::SendStatInfo(_player, _player);
+    }
+    else
+    {
+        uint16_t por = unit->Putoff((ItemWearType)position);
+        unit->CalculateStat();
+        Messages::SendStatInfo(_player, unit);
         Messages::SendResult(_player, _packet->GetPacketID(), 0, 0);
-        if (por == 0) {
-            if (true) {// TODO IsPlayer
+        if (por == 0)
+        {
+            if (unit->IsPlayer())
+            {
                 _player->SendWearInfo();
             }
         }
@@ -1533,5 +1571,73 @@ void WorldSession::onDropItem(XPacket * pRecvPct)
         item->Relocate(_player->GetPosition());
         sWorld->AddItemToWorld(item);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
+    }
+}
+
+void WorldSession::onMixRequest(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    struct MixInfo
+    {
+        uint handle;
+        uint16 count;
+    };
+    MixInfo main_item{};
+    main_item.handle = pRecvPct->read<uint>();
+    main_item.count = pRecvPct->read<uint16>();
+    int count = pRecvPct->read<uint16>();
+    std::vector<MixInfo> vSubItems{};
+    for(int i = 0; i < count; ++i)
+    {
+        MixInfo mi{};
+        mi.handle = pRecvPct->read<uint>();
+        mi.count = pRecvPct->read<uint16>();
+        vSubItems.emplace_back(mi);
+    }
+
+    if(count > 9)
+    {
+        KickPlayer();
+        return;
+    }
+
+    auto pMainItem = sMixManager->check_mixable_item(_player, main_item.handle, 1);
+    if(main_item.handle != 0 && pMainItem == nullptr)
+        return;
+
+    std::vector<Item*> pSubItem{};
+    std::vector<uint16> pCountList{};
+    if(count != 0)
+    {
+        for(auto& mixInfo : vSubItems)
+        {
+            auto item = sMixManager->check_mixable_item(_player, mixInfo.handle, mixInfo.count);
+            if(item == nullptr)
+                return;
+            pSubItem.emplace_back(item);
+            pCountList.emplace_back(mixInfo.count);
+        }
+    }
+    auto mb = sMixManager->GetProperMixInfo(pMainItem, count, pSubItem, pCountList);
+
+    if(mb == nullptr)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_INVALID_ARGUMENT, 0);
+        return;
+    }
+
+    switch(mb->type)
+    {
+        case 0:
+            break;
+        case 101:
+        case 103:
+            sMixManager->EnhanceItem(mb, _player, pMainItem, count, pSubItem, pCountList);
+            return;
+        case 311:
+            sMixManager->MixItem(mb, _player, pMainItem, count, pSubItem, pCountList);
+            return;
+        default:
+            break;
     }
 }

@@ -67,6 +67,8 @@ public:
     bool LoadLevelResource();
     bool LoadSkillTreeResource();
     bool LoadDungeonResource();
+    bool LoadEnhanceResource();
+    bool LoadMixResource();
     bool LoadSkillJP();
     bool InitGameContent();
 
@@ -102,7 +104,7 @@ public:
     bool IsInRandomPoolMonster(int group_id, int monster_id);
 
     DropGroup* GetDropGroupInfo(int drop_group_id);
-    bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, long &nItemCount);
+    bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);
 
     ushort IsLearnableSkill(Unit *, uint, int, int &);
     int GetLocationID(float x, float y) const;

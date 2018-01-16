@@ -101,6 +101,8 @@ public:
     static void SendNPCStatusInVisibleRange(Player* pPlayer);
     static void SendQuestStatus(Player* pPlayer, Quest *pQuest);
     static void SendItemCoolTimeInfo(Player* pPlayer);
+    static void SendMixResult(Player* pPlayer, std::vector<uint>* pHandles);
+    static void SendItemWearInfoMessage(Player* pPlayer, Unit* pTarget, Item* pItem);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

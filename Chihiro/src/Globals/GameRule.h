@@ -26,6 +26,8 @@ public:
     static int64 GetIntValueByRandomInt64(double fValue);
     static float GetStaminaRatio(int level);
     static float GetStaminaBonus();
+    static int nEnhanceFailType;
+    static int nCurrentLocalFlag;
 private:
     static int _chipLevelLimit[];
     static float _itemDropRate;

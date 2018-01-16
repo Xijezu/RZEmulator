@@ -454,13 +454,9 @@ bool Player::ReadEquipItem()
 
             Unit *unit = nullptr;
             if (summon_id == 0)
-            {
                 unit = this;
-            }
             else
-            {
                 unit = GetSummon(summon_id);
-            }
             Item *item = FindItemBySID(sid);
             std::vector<int> indices{ };
             if (item != nullptr && unit != nullptr)
@@ -468,7 +464,7 @@ bool Player::ReadEquipItem()
                 if (unit->m_anWear[wear_info] == nullptr)
                 {
                     auto iwt = (ItemWearType)wear_info;
-                    if (TranslateWearPosition(iwt, item, indices))
+                    if (unit->TranslateWearPosition(iwt, item, indices))
                     {
                         unit->m_anWear[wear_info] = item;
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;

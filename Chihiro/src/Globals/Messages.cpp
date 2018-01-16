@@ -870,3 +870,31 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     }
     pPlayer->SendPacket(coolTimePct);
 }
+
+void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket mixPct(TS_SC_MIX_RESULT);
+    mixPct << (uint) (pHandles != nullptr ? pHandles->size() : 0);
+    if(pHandles != nullptr && !pHandles->empty())
+    {
+        for (unsigned int pHandle : *pHandles)
+        {
+            mixPct << pHandle;
+        }
+    }
+
+    pPlayer->SendPacket(mixPct);
+}
+
+void Messages::SendItemWearInfoMessage(Player *pPlayer, Unit *pTarget, Item *pItem)
+{
+    XPacket packet(TS_SC_ITEM_WEAR_INFO);
+    packet << (uint32_t) pItem->GetHandle();
+    packet << (int16_t) pItem->m_Instance.nWearInfo;
+    packet << (uint32_t) (pTarget != nullptr ? pTarget->GetHandle() : 0);
+    packet << (int32_t) pItem->m_Instance.nEnhance;
+    pPlayer->SendPacket(packet);
+}

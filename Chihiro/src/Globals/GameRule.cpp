@@ -12,6 +12,8 @@ float GameRule::_itemDropRate = 1.0f;
 float GameRule::_GoldDropRate = 1.0f;
 float GameRule::_chaosDropRate = 1.0f;
 float GameRule::_expRate = 1.0f;
+int GameRule::nCurrentLocalFlag = 4;
+int GameRule::nEnhanceFailType = 2;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
 {
