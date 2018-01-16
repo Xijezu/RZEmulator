@@ -61,9 +61,18 @@ void Player::CleanupsBeforeDelete()
 
     for(auto &t : m_vSummonList) {
         if(t != nullptr)
+        {
+            State::DB_ClearState(t);
+            for(auto& state : t->m_vStateList)
+                State::DB_InsertState(t, state);
             t->DeleteThis();
+        }
     }
     m_vSummonList.clear();
+
+    State::DB_ClearState(this);
+    for(auto& state : m_vStateList)
+        State::DB_InsertState(this, state);
 
     for(auto &q : m_QuestManager.m_vActiveQuest) {
         Quest::DB_Insert(this, q);
@@ -182,7 +191,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
             m_pMainSummon = GetSummon(mainSummon);
         }
 
-        if(!ReadEquipItem() || !ReadSkillList(this) || !ReadQuestList())
+        if(!ReadEquipItem() || !ReadSkillList(this) || !ReadQuestList()  || !ReadStateList(this))
             return false;
 
         CalculateStat();
@@ -232,6 +241,47 @@ bool Player::ReadItemList(int sid)
                 item->m_Instance.nOwnerUID     = sid;
                 m_lInventory[item->GetHandle()] = item;
             }
+        } while (result->NextRow());
+    }
+    return true;
+}
+
+
+bool Player::ReadStateList(Unit * pUnit)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STATE);
+    auto uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
+    stmt->setInt32(0, pUnit->IsPlayer() ? uid : 0);
+    stmt->setInt32(1, pUnit->IsSummon() ? uid : 0);
+    uint ct = sWorld->GetArTime();
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
+        do {
+            Field *fields     = result->Fetch();
+            int idx = 3;
+
+            uint duration[3] = {0};
+            uint16 levels[3] = {0};
+            int base_damage[3] = {0};
+            int remain_times[3] = {0};
+
+            int code = fields[idx++].GetInt32();
+            levels[0] = fields[idx++].GetUInt16();
+            int level_2 = fields[idx++].GetInt32();
+            int level_3 = fields[idx++].GetInt32();
+            duration[0] = fields[idx++].GetUInt32();
+            int duration_2 = fields[idx++].GetInt32();
+            int duration_3 = fields[idx++].GetInt32();
+            remain_times[0] = fields[idx++].GetUInt32();
+            int remain_time_2 = fields[idx++].GetInt32();
+            int remain_time_3 = fields[idx++].GetInt32();
+            base_damage[0] = fields[idx++].GetInt32();
+            int base_damage_2 = fields[idx++].GetInt32();
+            int base_damage_3 = fields[idx++].GetInt32();
+            int remain_fire_time = fields[idx].GetInt32();
+            State state{};
+            auto si = sObjectMgr->GetStateInfo(code);
+            state.SetState(code, 0, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld->GetArTime()), base_damage, 0, "");
+            pUnit->m_vStateList.emplace_back(state);
         } while (result->NextRow());
     }
     return true;

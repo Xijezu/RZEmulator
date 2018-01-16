@@ -90,6 +90,7 @@ public:
     uint64 GetItemIndex();
     uint64 GetPlayerIndex();
     uint64 GetPetIndex();
+	uint64 GetStateIndex();
     uint64 GetSummonIndex();
 	uint64 GetSkillIndex();
 
@@ -113,6 +114,7 @@ private:
 	uint64_t s_nPetIndex{0};
 	uint64_t s_nSummonIndex{0};
 	uint64_t s_nSkillIndex{0};
+	uint64_t s_nStateIndex{0};
 };
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()

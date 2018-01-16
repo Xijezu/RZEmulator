@@ -29,8 +29,11 @@ struct StateDamage {
     uint16 uid;
 };
 
+class Unit;
 class State {
 public:
+    static void DB_ClearState(Unit* pOwner);
+    static void DB_InsertState(Unit* pOwner, State& pState);
     State() = default;
     ~State() = default;
     State(StateType type, StateCode code, int uid, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue);
@@ -43,7 +46,7 @@ public:
     float GetValue(int idx) const;
     bool IsHarmful();
     bool IsDuplicatedGroup(int nGroupID);
-    void SetState(StateCode code, int uid, uint caster, const uint16 levels[], const uint durations[], const int remain_times[], uint last_fire_time, const int base_damage[], int state_value, std::string szStateValue);
+    void SetState(int code, int uid, uint caster, const uint16 levels[], const uint durations[], const int remain_times[], uint last_fire_time, const int base_damage[], int state_value, std::string szStateValue);
     int GetTimeType() const;
 
     uint16 m_nUID;

@@ -2582,6 +2582,9 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
                                             && stateInfo->value[2] == 0.0f && stateInfo->value[3] == 0.0f)
 
     }*/
+    if(m_castingSkill != nullptr)
+        CancelSkill();
+
     if(code == StateCode::SC_FEAR)
         ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
 

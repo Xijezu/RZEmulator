@@ -46,4 +46,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_GET_MAX_QUEST_ID, "SELECT MAX(id) AS id FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_REP_ITEMCOOLTIME, "REPLACE INTO ItemCoolTime VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_ITEMCOOLTIME, "SELECT * FROM ItemCoolTime WHERE owner_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHARACTER_DEL_STATE, "DELETE FROM State WHERE owner_id = ? AND summon_id = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_REP_STATE, "REPLACE INTO State VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_GET_STATE, "SELECT * FROM State WHERE owner_id = ? AND summon_id = ?", CONNECTION_SYNCH);
 }

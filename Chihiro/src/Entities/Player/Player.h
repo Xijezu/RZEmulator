@@ -90,6 +90,7 @@ public:
     bool ReadEquipItem();
     bool ReadSkillList(Unit*);
     bool ReadQuestList();
+    bool ReadStateList(Unit*);
     /* ****************** DATABASE END ****************** */
 
     // Warping

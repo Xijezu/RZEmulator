@@ -48,10 +48,11 @@ void World::InitWorld()
 	MX_LOG_INFO("server.worldserver", "Initializing game content...");
 
     // Dörti häckz, plz ihgnoar
-    s_nItemIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();;
+    s_nItemIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();
     s_nPlayerIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Character`;").get()->Fetch()->GetUInt64();
 	s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
 	s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
+    s_nStateIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `State`;").get()->Fetch()->GetUInt64();
 
 	sObjectMgr->InitGameContent();
 	MX_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));
@@ -111,6 +112,11 @@ uint64 World::GetItemIndex()
 uint64 World::GetPlayerIndex()
 {
     return ++s_nPlayerIndex;
+}
+
+uint64 World::GetStateIndex()
+{
+    return ++s_nStateIndex;
 }
 
 uint64 World::GetPetIndex()
@@ -757,4 +763,3 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
         }
     }
 }
-
