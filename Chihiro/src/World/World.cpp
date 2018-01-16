@@ -471,11 +471,17 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
             fJP = 0.0f;
 
         auto mob = dynamic_cast<Monster*>(pCorpse);
-        //if(pCorpse->IsMonster() && mob.m_h)
-        /// TAMING
+        if(pCorpse->IsMonster() && mob->GetTamer() == pPlayer->GetHandle())
+        {
+            if(mob->m_bTamedSuccess)
+            {
+                exp *= mob->GetBase()->taming_exp_mod;
+                jp *= mob->GetBase()->taming_exp_mod;
+            }
+        }
     }
 
-    pPlayer->AddEXP(exp, jp, false);
+    pPlayer->AddEXP(GameRule::GetIntValueByRandomInt64(GameRule::GetEXPRate() * exp), GameRule::GetIntValueByRandomInt(GameRule::GetEXPRate() * jp), true);
 }
 void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {

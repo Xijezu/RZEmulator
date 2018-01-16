@@ -160,7 +160,7 @@ public:
     uint32 GetMaxMana() const { return GetUInt32Value(UNIT_FIELD_MAX_MANA); }
     uint32 GetCurrentJob() const { return GetUInt32Value(UNIT_FIELD_JOB); };
     uint32 GetCurrentJLv() const { return GetUInt32Value(UNIT_FIELD_JLV); }
-    uint32 GetStamina() const { return GetUInt32Value(UNIT_FIELD_STAMINA); }
+    int GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
     uint32 GetJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
     uint32 GetTotalJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
     float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
@@ -202,7 +202,7 @@ protected:
     void applyStatByState();
     void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
     void amplifyStatByState();
-    void applyState(State &state);
+    virtual void applyState(State &state);
     void applyStateEffect();
     void applyStateAmplifyEffect();
     void applyStateAmplify(State &state);
@@ -250,6 +250,13 @@ protected:
     CreatureElementalResistAmplifier m_ResistAmplifier{ };
     std::vector<Skill *> m_vSkillList;
     std::vector<HateModifier> m_vHateMod{ };
+
+    ///- Additional Damage
+    std::vector<AdditionalDamageInfo> m_vNormalAdditionalDamage{};
+    std::vector<AdditionalDamageInfo> m_vRangeAdditionalDamage{};
+    std::vector<AdditionalDamageInfo> m_vPhysicalSkillAdditionalDamage{};
+    std::vector<AdditionalDamageInfo> m_vMagicialSkillAdditionalDamage{};
+
     Item *m_anWear[Item::MAX_ITEM_WEAR]{nullptr};
     uint m_nMovableTime{0};
     int m_nUnitExpertLevel{0};

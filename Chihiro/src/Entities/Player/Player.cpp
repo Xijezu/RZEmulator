@@ -29,10 +29,12 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
     _objType  = OBJ_CLIENT;
     _valuesCount = BATTLE_FIELD_END;
 
-    m_QuestManager.m_pHandler = this;
-
     _InitValues();
+
+    m_QuestManager.m_pHandler = this;
+    m_nLastStaminaUpdateTime = sWorld->GetArTime();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
+    clearPendingBonusMsg();
 }
 
 Player::~Player()
@@ -573,8 +575,6 @@ void Player::SendLoginProperties()
     SendPropertyMessage("pk_count", (int64) GetUInt32Value(UNIT_FIELD_PKC));
     SendPropertyMessage("dk_count", (int64) GetUInt32Value(UNIT_FIELD_DKC));
     SendPropertyMessage("immoral", (int64) GetUInt32Value(UNIT_FIELD_IP));
-    SendPropertyMessage("stamina", (int64) GetUInt32Value(UNIT_FIELD_STAMINA));
-    SendPropertyMessage("max_stamina", (int64) GetUInt32Value(UNIT_FIELD_STAMINA));
     SendPropertyMessage("channel", (int64) 0);
     SendPropertyMessage("client_info", m_szClientInfo);
     Messages::SendGameTime(this);
@@ -591,6 +591,14 @@ void Player::SendLoginProperties()
         m_pMainSummon->SetLayer(GetLayer());
         sWorld->AddSummonToWorld(m_pMainSummon);
     }
+    for(auto& s : m_vStateList)
+    {
+        onUpdateState(s, false);
+    }
+    Messages::SendPropertyMessage(this, this, "stamina", GetStamina());
+    Messages::SendPropertyMessage(this, this, "max_stamina", MAX_STAMINA);
+    Messages::SendPropertyMessage(this, this, "stamina_regen", GetStaminaRegenRate());
+    Messages::BroadcastStatusMessage(this);
 }
 
 void Player::SendGoldChaosMessage()
@@ -1029,6 +1037,12 @@ void Player::Update(uint diff)
 void Player::OnUpdate()
 {
     uint ct = sWorld->GetArTime();
+    if(m_nLastStaminaUpdateTime + 6000 < ct)
+    {
+        uint lst = (ct - m_nLastStaminaUpdateTime) / 0x1770;
+        m_nLastStaminaUpdateTime += 6000 * lst;
+        AddStamina((int)(GetStaminaRegenRate() * lst));
+    }
     if(m_nLastSaveTime + 30000 < ct) {
         this->Save(false);
         Position pos = GetCurrentPosition(ct);
@@ -1070,6 +1084,7 @@ void Player::onExpChange()
     }
     level -= 1;
     Messages::SendEXPMessage(this, this);
+    sendBonusEXPJPMsg();
     int oldLevel = GetLevel();
     if(level != 0 && level != oldLevel) {
         SetLevel(level);
@@ -2320,9 +2335,28 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
 
     // @todo summon level exp
 
+    int64 gain_exp = exp;
+    int64 bonus_exp = 0;
+    int bonus_jp = 0;
     if(exp != 0)
     {
-        // @todo: stanima saver
+        if(bApplyStanima)
+        {
+            gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
+            if(GetStamina() >= gain_exp || m_bStaminaActive)
+            {
+                bonus_exp = (int64)((float)exp * GameRule::GetStaminaBonus());
+                bonus_jp = (int)((float)jp * GameRule::GetStaminaBonus());
+                if(bonus_exp != 0 || bonus_jp != 0)
+                {
+                    setBonusMsg(BONUS_TYPE::BONUS_STAMINA, (int)(GameRule::GetStaminaBonus() * 100.0f), bonus_exp, bonus_jp);
+                    exp += bonus_exp;
+                    jp +=  bonus_jp;
+                }
+                if(!m_bStaminaActive)
+                    AddStamina((int)(0 - gain_exp));
+            }
+        }
 
         uint ct = sWorld->GetArTime();
 
@@ -2393,4 +2427,118 @@ void Player::applyPassiveSkillEffect(Skill *skill)
     }
     Unit::applyPassiveSkillEffect(skill);
 
+}
+
+int Player::AddStamina(int nStamina)
+{
+    int addStamina = nStamina;
+    int oldStamina = GetStamina();
+    if(nStamina > 0)
+    {
+        if (oldStamina + nStamina > MAX_STAMINA)
+        {
+            if (MAX_STAMINA <= oldStamina)
+                addStamina = nStamina;
+            else
+                addStamina = MAX_STAMINA - oldStamina;
+        }
+    }
+    if(addStamina != 0)
+    {
+        SetInt32Value(UNIT_FIELD_STAMINA, GetStamina() + addStamina);
+        if(GetStamina() < 0)
+            SetInt32Value(UNIT_FIELD_STAMINA, 0);
+        if(GetStamina() != oldStamina)
+            Messages::SendPropertyMessage(this, this, "stamina", GetStamina());
+    }
+}
+
+int Player::GetStaminaRegenRate()
+{
+    int result = GetCondition() != 0 ? 100 : 110;
+    result += GetInt32Value(UNIT_FIELD_STAMINA_REGEN_BONUS);
+    if(GetInt32Value(UNIT_FIELD_STAMINA_REGEN_RATE) != result)
+    {
+        SetInt32Value(UNIT_FIELD_STAMINA_REGEN_RATE, result);
+        Messages::SendPropertyMessage(this, this, "stamina_regen", result);
+    }
+    return result;
+}
+
+CONDITION_INFO Player::GetCondition() const
+{
+    if(GetInt32Value(UNIT_FIELD_STAMINA) >= 10000)
+       return (GetInt32Value(UNIT_FIELD_STAMINA) < 130000) ? CONDITION_INFO::CONDITION_AVERAGE : CONDITION_INFO::CONDITION_GOOD;
+    return CONDITION_INFO::CONDITION_BAD;
+}
+
+void Player::applyState(State &state)
+{
+    int stateType = state.GetEffectType();
+    if(stateType == 200)
+    {
+        if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+            m_Attribute.nMoveSpeed += state.GetValue(0);
+        // Riding State UID @todo
+        return;
+    }
+    if(stateType == 0)
+    {
+        switch(state.m_nCode)
+        {
+            case StateCode::SC_STAMINA_SAVE:
+                m_bStaminaActive = true;
+                return;
+            default:
+                Unit::applyState(state);
+                return;
+        }
+    }
+    Unit::applyState(state);
+}
+
+void Player::setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP)
+{
+    m_pBonusInfo[type].type = type;
+    m_pBonusInfo[type].rate = nBonusPerc;
+    m_pBonusInfo[type].exp = nBonusEXP;
+    m_pBonusInfo[type].jp = nBonusJP;
+}
+
+void Player::clearPendingBonusMsg()
+{
+    for(auto& bonus : m_pBonusInfo)
+    {
+        bonus.exp = -1;
+        bonus.rate = -1;
+        bonus.jp = -1;
+    }
+}
+
+void Player::sendBonusEXPJPMsg()
+{
+    uint16 cnt{0};
+    for(auto& bonus : m_pBonusInfo)
+    {
+        if(bonus.exp != -1)
+            cnt++;
+    }
+    if(cnt == 0)
+        return;
+
+    XPacket bonusPct(TS_SC_BONUS_EXP_JP);
+    bonusPct << GetHandle();
+    bonusPct << cnt;
+    for(auto& bonus : m_pBonusInfo)
+    {
+        if(bonus.exp != -1)
+        {
+            bonusPct << bonus.type;
+            bonusPct << bonus.rate;
+            bonusPct << (int64)bonus.exp;
+            bonusPct << (int64)bonus.jp;
+        }
+    }
+    SendPacket(bonusPct);
+    clearPendingBonusMsg();
 }

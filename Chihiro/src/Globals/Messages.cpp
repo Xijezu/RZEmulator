@@ -132,7 +132,7 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
     pPlayer->SendPacket(summonPct);
 }
 
-void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szKey, int64_t nValue)
+void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string& szKey, int64 nValue)
 {
         XPacket packet(TS_SC_PROPERTY);
         packet << (uint32_t)pUnit->GetHandle();
@@ -143,7 +143,7 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, std::string szK
         pPlayer->SendPacket(packet);
 }
 
-void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, std::string szTitle, std::string szText, std::string szMenu)
+void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string& szTitle, const std::string& szText, const std::string& szMenu)
 {
     if (pPlayer == nullptr)
         return;
@@ -192,7 +192,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
     pPlayer->SendPacket(skillPct);
 }
 
-void Messages::SendChatMessage(int nChatType, std::string szSenderName, Player* target, std::string szMsg)
+void Messages::SendChatMessage(int nChatType, const std::string& szSenderName, Player* target, const std::string& szMsg)
 {
     if(target == nullptr)
         return;

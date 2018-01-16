@@ -98,7 +98,9 @@ enum EUnitFields {
     UNIT_FIELD_EXP                   = 0x0049, // Size: 2
     UNIT_FIELD_DEAD_TIME             = 0x004B, // Size: 1
     UNIT_FIELD_GOLD                  = 0x004C, // Size: 2
-    UNIT_END                         = 0x004E
+    UNIT_FIELD_STAMINA_REGEN_BONUS   = 0x004E, // Size: 1
+    UNIT_FIELD_STAMINA_REGEN_RATE    = 0x004F, // Size: 1
+    UNIT_END                         = 0x0050
 };
 
 enum EBattleFields {

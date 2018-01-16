@@ -17,18 +17,23 @@ public:
     static float GetItemDropRate();
     static float GetGoldDropRate();
     static float GetChaosDropRate();
+    static float GetEXPRate();
     static float GetItemValue(float, int, int, int, int);
     static float GetPickableRange();
     static int GetChipLevelLimit(int idx);
     static int GetMaxLevel() { return 150; }
     static int GetIntValueByRandomInt(double fValue);
     static int64 GetIntValueByRandomInt64(double fValue);
+    static float GetStaminaRatio(int level);
+    static float GetStaminaBonus();
 private:
     static int _chipLevelLimit[];
     static float _itemDropRate;
+    static float _expRate;
     static float _GoldDropRate;
     static float _chaosDropRate;
     static int _modtable[];
+    static float _staminaExpRate[];
 };
 
 

@@ -12,6 +12,30 @@
 class WorldSession;
 
 #define MAX_ITEM_COOLTIME_GROUP 20
+#define MAX_STAMINA 500000
+
+enum BONUS_TYPE : int
+{
+    BONUS_PCBANG         = 0x0,
+    BONUS_STAMINA        = 0x1,
+    BONUS_PREMIUM_PCBANG = 0x2,
+    MAX_BONUS_TYPE       = 0x3,
+};
+
+struct BonusInfo
+{
+    int type;
+    int rate;
+    int64 exp;
+    int jp;
+};
+
+enum CONDITION_INFO : int
+{
+    CONDITION_GOOD    = 0,
+    CONDITION_AVERAGE = 1,
+    CONDITION_BAD     = 2
+};
 
 class Player : public Unit, public QuestEventHandler {
 public:
@@ -52,6 +76,9 @@ public:
     int64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
     int GetPartyID() { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
     int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
+    int AddStamina(int nStamina);
+    int GetStaminaRegenRate();
+    CONDITION_INFO GetCondition() const;
 
     uint GetJobDepth();
     std::string GetFlag(const std::string& flag) { return m_lFlagList[flag]; }
@@ -181,15 +208,22 @@ protected:
     void onCantAttack(uint target, uint t) override;
     void onModifyStatAndAttribute() override;
     void applyPassiveSkillEffect(Skill* skill) override;
+    void applyState(State& state) override;
 
     void onStartQuest(Quest* pQuest);
     void updateQuestStatus(Quest* pQuest);
     void onEndQuest(Quest* pQuest);
 
 private:
+    void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP);
+    void clearPendingBonusMsg();
+    void sendBonusEXPJPMsg();
+
     WorldSession *m_session{nullptr};
     std::string  m_szAccount;
     QuestManager m_QuestManager{};
+    uint m_nLastStaminaUpdateTime{0};
+    bool m_bStaminaActive{false};
 
     float m_fDistEXPMod{1.0f};
     float m_fActiveSummonExpAmp{0.0f};
@@ -203,6 +237,8 @@ private:
     std::vector<Summon *> m_vSummonList{nullptr};
 
     uint m_nLastSaveTime{ }, m_nLastCantAttackTime{ };
+
+    BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{};
 
     // Dialog stuff
     int         m_nDialogType{ };

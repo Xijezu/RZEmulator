@@ -2,7 +2,7 @@
 #define PROJECT_DAMAGETEMPLATE_H
 
 #include "Common.h"
-
+#include "ItemFields.h"
 
 struct HateModifier {
     // Function       :     public void StructCreature::HateModifier::HateModifier(int, int, float, int)
@@ -87,5 +87,32 @@ struct AttackInfo : public DamageInfo {
     uint   attacker_hp;
     ushort attacker_mp;
 };
+
+ struct AdditionalDamageInfo
+ {
+     AdditionalDamageInfo(uint8 _ratio, ElementalType _require_type, ElementalType _type, uint16 _nDamage, float _fDamage)
+     {
+         ratio        = _ratio;
+         require_type = _require_type;
+         type         = _type;
+         nDamage      = _nDamage;
+         fDamage      = _fDamage;
+     }
+
+     AdditionalDamageInfo(uint8 _ratio, ElementalType _require_type, ElementalType _type, float _fDamage)
+     {
+         ratio        = _ratio;
+         require_type = _require_type;
+         type         = _type;
+         nDamage      = (uint16)_fDamage;
+         fDamage      = _fDamage;
+     }
+
+     uint8         ratio;
+     ElementalType require_type;
+     ElementalType type;
+     uint16        nDamage;
+     float         fDamage;
+ };
 
 #endif // PROJECT_DAMAGETEMPLATE_H

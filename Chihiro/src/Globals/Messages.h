@@ -69,10 +69,10 @@ public:
     static void SendStatInfo(Player *, Unit *);
     static void SendAddSummonMessage(Player *, Summon *);
     static void SendCreatureEquipMessage(Player *, bool);
-    static void SendPropertyMessage(Player *, Unit *, std::string, int64_t);
-    static void SendDialogMessage(Player *, uint32_t, int, std::string, std::string, std::string);
+    static void SendPropertyMessage(Player *, Unit *, const std::string&, int64);
+    static void SendDialogMessage(Player *, uint32_t, int, const std::string&, const std::string&, const std::string&);
     static void SendSkillList(Player *, Unit *, int);
-    static void SendChatMessage(int, std::string, Player*, std::string);
+    static void SendChatMessage(int, const std::string&, Player*, const std::string&);
     static void SendMarketInfo(Player *, uint32_t, const std::vector<MarketInfo>&);
     static void SendItemList(Player *, bool);
     static void SendItemMessage(Player *, Item *);

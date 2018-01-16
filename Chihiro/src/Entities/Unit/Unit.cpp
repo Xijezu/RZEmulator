@@ -220,42 +220,42 @@ void Unit::incParameter2(uint nBitset, float fValue)
     if ((nBitset & 0x40) != 0)
     {
         m_Resist.nResist[6] += (short)fValue;
-    }/*
+    }
     if ((nBitset & 0x200000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeNone, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeNone, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
     }
     if ((nBitset & 0x400000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeFire, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeFire, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
     }
     if ((nBitset & 0x800000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWater, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWater, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
     }
     if ((nBitset & 0x1000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWind, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWind, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
     }
     if ((nBitset & 0x2000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeEarth, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeEarth, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
     }
     if ((nBitset & 0x4000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeLight, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeLight, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
     }
     if ((nBitset & 0x8000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
-    }*/
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+    }
     if ((nBitset & 0x10000000) != 0)
         m_Attribute.nCriticalPower += fValue;
     if ((nBitset & 0x20000000) != 0)
@@ -302,6 +302,10 @@ void Unit::CalculateStat()
     m_Attribute.Reset(0);
     m_Resist.Reset(0);
     m_ResistAmplifier.Reset(0.0f);
+    m_vNormalAdditionalDamage.clear();
+    m_vRangeAdditionalDamage.clear();
+    m_vMagicialSkillAdditionalDamage.clear();
+    m_vPhysicalSkillAdditionalDamage.clear();
 
     auto statptr = GetBaseStat();
     CreatureStat basestat{};
@@ -482,7 +486,8 @@ void Unit::applyState(State &state)
             incParameter((uint) state.GetValue(12), (int) (state.GetValue(13) + (state.GetValue(14) * state.GetLevel())), false);
             incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) * state.GetLevel())), false);
             break;
-
+        default:
+            break;
     }
 }
 
@@ -669,63 +674,71 @@ void Unit::applyItemEffect()
 void Unit::ampParameter2(uint nBitset, float fValue)
 {
 
-    if ((nBitset & 1) != 0) {
+    if ((nBitset & 1) != 0)
+    {
         m_ResistAmplifier.fResist[0] += fValue;
     }
-    if ((nBitset & 2) != 0) {
+    if ((nBitset & 2) != 0)
+    {
         m_ResistAmplifier.fResist[1] += fValue;
     }
-    if ((nBitset & 4) != 0) {
+    if ((nBitset & 4) != 0)
+    {
         m_ResistAmplifier.fResist[2] += fValue;
     }
-    if ((nBitset & 8) != 0) {
+    if ((nBitset & 8) != 0)
+    {
         m_ResistAmplifier.fResist[3] += fValue;
     }
-    if ((nBitset & 0x10) != 0) {
+    if ((nBitset & 0x10) != 0)
+    {
         m_ResistAmplifier.fResist[4] += fValue;
     }
-    if ((nBitset & 0x20) != 0) {
+    if ((nBitset & 0x20) != 0)
+    {
         m_ResistAmplifier.fResist[5] += fValue;
     }
-    if ((nBitset & 0x40) != 0) {
+    if ((nBitset & 0x40) != 0)
+    {
         m_ResistAmplifier.fResist[6] += fValue;
     }
-    /*if ((nBitset & 0x200000) != 0)
+    if ((nBitset & 0x200000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeNone, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeNone, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
     }
     if ((nBitset & 0x400000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeFire, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeFire, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
     }
     if ((nBitset & 0x800000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWater, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWater, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
     }
     if ((nBitset & 0x1000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWind, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeWind, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
     }
     if ((nBitset & 0x2000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeEarth, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeEarth, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
     }
     if ((nBitset & 0x4000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeLight, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeLight, fValue));
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
     }
     if ((nBitset & 0x8000000) != 0)
     {
-        this.m_vNormalAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
-        this.m_vRangeAdditionalDamage.Add(new AdditionalDamageInfo(100, Elemental.Type.TypeNone, Elemental.Type.TypeDark, fValue));
-    }*/
-    if ((nBitset & 0x10000000) != 0) {
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+    }
+    if ((nBitset & 0x10000000) != 0)
+    {
         m_AttributeAmplifier.fCriticalPower += fValue;
     }
     if ((nBitset & 0x20000000) != 0)
@@ -1318,7 +1331,7 @@ void Unit::regenHPMP(uint t)
                 if (pt < 1.0f)
                     pt = 1.0f;
                 pt *= GetFloatValue(UNIT_FIELD_HP_REGEN_MOD);
-                int pti = static_cast<int>(pt);
+                auto pti = static_cast<int>(pt);
                 if (pti != 0.0) {
                     AddHealth(pti);
                 }
@@ -1845,7 +1858,19 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     result.SetDamage(d);
     if(!result.bMiss && !result.bPerfectBlock)
     {
-        // todo additionaldamageinfo
+        std::vector<AdditionalDamageInfo> v_add = bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage;
+        for(auto& addi : v_add)
+        {
+            if(addi.ratio > (uint8)((uint)rand32() % 100))
+            {
+                if(addi.nDamage != 0)
+                    damage = addi.nDamage;
+                else
+                    damage = (int)(addi.fDamage * (float)result.nDamage);
+                Damage dd = DealDamage(pFrom, damage, addi.type, DamageType::Additional, 0, 0, 0, nullptr, nullptr);
+                result.nDamage += dd.nDamage;
+            }
+        }
     }
 
     result.target_hp = GetHealth();
@@ -2713,6 +2738,13 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             result = TS_RESULT_ACCESS_DENIED;
         }
             break;
+        case 80:
+            if(IsPlayer())
+            {
+                dynamic_cast<Player*>(this)->AddStamina((int)var1);
+                return TS_RESULT_SUCCESS;
+            }
+            return TS_RESULT_ACCESS_DENIED;
         default:
             error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
             MX_LOG_ERROR("entites.unit", error.c_str());
