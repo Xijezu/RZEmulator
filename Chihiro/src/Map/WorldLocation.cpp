@@ -39,6 +39,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
     if (player->m_WorldLocation != nullptr)
         RemoveFromLocation(player);
 
+    MX_UNIQUE_GUARD writeGuard(i_lock);
     for(int i = 0; i < m_vWorldLocation.size(); i++)
     {
         if (m_vWorldLocation[i].idx == idx) {
@@ -55,15 +56,16 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
 
 bool WorldLocationManager::RemoveFromLocation(Player *player)
 {
-        for(auto& wl : m_vWorldLocation)
+    MX_UNIQUE_GUARD writeLock(i_lock);
+    for (auto &wl : m_vWorldLocation)
+    {
+        if (player->m_WorldLocation == &wl)
         {
-            if(player->m_WorldLocation == &wl)
-            {
-               wl.m_vIncludeClient.erase(std::remove(wl.m_vIncludeClient.begin(),
-                                                     wl.m_vIncludeClient.end(), player),
-                                         wl.m_vIncludeClient.end());
-                return true;
-            }
+            wl.m_vIncludeClient.erase(std::remove(wl.m_vIncludeClient.begin(),
+                                                  wl.m_vIncludeClient.end(), player),
+                                      wl.m_vIncludeClient.end());
+            return true;
+        }
     }
     return false;
 }
@@ -72,6 +74,8 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
 {
     if(player == nullptr)
         return;
+
+    MX_SHARED_GUARD readGuard(i_lock);
     for(auto& wl : m_vWorldLocation)
     {
         if(wl.idx == idx)

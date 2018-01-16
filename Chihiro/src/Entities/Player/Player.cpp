@@ -1013,6 +1013,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
         }
         if(nl != 0) {
             this->m_WorldLocation = sWorldLocationMgr->AddToLocation(nl, this);
+            GetStaminaRegenRate(); /* workaround so the value does update */
         }
         m_nWorldLocationId = nl;
     }

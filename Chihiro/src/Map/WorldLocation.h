@@ -2,6 +2,7 @@
 #define PROJECT_WORLDLOCATION_H
 
 #include "Common.h"
+#include "SharedMutex.h"
 
 class Player;
 
@@ -73,6 +74,8 @@ public:
     void RegisterWorldLocation(uint idx, uint8_t location_type, uint time_id, uint weather_id, uint8_t ratio, uint weather_change_time, int shovelable_item);
     void RegisterMonsterLocation(uint idx, uint monster_id);
 
+private:
+    MX_SHARED_MUTEX i_lock;
     std::vector<WorldLocation> m_vWorldLocation{ };
     UNORDERED_MAP<uint, std::vector<uint>> m_hsMonsterID{ };
 };
