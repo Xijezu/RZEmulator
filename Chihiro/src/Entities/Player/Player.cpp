@@ -597,7 +597,7 @@ void Player::SendLoginProperties()
         onUpdateState(s, false);
     }
     Messages::SendPropertyMessage(this, this, "stamina", GetStamina());
-    Messages::SendPropertyMessage(this, this, "max_stamina", MAX_STAMINA);
+    Messages::SendPropertyMessage(this, this, "max_stamina", GetInt32Value(UNIT_FIELD_MAX_STAMINA));
     Messages::SendPropertyMessage(this, this, "stamina_regen", GetStaminaRegenRate());
     Messages::BroadcastStatusMessage(this);
 }
@@ -990,30 +990,33 @@ void Player::PushItem(Item *pItem, uint64 count, bool bSkipUpdateToDB)
 
 void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
 {
-    Position client_pos{};
-    client_pos.Relocate(x,y,0,0);
-    uint ct = sWorld->GetArTime();
+    Position client_pos{ };
+    client_pos.Relocate(x, y, 0, 0);
+    uint     ct  = sWorld->GetArTime();
     Position pos = this->GetCurrentPosition(ct);
-    if(client_pos.GetExactDist2d(&pos) < 120.0f) {
-        pos.m_positionX = client_pos.m_positionX;
-        pos.m_positionY = client_pos.m_positionY;
-        pos.m_positionZ = client_pos.m_positionZ;
+    if (client_pos.GetExactDist2d(&pos) < 120.0f)
+    {
+        pos.m_positionX  = client_pos.m_positionX;
+        pos.m_positionY  = client_pos.m_positionY;
+        pos.m_positionZ  = client_pos.m_positionZ;
         pos._orientation = client_pos._orientation;
     }
-    int nl = sObjectMgr->GetLocationID(x, y);
+    int     nl = sObjectMgr->GetLocationID(x, y);
     XPacket locPct(TS_SC_CHANGE_LOCATION);
     locPct << (int)m_nWorldLocationId;
     locPct << (int)nl;
     SendPacket(locPct);
 
-    if(m_nWorldLocationId != nl) {
-        if(m_nWorldLocationId != 0) {
+    if (m_nWorldLocationId != nl)
+    {
+        if (m_nWorldLocationId != 0)
+        {
             sWorldLocationMgr->RemoveFromLocation(this);
             this->m_WorldLocation = nullptr;
         }
-        if(nl != 0) {
+        if (nl != 0)
+        {
             this->m_WorldLocation = sWorldLocationMgr->AddToLocation(nl, this);
-            GetStaminaRegenRate(); /* workaround so the value does update */
         }
         m_nWorldLocationId = nl;
     }
@@ -2436,14 +2439,15 @@ int Player::AddStamina(int nStamina)
 {
     int addStamina = nStamina;
     int oldStamina = GetStamina();
+    int maxStamina = GetInt32Value(UNIT_FIELD_MAX_STAMINA);
     if(nStamina > 0)
     {
-        if (oldStamina + nStamina > MAX_STAMINA)
+        if (oldStamina + nStamina > maxStamina)
         {
-            if (MAX_STAMINA <= oldStamina)
+            if (maxStamina <= oldStamina)
                 addStamina = nStamina;
             else
-                addStamina = MAX_STAMINA - oldStamina;
+                addStamina = maxStamina - oldStamina;
         }
     }
     if(addStamina != 0)
@@ -2460,8 +2464,15 @@ int Player::GetStaminaRegenRate()
 {
     int result = 30;
 
-    if(IsInTown())
-        result = GetCondition() != 0 ? 100 : 110;
+    if(!m_bUsingTent)
+    {
+        if (IsInTown())
+            result = GetCondition() != 0 ? 100 : 110;
+    }
+    else
+    {
+        result = 120;
+    }
 
     result += GetInt32Value(UNIT_FIELD_STAMINA_REGEN_BONUS);
     if(GetInt32Value(UNIT_FIELD_STAMINA_REGEN_RATE) != result)
@@ -2585,4 +2596,48 @@ bool Player::IsInBattleField()
 bool Player::IsInTown()
 {
     return isInLocationType(1) || isInLocationType(10);
+}
+
+void Player::onCompleteCalculateStat()
+{
+    for(auto& charm : m_lInventory)
+    {
+        if(charm.second->m_pItemBase->type == ItemType::TypeCharm)
+        {
+            applyCharm(charm.second);
+        }
+    }
+    Unit::onCompleteCalculateStat();
+}
+
+void Player::applyCharm(Item *pItem)
+{
+    for(int i = 0; i < Item::MAX_OPTION_NUMBER; i++)
+    {
+        switch(pItem->m_pItemBase->opt_type[i])
+        {
+            case 81:
+                if(pItem->m_pItemBase->opt_var[i][0] > GetInt32Value(UNIT_FIELD_MAX_STAMINA))
+                    SetInt32Value(UNIT_FIELD_MAX_STAMINA, (int)pItem->m_pItemBase->opt_var[i][0]);
+                break;
+            case 82:
+                m_bUsingTent = true;
+                break;
+            case 85:
+                SetInt32Value(UNIT_FIELD_STAMINA_REGEN_BONUS, (int)pItem->m_pItemBase->opt_var[i][0]);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+void Player::onBeforeCalculateStat()
+{
+    m_fDistEXPMod = 1.0f;
+    m_bStaminaActive = false;
+    SetInt32Value(UNIT_FIELD_MAX_STAMINA, 500000);
+    m_bUsingTent = false;
+    SetInt32Value(UNIT_FIELD_MAX_CHAOS, 0);
+    Unit::onBeforeCalculateStat();
 }

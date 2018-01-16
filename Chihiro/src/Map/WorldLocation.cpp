@@ -57,9 +57,10 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
 bool WorldLocationManager::RemoveFromLocation(Player *player)
 {
     MX_UNIQUE_GUARD writeLock(i_lock);
+
     for (auto &wl : m_vWorldLocation)
     {
-        if (player->m_WorldLocation == &wl)
+        if (player->m_WorldLocation->idx == wl.idx)
         {
             wl.m_vIncludeClient.erase(std::remove(wl.m_vIncludeClient.begin(),
                                                   wl.m_vIncludeClient.end(), player),

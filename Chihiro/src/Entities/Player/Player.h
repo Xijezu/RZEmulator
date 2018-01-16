@@ -12,7 +12,6 @@
 class WorldSession;
 
 #define MAX_ITEM_COOLTIME_GROUP 20
-#define MAX_STAMINA 500000
 
 enum BONUS_TYPE : int
 {
@@ -215,7 +214,8 @@ public:
 protected:
 
     bool isInLocationType(uint8 nLocationType);
-
+    void onCompleteCalculateStat() override;
+    void onBeforeCalculateStat() override;
     void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void onItemWearEffect(Item* pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
     void onExpChange() override;
@@ -230,6 +230,7 @@ protected:
     void onEndQuest(Quest* pQuest);
 
 private:
+    void applyCharm(Item* pItem);
     void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP);
     void clearPendingBonusMsg();
     void sendBonusEXPJPMsg();
@@ -239,7 +240,7 @@ private:
     QuestManager m_QuestManager{};
     uint m_nLastStaminaUpdateTime{0};
     bool m_bStaminaActive{false};
-
+    bool m_bUsingTent{false};
     float m_fDistEXPMod{1.0f};
     float m_fActiveSummonExpAmp{0.0f};
     float m_fDeactiveSummonExpAmp{0.0f};

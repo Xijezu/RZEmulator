@@ -307,9 +307,9 @@ void Unit::CalculateStat()
     m_vMagicialSkillAdditionalDamage.clear();
     m_vPhysicalSkillAdditionalDamage.clear();
 
-    auto statptr = GetBaseStat();
-    CreatureStat basestat{};
-    if(statptr != nullptr)
+    auto         statptr = GetBaseStat();
+    CreatureStat basestat{ };
+    if (statptr != nullptr)
         basestat.Copy(*statptr);
     m_cStat.Copy(basestat);
     onBeforeCalculateStat(); // TODO: Reset in Player
@@ -342,8 +342,8 @@ void Unit::CalculateStat()
     finalizeStat();
     float b1  = GetLevel();
     float fcm = 1.0f;
-    SetMaxHealth((uint32_t) (GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
-    SetMaxMana((uint32_t) (GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
+    SetMaxHealth((uint32_t)(GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
+    SetMaxMana((uint32_t)(GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
     calcAttribute(m_Attribute);
     // TODO onAfterCalcAttrivuteByStat -> Nonexistant
     applyItemEffect();
@@ -358,7 +358,7 @@ void Unit::CalculateStat()
     m_AttributeByState.nMagicPoint += (m_Attribute.nMagicPoint - stateAttr.nMagicPoint);
     m_AttributeByState.nMagicDefence += (m_Attribute.nMagicDefence - stateAttr.nMagicDefence);
     m_AttributeByState.nAccuracyRight += (m_Attribute.nAccuracyRight - stateAttr.nAccuracyRight);
-    m_AttributeByState.nAccuracyLeft += (m_Attribute.nAccuracyLeft- stateAttr.nAccuracyLeft);
+    m_AttributeByState.nAccuracyLeft += (m_Attribute.nAccuracyLeft - stateAttr.nAccuracyLeft);
     m_AttributeByState.nMagicAccuracy += (m_Attribute.nMagicAccuracy - stateAttr.nMagicAccuracy);
     m_AttributeByState.nAvoid += (m_Attribute.nAvoid - stateAttr.nAvoid);
     m_AttributeByState.nMagicAvoid += (m_Attribute.nMagicAvoid - stateAttr.nMagicAvoid);
@@ -382,21 +382,25 @@ void Unit::CalculateStat()
     applyStateAmplifyEffect();
     getAmplifiedAttributeByAmplifier(m_Attribute);
     applyDoubeWeaponEffect();
-    SetMaxHealth((uint32_t) (GetInt32Value(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth());
-    SetMaxMana((uint32_t) (GetInt32Value(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana());
+    SetMaxHealth((uint32_t)(GetInt32Value(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth());
+    SetMaxMana((uint32_t)(GetInt32Value(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana());
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
     auto hp = GetMaxHealth();
     auto mp = GetMaxMana();
-    // TODO this.onCompleteCalculateStat();
+    onCompleteCalculateStat();
     SetHealth(GetHealth());
     SetMana(GetMana());
     onModifyStatAndAttribute();
-    if (IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
+    if (IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
+    {
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
-    } else {
-        if (IsSummon() && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana())) {
+    }
+    else
+    {
+        if (IsSummon() && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
+        {
             auto s = dynamic_cast<Summon *>(this);
-            if(s != nullptr)
+            if (s != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), s, hp, mp, false);
         }
     }
@@ -2904,6 +2908,3 @@ int64 Unit::GetBulletCount() const
         return 0;
     }
 }
-
-
-

@@ -213,6 +213,7 @@ protected:
     void finalizeStat();
     void calcAttribute(CreatureAtributeServer &attribute);
     void applyItemEffect();
+    virtual void onCompleteCalculateStat() { }; /* overwritten in player class */
     int64 GetBulletCount() const;
     ///- Gets overwritten in player for Beltslots and Max Chaos
     virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
