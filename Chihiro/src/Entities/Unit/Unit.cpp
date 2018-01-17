@@ -325,8 +325,8 @@ void Unit::CalculateStat()
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
-    // TODO onApplyStat -> Beltslots
-    // TODO amplifyStatByItem -> Nonexistant
+    // TODO onApplyStat -> Beltslots, Summon
+    // TODO amplifyStatByItem -> Nonexistant atm, used for set effects?
     stateStat.Copy(m_cStat);
     getAmplifiedStatByAmplifier(stateStat);
     amplifyStatByState();
@@ -338,14 +338,14 @@ void Unit::CalculateStat()
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
-    // TODO onAfterApplyStat -> Nonexistant
+    // TODO onAfterApplyStat -> Nonexistant, used in summon
     finalizeStat();
     float b1  = GetLevel();
     float fcm = 1.0f;
     SetMaxHealth((uint32_t)(GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
     SetMaxMana((uint32_t)(GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
     calcAttribute(m_Attribute);
-    // TODO onAfterCalcAttrivuteByStat -> Nonexistant
+    // TODO onAfterCalcAttrivuteByStat -> Nonexistant, loop through passiveskills
     applyItemEffect();
     applyPassiveSkillEffect();
     stateAttr.Copy(m_Attribute);
@@ -1448,7 +1448,7 @@ int Unit::GetCurrentSkillLevel(int skill_id) const
 
 void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
 {
-    auto skill = new Skill(this, skill_uid, skill_id);
+    auto skill = new Skill{this, skill_uid, skill_id};
     skill->m_nSkillID      = skill_id;
     skill->m_nSkillLevel   = skill_level;
     skill->m_nSkillUID     = skill_uid;

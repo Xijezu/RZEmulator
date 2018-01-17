@@ -102,6 +102,7 @@ public:
     uint64 GetNeedSummonExp(int level);
     Monster* RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler* pDeleteHandler, bool bNeedLock);
     bool IsInRandomPoolMonster(int group_id, int monster_id);
+    bool LearnAllSkill(Player* pPlayer);
 
     DropGroup* GetDropGroupInfo(int drop_group_id);
     bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);

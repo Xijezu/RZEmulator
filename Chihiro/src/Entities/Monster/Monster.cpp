@@ -318,7 +318,7 @@ void Monster::Update(uint diff)
             //if(GetHealth() == GetMaxHealth())
             //clearHateList();
         }
-        if (IsInWorld() && ())
+        if (IsInWorld() && !m_bComeBackHome)
             processFirstAttack(ct);
         if (IsInWorld() && !m_bComeBackHome)
             processMove(ct);

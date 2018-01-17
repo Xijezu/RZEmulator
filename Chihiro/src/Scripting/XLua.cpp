@@ -95,6 +95,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("end_quest", &XLua::SCRIPT_EndQuest, this);
     m_pState.set_function("enter_dungeon", &XLua::SCRIPT_EnterDungeon, this);
     m_pState.set_function("warp_to_revive_position", &XLua::SCRIPT_WarpToRevivePosition, this);
+    m_pState.set_function("learn_all_skill", &XLua::SCRIPT_LearnAllSkill, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -814,7 +815,12 @@ void XLua::SCRIPT_EnterDungeon(int nDungeonID)
 
 int XLua::SCRIPT_LearnAllSkill()
 {
+    if(m_pUnit == nullptr || !m_pUnit->IsPlayer())
+        return 0;
 
+    if(sObjectMgr->LearnAllSkill((Player*)m_pUnit))
+        return 1;
+    return 0;
 }
 
 void XLua::SCRIPT_WarpToRevivePosition(sol::variadic_args)

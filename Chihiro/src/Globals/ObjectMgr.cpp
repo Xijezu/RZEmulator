@@ -12,6 +12,7 @@
 #include "DungeonManager.h"
 #include "MixManager.h"
 #include "GameRule.h"
+#include "Skill.h"
 
 bool ObjectMgr::InitGameContent()
 {
@@ -1738,4 +1739,38 @@ bool ObjectMgr::CollisionToLine(float x1, float y1, float x2, float y2)
 {
     return g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
                                                       {x2, y2}});
+}
+
+bool ObjectMgr::LearnAllSkill(Player *pPlayer)
+{
+    auto depth = pPlayer->GetJobDepth();
+    for(int i = 0; i <= depth; ++i)
+    {
+        int nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
+        auto tree = getSkillTree(nCurrJob);
+        if(tree.empty())
+            continue;
+
+        if(i == depth)
+            pPlayer->SetCurrentJLv(depth == 0 ? 10 : 50);
+        else
+            pPlayer->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
+        for(auto& s : tree)
+        {
+            auto currSkill      = pPlayer->GetSkill(s.skill_id);
+            int  currSkillLevel = 0;
+            if (currSkill != nullptr)
+                currSkillLevel = currSkill->m_nSkillLevel;
+
+            if (currSkillLevel >= s.max_skill_lv)
+                continue;
+
+            for (currSkillLevel += 1; currSkillLevel <= s.max_skill_lv; ++currSkillLevel)
+            {
+                int nNeedJP = sObjectMgr->GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
+                pPlayer->SetJP(nNeedJP);
+                pPlayer->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
+            }
+        }
+    }
 }
