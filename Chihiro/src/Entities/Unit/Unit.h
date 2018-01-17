@@ -179,6 +179,7 @@ public:
     void SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time);
     void SetMove(Position _to, uint8 _speed, uint _start_time);
     void CalculateStat();
+    int GetArmorClass() const;
     // Event handler
     bool IsWornByCode(int code) const;
     EventProcessor _Events;
@@ -208,6 +209,7 @@ protected:
     virtual void applyState(State &state);
     void applyStateEffect();
     void applyStateAmplifyEffect();
+    void applyPassiveSkillAmplifyEffect();
     void applyStateAmplify(State &state);
     void applyDoubeWeaponEffect();
     virtual void onApplyAttributeAdjustment() {};

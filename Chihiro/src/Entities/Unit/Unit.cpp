@@ -313,7 +313,7 @@ void Unit::CalculateStat()
         basestat.Copy(*statptr);
     m_cStat.Copy(basestat);
     onBeforeCalculateStat(); // TODO: Reset in Player
-    // TODO checkAdditionalItemEffect(); -> Nonexistant
+    // checkAdditionalItemEffect(); -> Nonexistant in epic 4
     applyStatByItem();
     applyJobLevelBonus();
     stateStat.Copy(m_cStat);
@@ -325,7 +325,7 @@ void Unit::CalculateStat()
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
-    // TODO onApplyStat -> Beltslots, Summon
+    // TODO onApplyStat -> Beltslots, Summonstatamplify?
     // TODO amplifyStatByItem -> Nonexistant atm, used for set effects?
     stateStat.Copy(m_cStat);
     getAmplifiedStatByAmplifier(stateStat);
@@ -338,14 +338,14 @@ void Unit::CalculateStat()
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
-    // TODO onAfterApplyStat -> Nonexistant, used in summon
+    // TODO onAfterApplyStat -> summonstatpenalty
     finalizeStat();
     float b1  = GetLevel();
     float fcm = 1.0f;
     SetMaxHealth((uint32_t)(GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
     SetMaxMana((uint32_t)(GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
     calcAttribute(m_Attribute);
-    // TODO onAfterCalcAttrivuteByStat -> Nonexistant, loop through passiveskills
+    // TODO onAfterCalcAttrivuteByStat -> Nonexistant, loop through passiveskills <- Beltskills? o0
     applyItemEffect();
     applyPassiveSkillEffect();
     stateAttr.Copy(m_Attribute);
@@ -375,7 +375,7 @@ void Unit::CalculateStat()
     m_AttributeByState.nHPRegenPoint += (m_Attribute.nHPRegenPoint - stateAttr.nHPRegenPoint);
     m_AttributeByState.nMPRegenPercentage += (m_Attribute.nMPRegenPercentage - stateAttr.nMPRegenPercentage);
     m_AttributeByState.nMPRegenPoint += (m_Attribute.nMPRegenPoint - stateAttr.nMPRegenPoint);
-    // TODO applyPassiveSkillAmplifyEffect
+    applyPassiveSkillAmplifyEffect();
     onApplyAttributeAdjustment();
     stateAttr.Copy(m_Attribute);
     getAmplifiedAttributeByAmplifier(stateAttr);
@@ -2464,8 +2464,10 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
     // SPECIAL CASES
     switch (skill->m_nSkillID)
     {
+        case 1201:
         case 1202: // Defense Practice
-            m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            if(m_anWear[ItemWearType::WearArmor] != nullptr)
+                m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             break;
         default:
             break;
@@ -2925,4 +2927,14 @@ int64 Unit::GetBulletCount() const
     {
         return 0;
     }
+}
+
+void Unit::applyPassiveSkillAmplifyEffect()
+{
+
+}
+
+int Unit::GetArmorClass() const
+{
+    return m_anWear[ItemWearType::WearArmor] != nullptr ? m_anWear[ItemWearType::WearArmor]->m_pItemBase->iclass : 0;
 }

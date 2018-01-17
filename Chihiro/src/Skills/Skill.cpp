@@ -357,6 +357,7 @@ void Skill::ProcSkill()
 void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
 {
     bool bHandled{true};
+    m_vResultList.clear();
     switch(m_SkillBase->effect_type) {
         case SKILL_EFFECT_TYPE::EF_SUMMON:
             DO_SUMMON();
