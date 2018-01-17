@@ -2407,8 +2407,10 @@ ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
 void Unit::applyPassiveSkillEffect(Skill *skill)
 {
     float atk = 0;
-    switch(skill->m_SkillBase->effect_type) {
-        case EffectType::WeaponMastery: {
+    switch (skill->m_SkillBase->effect_type)
+    {
+        case SKILL_EFFECT_TYPE::EF_WEAPON_MASTERY:
+        {
             auto weapon = GetWornItem(ItemWearType::WearWeapon);
             if (weapon == nullptr)
                 return;
@@ -2425,14 +2427,15 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
             m_Attribute.nMagicPoint += (skill->m_SkillBase->var[6] + (skill->m_SkillBase->var[7] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
         }
             break;
-        case EffectType::IncreaseBaseAttribute: {
+        case SKILL_EFFECT_TYPE::EF_INCREASE_BASE_ATTRIBUTE:
+        {
             atk = (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             m_Attribute.nAttackPointRight += atk;
             if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
                 m_Attribute.nAttackPointLeft += atk;
 
-            m_Attribute.nDefence      += (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
-            m_Attribute.nMagicPoint   += (skill->m_SkillBase->var[2] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nDefence += (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
+            m_Attribute.nMagicPoint += (skill->m_SkillBase->var[2] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             m_Attribute.nMagicDefence += (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
 
             atk = (skill->m_SkillBase->var[6] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
@@ -2442,22 +2445,25 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
             m_Attribute.nMagicAccuracy += (skill->m_SkillBase->var[7] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
         }
             break;
-        case EffectType::IncreaseHPMP: {
-            SetMaxHealth((uint) (GetMaxHealth() + skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
-            SetMaxMana((uint) (GetMaxMana() + skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
+        case SKILL_EFFECT_TYPE::EF_INCREASE_HP_MP:
+        {
+            SetMaxHealth((uint)(GetMaxHealth() + skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
+            SetMaxMana((uint)(GetMaxMana() + skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel))));
         }
             break;
-        case EffectType::EF_WEAPON_TRAINING: {
+        case SKILL_EFFECT_TYPE::EF_WEAPON_TRAINING:
+        {
             m_Attribute.nAttackSpeedRight += (skill->m_SkillBase->var[3] * 100 * skill->m_nSkillLevel);
         }
-        break;
+            break;
         default:
             //MX_LOG_DEBUG("entities.unit", "Unknown SKill Effect Type Unit::applyPassiveSkillEffect: %u", skill->m_SkillBase->id);
             break;
     }
 
     // SPECIAL CASES
-    switch(skill->m_nSkillID) {
+    switch (skill->m_nSkillID)
+    {
         case 1202: // Defense Practice
             m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             break;

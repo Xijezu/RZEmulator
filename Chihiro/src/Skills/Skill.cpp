@@ -36,20 +36,41 @@ Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0)
     m_nSummonID = 0;
     m_nSkillLevel = 0;
     m_SkillBase = sObjectMgr->GetSkillBase(m_nSkillID);
+    if(m_SkillBase != nullptr)
+    {
+        short et = m_SkillBase->effect_type;
+        if (et == 107
+            || et == 202
+            || et == 204
+            || et == 206
+            || et == 212
+            || et == 151
+            || et == 152
+            || et == 108
+            || et == 232
+            || et == 233
+            || et == 263
+            || et == 30004
+            || et == 30005
+            || et == 30009
+            || et == 30017
+            || et == 30018)
+            m_bMultiple = true;
+    }
     Init();
 }
 
 void Skill::Init()
 {
     m_nErrorCode = 0;
-    /*m_Status = 0;*/
+    m_Status = SkillStatus::SS_IDLE;
     m_nCastTime = 0;
     m_nCastingDelay = 0;
     m_nFireTime = 0;
     m_nRequestedSkillLevel = 0;
     m_hTarget = 0;
-    /*m_nCurrentFire = 0;
-    m_nTotalFire = 0;*/
+    m_nCurrentFire = 0;
+    m_nTotalFire = 0;
     m_nTargetCount = 1;
     m_nFireCount = 1;
     m_targetPosition.Relocate(0, 0, 0, 0);
@@ -81,14 +102,15 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         return TS_RESULT_COOL_TIME;
     }
 
+    m_Status = SkillStatus::SS_CAST;
     switch(m_SkillBase->effect_type)
     {
-        case EffectType::ET_Summon:
+        case SKILL_EFFECT_TYPE::EF_SUMMON:
             m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
             break;
-        case EffectType::ActivateFieldProp:
-        case EffectType::RegionHealByFieldProp:
-        case EffectType::AreaAffectHealByHieldProp:
+        case SKILL_EFFECT_TYPE::EF_ACTIVATE_FIELD_PROP:
+        case SKILL_EFFECT_TYPE::EF_REGION_HEAL_BY_FIELD_PROP:
+        case SKILL_EFFECT_TYPE::EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
         {
             m_nErrorCode = TS_RESULT_NOT_ACTABLE;
             if(m_pOwner->IsPlayer())
@@ -143,16 +165,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     {
         m_nRequestedSkillLevel = (uint8)nSkillLevel;
         m_pOwner->m_castingSkill = this;
-        broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
-                              (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
-                              0, 0, 1);
+        broadcastSkillMessage(m_pOwner, 0, 0, 1);
     }
     else
     {
+        broadcastSkillMessage(m_pOwner, 0, 0, 5);
         Init();
-        broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
-                              (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
-                              0, 0, 5);
     }
 
     return error_code;
@@ -228,18 +246,18 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
             return;
     }
 
-    pct << (uint8)0;
+    pct << (uint8)(m_bMultiple ? 1 : 0);
     pct << (float)0;
-    pct << (uint8)1;
-    pct << (uint8)1;
+    pct << (uint8)m_nTargetCount;
+    pct << (uint8)m_nFireCount;
     pct << (uint16)m_vResultList.size();
+
+    int fillSize = 45;
 
     if (!m_vResultList.empty()) {
         for (auto &sr : m_vResultList) {
             // Odd fixed padding for the skill result
-            auto wpos = pct.wpos();
-            pct.fill("", m_vResultList.size() * 45);
-            pct.wpos(wpos);
+            auto pos = pct.wpos();
 
             pct << (uint8)sr.type;
             pct << (uint)sr.damage.hTarget;
@@ -253,10 +271,14 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
                     pct << sr.damage.flag;
                     for (uint16 i : sr.damage.elemental_damage)
                         pct << i;
+                    pos = pct.wpos() - pos;
+                    pct.fill("", fillSize - pos);
                     break;
                 case SR_ResultType::SRT_AddHP:
                     pct << sr.damage.target_hp;
                     pct << sr.addHPType.nIncHP;
+                    pos = pct.wpos() - pos;
+                    pct.fill("", fillSize - pos);
                 default:
                     break;
             }
@@ -264,71 +286,104 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     }
 }
 
-void Skill::broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType)
+void Skill::broadcastSkillMessage(Unit* pUnit, int cost_hp, int cost_mp, int nType)
 {
+    if(pUnit == nullptr)
+        return;
+
+    auto rx = (uint) (pUnit->GetPositionX() /g_nRegionSize);
+    auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
+    uint8 layer = pUnit->GetLayer();
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld->Broadcast((uint)rx, (uint)ry, layer, skillPct);
 }
 
-void Skill::broadcastSkillMessage(int rx1, int ry1, int rx2, int ry2, uint8 layer, int cost_hp, int cost_mp, int nType)
+void Skill::broadcastSkillMessage(Unit* pUnit1, Unit* pUnit2, int cost_hp, int cost_mp, int nType)
 {
+    if(pUnit1 == nullptr || pUnit2 == nullptr)
+        return;
+
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld->Broadcast((uint)rx1, (uint)ry1,(uint) rx2, (uint)ry2, layer, skillPct);
+    sWorld->Broadcast((uint)(pUnit1->GetPositionX() /g_nRegionSize), (uint)(pUnit1->GetPositionY() /g_nRegionSize),
+                      (uint) (pUnit2->GetPositionX() /g_nRegionSize), (uint)(pUnit2->GetPositionY() /g_nRegionSize),
+                      pUnit1->GetLayer(), skillPct);
 }
 
 void Skill::ProcSkill()
 {
     if(sWorld->GetArTime() < m_nFireTime)
         return;
-    m_pOwner->m_castingSkill = nullptr;
 
-    bool bIsSuccess = false;
-    FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), bIsSuccess);
-    if(bIsSuccess)
+    if(m_Status == SkillStatus::SS_CAST)
+        m_Status = SkillStatus::SS_FIRE;
+
+    /*if(pTarget != nullptr && !pTarget->IsInWorld())
     {
-        SetRemainCoolTime(GetSkillCoolTime());
-        Player* pOwner = m_pOwner->IsSummon() ? ((Summon*)m_pOwner)->GetMaster() : (Player*)m_pOwner;
-        Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
+        m_pOwner->CancelSkill();
+
+    }*/
+
+    if(m_Status == SkillStatus::SS_FIRE)
+    {
+        bool bIsSuccess = false;
+        FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), bIsSuccess);
+        broadcastSkillMessage(m_pOwner, 0, 0, 0);
+
+        if (!m_bMultiple || m_nCurrentFire == m_nTotalFire)
+        {
+            m_nFireTime += m_SkillBase->delay_common;
+            m_Status = SkillStatus::SS_COMPLETE;
+        }
+
+        if (bIsSuccess)
+        {
+            SetRemainCoolTime(GetSkillCoolTime());
+            Player *pOwner = m_pOwner->IsSummon() ? ((Summon *)m_pOwner)->GetMaster() : (Player *)m_pOwner;
+            Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
+        }
     }
 
-    broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
-                          (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
-                          0, 0, 0);
-    broadcastSkillMessage((int)(m_pOwner->GetPositionX() /g_nRegionSize),
-                          (int)(m_pOwner->GetPositionY() / g_nRegionSize),m_pOwner->GetLayer(),
-                          0, 0, 5);
+    if(m_Status == SkillStatus::SS_COMPLETE && sWorld->GetArTime() >= m_nFireTime)
+    {
+        broadcastSkillMessage(m_pOwner, 0, 0, 5);
 
-    Init();
+        m_pOwner->m_castingSkill = nullptr;
+        Init();
+    }
 }
 
 void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
 {
     bool bHandled{true};
     switch(m_SkillBase->effect_type) {
-        case EffectType::ET_Summon:
+        case SKILL_EFFECT_TYPE::EF_SUMMON:
             DO_SUMMON();
             break;
-        case EffectType::Unsummon:
+        case SKILL_EFFECT_TYPE::EF_UNSUMMON:
             DO_UNSUMMON();
             break;
-        case EffectType::AddState: {
+        case SKILL_EFFECT_TYPE::EF_ADD_STATE: {
             FireSkillStateSkillFunctor fn{ };
             fn.onCreature(this, sWorld->GetArTime(), m_pOwner, sMemoryPool->GetObjectInWorld<Unit>(m_hTarget));
         }
             break;
-        case EffectType::MagicSingleDamage:
-        case EffectType::MagicSingleDamageAddRandomState:
+        case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE:
+        case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
             SINGLE_MAGICAL_DAMAGE(pTarget);
+            break;
+        case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE:
+        case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
+            MULTIPLE_MAGICAL_DAMAGE(pTarget);
             break;
         case 30001:// EffectType::PhysicalSingleDamage
             SINGLE_PHYSICAL_DAMAGE(pTarget);
             break;
-        case EffectType::ActivateFieldProp:
+        case SKILL_EFFECT_TYPE::EF_ACTIVATE_FIELD_PROP:
             ACTIVATE_FIELD_PROP();
             break;
-        case 501:
+        case SKILL_EFFECT_TYPE::EF_ADD_HP:
             HEALING_SKILL_FUNCTOR(pTarget);
             break;
         default:
@@ -405,9 +460,7 @@ void Skill::DO_UNSUMMON()
 bool Skill::Cancel()
 {
     Init();
-    broadcastSkillMessage((int)(m_pOwner->GetPositionX() / g_nRegionSize),
-                          (int)(m_pOwner->GetPositionY() / g_nRegionSize), m_pOwner->GetLayer(),
-                          0, 0, SkillState::ST_Cancel);
+    broadcastSkillMessage(m_pOwner, 0, 0, SkillState::ST_Cancel);
     return true;
 }
 
@@ -470,6 +523,52 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
     return TS_RESULT_SUCCESS;
 }
 
+
+
+/************************* SKILL RESULTS *************************/
+// Function       :   protected bool StructSkill::AFFECT_RUSH_OLD(struct StructCreature *, float *, struct ArPosition *, float *)
+// Function       :   protected int StructSkill::AFFECT_KNOCK_BACK(struct StructCreature *, float, unsigned long)
+// Function       :   protected bool StructSkill::PHYSICAL_DAMAGE_RUSH(struct StructCreature *, int *)
+// Function       :   protected void StructSkill::ADD_REGION_STATE(struct StructCreature *)
+// Function       :   protected void StructSkill::ADD_STATE_BY_SELF_COST(struct StructCreature *)
+// Function       :   protected void StructSkill::ADD_REGION_STATE_BY_SELF_COST(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_DIRECTIONAL_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T1(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T2(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T1(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T2(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T3(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_ABSORB(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SPECIAL_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T3(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T4(struct StructCreature *)
+// Function       :   protected bool StructSkill::RUSH(struct StructCreature *, float)
+// Function       :   protected bool StructSkill::AFFECT_RUSH(struct StructCreature *, float *, struct ArPosition *, float *, float)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE_ABSORB(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_MAGICAL_DAMAGE_T1(struct StructCreature *)
+// Function       :   protected void StructSkill::SINGLE_MAGICAL_DAMAGE_T2(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T1(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T2(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T3(struct StructCreature *)
+// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(struct StructCreature *)
+// Function       :   protected void StructSkill::MAGIC_SINGLE_REGION_DAMAGE_OLD(struct StructCreature *)
+// Function       :   protected void StructSkill::MAGIC_MULTIPLE_REGION_DAMAGE_OLD(struct StructCreature *)
+// Function       :   protected void StructSkill::MAGIC_MULTIPLE_REGION_DAMAGE_T2(struct StructCreature *)
+// Function       :   protected void StructSkill::MAGIC_SPECIAL_REGION_DAMAGE_OLD(struct StructCreature *)
+// Function       :   protected void StructSkill::MAGIC_ABSORB_DAMAGE(struct StructCreature *)
 void Skill::CREATURE_TAMING()
 {
     auto pTarget = sMemoryPool->GetObjectInWorld<Monster>(m_hTarget);
@@ -487,7 +586,7 @@ void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr || m_pOwner == nullptr)
         return;
 
-    if (m_SkillBase->effect_type == PhysicalSingleDamageRush || m_SkillBase->effect_type == PhysicalSingleDamageRushKnockback)
+    if (m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_PHYSICAL_SINGLE_DAMAGE_RUSH || m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
     {
 
     }
@@ -570,4 +669,34 @@ void Skill::TOWN_PORTAL()
         pos = pPlayer->GetCurrentPosition(sWorld->GetArTime());
         pPlayer->SetMove(pos, 0, 0);
     }
+}
+
+void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
+{
+    if (pTarget == nullptr || m_pOwner == nullptr)
+        return;
+
+    bool v10         = m_SkillBase->is_physical_act != 0;
+    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+    auto magic_point = m_pOwner->m_Attribute.nMagicPoint;
+
+    auto dmg = (int)(magic_point
+                     * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
+                     + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+
+    if (m_nCurrentFire != 0)
+    {
+        m_nCurrentFire++;
+    }
+    else
+    {
+        m_nTotalFire = (int)(m_SkillBase->var[6] + (m_SkillBase->var[7] * m_nRequestedSkillLevel));
+        m_nCurrentFire = 1;
+    }
+
+    auto Damage = pTarget->DealMagicalSkillDamage(m_pOwner, dmg, (ElementalType)m_SkillBase->elemental,
+                                                  m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
+                                                  (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)), 0);
+    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, Damage, pTarget->GetHandle());
+    m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);
 }

@@ -8,6 +8,14 @@
 class XPacket;
 class Unit;
 
+enum SkillStatus : int
+{
+    SS_IDLE     = 0,
+    SS_CAST     = 1,
+    SS_FIRE     = 2,
+    SS_COMPLETE = 3
+};
+
 class Skill {
     friend class Unit;
 public:
@@ -37,8 +45,8 @@ public:
 
     SkillBase* m_SkillBase{nullptr};
 
-    void broadcastSkillMessage(int rx, int ry, uint8 layer, int cost_hp, int cost_mp, int nType);
-    void broadcastSkillMessage(int rx1, int ry1, int rx2, int ry2, uint8 layer, int cost_hp, int cost_mp, int nType);
+    void broadcastSkillMessage(Unit* pUnit, int cost_hp, int cost_mp, int nType);
+    void broadcastSkillMessage(Unit* pUnit1, Unit* pUnit2, int cost_hp, int cost_mp, int nType);
 
     // For processing skill
     uint8 m_nRequestedSkillLevel;
@@ -51,8 +59,13 @@ private:
     uint m_nCastTime{};
     uint m_nNextCoolTime{};
     uint m_nFireTime{};
+    int m_nCurrentFire{};
+    int m_nTotalFire{};
+    bool m_bMultiple{false};
     uint m_nTargetCount;
     uint m_nFireCount;
+
+    SkillStatus m_Status{};
 protected:
     void assembleMessage(XPacket& pct, int nType, int cost_hp, int cost_mp);
     void Init();
@@ -66,14 +79,15 @@ private:
     void SINGLE_PHYSICAL_DAMAGE(Unit* pTarget);
     void SINGLE_MAGICAL_DAMAGE(Unit* pTarget);
 
+    void MULTIPLE_MAGICAL_DAMAGE(Unit* pTarget);
+
     void HEALING_SKILL_FUNCTOR(Unit* pTarget);
-
     void ACTIVATE_FIELD_PROP();
-
     void TOWN_PORTAL();
     void DO_SUMMON();
     void DO_UNSUMMON();
     void CREATURE_TAMING();
+
 };
 
 

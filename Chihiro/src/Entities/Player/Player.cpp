@@ -2460,16 +2460,16 @@ void Player::applyPassiveSkillEffect(Skill *skill)
     {
         switch(skill->m_SkillBase->effect_type)
         {
-            case EffectType::IncreaseSummonHPMPSP:
+            case SKILL_EFFECT_TYPE::EF_INCREASE_SUMMON_HP_MP_SP:
                 return;
 
-            case EffectType::AmplifySummonHPMPSP:
+            case SKILL_EFFECT_TYPE::EF_AMPLIFY_SUMMON_HP_MP_SP:
                 return;
 
-            case EffectType::CreatureAssignmentIncrease:
+            case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
                 m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
                 return;
-            case EffectType::AmplifyExpForSummon:
+            case SKILL_EFFECT_TYPE::EF_AMPLIFY_EXP_FOR_SUMMON:
                 m_fActiveSummonExpAmp += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
                 m_fDeactiveSummonExpAmp += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
                 return;

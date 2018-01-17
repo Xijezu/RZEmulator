@@ -1773,4 +1773,5 @@ bool ObjectMgr::LearnAllSkill(Player *pPlayer)
             }
         }
     }
+    return true;
 }
