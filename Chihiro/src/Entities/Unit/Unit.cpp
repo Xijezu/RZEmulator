@@ -2768,6 +2768,40 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                 return TS_RESULT_SUCCESS;
             }
             return TS_RESULT_ACCESS_DENIED;
+        case 94:
+        {
+            if(!pCaster->IsPlayer())
+                return TS_RESULT_ACCESS_DENIED;
+            if(var1 != 0.0f)
+            {
+                int total = 1;
+                if(var1 < 0.0f)
+                    total = (int)var2;
+
+                for(int i = 0; i < total; ++i)
+                {
+                    auto nItemID = (int)var1;
+                    auto nItemCount = (int64)var2;
+                    while(nItemID < 0)
+                        sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+                    if(nItemID != 0)
+                    {
+                        auto pCItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::ByItem, -1, -1, -1, -1, 0, 0, 0, 0);
+                        pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
+                        if(pCItem != nullptr)
+                            Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());
+                    }
+                }
+            }
+            else
+            {
+                auto gold = pPlayer->GetGold() + (int64)var2;
+                if(pPlayer->ChangeGold(gold) != TS_RESULT_SUCCESS)
+                    return 53;
+            }
+            return TS_RESULT_SUCCESS;
+        }
+        break;
         default:
             error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
             MX_LOG_ERROR("entites.unit", error.c_str());
