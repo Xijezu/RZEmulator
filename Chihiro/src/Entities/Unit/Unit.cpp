@@ -625,23 +625,30 @@ void Unit::applyItemEffect()
 
     m_nUnitExpertLevel = 0;
     std::vector<int> ref_list{ };
-    for (int i = 0; i < 24; i++) {
-        curItem = GetWornItem((ItemWearType) i);
-        if (curItem != nullptr && curItem->m_pItemBase != nullptr) {
+    for (int         i = 0; i < 24; i++)
+    {
+        curItem = GetWornItem((ItemWearType)i);
+        if (curItem != nullptr && curItem->m_pItemBase != nullptr)
+        {
             auto iwt = (ItemWearType)i;
-            if (TranslateWearPosition(iwt, curItem, ref_list)) {
-                float    fItemRatio = 1.0f;
-                if(curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
-                    fItemRatio = 0.40000001f;
+            if (TranslateWearPosition(iwt, curItem, ref_list))
+            {
+                float fItemRatio = 1.0f;
+                if (curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
+                    fItemRatio   = 0.40000001f;
 
-                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
-                    if (curItem->m_pItemBase->base_type[ol] != 0) {
+                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++)
+                {
+                    if (curItem->m_pItemBase->base_type[ol] != 0)
+                    {
                         onItemWearEffect(curItem, true, curItem->m_pItemBase->base_type[ol], curItem->m_pItemBase->base_var[ol][0], curItem->m_pItemBase->base_var[ol][1], fItemRatio);
                     }
                 }
 
-                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++) {
-                    if (curItem->m_pItemBase->opt_type[ol] != 0) {
+                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++)
+                {
+                    if (curItem->m_pItemBase->opt_type[ol] != 0)
+                    {
                         onItemWearEffect(curItem, false, curItem->m_pItemBase->opt_type[ol], curItem->m_pItemBase->opt_var[ol][0], curItem->m_pItemBase->opt_var[ol][1], fItemRatio);
                     }
                 }
@@ -649,27 +656,51 @@ void Unit::applyItemEffect()
                 float fAddPoint    = 0.0f;
                 float fTotalPoints = 0.0f;
 
-                for (int ol = 0; ol < 2; ol++) {
-                    if (curItem->m_pItemBase->enhance_id[ol] != 0) {
+                for (int ol = 0; ol < 2; ol++)
+                {
+                    if (curItem->m_pItemBase->enhance_id[ol] != 0)
+                    {
                         int curEnhance  = curItem->m_Instance.nEnhance;
                         int realEnhance = curEnhance;
 
-                        if (realEnhance >= 1) {
+                        if (realEnhance >= 1)
+                        {
                             fTotalPoints = curItem->m_pItemBase->_enhance[0][ol] * curEnhance;
 
-                            if (realEnhance > 4) {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[1][ol] * (float) (realEnhance - 4));
+                            if (realEnhance > 4)
+                            {
+                                fTotalPoints += (curItem->m_pItemBase->_enhance[1][ol] * (float)(realEnhance - 4));
                             }
-                            if (realEnhance > 8) {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[2][ol] * (float) (realEnhance - 8));
+                            if (realEnhance > 8)
+                            {
+                                fTotalPoints += (curItem->m_pItemBase->_enhance[2][ol] * (float)(realEnhance - 8));
                             }
-                            if (realEnhance > 12) {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[3][ol] * (float) (realEnhance - 12));
+                            if (realEnhance > 12)
+                            {
+                                fTotalPoints += (curItem->m_pItemBase->_enhance[3][ol] * (float)(realEnhance - 12));
                             }
                             onItemWearEffect(curItem, false, curItem->m_pItemBase->enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
                         }
                     }
                 }
+                if(curItem->m_pItemBase->socket > 0)
+                {
+                    for (int x : curItem->m_Instance.Socket)
+                    {
+                        if(x != 0)
+                        {
+                            auto ibs = sObjectMgr->GetItemBase(x);
+                            if(ibs == nullptr)
+                                continue;
+
+                            if(ibs->use_min_level > GetLevel())
+                                continue;
+
+                            onItemWearEffect(curItem, true, ibs->opt_type[0], ibs->opt_var[0][0], ibs->opt_var[0][1], 1);
+                        }
+                    }
+                }
+                /// Soulstones here
             }
         }
     }
@@ -1023,7 +1054,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
         }
     } else {
         if (type == 96) {
-            incParameter((uint) var1, (int) var2, false);
+            incParameter((uint) var1, (int) var2, bIsBaseVar);
         } else {
             switch (type) {
                 case 12:

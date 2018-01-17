@@ -103,6 +103,8 @@ public:
     static void SendItemCoolTimeInfo(Player* pPlayer);
     static void SendMixResult(Player* pPlayer, std::vector<uint>* pHandles);
     static void SendItemWearInfoMessage(Player* pPlayer, Unit* pTarget, Item* pItem);
+    static void ShowSoulStoneRepairWindow(Player*);
+    static void ShowSoulStoneCraftWindow(Player*);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

@@ -18,7 +18,8 @@ struct ItemPickupOrder {
     int  nPartyID[3];
 };
 
-class ItemInstance {
+class ItemInstance
+{
 public:
     uint         OwnerHandle{0};                            // 0x0
     uint         OwnSummonHandle{0};                        // 0x4
@@ -28,12 +29,13 @@ public:
     int          nLevel{0};                                  // 0x18
     int          nEnhance{0};                                // 0x1C
     int          nEndurance{0};
+    int          nCurrentEndurance{0};
     int          nOwnerUID{0};                               // 0x20
     int          nOwnSummonUID{0};                           // 0x24
     int          nAuctionID{0};                              // 0x28
     int          nItemKeepingID{0};                          // 0x2C
-    int64       nCount{0};                                 // 0x30
-    int64       tExpire{0};                                // 0x40
+    int64        nCount{0};                                 // 0x30
+    int64        tExpire{0};                                // 0x40
     //Elemental::Type eElementalEffectType;         // 0x48
     int          Flag{0};                                   // 0x60
     GenerateCode GenerateInfo = GenerateCode::ByUnknown;      // 0x64
@@ -71,6 +73,8 @@ public:
     bool IsQuestItem() const { if(m_pItemBase== nullptr) return false; return m_pItemBase->flaglist[FLAG_QUEST] != 0; }
     void DBUpdate();
     void DBInsert();
+    void SetCurrentEndurance(int n);
+    int GetMaxEndurance() const;
 
     ItemWearType GetWearType();
     int GetLevelLimit();

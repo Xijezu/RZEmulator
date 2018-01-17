@@ -111,6 +111,7 @@ const AuthGameSession packetHandler[] =
                                       {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
                                       {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
                                       {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
+                                      {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft}
                               };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
@@ -1036,7 +1037,6 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
         if(result == TS_RESULT_SUCCESS)
         {
             target->RegisterSkill(skill_id, currentLevel, 0, jobID);
-            // TODO: Hack
             target->CalculateStat();
         }
         Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
@@ -1199,7 +1199,6 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     int64 nPrevGold = _player->GetGold();
     int64 nNewGold = _player->GetGold() + sell_count * nPrice;
     if(_player->ChangeGold(_player->GetGold() + sell_count * nPrice) != 0) {
-        MX_LOG_TRACE("entities", "Sold [%d]x [%d] for a total of %d gold [Prev: %d, New: %d]", sell_count, code, sell_count * nPrice, nPrevGold, nNewGold);
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
         return;
     }
@@ -1640,4 +1639,128 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
         default:
             break;
     }
+}
+
+void WorldSession::onSoulStoneCraft(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+
+    if(_player->GetLastContactLong("SoulStoneCraft") == 0)
+        return;
+
+    auto craft_item_handle = pRecvPct->read<uint>();
+    uint soulstone_handle[4]{0};
+    Item* pSoulStoneList[4]{nullptr};
+    for (unsigned int &i : soulstone_handle)
+        i = pRecvPct->read<uint>();
+
+    auto nPrevGold = _player->GetGold();
+    auto pItem = _player->FindItemByHandle(craft_item_handle);
+    if(pItem == nullptr)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, craft_item_handle);
+        return;
+    }
+
+    int nSocketCount = pItem->m_pItemBase->socket;
+    if(nSocketCount < 1 || nSocketCount > 4)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, craft_item_handle);
+        return;
+    }
+
+    int nMaxReplicatableCount = nSocketCount == 4 ? 2 : 1;
+    int nCraftCost = 0;
+    bool bIsValid = false;
+    for(int i = 0; i < nSocketCount; ++i)
+    {
+        if(soulstone_handle[i] != 0)
+        {
+            pSoulStoneList[i] = _player->FindItemByHandle(soulstone_handle[i]);
+            if (pSoulStoneList[i] == nullptr)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, soulstone_handle[i]);
+                return;
+            }
+            if (pSoulStoneList[i]->m_pItemBase->type != ItemType::TypeSoulStone
+                || pSoulStoneList[i]->m_pItemBase->group != ItemGroup::SoulStone
+                || pSoulStoneList[i]->m_pItemBase->iclass != ItemClass::ClassSoulStone)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, soulstone_handle[i]);
+                return;
+            }
+
+            int nReplicatedCount = 0;
+            for(int k = 0; k < pItem->m_pItemBase->socket; ++k)
+            {
+                if(pItem->m_Instance.Socket[k] != 0 && k != i)
+                {
+                    auto ibs = sObjectMgr->GetItemBase(pItem->m_Instance.Socket[k]);
+                    if (ibs->base_type[0] == pSoulStoneList[i]->m_pItemBase->base_type[0]
+                        && ibs->base_type[1] == pSoulStoneList[i]->m_pItemBase->base_type[1]
+                        && ibs->base_type[2] == pSoulStoneList[i]->m_pItemBase->base_type[2]
+                        && ibs->base_type[3] == pSoulStoneList[i]->m_pItemBase->base_type[3]
+                        && ibs->base_var[0][0] == pSoulStoneList[i]->m_pItemBase->base_var[0][0]
+                        && ibs->base_var[1][0] == pSoulStoneList[i]->m_pItemBase->base_var[1][0]
+                        && ibs->base_var[2][0] == pSoulStoneList[i]->m_pItemBase->base_var[2][0]
+                        && ibs->base_var[3][0] == pSoulStoneList[i]->m_pItemBase->base_var[3][0]
+                        && ibs->opt_type[0] == pSoulStoneList[i]->m_pItemBase->opt_type[0]
+                        && ibs->opt_type[1] == pSoulStoneList[i]->m_pItemBase->opt_type[1]
+                        && ibs->opt_type[2] == pSoulStoneList[i]->m_pItemBase->opt_type[2]
+                        && ibs->opt_type[3] == pSoulStoneList[i]->m_pItemBase->opt_type[3]
+                        && ibs->opt_var[0][0] == pSoulStoneList[i]->m_pItemBase->opt_var[0][0]
+                        && ibs->opt_var[1][0] == pSoulStoneList[i]->m_pItemBase->opt_var[1][0]
+                        && ibs->opt_var[2][0] == pSoulStoneList[i]->m_pItemBase->opt_var[2][0]
+                        && ibs->opt_var[3][0] == pSoulStoneList[i]->m_pItemBase->opt_var[3][0])
+                    {
+                        nReplicatedCount++;
+                        if(nReplicatedCount >= nMaxReplicatableCount)
+                        {
+                            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
+                            return;
+                        }
+                    }
+                }
+            }
+            nCraftCost += pSoulStoneList[i]->m_pItemBase->price / 10;
+            bIsValid = true;
+        }
+    }
+    if(!bIsValid)
+    {
+        // maybe log here?
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_INVALID_ARGUMENT, 0);
+        return;
+    }
+    if(nPrevGold < nCraftCost || _player->ChangeGold(nPrevGold - nCraftCost) != TS_RESULT_SUCCESS)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
+        return;
+    }
+
+    int nEndurance = 0;
+    for(int i = 0; i < 4; ++i)
+    {
+        if(pItem->m_Instance.Socket[i] != 0 || pSoulStoneList[i] != nullptr)
+        {
+            if(pSoulStoneList[i] != nullptr)
+            {
+                nEndurance += pSoulStoneList[i]->m_Instance.nCurrentEndurance;
+                pItem->m_Instance.Socket[i] = pSoulStoneList[i]->m_Instance.Code;
+                _player->Erase(pSoulStoneList[i], 1, false);
+            }
+            else
+            {
+                nEndurance += pItem->m_Instance.nCurrentEndurance;
+            }
+        }
+    }
+
+    pItem->SetCurrentEndurance(nEndurance);
+    _player->Save(false);
+    pItem->DBUpdate();
+    _player->SetLastContact("SoulStoneCraft", 0);
+    Messages::SendItemMessage(_player, pItem);
+    _player->CalculateStat();
+    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
 }

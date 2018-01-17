@@ -35,6 +35,7 @@ Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int le
 
         item->m_Instance.GenerateInfo = info;
         item->m_Instance.Flag         = flag;
+        item->m_Instance.nCurrentEndurance = item->m_pItemBase->endurance;
 
         if (enhance == -1)
             item->m_Instance.nEnhance = item->m_pItemBase->enhance;
@@ -198,4 +199,44 @@ bool Item::IsCrossBow()
 int Item::GetItemRank() const
 {
     return m_pItemBase->rank;
+}
+
+void Item::SetCurrentEndurance(int n)
+{
+    int maxendurance = GetMaxEndurance();
+    m_Instance.nCurrentEndurance = n;
+    if(n > maxendurance)
+        m_Instance.nCurrentEndurance = maxendurance;
+    if(m_Instance.nCurrentEndurance < 0)
+        m_Instance.nCurrentEndurance = 0;
+    m_bIsNeedUpdateToDB = true;
+}
+
+int Item::GetMaxEndurance() const
+{
+    int result = 0;
+
+    if (m_pItemBase->socket != 0)
+    {
+        if (m_pItemBase->socket <= 0 )
+            return m_pItemBase->endurance;
+
+        int total_endurance = 0;
+        for (int i = 0; i < m_pItemBase->socket; ++i)
+        {
+            if(m_Instance.Socket[i] != 0)
+            {
+                total_endurance += sObjectMgr->GetItemBase(m_Instance.Socket[i])->endurance;
+            }
+        }
+        if (total_endurance != 0)
+            result = total_endurance;
+        else
+            result = m_pItemBase->endurance;
+    }
+    else
+    {
+        result = m_pItemBase->endurance;
+    }
+    return result;
 }

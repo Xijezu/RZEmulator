@@ -49,6 +49,8 @@ private:
     int SCRIPT_GetQuestProgress(int);
     void SCRIPT_StartQuest(int, sol::variadic_args);
     void SCRIPT_EndQuest(int, int, sol::variadic_args);
+    void SCRIPT_ShowSoulStoneCraftWindow();
+    void SCRIPT_ShowSoulStoneRepairWindow();
 
     // Teleporter
     void SCRIPT_EnterDungeon(int);

@@ -103,6 +103,7 @@ public:
     void onPutOnItem(XPacket *);
     void onPutOffItem(XPacket *);
 	void onEquipSummon(XPacket *);
+	void onSoulStoneCraft(XPacket*);
 
     void onContact(XPacket *);
 	void onDialog(XPacket *);

@@ -255,7 +255,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     packet << (int32) item->m_Instance.nCount;
 #endif // EPIC >= 5
 
-    packet << (uint32_t) item->m_Instance.nEndurance;
+    packet << (uint32_t) item->m_Instance.nCurrentEndurance;
     packet << (uint8_t) item->m_Instance.nEnhance;
     packet << (uint8_t) item->m_Instance.nLevel;
     packet << (uint32_t) item->m_Instance.Flag;
@@ -897,4 +897,18 @@ void Messages::SendItemWearInfoMessage(Player *pPlayer, Unit *pTarget, Item *pIt
     packet << (uint32_t) (pTarget != nullptr ? pTarget->GetHandle() : 0);
     packet << (int32_t) pItem->m_Instance.nEnhance;
     pPlayer->SendPacket(packet);
+}
+
+void Messages::ShowSoulStoneRepairWindow(Player *pPlayer)
+{
+    XPacket soulPct(TS_SC_SHOW_SOULSTONE_REPAIR_WINDOW);
+    pPlayer->SetLastContact("RepairSoulStone", 1);
+    pPlayer->SendPacket(soulPct);
+}
+
+void Messages::ShowSoulStoneCraftWindow(Player *pPlayer)
+{
+    XPacket soulPct(TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW);
+    pPlayer->SetLastContact("SoulStoneCraft", 1);
+    pPlayer->SendPacket(soulPct);
 }
