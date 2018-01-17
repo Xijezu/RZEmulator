@@ -44,6 +44,7 @@ enum StatusFlags : uint
     UsingDoubleWeapon = 0x2000000,
     CompeteDead = 0x4000000,
 };
+
 enum DamageType : int
 {
     NormalPhysical = 0,
@@ -56,6 +57,7 @@ enum DamageType : int
     StateMagical = 7,
     StatePhysical = 8,
 };
+
 enum DamageFlag : int
 {
     IgnoreAvoid = 2,
@@ -63,6 +65,7 @@ enum DamageFlag : int
     IgnoreBlock = 8,
     IgnoreCritical = 16,
 };
+
 class Unit : public WorldObject
 {
     friend class Messages;

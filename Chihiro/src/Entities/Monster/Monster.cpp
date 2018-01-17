@@ -111,16 +111,15 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     std::vector<VirtualParty> vPartyContribute{};
     takePriority Priority{};
 
-    // TODO: Do tame
-
-    calcPartyContribute(pFrom, vPartyContribute);
-    procEXP(pFrom, vPartyContribute);
     m_bTamedSuccess = false;
     if(m_hTamer != 0) {
         auto player = sMemoryPool->GetObjectInWorld<Player>(m_hTamer);
         if(player != nullptr)
             m_bTamedSuccess = sWorld->ProcTame(this);
     }
+
+    calcPartyContribute(pFrom, vPartyContribute);
+    procEXP(pFrom, vPartyContribute);
     if(!m_bTamedSuccess) {
         uint ct = sWorld->GetArTime();
         auto pos = GetCurrentPosition(ct);
@@ -279,57 +278,72 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
 
 void Monster::Update(uint diff)
 {
-    uint ct = sWorld->GetArTime();
-    MonsterStatus  ms = GetStatus();
-    if(ms != MonsterStatus::MS_Normal) {
-        if((int)ms > 0) {
-            if((int)ms <= 3) {
-                if(m_nLastUpdatedTime + 50 < ct)
+    uint          ct = sWorld->GetArTime();
+    MonsterStatus ms = GetStatus();
+    if (ms != MonsterStatus::MS_Normal)
+    {
+        if ((int)ms > 0)
+        {
+            if ((int)ms <= 3)
+            {
+                if (m_nLastUpdatedTime + 50 < ct)
                     OnUpdate();
 
-                if(true/*IsActable*/) {
-                    if(GetHealth() == 0)
+                if (true/*IsActable*/)
+                {
+                    if (GetHealth() == 0)
                         return;
 
                     AI_processAttack(ct);
                 }
-            } else {
-                if(ms == MonsterStatus::MS_Dead) {
+            }
+            else
+            {
+                if (ms == MonsterStatus::MS_Dead)
+                {
                     processDead(ct);
                     return;
                 }
             }
         }
-    } else {
-        if(m_nLastUpdatedTime + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending)) {
+    }
+    else
+    {
+        if (m_nLastUpdatedTime + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+        {
             OnUpdate();
 
-            if(GetHealth() == 0)
+            if (GetHealth() == 0)
                 return;
             //if(GetHealth() == GetMaxHealth())
-                //clearHateList();
+            //clearHateList();
         }
-        if(IsInWorld() && !m_bComeBackHome)
+        if (IsInWorld() && ())
             processFirstAttack(ct);
-        if(IsInWorld() && !m_bComeBackHome)
+        if (IsInWorld() && !m_bComeBackHome)
             processMove(ct);
     }
 
-    if(GetHealth() != 0) {
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending)) {
-            if(IsInWorld())
+    if (GetHealth() != 0)
+    {
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+        {
+            if (IsInWorld())
                 processPendingMove();
         }
-        if(m_nLastHateUpdateTime < ct + 6000) {
+        if (m_nLastHateUpdateTime < ct + 6000)
+        {
             m_nLastHateUpdateTime = ct;
             //updateHate();
         }
-        if(m_nTamedTime + 30000 < ct) {
-            m_hTamer = 0;
+        if (m_nTamedTime + 30000 < ct)
+        {
+            m_hTamer     = 0;
             m_nTamedTime = -1;
         }
 
-        if(bIsMoving && IsInWorld()) {
+        if (bIsMoving && IsInWorld())
+        {
             //processWalk
         }
     }
@@ -600,7 +614,8 @@ bool Monster::StartAttack(uint target, bool bNeedFastReaction)
 
 void Monster::AI_processAttack(uint t)
 {
-    if (m_castingSkill != nullptr) {
+    if (m_castingSkill != nullptr)
+    {
         m_castingSkill->ProcSkill();
         return;
     }
@@ -609,15 +624,20 @@ void Monster::AI_processAttack(uint t)
     if (target == nullptr
         || target->GetHandle() != m_hEnemy
         || target->GetHealth() == 0
-        || !target->IsInWorld()) {
+        || !target->IsInWorld())
+    {
         removeFromHateList(m_hEnemy);
         findNextEnemy();
-    } else {
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack)) {
+    }
+    else
+    {
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack))
+        {
             target->OnUpdate();
             RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
         }
-        if(target->GetHealth() != 0) {
+        if (target->GetHealth() != 0)
+        {
             AI_processAttack(target, t);
             return;
         }
@@ -631,9 +651,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if (!IsInWorld() || pEnemy == nullptr)
         return;
 
-    if ((IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer())
-        || sArRegion->IsVisibleRegion((uint) (pEnemy->GetPositionX() / g_nRegionSize), (uint) (pEnemy->GetPositionY() / g_nRegionSize),
-                                      (uint) (GetPositionX() / g_nRegionSize), (uint) (GetPositionY() / g_nRegionSize)) == 0
+    if (IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer()
+        || sArRegion->IsVisibleRegion(pEnemy, this) == 0
         || pEnemy->GetLayer() != GetLayer()
            && pEnemy->GetTargetHandle() != GetHandle()) {
         comeBackHome(false);
@@ -669,7 +688,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
 
     auto rx1 = (pEnemy->GetUnitSize() * 0.5f) + (GetUnitSize() * 0.5f);
     if((pEnemy->IsMoving(t) && GetRealAttackRange() * 1.5f < ry1 - rx1)
-        || !pEnemy->IsMoving(t) && GetRealAttackRange() * 1.2f < ry1 - rx1) {
+        || (!pEnemy->IsMoving(t) && GetRealAttackRange() * 1.2f < ry1 - rx1)) {
 
         if (bIsMoving && IsInWorld() && !pEnemy->IsMoving(t)
             && (GetRealAttackRange() * 1.2f >= GetTargetPos().GetExactDist2d(&enemyPosition) - rx1)
@@ -749,7 +768,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             break;
     }
     m_nMovableTime = (uint) ((float) GetAttackInterval() * fMod + t);
-    broadcastAttackMessage(pEnemy, Damages, (10 * GetAttackInterval()), (int) (10 * (GetNextAttackableTime() - t)), bDoubleAttack, false, false, false);
+    broadcastAttackMessage(pEnemy, Damages, (int)(10 * GetAttackInterval()), (int) (10 * (GetNextAttackableTime() - t)), bDoubleAttack, false, false, false);
     if(pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
         SetStatus(MonsterStatus::MS_Tracking);
 }
@@ -978,7 +997,8 @@ void Monster::processWalk(uint t)
 
 void Monster::processMove(uint t)
 {
-
+    if(IsDungeonConnector())
+        return;
 }
 
 void Monster::processFirstAttack(uint t)
@@ -988,20 +1008,23 @@ void Monster::processFirstAttack(uint t)
 
 void Monster::FindAttackablePosition(Position& myPosition, Position& enemyPosition, float distance, float gap)
 {
-    auto duplicateEnemyPosition = enemyPosition.GetPosition();
-    float walk_length = distance - gap;
+    auto  duplicateEnemyPosition = enemyPosition.GetPosition();
+    float walk_length            = distance - gap;
     float v{0};
-    if(walk_length >= 0.0f) {
+    if (walk_length >= 0.0f)
+    {
         v = (walk_length / distance) + 0.1f;
         enemyPosition.m_positionX = ((enemyPosition.GetPositionX() - myPosition.GetPositionX()) * v) + myPosition.GetPositionX();
         enemyPosition.m_positionY = ((enemyPosition.GetPositionY() - myPosition.GetPositionY()) * v) + myPosition.GetPositionY();
         enemyPosition.m_positionZ = ((enemyPosition.GetPositionZ() - myPosition.GetPositionZ()) * v) + myPosition.GetPositionZ();
 
-        if(true) // !isblocked
+        if (!sObjectMgr->IsBlocked(enemyPosition.GetPositionX(), enemyPosition.GetPositionY()))
             return;
 
         enemyPosition = duplicateEnemyPosition;
-    } else {
+    }
+    else
+    {
         enemyPosition = myPosition;
     }
 }

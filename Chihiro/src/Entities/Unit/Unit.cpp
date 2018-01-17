@@ -2386,10 +2386,10 @@ ushort Unit::Putoff(ItemWearType pos)
     if(pos == ItemWearType::WearTwoFingerRing)
         pos = ItemWearType::WearRing;
     if(pos >= 24 || pos < 0)
-        return 5;
+        return TS_RESULT_NOT_ACTABLE;
     ItemWearType abspos = GetAbsoluteWearPos(pos);
     if(abspos == ItemWearType::WearCantWear)
-        return 5;
+        return TS_RESULT_NOT_ACTABLE;
     if(pos != ItemWearType::WearBagSlot)
         return putoffItem(abspos);
 

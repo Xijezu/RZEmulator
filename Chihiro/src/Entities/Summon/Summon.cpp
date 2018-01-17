@@ -432,3 +432,83 @@ uint16 Summon::putoffItem(ItemWearType pos)
     }
     return result;
 }
+
+void Summon::onCompleteCalculateStat()
+{
+    /* todo: riding mount */
+    m_Attribute.nAttackRange = m_tSummonBase->attack_range;
+}
+
+void Summon::onModifyStatAndAttribute()
+{
+    if(GetMaster() != nullptr)
+    {
+        Messages::SendStatInfo(GetMaster(), this);
+    }
+}
+
+void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
+{
+/*
+   StructSummon *v7; // esi@1
+  c_fixed<10000> *v8; // eax@6
+  double v9; // st7@6
+  unsigned int v10; // edi@9
+  unsigned int v11; // ebx@9
+  float n; // ST1C_4@9
+  c_fixed<10000> *v13; // eax@9
+  unsigned int v14; // ecx@9
+  unsigned int v15; // eax@9
+  c_fixed<10000> result; // [sp+10h] [bp-8h]@6
+
+  v7 = this;
+  if ( !bIsBaseVar )
+    goto LABEL_15;
+  if ( type == 11 )
+  {
+    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseAttackPointRatio);
+    v9 = v7->m_fBaseAttackPointRatio;
+    goto LABEL_9;
+  }
+  if ( type == 12 )
+  {
+    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseMagicPointRatio);
+    v9 = v7->m_fBaseMagicPointRatio;
+    goto LABEL_9;
+  }
+  if ( type == 15 )
+  {
+    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseDefenceRatio);
+    v9 = v7->m_fBaseDefenceRatio;
+    goto LABEL_9;
+  }
+  if ( type != 16 )
+  {
+LABEL_15:
+    v15 = HIDWORD(var2.value);
+    v14 = var2.value;
+    v10 = HIDWORD(var1.value);
+    v11 = var1.value;
+    goto LABEL_12;
+  }
+  v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseMagicDefenceRatio);
+  v9 = v7->m_fBaseMagicDefenceRatio;
+LABEL_9:
+  v10 = HIDWORD(v8->value);
+  v11 = v8->value;
+  n = v9;
+  v13 = c_fixed<10000>::operator*<float>(&var2, &var1, n);
+  v14 = v13->value;
+  v15 = HIDWORD(v13->value);
+LABEL_12:
+  StructCreature::onItemWearEffect(
+    (StructCreature *)&v7->vfptr,
+    pItem,
+    bIsBaseVar,
+    type,
+    (c_fixed<10000>)__PAIR__(v10, v11),
+    (c_fixed<10000>)__PAIR__(v15, v14),
+    fRatio);
+ */
+    Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
+}

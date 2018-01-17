@@ -1470,7 +1470,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 || GetCurrentSkillLevel(1181) < 1
                    && GetCurrentSkillLevel(61010) < 1
                    && GetCurrentSkillLevel(61015) < 1)
-            { // TODO: PassiveSkill
+            {
                 pos = ItemWearType::WearDecoWeapon;
             }
         } else
@@ -2141,7 +2141,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
             // @todo: max JP
         }
 
-        AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
+        Unit::AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
         // @todo: favor
 
         if (q->m_QuestBase->nType == QuestType::QT_Collect || q->m_QuestBase->nType == QuestType::QT_HuntItem || q->m_QuestBase->nType == QuestType::QT_HuntItemFromAnyMonsters)

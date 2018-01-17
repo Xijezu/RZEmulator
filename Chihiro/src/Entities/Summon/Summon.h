@@ -43,6 +43,11 @@ protected:
     void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
     void processWalk(uint t);
     void onExpChange() override;
+    //void onAfterApplyStat() override;
+    void onModifyStatAndAttribute() override;
+    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
+    //void onApplyStat
+    void onCompleteCalculateStat() override;
 private:
     SummonResourceTemplate* m_tSummonBase{nullptr};
     Player *m_pMaster{nullptr};
