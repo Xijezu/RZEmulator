@@ -1069,7 +1069,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
 
     Item   *pItem  = nullptr;
     Summon *summon = nullptr;
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < nCFL; ++i)
     {
         bool bFound = false;
         pItem = nullptr;
@@ -1084,7 +1084,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
                     continue;
             }
         }
-        for (int j = 0; j < 6; j++)
+        for (int j = 0; j < nCFL; j++)
         {
             if (pItem != nullptr)
             {
@@ -1137,11 +1137,11 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
     }
     if (nCFL > 1)
     {
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < nCFL; ++i)
         {
             if (_player->m_aBindSummonCard[i] == nullptr)
             {
-                for (int x = i + 1; x < 6; ++x)
+                for (int x = i + 1; x < nCFL; ++x)
                 {
                     if (_player->m_aBindSummonCard[x] != nullptr)
                     {
