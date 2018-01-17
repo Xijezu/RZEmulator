@@ -1037,8 +1037,7 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
         {
             target->RegisterSkill(skill_id, currentLevel, 0, jobID);
             // TODO: Hack
-            _player->CalculateStat();
-            Messages::SendStatInfo(_player, target);
+            target->CalculateStat();
         }
         Messages::SendResult(_player,pRecvPct->GetPacketID(), result, value);
     //}
@@ -1127,6 +1126,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
 
                     Summon::DB_InsertSummon(_player, summon);
                     sScriptingMgr->RunString(_player, string_format("on_first_summon( %d, %d)", summon->GetSummonCode(), summon->GetHandle()));
+                    summon->SetCurrentJLv(summon->GetLevel());
                     summon->CalculateStat();
                 }
                 summon->m_cSlotIdx = (uint8_t)i;

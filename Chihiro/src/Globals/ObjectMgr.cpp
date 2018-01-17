@@ -1298,7 +1298,8 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, 
                 if(stree.lv > pUnit->GetLevel()) {
                     return TS_RESULT_NOT_ENOUGH_LEVEL;
                 }
-                if(stree.job_lv <= unit_job_level) {
+                if(stree.job_lv <= unit_job_level)
+                {
                     for(int nsi = 0; nsi < 3; nsi++) {
                         if(stree.need_skill_id[nsi] == 0)
                             break;
