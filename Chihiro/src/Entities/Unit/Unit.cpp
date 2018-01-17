@@ -1300,7 +1300,7 @@ void Unit::OnUpdate()
 
     if(IsInWorld()) {
         if(!m_vStateList.empty() && m_nLastStateProcTime + 100 < ct) {
-            //procStateDamage(ct);
+            procStateDamage(ct);
             //procState(ct);
             if(ClearExpiredState(ct)) {
                 CalculateStat();
@@ -2496,7 +2496,6 @@ ItemClass Unit::GetWeaponClass()
         if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
         {
             Item* itemLeft = GetWornItem(ItemWearType::WearLeftHand);
-            result = (ItemClass)itemRight->m_pItemBase->iclass;
             if (itemRight->m_pItemBase->iclass == ItemClass::ClassOneHandSword && itemLeft->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
                 return ItemClass::ClassDoubleSword;
             if (itemRight->m_pItemBase->iclass == ItemClass::ClassDagger && itemLeft->m_pItemBase->iclass == ItemClass::ClassDagger)
@@ -2937,4 +2936,314 @@ void Unit::applyPassiveSkillAmplifyEffect()
 int Unit::GetArmorClass() const
 {
     return m_anWear[ItemWearType::WearArmor] != nullptr ? m_anWear[ItemWearType::WearArmor]->m_pItemBase->iclass : 0;
+}
+
+void Unit::procStateDamage(uint t)
+{
+    std::vector<StateDamage> vDamageList{};
+    for(auto& st : m_vStateList)
+    {
+        if(IsPlayer() || IsSummon())
+        {
+            auto caster = sMemoryPool->GetObjectInWorld<Unit>(st.m_hCaster[0]);
+            if (caster == nullptr)
+            {
+                if (st.m_nCode != StateCode::SC_GAIA_MEMBER_SHIP
+                    && st.m_nCode != StateCode::SC_NEMESIS
+                    && st.m_nCode != StateCode::SC_NEMESIS_FOR_AUTO
+                    && st.m_nCode != StateCode::SC_FALL_FROM_SUMMON
+                    && st.IsHarmful())
+                {
+                    st.AddState(StateType::SG_NORMAL, st.m_hCaster[0], (uint16)st.m_nLevel[0], st.m_nStartTime[0], (uint)(t - 1), st.m_nBaseDamage[0], false);
+                    onUpdateState(st, false);
+                    continue;
+                }
+            }
+        }
+
+        bool bNeedToProcLightningForceCongestion = false;
+        auto stateBase = sObjectMgr->GetStateInfo((int)st.m_nCode);
+        if(stateBase == nullptr)
+            continue;
+        int nBaseEffectID = 0;
+        auto nThisFireTime = (uint)(st.m_nLastProcessedTime + 100 * stateBase->fire_interval);
+        if(nThisFireTime < t && nThisFireTime <= st.m_nEndTime[0])
+        {
+            if(st.m_nCode == StateCode::SC_LIGHTNING_FORCE_CONGESTION)
+                bNeedToProcLightningForceCongestion = true;
+            nBaseEffectID = stateBase->base_effect_id;
+            if(nBaseEffectID <= 0)
+                continue;
+
+            int nDamageHP = 0;
+            int nDamageMP = 0;
+            auto elem = (ElementalType)stateBase->elemental_type;
+
+            switch(nBaseEffectID)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 11:
+                    nDamageHP = (int)((stateBase->add_damage_per_skl * st.GetLevel())
+                                      + (st.m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st.GetLevel())))
+                                      + stateBase->add_damage_base);
+                    break;
+                case 6:
+                    nDamageHP = (int)((st.GetValue(0) + (st.GetValue(1) * st.GetLevel())) * GetMaxHealth());
+                    nDamageMP = (int)((st.GetValue(2) + (st.GetValue(3) * st.GetLevel())) * GetMaxMana());
+                    break;
+                case 12:
+                    nDamageMP = (int)((stateBase->add_damage_per_skl * st.GetLevel())
+                                      + (st.m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st.GetLevel())))
+                                      + stateBase->add_damage_base);
+                    break;
+                case 21:
+                    nDamageHP = (stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel()));
+                    break;
+                case 22:
+                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
+                    break;
+                case 24:
+                    nDamageHP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
+                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
+                    break;
+                case 25:
+                    nDamageHP = (int)((st.GetValue(0) + (st.GetValue(1) * st.GetLevel())) * GetMaxHealth());
+                    nDamageMP = (int)((st.GetValue(3) + (st.GetValue(4) * st.GetLevel())) * GetMaxMana());
+                    break;
+                default:
+                    break;
+            }
+
+            if(nDamageHP != 0 || nDamageMP != 0)
+            {
+                st.m_nLastProcessedTime = nThisFireTime;
+                StateDamage sd{st.m_hCaster[0], elem, nBaseEffectID, (int)st.m_nCode, st.GetLevel(), nDamageHP, nDamageMP,
+                               nThisFireTime + (100 * stateBase->fire_interval) > st.m_nEndTime[0], st.m_nUID};
+                vDamageList.emplace_back(sd);
+            }
+        }
+    }
+
+    for(auto& sd : vDamageList)
+    {
+        auto caster = sMemoryPool->GetObjectInWorld<Unit>(sd.caster);
+        int nFlag = 0;
+        Damage dmg{};
+        if(sd.base_effect_id < 11)
+        {
+            if(caster == nullptr)
+            {
+                RemoveState(sd.uid);
+                continue;
+            }
+
+            switch(sd.base_effect_id)
+            {
+                case 1:
+                    nFlag |= 10;
+                   dmg = DealPhysicalStateDamage(caster, sd.damage_hp, sd.elementalType, 0, 0, nFlag, nullptr, nullptr);
+                    break;
+                case 2:
+                case 6:
+                   nFlag |= 14;
+                    dmg = DealPhysicalStateDamage(caster, sd.damage_hp, sd.elementalType, 0, 0, nFlag, nullptr, nullptr);
+                    break;
+                case 3:
+                    nFlag |= 8;
+                    dmg = DealMagicalStateDamage(caster, sd.damage_hp, sd.elementalType, 0, 0, nFlag, nullptr, nullptr);
+                    break;
+                case 4:
+                    nFlag |= 12;
+                    dmg = DealMagicalStateDamage(caster, sd.damage_hp, sd.elementalType, 0, 0, nFlag, nullptr, nullptr);
+                    break;
+                default:
+                    continue;
+            }
+
+            int total_amount = 0;
+            for(auto& st : m_vStateList)
+            {
+                if(st.m_nUID == sd.uid)
+                {
+                    auto stateBase = sObjectMgr->GetStateInfo((int)st.m_nCode);
+                    if(stateBase == nullptr)
+                        continue;
+                    st.m_nTotalDamage += dmg.nDamage;
+                    total_amount = stateBase->state_id;
+                    break;
+                }
+            }
+
+            XPacket statePct(TS_SC_STATE_RESULT);
+            statePct << (uint)sd.caster;
+            statePct << GetHandle();
+            statePct << sd.code;
+            statePct << sd.level;
+            statePct << (uint16)1; // STATE_DAMAGE_HP
+            statePct << dmg.nDamage;
+            statePct << GetHealth();
+            statePct << (uint8)(sd.final ? 1 : 0);
+            statePct << total_amount;
+
+            sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+                              (uint)(GetPositionY() / g_nRegionSize),
+                              GetLayer(),
+                              statePct);
+        }
+        else
+        {
+            int nHealHP = 0;
+            int nHealMP = 0;
+
+            switch(sd.base_effect_id)
+            {
+                case 11:
+                    nHealHP = Heal(sd.damage_hp);
+                    break;
+                case 12:
+                    nHealMP = MPHeal(sd.damage_mp);
+                    break;
+                case 21:
+                    nHealHP = HealByItem(sd.damage_hp);
+                    break;
+                case 22:
+                    nHealMP = (int)MPHealByItem(sd.damage_mp);
+                    break;
+                case 24:
+                case 25:
+                    nHealHP = HealByItem(sd.damage_hp);
+                    nHealMP = (int)MPHealByItem(sd.damage_mp);
+
+                default:
+                    continue;
+            }
+
+            int total_amount = 0;
+            for(auto& st : m_vStateList)
+            {
+                if(st.m_nUID == sd.uid)
+                {
+                    int ad = nHealHP;
+                    if(ad == 0)
+                        ad = nHealMP;
+                    if(ad != 0)
+                    {
+                        st.m_nTotalDamage += ad;
+                        total_amount = st.m_nTotalDamage;
+                    }
+                    break;
+                }
+            }
+
+            int df = 0;
+            if(nHealHP != 0)
+            {
+                XPacket statePct(TS_SC_STATE_RESULT);
+                statePct << (uint)sd.caster;
+                statePct << GetHandle();
+                statePct << sd.code;
+                statePct << sd.level;
+                statePct << (uint16)4; // STATE_HEAL
+                statePct << nHealHP;
+                statePct << GetHealth();
+                statePct << (uint8)(sd.final ? 1 : 0);
+                statePct << total_amount;
+
+                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+                                  (uint)(GetPositionY() / g_nRegionSize),
+                                  GetLayer(),
+                                  statePct);
+            }
+
+            if(nHealMP != 0)
+            {
+                df = df != 0 ? -1 : 0;
+                df = total_amount & df;
+
+                XPacket statePct(TS_SC_STATE_RESULT);
+                statePct << (uint)sd.caster;
+                statePct << GetHandle();
+                statePct << sd.code;
+                statePct << sd.level;
+                statePct << (uint16)5; // STATE_HEAL_MP
+                statePct << nHealMP;
+                statePct << GetMana();
+                statePct << (uint8)(sd.final ? 1 : 0);
+                statePct << df;
+
+                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+                                  (uint)(GetPositionY() / g_nRegionSize),
+                                  GetLayer(),
+                                  statePct);
+            }
+        }
+    }
+}
+
+Damage Unit::DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+{
+    return DealDamage(pFrom, nDamage, elemental_type, DamageType::StatePhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}
+
+Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+{
+    return DealDamage(pFrom, nDamage, elemental_type, DamageType::StateMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}
+
+void Unit::RemoveState(StateCode code, int state_level)
+{
+    for(int i = 0; i < m_vStateList.size(); ++i)
+    {
+        State s = m_vStateList[i];
+        if(s.m_nCode == code)
+        {
+            int level = s.GetLevel();
+            if(level <= state_level)
+            {
+                onUpdateState(s, true);
+                m_vStateList.erase(m_vStateList.begin() + i);
+                CalculateStat();
+                onAfterAddState(s); // @todo: onafterremovestate
+            }
+            return;
+        }
+    }
+}
+
+void Unit::RemoveState(int uid)
+{
+    for(int i = 0; i < m_vStateList.size(); ++i)
+    {
+        State s = m_vStateList[i];
+        if(s.m_nUID == uid)
+        {
+            onUpdateState(s, true);
+            m_vStateList.erase(m_vStateList.begin() + i);
+            CalculateStat();
+            onAfterAddState(s);
+            return;
+        }
+    }
+}
+
+int Unit::MPHeal(int mp)
+{
+    return MPHealByItem(mp);
+}
+
+int Unit::HealByItem(int hp)
+{
+    auto result = (int)((GetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM) * hp) + GetFloatValue(UNIT_FIELD_ADDITIONAL_HEAL));
+    AddHealth(result);
+    return result;
+}
+
+int Unit::MPHealByItem(int mp)
+{
+    int result = (int)(GetInt32Value(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
+    AddMana(result);
+    return result;
 }

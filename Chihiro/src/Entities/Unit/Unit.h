@@ -123,13 +123,21 @@ public:
     Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
     Damage DealPhysicalLeftHandDamage(Unit* pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage);
     Damage DealMagicalDamage(Unit* pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
+    Damage DealPhysicalStateDamage(Unit* pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage);
+    Damage DealMagicalStateDamage(Unit* pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage);
 
     DamageInfo DealMagicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalSkillDamage(Unit* pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead);
 
     int Heal(int hp);
+    int MPHeal(int mp);
+    int HealByItem(int hp);
+    int MPHealByItem(int mp);
+
     /// BATTLE END
+    void RemoveState(StateCode code, int state_level);
+    void RemoveState(int uid);
 
     void AddUnitTypeMask(uint32 mask) { m_unitTypeMask |= mask; }
     // Setters
@@ -199,6 +207,7 @@ public:
 protected:
     uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
     void applyStatByItem();
+    virtual void procStateDamage(uint t);
     virtual void applyJobLevelBonus() {};
     virtual void onModifyStatAndAttribute() {};
     virtual void onBeforeCalculateStat() {};
