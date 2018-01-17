@@ -85,7 +85,7 @@ void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
 {
     Tokenizer tokenizer(szMessage, ' ');
     for (const auto &i : commandHandler) {
-        if(i.szCommand == tokenizer[0] /*&& (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100))*/) {
+        if(i.szCommand == tokenizer[0] && (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100))) {
             auto pos = szMessage.find(' ');
             if(pos != std::string::npos)
                 (*this.*i.handler)(pClient, szMessage.substr(pos+1));
