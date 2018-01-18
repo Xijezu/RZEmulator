@@ -436,41 +436,45 @@ void WorldObject::AddNoise(int r1, int r2, int v)
         m_positionY = prev_y;
 }
 
-ArMoveVector::ArMoveVector(const ArMoveVector *src)
+ArMoveVector::ArMoveVector(const ArMoveVector &src)
 {
-    this->m_positionX = src->m_positionX;
-    this->m_positionY = src->m_positionY;
-    this->m_positionZ = src->m_positionZ;
-    this->_orientation = src->_orientation;
+    this->m_positionX = src.m_positionX;
+    this->m_positionY = src.m_positionY;
+    this->m_positionZ = src.m_positionZ;
+    this->_orientation = src._orientation;
 
-    this->bIsMoving = src->bIsMoving;
-    this->bWithZMoving = src->bWithZMoving;
-    this->speed = src->speed;
-    this->start_time = src->start_time;
-    this->proc_time = src->proc_time;
-    for(auto& mi : src->ends) {
+    this->bIsMoving = src.bIsMoving;
+    this->bWithZMoving = src.bWithZMoving;
+    this->speed = src.speed;
+    this->start_time = src.start_time;
+    this->proc_time = src.proc_time;
+    for(auto& mi : src.ends) {
         this->ends.emplace_back(MoveInfo(mi.end, mi.end_time));
     }
-    this->bHasDirectionChanged = src->bHasDirectionChanged;
-    this->direction.m_positionX = src->direction.m_positionX;
-    this->direction.m_positionY = src->direction.m_positionY;
-    this->direction.m_positionZ = src->direction.m_positionZ;
-    this->direction._orientation = src->direction._orientation;
+    this->bHasDirectionChanged = src.bHasDirectionChanged;
+    this->direction.m_positionX = src.direction.m_positionX;
+    this->direction.m_positionY = src.direction.m_positionY;
+    this->direction.m_positionZ = src.direction.m_positionZ;
+    this->direction._orientation = src.direction._orientation;
 }
 
 bool ArMoveVector::Step(uint current_time)
 {
-    bool res{false};
+    bool                  res{false};
     std::vector<MoveInfo> removed{ };
 
-    if(proc_time < current_time && bIsMoving) {
-        for(auto& info : ends) {
-            if(current_time < info.end_time) {
-                uint et = current_time - proc_time;
+    if (proc_time < current_time && bIsMoving)
+    {
+        for (auto &info : ends)
+        {
+            if (current_time < info.end_time)
+            {
+                uint  et  = current_time - proc_time;
                 float fet = (float)et / (float)(info.end_time - proc_time);
                 m_positionX = (info.end.m_positionX - m_positionX) * fet + m_positionX;
                 m_positionY = (info.end.m_positionY - m_positionY) * fet + m_positionY;
-                if(bWithZMoving) {
+                if (bWithZMoving)
+                {
                     m_positionZ = (info.end.m_positionZ - m_positionZ) * fet + m_positionZ;
                 }
                 break;
@@ -478,25 +482,31 @@ bool ArMoveVector::Step(uint current_time)
             m_positionX = info.end.m_positionX;
             m_positionY = info.end.m_positionY;
             m_positionZ = info.end.m_positionZ;
-            proc_time = info.end_time;
+            proc_time   = info.end_time;
             removed.emplace_back(info);
-            if(!ends.empty())
+            if (!ends.empty())
                 SetDirection(ends[0].end);
         }
         proc_time = current_time;
-        for(auto info : removed) {
+        for (auto& info : removed)
+        {
             this->ends.erase(std::remove(ends.begin(), ends.end(), info), ends.end());
         }
-        if(ends.empty() || this->m_positionX == (ends.back()).end.m_positionX &&
-                                   m_positionY == (ends.back()).end.m_positionY &&
-                                   m_positionZ == (ends.back()).end.m_positionZ) {
+        if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX &&
+                            m_positionY == (ends.back()).end.m_positionY &&
+                            m_positionZ == (ends.back()).end.m_positionZ))
+        {
             bIsMoving = false;
             ends.clear();
             res = true;
-        } else {
+        }
+        else
+        {
             res = false;
         }
-    } else {
+    }
+    else
+    {
         res = false;
     }
     return res;

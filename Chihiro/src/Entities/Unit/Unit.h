@@ -134,6 +134,7 @@ public:
     int MPHeal(int mp);
     int HealByItem(int hp);
     int MPHealByItem(int mp);
+    virtual bool IsMovable();
 
     /// BATTLE END
     void RemoveState(StateCode code, int state_level);

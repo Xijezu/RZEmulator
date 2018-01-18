@@ -43,6 +43,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
+    SetFlag(UNIT_FIELD_STATUS, (StatusFlags::NeedToCalculateStat | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::Movable | StatusFlags::MagicCastable | StatusFlags::ItemUsable | StatusFlags::Mortal));
 
     m_nLastEnemyDistance = 0.0f;
     m_nLastTrackTime = 0;
@@ -654,30 +655,35 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if (IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer()
         || sArRegion->IsVisibleRegion(pEnemy, this) == 0
         || pEnemy->GetLayer() != GetLayer()
-           && pEnemy->GetTargetHandle() != GetHandle()) {
+           && pEnemy->GetTargetHandle() != GetHandle())
+    {
         comeBackHome(false);
         return;
     }
 
+    Step(t);
     Position enemyPosition = pEnemy->GetCurrentPosition(t);
     Position myPosition    = GetCurrentPosition(t);
-    auto     ry1      = myPosition.GetExactDist2d(&enemyPosition);
+    auto     ry1           = myPosition.GetExactDist2d(&enemyPosition);
 
     // Trigger condition
-    if (GetNextAttackableTime() <= t) {
+    if (GetNextAttackableTime() <= t)
+    {
 
     }
 
     auto ht = getHateTag(pEnemy->GetHandle(), 0);
-    if(/*!m_bIsDungeonRaidMonster*/ ((ht != nullptr && ht->nTime + 2500 < t) && pEnemy->bIsMoving && pEnemy->IsInWorld()
-    && ry1 > 360.0f || m_nLastEnemyDistance != 0.0f && ry1 > 600.0f && m_nLastEnemyDistance < ry1)) {
+    if (/*!m_bIsDungeonRaidMonster*/ ((ht != nullptr && ht->nTime + 2500 < t) && pEnemy->bIsMoving && pEnemy->IsInWorld()
+                                      && ry1 > 360.0f || m_nLastEnemyDistance != 0.0f && ry1 > 600.0f && m_nLastEnemyDistance < ry1))
+    {
         auto ht2 = getHateTag(pEnemy->GetHandle(), t);
 
-        if(ht2 != nullptr) {
+        if (ht2 != nullptr)
+        {
             ht2->nBadAttackCount++;
             ht2->bIsActive = false;
             float fMod = ((float)ht2->nHate * 0.5f);
-            if(fMod < 100)
+            if (fMod < 100)
                 fMod = 100;
             ht2->nHate -= (int)fMod;
         }
@@ -687,33 +693,40 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     m_nLastEnemyDistance = ry1;
 
     auto rx1 = (pEnemy->GetUnitSize() * 0.5f) + (GetUnitSize() * 0.5f);
-    if((pEnemy->IsMoving(t) && GetRealAttackRange() * 1.5f < ry1 - rx1)
-        || (!pEnemy->IsMoving(t) && GetRealAttackRange() * 1.2f < ry1 - rx1)) {
+    if ((pEnemy->IsMoving(t) && GetRealAttackRange() * 1.5f < ry1 - rx1)
+        || (!pEnemy->IsMoving(t) && GetRealAttackRange() * 1.2f < ry1 - rx1))
+    {
 
         if (bIsMoving && IsInWorld() && !pEnemy->IsMoving(t)
             && (GetRealAttackRange() * 1.2f >= GetTargetPos().GetExactDist2d(&enemyPosition) - rx1)
             // || !IsActable()
-            || false /*!HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)*/
-            || m_nMovableTime > t) {
+            || !IsMovable()
+            || m_nMovableTime > t)
+        {
             return;
         }
 
         auto targetPosition = enemyPosition.GetPosition();
-        if (!pEnemy->bIsMoving || !pEnemy->IsInWorld()) {
-            FindAttackablePosition(myPosition, targetPosition, ry1, GetRealAttackRange() - rx1);
-        } else {
+        if (!pEnemy->bIsMoving || !pEnemy->IsInWorld())
+        {
+            FindAttackablePosition(myPosition, targetPosition, ry1, GetRealAttackRange() + rx1);
+        }
+        else
+        {
             targetPosition = pEnemy->GetCurrentPosition(t + 15);
         }
         // Pathfinding here
         SetStatus(MonsterStatus::MS_Tracking);
         auto homePosition   = m_pRespawn.GetPosition();
         auto track_distance = myPosition.GetExactDist2d(&homePosition);
-        if (GetChaseRange() >= track_distance) {
-            if (m_nLastTrackTime + 50 < t) {
+        if (/*isDungeonRaidMonster || */GetChaseRange() >= track_distance)
+        {
+            if (m_nLastTrackTime + 50 < t)
+            {
                 m_nLastTrackTime = t;
-                track_distance   = (((float) irand(0, 9) / 100.0f) + 1.0f);
-                if (!sObjectMgr->IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()))
-                { // GameContent::IsBlocked
+                track_distance   = (((float)irand(0, 9) / 100.0f) + 1.0f);
+                if (!sObjectMgr->IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()) && IsMovable())
+                {
                     sWorld->SetMove(this, GetCurrentPosition(t), targetPosition, (uint8)((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld->GetArTime(), true);
                 }
             }
@@ -722,28 +735,31 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         comeBackHome(true);
         return;
     }
-    if(GetStatus() == MonsterStatus::MS_FindAttackPos && IsMoving(t)) {
+    if (GetStatus() == MonsterStatus::MS_FindAttackPos && IsMoving(t))
+    {
         return;
     }
 
-    if(!pEnemy->IsMoving(t) && (GetStatus() == MonsterStatus::MS_Tracking && irand(0,99) < 5))
+    if (!pEnemy->IsMoving(t) && (GetStatus() == MonsterStatus::MS_Tracking && irand(0, 99) < 5))
     {
         auto attack_pos = getNonDuplicateAttackPos(pEnemy);
         SetStatus(MonsterStatus::MS_FindAttackPos);
-        if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY())) // !IsBlocked && Movable()
+        if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
             sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
         return;
     }
 
     int nPrevStatus = GetStatus();
     SetStatus(MonsterStatus::MS_Attack);
-    if(GetNextAttackableTime() > t) {
-        if(pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
+    if (GetNextAttackableTime() > t)
+    {
+        if (pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
             SetStatus(MonsterStatus::MS_Tracking);
         return;
     }
     // Checks for attackable
-    if(bIsMoving && IsInWorld()) {
+    if (bIsMoving && IsInWorld())
+    {
         sWorld->SetMove(this, myPosition, GetCurrentPosition(t + 10), 0, true, sWorld->GetArTime(), true);
     }
 
@@ -753,7 +769,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     Attack(pEnemy, t, GetAttackInterval(), Damages, bDoubleAttack);
     float fMod     = 0.5f;
 
-    switch (m_Base->weapon_type) {
+    switch (m_Base->weapon_type)
+    {
         case 1:
             fMod = 0.6f;
             break;
@@ -767,9 +784,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             fMod = 0.5f;
             break;
     }
-    m_nMovableTime = (uint) ((float) GetAttackInterval() * fMod + t);
-    broadcastAttackMessage(pEnemy, Damages, (int)(10 * GetAttackInterval()), (int) (10 * (GetNextAttackableTime() - t)), bDoubleAttack, false, false, false);
-    if(pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
+    m_nMovableTime = (uint)((float)GetAttackInterval() * fMod + t);
+    broadcastAttackMessage(pEnemy, Damages, (int)(10 * GetAttackInterval()), (int)(10 * (GetNextAttackableTime() - t)), bDoubleAttack, false, false, false);
+    if (pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
         SetStatus(MonsterStatus::MS_Tracking);
 }
 
@@ -999,6 +1016,15 @@ void Monster::processMove(uint t)
 {
     if(IsDungeonConnector())
         return;
+
+    if(false /* waypointinfo*/)
+    {
+
+    }
+    else
+    {
+
+    }
 }
 
 void Monster::processFirstAttack(uint t)

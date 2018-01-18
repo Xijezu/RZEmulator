@@ -1595,7 +1595,7 @@ bool Unit::StartAttack(uint target, bool bNeedFastReaction)
     else
     {
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
+        RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
         if((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
             m_nNextAttackMode = 1;
         if (bNeedFastReaction)
@@ -3311,4 +3311,12 @@ int Unit::MPHealByItem(int mp)
     int result = (int)(GetInt32Value(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
     AddMana(result);
     return result;
+}
+
+bool Unit::IsMovable()
+{
+    if (GetHealth() == 0 || /*this.IsSitDown() ||*/ m_nMovableTime > sWorld->GetArTime() || m_castingSkill != nullptr)
+        return false;
+    else
+        return HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
 }

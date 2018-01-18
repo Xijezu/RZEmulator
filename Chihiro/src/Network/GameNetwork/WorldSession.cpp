@@ -1300,38 +1300,52 @@ void WorldSession::KickPlayer()
 
 void WorldSession::onAttackRequest(XPacket *pRecvPct)
 {
-    if(_player == nullptr)
+    if (_player == nullptr)
         return;
 
     pRecvPct->read_skip(7);
     auto handle = pRecvPct->read<uint>();
     auto target = pRecvPct->read<uint>();
 
-    if(_player->GetHealth() == 0)
+    if (_player->GetHealth() == 0)
         return;
 
-    auto unit = dynamic_cast<Unit*>(_player);
-    if(handle != _player->GetHandle())
+    auto unit = dynamic_cast<Unit *>(_player);
+    if (handle != _player->GetHandle())
         unit = _player->GetSummonByHandle(handle);
-    if(unit == nullptr) {
+    if (unit == nullptr)
+    {
         Messages::SendCantAttackMessage(_player, handle, target, TS_RESULT_NOT_OWN);
         return;
     }
 
-    if(target == 0) { // Todo
+    if (target == 0)
+    {
+        if (unit->GetTargetHandle() != 0)
+            unit->CancelAttack();
         return;
     }
 
     //auto pTarget = sMemoryPool->getPtrFromId(target);
     auto pTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target);
-    if(pTarget == nullptr){
-        // Todo same as above
+    if(pTarget == nullptr)
+    {
+        if (unit->GetTargetHandle() != 0)
+        {
+            unit->EndAttack();
+            return;
+        }
         Messages::SendCantAttackMessage(_player, handle, target, TS_RESULT_NOT_EXIST);
         return;
     }
 
     // TODO isEnemy
     // Todo various checks
+    if((unit->IsUsingCrossBow() || unit->IsUsingBow()) && unit->IsPlayer() && unit->GetBulletCount() < 1)
+    {
+        Messages::SendCantAttackMessage(_player, handle, target, 0);
+        return;
+    }
 
     unit->StartAttack(target, true);
 }

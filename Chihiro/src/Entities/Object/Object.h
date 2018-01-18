@@ -513,7 +513,7 @@ struct Position {
 class ArMoveVector : public Position {
 public:
     ArMoveVector() = default;
-    explicit ArMoveVector(const ArMoveVector*);
+    ArMoveVector(const ArMoveVector&);
     ~ArMoveVector() = default;
 
     virtual bool Step(uint current_time);
@@ -573,19 +573,22 @@ public:
 
     Position GetCurrentPosition(uint t)
     {
-        Position result{ };
-        ArMoveVector _mv { };
-        if(bIsMoving && IsInWorld()) {
-            _mv = ArMoveVector(this);
+        Position     result{ };
+        ArMoveVector _mv{ };
+        if (bIsMoving && IsInWorld())
+        {
+            _mv = ArMoveVector{dynamic_cast<ArMoveVector>(*this)};
             _mv.Step(t);
-            result.m_positionX = _mv.GetPositionX();
-            result.m_positionY = _mv.GetPositionY();
-            result.m_positionZ = _mv.GetPositionZ();
+            result.m_positionX  = _mv.GetPositionX();
+            result.m_positionY  = _mv.GetPositionY();
+            result.m_positionZ  = _mv.GetPositionZ();
             result._orientation = _mv.GetOrientation();
-        } else {
-            result.m_positionX = GetPositionX();
-            result.m_positionY = GetPositionY();
-            result.m_positionZ = GetPositionZ();
+        }
+        else
+        {
+            result.m_positionX  = GetPositionX();
+            result.m_positionY  = GetPositionY();
+            result.m_positionZ  = GetPositionZ();
             result._orientation = GetOrientation();
         }
         return result;
