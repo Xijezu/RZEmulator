@@ -27,6 +27,7 @@
 #include "State.h"
 #include "Quest.h"
 #include "WorldSession.h"
+#include "GroupManager.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -911,4 +912,53 @@ void Messages::ShowSoulStoneCraftWindow(Player *pPlayer)
     XPacket soulPct(TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW);
     pPlayer->SetLastContact("SoulStoneCraft", 1);
     pPlayer->SendPacket(soulPct);
+}
+
+void Messages::SendPartyInfo(Player *pPlayer)
+{
+    if (pPlayer == nullptr)
+        return;
+
+    if(pPlayer->GetPartyID() == 0)
+    {
+        Messages::SendChatMessage(100, "@PARTY", pPlayer, "PINFO|");
+        return;
+    }
+
+    auto leader     = sGroupManager->GetLeaderName(pPlayer->GetPartyID());
+    auto name       = sGroupManager->GetPartyName(pPlayer->GetPartyID());
+    int  min_lvl    = sGroupManager->GetMinLevel(pPlayer->GetPartyID());
+    int  max_lvl    = sGroupManager->GetMaxLevel(pPlayer->GetPartyID());
+    int  share_mode = sGroupManager->GetShareMode(pPlayer->GetPartyID());
+
+    std::string msg = string_format("PINFO|%s|%s|%d|%d|%d|", name.c_str(),leader.c_str(), share_mode, min_lvl, max_lvl);
+
+    struct PInfo
+    {
+        uint handle;
+        int hp;
+        int mp;
+        int  x;
+        int  y;
+        int race;
+        int isOnline;
+    };
+
+    sGroupManager->DoEachMemberTag(pPlayer->GetPartyID(), [&msg](PartyMemberTag& tag) {
+        PInfo info{ };
+        auto  player = Player::FindPlayer(tag.strName);
+        if (player != nullptr)
+        {
+            info.handle = player->GetHandle();
+            info.hp     = (int)GetPct((float)player->GetHealth(), player->GetMaxHealth());
+            info.mp     = (int)GetPct((float)player->GetMana(), player->GetMaxMana());
+            info.x      = (int)player->GetPositionX();
+            info.y      = (int)player->GetPositionY();
+            info.race = player->GetRace();
+            info.isOnline = 2;
+        }
+        // handle|name|level|job_id|hp_pct|mp_pct|x|y|
+        msg.append(string_format("%d|%s|%d|%d|%d|%d|%d|%d|%d|", info.handle, tag.strName.c_str(), info.race, tag.nJobID, info.hp, info.mp, info.x, info.y, info.isOnline));
+    });
+    SendChatMessage(100, "@PARTY", pPlayer, msg);
 }

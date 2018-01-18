@@ -128,6 +128,12 @@ inline T CalculatePct(T base, U pct)
 }
 
 template <class T, class U>
+inline T GetPct(T curr, U max)
+{
+    return T(curr / static_cast<float>(max) * 100);
+};
+
+template <class T, class U>
 inline T AddPct(T &base, U pct)
 {
     return base += CalculatePct(base, pct);

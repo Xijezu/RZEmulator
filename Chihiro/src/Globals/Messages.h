@@ -105,6 +105,7 @@ public:
     static void SendItemWearInfoMessage(Player* pPlayer, Unit* pTarget, Item* pItem);
     static void ShowSoulStoneRepairWindow(Player*);
     static void ShowSoulStoneCraftWindow(Player*);
+    static void SendPartyInfo(Player*);
 private:
     static void fillItemInfo(XPacket&,Item *);
 };

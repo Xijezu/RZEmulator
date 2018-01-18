@@ -9,6 +9,7 @@ file(GLOB_RECURSE sources_Crafting src/Crafting/*.cpp src/Crafting/*.h)
 file(GLOB_RECURSE sources_Quests src/Quests/*.cpp src/Quests/*.h)
 file(GLOB_RECURSE sources_Dungeons src/Dungeons/*.cpp src/Dungeons/*.h)
 file(GLOB_RECURSE sources_Globals src/Globals/*.cpp src/Globals/*.h)
+file(GLOB_RECURSE sources_Groups src/Groups/*.cpp src/Groups/*.h)
 file(GLOB_RECURSE sources_Map src/Map/*.cpp src/Map/*.h)
 file(GLOB_RECURSE sources_Network src/Network/*.cpp src/Network/*.h)
 file(GLOB_RECURSE sources_World src/World/*.cpp src/World/*.h)
@@ -20,6 +21,7 @@ set(SOURCE_FILES ${sources_Entities}
                  ${sources_Quests}
                  ${sources_Crafting}
                  ${sources_Globals}
+                 ${sources_Groups}
                  ${sources_Dungeons}
                  ${sources_Map}
                  ${sources_Skills}
@@ -39,6 +41,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Player
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Unit
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Globals
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Groups
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Dungeons
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Map
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Crafting

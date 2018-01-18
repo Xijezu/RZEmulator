@@ -19,6 +19,9 @@ public:
     void onCheatSuicide(Player* pClient, const std::string&);
     void onCheatKillAll(Player* pClient, const std::string&);
     void onCheatRespawn(Player* pClient, const std::string&);
+    void onCheatCreateParty(Player* pClient, const std::string&);
+    void onInviteParty(Player* pClient, const std::string&);
+    void onJoinParty(Player* pClient, const std::string&);
 };
 
 #define sAllowedCommandInfo ACE_Singleton<AllowedCommandInfo, ACE_Null_Mutex>::instance()

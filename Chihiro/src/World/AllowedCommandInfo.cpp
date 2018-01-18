@@ -21,6 +21,7 @@
 #include "Scripting/XLua.h"
 #include "MemPool.h"
 #include "ArRegion.h"
+#include "GroupManager.h"
 
 typedef struct AllowedCommands {
     std::string szCommand;
@@ -29,17 +30,20 @@ typedef struct AllowedCommands {
 } GameHandler;
 
 const AllowedCommands commandHandler[] =
-        {
-                { "/run", true, &AllowedCommandInfo::onRunScript },
-                { "/sitdown", false, &AllowedCommandInfo::onCheatSitdown },
-                { "/position", false, &AllowedCommandInfo::onCheatPosition},
-                { "/battle", false, &AllowedCommandInfo::onBattleMode },
-                { "/notice", true, &AllowedCommandInfo::onCheatNotice },
-                { "/plist", false, &AllowedCommandInfo::onCheatParty },
-                { "/suicide", true, &AllowedCommandInfo::onCheatSuicide },
-                { "/doit", true, &AllowedCommandInfo::onCheatKillAll },
-                { "/regenerate", true, &AllowedCommandInfo::onCheatRespawn }
-        };
+                              {
+                                      {"/run",        true,  &AllowedCommandInfo::onRunScript},
+                                      {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
+                                      {"/position",   false, &AllowedCommandInfo::onCheatPosition},
+                                      {"/battle",     false, &AllowedCommandInfo::onBattleMode},
+                                      {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
+                                      {"/plist",      false, &AllowedCommandInfo::onCheatParty},
+                                      {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
+                                      {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
+                                      {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
+                                      {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
+                                      {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
+                                      {"/pjoin",      false, &AllowedCommandInfo::onJoinParty}
+                              };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
@@ -127,4 +131,61 @@ void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string& str)
     auto pos = pClient->GetCurrentPosition(sWorld->GetArTime());
     auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(),i, cnt);
     sScriptingMgr->RunString(pClient, res);
+}
+
+void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &partyName)
+{
+    if(pClient->GetPartyID() != 0)
+        return;
+
+    auto partyID = sGroupManager->CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
+    if(partyID == -1)
+    {
+        MX_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
+    }
+    pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
+    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("CREATE|%s|%s|", partyName.c_str(), pClient->GetName()));
+    Messages::SendPartyInfo(pClient);
+}
+
+void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPlayer)
+{
+    if(pClient->GetPartyID() == 0)
+        return;
+
+    auto player = Player::FindPlayer(szPlayer);
+    if(player == nullptr)
+        return;
+
+    auto partyname = sGroupManager->GetPartyName(pClient->GetPartyID());
+    if(partyname.empty())
+        return;
+
+    Messages::SendChatMessage(100, "@PARTY", player, string_format("INVITE|%s|%s|%d|0", pClient->GetName(), partyname.c_str(), pClient->GetPartyID()));
+}
+
+void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
+{
+    if(pClient == nullptr)
+        return;
+    if(pClient->GetPartyID() != 0)
+    {
+        Messages::SendChatMessage(100, "@PARTY", pClient, "ERROR_YOU_CAN_JOIN_ONLY_ONE_PARTY");
+        return;
+    }
+    Tokenizer tokenizer(args, ' ');
+    if(tokenizer.size() != 2)
+        return;
+
+    int partyID = std::stoi(tokenizer[0]);
+    int partyPW = std::stoi(tokenizer[1]);
+
+    if(!sGroupManager->JoinParty(partyID, pClient))
+    {
+        MX_LOG_ERROR("group", "JoinParty failed!");
+        Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
+        return;
+    }
+    pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
+    Messages::SendPartyInfo(pClient);
 }
