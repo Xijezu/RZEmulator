@@ -1568,7 +1568,13 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
             return TS_RESULT_NOT_ACTABLE;
     }
 
+    SetDirection(tpos);
+    m_castingSkill = pSkill;
     int res = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
+    if(res != TS_RESULT_SUCCESS)
+    {
+        m_castingSkill = nullptr;
+    }
 
     return res;
 }
@@ -3325,4 +3331,14 @@ bool Unit::IsMovable()
         return false;
     else
         return HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+}
+
+bool Unit::OnCompleteSkill()
+{
+    if(m_castingSkill != nullptr)
+    {
+        m_castingSkill = nullptr;
+        return true;
+    }
+    return false;
 }

@@ -164,12 +164,10 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     if (m_nErrorCode == TS_RESULT_SUCCESS)
     {
         m_nRequestedSkillLevel = (uint8)nSkillLevel;
-        m_pOwner->m_castingSkill = this;
         broadcastSkillMessage(m_pOwner, 0, 0, 1);
     }
     else
     {
-        broadcastSkillMessage(m_pOwner, 0, 0, 5);
         Init();
     }
 
@@ -348,8 +346,7 @@ void Skill::ProcSkill()
     if(m_Status == SkillStatus::SS_COMPLETE && sWorld->GetArTime() >= m_nFireTime)
     {
         broadcastSkillMessage(m_pOwner, 0, 0, 5);
-
-        m_pOwner->m_castingSkill = nullptr;
+        m_pOwner->OnCompleteSkill();
         Init();
     }
 }
@@ -408,7 +405,19 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
                 MX_LOG_INFO("skill", result.c_str());
                 if(m_pOwner->IsPlayer())
                     Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Player*>(m_pOwner), result);
+                else if(m_pOwner->IsSummon())
+                {
+                    Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Summon*>(m_pOwner)->GetMaster(), result);
+                }
                 break;
+        }
+    }
+    if (m_SkillBase->is_harmful != 0)
+    {
+        auto mob = dynamic_cast<Monster*>(pTarget);
+        if (mob != nullptr && mob->IsMonster() && mob->IsCastRevenger())
+        {
+            mob->AddHate(m_pOwner->GetHandle(), 1, true, true);
         }
     }
     bIsSuccess = bHandled;
