@@ -14,6 +14,7 @@
 #include "SharedMutex.h"
 #include "GameRule.h"
 #include "DungeonManager.h"
+#include "GroupManager.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -596,6 +597,10 @@ void Player::SendLoginProperties()
     Unit::SetFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete);
     CalculateStat();
     // Login();
+
+    if(GetPartyID() != 0)
+        sGroupManager->onLogin(GetPartyID(), this);
+
     Messages::SendQuestList(this);
     for(auto& summon: m_vSummonList)
     {

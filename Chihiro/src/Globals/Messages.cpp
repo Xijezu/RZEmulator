@@ -916,14 +916,8 @@ void Messages::ShowSoulStoneCraftWindow(Player *pPlayer)
 
 void Messages::SendPartyInfo(Player *pPlayer)
 {
-    if (pPlayer == nullptr)
+    if (pPlayer == nullptr || pPlayer->GetPartyID() == 0)
         return;
-
-    if(pPlayer->GetPartyID() == 0)
-    {
-        Messages::SendChatMessage(100, "@PARTY", pPlayer, "PINFO|");
-        return;
-    }
 
     auto leader     = sGroupManager->GetLeaderName(pPlayer->GetPartyID());
     auto name       = sGroupManager->GetPartyName(pPlayer->GetPartyID());

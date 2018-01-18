@@ -42,7 +42,8 @@ const AllowedCommands commandHandler[] =
                                       {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
                                       {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
                                       {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
-                                      {"/pjoin",      false, &AllowedCommandInfo::onJoinParty}
+                                      {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
+                                      {"/plist",      false, &AllowedCommandInfo::onPartyInfo}
                               };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
@@ -187,5 +188,10 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         return;
     }
     pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
+    Messages::SendPartyInfo(pClient);
+}
+
+void AllowedCommandInfo::onPartyInfo(Player *pClient, const std::string &)
+{
     Messages::SendPartyInfo(pClient);
 }

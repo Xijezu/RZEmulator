@@ -14,6 +14,7 @@
 #include "NPC.h"
 #include "Skill.h"
 #include "FieldPropManager.h"
+#include "GroupManager.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -53,6 +54,7 @@ void World::InitWorld()
 	s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
 	s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
     s_nStateIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `State`;").get()->Fetch()->GetUInt64();
+    sGroupManager->InitGroupSystem();
 
 	sObjectMgr->InitGameContent();
 	MX_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));

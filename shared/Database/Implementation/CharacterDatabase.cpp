@@ -49,4 +49,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_DEL_STATE, "DELETE FROM State WHERE owner_id = ? AND summon_id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_REP_STATE, "REPLACE INTO State VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_STATE, "SELECT * FROM State WHERE owner_id = ? AND summon_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHARACTER_ADD_PARTY, "INSERT INTO Party VALUES(?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }
