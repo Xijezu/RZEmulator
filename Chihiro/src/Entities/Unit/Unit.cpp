@@ -2753,6 +2753,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
     std::string error{};
     uint ct = sWorld->GetArTime();
     uint prev_hp;
+    uint prev_mp;
 
     auto pPlayer = dynamic_cast<Player*>(pCaster);
 
@@ -2761,6 +2762,11 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             prev_hp = GetHealth();
             Heal((int)var1);
             Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
+            return TS_RESULT_SUCCESS;
+        case 2:
+            prev_mp = GetMana();
+            MPHealByItem((int)var1);
+            Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
             return TS_RESULT_SUCCESS;
         case 5: // Skillcast (e.g. Force/Soul Chips)
             target_handle = GetHandle();
@@ -3308,7 +3314,7 @@ int Unit::HealByItem(int hp)
 
 int Unit::MPHealByItem(int mp)
 {
-    int result = (int)(GetInt32Value(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
+    int result = (int)(GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
     AddMana(result);
     return result;
 }
