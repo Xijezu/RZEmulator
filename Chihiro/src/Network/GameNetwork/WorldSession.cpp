@@ -399,7 +399,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
     for (auto &mi : vPctInfo)
     {
-        if (mover->IsPlayer() && sObjectMgr->CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
+        if (sObjectMgr->CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
         {
             Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -430,7 +430,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         return;
     }
 
-    if (_player->IsInWorld())
+    if (mover->IsInWorld())
     {
         if(mover->GetTargetHandle() != 0)
             mover->CancelAttack();
