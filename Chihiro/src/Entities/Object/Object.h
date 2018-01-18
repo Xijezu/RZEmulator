@@ -577,7 +577,7 @@ public:
         ArMoveVector _mv{ };
         if (bIsMoving && IsInWorld())
         {
-            _mv = ArMoveVector{dynamic_cast<ArMoveVector>(*this)};
+            _mv = ArMoveVector{*dynamic_cast<ArMoveVector*>(this)};
             _mv.Step(t);
             result.m_positionX  = _mv.GetPositionX();
             result.m_positionY  = _mv.GetPositionY();

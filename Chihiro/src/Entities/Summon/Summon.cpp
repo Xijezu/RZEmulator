@@ -159,7 +159,7 @@ void Summon::OnUpdate()
 void Summon::processWalk(uint t)
 {
     // Do Ride check here
-    ArMoveVector tmp_mv{dynamic_cast<ArMoveVector>(*this)};
+    ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector*>(this)};
     tmp_mv.Step(t);
     if((tmp_mv.GetPositionX() / g_nRegionSize) != (GetPositionX() / g_nRegionSize) ||
             (tmp_mv.GetPositionY() / g_nRegionSize) != (GetPositionY() / g_nRegionSize) ||
