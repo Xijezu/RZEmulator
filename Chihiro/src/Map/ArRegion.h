@@ -31,10 +31,10 @@ class ArRegion {
     protected:
         void addObject(WorldObject* obj, svObjects* objContainer);
         void removeObject(WorldObject* obj, svObjects* objContainer);
-        svObjects m_vStatic;
-        svObjects m_vMovable;
-        svObjects m_vClient;
-        MX_SHARED_MUTEX i_lock;
+        svObjects m_vStatic{};
+        svObjects m_vMovable{};
+        svObjects m_vClient{};
+        MX_SHARED_MUTEX i_lock{};
 };
 
 //////////////////////////////////////////////////////////////////////////
