@@ -1959,10 +1959,10 @@ Player* Player::FindPlayer(const std::string &szName)
 {
     MX_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sMemoryPool->GetPlayers();
-    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (auto itr : m)
     {
-        if(itr->second->GetName() == szName)
-            return itr->second;
+        if(itr.second->GetName() == szName)
+            return itr.second;
     }
     return nullptr;
 }

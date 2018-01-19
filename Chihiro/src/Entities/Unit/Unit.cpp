@@ -2308,6 +2308,12 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     }
     if(GetTargetHandle() != 0)
         EndAttack();
+
+    for(auto state : m_vStateList)
+    {
+        Messages::BroadcastStateMessage(this, state, true);
+    }
+    m_vStateList.clear();
 }
 
 void Unit::AddEXP(int64 exp, uint jp, bool bApplyStanima)
