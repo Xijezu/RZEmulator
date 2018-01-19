@@ -106,6 +106,24 @@ void MemoryPoolMgr::Destroy()
 
 void MemoryPoolMgr::Update(uint diff)
 {
+    ///- Add new update objects
+    WorldObject *sess = nullptr;
+    while (addUpdateQueue.next(sess))
+        i_objectsToUpdate[sess->GetHandle()] = sess;
+
+    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr != i_objectsToUpdate.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+
+        itr->second->Update(0);
+        if (itr->second->IsDeleteRequested())
+        {
+            AddToDeleteList(itr->second);
+            i_objectsToUpdate.erase(itr->second->GetHandle());
+            continue;
+        }
+    }
     // First deleting all things in the remove list
     while (!i_objectsToRemove.empty())
     {
@@ -136,25 +154,6 @@ void MemoryPoolMgr::Update(uint diff)
         i_objectsToRemove.erase(itr);
         delete obj;
         //*&obj = nullptr;
-    }
-
-    ///- Add new update objects
-    WorldObject *sess = nullptr;
-    while (addUpdateQueue.next(sess))
-        i_objectsToUpdate[sess->GetHandle()] = sess;
-
-    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr != i_objectsToUpdate.end(); itr = next)
-    {
-        next = itr;
-        ++next;
-
-        itr->second->Update(0);
-        if (itr->second->IsDeleteRequested())
-        {
-            AddToDeleteList(itr->second);
-            i_objectsToUpdate.erase(itr->second->GetHandle());
-            continue;
-        }
     }
     sFieldPropManager->Update(diff);
 }
