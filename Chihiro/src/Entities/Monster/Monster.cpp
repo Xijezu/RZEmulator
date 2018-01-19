@@ -24,7 +24,7 @@
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "GameRule.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 #include "Skill.h"
 
 Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
@@ -641,7 +641,7 @@ void Monster::findNextEnemy()
             if (nHate > nMaxHate) {
                 auto* unit = sMemoryPool->GetObjectInWorld<WorldObject>(ht.uid);
                 if (unit != nullptr
-                    && sArRegion->IsVisibleRegion((uint) (unit->GetPositionX() / g_nRegionSize), (uint) (unit->GetPositionY() / g_nRegionSize),
+                    && sRegion->IsVisibleRegion((uint) (unit->GetPositionX() / g_nRegionSize), (uint) (unit->GetPositionY() / g_nRegionSize),
                                                   (uint) (GetPositionX() / g_nRegionSize), (uint) (GetPositionY() / g_nRegionSize)) != 0
                     /*&&  IsVisible(unit) */) {
                     nMaxHate = nHate;
@@ -728,7 +728,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         return;
 
     if (IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer()
-        || sArRegion->IsVisibleRegion(pEnemy, this) == 0
+        || sRegion->IsVisibleRegion(pEnemy, this) == 0
         || pEnemy->GetLayer() != GetLayer()
            && pEnemy->GetTargetHandle() != GetHandle())
     {

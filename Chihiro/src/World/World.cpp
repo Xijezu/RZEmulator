@@ -1,6 +1,6 @@
 #include "World.h"
 #include "DatabaseEnv.h"
-#include "Map/ArRegion.h"
+#include "RegionContainer.h"
 #include "Globals/ObjectMgr.h"
 #include "Timer.h"
 #include "Scripting/XLua.h"
@@ -42,7 +42,7 @@ void World::InitWorld()
 
     uint32_t oldTime = getMSTime(), oldFullTime = getMSTime();
 	MX_LOG_INFO("server.worldserver", "Initializing region system...");
-	sArRegion->InitRegionSystem(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
+	sRegion->InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
 	MX_LOG_INFO("server.worldserver", "Initialized region system in %u ms", GetMSTimeDiffToNow(oldTime));
 
     oldTime = getMSTime();
@@ -158,16 +158,14 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
 		enterProc(pUnit, (uint)(oldPos.GetPositionX() / g_nRegionSize), (uint)(oldPos.GetPositionY() / g_nRegionSize));
 		pUnit->SetMultipleMove(newPos, speed, t);
 
-		if(bBroadcastMove) {
-			sArRegion->DoEachVisibleRegion((uint) (pUnit->GetPositionX() / g_nRegionSize),
-                                           (uint) (pUnit->GetPositionY() / g_nRegionSize),
-                                           pUnit->GetLayer(),
-										   [=](ArRegion *region) {
-											   region->DoEachClient([=](WorldObject *obj) {
-												   Messages::SendMoveMessage(dynamic_cast<Player *>(obj), pUnit);
-											   });
-										   });
-		}
+		if(bBroadcastMove)
+        {
+            SetMoveFunctor fn;
+            fn.obj = pUnit;
+            sRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
+                                         (uint)(pUnit->GetPositionY() / g_nRegionSize),
+                                         pUnit->GetLayer(), fn);
+        }
         result = true;
 	}
     return result;
@@ -190,14 +188,11 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
             obj->SetMove(newPos, speed, t);
         }
         if(bBroadcastMove) {
-            sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize),
-                                           (uint) (obj->GetPositionY() / g_nRegionSize),
-                                           obj->GetLayer(),
-                                           [=](ArRegion *region) {
-                                               region->DoEachClient([=](WorldObject *pObj) {
-                                                   Messages::SendMoveMessage(dynamic_cast<Player *>(pObj), obj);
-                                               });
-                                           });
+            SetMoveFunctor fn;
+            fn.obj = obj;
+            sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                                         (uint)(obj->GetPositionY() / g_nRegionSize),
+                                         obj->GetLayer(), fn);
 
         }
         return true;
@@ -213,8 +208,8 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 	if(prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
     {
 
-		sArRegion->GetRegion(prev_rx, prev_ry, (uint32)pUnit->GetLayer())->RemoveObject(pUnit);
-		sArRegion->GetRegion(pUnit)->AddObject(pUnit);
+		sRegion->GetRegion(prev_rx, prev_ry, pUnit->GetLayer())->RemoveObject(pUnit);
+		sRegion->GetRegion(pUnit)->AddObject(pUnit);
 	}
 }
 
@@ -223,51 +218,24 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 	auto rx = (uint)(pUnit->GetPositionX() / g_nRegionSize);
 	auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
 	if(rx != prx || ry != pry) {
-		sArRegion->DoEachVisibleRegion(rx, ry, prx, pry, pUnit->GetLayer(), [=](ArRegion* rgn) {
-			rgn->DoEachClient([=](Unit* client) { // enterProc
-				// BEGIN Send Enter Message to each other
-				if(client->GetHandle() != pUnit->GetHandle()) {
-					Messages::sendEnterMessage(dynamic_cast<Player*>(pUnit), client, false);
-					if(client->IsPlayer()) {
-						Messages::sendEnterMessage(dynamic_cast<Player *>(client), pUnit, false);
-					}
-				}
-			});	// END Send Enter Message to each other
-			auto func = [=](WorldObject* obj) {
-				Messages::sendEnterMessage(dynamic_cast<Player*>(pUnit), obj, false);
-			};
-			rgn->DoEachMovableObject(func);
-			rgn->DoEachStaticObject(func);
-		});
+        AddObjectRegionFunctor fn;
+        fn.newObj = pUnit;
+		sRegion->DoEachVisibleRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
 	}
 }
 
+
 void World::AddObjectToWorld(WorldObject *obj)
 {
-    sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize), (uint) (obj->GetPositionY() / g_nRegionSize), obj->GetLayer(),
-                                   [=](ArRegion *rgn) {
-                                       rgn->DoEachClient([=](Unit *client) { // enterProc
-                                           // BEGIN Send Enter Message to each other
-                                           if (client->GetHandle() != obj->GetHandle()) {
-                                               // Enter message FROM doEachRegion-Client TO obj
-                                               if (client->IsInWorld() && obj->IsPlayer())
-                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
-                                               // Enter message FROM obj TO doEachRegion-Client
-                                               if (client->IsPlayer())
-                                                   Messages::sendEnterMessage(dynamic_cast<Player *>(client), obj, false);
-                                           }
-                                       });    // END Send Enter Message to each other
-									   /// Sending enter messages of NPCs and pets to the object - if it's an player
-                                       rgn->DoEachMovableObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld() && obj->IsPlayer())
-                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
-                                       });
-                                       rgn->DoEachStaticObject([=](WorldObject *lbObj) {
-                                           if (lbObj->IsInWorld() && obj->IsPlayer())
-                                               Messages::sendEnterMessage(dynamic_cast<Player *>(obj), lbObj, false);
-                                       });
-                                   });
-    sArRegion->GetRegion(obj)->AddObject(obj);
+    Region* region = sRegion->GetRegion(obj);
+    if(region == nullptr)
+        return;
+
+    AddObjectRegionFunctor rf;
+    rf.newObj = obj;
+    sRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize), (uint) (obj->GetPositionY() / g_nRegionSize), obj->GetLayer(), rf);
+
+    region->AddObject(obj);
 }
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
@@ -287,19 +255,17 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     // Create & set leave packet
     XPacket leavePct(TS_SC_LEAVE);
     leavePct << obj->GetHandle();
-    // Send one to each player in visible region
-    sArRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize),
-                                   (uint) (obj->GetPositionY() / g_nRegionSize),
-                                   obj->GetLayer(),
-                                   [&leavePct,&obj](ArRegion *lbRegion) {
-                                       lbRegion->DoEachClient([&leavePct,&obj](WorldObject *lbPlayer) {
-                                           if (lbPlayer != nullptr && lbPlayer->IsInWorld() && lbPlayer->GetHandle() != obj->GetHandle()) {
-                                               dynamic_cast<Player *>(lbPlayer)->SendPacket(leavePct);
-                                           }
-                                       });
-                                   });
 
-    sArRegion->GetRegion(obj)->RemoveObject(obj);
+    BroadcastRegionFunctor clientFunctor;
+    BroadcastFunctor          broadcastFunctor;
+    broadcastFunctor.packet = leavePct;
+    clientFunctor.fn       = broadcastFunctor;
+    // Send one to each player in visible region
+    sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                                 (uint)(obj->GetPositionY() / g_nRegionSize),
+                                 obj->GetLayer(), clientFunctor);
+
+    sRegion->GetRegion(obj)->RemoveObject(obj);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -359,20 +325,22 @@ void World::UpdateSessions(uint diff)
 
 void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
 {
-    sArRegion->DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, [&packet](ArRegion* rgn) {
-        rgn->DoEachClient([&packet](WorldObject* obj) {
-            dynamic_cast<Player*>(obj)->SendPacket(packet);
-        });
-    });
+    BroadcastRegionFunctor clientFunctor;
+    BroadcastFunctor          broadcastFunctor;
+    broadcastFunctor.packet = packet;
+    clientFunctor.fn       = broadcastFunctor;
+    sRegion->DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, clientFunctor);
 }
 
 void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
 {
-    sArRegion->DoEachVisibleRegion(rx, ry, layer, [&packet](ArRegion* rgn) {
-       rgn->DoEachClient([&packet](WorldObject* obj) {
-           dynamic_cast<Player*>(obj)->SendPacket(packet);
-       });
-    });
+    BroadcastRegionFunctor clientFunctor;
+    BroadcastFunctor          broadcastFunctor;
+    broadcastFunctor.packet = packet;
+    clientFunctor.fn       = broadcastFunctor;
+
+    sRegion->DoEachVisibleRegion(rx, ry, layer, clientFunctor);
+
 }
 
 void World::AddSummonToWorld(Summon *pSummon)

@@ -22,7 +22,7 @@
 #include "Messages.h"
 #include "World.h"
 #include "ClientPackets.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 #include "Skill.h"
 // static
 void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player* pPlayer)
@@ -274,11 +274,7 @@ bool Summon::DoEvolution()
                     m_pMaster->SendPacket(evoPct);
             }
 
-            if (sArRegion->IsVisibleRegion(
-                    (uint)(GetPositionX() / g_nRegionSize),
-                    (uint)(GetPositionY() / g_nRegionSize),
-                    (uint)(m_pMaster->GetPositionX() / g_nRegionSize),
-                    (uint)(m_pMaster->GetPositionY() / g_nRegionSize)) == 0)
+            if (sRegion->IsVisibleRegion(this, GetMaster()) == 0)
             {
                 m_pMaster->SendPacket(evoPct);
             }

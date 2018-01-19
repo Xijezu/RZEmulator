@@ -2,7 +2,7 @@
 #include "ClientPackets.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 #include "Messages.h"
 #include "Monster.h"
 #include "NPC.h"
@@ -337,7 +337,9 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-WorldObject::WorldObject(bool isWorldObject) : m_name(""), _isActive(false), m_isWorldObject(isWorldObject), _region(nullptr)
+WorldObject::WorldObject(bool isWorldObject)
+        : m_name(""), _isActive(false), m_isWorldObject(isWorldObject),
+          pRegion(nullptr), region_index(-1)
 {
 }
 

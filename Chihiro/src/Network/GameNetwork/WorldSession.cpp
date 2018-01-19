@@ -26,7 +26,7 @@
 #include "Scripting/XLua.h"
 
 #include "Encryption/MD5.h"
-#include "Map/ArRegion.h"
+#include "RegionContainer.h"
 #include "NPC.h"
 #include "ObjectMgr.h"
 #include "Skill.h"
@@ -974,10 +974,7 @@ void WorldSession::onQuery(XPacket *pRecvPct)
     auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(handle);
     if (obj != nullptr)
     {
-        if (!sArRegion->IsVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                        (uint)(obj->GetPositionY() / g_nRegionSize),
-                                        (uint)(_player->GetPositionX() / g_nRegionSize),
-                                        (uint)(_player->GetPositionY() / g_nRegionSize)))
+        if (!sRegion->IsVisibleRegion(obj, _player))
         {
             MX_LOG_DEBUG("network", "onQuery failed: Not visible region!");
             return;

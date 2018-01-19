@@ -8,7 +8,7 @@
 #include "Scripting/XLua.h"
 #include "World.h"
 #include "Skill.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 #include "NPC.h"
 #include "MemPool.h"
 #include "SharedMutex.h"
@@ -1371,7 +1371,7 @@ void Player::DoUnSummon(Summon *pSummon)
     XPacket usPct(TS_SC_UNSUMMON);
     usPct << pSummon->GetHandle();
     sWorld->Broadcast((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize), pSummon->GetLayer(), usPct);
-    if(sArRegion->IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
+    if(sRegion->IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
                                   (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) == 0) {
         SendPacket(usPct);
     }

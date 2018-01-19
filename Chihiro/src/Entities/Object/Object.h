@@ -538,6 +538,7 @@ class ArMoveVector : public Position
 };
 
 class Player;
+class Region;
 
 class WorldObject : public Object, public ArMoveVector
 {
@@ -564,8 +565,9 @@ class WorldObject : public Object, public ArMoveVector
         const char *GetName() const { return m_name.c_str(); }
         void SetName(const std::string &newname) { m_name = newname; }
 
-        ArRegion              *_region;
-        bool                  _bIsInWorld{false};
+        Region *pRegion;
+        int    region_index;
+        bool   _bIsInWorld{false};
 
     protected:
         explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list

@@ -22,10 +22,8 @@
 #include "Skill.h"
 #include "NPC.h"
 #include "MemPool.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 #include "ObjectMgr.h"
-#include "State.h"
-#include "Quest.h"
 #include "WorldSession.h"
 #include "GroupManager.h"
 
@@ -711,19 +709,14 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
     if(obj == nullptr)
         return;
 
-    sArRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+    BroadcastStatusMessageObjectFunctor statusFunctor;
+    DoEachClientRegionFunctor regionFunctor;
+    statusFunctor.pObject = obj;
+    regionFunctor.pFo = statusFunctor;
+
+    sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                    (uint)(obj->GetPositionY() / g_nRegionSize),
-                                   obj->GetLayer(),
-                                   [&obj](ArRegion* rgn) {
-                                       rgn->DoEachClient([&obj](WorldObject* client) {
-                                           if(client != nullptr) {
-                                               XPacket pct(TS_SC_STATUS_CHANGE);
-                                               pct << obj->GetHandle();
-                                               pct << GetStatusCode(obj, dynamic_cast<Player*>(client));
-                                               dynamic_cast<Player *>(client)->SendPacket(pct);
-                                           }
-                                       });
-                                   });
+                                   obj->GetLayer(), regionFunctor);
 }
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
@@ -831,18 +824,16 @@ void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::strin
 
 void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 {
-    sArRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
-                                   (uint)(pPlayer->GetPositionY() / g_nRegionSize),
-                                   pPlayer->GetLayer(),
-                                   [&pPlayer](ArRegion *rgn) {
-                                       rgn->DoEachMovableObject([&pPlayer](WorldObject *obj) {
-                                           XPacket pct(TS_SC_STATUS_CHANGE);
-                                           pct << obj->GetHandle();
-                                           pct << Messages::GetStatusCode(obj, pPlayer);
-                                           pPlayer->SendPacket(pct);
-                                       });
-                                   });
-}
+    DoEachMovableRegionFunctor         movableRegionFunctor;
+    SendNPCStatusInVisibleRangeFunctor npcStatusFunctor;
+    npcStatusFunctor.player  = pPlayer;
+    movableRegionFunctor.pFo = npcStatusFunctor;
+
+    sRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
+                                 (uint)(pPlayer->GetPositionY() / g_nRegionSize),
+                                 pPlayer->GetLayer(),
+                                 movableRegionFunctor);
+};
 
 void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {

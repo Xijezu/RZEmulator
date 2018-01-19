@@ -7,7 +7,7 @@
 #include "Skill.h"
 #include "MemPool.h"
 #include "Item.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1641,7 +1641,7 @@ void Unit::processAttack()
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
-        if (enemy == nullptr || enemy->GetHealth() == 0 || sArRegion->IsVisibleRegion(this, enemy) == 0)
+        if (enemy == nullptr || enemy->GetHealth() == 0 || sRegion->IsVisibleRegion(this, enemy) == 0)
         {
             if (IsPlayer())
             {

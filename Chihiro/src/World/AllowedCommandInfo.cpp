@@ -20,7 +20,6 @@
 #include "Messages.h"
 #include "Scripting/XLua.h"
 #include "MemPool.h"
-#include "ArRegion.h"
 #include "GroupManager.h"
 
 typedef struct AllowedCommands {

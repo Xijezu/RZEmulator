@@ -25,7 +25,7 @@
 #include "SkillFunctor.h"
 #include "Messages.h"
 #include "FieldPropManager.h"
-#include "ArRegion.h"
+#include "RegionContainer.h"
 
 Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0)
 {
@@ -121,7 +121,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
                     if(pProp->m_nUseCount >= 1 && pProp->IsUsable(dynamic_cast<Player*>(m_pOwner)))
                     {
                         delay = pProp->GetCastingDelay();
-                        if (sArRegion->IsVisibleRegion(m_pOwner, pProp) == 0)
+                        if (sRegion->IsVisibleRegion(m_pOwner, pProp) == 0)
                             return TS_RESULT_NOT_ACTABLE;
                         pProp->Cast();
                         m_nErrorCode = TS_RESULT_SUCCESS;

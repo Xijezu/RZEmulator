@@ -1,6 +1,5 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "Map/ArRegion.h"
 #include "Utilities/Timer.h"
 #include "MemPool.h"
 #include <fstream>
