@@ -223,7 +223,7 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 	auto rx = (uint)(pUnit->GetPositionX() / g_nRegionSize);
 	auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
 	if(rx != prx || ry != pry) {
-		sArRegion->DoEachNewRegion(rx, ry, prx, pry, pUnit->GetLayer(), [=](ArRegion* rgn) {
+		sArRegion->DoEachVisibleRegion(rx, ry, prx, pry, pUnit->GetLayer(), [=](ArRegion* rgn) {
 			rgn->DoEachClient([=](Unit* client) { // enterProc
 				// BEGIN Send Enter Message to each other
 				if(client->GetHandle() != pUnit->GetHandle()) {
