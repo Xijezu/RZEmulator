@@ -198,19 +198,19 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
         partyInfo.nLastItemAcquirerIdx = 0;
         partyInfo.nLeaderSID           = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
         partyInfo.nLeaderJobID         = pPlayer->GetCurrentJob();
-        partyInfo.nPartyPassword       = 0;
+        partyInfo.nPartyPassword       = (uint)rand32();
         m_hshPartyID[partyInfo.nPartyID] = partyInfo;
     }
-    JoinParty(partyInfo.nPartyID, pPlayer);
+    JoinParty(partyInfo.nPartyID, pPlayer, partyInfo.nPartyPassword);
     AddGroupToDatabase(partyInfo);
     return partyInfo.nPartyID;
 }
 
-bool GroupManager::JoinParty(int nPartyID, Player* pPlayer)
+bool GroupManager::JoinParty(int nPartyID, Player* pPlayer, uint nPass)
 {
     MX_UNIQUE_GUARD writeLock(i_lock);
     auto info = getPartyInfoNC(nPartyID);
-    if(info == nullptr || info->vMemberNameList.size() >= 8)
+    if(info == nullptr || info->vMemberNameList.size() >= 8 || nPass != info->nPartyPassword)
         return false;
 
     PartyMemberTag tag{};
@@ -249,6 +249,15 @@ int GroupManager::GetMinLevel(int nPartyID)
     });
     return min;
 }
+
+uint GroupManager::GetPassword(int nPartyID)
+{
+    auto info = getPartyInfo(nPartyID);
+    if(info != nullptr)
+        return info->nPartyPassword;
+    return 0;
+}
+
 
 int GroupManager::GetMaxLevel(int nPartyID)
 {

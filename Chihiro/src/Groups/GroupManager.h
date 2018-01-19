@@ -33,7 +33,7 @@ struct PartyMemberTag
 
 struct PartyInfo
 {
-    int                         nPartyPassword;
+    uint                        nPartyPassword;
     int                         nPartyID;
     int                         nLeaderSID;
     ITEM_SHARE_MODE             eShareMode;
@@ -50,49 +50,50 @@ struct PartyInfo
 class Player;
 class GroupManager
 {
-public:
-    GroupManager() = default;
-    ~GroupManager() = default;
+    public:
+        GroupManager() = default;
+        ~GroupManager() = default;
 
-    void InitGroupSystem();
+        void InitGroupSystem();
 
-    ///- Getters
-    int GetAttackTeamLeadPartyID(int nPartyID);
-    int GetAttackTeamGuildID(int nPartyID);
-    int GetMemberCount(int nPartyID);
-    int GetMinLevel(int nPartyID);
-    int GetMaxLevel(int nPartyID);
-    int GetShareMode(int nPartyID);
-    std::string GetPartyName(int nPartyID);
-    PARTY_TYPE GetPartyType(int nPartyID) ;
-    std::string GetLeaderName(int nPartyID);
-    void GetNearMember(Player* pPlayer, float distance, std::vector<Player*>& vList);
+        ///- Getters
+        int GetAttackTeamLeadPartyID(int nPartyID);
+        int GetAttackTeamGuildID(int nPartyID);
+        int GetMemberCount(int nPartyID);
+        int GetMinLevel(int nPartyID);
+        int GetMaxLevel(int nPartyID);
+        int GetShareMode(int nPartyID);
+        uint GetPassword(int nPartyID);
+        std::string GetPartyName(int nPartyID);
+        PARTY_TYPE GetPartyType(int nPartyID);
+        std::string GetLeaderName(int nPartyID);
+        void GetNearMember(Player *pPlayer, float distance, std::vector<Player *> &vList);
 
-    ///- booleans
-    bool IsLeader(int nPartyID, const std::string& szPlayerName);
-    bool IsAttackTeamParty(int nPartyID);
+        ///- booleans
+        bool IsLeader(int nPartyID, const std::string &szPlayerName);
+        bool IsAttackTeamParty(int nPartyID);
 
-    ///- Functionality
-    bool JoinParty(int nPartyID, Player* pPlayer);
-    bool DestroyParty(int nPartyID);
-    bool LeaveParty(int nPartyID, const std::string& szName);
-    int CreateParty(Player* pPlayer, const std::string& szName, PARTY_TYPE partyType);
-    void DoEachMemberTag(int nPartyID, std::function<void (PartyMemberTag&)> fn);
+        ///- Functionality
+        bool JoinParty(int nPartyID, Player *pPlayer, uint nPass);
+        bool DestroyParty(int nPartyID);
+        bool LeaveParty(int nPartyID, const std::string &szName);
+        int CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType);
+        void DoEachMemberTag(int nPartyID, std::function<void(PartyMemberTag &)> fn);
 
-    ///- Events
-    void OnChangeCharacterLevel(int nPartyID, const std::string& szName, int nLevel);
-    void OnChangeCharacterJob(int nPartyID, const std::string& szName, int nJobID);
-    bool onLogin(int nPartyID, Player* pPlayer);
-    bool onLogout(int nPartyID, Player* pPlayer);
-protected:
-    void AddGroupToDatabase(const PartyInfo&);
-    void LoadPartyInfo(PartyInfo& info);
-    PartyInfo* getPartyInfo(int nPartyID);
-    PartyInfo* getPartyInfoNC(int nPartyID);
-private:
-    uint64 m_nMaxPartyID{0};
-    std::map<int, PartyInfo> m_hshPartyID{};
-    MX_SHARED_MUTEX i_lock;
+        ///- Events
+        void OnChangeCharacterLevel(int nPartyID, const std::string &szName, int nLevel);
+        void OnChangeCharacterJob(int nPartyID, const std::string &szName, int nJobID);
+        bool onLogin(int nPartyID, Player *pPlayer);
+        bool onLogout(int nPartyID, Player *pPlayer);
+    protected:
+        void AddGroupToDatabase(const PartyInfo &);
+        void LoadPartyInfo(PartyInfo &info);
+        PartyInfo *getPartyInfo(int nPartyID);
+        PartyInfo *getPartyInfoNC(int nPartyID);
+    private:
+        uint64                   m_nMaxPartyID{0};
+        std::map<int, PartyInfo> m_hshPartyID{ };
+        MX_SHARED_MUTEX i_lock;
 };
 
 #define sGroupManager ACE_Singleton<GroupManager, ACE_Thread_Mutex>::instance()

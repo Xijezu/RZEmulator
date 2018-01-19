@@ -36,7 +36,6 @@ const AllowedCommands commandHandler[] =
                                       {"/position",   false, &AllowedCommandInfo::onCheatPosition},
                                       {"/battle",     false, &AllowedCommandInfo::onBattleMode},
                                       {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
-                                      {"/plist",      false, &AllowedCommandInfo::onCheatParty},
                                       {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
                                       {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
                                       {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
@@ -164,7 +163,9 @@ void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPla
     if(partyname.empty())
         return;
 
-    Messages::SendChatMessage(100, "@PARTY", player, string_format("INVITE|%s|%s|%d|0", pClient->GetName(), partyname.c_str(), pClient->GetPartyID()));
+    auto nPW = sGroupManager->GetPassword(pClient->GetPartyID());
+
+    Messages::SendChatMessage(100, "@PARTY", player, string_format("INVITE|%s|%s|%d|%d", pClient->GetName(), partyname.c_str(), pClient->GetPartyID(), nPW));
 }
 
 void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
@@ -180,10 +181,13 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
     if(tokenizer.size() != 2)
         return;
 
-    int partyID = std::stoi(tokenizer[0]);
-    int partyPW = std::stoi(tokenizer[1]);
+    if(!isNumeric(tokenizer[0]) || !isNumeric(tokenizer[1]))
+        return;
 
-    if(!sGroupManager->JoinParty(partyID, pClient))
+    int partyID = std::stoi(tokenizer[0]);
+    uint partyPW = (uint)std::stoi(tokenizer[1]);
+
+    if(!sGroupManager->JoinParty(partyID, pClient, partyPW))
     {
         MX_LOG_ERROR("group", "JoinParty failed!");
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
