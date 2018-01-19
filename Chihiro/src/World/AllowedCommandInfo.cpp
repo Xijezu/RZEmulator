@@ -43,7 +43,8 @@ const AllowedCommands commandHandler[] =
                                       {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
                                       {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
                                       {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
-                                      {"/plist",      false, &AllowedCommandInfo::onPartyInfo}
+                                      {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
+                                      {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy}
                               };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
@@ -143,6 +144,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
     if(partyID == -1)
     {
         MX_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
+        return;
     }
     pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
     Messages::SendChatMessage(100, "@PARTY", pClient, string_format("CREATE|%s|%s|", partyName.c_str(), pClient->GetName()));
@@ -187,11 +189,18 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
     Messages::SendPartyInfo(pClient);
 }
 
 void AllowedCommandInfo::onPartyInfo(Player *pClient, const std::string &)
 {
     Messages::SendPartyInfo(pClient);
+}
+
+void AllowedCommandInfo::onPartyDestroy(Player *pClient, const std::string &)
+{
+    if(pClient->GetPartyID() != 0 && !sGroupManager->IsLeader(pClient->GetPartyID(), pClient->GetName()))
+        return;
+
+    sGroupManager->DestroyParty(pClient->GetPartyID());
 }

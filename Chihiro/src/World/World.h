@@ -37,6 +37,7 @@ public:
 	bool SetMove(Unit* obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
 
 	void addEXP(Unit* pCorpse, Player* pPlayer, float exp, float jp);
+	void addEXP(Unit* pCorpse, int nPartyID, float exp, float jp);
 
 	WorldSession* FindSession(uint32 id) const;
 	void AddSession(WorldSession* s);
@@ -65,6 +66,7 @@ public:
 
     // Item
     uint procAddItem(Player* pClient, Item* pItem, bool bIsPartyProcess);
+	void procPartyShare(Player* pClient, Item* pItem);
 	void addChaos(Unit* pCorpse, Player* pPlayer, float chaos);
 
 	// Warping

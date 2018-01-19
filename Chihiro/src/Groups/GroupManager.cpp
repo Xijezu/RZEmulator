@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "DatabaseEnv.h"
 #include "Timer.h"
+#include "Messages.h"
 
 int GroupManager::GetAttackTeamLeadPartyID(int nPartyID)
 {
@@ -45,7 +46,23 @@ PARTY_TYPE GroupManager::GetPartyType(int nPartyID)
 
 bool GroupManager::DestroyParty(int nPartyID)
 {
-    return false;
+    auto name = GetPartyName(nPartyID);
+    DoEachMemberTag(nPartyID, [&name](PartyMemberTag& tag) {
+       auto player = Player::FindPlayer(tag.strName);
+        if(player != nullptr)
+        {
+            player->SetInt32Value(UNIT_FIELD_PARTY_ID, 0);
+            Messages::SendChatMessage(100, "@PARTY", player, string_format("DESTROY|%s|", name));
+        }
+    });
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_PARTY);
+    stmt->setInt32(0, nPartyID);
+    CharacterDatabase.Execute(stmt);
+
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        m_hshPartyID.erase(nPartyID);
+    }
 }
 
 int GroupManager::GetMemberCount(int nPartyID)
@@ -122,9 +139,20 @@ bool GroupManager::onLogout(int nPartyID, Player *pPlayer)
     return false;
 }
 
-void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Player *> vList)
+void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Player *>& vList)
 {
+    auto info = getPartyInfo(pPlayer->GetPartyID());
+    if(info == nullptr)
+        return;
 
+    for(auto& p : info->vMemberNameList)
+    {
+        auto player = Player::FindPlayer(p.strName);
+        if(player != nullptr && player->GetExactDist2d(pPlayer) <= distance)
+        {
+            vList.emplace_back(player);
+        }
+    }
 }
 
 PartyInfo* GroupManager::getPartyInfo(int nPartyID)
@@ -192,6 +220,7 @@ bool GroupManager::JoinParty(int nPartyID, Player* pPlayer)
     tag.nJobID = pPlayer->GetCurrentJob();
     tag.strName = pPlayer->GetName();
     info->vMemberNameList.emplace_back(tag);
+    pPlayer->SetInt32Value(UNIT_FIELD_PARTY_ID, nPartyID);
     return true;
 }
 
@@ -243,7 +272,7 @@ int GroupManager::GetShareMode(int nPartyID)
 void GroupManager::InitGroupSystem()
 {
     uint32_t    oldMSTime = getMSTime();
-    m_nMaxPartyID = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();
+    m_nMaxPartyID = CharacterDatabase.Query("SELECT MAX(sid) FROM Party;").get()->Fetch()->GetUInt64();
     QueryResult result    = CharacterDatabase.Query("SELECT * FROM Party;");
     if (!result)
     {
@@ -262,9 +291,10 @@ void GroupManager::InitGroupSystem()
         info.eShareMode = (ITEM_SHARE_MODE)field[idx++].GetInt32();
         LoadPartyInfo(info);
         m_hshPartyID[info.nPartyID] = info;
+        count++;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Parties in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void GroupManager::AddGroupToDatabase(const PartyInfo &info)
@@ -289,15 +319,15 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
         return;
     }
 
-    uint32 idx = 0;
     do
     {
+        uint32 idx = 0;
         Field* field = result->Fetch();
         PartyMemberTag tag{};
         tag.sid = field[idx++].GetInt32();
         tag.strName = field[idx++].GetString();
         tag.nJobID = field[idx++].GetInt32();
-        tag.nLevel = field[idx++].GetInt32();
+        tag.nLevel = field[idx].GetInt32();
         tag.bIsOnline = 0;
         if(tag.sid == info.nLeaderSID)
         {

@@ -23,6 +23,7 @@ public:
     void onInviteParty(Player* pClient, const std::string&);
     void onJoinParty(Player* pClient, const std::string&);
     void onPartyInfo(Player* pClient, const std::string&);
+    void onPartyDestroy(Player* pClient, const std::string&);
 };
 
 #define sAllowedCommandInfo ACE_Singleton<AllowedCommandInfo, ACE_Null_Mutex>::instance()

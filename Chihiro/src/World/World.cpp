@@ -210,7 +210,9 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 {
 	auto prev_rx = (uint)(oldPos.m_positionX / g_nRegionSize);
 	auto prev_ry = (uint)(oldPos.m_positionY / g_nRegionSize);
-	if(prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize)) {
+	if(prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
+    {
+
 		sArRegion->GetRegion(prev_rx, prev_ry, (uint32)pUnit->GetLayer())->RemoveObject(pUnit);
 		sArRegion->GetRegion(pUnit)->AddObject(pUnit);
 	}
@@ -274,10 +276,9 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
     auto oldy = (uint)(obj->GetPositionY() / g_nRegionSize);
     step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
 
-    if((uint)(obj->GetPositionX() / g_nRegionSize) != oldx || (uint)(obj->GetPositionY() / g_nRegionSize) != oldy) {
+    if ((uint)(obj->GetPositionX() / g_nRegionSize) != oldx || (uint)(obj->GetPositionY() / g_nRegionSize) != oldy)
+    {
         enterProc(obj, oldx, oldy);
-        obj->prevX = oldx;
-        obj->prevY = oldy;
     }
 }
 
@@ -763,5 +764,98 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
             sWorld->Broadcast((uint)(pCorpse->GetPositionX() / g_nRegionSize), (uint)(pCorpse->GetPositionY() / g_nRegionSize), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
+    }
+}
+
+void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
+{
+    int    nMinLevel     = 0;
+    int    nMaxLevel     = 0;
+    int    nTotalLevel   = 0;
+    int    nCount        = 0;
+    int    nTotalCount   = 0;
+    float  fLevelPenalty = 0;
+    Player *pOneManPlayer{nullptr};
+    sGroupManager->DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
+        nTotalCount++;
+        auto player = Player::FindPlayer(tag.strName);
+        if (player != nullptr && player->IsInWorld() && pCorpse->GetLayer() == player->GetLayer() && pCorpse->GetExactDist2d(player) <= 500.0f)
+        {
+            pOneManPlayer = player;
+            int l         = player->GetLevel();
+            if (nMaxLevel < l)
+                nMaxLevel = l;
+            if (nMinLevel > l)
+                nMinLevel = l;
+            nTotalLevel += l;
+            nCount++;
+        }
+    });
+
+    if (nCount >= 1)
+    {
+        if (nCount < 2)
+        {
+            addEXP(pCorpse, pOneManPlayer, exp, jp);
+            return;
+        }
+
+        int levelDiff = nMaxLevel - nMinLevel;
+        if (levelDiff < nTotalCount + 40)
+        {
+            if (levelDiff >= nTotalCount + 5)
+            {
+                fLevelPenalty = levelDiff - nCount - 5;
+                fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
+                exp           = (int)(exp * fLevelPenalty);
+                jp            = (int)(jp * fLevelPenalty);
+            }
+        }
+        else
+        {
+            exp = 0;
+            jp  = 0;
+        }
+        float lp         = fLevelPenalty * 0.01f + 1.0f;
+        auto  nSharedEXP = (int)(exp * lp);
+        auto  nSharedJP  = (int)(jp * lp);
+        sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
+            Player *player = Player::FindPlayer(tag.strName);
+            if (player != nullptr)
+            {
+                float ratio   = player->GetLevel() / nTotalLevel;
+                float fEXP    = nSharedEXP * ratio;
+                float fJP     = nSharedJP * ratio;
+                float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - player->GetLevel()) * 0.1f);
+                penalty  = std::max(0.0f, penalty >= 1.0f ? 1.0f : penalty);
+                fEXP     = (penalty * fEXP) * 1.0f; // @todo: partyexprate
+                fJP      = (penalty * fJP) * 1.0f;
+                if (fEXP < 1.0f)
+                    fEXP = 1.0f;
+                addEXP(pCorpse, player, fEXP, fJP);
+            }
+        });
+    }
+}
+
+void World::procPartyShare(Player *pClient, Item *pItem)
+{
+    if(pClient == nullptr || pItem == nullptr)
+        return;
+
+    if(pClient->GetPartyID() == 0)
+        return;
+
+    auto mode = sGroupManager->GetShareMode(pClient->GetPartyID());
+    if(mode == ITEM_SHARE_MODE::ITEM_SHARE_MONOPOLY)
+    {
+        procAddItem(pClient, pItem, true);
+    }
+    else if(mode == ITEM_SHARE_MODE::ITEM_SHARE_RANDOM)
+    {
+        std::vector<Player*> vList{};
+        sGroupManager->GetNearMember(pClient, 500.0f, vList);
+        auto idx = irand(0, (int)vList.size() - 1);
+        procAddItem(vList[idx], pItem, true);
     }
 }

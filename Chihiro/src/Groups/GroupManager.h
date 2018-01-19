@@ -66,7 +66,7 @@ public:
     std::string GetPartyName(int nPartyID);
     PARTY_TYPE GetPartyType(int nPartyID) ;
     std::string GetLeaderName(int nPartyID);
-    void GetNearMember(Player* pPlayer, float distance, std::vector<Player*> vList);
+    void GetNearMember(Player* pPlayer, float distance, std::vector<Player*>& vList);
 
     ///- booleans
     bool IsLeader(int nPartyID, const std::string& szPlayerName);

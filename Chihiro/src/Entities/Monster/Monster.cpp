@@ -109,64 +109,74 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     Unit::onDead(pFrom, decreaseEXPOnDead);
     SetStatus(MonsterStatus::MS_Dead);
 
-    std::vector<VirtualParty> vPartyContribute{};
-    takePriority Priority{};
+    std::vector<VirtualParty> vPartyContribute{ };
+    takePriority              Priority{ };
 
     m_bTamedSuccess = false;
-    if(m_hTamer != 0) {
-        auto player = sMemoryPool->GetObjectInWorld<Player>(m_hTamer);
-        if(player != nullptr)
+    if (m_hTamer != 0)
+    {
+        auto player         = sMemoryPool->GetObjectInWorld<Player>(m_hTamer);
+        if (player != nullptr)
             m_bTamedSuccess = sWorld->ProcTame(this);
     }
 
     calcPartyContribute(pFrom, vPartyContribute);
     procEXP(pFrom, vPartyContribute);
-    if(!m_bTamedSuccess) {
-        uint ct = sWorld->GetArTime();
+    if (!m_bTamedSuccess)
+    {
+        uint ct  = sWorld->GetArTime();
         auto pos = GetCurrentPosition(ct);
 
         int i = 0;
-        for(auto& vp : vPartyContribute) {
-            if(m_Base->monster_type >= 31 /* && isDungeonRaidMonster */) {
+        for (auto &vp : vPartyContribute)
+        {
+            if (m_Base->monster_type >= 31 /* && isDungeonRaidMonster */)
+            {
                 Priority.PickupOrder.hPlayer[i]  = 0;
                 Priority.PickupOrder.nPartyID[i] = 0;
-            } else if(vp.hPlayer != 0) {
-                Priority.PickupOrder.hPlayer[i] = vp.hPlayer;
+            }
+            else if (vp.hPlayer != 0)
+            {
+                Priority.PickupOrder.hPlayer[i]  = vp.hPlayer;
                 Priority.PickupOrder.nPartyID[i] = 0;
-            } else {
-                Priority.PickupOrder.hPlayer[i] = 0;
+            }
+            else
+            {
+                Priority.PickupOrder.hPlayer[i]  = 0;
                 Priority.PickupOrder.nPartyID[i] = vp.nPartyID;
             }
 
             i++;
-            if(i >= 3)
+            if (i >= 3)
                 break;
         }
 
         int cl;
-        if(!vPartyContribute.empty())
+        if (!vPartyContribute.empty())
             cl = vPartyContribute[0].nLevel;
         else
             cl = 0;
 
         auto fDropRatePenalty = 1.0f;
         cl -= GetLevel();
-        if(cl >= 5) {
-            fDropRatePenalty     = 1.0f - (float) pow(cl - 3, 2.0f) * 0.02f;
+        if (cl >= 5)
+        {
+            fDropRatePenalty     = 1.0f - (float)pow(cl - 3, 2.0f) * 0.02f;
             if (fDropRatePenalty < 0.0f)
                 fDropRatePenalty = 0.0f;
         }
 
         float fChaosDropRateBonus = 1.0f;
-        float fItemDropRateBonus = 1.0f;
-        float fGoldDropRateBonus = 1.0f;
+        float fItemDropRateBonus  = 1.0f;
+        float fGoldDropRateBonus  = 1.0f;
 
-        auto player = dynamic_cast<Player*>(pFrom);
+        auto player = dynamic_cast<Player *>(pFrom);
         procDropChaos(pFrom, Priority, vPartyContribute, fDropRatePenalty);
-        if(pFrom->IsPlayer() && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
+        if (pFrom->IsPlayer() && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
             sWorld->addChaos(this, player, 1.0f);
 
-        if(m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
+        if (m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/)
+        {
             procDropGold(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
             procDropItem(pos, pFrom, Priority, vPartyContribute, fDropRatePenalty);
         }
@@ -179,42 +189,102 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
 void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute)
 {
-    if(m_vDamageList.empty())
+    if (m_vDamageList.empty())
         return;
 
-    uint t = sWorld->GetArTime();
-    uint hKiller = 0;
-    float fMaxDamageAdd = 0.1f;
-    int nLastAttackPartyID = 0;
-    Player* player{nullptr};
+    uint  t                   = sWorld->GetArTime();
+    uint  hKiller             = 0;
+    float fMaxDamageAdd       = 0.1f;
+    uint  totalDamage         = 0;
+    int   nLastAttackPartyID  = 0;
+    int   nFirstAttackPartyID = 0;
+    Player *player{nullptr};
 
-    if(m_nFirstAttackTime + 6000 < t) {
+    if (m_nFirstAttackTime + 6000 < t)
+    {
         m_hFirstAttacker = 0;
-        fMaxDamageAdd = 0.4f;
+        fMaxDamageAdd    = 0.4f;
     }
 
-    if(pKiller->IsSummon()) {
-        player = dynamic_cast<Summon*>(pKiller)->GetMaster();
-    } else if(pKiller->IsPlayer()) {
+    if (pKiller->IsSummon())
+    {
+        player = dynamic_cast<Summon *>(pKiller)->GetMaster();
+    }
+    else if (pKiller->IsPlayer())
+    {
         player = dynamic_cast<Player *>(pKiller);
-        if (player != nullptr) {
+        if (player != nullptr)
+        {
             hKiller            = player->GetHandle();
-            nLastAttackPartyID = player->GetInt32Value(UNIT_FIELD_PARTY_ID);
+            nLastAttackPartyID = player->GetPartyID();
         }
     }
 
-    for(auto& dt : m_vDamageList) {
-        /////// HACK
+    for (auto &dt : m_vDamageList)
+    {
+        totalDamage += dt.nDamage;
         auto p = sMemoryPool->GetObjectInWorld<Player>(dt.uid);
-        if(p != nullptr) {
+        if (p != nullptr)
+        {
+            if (p->GetHandle() == m_hFirstAttacker)
+            {
+                nFirstAttackPartyID = p->GetPartyID();
+            }
+            if (p->GetPartyID() != 0)
+            {
+                bool bHandled = false;
+                for (auto &contribute : vPartyContribute)
+                {
+                    if (contribute.nPartyID == p->GetPartyID())
+                    {
+                        bHandled = true;
+                        contribute.nDamage += dt.nDamage;
+                        break;
+                    }
+                }
+                if (!bHandled)
+                {
+                    VirtualParty virtualParty{ };
+                    virtualParty.nDamage += dt.nDamage;
+                    virtualParty.nPartyID = p->GetPartyID();
+                    virtualParty.nLevel   = p->GetLevel();
+                    vPartyContribute.emplace_back(virtualParty);
+                }
+                continue;
+            }
             VirtualParty vp{dt.uid, dt.nDamage, (int)p->GetLevel()};
-            vp.fContribute = 1.0f;
             vPartyContribute.emplace_back(vp);
         }
     }
 
+    for (auto &vp : vPartyContribute)
+    {
+        vp.fContribute = GetPct((float)vp.nDamage, totalDamage) / 100;
+        if (nFirstAttackPartyID != 0)
+        {
+            if (nFirstAttackPartyID == vp.nPartyID)
+                vp.fContribute += 0.3f;
+        }
+        else if (m_hFirstAttacker != 0 && m_hFirstAttacker == vp.hPlayer)
+        {
+            vp.fContribute += 0.3f;
+        }
+        if (nLastAttackPartyID != 0)
+        {
+            if (vp.nPartyID == nLastAttackPartyID)
+                vp.fContribute += 0.1f;
+        }
+        else
+        {
+            if (vp.hPlayer == hKiller)
+                vp.fContribute += 0.1f;
+        }
+    }
 
-    ///// TODO: Do whole file
+    std::sort(vPartyContribute.begin(), vPartyContribute.end(),
+              [](const VirtualParty &a, const VirtualParty &b) -> bool {
+                  return a.fContribute > b.fContribute;
+              });
 }
 
 DamageTag* Monster::addDamage(uint handle, int nDamage)
@@ -250,29 +320,34 @@ DamageTag* Monster::getDamageTag(uint handle, uint t) {
 
 void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute)
 {
-    if(m_vDamageList.empty())
+    if (m_vDamageList.empty())
         return;
 
-    float fSharedJP = 0.0f;
+    float fSharedJP  = 0.0f;
     float fSharedEXP = 0.0f;
 
-    for(auto& vp : vPartyContribute) {
-        fSharedEXP = vp.fContribute * m_Base->exp[0];
-        fSharedJP = vp.fContribute * m_Base->jp[0];
-        if(fSharedEXP < 1)
+    for (auto &vp : vPartyContribute)
+    {
+        fSharedEXP     = vp.fContribute * m_Base->exp[0];
+        fSharedJP      = vp.fContribute * m_Base->jp[0];
+        if (fSharedEXP < 1)
             fSharedEXP = 1;
 
-        if(vp.bTamer || (vp.hPlayer != 0 && vp.hPlayer == m_hTamer)) {
+        if (vp.bTamer || (vp.hPlayer != 0 && vp.hPlayer == m_hTamer))
+        {
             fSharedEXP = fSharedEXP * m_Base->taming_exp_mod;
-            fSharedJP = fSharedJP * m_Base->taming_exp_mod;
+            fSharedJP  = fSharedJP * m_Base->taming_exp_mod;
         }
 
-        if(vp.hPlayer != 0) {
+        if (vp.hPlayer != 0)
+        {
             auto player2 = sMemoryPool->GetObjectInWorld<Player>(vp.hPlayer);
             if (player2 != nullptr)
                 sWorld->addEXP(this, player2, fSharedEXP, fSharedJP);
-        } else {
-            //sWorld->addEXP(this, vp.nPartyID, (int)fSharedEXP, (int)fSharedJP);
+        }
+        else
+        {
+            sWorld->addEXP(this, vp.nPartyID, (int)fSharedEXP, (int)fSharedJP);
         }
     }
 }

@@ -33,6 +33,7 @@
 #include "GameRule.h"
 #include "AllowedCommandInfo.h"
 #include "MixManager.h"
+#include "GroupManager.h"
 
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
@@ -1402,7 +1403,6 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
         return;
     }
 
-    // Quest Item Check TODO
     if(item->IsQuestItem() && !_player->IsTakeableQuestItem(item->m_Instance.Code))
     {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
@@ -1417,7 +1417,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
         if (item->m_pPickupOrder.hPlayer[i] == 0 && item->m_pPickupOrder.nPartyID[i] == 0)
             break;
 
-        if (item->m_pPickupOrder.nPartyID[i] <= 0 || item->m_pPickupOrder.nPartyID[i] != _player->GetInt32Value(UNIT_FIELD_PARTY_ID))
+        if (item->m_pPickupOrder.nPartyID[i] <= 0 || item->m_pPickupOrder.nPartyID[i] != _player->GetPartyID())
         {
             if (item->m_pPickupOrder.hPlayer[i] != _player->GetHandle())
             {
@@ -1433,7 +1433,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 
     if (item->m_Instance.Code == 0)
     {
-        if (_player->GetInt32Value(UNIT_FIELD_PARTY_ID) == 0)
+        if (_player->GetPartyID() == 0)
         {
             if (_player->GetGold() + item->m_Instance.nCount > MAX_GOLD_FOR_INVENTORY)
             {
@@ -1449,7 +1449,29 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     sWorld->Broadcast((uint)(_player->GetPositionX() / g_nRegionSize), (uint)(_player->GetPositionY() / g_nRegionSize), _player->GetLayer(), resultPct);
     if (sWorld->RemoveItemFromWorld(item))
     {
-        // TODO: Party
+        if(_player->GetPartyID() != 0)
+        {
+            if(item->m_Instance.Code != 0)
+            {
+                ///- Actual Item
+                sWorld->procPartyShare(_player, item);
+            }
+            else
+            {
+                ///- Gold
+                std::vector<Player*> vList{};
+                sGroupManager->GetNearMember(_player, 400.0f, vList);
+                auto incGold = (int64)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
+
+                for(auto& np : vList)
+                {
+                    auto nNewGold = incGold + np->GetGold();
+                    np->ChangeGold(nNewGold);
+                }
+                Item::PendFreeItem(item);
+            }
+            return;
+        }
         uint nih = sWorld->procAddItem(_player, item, false);
         if (nih != 0)
         { // nih = new item handle

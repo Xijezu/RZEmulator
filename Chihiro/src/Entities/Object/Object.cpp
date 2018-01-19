@@ -8,6 +8,10 @@
 #include "NPC.h"
 #include "FieldPropManager.h"
 
+// used for creating values for respawn for example
+#define PAIR64_HIPART(x)   (uint32)((uint64(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
+#define PAIR64_LOPART(x)   (uint32)(uint64(x)         & UI64LIT(0x00000000FFFFFFFF))
+
 Object::Object()
 {
     _subType = ST_Object;
@@ -434,6 +438,29 @@ void WorldObject::AddNoise(int r1, int r2, int v)
         m_positionX = prev_x;
     if ((int)(m_positionY / rs) != ty)
         m_positionY = prev_y;
+}
+
+Position WorldObject::GetCurrentPosition(uint t)
+{
+    Position     result{ };
+    ArMoveVector _mv{ };
+    if (bIsMoving && IsInWorld())
+    {
+        _mv = ArMoveVector{*dynamic_cast<ArMoveVector *>(this)};
+        _mv.Step(t);
+        result.m_positionX  = _mv.GetPositionX();
+        result.m_positionY  = _mv.GetPositionY();
+        result.m_positionZ  = _mv.GetPositionZ();
+        result._orientation = _mv.GetOrientation();
+    }
+    else
+    {
+        result.m_positionX  = GetPositionX();
+        result.m_positionY  = GetPositionY();
+        result.m_positionZ  = GetPositionZ();
+        result._orientation = GetOrientation();
+    }
+    return result;
 }
 
 ArMoveVector::ArMoveVector(const ArMoveVector &src)

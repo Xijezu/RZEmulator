@@ -7,14 +7,6 @@
 #include "Encryption/ByteBuffer.h"
 #include "Util.h"
 
-// used for creating values for respawn for example
-#define MAKE_PAIR64(l, h)  uint64(uint32(l) | (uint64(h) << 32))
-#define PAIR64_HIPART(x)   (uint32)((uint64(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
-#define PAIR64_LOPART(x)   (uint32)(uint64(x)         & UI64LIT(0x00000000FFFFFFFF))
-
-#define PAIR32_HIPART(x)   (uint16)((uint32(x) >> 16) & 0x0000FFFF)
-#define PAIR32_LOPART(x)   (uint16)(uint32(x)         & 0x0000FFFF)
-
 typedef unsigned long  DWORD;
 typedef unsigned short WORD;
 #define LOWORD(a) ((WORD)(a))
@@ -111,224 +103,214 @@ enum EBattleFields {
 };
 
 class ArRegion;
+class Object
+{
+    public:
+        virtual ~Object();
 
-class Object {
-public:
-    virtual ~Object();
+        bool IsInWorld() const { return m_inWorld; }
+        bool IsDeleteRequested() const { return m_bDeleteRequest; }
+        void DeleteThis() { m_bDeleteRequest = true; }
 
-    bool IsInWorld() const
-    { return m_inWorld; }
+        virtual void AddToWorld();
+        virtual void RemoveFromWorld();
 
-    bool IsDeleteRequested() const
-    { return m_bDeleteRequest; }
+        uint32 GetHandle() const { return GetUInt32Value(0); }
 
-    void DeleteThis() { m_bDeleteRequest = true; }
+        SubType GetSubType() const { return _subType; }
 
-    virtual void AddToWorld();
-    virtual void RemoveFromWorld();
+        MainType GetMainType() const { return _mainType; }
 
-    uint32 GetHandle() const
-    { return GetUInt32Value(0); }
+        ObjType GetObjType() const { return _objType; }
 
-    SubType GetSubType() const
-    { return _subType; }
+        int32 GetInt32Value(uint16 index) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+            return m_int32Values[index];
+        }
 
-    MainType GetMainType() const
-    { return _mainType; }
+        uint32 GetUInt32Value(uint16 index) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+            return _uint32Values[index];
+        }
 
-    ObjType GetObjType() const
-    { return _objType; }
+        uint64 GetUInt64Value(uint16 index) const
+        {
+                    ASSERT(index + 1 < _valuesCount || PrintIndexError(index, false));
+            return *((uint64 *)&(_uint32Values[index]));
+        }
 
-    int32 GetInt32Value(uint16 index) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-        return m_int32Values[index];
-    }
+        float GetFloatValue(uint16 index) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+            return m_floatValues[index];
+        }
 
-    uint32 GetUInt32Value(uint16 index) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-        return _uint32Values[index];
-    }
+        uint8 GetByteValue(uint16 index, uint8 offset) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+                    ASSERT(offset < 4);
+            return *(((uint8 *)&_uint32Values[index]) + offset);
+        }
 
-    uint64 GetUInt64Value(uint16 index) const
-    {
-                ASSERT(index + 1 < _valuesCount || PrintIndexError(index, false));
-        return *((uint64 *) &(_uint32Values[index]));
-    }
+        uint16 GetUInt16Value(uint16 index, uint8 offset) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+                    ASSERT(offset < 2);
+            return *(((uint16 *)&_uint32Values[index]) + offset);
+        }
 
-    float GetFloatValue(uint16 index) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-        return m_floatValues[index];
-    }
+        void SetInt32Value(uint16 index, int32 value);
 
-    uint8 GetByteValue(uint16 index, uint8 offset) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-                ASSERT(offset < 4);
-        return *(((uint8 *) &_uint32Values[index]) + offset);
-    }
+        void SetUInt32Value(uint16 index, uint32 value);
 
-    uint16 GetUInt16Value(uint16 index, uint8 offset) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-                ASSERT(offset < 2);
-        return *(((uint16 *) &_uint32Values[index]) + offset);
-    }
+        void UpdateUInt32Value(uint16 index, uint32 value);
 
-    void SetInt32Value(uint16 index, int32 value);
+        void SetUInt64Value(uint16 index, uint64 value);
 
-    void SetUInt32Value(uint16 index, uint32 value);
+        void SetFloatValue(uint16 index, float value);
 
-    void UpdateUInt32Value(uint16 index, uint32 value);
+        void SetByteValue(uint16 index, uint8 offset, uint8 value);
 
-    void SetUInt64Value(uint16 index, uint64 value);
+        void SetUInt16Value(uint16 index, uint8 offset, uint16 value);
 
-    void SetFloatValue(uint16 index, float value);
+        void SetInt16Value(uint16 index, uint8 offset, int16 value) { SetUInt16Value(index, offset, (uint16)value); }
 
-    void SetByteValue(uint16 index, uint8 offset, uint8 value);
+        void SetStatFloatValue(uint16 index, float value);
 
-    void SetUInt16Value(uint16 index, uint8 offset, uint16 value);
+        void SetStatInt32Value(uint16 index, int32 value);
 
-    void SetInt16Value(uint16 index, uint8 offset, int16 value)
-    { SetUInt16Value(index, offset, (uint16) value); }
+        bool AddUInt64Value(uint16 index, uint64 value);
 
-    void SetStatFloatValue(uint16 index, float value);
+        bool RemoveUInt64Value(uint16 index, uint64 value);
 
-    void SetStatInt32Value(uint16 index, int32 value);
+        void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
 
-    bool AddUInt64Value(uint16 index, uint64 value);
+        void ApplyModInt32Value(uint16 index, int32 val, bool apply);
 
-    bool RemoveUInt64Value(uint16 index, uint64 value);
+        void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
 
-    void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
+        void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
 
-    void ApplyModInt32Value(uint16 index, int32 val, bool apply);
+        void ApplyModSignedFloatValue(uint16 index, float val, bool apply);
 
-    void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
+        void SetFlag(uint16 index, uint32 newFlag);
 
-    void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
+        void RemoveFlag(uint16 index, uint32 oldFlag);
 
-    void ApplyModSignedFloatValue(uint16 index, float val, bool apply);
+        void ToggleFlag(uint16 index, uint32 flag)
+        {
+            if (HasFlag(index, flag))
+                RemoveFlag(index, flag);
+            else
+                SetFlag(index, flag);
+        }
 
-    void SetFlag(uint16 index, uint32 newFlag);
+        bool HasFlag(uint16 index, uint32 flag) const
+        {
+            if (index >= _valuesCount && !PrintIndexError(index, false))
+                return false;
+            return (_uint32Values[index] & flag) != 0;
+        }
 
-    void RemoveFlag(uint16 index, uint32 oldFlag);
+        void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
 
-    void ToggleFlag(uint16 index, uint32 flag)
-    {
-        if (HasFlag(index, flag))
-            RemoveFlag(index, flag);
-        else
-            SetFlag(index, flag);
-    }
+        void RemoveByteFlag(uint16 index, uint8 offset, uint8 newFlag);
 
-    bool HasFlag(uint16 index, uint32 flag) const
-    {
-        if (index >= _valuesCount && !PrintIndexError(index, false)) return false;
-        return (_uint32Values[index] & flag) != 0;
-    }
+        void ToggleFlag(uint16 index, uint8 offset, uint8 flag)
+        {
+            if (HasByteFlag(index, offset, flag))
+                RemoveByteFlag(index, offset, flag);
+            else
+                SetByteFlag(index, offset, flag);
+        }
 
-    void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+        bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+                    ASSERT(offset < 4);
+            return (((uint8 *)&_uint32Values[index])[offset] & flag) != 0;
+        }
 
-    void RemoveByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+        void ApplyModFlag(uint16 index, uint32 flag, bool apply)
+        {
+            if (apply)
+                SetFlag(index, flag);
+            else
+                RemoveFlag(index, flag);
+        }
 
-    void ToggleFlag(uint16 index, uint8 offset, uint8 flag)
-    {
-        if (HasByteFlag(index, offset, flag))
-            RemoveByteFlag(index, offset, flag);
-        else
-            SetByteFlag(index, offset, flag);
-    }
+        void SetFlag64(uint16 index, uint64 newFlag)
+        {
+            uint64 oldval = GetUInt64Value(index);
+            uint64 newval = oldval | newFlag;
+            SetUInt64Value(index, newval);
+        }
 
-    bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-                ASSERT(offset < 4);
-        return (((uint8 *) &_uint32Values[index])[offset] & flag) != 0;
-    }
+        void RemoveFlag64(uint16 index, uint64 oldFlag)
+        {
+            uint64 oldval = GetUInt64Value(index);
+            uint64 newval = oldval & ~oldFlag;
+            SetUInt64Value(index, newval);
+        }
 
-    void ApplyModFlag(uint16 index, uint32 flag, bool apply)
-    {
-        if (apply) SetFlag(index, flag); else RemoveFlag(index, flag);
-    }
+        void ToggleFlag64(uint16 index, uint64 flag)
+        {
+            if (HasFlag64(index, flag))
+                RemoveFlag64(index, flag);
+            else
+                SetFlag64(index, flag);
+        }
 
-    void SetFlag64(uint16 index, uint64 newFlag)
-    {
-        uint64 oldval = GetUInt64Value(index);
-        uint64 newval = oldval | newFlag;
-        SetUInt64Value(index, newval);
-    }
+        bool HasFlag64(uint16 index, uint64 flag) const
+        {
+                    ASSERT(index < _valuesCount || PrintIndexError(index, false));
+            return (GetUInt64Value(index) & flag) != 0;
+        }
 
-    void RemoveFlag64(uint16 index, uint64 oldFlag)
-    {
-        uint64 oldval = GetUInt64Value(index);
-        uint64 newval = oldval & ~oldFlag;
-        SetUInt64Value(index, newval);
-    }
+        void ApplyModFlag64(uint16 index, uint64 flag, bool apply)
+        {
+            if (apply)
+                SetFlag64(index, flag);
+            else
+                RemoveFlag64(index, flag);
+        }
 
-    void ToggleFlag64(uint16 index, uint64 flag)
-    {
-        if (HasFlag64(index, flag))
-            RemoveFlag64(index, flag);
-        else
-            SetFlag64(index, flag);
-    }
+        uint16 GetValuesCount() const { return _valuesCount; }
+        virtual bool IsPlayer() const { return false; }
+        virtual bool IsSummon() const { return false; }
+        virtual bool IsMonster() const { return false; }
+        virtual bool IsFieldProp() const { return false; }
+        virtual bool IsItem() const { return false; }
+        virtual bool IsNPC() const { return false; }
 
-    bool HasFlag64(uint16 index, uint64 flag) const
-    {
-                ASSERT(index < _valuesCount || PrintIndexError(index, false));
-        return (GetUInt64Value(index) & flag) != 0;
-    }
+    protected:
+        Object();
+        void _InitValues();
+        uint16 m_updateFlag;
+        union
+        {
+            int32  *m_int32Values;
+            uint32 *_uint32Values;
+            float  *m_floatValues;
+        };
+        bool   *_changedFields;
+        uint16 _valuesCount;
+        bool   m_objectUpdated;
 
-    void ApplyModFlag64(uint16 index, uint64 flag, bool apply)
-    {
-        if (apply) SetFlag64(index, flag); else RemoveFlag64(index, flag);
-    }
+        MainType _mainType;
+        ObjType  _objType;
+        SubType  _subType;
+    private:
+        bool m_inWorld;
+        bool m_bDeleteRequest;
 
-    uint16 GetValuesCount() const
-    { return _valuesCount; }
+        // for output helpful error messages from asserts
+        bool PrintIndexError(uint32 index, bool set) const;
 
-    virtual bool hasQuest(uint32 /* quest_id */) const
-    { return false; }
-
-    virtual bool IsPlayer() const { return false; }
-    virtual bool IsSummon() const { return false; }
-    virtual bool IsMonster() const { return false; }
-    virtual bool IsFieldProp() const { return false; }
-    virtual bool IsItem() const { return false; }
-    virtual bool IsNPC() const { return false; }
-
-protected:
-    Object();
-
-    void _InitValues();
-
-    uint16 m_updateFlag;
-
-    union {
-        int32  *m_int32Values;
-        uint32 *_uint32Values;
-        float  *m_floatValues;
-    };
-    bool   *_changedFields;
-
-    uint16 _valuesCount;
-    bool   m_objectUpdated;
-
-    MainType _mainType;
-    ObjType  _objType;
-    SubType  _subType;
-private:
-    bool m_inWorld;
-    bool m_bDeleteRequest;
-
-    // for output helpful error messages from asserts
-    bool PrintIndexError(uint32 index, bool set) const;
-
-    Object(const Object &);                              // prevent generation copy constructor
-    Object &operator=(Object const &);                   // prevent generation assignment operator
+        Object(const Object &);                              // prevent generation copy constructor
+        Object &operator=(Object const &);                   // prevent generation assignment operator
 };
 
 struct Position {
@@ -338,8 +320,6 @@ struct Position {
     float  _orientation{ };
     uint8 m_nLayer{ };
 
-    float prevX{}, prevY{};
-
     bool operator==(Position pos) {
         return pos.m_positionX == m_positionX &&
                 pos.m_positionY == m_positionY &&
@@ -348,11 +328,8 @@ struct Position {
 
     }
 
-    void SetCurrentXY(float x, float y) {
-        if(prevX > -1) {
-            prevX = (int)(GetPositionX() / 180);
-            prevY = (int)(GetPositionY() / 180);
-        }
+    void SetCurrentXY(float x, float y)
+    {
         this->m_positionX = x;
         this->m_positionY = y;
     }
@@ -510,110 +487,94 @@ struct Position {
 };
 
 
-class ArMoveVector : public Position {
-public:
-    ArMoveVector() = default;
-    ArMoveVector(const ArMoveVector&);
-    ~ArMoveVector() = default;
+class ArMoveVector : public Position
+{
+    public:
+        ArMoveVector() = default;
+        ArMoveVector(const ArMoveVector &);
+        ~ArMoveVector() = default;
 
-    virtual bool Step(uint current_time);
-    virtual void SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time, uint current_time);
-    virtual void SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time);
-    void SetDirection(Position pos);
-    Position GetTargetPos();
-    bool IsMoving(uint t);
-    void StopMove() { ends.clear(); bIsMoving = false; }
+        virtual bool Step(uint current_time);
+        virtual void SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time, uint current_time);
+        virtual void SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time);
+        void SetDirection(Position pos);
+        Position GetTargetPos();
+        bool IsMoving(uint t);
 
-    struct MoveInfo {
-        MoveInfo(Position pos, uint t) {
-            end = Position(pos);
-            end_time = t;
+        void StopMove()
+        {
+            ends.clear();
+            bIsMoving = false;
         }
 
-        bool operator==(MoveInfo mv) {
-            return mv.end == end && mv.end_time == end_time;
-        }
-        Position end{ };
-        uint end_time{ };
-    };
+        struct MoveInfo
+        {
+            MoveInfo(Position pos, uint t)
+            {
+                end      = Position(pos);
+                end_time = t;
+            }
 
-public:
-    bool bIsMoving{false};
-    bool bWithZMoving{false};
-    uint8_t speed{ };
-    uint start_time{ };
-    uint proc_time{ };
-    std::vector<MoveInfo> ends{ };
-    bool bHasDirectionChanged{false};
-    Position direction{ };
-    uint lastStepTime{};
+            bool operator==(MoveInfo mv)
+            {
+                return mv.end == end && mv.end_time == end_time;
+            }
+
+            Position end{ };
+            uint     end_time{ };
+        };
+
+    public:
+        bool     bIsMoving{false};
+        bool     bWithZMoving{false};
+        uint8_t  speed{ };
+        uint     start_time{ };
+        uint     proc_time{ };
+        bool     bHasDirectionChanged{false};
+        Position direction{ };
+        uint     lastStepTime{ };
+
+        std::vector<MoveInfo> ends{ };
 };
 
 class Player;
 
-class WorldObject : public Object, public ArMoveVector {
-public:
-    ~WorldObject() override;
+class WorldObject : public Object, public ArMoveVector
+{
+    public:
+        ~WorldObject() override;
 
-    virtual void Update(uint32 /*time_diff*/)
-    {}
+        virtual void Update(uint32 /*time_diff*/) {}
 
-    bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
-    bool Step(uint tm) override;
+        bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
+        bool Step(uint tm) override;
 
-    virtual float GetScale() const { return 1.0f; }
-    virtual float GetSize() const { return 1.0f; }
-    float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
+        virtual float GetScale() const { return 1.0f; }
+        virtual float GetSize() const { return 1.0f; }
+        float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
 
-    void SendEnterMsg(Player *);
-    void AddNoise(int, int, int);
+        void SendEnterMsg(Player *);
+        void AddNoise(int, int, int);
 
-    void AddToWorld() override;
-    void RemoveFromWorld() override;
+        void AddToWorld() override;
+        void RemoveFromWorld() override;
 
-    Position GetCurrentPosition(uint t)
-    {
-        Position     result{ };
-        ArMoveVector _mv{ };
-        if (bIsMoving && IsInWorld())
-        {
-            _mv = ArMoveVector{*dynamic_cast<ArMoveVector*>(this)};
-            _mv.Step(t);
-            result.m_positionX  = _mv.GetPositionX();
-            result.m_positionY  = _mv.GetPositionY();
-            result.m_positionZ  = _mv.GetPositionZ();
-            result._orientation = _mv.GetOrientation();
-        }
-        else
-        {
-            result.m_positionX  = GetPositionX();
-            result.m_positionY  = GetPositionY();
-            result.m_positionZ  = GetPositionZ();
-            result._orientation = GetOrientation();
-        }
-        return result;
-    }
+        Position GetCurrentPosition(uint t);
 
-    const char *GetName() const
-    { return m_name.c_str(); }
+        const char *GetName() const { return m_name.c_str(); }
+        void SetName(const std::string &newname) { m_name = newname; }
 
-    void SetName(const std::string &newname)
-    { m_name = newname; }
+        ArRegion              *_region;
+        bool                  _bIsInWorld{false};
 
-    virtual const char *GetNameForLocaleIdx(LocaleConstant /*locale_idx*/) const
-    { return GetName(); }
-
-    ArRegion *_region;
-    bool _bIsInWorld{false};
-
-protected:
-    explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
-    std::vector<Position> m_PendingMovePos{};
-    uint8_t m_nPendingMoveSpeed{};
-    uint lastProcessTime{0};
-    std::string m_name;
-    bool        _isActive;
-    const bool  m_isWorldObject;
+    protected:
+        explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
+        std::vector<Position> m_PendingMovePos{ };
+        uint8_t               m_nPendingMoveSpeed{ };
+        uint                  lastProcessTime{0};
+        std::string           m_name;
+        bool                  _isActive;
+        const bool            m_isWorldObject;
 
 };
 

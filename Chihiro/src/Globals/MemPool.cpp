@@ -13,7 +13,6 @@ template class HashMapHolder<Summon>;
 template class HashMapHolder<Monster>;
 template class HashMapHolder<Item>;
 
-
 Item *MemoryPoolMgr::AllocItem()
 {
     auto *p = new Item{ };
@@ -24,7 +23,7 @@ Item *MemoryPoolMgr::AllocItem()
     return p;
 }
 
-void MemoryPoolMgr::AllocMiscHandle(WorldObject* obj)
+void MemoryPoolMgr::AllocMiscHandle(WorldObject *obj)
 {
     obj->SetUInt32Value(UNIT_FIELD_HANDLE, m_nMiscTop++);
     m_nItemTop++;
@@ -50,7 +49,8 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
     item->SetUInt32Value(UNIT_FIELD_HANDLE, item->m_nHandle);
-    if(item->m_Instance.UID == 0) {
+    if (item->m_Instance.UID == 0)
+    {
         item->m_Instance.UID = sWorld->GetItemIndex();
     }
     m_nMiscTop++;
@@ -61,10 +61,10 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 
 Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 {
-    if(pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
+    if (pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
         return nullptr;
     std::string szName = "HurrDurr!"s;
-    Summon* s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
+    Summon *s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
     s->SetUInt32Value(UNIT_FIELD_UID, (uint)sWorld->GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
@@ -77,14 +77,14 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 
     pItem->m_Instance.Socket[0] = s->GetUInt32Value(UNIT_FIELD_UID);
     pItem->m_bIsNeedUpdateToDB = true;
-    pItem->m_pSummon = s;
+    pItem->m_pSummon           = s;
     return s;
 }
 
 Monster *MemoryPoolMgr::AllocMonster(uint idx)
 {
     auto mb = sObjectMgr->GetMonsterInfo(idx);
-    if(mb == nullptr)
+    if (mb == nullptr)
         return nullptr;
     auto p = new Monster{m_nMonsterTop, mb};
     p->SetInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
@@ -104,16 +104,19 @@ void MemoryPoolMgr::Destroy()
     _unload<Summon>();
 }
 
-void MemoryPoolMgr::Update(uint diff) {
+void MemoryPoolMgr::Update(uint diff)
+{
     // First deleting all things in the remove list
-    while (!i_objectsToRemove.empty()) {
-        std::set<WorldObject *>::iterator itr = i_objectsToRemove.begin();
-        WorldObject *obj = *itr;
+    while (!i_objectsToRemove.empty())
+    {
+        std::set<WorldObject *>::iterator itr  = i_objectsToRemove.begin();
+        WorldObject                       *obj = *itr;
 
         if (obj->IsInWorld())
             sWorld->RemoveObjectFromWorld(obj);
 
-        switch (obj->GetSubType()) {
+        switch (obj->GetSubType())
+        {
             case ST_Player:
                 RemoveObject((Player *)obj);
                 break;
@@ -136,23 +139,23 @@ void MemoryPoolMgr::Update(uint diff) {
     }
 
     ///- Add new update objects
-    WorldObject* sess = nullptr;
-    while(addUpdateQueue.next(sess))
+    WorldObject *sess = nullptr;
+    while (addUpdateQueue.next(sess))
         i_objectsToUpdate[sess->GetHandle()] = sess;
 
-    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr !=  i_objectsToUpdate.end(); itr = next) {
+    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr != i_objectsToUpdate.end(); itr = next)
+    {
         next = itr;
         ++next;
 
         itr->second->Update(0);
-        if(itr->second->IsDeleteRequested())
+        if (itr->second->IsDeleteRequested())
         {
             AddToDeleteList(itr->second);
             i_objectsToUpdate.erase(itr->second->GetHandle());
             continue;
         }
     }
-
     sFieldPropManager->Update(diff);
 }
 
@@ -165,8 +168,9 @@ template<class T>
 void MemoryPoolMgr::_unload()
 {
     MX_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());
-    auto container = HashMapHolder<T>::GetContainer();
-    for(auto& obj : container) {
+    auto            container = HashMapHolder<T>::GetContainer();
+    for (auto &obj : container)
+    {
         container.erase(obj.second->GetHandle());
         delete obj.second;
     }
@@ -178,6 +182,7 @@ void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
     i_objectsToRemove.insert(obj);
 }
 
-const HashMapHolder<Player>::MapType &MemoryPoolMgr::GetPlayers() {
+const HashMapHolder<Player>::MapType &MemoryPoolMgr::GetPlayers()
+{
     return HashMapHolder<Player>::GetContainer();
 }

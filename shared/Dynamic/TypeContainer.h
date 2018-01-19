@@ -28,7 +28,7 @@
 #include <vector>
 #include "Define.h"
 #include "Dynamic/TypeList.h"
-#include "RegionRefManager.h"
+#include "GridRefManager.h"
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -38,7 +38,7 @@
 template<class OBJECT> struct ContainerMapList
 {
     //std::map<OBJECT_HANDLE, OBJECT *> _element;
-    RegionRefManager<OBJECT> _element;
+    GridRefManager<OBJECT> _element;
 };
 
 template<> struct ContainerMapList<TypeNull>                /* nothing is in type null */

@@ -62,7 +62,7 @@ namespace SkyFire
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj)
     {
         //elements._element[hdl] = obj;
-        obj->AddToRegion(elements._element);
+        obj->AddToGrid(elements._element);
         return obj;
     };
 
