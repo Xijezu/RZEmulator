@@ -12,7 +12,7 @@
 #include <ace/ACE.h>
 #include <ace/Sig_Handler.h>
 #include <ace/Event_Handler.h>
-
+#include <fstream>
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
 #endif //_CHIHIRO_CORE_CONFIG
@@ -41,7 +41,12 @@ public:
 				World::StopNow(SHUTDOWN_EXIT_CODE);
 				break;
 			case SIGSEGV:
-				ASSERT(false); // Generates a stacktrace
+			{
+				ACE_Stack_Trace st;
+				MX_LOG_FATAL("server.worldserver", st.c_str());
+				sLog->Close();
+				*((volatile int*)NULL) = 0;
+			}
 				break;
 			default:
 				break;
@@ -52,7 +57,7 @@ public:
 
 int main(int argc, char **argv)
 {
-    if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG))
+	if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG))
 	{
 		MX_LOG_ERROR("server.worldserver", "Invalid or missing configuration file : %s", _CHIHIRO_CORE_CONFIG);
 		MX_LOG_ERROR("server.worldserver","Verify that the file exists and has \'[chihiro]' written in the top of the file!");
