@@ -134,38 +134,17 @@ void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
     CharacterDatabase.Execute(stmt);
 }
 
-void Summon::OnUpdate()
-{
-    uint ct = sWorld->GetArTime();
-    if(IsInWorld()) {
-        if(GetHealth() == 0) {
-            // Unsummon after some time
-        }
-
-        if(bIsMoving && IsInWorld()) {
-            processWalk(ct);
-            lastProcessTime = ct;
-            return;
-        }
-
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending)) {
-            processPendingMove();
-        }
-        lastProcessTime = ct;
-    }
-    Unit::OnUpdate();
-}
-
 void Summon::processWalk(uint t)
 {
     // Do Ride check here
-    ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector*>(this)};
+    ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector *>(this)};
     tmp_mv.Step(t);
-    if((tmp_mv.GetPositionX() / g_nRegionSize) != (GetPositionX() / g_nRegionSize) ||
-            (tmp_mv.GetPositionY() / g_nRegionSize) != (GetPositionY() / g_nRegionSize) ||
-            !tmp_mv.bIsMoving)
+    if ((tmp_mv.GetPositionX() / g_nRegionSize) != (GetPositionX() / g_nRegionSize) ||
+        (tmp_mv.GetPositionY() / g_nRegionSize) != (GetPositionY() / g_nRegionSize) ||
+        !tmp_mv.bIsMoving)
     {
-        if(bIsMoving && IsInWorld()) {
+        if (bIsMoving && IsInWorld())
+        {
             sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
         }
     }
@@ -375,6 +354,7 @@ void Summon::Update(uint diff)
         {
             GetMaster()->DoUnSummon(this);
         }
+        return;
     }
 
     if (bIsMoving && IsInWorld())
@@ -392,8 +372,6 @@ void Summon::Update(uint diff)
     {
         processPendingMove();
     }
-
-    Unit::Update(diff);
 }
 
 uint16 Summon::putonItem(ItemWearType pos, Item *pItem)

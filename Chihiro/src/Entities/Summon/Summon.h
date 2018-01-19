@@ -25,7 +25,6 @@ public:
     Player* GetMaster() const
     { return m_pMaster; }
 
-    void OnUpdate() override;
     void Update(uint/*diff*/) override;
 
     bool TranslateWearPosition(ItemWearType& pos, Item* item, std::vector<int>& ItemList) override;

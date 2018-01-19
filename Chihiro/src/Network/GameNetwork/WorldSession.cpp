@@ -1310,7 +1310,11 @@ void WorldSession::onSkill(XPacket *pRecvPct)
         //skill_level = skill_level + skill.m_nSkillLevelAdd;
         int res = pCaster->CastSkill(skill_id, skill_level, target, pos, pCaster->GetLayer(), false);
         if (res != 0)
+        {
             Messages::SendSkillCastFailMessage(_player, caster, target, skill_id, skill_level, pos, res);
+            if (skill->m_SkillBase->is_harmful != 0 && pCaster->GetTargetHandle() != 0)
+                pCaster->StartAttack(target, false);
+        }
     }
 }
 
