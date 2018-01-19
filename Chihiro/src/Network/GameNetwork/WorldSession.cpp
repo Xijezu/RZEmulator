@@ -643,10 +643,42 @@ void WorldSession::onChatRequest(XPacket *_packet)
         case 2:
             Messages::SendGlobalChatMessage(2, _player->GetName(), request.szMsg, 0);
             break;
+
+            // Whisper chat message: "player msg
+        case 3:
+        {
+            auto target = Player::FindPlayer(request.szTarget);
+            if(target != nullptr)
+            {
+                // Todo: Denal check
+                Messages::SendChatMessage((_player->GetPermission() > 0 ? 7 : 3), _player->GetName(), target, request.szMsg);
+                Messages::SendResult(_player, _packet->GetPacketID(), TS_RESULT_SUCCESS, 0);
+                return;
+            }
+            Messages::SendResult(_player, _packet->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
+        }
+        break;
         // Global chat message: !msg
         case 4:
             Messages::SendGlobalChatMessage(_player->GetPermission() > 0 ? 6 : 4, _player->GetName(), request.szMsg, 0);
             break;
+        case 0xA:
+        {
+            if(_player->GetPartyID() != 0)
+            {
+                sGroupManager->DoEachMemberTag(_player->GetPartyID(), [=,&request](PartyMemberTag& tag) {
+                    if(tag.bIsOnline)
+                    {
+                        auto player = Player::FindPlayer(tag.strName);
+                        if(player != nullptr)
+                        {
+                            Messages::SendChatMessage(0xA, _player->GetName(), player, request.szMsg);
+                        }
+                    }
+                });
+            }
+        }
+        break;
         default:
             break;
     }
