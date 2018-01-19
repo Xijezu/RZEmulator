@@ -431,7 +431,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         return;
     }
 
-    if (mover->IsInWorld())
+    if (_player->IsInWorld())
     {
         if(mover->GetTargetHandle() != 0)
             mover->CancelAttack();
