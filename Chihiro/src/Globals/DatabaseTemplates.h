@@ -7,6 +7,18 @@
 
 #define MAX_DROP_GROUP 10
 
+struct SummonLevelBonus
+{
+    int summon_id;
+    float strength;
+    float vital;
+    float dexterity;
+    float agility;
+    float intelligence;
+    float mentality;
+    float luck;
+};
+
 struct DropGroup {
     int uid;
     int drop_item_id[MAX_DROP_GROUP];

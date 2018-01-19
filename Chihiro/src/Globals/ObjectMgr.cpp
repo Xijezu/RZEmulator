@@ -38,6 +38,7 @@ bool ObjectMgr::InitGameContent()
         return false;
     if(!LoadSummonLevelResource())
         return false;
+    LoadSummonLevelBonus();
     if (!LoadSummonResource())
         return false;
     if(!LoadDungeonResource())
@@ -909,6 +910,37 @@ bool ObjectMgr::LoadSummonLevelResource()
     return true;
 }
 
+
+void ObjectMgr::LoadSummonLevelBonus()
+{
+    uint32_t    oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT summon_id, strength, vital, dexterity, agility, intelligence, mentality, luck FROM CreatureLevelBonus;");
+    if (!result) {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLevelBonus templates. Table `CreatureLevelBonus` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do {
+        Field                 *field = result->Fetch();
+        SummonLevelBonus bonus{ };
+        int i = 0, j = 0;
+        bonus.summon_id = field[i++].GetInt32();
+        bonus.strength = field[i++].GetFloat();
+        bonus.vital = field[i++].GetFloat();
+        bonus.dexterity = field[i++].GetFloat();
+        bonus.agility = field[i++].GetFloat();
+        bonus.intelligence = field[i++].GetFloat();
+        bonus.mentality = field[i++].GetFloat();
+        bonus.luck = field[i].GetFloat();
+        _summonBonusStore[bonus.summon_id] = bonus;
+        ++count;
+    } while (result->NextRow());
+
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLevelBonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+
 bool ObjectMgr::LoadJobLevelBonus()
 {
     uint32_t    oldMSTime = getMSTime();
@@ -1775,4 +1807,28 @@ bool ObjectMgr::LearnAllSkill(Player *pPlayer)
         }
     }
     return true;
+}
+
+CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type */, int level)
+{
+    if(_summonBonusStore.count(summon_code) == 0)
+        return CreatureStat{};
+
+    CreatureStat stat {};
+    auto bonus = _summonBonusStore[summon_code];
+    if(growth_depth != 1)
+    {
+        level = level - 50 * growth_depth + 51;
+    }
+
+    stat.stat_id = summon_code;
+    stat.strength = bonus.strength * level;
+    stat.vital = bonus.vital * level;
+    stat.dexterity = bonus.dexterity * level;
+    stat.agility = bonus.agility * level;
+    stat.intelligence = bonus.intelligence;
+    stat.mentality = bonus.mentality;
+    stat.luck = bonus.luck;
+
+    return stat;
 }

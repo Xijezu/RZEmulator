@@ -512,3 +512,15 @@ LABEL_12:
  */
     Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
 }
+
+void Summon::applyJobLevelBonus()
+{
+    auto stat = sObjectMgr->GetSummonLevelBonus(m_tSummonBase->id, m_tSummonBase->form, GetLevel());
+    m_cStat.strength += stat.strength;
+    m_cStat.vital += stat.vital;
+    m_cStat.agility += stat.agility;
+    m_cStat.dexterity += stat.dexterity;
+    m_cStat.intelligence += stat.intelligence;
+    m_cStat.luck += stat.luck;
+    m_cStat.mentality += stat.luck;
+}

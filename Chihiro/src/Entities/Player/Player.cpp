@@ -1467,7 +1467,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                  && item1->m_pItemBase->iclass != ItemClass::ClassOneHandSword
                  && item1->m_pItemBase->iclass != ItemClass::ClassDagger
                  && item1->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)
-                || (item2 == nullptr
+                || (item2 != nullptr
                     || item2->m_pItemBase->iclass != ItemClass::ClassOneHandSword
                     || item2->m_pItemBase->iclass != ItemClass::ClassDagger
                     || item2->m_pItemBase->iclass != ItemClass::ClassOneHandAxe)

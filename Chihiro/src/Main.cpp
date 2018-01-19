@@ -40,6 +40,9 @@ public:
 #endif
 				World::StopNow(SHUTDOWN_EXIT_CODE);
 				break;
+			case SIGSEGV:
+				ASSERT(false); // Generates a stacktrace
+				break;
 			default:
 				break;
 		}
@@ -63,7 +66,7 @@ int main(int argc, char **argv)
 #endif
 
 	///- Initialize the signal handlers
-	WorldServerSignalHandler SignalINT, SignalTERM;
+	WorldServerSignalHandler SignalINT, SignalTERM, SignalSEGV;
 #ifdef _WIN32
 	WorldServerSignalHandler SignalBREAK;
 #endif /* _WIN32 */
@@ -72,6 +75,7 @@ int main(int argc, char **argv)
 	ACE_Sig_Handler Handler;
 	Handler.register_handler(SIGINT, &SignalINT);
 	Handler.register_handler(SIGTERM, &SignalTERM);
+    Handler.register_handler(SIGSEGV, &SignalSEGV);
 #ifdef _WIN32
 	Handler.register_handler(SIGBREAK, &SignalBREAK);
 #endif /* _WIN32 */
