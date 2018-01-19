@@ -341,7 +341,7 @@ void Unit::CalculateStat()
     // TODO onAfterApplyStat -> summonstatpenalty
     finalizeStat();
     float b1  = GetLevel();
-    float fcm = 1.0f;
+    float fcm = GetFCM();
     SetMaxHealth((uint32_t)(GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
     SetMaxMana((uint32_t)(GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
     calcAttribute(m_Attribute);
@@ -1177,47 +1177,48 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     attribute.nCritical += ((m_cStat.luck * 0.2f) + 3.0f);
 
     float b1                   = GetLevel();
-    float fcm                  = 1.0f;
-    float d1                   = (fcm * 5.0f);
+    float fcm                  = GetFCM();
+    float dl                   = (fcm * 5.0f);
 
-    if (IsUsingBow() || IsUsingCrossBow()) {
-        v = (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
-        attribute.nAttackPointRight += v;
+    if (IsUsingBow() || IsUsingCrossBow())
+    {
+        attribute.nAttackPointRight += (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
     }
     else
     {
-        v = (2.0f * m_cStat.strength) + (fcm * b1);
-        attribute.nAttackPointRight += v;
+        attribute.nAttackPointRight += (2.0f * m_cStat.strength) * fcm + b1;
         if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
-            attribute.nAttackPointLeft += v;// ((2 * this.m_Stat.strength) * fcm + bl);
+            attribute.nAttackPointLeft += (2.0f * m_cStat.strength) * fcm + b1;
     }
 
-    attribute.nMagicPoint += ((2 * m_cStat.intelligence) + (fcm * b1));
+    attribute.nMagicPoint += ((2 * m_cStat.intelligence) * fcm + b1);
     attribute.nItemChance += (m_cStat.luck * 0.2000000029802322f);
-    attribute.nDefence += ((2.0f * m_cStat.vital) + (fcm * b1));
-    attribute.nMagicDefence += ((2.0f * m_cStat.mentality) + (fcm * b1));
+    attribute.nDefence += ((2.0f * m_cStat.vital) * fcm + b1);
+    attribute.nMagicDefence += ((2.0f * m_cStat.mentality) * fcm + b1);
     attribute.nMaxWeight += 10 * (GetLevel() + m_cStat.strength);
     attribute.nAccuracyRight += ((m_cStat.dexterity) * 0.5f * fcm + b1);
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
         attribute.nAccuracyLeft += ((m_StatAmplifier.dexterity) * 0.5f * fcm + b1);
     attribute.nMagicAccuracy += ((m_cStat.mentality * 0.4f + m_cStat.dexterity * 0.1f) * fcm + b1);
     attribute.nAvoid += (m_cStat.agility * 0.5f * fcm + b1);
     attribute.nMagicAvoid += (m_cStat.mentality * 0.5f * fcm + b1);
     attribute.nAttackSpeedRight += 100; /*(100 + (m_cStat.agility * 0.1f));*/
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
         attribute.nAttackSpeedLeft += 100;/*((this->m_cStat.dexterity) * 0.5f + (fcm + b1));*/
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
-        attribute.nMoveSpeed += (120 * fcm);
-    attribute.nCastingSpeed += (100 * fcm);
+    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+        attribute.nMoveSpeed += 120;
+    attribute.nCastingSpeed += 100;
     attribute.nCoolTimeSpeed   = 100;
 
-    attribute.nHPRegenPercentage += d1;
-    attribute.nHPRegenPoint += ((2 * fcm * b1) + 48.0f);
-    attribute.nMPRegenPercentage += d1;
-    attribute.nMPRegenPoint += ((2 * fcm * b1) + 48.0f); // + (4.1f * m_cStat.mentality));
+
+
+    attribute.nHPRegenPercentage += dl;
+    attribute.nHPRegenPoint += ((2 * b1) + 48.0f);
+    attribute.nMPRegenPercentage += dl;
+    attribute.nMPRegenPoint += ((2 * b1) + 48.0f); // + (4.1f * m_cStat.mentality));
     if (attribute.nAttackRange == 0)
         attribute.nAttackRange = 50;
-}
+};
 
 void Unit::finalizeStat()
 {
@@ -1245,13 +1246,13 @@ void Unit::finalizeStat()
 
 void Unit::getAmplifiedStatByAmplifier(CreatureStat &stat)
 {
-    stat.strength     = ((m_StatAmplifier.strength * stat.strength) + stat.strength);
-    stat.vital        = ((m_StatAmplifier.vital * stat.vital) + stat.vital);
-    stat.dexterity    = ((m_StatAmplifier.dexterity * stat.dexterity) + stat.dexterity);
-    stat.agility      = ((m_StatAmplifier.agility * stat.agility) + stat.agility);
-    stat.intelligence = ((m_StatAmplifier.intelligence * stat.intelligence) + stat.intelligence);
-    stat.mentality    = ((m_StatAmplifier.mentality * stat.mentality) + stat.mentality);
-    stat.luck         = ((m_StatAmplifier.luck * stat.luck) + stat.luck);
+    stat.strength     = (int)((m_StatAmplifier.strength * stat.strength) + stat.strength);
+    stat.vital        = (int)((m_StatAmplifier.vital * stat.vital) + stat.vital);
+    stat.dexterity    = (int)((m_StatAmplifier.dexterity * stat.dexterity) + stat.dexterity);
+    stat.agility      = (int)((m_StatAmplifier.agility * stat.agility) + stat.agility);
+    stat.intelligence = (int)((m_StatAmplifier.intelligence * stat.intelligence) + stat.intelligence);
+    stat.mentality    = (int)((m_StatAmplifier.mentality * stat.mentality) + stat.mentality);
+    stat.luck         = (int)((m_StatAmplifier.luck * stat.luck) + stat.luck);
 }
 
 void Unit::applyStatByItem()

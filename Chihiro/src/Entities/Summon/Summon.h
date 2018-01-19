@@ -22,6 +22,7 @@ public:
     uint32_t GetCardHandle();
     bool IsSummon() const override { return true; }
     int32_t GetSummonCode();
+        float GetFCM() const override;
     Player* GetMaster() const
     { return m_pMaster; }
 
@@ -37,6 +38,7 @@ public:
     bool DoEvolution();
     uint8_t m_cSlotIdx{};
 protected:
+        void onBeforeCalculateStat() override;
         void applyJobLevelBonus() override;
     uint16 putonItem(ItemWearType pos, Item* pItem) override;
     uint16 putoffItem(ItemWearType pos) override;

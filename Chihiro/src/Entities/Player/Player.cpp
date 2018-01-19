@@ -171,6 +171,9 @@ bool Player::ReadCharacter(std::string _name, int _race)
             return false;
         }
 
+        if(!ReadEquipItem() || !ReadSkillList(this) || !ReadQuestList()  || !ReadStateList(this))
+            return false;
+
         int nSummonIdx = 0;
         for(int i = 0; i < 6; ++i) {
             if (GetInt32Value(UNIT_FIELD_SUMMON + i) != 0) {
@@ -191,9 +194,6 @@ bool Player::ReadCharacter(std::string _name, int _race)
         if(mainSummon != 0) {
             m_pMainSummon = GetSummon(mainSummon);
         }
-
-        if(!ReadEquipItem() || !ReadSkillList(this) || !ReadQuestList()  || !ReadStateList(this))
-            return false;
 
         CalculateStat();
         Messages::SendHPMPMessage(this, this, GetHealth(), GetMana(), true);

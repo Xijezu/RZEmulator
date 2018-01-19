@@ -242,14 +242,18 @@ void Summon::onExpChange()
 
 bool Summon::DoEvolution()
 {
-     auto prev_hp = GetHealth();
+    auto prev_hp = GetHealth();
     auto prev_mp = GetMana();
 
-    if(this->m_tSummonBase->form < 3) {
+    if (this->m_tSummonBase->form < 3)
+    {
         // @TODO Ride
-        if(false) {
+        if (false)
+        {
             return false;
-        } else {
+        }
+        else
+        {
             auto nTargetCode = m_tSummonBase->evolve_target;
             SetSummonInfo(nTargetCode);
             CalculateStat();
@@ -260,18 +264,22 @@ bool Summon::DoEvolution()
             evoPct << GetHandle();
             evoPct.fill(GetName(), 19);
             evoPct << m_tSummonBase->id;
-            if(IsInWorld()) {
-                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY()/g_nRegionSize), GetLayer(), evoPct);
-            } else {
-                if(m_pMaster != nullptr)
+            if (IsInWorld())
+            {
+                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), evoPct);
+            }
+            else
+            {
+                if (m_pMaster != nullptr)
                     m_pMaster->SendPacket(evoPct);
             }
 
-            if(sArRegion->IsVisibleRegion(
+            if (sArRegion->IsVisibleRegion(
                     (uint)(GetPositionX() / g_nRegionSize),
                     (uint)(GetPositionY() / g_nRegionSize),
                     (uint)(m_pMaster->GetPositionX() / g_nRegionSize),
-                    (uint)(m_pMaster->GetPositionY() / g_nRegionSize)) == 0) {
+                    (uint)(m_pMaster->GetPositionY() / g_nRegionSize)) == 0)
+            {
                 m_pMaster->SendPacket(evoPct);
             }
             Messages::SendStatInfo(m_pMaster, this);
@@ -279,20 +287,21 @@ bool Summon::DoEvolution()
             Messages::SendLevelMessage(m_pMaster, this);
             Messages::SendEXPMessage(m_pMaster, this);
 
-            if(m_pItem != nullptr)  {
+            if (m_pItem != nullptr)
+            {
                 /*int i = 0;
                 for( i = 0; i < m_tSummonBase.form - 1; ++i) {
                     m_pItem->m_Instance.Socket[i+1] = GetPrevJobLv(i);
                 }
                 m_pItem->m_Instance.Socket[i + 1] = GetLevel();*/
-                if(m_pMaster != nullptr)
+                if (m_pMaster != nullptr)
                     Messages::SendItemMessage(m_pMaster, m_pItem);
             }
             return true;
         }
     }
     return false;
-}
+};
 
 bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
 {
@@ -496,9 +505,25 @@ void Summon::applyJobLevelBonus()
     auto stat = sObjectMgr->GetSummonLevelBonus(m_tSummonBase->id, m_tSummonBase->form, GetLevel());
     m_cStat.strength += stat.strength;
     m_cStat.vital += stat.vital;
-    m_cStat.agility += stat.agility;
+    m_cStat.agility += stat.agility;// /run scv(get_creature_handle(0), "lv", 50)
     m_cStat.dexterity += stat.dexterity;
     m_cStat.intelligence += stat.intelligence;
     m_cStat.luck += stat.luck;
-    m_cStat.mentality += stat.luck;
+    m_cStat.mentality += stat.mentality;
+}
+
+float Summon::GetFCM() const
+{
+    Skill* skill{nullptr};
+    if(GetMaster() != nullptr && (skill = GetMaster()->GetSkill(1811)) != nullptr)
+    {
+        return skill->m_nSkillLevel * 0.03f + 0.69999999f;
+    }
+    return 0.69999999f;
+}
+
+void Summon::onBeforeCalculateStat()
+{
+    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+        m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - 120;
 }

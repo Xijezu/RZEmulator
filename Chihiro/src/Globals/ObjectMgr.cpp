@@ -1826,9 +1826,9 @@ CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /*
     stat.vital = bonus.vital * level;
     stat.dexterity = bonus.dexterity * level;
     stat.agility = bonus.agility * level;
-    stat.intelligence = bonus.intelligence;
-    stat.mentality = bonus.mentality;
-    stat.luck = bonus.luck;
+    stat.intelligence = bonus.intelligence * level;
+    stat.mentality = bonus.mentality * level;
+    stat.luck = bonus.luck * level;
 
     return stat;
 }

@@ -731,7 +731,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     } else if(key == "name"s) {
         return return_object(summon->GetName());
     } else if(key == "summon_state"s) {
-        return return_object(summon->GetInt32Value(UNIT_FIELD_STATUS));
+        return return_object(summon->IsInWorld() ? 1 : 0);
     }
 }
 
