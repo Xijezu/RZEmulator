@@ -535,7 +535,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex)
 {
     std::map<int, long> mapDropItem{};
-    long nItemCount;
+    int64 nItemCount;
     int nItemID;
 
     for(int i = 0; i < count; ++i) {
@@ -736,7 +736,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         return;
     }
 
-    Step(t);
+    //Step(t);
     Position enemyPosition = pEnemy->GetCurrentPosition(t);
     Position myPosition    = GetCurrentPosition(t);
     auto     ry1           = myPosition.GetExactDist2d(&enemyPosition);
@@ -820,7 +820,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         auto attack_pos = getNonDuplicateAttackPos(pEnemy);
         SetStatus(MonsterStatus::MS_FindAttackPos);
         if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
+        {
             sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
+        }
         return;
     }
 

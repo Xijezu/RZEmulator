@@ -207,9 +207,10 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 	auto prev_ry = (uint)(oldPos.m_positionY / g_nRegionSize);
 	if(prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
     {
-
-		sRegion->GetRegion(prev_rx, prev_ry, pUnit->GetLayer())->RemoveObject(pUnit);
-		sRegion->GetRegion(pUnit)->AddObject(pUnit);
+        auto oldRegion = sRegion->GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
+        oldRegion->RemoveObject(pUnit);
+        auto newRegion = sRegion->GetRegion(pUnit);
+        newRegion->AddObject(pUnit);
 	}
 }
 
@@ -235,6 +236,8 @@ void World::AddObjectToWorld(WorldObject *obj)
     rf.newObj = obj;
     sRegion->DoEachVisibleRegion((uint) (obj->GetPositionX() / g_nRegionSize), (uint) (obj->GetPositionY() / g_nRegionSize), obj->GetLayer(), rf);
 
+    if(obj->pRegion != nullptr)
+        MX_LOG_INFO("map", "Region not nullptr!!!");
     region->AddObject(obj);
 }
 

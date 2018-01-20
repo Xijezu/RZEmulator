@@ -103,10 +103,12 @@ void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
     if(v->empty())
     {
         MX_LOG_ERROR("map", "RemoveObject Error 1");
+        return;
     }
     if((*v)[obj->region_index]->GetHandle() != obj->GetHandle())
     {
         MX_LOG_ERROR("map", "RemoveObject Error 2");
+        return;
     }
     if(v->back()->GetHandle() != obj->GetHandle())
     {
