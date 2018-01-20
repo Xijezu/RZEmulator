@@ -17,17 +17,8 @@
 
 #include "RegionContainer.h"
 #include "World.h"
-#include "RegionBlock.h"
 
 #define REGION_BLOCK_COUNT 100
-
-static uint s_Matrix[] = {0,0,0,0,0,0,0,
-                         0,0,1,1,1,0,0,
-                         0,1,1,1,1,1,0,
-                         0,1,1,1,1,1,0,
-                         0,1,1,1,1,1,0,
-                         0,0,1,1,1,0,0,
-                         0,0,0,0,0,0,0};
 
 void RegionContainer::InitRegion(float map_width, float map_height)
 {
@@ -45,11 +36,11 @@ void RegionContainer::initRegion()
     MX_UNIQUE_GUARD writeGuard(i_lock);
     {
         uint count = m_nRegionBlockHeight * m_nRegionBlockWidth;
-        m_RegionBlock = std::vector<RegionBlock*>(count);
+        m_RegionBlock = std::vector<RegionBlock*>(count, nullptr);
     }
 }
 
-bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8 layer)
+bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8/* layer*/)
 {
     return rx < m_nRegionWidth && ry < m_nRegionHeight;
 }

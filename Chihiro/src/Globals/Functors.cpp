@@ -78,7 +78,7 @@ void SendEnterMessageEachOtherFunctor::Run(WorldObject *client)
     if(client != nullptr && client->GetHandle() != obj->GetHandle())
     {
         Messages::sendEnterMessage(dynamic_cast<Player*>(client), obj, false);
-        if(obj->GetObjType() == 2)
+        if(obj->IsPlayer())
             Messages::sendEnterMessage(dynamic_cast<Player*>(obj), client, false);
     }
 }

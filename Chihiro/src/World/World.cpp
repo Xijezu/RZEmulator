@@ -268,12 +268,12 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     BroadcastFunctor          broadcastFunctor;
     broadcastFunctor.packet = leavePct;
     clientFunctor.fn       = broadcastFunctor;
+
+    sRegion->GetRegion(obj)->RemoveObject(obj);
     // Send one to each player in visible region
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                  (uint)(obj->GetPositionY() / g_nRegionSize),
                                  obj->GetLayer(), clientFunctor);
-
-    sRegion->GetRegion(obj)->RemoveObject(obj);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -364,7 +364,7 @@ void World::WarpBegin(Player * pPlayer)
 {
 	if(pPlayer->IsInWorld())
 		RemoveObjectFromWorld(pPlayer);
-	if(pPlayer->m_pMainSummon != nullptr)
+	if(pPlayer->m_pMainSummon != nullptr && pPlayer->m_pMainSummon->IsInWorld())
 		RemoveObjectFromWorld(pPlayer->m_pMainSummon);
 	// Same for sub summon
 	// same for pet
@@ -391,7 +391,7 @@ void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
 	AddObjectToWorld(pPlayer);
 	pPlayer->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
 	Position pos = pPlayer->GetCurrentPosition(ct);
-	// Set Move
+	SetMove(pPlayer, pos, pos, 0, true, ct, true);
 	Messages::SendPropertyMessage(pPlayer,pPlayer, "channel", 0);
 	pPlayer->ChangeLocation(pPlayer->GetPositionX(), pPlayer->GetPositionY(), false, true);
 	pPlayer->Save(true);

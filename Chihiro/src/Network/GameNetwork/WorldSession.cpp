@@ -143,16 +143,6 @@ void WorldSession::ProcessIncoming(XPacket *pRecvPct)
     aptr.release();
 }
 
-/*void WorldSession::Decrypt(void *pBuf, size_t size, bool isPeek)
-{
-    _rc4decode.Decode(pBuf, pBuf, size, isPeek);
-}
-
-void WorldSession::Encrypt(void *pBuf, size_t size, bool isPeek)
-{
-    _rc4encode.Encode(pBuf, pBuf, size, isPeek);
-}*/
-
 /// TODO: The whole stuff needs a rework, it is working as intended but it's just a dirty hack
 void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
@@ -792,7 +782,10 @@ void WorldSession::onRegionUpdate(XPacket *pRecvPct)
     auto z = pRecvPct->read<float>();
     auto bIsStopMessage = pRecvPct->read<bool>();
 
-    sWorld->onRegionChange(_player, update_time, bIsStopMessage);
+    if(_player->IsInWorld())
+    {
+        sWorld->onRegionChange(_player, update_time, bIsStopMessage);
+    }
 }
 
 void WorldSession::onGetSummonSetupInfo(XPacket *pRecvPct)
@@ -972,13 +965,8 @@ void WorldSession::onQuery(XPacket *pRecvPct)
 
     //WorldObject* obj = sMemoryPool->getPtrFromId(handle);
     auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(handle);
-    if (obj != nullptr)
+    if (obj != nullptr && obj->IsInWorld() && obj->GetLayer() == _player->GetLayer() && sRegion->IsVisibleRegion(obj, _player) != 0)
     {
-        if (!sRegion->IsVisibleRegion(obj, _player))
-        {
-            MX_LOG_DEBUG("network", "onQuery failed: Not visible region!");
-            return;
-        }
         Messages::sendEnterMessage(_player, obj, false);
     }
 }
