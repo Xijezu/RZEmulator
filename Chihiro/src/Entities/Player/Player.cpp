@@ -144,7 +144,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
         for (auto iter : token) {
             Tokenizer flag(iter, ':');
             if (flag.size() == 2) {
-                SetFlag(flag[1], flag[0]);
+                SetCharacterFlag(flag[0], flag[1]);
             }
         }
         mainSummon = (*result)[51].GetInt32();
@@ -2314,8 +2314,8 @@ void Player::UpdateQuestStatusByItemUpgrade()
 Position Player::GetLastTownPosition()
 {
     Position pos{ };
-    pos.m_positionX = std::stof(GetFlag("rx"));
-    pos.m_positionY = std::stof(GetFlag("ry"));
+    pos.m_positionX = std::stof(GetCharacterFlag("rx"));
+    pos.m_positionY = std::stof(GetCharacterFlag("ry"));
     if (pos.GetPositionX() == 0 || pos.GetPositionY() == 0)
     {
         switch (GetRace())
@@ -2336,9 +2336,9 @@ Position Player::GetLastTownPosition()
     return pos;
 }
 
-void Player::SetFlag(const std::string &key, std::string value)
+void Player::SetCharacterFlag(const std::string &key, const std::string& value)
 {
-    m_lFlagList[key] = std::move(value);
+    m_lFlagList[key] = value;
 }
 
 void Player::DB_ItemCoolTime(Player * pPlayer)

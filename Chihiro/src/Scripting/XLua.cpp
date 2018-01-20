@@ -327,7 +327,7 @@ std::string XLua::SCRIPT_GetFlag(std::string szKey)
     if (player == nullptr)
         return "";
 
-    return player->GetFlag(szKey);
+    return player->GetCharacterFlag(szKey);
 }
 
 void XLua::SCRIPT_SetFlag(sol::variadic_args args)
@@ -339,7 +339,10 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
     if (args.size() != 2)
         return;
 
-    player->SetFlag(args[0].get<std::string>(), args[1].get<std::string>());
+    auto key = args[0].get<std::string>();
+    auto value = args[1].get<std::string>();
+
+    player->SetCharacterFlag(key, value);
 }
 
 void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)

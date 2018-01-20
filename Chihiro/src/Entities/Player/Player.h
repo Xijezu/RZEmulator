@@ -91,7 +91,7 @@ class Player : public Unit, public QuestEventHandler
 
         uint GetJobDepth();
 
-        std::string GetFlag(const std::string &flag) { return m_lFlagList[flag]; }
+        std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
         /* ****************** DATABASE ****************** */
         bool ReadCharacter(std::string, int);
@@ -107,7 +107,7 @@ class Player : public Unit, public QuestEventHandler
         // Warping
         void PendWarp(int x, int y, uint8_t layer);
 
-        void SetFlag(const std::string &key, std::string value);
+        void SetCharacterFlag(const std::string &key, const std::string& value);
 
         // Network
         void SendPropertyMessage(std::string key, std::string value);
