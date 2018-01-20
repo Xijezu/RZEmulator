@@ -170,7 +170,6 @@ bool StartDB()
 	}
 
 	synch_threads = (uint8)sConfigMgr->GetIntDefault("CharacterDB.SynchThreads", 2);
-
 	///- Initialize the world database
 	if (!CharacterDatabase.Open(dbstring, 1, synch_threads))
 	{

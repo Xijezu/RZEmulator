@@ -118,6 +118,8 @@ struct SummonResourceTemplate {
     int   magic_type;
     int   rate;
     int   stat_id;
+    float size;
+    float scale;
     int   standard_walk_speed;
     int   standard_run_speed;
     int   walk_speed;

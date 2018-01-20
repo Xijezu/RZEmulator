@@ -1150,7 +1150,7 @@ bool ObjectMgr::LoadMixResource()
 bool ObjectMgr::LoadSummonResource()
 {
     uint32      oldMSTime = getMSTime();
-    QueryResult result    = GameDatabase.Query("SELECT id, type, magic_type, rate, stat_id, standard_walk_speed, standard_run_speed,"
+    QueryResult result    = GameDatabase.Query("SELECT id, type, magic_type, rate, stat_id, size, scale, standard_walk_speed, standard_run_speed,"
                                                        "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
                                                        "form, evolve_target, card_id FROM SummonResource;");
 
@@ -1169,6 +1169,8 @@ bool ObjectMgr::LoadSummonResource()
         summon.magic_type          = field[i++].GetInt32();
         summon.rate                = field[i++].GetInt32();
         summon.stat_id             = field[i++].GetInt32();
+        summon.size = field[i++].GetFloat();
+        summon.scale = field[i++].GetFloat();
         summon.standard_walk_speed = field[i++].GetInt32();
         summon.standard_run_speed  = field[i++].GetInt32();
         summon.walk_speed          = field[i++].GetInt32();

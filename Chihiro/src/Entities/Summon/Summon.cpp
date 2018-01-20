@@ -523,3 +523,13 @@ void Summon::onBeforeCalculateStat()
     if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
         m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - 120;
 }
+
+float Summon::GetSize() const
+{
+    return m_tSummonBase->size;
+}
+
+float Summon::GetScale() const
+{
+    return m_tSummonBase->scale;
+}
