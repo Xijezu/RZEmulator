@@ -1159,6 +1159,7 @@ bool ObjectMgr::LoadSummonResource()
         return false;
     }
 
+
     uint32 count = 0;
     do {
         Field                  *field = result->Fetch();

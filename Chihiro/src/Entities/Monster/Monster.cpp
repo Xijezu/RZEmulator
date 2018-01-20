@@ -727,7 +727,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if (!IsInWorld() || pEnemy == nullptr)
         return;
 
-    if (IsNonAttacker() || IsAutoTrap() || IsAgent() && !pEnemy->IsPlayer()
+
+    if (IsNonAttacker() || IsAutoTrap() || (IsAgent() && !pEnemy->IsPlayer())
         || sRegion->IsVisibleRegion(pEnemy, this) == 0
         || pEnemy->GetLayer() != GetLayer()
            && pEnemy->GetTargetHandle() != GetHandle())
@@ -768,8 +769,10 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     m_nLastEnemyDistance = ry1;
 
     auto rx1 = (pEnemy->GetUnitSize() * 0.5f) + (GetUnitSize() * 0.5f);
-    if ((pEnemy->IsMoving(t) && GetRealAttackRange() * 1.5f < ry1 - rx1)
-        || (!pEnemy->IsMoving(t) && GetRealAttackRange() * 1.2f < ry1 - rx1))
+    if ((pEnemy->IsMoving(t)
+         && GetRealAttackRange() * 1.5f < ry1 - rx1)
+        || (!pEnemy->IsMoving(t)
+            && GetRealAttackRange() * 1.2f < ry1 - rx1))
     {
 
         if (bIsMoving && IsInWorld() && !pEnemy->IsMoving(t)
@@ -783,13 +786,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
 
         auto targetPosition = enemyPosition.GetPosition();
         if (!pEnemy->bIsMoving || !pEnemy->IsInWorld())
-        {
             FindAttackablePosition(myPosition, targetPosition, ry1, GetRealAttackRange() + rx1);
-        }
         else
-        {
             targetPosition = pEnemy->GetCurrentPosition(t + 15);
-        }
         // Pathfinding here
         SetStatus(MonsterStatus::MS_Tracking);
         auto homePosition   = m_pRespawn.GetPosition();
@@ -835,7 +834,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         return;
     }
     // Checks for attackable
-    if (bIsMoving && IsInWorld())
+    if (IsMoving(t) && IsInWorld())
     {
         sWorld->SetMove(this, myPosition, GetCurrentPosition(t + 10), 0, true, sWorld->GetArTime(), true);
     }

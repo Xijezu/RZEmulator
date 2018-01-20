@@ -1301,14 +1301,18 @@ void Unit::processPendingMove()
     Position pos{ };//             = ArPosition ptr -10h
 
 
-    if (HasFlag(UNIT_FIELD_STATUS, MovePending)) {
-        if (m_nMovableTime < ct) {
+    if (HasFlag(UNIT_FIELD_STATUS, MovePending))
+    {
+        if (m_nMovableTime < ct)
+        {
             RemoveFlag(UNIT_FIELD_STATUS, MovePending);
             //if (this.IsActable() && this.IsMovable())
-            if (true) {
+            if (true)
+            {
                 pos = GetCurrentPosition(ct);
                 sWorld->SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
-                if (IsPlayer()) {
+                if (IsPlayer())
+                {
                     //auto p = dynamic_cast<Player*>(this);
                     /*if (p.m_nRideIdx != 0)
                     {
