@@ -947,3 +947,14 @@ void Messages::SendPartyInfo(Player *pPlayer)
     });
     SendChatMessage(100, "@PARTY", pPlayer, msg);
 }
+
+void Messages::SendRegionAckMessage(Player *pPlayer, uint rx, uint ry)
+{
+    if(pPlayer == nullptr)
+        return;
+
+    XPacket ackPct(TS_SC_REGION_ACK);
+    ackPct << rx;
+    ackPct << ry;
+    pPlayer->SendPacket(ackPct);
+}

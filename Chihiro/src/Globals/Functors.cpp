@@ -89,7 +89,7 @@ void AddObjectRegionFunctor::Run(Region *region)
     fn.obj = newObj;
     region->DoEachClient(fn);
 
-    if(newObj->GetObjType() == 2)
+    if(newObj->IsPlayer())
     {
         SendEnterMessageFunctor fn2;
         fn2.obj = dynamic_cast<Player*>(newObj);

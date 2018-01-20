@@ -431,7 +431,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         return;
     }
 
-    if (_player->IsInWorld())
+    if (mover->IsInWorld())
     {
         if(mover->GetTargetHandle() != 0)
             mover->CancelAttack();
@@ -468,6 +468,14 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                         sWorld->SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
                         // TODO: Mount
                     }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
                 }
                 return;
             } //if (true /* IsActable() && IsMovable() && isInWorld */)

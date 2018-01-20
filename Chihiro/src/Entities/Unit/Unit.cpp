@@ -79,7 +79,7 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player* pPlayer)
     pEnterPct << (int32_t) pUnit->GetLevel();
     pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
     pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) == 1 ? 1 : 0);
+    pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) ? 1 : 0);
     pEnterPct << (int32_t) 0;
 }
 

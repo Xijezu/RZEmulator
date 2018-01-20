@@ -218,10 +218,15 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 {
 	auto rx = (uint)(pUnit->GetPositionX() / g_nRegionSize);
 	auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
-	if(rx != prx || ry != pry) {
+	if(rx != prx || ry != pry)
+    {
         AddObjectRegionFunctor fn;
         fn.newObj = pUnit;
-		sRegion->DoEachVisibleRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
+		sRegion->DoEachNewRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
+        if(pUnit->IsPlayer())
+        {
+            Messages::SendRegionAckMessage(dynamic_cast<Player*>(pUnit), rx, ry);
+        }
 	}
 }
 
