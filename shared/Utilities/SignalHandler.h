@@ -29,7 +29,7 @@ namespace Skyfire
 class SignalHandler : public ACE_Event_Handler
 {
     public:
-        int handle_signal(int SigNum, siginfo_t* = NULL, ucontext_t* = NULL)
+        int handle_signal(int SigNum, siginfo_t* = NULL, ucontext_t* = NULL) override
         {
             HandleSignal(SigNum);
             return 0;
