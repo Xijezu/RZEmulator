@@ -43,7 +43,7 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${LUA_INCLUDE_DIR}
                     ${MYSQL_INCLUDE_DIR})
 
-file(GLOB_RECURSE SHARED_SRC shared/*.cpp ${ace_STAT_SRCS} )
+file(GLOB_RECURSE SHARED_SRC shared/Utilities/SignalHandler.h shared/*.cpp ${ace_STAT_SRCS} )
 
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)
