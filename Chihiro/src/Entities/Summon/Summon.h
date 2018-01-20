@@ -46,6 +46,7 @@ class Summon : public Unit
         bool DoEvolution();
         uint8_t m_cSlotIdx{ };
     protected:
+        void onCantAttack(uint handle, uint t) override;
         void onBeforeCalculateStat() override;
         void applyJobLevelBonus() override;
         uint16 putonItem(ItemWearType pos, Item *pItem) override;
@@ -59,6 +60,7 @@ class Summon : public Unit
         //void onApplyStat
         void onCompleteCalculateStat() override;
     private:
+        uint m_nLastCantAttackTime;
         SummonResourceTemplate *m_tSummonBase{nullptr};
         Player *m_pMaster{nullptr};
 };

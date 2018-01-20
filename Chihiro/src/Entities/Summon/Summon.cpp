@@ -533,3 +533,12 @@ float Summon::GetScale() const
 {
     return m_tSummonBase->scale;
 }
+
+void Summon::onCantAttack(uint handle, uint t)
+{
+    if(m_nLastCantAttackTime + 100 < t)
+    {
+        m_nLastCantAttackTime = t;
+        Messages::SendCantAttackMessage(GetMaster(), GetHandle(), handle, TS_RESULT_TOO_FAR);
+    }
+}
