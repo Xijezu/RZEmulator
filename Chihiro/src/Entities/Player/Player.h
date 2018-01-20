@@ -9,6 +9,7 @@
 #include "WorldLocation.h"
 #include "TimeSync.h"
 #include "QuestManager.h"
+#include "Inventory.h"
 class WorldSession;
 
 #define MAX_ITEM_COOLTIME_GROUP 20
@@ -36,7 +37,7 @@ enum CONDITION_INFO : int
     CONDITION_BAD     = 2
 };
 
-class Player : public Unit, public QuestEventHandler
+class Player : public Unit, public QuestEventHandler, public InventoryEventReceiver
 {
     public:
         friend class Messages;
@@ -78,13 +79,9 @@ class Player : public Unit, public QuestEventHandler
         /* ****************** QUEST END ****************** */
 
         int GetPermission() { return GetInt32Value(UNIT_FIELD_PERMISSION); }
-
         int64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
-
         int GetPartyID() { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
-
         int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
-
         int AddStamina(int nStamina);
         int GetStaminaRegenRate();
         CONDITION_INFO GetCondition() const;
@@ -133,15 +130,28 @@ class Player : public Unit, public QuestEventHandler
 
         // Item relevant
         Item *FindItemByCode(int);
-        Item *FindItemBySID(uint64_t);
-        Item *FindItemByHandle(uint32_t);
+        Item *FindItemBySID(int64);
+        Item *FindItemByHandle(uint);
         Item *FindItem(uint code, uint flag, bool bFlag);
-        void PushItem(Item *, uint64, bool);
-        void PopItem(Item *, bool);
+        /* InventoryEventReceiver Start */
+        void onAdd(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
+        void onRemove(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
+        void onChangeCount(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
+        /* InventoryEventReceiver End */
+        Item *PushItem(Item *, int64, bool);
+        Item *PopItem(Item *, int64, bool);
+        Item *GetItem(uint idx);
+        Item *GetStorageItem(uint idx);
+        uint GetItemCount() const;
+        uint GetStorageItemCount() const;
+        bool EraseItem(Item* pItem, int64 count);
         bool EraseBullet(int64 count);
 
-        bool Erase(Item *, int64, bool);
-        void SetItemCount(Item *pItem, int64 nc, bool bSkipUpdateToDB);
+        // Storage Relevant
+        bool RemoveSummon(Summon* pSummon);
+        void AddSummonToStorage(Summon* pSummon);
+        void RemoveSummonFromStorage(Summon* pSummon);
+
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
         uint16_t putoffItem(ItemWearType) override;
@@ -207,20 +217,16 @@ class Player : public Unit, public QuestEventHandler
         uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
 
         void SendPacket(XPacket pPacket);
-
         WorldSession &GetSession() const { return *m_session; }
-
         void SetClientInfo(const std::string &value) { m_szClientInfo = value; }
-
         void SetSession(WorldSession *session) { m_session = session; }
 
         void applyJobLevelBonus() override;
 
-        std::map<uint64, Item *> m_lInventory;
-        Item                     *m_aBindSummonCard[6]{nullptr};
-        WorldLocation            *m_WorldLocation{nullptr};
-        int                      m_nWorldLocationId{0};
-        TimeSynch                m_TS{200, 2, 10};
+        Item          *m_aBindSummonCard[6]{nullptr};
+        WorldLocation *m_WorldLocation{nullptr};
+        int           m_nWorldLocationId{0};
+        TimeSynch     m_TS{200, 2, 10};
 
         Summon *m_pMainSummon{nullptr};
         uint m_hTamingTarget{ };
@@ -246,6 +252,8 @@ class Player : public Unit, public QuestEventHandler
         void onEndQuest(Quest *pQuest);
 
     private:
+        Item *popItem(Item* pItem, int64 cnt, bool bSkipUpdateToDB);
+
         void applyCharm(Item *pItem);
         void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP);
         void clearPendingBonusMsg();
@@ -266,11 +274,15 @@ class Player : public Unit, public QuestEventHandler
         UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
         UNORDERED_MAP<std::string, std::string> m_hsContact{ };
 
-        std::vector<Summon *> m_vSummonList{nullptr};
+        std::vector<Summon *> m_vSummonList{};
+        std::vector<Item*> m_vCharmList{};
 
         uint m_nLastSaveTime{ }, m_nLastCantAttackTime{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
+
+        Inventory m_Inventory;
+        Inventory m_Storage;
 
         // Dialog stuff
         int         m_nDialogType{ };

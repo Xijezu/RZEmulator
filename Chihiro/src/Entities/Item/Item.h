@@ -45,60 +45,71 @@ public:
 
 class XPacket;
 
-class Item : public WorldObject {
-public:
-    static void EnterPacket(XPacket &pEnterPct, Item *pItem);
+class Item : public WorldObject
+{
+    public:
+        static void EnterPacket(XPacket &pEnterPct, Item *pItem);
 
-    Item() : WorldObject(true)
-    {
-        _mainType = MT_StaticObject;
-        _subType  = ST_Object;
-        _objType  = OBJ_STATIC;
+        Item() : WorldObject(true)
+        {
+            _mainType = MT_StaticObject;
+            _subType  = ST_Object;
+            _objType  = OBJ_STATIC;
 
-        _valuesCount = UNIT_FIELD_HANDLE + 1;
-        _InitValues();
-    };
+            _valuesCount = UNIT_FIELD_HANDLE + 1;
+            _InitValues();
+        };
 
-    static const int MAX_COOLTIME_GROUP   = 40;
-    static const int MAX_OPTION_NUMBER    = 4;
-    static const int MAX_SOCKET_NUMBER    = 4;
-    static const int MAX_ITEM_NAME_LENGTH = 32;
-    static const int MAX_ITEM_WEAR        = 24;
+        static const int MAX_COOLTIME_GROUP   = 40;
+        static const int MAX_OPTION_NUMBER    = 4;
+        static const int MAX_SOCKET_NUMBER    = 4;
+        static const int MAX_ITEM_NAME_LENGTH = 32;
+        static const int MAX_ITEM_WEAR        = 24;
 
-    static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
-            int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time);
-    static void PendFreeItem(Item* pItem);
+        static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
+                int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time);
+        static void PendFreeItem(Item *pItem);
 
-    bool IsWearable();
-    bool IsQuestItem() const { if(m_pItemBase== nullptr) return false; return m_pItemBase->flaglist[FLAG_QUEST] != 0; }
-    void DBUpdate();
-    void DBInsert();
-    void SetCurrentEndurance(int n);
-    int GetMaxEndurance() const;
+        void SetCount(int64 count);
 
-    ItemWearType GetWearType();
-    int GetLevelLimit();
-    int GetItemRank() const;
-    bool IsBow();
-    bool IsCrossBow();
-    bool IsItem() const override { return true; }
+        bool IsWearable();
+        bool IsExpireItem() const;
+        bool IsJoinable() const;
+        bool IsQuestItem() const;
+        float GetWeight() const;
 
-    void SetOwnerInfo(uint, int, int);
-    void SetPickupOrder(const ItemPickupOrder& order);
+        bool IsInInventory() const;
+        bool IsInStorage() const;
+
+        void DBUpdate();
+        void DBInsert();
+        void SetCurrentEndurance(int n);
+        int GetMaxEndurance() const;
+
+        ItemWearType GetWearType();
+        int GetLevelLimit();
+        int GetItemRank() const;
+        bool IsBow();
+        bool IsCrossBow();
+
+        bool IsItem() const override { return true; }
+
+        void SetOwnerInfo(uint, int, int);
+        void SetPickupOrder(const ItemPickupOrder &order);
 
 // private:
-    ItemInstance    m_Instance{ };
-    ItemTemplate    *m_pItemBase{ };
-    Summon          *m_pSummon{nullptr};
-    uint32_t        m_nHandle{0};
-    int             m_nAccountID{0};
-    int             m_nItemID{0};
-    uint32_t        m_unInventoryIndex{0};
-    uint            m_nDropTime{0};
-    bool            m_bIsEventDrop{0};
-    bool            m_bIsVirtualItem{0};
-    bool            m_bIsNeedUpdateToDB{false};
-    ItemPickupOrder m_pPickupOrder{ };
+        ItemInstance    m_Instance{ };
+        ItemTemplate    *m_pItemBase{ };
+        Summon          *m_pSummon{nullptr};
+        uint32_t        m_nHandle{0};
+        int             m_nAccountID{0};
+        int             m_nItemID{0};
+        uint32_t        m_unInventoryIndex{0};
+        uint            m_nDropTime{0};
+        bool            m_bIsEventDrop{0};
+        bool            m_bIsVirtualItem{0};
+        bool            m_bIsNeedUpdateToDB{false};
+        ItemPickupOrder m_pPickupOrder{ };
 };
 
 

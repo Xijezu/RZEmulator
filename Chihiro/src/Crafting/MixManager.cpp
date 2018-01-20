@@ -89,9 +89,9 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     }
 
     // Maybe do logging here like retail?
-    pPlayer->Erase(pCube, 1, false);
+    pPlayer->EraseItem(pCube, 1);
     if(pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder != nullptr)
-        pPlayer->Erase(pPowder, 1, false);
+        pPlayer->EraseItem(pPowder, 1);
 
     int itemEnhance{1};
     /*if(pMixInfo->type == MIX_TYPE::MIX_ENHANCE)
@@ -148,7 +148,7 @@ bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial
 
     for(int i = 0; i < nSubMaterialCountItem; ++i)
     {
-        pPlayer->Erase(pSubItem[i], pCountList[i], false);
+        pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
 
     pMainMaterial->m_Instance.Flag |= pMixInfo->value[2];
@@ -164,12 +164,12 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
 {
     if(pMainMaterial != nullptr)
     {
-        pPlayer->Erase(pMainMaterial, pMainMaterial->m_Instance.nCount, false);
+        pPlayer->EraseItem(pMainMaterial, pMainMaterial->m_Instance.nCount);
     }
 
     for(int i = 0; i < nSubMaterialCount; ++i)
     {
-        pPlayer->Erase(pSubItem[i], pCountList[i], false);
+        pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
     bool bResult = false;
     if(pMixInfo->value[2] <= irand(0, 99))

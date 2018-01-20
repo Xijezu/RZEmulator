@@ -29,7 +29,7 @@
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
-    if(pPlayer == nullptr || pUnit == nullptr)
+    if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
     XPacket resultPct(TS_SC_EXP_UPDATE);
@@ -41,19 +41,19 @@ void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 
 void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
 {
-    if(pPlayer == nullptr || pUnit == nullptr)
+    if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
     XPacket resultPct(TS_SC_LEVEL_UPDATE);
     resultPct << (uint32_t)pUnit->GetHandle();
-    resultPct << (uint32_t) pUnit->GetLevel();
+    resultPct << (uint32_t)pUnit->GetLevel();
     resultPct << pUnit->GetCurrentJLv();
     pPlayer->SendPacket(resultPct);
 }
 
 void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float add_mp, bool display)
 {
-    if(pPlayer == nullptr || pUnit == nullptr)
+    if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
     XPacket statPct(TS_SC_HPMP);
@@ -72,28 +72,27 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
 
 void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
 {
-    if(pPlayer == nullptr || pUnit == nullptr)
+    if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-
     XPacket statPct(1000);
-    statPct << (uint32_t) pUnit->GetHandle();
+    statPct << (uint32_t)pUnit->GetHandle();
     pUnit->m_cStat.WriteToPacket(statPct);
     pUnit->m_Attribute.WriteToPacket(statPct);
-    statPct << (uint8_t) 0;
+    statPct << (uint8_t)0;
     pPlayer->SendPacket(statPct);
 
     statPct.Reset();
-    statPct << (uint32_t) pUnit->GetHandle();
+    statPct << (uint32_t)pUnit->GetHandle();
     pUnit->m_cStatByState.WriteToPacket(statPct);
     pUnit->m_AttributeByState.WriteToPacket(statPct);
-    statPct << (uint8_t) 1;
+    statPct << (uint8_t)1;
     pPlayer->SendPacket(statPct);
 }
 
 void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
 {
-    if(pPlayer == nullptr || pSummon == nullptr)
+    if (pPlayer == nullptr || pSummon == nullptr)
         return;
 
     XPacket summonPct(TS_SC_ADD_SUMMON_INFO);
@@ -101,7 +100,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     summonPct << (uint32_t)pSummon->GetHandle();
     summonPct.fill(pSummon->GetName(), 19);
     summonPct << (int32_t)pSummon->GetSummonCode();
-    summonPct << (int32_t) pSummon->GetLevel();
+    summonPct << (int32_t)pSummon->GetLevel();
     summonPct << (int32_t)1000; // TODO: SP
     pPlayer->SendPacket(summonPct);
 
@@ -116,33 +115,37 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
 
 void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket summonPct(TS_EQUIP_SUMMON);
     summonPct << ((uint8_t)(bShowDialog ? 1 : 0));
-    for (auto &i : pPlayer->m_aBindSummonCard) {
-        if(i != nullptr) {
-            summonPct << (uint32_t) i->m_nHandle;
-        } else {
+    for (auto &i : pPlayer->m_aBindSummonCard)
+    {
+        if (i != nullptr)
+        {
+            summonPct << (uint32_t)i->m_nHandle;
+        }
+        else
+        {
             summonPct << (uint32_t)0;
         }
     }
     pPlayer->SendPacket(summonPct);
 }
 
-void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string& szKey, int64 nValue)
+void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string &szKey, int64 nValue)
 {
-        XPacket packet(TS_SC_PROPERTY);
-        packet << (uint32_t)pUnit->GetHandle();
-        packet << (uint8) 1;
-        packet.fill(szKey, 16);
-        packet << (int64)nValue;
-        packet.FinalizePacket();
-        pPlayer->SendPacket(packet);
+    XPacket packet(TS_SC_PROPERTY);
+    packet << (uint32_t)pUnit->GetHandle();
+    packet << (uint8)1;
+    packet.fill(szKey, 16);
+    packet << (int64)nValue;
+    packet.FinalizePacket();
+    pPlayer->SendPacket(packet);
 }
 
-void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string& szTitle, const std::string& szText, const std::string& szMenu)
+void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string &szTitle, const std::string &szText, const std::string &szMenu)
 {
     if (pPlayer == nullptr)
         return;
@@ -150,9 +153,9 @@ void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type,
     XPacket dialogPct(TS_SC_DIALOG);
     dialogPct << type;
     dialogPct << npc_handle;
-    dialogPct << (int16_t) szTitle.length();
-    dialogPct << (int16_t) szText.length();
-    dialogPct << (int16_t) szMenu.length();
+    dialogPct << (int16_t)szTitle.length();
+    dialogPct << (int16_t)szText.length();
+    dialogPct << (int16_t)szMenu.length();
     dialogPct.WriteString(szTitle);
     dialogPct.WriteString(szText);
     dialogPct.WriteString(szMenu);
@@ -163,66 +166,72 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
 {
     XPacket skillPct(TS_SC_SKILL_LIST);
     skillPct << (uint32_t)pUnit->GetHandle();
-    if(skill_id < 0) {
-        skillPct << (uint16_t) pUnit->m_vSkillList.size();
-        skillPct << (uint8_t) 0; // reset | modification_type ?
+    if (skill_id < 0)
+    {
+        skillPct << (uint16_t)pUnit->m_vSkillList.size();
+        skillPct << (uint8_t)0; // reset | modification_type ?
 
-        for (auto t : pUnit->m_vSkillList) {
-            if(t->m_nSkillUID < 0)
+        for (auto t : pUnit->m_vSkillList)
+        {
+            if (t->m_nSkillUID < 0)
                 continue;
-            skillPct << (int32_t) t->m_nSkillID;
-            skillPct << (int8_t) pUnit->GetBaseSkillLevel(t->m_nSkillID);
-            skillPct << (int8_t) pUnit->GetCurrentSkillLevel(t->m_nSkillID);
-            skillPct << (uint32_t) pUnit->GetTotalCoolTime(t->m_nSkillID);
-            skillPct << (uint32_t) pUnit->GetRemainCoolTime(t->m_nSkillID);
+            skillPct << (int32_t)t->m_nSkillID;
+            skillPct << (int8_t)pUnit->GetBaseSkillLevel(t->m_nSkillID);
+            skillPct << (int8_t)pUnit->GetCurrentSkillLevel(t->m_nSkillID);
+            skillPct << (uint32_t)pUnit->GetTotalCoolTime(t->m_nSkillID);
+            skillPct << (uint32_t)pUnit->GetRemainCoolTime(t->m_nSkillID);
         }
-    }else {
+    }
+    else
+    {
         auto skill = pUnit->GetSkill(skill_id);
-        if(skill == nullptr)
+        if (skill == nullptr)
             return;
         skillPct << (ushort)1; // Size
         skillPct << (uint8_t)0; // reset | modification_type?
         skillPct << (int)skill_id;
-        skillPct << (int8_t) pUnit->GetBaseSkillLevel(skill_id);
-        skillPct << (int8_t) pUnit->GetCurrentSkillLevel(skill_id);
-        skillPct << (uint32_t) pUnit->GetTotalCoolTime(skill_id);
-        skillPct << (uint32_t) pUnit->GetRemainCoolTime(skill_id);
+        skillPct << (int8_t)pUnit->GetBaseSkillLevel(skill_id);
+        skillPct << (int8_t)pUnit->GetCurrentSkillLevel(skill_id);
+        skillPct << (uint32_t)pUnit->GetTotalCoolTime(skill_id);
+        skillPct << (uint32_t)pUnit->GetRemainCoolTime(skill_id);
     }
     pPlayer->SendPacket(skillPct);
 }
 
-void Messages::SendChatMessage(int nChatType, const std::string& szSenderName, Player* target, const std::string& szMsg)
+void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, Player *target, const std::string &szMsg)
 {
-    if(target == nullptr)
+    if (target == nullptr)
         return;
 
-    if(szMsg.length() <= 30000) {
+    if (szMsg.length() <= 30000)
+    {
         XPacket chatPct(TS_SC_CHAT);
         chatPct.fill(szSenderName, 21);
         chatPct << (uint16_t)szMsg.length();
         chatPct << (uint8_t)nChatType;
-        chatPct.fill(szMsg, szMsg.length()+1);
+        chatPct.fill(szMsg, szMsg.length() + 1);
         target->SendPacket(chatPct);
     }
 }
 
-void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::vector<MarketInfo>& pMarket)
+void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::vector<MarketInfo> &pMarket)
 {
-    if (pPlayer == nullptr  || pMarket.empty())
+    if (pPlayer == nullptr || pMarket.empty())
         return;
 
     XPacket marketPct(TS_SC_MARKET);
     pPlayer->SetLastContact("market", pMarket[0].name);
 
     marketPct << npc_handle;
-    marketPct << (uint16_t) pMarket.size();
-    for (auto info : pMarket) {
-        marketPct << (int32_t) info.code;
+    marketPct << (uint16_t)pMarket.size();
+    for (auto info : pMarket)
+    {
+        marketPct << (int32_t)info.code;
 #if EPIC >= 5
         marketPct << (int64_t) info.price_ratio;
         marketPct << (int32_t) 0;//info.huntaholic_ratio;
 #else
-        marketPct << (int32_t) info.price_ratio;
+        marketPct << (int32_t)info.price_ratio;
 #endif // EPIC >= 5
     }
 
@@ -231,7 +240,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
 
 void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
 {
-    if(pPlayer == nullptr || pItem == nullptr)
+    if (pPlayer == nullptr || pItem == nullptr)
         return;
 
     XPacket inventoryPct(TS_SC_INVENTORY);
@@ -242,60 +251,63 @@ void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
 
 void Messages::fillItemInfo(XPacket &packet, Item *item)
 {
-    if(item == nullptr || item->m_pItemBase == nullptr)
+    if (item == nullptr || item->m_pItemBase == nullptr)
         return;
 
-    packet << (uint32_t) item->m_nHandle;
-    packet << (int32_t) item->m_Instance.Code;
-    packet << (int64) item->m_Instance.UID;
+    packet << (uint32_t)item->m_nHandle;
+    packet << (int32_t)item->m_Instance.Code;
+    packet << (int64)item->m_Instance.UID;
 #if EPIC >= 5
     packet << (int64) item->m_Instance.nCount;
 #else
-    packet << (int32) item->m_Instance.nCount;
+    packet << (int32)item->m_Instance.nCount;
 #endif // EPIC >= 5
 
-    packet << (uint32_t) item->m_Instance.nCurrentEndurance;
-    packet << (uint8_t) item->m_Instance.nEnhance;
-    packet << (uint8_t) item->m_Instance.nLevel;
-    packet << (uint32_t) item->m_Instance.Flag;
+    packet << (uint32_t)item->m_Instance.nCurrentEndurance;
+    packet << (uint8_t)item->m_Instance.nEnhance;
+    packet << (uint8_t)item->m_Instance.nLevel;
+    packet << (uint32_t)item->m_Instance.Flag;
 
-    int socket[4] {0};
+    int socket[4]{0};
     std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(socket));
 
-    if(item->m_pItemBase->group == ItemGroup::SummonCard) {
-        if(item->m_pSummon != nullptr) {
-            int slot = 1;
-            int tl = item->m_pSummon->m_nTransform;
-            while(slot < tl) {
-                socket[slot] = item->m_pSummon->GetPrevJobLv(slot -1);
+    if (item->m_pItemBase->group == ItemGroup::SummonCard)
+    {
+        if (item->m_pSummon != nullptr)
+        {
+            int slot     = 1;
+            int tl       = item->m_pSummon->m_nTransform;
+            while (slot < tl)
+            {
+                socket[slot] = item->m_pSummon->GetPrevJobLv(slot - 1);
                 ++slot;
             }
             socket[slot] = item->m_pSummon->GetLevel();
         }
     }
 
-    packet << (int32_t) socket[0];
-    packet << (int32_t) socket[1];
-    packet << (int32_t) socket[2];
-    packet << (int32_t) socket[3];
+    packet << (int32_t)socket[0];
+    packet << (int32_t)socket[1];
+    packet << (int32_t)socket[2];
+    packet << (int32_t)socket[3];
     // Prior to Epic 6 we have to use 2 dummy socket slots.
     // Can you imagine how much time I wasted on this?
 #if EPIC < 6
-    packet << (int32_t) 0;
-    packet << (int32_t) 0;
+    packet << (int32_t)0;
+    packet << (int32_t)0;
 #endif // EPIC < 6
-    packet << (int32_t) item->m_Instance.tExpire;
+    packet << (int32_t)item->m_Instance.tExpire;
 
-    packet << (int16_t) item->m_Instance.nWearInfo;
-    packet << (uint32_t) (item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0);
+    packet << (int16_t)item->m_Instance.nWearInfo;
+    packet << (uint32_t)(item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0);
 #if EPIC >= 5
     packet << (int32_t) item->m_Instance.nIdx;
 #endif // EPIC >= 5
 }
 
-void Messages::SendTimeSynch(Player* pPlayer)
+void Messages::SendTimeSynch(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket result(TS_TIMESYNC);
@@ -305,7 +317,7 @@ void Messages::SendTimeSynch(Player* pPlayer)
 
 void Messages::SendGameTime(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket gtPct(TS_SC_GAME_TIME);
@@ -316,28 +328,33 @@ void Messages::SendGameTime(Player *pPlayer)
 
 void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
 {
-    if (!pPlayer->m_lInventory.empty()) {
-        ulong count = pPlayer->m_lInventory.size();
+    Item *item{nullptr};
+    if (pPlayer->GetItemCount() > 0)
+    {
+        ulong count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
         ulong idx   = 0;
-        if (count != 0) {
-            do {
+        if (count != 0)
+        {
+            do
+            {
                 XPacket packet(TS_SC_INVENTORY);
                 auto    lcnt   = idx;
-                ulong    mcount = 200;
+                ulong   mcount = 200;
                 if (count - idx <= 200)
                     mcount = count - idx;
 
-                packet << (uint16_t) mcount;
-
-                auto iter = pPlayer->m_lInventory.begin();
+                packet << (uint16_t)mcount;
 
                 auto ltotal = idx + mcount;
-                if (idx < ltotal) {
-                    do {
+                if (idx < ltotal)
+                {
+                    do
+                    {
                         if (bIsStorage)
-                            continue;
+                            item = pPlayer->GetStorageItem((uint)lcnt);
                         else
-                            fillItemInfo(packet, iter++->second);
+                            item = pPlayer->GetItem((uint)lcnt);
+                        fillItemInfo(packet, item);
                         ++lcnt;
                     } while (lcnt < ltotal);
                 }
@@ -350,7 +367,7 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
 
 void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 nValue)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket packet(CSPACKETS::TS_SC_RESULT);
@@ -360,10 +377,9 @@ void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 n
     pPlayer->SendPacket(packet);
 }
 
-
 void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResult, uint32 nValue)
 {
-    if(worldSession == nullptr)
+    if (worldSession == nullptr)
         return;
 
     XPacket packet(CSPACKETS::TS_SC_RESULT);
@@ -373,30 +389,31 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
     worldSession->GetSocket()->SendPacket(packet);
 }
 
-
 void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool bAbsolute)
 {
-    if(pObj == nullptr || pPlayer == nullptr)
+    if (pObj == nullptr || pPlayer == nullptr)
         return;
     pObj->SendEnterMsg(pPlayer);
 
-    if(pObj->GetObjType() != 0 && pObj->bIsMoving /*&& pObj->IsInWorld()*/)
-        SendMoveMessage(pPlayer, dynamic_cast<Unit*>(pObj));
+    if (pObj->GetObjType() != 0 && pObj->bIsMoving /*&& pObj->IsInWorld()*/)
+        SendMoveMessage(pPlayer, dynamic_cast<Unit *>(pObj));
 }
 
 void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
 {
-    if(pPlayer == nullptr || pUnit == nullptr)
+    if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    if(pUnit->ends.size() < 2000) {
+    if (pUnit->ends.size() < 2000)
+    {
         XPacket movePct(TS_SC_MOVE);
         movePct << (uint32_t)pUnit->lastStepTime;
         movePct << (uint32)pUnit->GetHandle();
         movePct << (uint8_t)pUnit->GetLayer();
         movePct << (uint8_t)pUnit->speed;
         movePct << (uint16)pUnit->ends.size();
-        for(auto& pos : pUnit->ends) {
+        for (auto &pos : pUnit->ends)
+        {
             movePct << pos.end.GetPositionX();
             movePct << pos.end.GetPositionY();
         }
@@ -408,7 +425,8 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 {
     XPacket packet(TS_SC_WEAR_INFO);
     packet << pUnit->GetHandle();
-    for (int i = 0; i < Item::MAX_ITEM_WEAR; i++) {
+    for (int  i = 0; i < Item::MAX_ITEM_WEAR; i++)
+    {
         int wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 2);
@@ -418,10 +436,12 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 4);
         packet << wear_info;
     }
-    for (auto &i : pUnit->m_anWear) {
+    for (auto &i : pUnit->m_anWear)
+    {
         packet << (i != nullptr ? i->m_Instance.nEnhance : 0);
     }
-    for (auto &i : pUnit->m_anWear) {
+    for (auto &i : pUnit->m_anWear)
+    {
         packet << (i != nullptr ? i->m_Instance.nLevel : 0);
     }
     packet.FinalizePacket();
@@ -446,22 +466,22 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
 {
     XPacket levelPct(TS_SC_LEVEL_UPDATE);
     levelPct << (uint32)pUnit->GetHandle();
-    levelPct << (int) pUnit->GetLevel();
+    levelPct << (int)pUnit->GetLevel();
     levelPct << (int)pUnit->GetCurrentJLv();
     sWorld->Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), levelPct);
 }
 
-void Messages::GetEncodedInt(XPacket& packet, uint32 nDecoded)
+void Messages::GetEncodedInt(XPacket &packet, uint32 nDecoded)
 {
-    packet << (int16) 0;
-    packet << (int16) HIWORD(nDecoded);
-    packet << (int16) 0;
-    packet << (int16) LOWORD(nDecoded);
+    packet << (int16)0;
+    packet << (int16)HIWORD(nDecoded);
+    packet << (int16)0;
+    packet << (int16)LOWORD(nDecoded);
 }
 
 void Messages::SendWarpMessage(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
     XPacket packet(CSPACKETS::TS_SC_WARP);
     packet << pPlayer->GetPositionX();
@@ -473,7 +493,7 @@ void Messages::SendWarpMessage(Player *pPlayer)
 
 void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
 {
-    if(pPlayer == nullptr || pItem == nullptr)
+    if (pPlayer == nullptr || pItem == nullptr)
         return;
 
     XPacket itemPct(TS_SC_UPDATE_ITEM_COUNT);
@@ -484,7 +504,7 @@ void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
 
 void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
 {
-    if(pPlayer == nullptr || pItem == nullptr)
+    if (pPlayer == nullptr || pItem == nullptr)
         return;
 
     XPacket itemPct(TS_SC_DESTROY_ITEM);
@@ -495,7 +515,7 @@ void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
 
 void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint target, uint16 skill_id, uint8 skill_level, Position pos, int error_code)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket skillPct(TS_SC_SKILL);
@@ -520,7 +540,7 @@ void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint targe
 
 void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, int reason)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket atkPct(TS_SC_CANT_ATTACK);
@@ -534,23 +554,26 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 {
     uint v2{0};
 
-    switch(pObj->GetSubType()) {
-        case ST_NPC: {
-            auto npc = dynamic_cast<NPC*>(pObj);
-            if(npc->HasFinishableQuest(pClient))
+    switch (pObj->GetSubType())
+    {
+        case ST_NPC:
+        {
+            auto npc = dynamic_cast<NPC *>(pObj);
+            if (npc->HasFinishableQuest(pClient))
                 v2 |= 0x400;
-            else if(npc->HasStartableQuest(pClient))
+            else if (npc->HasStartableQuest(pClient))
                 v2 |= 0x100;
-            else if(npc->HasInProgressQuest(pClient))
+            else if (npc->HasInProgressQuest(pClient))
                 v2 |= 0x200;
         }
-        break;
-        case ST_Mob: {
-            auto monster = dynamic_cast<Monster*>(pObj);
-            if(monster->GetStatus() == 4)
+            break;
+        case ST_Mob:
+        {
+            auto monster = dynamic_cast<Monster *>(pObj);
+            if (monster->GetStatus() == 4)
                 v2 |= 0x100;
         }
-        break;
+            break;
         default:
             break;
     }
@@ -561,17 +584,17 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int ttype)
 {
     //auto npc = dynamic_cast<NPC*>(sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc")));
-    std::string strButton{};
-    std::string strTrigger{};
-    int i = 0;
-    int type = 3;
+    std::string strButton{ };
+    std::string strTrigger{ };
+    int         i    = 0;
+    int         type = 3;
 
     auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
-    if(npc == nullptr)
+    if (npc == nullptr)
     {
 
     }
-    if(true /*npc != nullptr*/)
+    if (true /*npc != nullptr*/)
     {
         int progress = 0;
         if (text != 0)
@@ -599,7 +622,8 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
             {
                 type     = 7;
                 progress = 1;
-            } else
+            }
+            else
             {
                 QuestLink *l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
                 if (l != nullptr && l->nEndTextID != 0)
@@ -634,7 +658,8 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 {
                     strButton  = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
-                } else
+                }
+                else
                 {
 #if EPIC <= 4
                     ///- Hack for epic 4, use proper workaround instead @todo
@@ -668,17 +693,17 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
 
 void Messages::SendQuestList(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket questPct(TS_SC_QUEST_LIST);
     questPct << (uint16)pPlayer->GetActiveQuestCount();
 
     /* FUNCTOR BEGIN */
-    auto functor = [&questPct](Quest* pQuest) {
+    auto functor = [&questPct](Quest *pQuest) {
         questPct << pQuest->m_Instance.Code;
         questPct << pQuest->m_Instance.nStartID;
-        if(Quest::IsRandomQuest(pQuest->m_Instance.Code))
+        if (Quest::IsRandomQuest(pQuest->m_Instance.Code))
         {
             questPct << pQuest->GetRandomKey(0);
             questPct << pQuest->GetRandomValue(0);
@@ -689,12 +714,12 @@ void Messages::SendQuestList(Player *pPlayer)
         }
         else
         {
-           for(int i = 0; i < 6; ++i)
-           {
-               questPct << pQuest->m_QuestBase->nValue[i];
-           }
+            for (int i = 0; i < 6; ++i)
+            {
+                questPct << pQuest->m_QuestBase->nValue[i];
+            }
         }
-        for(int i = 0; i < 3; ++i)
+        for (int i = 0; i < 3; ++i)
         {
             questPct << pQuest->m_Instance.nStatus[i];
         }
@@ -706,17 +731,17 @@ void Messages::SendQuestList(Player *pPlayer)
 
 void Messages::BroadcastStatusMessage(WorldObject *obj)
 {
-    if(obj == nullptr)
+    if (obj == nullptr)
         return;
 
     BroadcastStatusMessageObjectFunctor statusFunctor;
-    DoEachClientRegionFunctor regionFunctor;
+    DoEachClientRegionFunctor           regionFunctor;
     statusFunctor.pObject = obj;
-    regionFunctor.pFo = statusFunctor;
+    regionFunctor.pFo     = statusFunctor;
 
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                   (uint)(obj->GetPositionY() / g_nRegionSize),
-                                   obj->GetLayer(), regionFunctor);
+                                 (uint)(obj->GetPositionY() / g_nRegionSize),
+                                 obj->GetLayer(), regionFunctor);
 }
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
@@ -726,24 +751,30 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
     statePct << (uint16)pState.m_nUID;
     statePct << (int)pState.m_nCode;
 
-    if(bIsCancel) {
+    if (bIsCancel)
+    {
         statePct << (uint16)0;
         statePct << (uint32)0;
         statePct << (uint32)0;
-    } else {
+    }
+    else
+    {
         statePct << (uint16)pState.GetLevel();
-        uint t{};
-        if(!pState.m_bAura) {
-            t = pState.m_nEndTime[0];
-            if(t <= pState.m_nEndTime[1])
+        uint t{ };
+        if (!pState.m_bAura)
+        {
+            t     = pState.m_nEndTime[0];
+            if (t <= pState.m_nEndTime[1])
                 t = pState.m_nEndTime[1];
             statePct << t;
-        } else {
+        }
+        else
+        {
             statePct << (int)-1;
         }
 
-        t = pState.m_nStartTime[1];
-        if(pState.m_nStartTime[0] > t)
+        t     = pState.m_nStartTime[1];
+        if (pState.m_nStartTime[0] > t)
             t = pState.m_nStartTime[0];
         statePct << t;
     }
@@ -756,7 +787,7 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
 
 void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode)
 {
-    if(pPlayer == nullptr || pMonster == nullptr)
+    if (pPlayer == nullptr || pMonster == nullptr)
         return;
 
     XPacket tamePct(TS_SC_TAMING_INFO);
@@ -766,8 +797,9 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
 
     sWorld->Broadcast((uint)(pMonster->GetPositionX() / g_nRegionSize), (uint)(pMonster->GetPositionY() / g_nRegionSize), pMonster->GetLayer(), tamePct);
 
-    std::string chatMsg{};
-    switch(mode) {
+    std::string chatMsg{ };
+    switch (mode)
+    {
         case 0:
             chatMsg = string_format("TAMING_START|%s|", "Random Monster");
             break;
@@ -792,20 +824,21 @@ void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderNa
     chatPct.fill(szSenderName, 21);
     chatPct << (int16)szString.length();
     chatPct << (uint8)chatType;
-    chatPct.fill(szString, szString.length()+1);
+    chatPct.fill(szString, szString.length() + 1);
 
-    Player::DoEachPlayer([=](Player* pPlayer) {
+    Player::DoEachPlayer([=](Player *pPlayer) {
         pPlayer->SendPacket(chatPct);
     });
     auto sender = Player::FindPlayer(szSenderName);
-    if(sender != nullptr)
+    if (sender != nullptr)
         Messages::SendResult(sender, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
 }
 
 void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::string &szMessage, uint len)
 {
     auto p = sMemoryPool->GetObjectInWorld<Player>(handle);
-    if(p != nullptr) {
+    if (p != nullptr)
+    {
         XPacket result(TS_SC_CHAT_LOCAL);
         result << (uint32)handle;
         result << (uint8)szMessage.length();
@@ -848,15 +881,15 @@ void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 
 void Messages::SendItemCoolTimeInfo(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
-    uint ct = sWorld->GetArTime();
-    XPacket coolTimePct(TS_SC_ITEM_COOL_TIME);
+    uint              ct = sWorld->GetArTime();
+    XPacket           coolTimePct(TS_SC_ITEM_COOL_TIME);
     for (unsigned int coolTime : pPlayer->m_nItemCooltime)
     {
         int cool_time = coolTime - ct;
-        if(cool_time < 0)
+        if (cool_time < 0)
             cool_time = 0;
         coolTimePct << cool_time;
     }
@@ -865,12 +898,12 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
 
 void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket mixPct(TS_SC_MIX_RESULT);
-    mixPct << (uint) (pHandles != nullptr ? pHandles->size() : 0);
-    if(pHandles != nullptr && !pHandles->empty())
+    mixPct << (uint)(pHandles != nullptr ? pHandles->size() : 0);
+    if (pHandles != nullptr && !pHandles->empty())
     {
         for (unsigned int pHandle : *pHandles)
         {
@@ -884,10 +917,10 @@ void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
 void Messages::SendItemWearInfoMessage(Player *pPlayer, Unit *pTarget, Item *pItem)
 {
     XPacket packet(TS_SC_ITEM_WEAR_INFO);
-    packet << (uint32_t) pItem->GetHandle();
-    packet << (int16_t) pItem->m_Instance.nWearInfo;
-    packet << (uint32_t) (pTarget != nullptr ? pTarget->GetHandle() : 0);
-    packet << (int32_t) pItem->m_Instance.nEnhance;
+    packet << (uint32_t)pItem->GetHandle();
+    packet << (int16_t)pItem->m_Instance.nWearInfo;
+    packet << (uint32_t)(pTarget != nullptr ? pTarget->GetHandle() : 0);
+    packet << (int32_t)pItem->m_Instance.nEnhance;
     pPlayer->SendPacket(packet);
 }
 
@@ -916,30 +949,30 @@ void Messages::SendPartyInfo(Player *pPlayer)
     int  max_lvl    = sGroupManager->GetMaxLevel(pPlayer->GetPartyID());
     int  share_mode = sGroupManager->GetShareMode(pPlayer->GetPartyID());
 
-    std::string msg = string_format("PINFO|%s|%s|%d|%d|%d|", name.c_str(),leader.c_str(), share_mode, min_lvl, max_lvl);
+    std::string msg = string_format("PINFO|%s|%s|%d|%d|%d|", name.c_str(), leader.c_str(), share_mode, min_lvl, max_lvl);
 
     struct PInfo
     {
         uint handle;
-        int hp;
-        int mp;
+        int  hp;
+        int  mp;
         int  x;
         int  y;
-        int race;
-        int isOnline;
+        int  race;
+        int  isOnline;
     };
 
-    sGroupManager->DoEachMemberTag(pPlayer->GetPartyID(), [&msg](PartyMemberTag& tag) {
+    sGroupManager->DoEachMemberTag(pPlayer->GetPartyID(), [&msg](PartyMemberTag &tag) {
         PInfo info{ };
         auto  player = Player::FindPlayer(tag.strName);
         if (player != nullptr)
         {
-            info.handle = player->GetHandle();
-            info.hp     = (int)GetPct((float)player->GetHealth(), player->GetMaxHealth());
-            info.mp     = (int)GetPct((float)player->GetMana(), player->GetMaxMana());
-            info.x      = (int)player->GetPositionX();
-            info.y      = (int)player->GetPositionY();
-            info.race = player->GetRace();
+            info.handle   = player->GetHandle();
+            info.hp       = (int)GetPct((float)player->GetHealth(), player->GetMaxHealth());
+            info.mp       = (int)GetPct((float)player->GetMana(), player->GetMaxMana());
+            info.x        = (int)player->GetPositionX();
+            info.y        = (int)player->GetPositionY();
+            info.race     = player->GetRace();
             info.isOnline = 2;
         }
         // handle|name|level|job_id|hp_pct|mp_pct|x|y|
@@ -950,7 +983,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
 
 void Messages::SendRegionAckMessage(Player *pPlayer, uint rx, uint ry)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket ackPct(TS_SC_REGION_ACK);

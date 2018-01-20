@@ -240,3 +240,42 @@ int Item::GetMaxEndurance() const
     }
     return result;
 }
+
+bool Item::IsQuestItem() const
+{
+    if(m_pItemBase== nullptr)
+        return false;
+    return m_pItemBase->flaglist[FLAG_QUEST] != 0;
+}
+
+bool Item::IsJoinable() const
+{
+    if(m_pItemBase == nullptr)
+        return false;
+    return m_pItemBase->flaglist[FLAG_DUPLICATE] != 0;
+}
+
+float Item::GetWeight() const
+{
+        return m_pItemBase->weight * (float)m_Instance.nCount;
+}
+
+void Item::SetCount(int64 count)
+{
+    m_Instance.nCount = count;
+}
+
+bool Item::IsExpireItem() const
+{
+    return m_pItemBase->decrease_type == 1 || m_pItemBase->decrease_type == 2;
+}
+
+bool Item::IsInInventory() const
+{
+    return m_nAccountID == 0 && m_Instance.nOwnerUID != 0;
+}
+
+bool Item::IsInStorage() const
+{
+    return m_nAccountID != 0 && m_Instance.nOwnerUID == 0 && m_Instance.Code != 0;
+}

@@ -616,7 +616,7 @@ bool World::ProcTame(Monster *pMonster)
     MX_LOG_INFO("taming", "You have a success rate of %f percent.", fTameProbability / 1000000);
     if(fTameProbability < irand(1, 1000000))
     {
-        player->Erase(pItem, 1, true);
+        player->EraseItem(pItem, 1);
         ClearTamer(pMonster, false);
         Messages::BroadcastTamingMessage(player, pMonster, 3);
         return false;
