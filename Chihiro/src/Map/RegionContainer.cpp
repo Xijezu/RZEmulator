@@ -214,13 +214,15 @@ void RegionContainer::DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint
 
 uint RegionContainer::IsVisibleRegion(uint rx, uint ry, uint _rx, uint _ry)
 {
-    uint result = 0;
+    int result = 0;
 
-    uint cx = _rx - rx + 3;
-    uint cy = _ry - ry + 3;
-    if (cx <= 6 && cy <= 6)
-        result = s_Matrix[cx + (7 * cy)];
-    return result;
+    int cx = abs((int)(_rx - rx));
+    int cy = abs((int)(_ry - ry));
+    if (cx <= cy)
+        result = cx + 3 * cy;
+    else
+        result = cy + 3 * cx;
+    return (9 >= result) ? 1 : 0;
 }
 
 uint RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)

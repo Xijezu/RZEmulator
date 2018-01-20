@@ -468,14 +468,6 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                         sWorld->SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
                         // TODO: Mount
                     }
-                    else
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    return;
                 }
                 return;
             } //if (true /* IsActable() && IsMovable() && isInWorld */)
