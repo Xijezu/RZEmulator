@@ -90,22 +90,22 @@ Item *Unit::GetWornItem(ItemWearType idx)
     return m_anWear[idx];
 }
 
-void Unit::SetHealth(uint32 hp)
+void Unit::SetHealth(int hp)
 {
     int old_hp = GetHealth();
-    SetUInt32Value(UNIT_FIELD_HEALTH, hp);
+    SetInt32Value(UNIT_FIELD_HEALTH, hp);
     if (hp > GetMaxHealth())
-        SetUInt32Value(UNIT_FIELD_HEALTH, GetMaxHealth());
+        SetInt32Value(UNIT_FIELD_HEALTH, GetMaxHealth());
     //if (old_hp != GetHealth())
     //this.onHPChange(old_hp);
 }
 
-void Unit::SetMana(uint32 mp)
+void Unit::SetMana(int mp)
 {
     int old_np = GetMana();
-    SetUInt32Value(UNIT_FIELD_MANA, mp);
+    SetInt32Value(UNIT_FIELD_MANA, mp);
     if (mp > GetMaxMana())
-        SetUInt32Value(UNIT_FIELD_MANA, GetMaxMana());
+        SetInt32Value(UNIT_FIELD_MANA, GetMaxMana());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3354,4 +3354,9 @@ bool Unit::OnCompleteSkill()
         return true;
     }
     return false;
+}
+
+float Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
+{
+    return 1.0f;
 }

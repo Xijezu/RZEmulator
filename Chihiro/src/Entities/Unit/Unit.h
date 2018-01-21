@@ -140,6 +140,8 @@ class Unit : public WorldObject
         DamageInfo DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
         int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead);
 
+        float GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad);
+
         int Heal(int hp);
         int MPHeal(int mp);
         int HealByItem(int hp);
@@ -160,8 +162,8 @@ class Unit : public WorldObject
         void SetJP(int jp);
         void SetCurrentJLv(int jlv);
         void SetSkill(int, int, int, int);
-        void SetHealth(uint32);
-        void SetMana(uint32);
+        void SetHealth(int);
+        void SetMana(int);
 
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
 

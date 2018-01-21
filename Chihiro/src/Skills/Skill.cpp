@@ -77,6 +77,14 @@ void Skill::Init()
     m_targetPosition.SetLayer(0);
 }
 
+void Skill::SetRequestedSkillLevel(int nLevel)
+{
+    int tl = m_nSkillLevel + m_nSkillLevelAdd;
+    if(nLevel <= tl)
+        tl = nLevel;
+    m_nRequestedSkillLevel = (uint8)tl;
+}
+
 
 void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_level, int cool_time)
 {
@@ -97,10 +105,88 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     auto current_time = sWorld->GetArTime();
     uint delay        = 0xffffffff;
 
+    if(m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
+        nSkillLevel = m_nSkillLevel + m_nSkillLevelAdd;
+    SetRequestedSkillLevel(nSkillLevel);
     if (!CheckCoolTime(current_time))
     {
         return TS_RESULT_COOL_TIME;
     }
+
+    if (m_SkillBase->vf_is_not_need_weapon == 0)
+    {
+        bool bOk{false};
+        if (m_SkillBase->vf_shield_only != 0)
+            bOk = m_pOwner->IsWearShield();
+        else
+            bOk = m_SkillBase->IsUseableWeapon(m_pOwner->GetWeaponClass());
+        if (!bOk)
+        {
+            Init();
+            return TS_RESULT_LIMIT_WEAPON;
+        }
+    }
+
+    /* ******* SKILL COST CALCULATION ******* */
+    int   nHP       = m_pOwner->GetHealth();
+    int   nMP       = m_pOwner->GetMana();
+    float decHP     = 0;
+    float decMP     = 0;
+    int   hp_cost   = 0;
+    int   mana_cost = 0;
+
+    if (m_pOwner->GetMaxHealth() != 0)
+        decHP = 100 * nHP / m_pOwner->GetMaxHealth();
+    if (m_pOwner->GetMaxMana() != 0)
+        decMP = 100 * nMP / m_pOwner->GetMaxMana();
+
+    if ((m_SkillBase->effect_type == EF_TOGGLE_AURA || m_SkillBase->effect_type == EF_TOGGLE_DIFFERENTIAL_AURA) /*&& m_pOwner->IsActiveAura(this)*/)
+    {
+        mana_cost = 0;
+    }
+    else
+    {
+        auto cmp1 = m_SkillBase->cost_mp + (m_nEnhance * m_SkillBase->cost_mp_per_enhance) + (m_nRequestedSkillLevel * m_SkillBase->cost_mp_per_skl);
+        auto cmp2 = (m_SkillBase->cost_mp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_mp_per;
+        mana_cost = (int)(m_pOwner->GetManaCostRatio((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0)
+                          * (m_pOwner->GetMana() * cmp2 / 100.0f + cmp1));
+    }
+
+    if(m_SkillBase->need_hp <= 0)
+    {
+        if(m_SkillBase->need_hp < 0 && decHP > -m_SkillBase->need_hp)
+        {
+            Init();
+            return TS_RESULT_NOT_ACTABLE;
+        }
+    }
+    else
+    {
+        if(decHP < m_SkillBase->need_hp)
+        {
+            Init();
+            return TS_RESULT_NOT_ENOUGH_HP;
+        }
+    }
+    if(decMP < m_SkillBase->need_mp || nMP < mana_cost)
+    {
+        Init();
+        return TS_RESULT_NOT_ENOUGH_MP;
+    }
+
+    if(m_pOwner->GetLevel() < m_SkillBase->need_level)
+    {
+        Init();
+        return TS_RESULT_NOT_ENOUGH_LEVEL;
+    }
+    if(m_pOwner->GetJP() < m_SkillBase->cost_jp + m_nEnhance * m_SkillBase->cost_jp_per_enhance)
+    {
+        Init();
+        return TS_RESULT_NOT_ENOUGH_JP;
+    }
+
+
+    /* ******* SKILL COST CALCULATION ******* */
 
     m_Status = SkillStatus::SS_CAST;
     switch(m_SkillBase->effect_type)
@@ -134,6 +220,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
             break;
     } // END SWITCH
 
+    m_pOwner->SetMana(nMP - mana_cost);
+
     // Check for Creature Taming since it doesn't have an effect type
     if (m_SkillBase->id == SkillId::CreatureTaming)
     {
@@ -163,8 +251,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 
     if (m_nErrorCode == TS_RESULT_SUCCESS)
     {
-        m_nRequestedSkillLevel = (uint8)nSkillLevel;
-        broadcastSkillMessage(m_pOwner, 0, 0, 1);
+        broadcastSkillMessage(m_pOwner, 0, mana_cost, 1);
     }
     else
     {
@@ -710,3 +797,4 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
     sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, Damage, pTarget->GetHandle());
     m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);
 }
+
