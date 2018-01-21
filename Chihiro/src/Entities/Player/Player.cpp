@@ -3212,3 +3212,9 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     }
 }
 
+bool Player::IsAlly(const Unit *pUnit)
+{
+    // TODO: Implement real function
+    return !pUnit->IsMonster();
+}
+

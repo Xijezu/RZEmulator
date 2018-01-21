@@ -166,6 +166,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void SendItemWearInfoMessage(Item *item, Unit *u);
         void ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast);
 
+        bool IsAlly(const Unit *pUnit) override;
+
         /* ****************** DIALOG ****************** */
         void SetLastContact(std::string, uint32_t);
         void SetLastContact(std::string, std::string);

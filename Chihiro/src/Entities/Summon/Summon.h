@@ -25,6 +25,7 @@ class Summon : public Unit
         uint32_t GetCardHandle();
 
         bool IsSummon() const override { return true; }
+        bool IsAlly(const Unit *pTarget) override;
 
         int32_t GetSummonCode();
         float GetFCM() const override;

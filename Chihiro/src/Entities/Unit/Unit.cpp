@@ -1557,20 +1557,52 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
                 range_mod = 1.5f;
         }
         bool isInRange{false};
-        if(pSkill->m_SkillBase->cast_range == -1)
+        if (pSkill->m_SkillBase->cast_range == -1)
         {
             isInRange = enemy_distance < GetRealAttackRange() * range_mod;
         }
         else
         {
             target_distance = 12 * pSkill->m_SkillBase->cast_range * range_mod;
-            isInRange = enemy_distance < target_distance;
+            isInRange       = enemy_distance < target_distance;
         }
-        if(!isInRange)
+        if (!isInRange)
             return TS_RESULT_TOO_FAR;
 
-        if(pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
+        if (pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
             return TS_RESULT_NOT_ACTABLE;
+
+        if (pSkillTarget->GetHandle() == GetHandle()
+            || pSkillTarget->IsSummon()
+               && dynamic_cast<Summon *>(pSkillTarget)->GetMaster()->GetHandle() == GetHandle())
+        {
+            if (!pSkill->m_SkillBase->IsUsable(1))
+                return TS_RESULT_NOT_ACTABLE;
+        }
+        else
+        {
+            if (IsAlly(pSkillTarget))
+            {
+                if (!pSkill->m_SkillBase->IsUsable(1))
+                    return TS_RESULT_NOT_ACTABLE;
+            }
+            else if (IsEnemy(pSkillTarget, false))
+            {
+                if (!pSkill->m_SkillBase->IsUsable(5))
+                    return TS_RESULT_NOT_ACTABLE;
+            }
+            else if (!pSkill->m_SkillBase->IsUsable(3))
+            {
+                return TS_RESULT_NOT_ACTABLE;
+            }
+        }
+
+        if (pSkillTarget->IsPlayer() && pSkill->m_SkillBase->tf_avatar == 0
+            || pSkillTarget->IsMonster() && pSkill->m_SkillBase->tf_monster == 0
+            || pSkillTarget->IsSummon() && pSkill->m_SkillBase->tf_summon == 0)
+            return TS_RESULT_NOT_ACTABLE;
+
+        tpos = pSkillTarget->GetCurrentPosition(ct);
     }
 
     SetDirection(tpos);
@@ -1645,7 +1677,7 @@ void Unit::processAttack()
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
-        if (enemy == nullptr || enemy->GetHealth() == 0 || sRegion->IsVisibleRegion(this, enemy) == 0)
+        if (enemy == nullptr || !IsEnemy(enemy, false) || enemy->GetHealth() == 0 || sRegion->IsVisibleRegion(this, enemy) == 0)
         {
             if (IsPlayer())
             {
@@ -3381,4 +3413,21 @@ void Unit::UnBindSkillCard(Item *pItem)
         pItem->SetBindTarget(nullptr);
         Messages::SendSkillCardInfo(dynamic_cast<Player*>(this), pItem);
     }
+}
+
+bool Unit::IsEnemy(const Unit *pTarget, bool bIncludeHiding)
+{
+    return pTarget != nullptr && pTarget->IsInWorld()
+           && (bIncludeHiding || IsVisible(pTarget))
+           && !IsAlly(pTarget);
+}
+
+bool Unit::IsAlly(const Unit */*pTarget*/)
+{
+    return false;
+}
+
+bool Unit::IsVisible(const Unit *pTarget)
+{
+    return !pTarget->HasFlag(UNIT_FIELD_STATUS, StatusFlags::Hiding);
 }

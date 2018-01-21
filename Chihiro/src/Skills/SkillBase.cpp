@@ -65,3 +65,63 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
 
     return false;
 }
+
+int SkillBase::GetStateSecond(int skill_lv, int enhance_lv)
+{
+    return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
+}
+
+int SkillBase::GetHitBonus(int enhance, int level_diff) const
+{
+    return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
+}
+
+int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
+{
+    return (int) (state_level_base
+                  + (state_level_per_enhance * enhance_lv)
+                  + (state_level_per_skl * skill_lv));
+}
+
+uint SkillBase::GetCastDelay(int skill_lv, int enhance)
+{
+    return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
+}
+
+uint SkillBase::GetCoolTime(int enhance) const
+{
+    return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
+}
+
+int SkillBase::GetNeedJobPoint(int skill_lv)
+{
+    int result;
+
+    if (skill_lv <= 50)
+        result = this->m_need_jp[skill_lv - 1];
+    else
+        result = this->m_need_jp[49];
+    return result;
+}
+
+bool SkillBase::IsUsable(uint8 nUseIndex) const
+{
+    switch (nUseIndex)
+    {
+        case 0:
+            return uf_self != 0;
+        case 1:
+            return uf_party != 0;
+        case 2:
+            return uf_guild != 0;
+        case 3:
+            return uf_neutral != 0;
+        case 4:
+            return uf_purple != 0;
+        case 5:
+            return uf_enemy != 0;
+        default:
+            return false;
+    }
+    ACE_NOTREACHED(return false);
+}

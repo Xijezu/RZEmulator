@@ -167,6 +167,9 @@ class Unit : public WorldObject
 
         void BindSkillCard(Item *pItem);
         void UnBindSkillCard(Item *pItem);
+        virtual bool IsEnemy(const Unit* pTarget, bool bIncludeHiding);
+        virtual bool IsAlly(const Unit* pTarget);
+        bool IsVisible(const Unit *pTarget);
 
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
 

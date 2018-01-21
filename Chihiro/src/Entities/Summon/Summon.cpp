@@ -542,3 +542,8 @@ void Summon::onCantAttack(uint handle, uint t)
         Messages::SendCantAttackMessage(GetMaster(), GetHandle(), handle, TS_RESULT_TOO_FAR);
     }
 }
+
+bool Summon::IsAlly(const Unit *pTarget)
+{
+    return GetMaster()->IsAlly(pTarget);
+}

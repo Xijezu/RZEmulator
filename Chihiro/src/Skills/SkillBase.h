@@ -441,44 +441,14 @@ struct SkillTreeGroup {
 
 struct SkillBase {
 
-    int GetNeedJobPoint(int skill_lv)
-    {
-        int result;
-
-        if (skill_lv <= 50)
-            result = this->m_need_jp[skill_lv - 1];
-        else
-            result = this->m_need_jp[49];
-        return result;
-    }
-
+    int GetNeedJobPoint(int skill_lv);
     bool IsUseableWeapon(ItemClass cl);
-
-    int GetStateSecond(int skill_lv, int enhance_lv)
-    {
-        return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
-    }
-
-    int GetHitBonus(int enhance, int level_diff) const {
-        return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
-    }
-
-    int GetStateLevel(int skill_lv, int enhance_lv)
-    {
-        return (int) (state_level_base
-                      + (state_level_per_enhance * enhance_lv)
-                      + (state_level_per_skl * skill_lv));
-    }
-
-    uint GetCastDelay(int skill_lv, int enhance)
-    {
-        return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
-    }
-
-    uint GetCoolTime(int enhance) const
-    {
-        return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
-    }
+    int GetStateSecond(int skill_lv, int enhance_lv);
+    int GetHitBonus(int enhance, int level_diff) const;
+    int GetStateLevel(int skill_lv, int enhance_lv);
+    uint GetCastDelay(int skill_lv, int enhance);
+    uint GetCoolTime(int enhance) const;
+    bool IsUsable(uint8 nUseIndex) const;
 
     int m_need_jp[50]{ };
 

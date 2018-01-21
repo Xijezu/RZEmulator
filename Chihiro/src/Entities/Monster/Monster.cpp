@@ -1246,3 +1246,8 @@ void Monster::procDropChaos(Unit *pKiller, takePriority pPriority, std::vector<V
         }
     }
 }
+
+bool Monster::IsAlly(const Unit *pTarget)
+{
+    return pTarget->IsMonster();
+}
