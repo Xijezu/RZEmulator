@@ -824,6 +824,23 @@ void Player::SendLoginProperties()
     Messages::SendGameTime(this);
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
 
+    for(auto& item : m_Inventory.m_vList)
+    {
+        if(item->m_pItemBase->group == ItemGroup::SkillCard)
+        {
+            if(item->m_Instance.Socket[0] == GetUInt32Value(UNIT_FIELD_UID))
+            {
+                BindSkillCard(item);
+            }
+            else if(item->m_Instance.Socket[1] != 0)
+            {
+                auto summon = GetSummon(item->m_Instance.nOwnSummonUID);
+                if(summon != nullptr)
+                    summon->BindSkillCard(item);
+            }
+        }
+    }
+
     if (!_bIsInWorld)
     {
         sWorld->AddObjectToWorld(this);

@@ -298,12 +298,12 @@ void Item::CopyFrom(const Item *pFrom)
 void Item::SetBindTarget(Unit *pUnit)
 {
     if(pUnit != nullptr && pUnit->IsPlayer())
-        m_Instance.Socket[0] = pUnit->GetHandle();
+        m_Instance.Socket[0] = pUnit->GetUInt32Value(UNIT_FIELD_UID);
     else
         m_Instance.Socket[0] = 0;
 
     if(pUnit != nullptr && pUnit->IsSummon())
-        m_Instance.Socket[1] = pUnit->GetHandle();
+        m_Instance.Socket[1] = pUnit->GetUInt32Value(UNIT_FIELD_UID);
     else
         m_Instance.Socket[1] = 0;
 

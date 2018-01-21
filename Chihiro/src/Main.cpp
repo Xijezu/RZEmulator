@@ -42,6 +42,11 @@ public:
 				break;
 			case SIGSEGV:
 			{
+				/* Dont mind this line of code here
+				 * This small thing gets us a stacktrace
+				 * no matter what happened as long as it
+				 * was a segmentation fault
+				 */
 				ACE_Stack_Trace st;
 				MX_LOG_FATAL("server.worldserver", st.c_str());
 				sLog->Close();
