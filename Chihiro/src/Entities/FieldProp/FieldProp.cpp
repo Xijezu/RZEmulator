@@ -126,12 +126,14 @@ bool FieldProp::UseProp(Player * pPlayer)
                     auto ti         = Item::AllocItem(0, i.code, (uint64)nItemCount, GenerateCode::ByFieldProp, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
                     auto cnt = ti->m_Instance.nCount;
-                    pPlayer->PushItem(ti, cnt, false);
+                    Item *pNewItem = pPlayer->PushItem(ti, cnt, false);
 
-                    if(ti != nullptr)
+                    if(pNewItem != nullptr)
                     {
                         Messages::SendResult(pPlayer, 0xCC, 0, ti->GetHandle());
                     }
+                    if(pNewItem != nullptr && pNewItem->GetHandle() != ti->GetHandle())
+                        Item::PendFreeItem(ti);
                 }
             }
         }

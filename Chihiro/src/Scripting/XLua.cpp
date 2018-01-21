@@ -605,13 +605,20 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
     int nFlag = args.size() >= 5 ? args[4].get<int>() : 0;
     auto player = dynamic_cast<Player*>(m_pUnit);
 
+    uint handle = 0;
     if(player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0) {
         auto item = Item::AllocItem(0, nCode, nCount, GenerateCode::ByScript, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
-        player->PushItem(item, nCount, false);
 
-        return item->m_nHandle;
+        Item *pNewItem = player->PushItem(item, nCount, false);
+        if(pNewItem != nullptr)
+            handle = pNewItem->GetHandle();
+        else
+            handle = item->GetHandle();
+
+        if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
+            Item::PendFreeItem(item);
     }
-    return 0;
+    return handle;
 }
 
 void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)

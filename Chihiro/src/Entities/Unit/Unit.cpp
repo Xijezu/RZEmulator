@@ -2841,9 +2841,11 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                     if(nItemID != 0)
                     {
                         auto pCItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::ByItem, -1, -1, -1, -1, 0, 0, 0, 0);
-                        pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
-                        if(pCItem != nullptr)
+                        Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
+                        if(pNewItem != nullptr)
                             Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());
+                        if(pNewItem != nullptr && pNewItem->GetHandle() != pCItem->GetHandle())
+                            Item::PendFreeItem(pCItem);
                     }
                 }
             }

@@ -883,6 +883,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
     }
 
     bool bJoinable{false};
+    Item *pNewItem{nullptr};
 
     for (auto &mt : *market)
     {
@@ -921,14 +922,19 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
             if (bJoinable)
             {
                 auto item = Item::AllocItem(0, mt.code, buy_count, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
-                _player->PushItem(item, buy_count, false);
+                pNewItem = _player->PushItem(item, buy_count, false);
+
+                if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
+                    Item::PendFreeItem(item);
             }
             else
             {
                 for (int i = 0; i < buy_count; i++)
                 {
                     auto item = Item::AllocItem(0, mt.code, 1, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
-                    _player->PushItem(item, buy_count, false);
+                    pNewItem = _player->PushItem(item, buy_count, false);
+                    if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
+                        Item::PendFreeItem(item);
                 }
             }
             Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item_code);

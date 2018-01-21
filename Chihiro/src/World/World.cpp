@@ -494,15 +494,24 @@ bool World::RemoveItemFromWorld(Item *pItem)
 
 uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 {
-    uint item_handle = pItem->GetHandle();
-    int code = pItem->m_Instance.Code;
-    if(code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY) {
-        pItem->m_Instance.nIdx = 0;
+    uint item_handle = 0;
+    int  code        = pItem->m_Instance.Code;
+    Item *pNewItem{nullptr};
+    if (code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY)
+    {
+        pItem->m_Instance.nIdx     = 0;
         pItem->m_bIsNeedUpdateToDB = true;
-        pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
+        pNewItem = pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
     }
-    if(pItem != nullptr && pItem->m_Instance.Code != 0)
+    if (pNewItem != nullptr && pItem->m_Instance.Code != 0)
+        item_handle  = pNewItem->GetHandle();
+    else
         item_handle = pItem->GetHandle();
+
+    if (pNewItem != nullptr && pNewItem->GetHandle() != pItem->GetHandle())
+    {
+        Item::PendFreeItem(pItem);
+    }
     return item_handle;
 }
 
