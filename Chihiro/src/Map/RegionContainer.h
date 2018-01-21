@@ -8,6 +8,7 @@
 class RegionContainer
 {
     public:
+        ~RegionContainer();
         void InitRegion(float map_width, float map_height);
         bool IsValidRegion(uint rx, uint ry, uint8 layer);
         Region* GetRegion(WorldObject* pObject);
@@ -19,6 +20,7 @@ class RegionContainer
         uint IsVisibleRegion(WorldObject* obj1, WorldObject* obj2);
     private:
         void initRegion();
+        void deinitRegion();
         RegionBlock* getRegionBlockPtr(uint rcx, uint rcy);
         RegionBlock* getRegionBlock(uint rcx, uint rcy);
         Region* getRegionPtr(uint rx, uint ry, uint8 layer);

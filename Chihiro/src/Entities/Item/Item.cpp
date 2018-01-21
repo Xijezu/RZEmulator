@@ -216,6 +216,9 @@ int Item::GetMaxEndurance() const
 {
     int result = 0;
 
+    if(m_pItemBase == nullptr)
+        return 0;
+
     if (m_pItemBase->socket != 0)
     {
         if (m_pItemBase->socket <= 0 )
@@ -278,4 +281,38 @@ bool Item::IsInInventory() const
 bool Item::IsInStorage() const
 {
     return m_nAccountID != 0 && m_Instance.nOwnerUID == 0 && m_Instance.Code != 0;
+}
+
+void Item::CopyFrom(const Item *pFrom)
+{
+    auto oldOwner = m_Instance.OwnerHandle;
+    auto oldUID = m_Instance.UID;
+    Relocate(pFrom->GetPositionX(), pFrom->GetPositionY(), pFrom->GetPositionZ(), pFrom->GetOrientation());
+    SetLayer(pFrom->GetLayer());
+    m_Instance.Copy(pFrom->m_Instance);
+    m_Instance.UID = 0;
+    m_Instance.nOwnerUID = (int)oldUID;
+    m_Instance.OwnerHandle = oldOwner;
+}
+
+void ItemInstance::Copy(const ItemInstance &pFrom)
+{
+    OwnerHandle = pFrom.OwnerHandle;
+    OwnSummonHandle = pFrom.OwnSummonHandle;
+    UID = pFrom.UID;
+    Code = pFrom.Code;
+    nIdx = pFrom.nIdx;
+    nLevel = pFrom.nLevel;
+    nEnhance = pFrom.nEnhance;
+    nOwnerUID = pFrom.nOwnerUID;
+    nOwnSummonUID = pFrom.nOwnSummonUID;
+    nAuctionID = pFrom.nAuctionID;
+    nItemKeepingID = pFrom.nItemKeepingID;
+    nCount = pFrom.nCount;
+    nCurrentEndurance = pFrom.nCurrentEndurance;
+    tExpire = pFrom.tExpire;
+    Flag = pFrom.Flag;
+    GenerateInfo = pFrom.GenerateInfo;
+    nWearInfo = pFrom.nWearInfo;
+    std::copy(std::begin(pFrom.Socket), std::end(pFrom.Socket), std::begin(Socket));
 }

@@ -267,3 +267,18 @@ Region *RegionContainer::getRegion(uint rx, uint ry, uint8 layer)
         return b->getRegion(rx % REGION_BLOCK_COUNT, ry % REGION_BLOCK_COUNT, layer);
     return nullptr;
 }
+
+RegionContainer::~RegionContainer()
+{
+    deinitRegion();
+}
+
+void RegionContainer::deinitRegion()
+{
+    MX_UNIQUE_GUARD writeLock(i_lock);
+    for(auto &x : m_RegionBlock)
+    {
+        delete x;
+        x = nullptr;
+    }
+}

@@ -5,7 +5,8 @@
 #ifndef PROJECT_ITEMFIELDS_H
 #define PROJECT_ITEMFIELDS_H
 
-static const long MAX_GOLD_FOR_INVENTORY = 100000000000;
+#define MAX_GOLD_FOR_INVENTORY  100000000000
+#define MAX_GOLD_FOR_STORAGE    100000000000
 
 enum ElementalType {
     TypeNone  = 0,

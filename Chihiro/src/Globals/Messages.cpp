@@ -298,7 +298,10 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
 #endif // EPIC < 6
     packet << (int32_t)item->m_Instance.tExpire;
 
-    packet << (int16_t)item->m_Instance.nWearInfo;
+    if(item->IsInStorage())
+        packet << (int16_t)-2;
+    else
+        packet << (int16_t)item->m_Instance.nWearInfo;
     packet << (uint32_t)(item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0);
 #if EPIC >= 5
     packet << (int32_t) item->m_Instance.nIdx;
@@ -990,4 +993,13 @@ void Messages::SendRegionAckMessage(Player *pPlayer, uint rx, uint ry)
     ackPct << rx;
     ackPct << ry;
     pPlayer->SendPacket(ackPct);
+}
+
+void Messages::SendOpenStorageMessage(Player *pPlayer)
+{
+    XPacket storagePct(TS_SC_OPEN_STORAGE);
+    // Some dirty hacks unknown to mankind to fill
+    // this packet with various, godlike and important infos
+    // jk, packet is empty
+    pPlayer->SendPacket(storagePct);
 }

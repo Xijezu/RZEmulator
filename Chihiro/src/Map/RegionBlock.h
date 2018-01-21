@@ -12,6 +12,16 @@ struct RegionBase
         m_Regions = std::vector<Region*>(100 * 100, nullptr);
     }
 
+    ~RegionBase()
+    {
+        for(auto &x : m_Regions)
+        {
+            delete x;
+            x = nullptr;
+        }
+        m_Regions.clear();
+    }
+
     std::vector<Region*> m_Regions;
 };
 
@@ -21,6 +31,15 @@ class RegionBlock
         RegionBlock()
         {
             m_RegionBases = std::vector<RegionBase *>(256, nullptr);
+        }
+
+        ~RegionBlock()
+        {
+            for(auto &x : m_RegionBases)
+            {
+                delete x;
+                x = nullptr;
+            }
         }
 
         Region *getRegionPtr(uint rx, uint ry, uint8 layer)

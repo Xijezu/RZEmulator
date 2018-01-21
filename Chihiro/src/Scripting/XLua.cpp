@@ -98,6 +98,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("learn_all_skill", &XLua::SCRIPT_LearnAllSkill, this);
     m_pState.set_function("show_soulstone_craft_window", &XLua::SCRIPT_ShowSoulStoneCraftWindow, this);
     m_pState.set_function("show_soulstone_repair_window", &XLua::SCRIPT_ShowSoulStoneRepairWindow, this);
+    m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -852,4 +853,11 @@ void XLua::SCRIPT_ShowSoulStoneRepairWindow()
     if(m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return;
     Messages::ShowSoulStoneRepairWindow(dynamic_cast<Player*>(m_pUnit));
+}
+
+void XLua::SCRIPT_OpenStorage()
+{
+    if(m_pUnit == nullptr || !m_pUnit->IsPlayer())
+        return;
+    dynamic_cast<Player*>(m_pUnit)->OpenStorage();
 }

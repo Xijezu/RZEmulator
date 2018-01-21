@@ -21,6 +21,8 @@ struct ItemPickupOrder {
 class ItemInstance
 {
 public:
+        void Copy(const ItemInstance& pFrom);
+
     uint         OwnerHandle{0};                            // 0x0
     uint         OwnSummonHandle{0};                        // 0x4
     uint64       UID{0};                                    // 0x8
@@ -77,6 +79,7 @@ class Item : public WorldObject
         bool IsJoinable() const;
         bool IsQuestItem() const;
         float GetWeight() const;
+        void CopyFrom(const Item* pFrom);
 
         bool IsInInventory() const;
         bool IsInStorage() const;

@@ -108,6 +108,7 @@ class Messages
         static void ShowSoulStoneCraftWindow(Player *);
         static void SendPartyInfo(Player *);
         static void SendRegionAckMessage(Player* pPlayer, uint rx, uint ry);
+        static void SendOpenStorageMessage(Player* pPlayer);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };

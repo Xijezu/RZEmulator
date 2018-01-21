@@ -68,13 +68,16 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
     }
     else if(pItem->m_Instance.nCount > cnt)
     {
-        // TODO: Maybe really allocate new item?
+        new_cnt = pItem->m_Instance.nCount - cnt;
+        auto pNewItem = Item::AllocItem(0, pItem->m_Instance.Code,new_cnt, GenerateCode::ByDivide, -1, -1, -1 -1 ,0 ,0 ,0 ,0 ,0);
+        pNewItem->CopyFrom(pItem);
+        pNewItem->SetCount(cnt);
         m_fWeight -= pItem->GetWeight() * cnt;
         if(pItem->m_Instance.nWearInfo != ItemWearType::WearNone)
             m_fWeightModifier += pItem->GetWeight() * cnt;
         new_cnt = pItem->m_Instance.nCount - cnt;
         setCount(pItem, new_cnt, bSkipUpdateItemToDB);
-        return pItem;
+        return pNewItem;
     }
     return nullptr;
 }
@@ -169,13 +172,13 @@ void Inventory::pop(Item *pItem, bool bSkipUpdateItemToDB)
         m_pEventReceiver->onRemove(this, pItem, bSkipUpdateItemToDB);
 
     Item* last = m_vList.back();
+    auto idx = (int)last->m_unInventoryIndex;
     if(last->GetHandle() != pItem->GetHandle())
     {
-        auto idx = (int)last->m_unInventoryIndex;
         last->m_unInventoryIndex = pItem->m_unInventoryIndex;
         m_vList[(int)last->m_unInventoryIndex] = last;
-        m_vList.erase(m_vList.begin() + idx);
     }
+    m_vList.erase(m_vList.begin() + idx);
     auto pos = std::find(m_vExpireItemList.begin(), m_vExpireItemList.end(), pItem);
     if(pos != m_vExpireItemList.end())
         m_vExpireItemList.erase(pos);

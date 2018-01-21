@@ -114,7 +114,8 @@ const AuthGameSession packetHandler[] =
                                       {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
                                       {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
                                       {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
-                                      {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft}
+                                      {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
+                                      {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage}
                               };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
@@ -1871,4 +1872,100 @@ void WorldSession::onSoulStoneCraft(XPacket *pRecvPct)
     Messages::SendItemMessage(_player, pItem);
     _player->CalculateStat();
     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
+}
+
+void WorldSession::onStorage(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return;
+    pRecvPct->read_skip(7);
+
+    auto handle = pRecvPct->read<uint>();
+    auto mode = pRecvPct->read<uint8>();
+    int64 count = (int64)pRecvPct->read<int32>();
+
+    if(!_player->m_bIsUsingStorage || _player->m_castingSkill != nullptr /* TODO tradeTarget, Actable */)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, handle);
+        return;
+    }
+
+    switch((STORAGE_MODE)mode)
+    {
+        case ITEM_INVENTORY_TO_STORAGE:
+        case ITEM_STORAGE_TO_INVENTORY:
+        {
+            if (count <= 0)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, handle);
+                return;
+            }
+
+            auto *pItem = sMemoryPool->GetObjectInWorld<Item>(handle);
+            if (pItem == nullptr)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, handle);
+                return;
+            }
+            if (pItem->m_Instance.OwnerHandle != _player->GetHandle())
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, handle);
+                return;
+            }
+            if (pItem->IsInInventory() && mode == ITEM_INVENTORY_TO_STORAGE)
+            {
+                /*if((pItem->m_Instance.Flag & 0x40) == 0 || _player->FindStorageItem(pItem->m_Instance.Code) == nullptr)
+                {
+                    Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, handle); // too heavy??
+                    return;
+                }*/
+                _player->MoveInventoryToStorage(pItem, count);
+            }
+            else if (pItem->IsInStorage() && mode == ITEM_STORAGE_TO_INVENTORY)
+            {
+                _player->MoveStorageToInventory(pItem, count);
+            }
+            _player->Save(true);
+            return;
+        }
+        case GOLD_INVENTORY_TO_STORAGE: // 2
+        {
+            if(_player->GetGold() < count)
+                return;
+            if(_player->GetStorageGold() + count > MAX_GOLD_FOR_STORAGE)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, handle);
+                return;
+            }
+            auto nGold = _player->GetGold();
+            if(_player->ChangeGold(nGold - count) == TS_RESULT_SUCCESS && _player->ChangeStorageGold(_player->GetStorageGold() + count) == TS_RESULT_SUCCESS)
+            {
+                _player->Save(true);
+                return;
+            }
+        }
+            return;
+        case GOLD_STORAGE_TO_INVENTORY:
+        {
+            if (_player->GetStorageGold() < count)
+                return;
+            if (_player->GetGold() + count > MAX_GOLD_FOR_INVENTORY)
+            {
+                Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, handle);
+                return;
+            }
+            auto nGold = _player->GetStorageGold();
+            if (_player->ChangeStorageGold(nGold - count) == TS_RESULT_SUCCESS && _player->ChangeGold(_player->GetGold() + count) == TS_RESULT_SUCCESS)
+            {
+                _player->Save(true);
+                return;
+            }
+            return;
+        }
+        case STORAGE_CLOSE:
+            _player->m_bIsUsingStorage = false;
+            return;
+        default:
+            break;
+    }
 }

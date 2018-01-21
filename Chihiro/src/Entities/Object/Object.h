@@ -93,7 +93,9 @@ enum EUnitFields {
     UNIT_FIELD_STAMINA_REGEN_BONUS   = 0x004E, // Size: 1
     UNIT_FIELD_STAMINA_REGEN_RATE    = 0x004F, // Size: 1
     UNIT_FIELD_MAX_STAMINA           = 0x0050, // Size: 1
-    UNIT_END                         = 0x0051
+    UNIT_FIELD_STORAGE_GOLD          = 0x0051, // Size: 2
+    UNIT_FIELD_STORAGE_GOLD_SID      = 0x0053, // Size: 2
+    UNIT_END                         = 0x0055
 };
 
 enum EBattleFields {

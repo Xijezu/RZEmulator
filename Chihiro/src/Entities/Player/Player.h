@@ -41,6 +41,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 {
     public:
         friend class Messages;
+        friend class WorldSession;
 
         explicit Player(uint32);
         ~Player() override;
@@ -78,10 +79,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         /* ****************** QUEST END ****************** */
 
-        int GetPermission() { return GetInt32Value(UNIT_FIELD_PERMISSION); }
-        int64 GetGold() { return GetUInt64Value(UNIT_FIELD_GOLD); }
-        int GetPartyID() { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
-        int GetGuildID() { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
+        int GetPermission() const { return GetInt32Value(UNIT_FIELD_PERMISSION); }
+        int64 GetGold() const { return GetUInt64Value(UNIT_FIELD_GOLD); }
+        int64 GetStorageGold() const { return GetUInt64Value(UNIT_FIELD_STORAGE_GOLD); }
+        int GetPartyID() const { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
+        int GetGuildID() const { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
         int AddStamina(int nStamina);
         int GetStaminaRegenRate();
         CONDITION_INFO GetCondition() const;
@@ -99,6 +101,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool ReadSkillList(Unit *);
         bool ReadQuestList();
         bool ReadStateList(Unit *);
+        void DB_ReadStorage();
+        void DB_UpdateStorageGold();
         /* ****************** DATABASE END ****************** */
 
         // Warping
@@ -133,6 +137,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Item *FindItemBySID(int64);
         Item *FindItemByHandle(uint);
         Item *FindItem(uint code, uint flag, bool bFlag);
+        Item *FindStorageItem(int code);
         /* InventoryEventReceiver Start */
         void onAdd(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
         void onRemove(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
@@ -144,6 +149,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Item *GetStorageItem(uint idx);
         uint GetItemCount() const;
         uint GetStorageItemCount() const;
+        void MoveStorageToInventory(Item *pItem, int64 count);
+        void MoveInventoryToStorage(Item *pItem, int64 count);
         bool EraseItem(Item* pItem, int64 count);
         bool EraseBullet(int64 count);
 
@@ -151,6 +158,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool RemoveSummon(Summon* pSummon);
         void AddSummonToStorage(Summon* pSummon);
         void RemoveSummonFromStorage(Summon* pSummon);
+        void OpenStorage();
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
@@ -212,6 +220,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         uint GetCreatureGroup() const override { return 9; }
 
         ushort ChangeGold(int64);
+        ushort ChangeStorageGold(int64);
 
         uint16 IsUseableItem(Item *pItem, Unit *pTarget);
         uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
@@ -252,6 +261,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void onEndQuest(Quest *pQuest);
 
     private:
+        void openStorage();
         Item *popItem(Item* pItem, int64 cnt, bool bSkipUpdateToDB);
 
         void applyCharm(Item *pItem);
@@ -283,6 +293,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         Inventory m_Inventory;
         Inventory m_Storage;
+        bool m_bIsStorageRequested{false};
+        bool m_bIsStorageLoaded{false};
+        bool m_bIsUsingStorage{false};
 
         // Dialog stuff
         int         m_nDialogType{ };
