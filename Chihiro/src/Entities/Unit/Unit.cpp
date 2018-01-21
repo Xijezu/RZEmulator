@@ -3360,3 +3360,25 @@ float Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
 {
     return 1.0f;
 }
+
+void Unit::BindSkillCard(Item *pItem)
+{
+    Skill *pSkill = GetSkill(pItem->m_pItemBase->skill_id);
+    if(pSkill != nullptr)
+    {
+        pSkill->m_nEnhance = (uint)pItem->m_Instance.nEnhance;
+        pItem->SetBindTarget(this);
+        Messages::SendSkillCardInfo(dynamic_cast<Player*>(this), pItem);
+    }
+}
+
+void Unit::UnBindSkillCard(Item *pItem)
+{
+    Skill *pSkill = GetSkill(pItem->m_pItemBase->skill_id);
+    if(pSkill != nullptr)
+    {
+        pSkill->m_nEnhance = 0;
+        pItem->SetBindTarget(nullptr);
+        Messages::SendSkillCardInfo(dynamic_cast<Player*>(this), pItem);
+    }
+}

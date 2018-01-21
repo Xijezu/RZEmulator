@@ -295,6 +295,26 @@ void Item::CopyFrom(const Item *pFrom)
     m_Instance.OwnerHandle = oldOwner;
 }
 
+void Item::SetBindTarget(Unit *pUnit)
+{
+    if(pUnit != nullptr && pUnit->IsPlayer())
+        m_Instance.Socket[0] = pUnit->GetHandle();
+    else
+        m_Instance.Socket[0] = 0;
+
+    if(pUnit != nullptr && pUnit->IsSummon())
+        m_Instance.Socket[1] = pUnit->GetHandle();
+    else
+        m_Instance.Socket[1] = 0;
+
+    if(pUnit != nullptr)
+        m_hBindedTarget = pUnit->GetHandle();
+    else
+        m_hBindedTarget = 0;
+
+    m_bIsNeedUpdateToDB = true;
+}
+
 void ItemInstance::Copy(const ItemInstance &pFrom)
 {
     OwnerHandle = pFrom.OwnerHandle;

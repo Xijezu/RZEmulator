@@ -115,7 +115,9 @@ const AuthGameSession packetHandler[] =
                                       {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
                                       {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
                                       {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
-                                      {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage}
+                                      {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
+                                      {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
+                                      {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard}
                               };
 
 const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
@@ -1974,4 +1976,60 @@ void WorldSession::onStorage(XPacket *pRecvPct)
         default:
             break;
     }
+}
+
+void WorldSession::onBindSkillCard(XPacket *pRecvPct)
+{
+    if(_player == nullptr)
+        return;
+
+    pRecvPct->read_skip(7);
+    auto item_handle = pRecvPct->read<uint>();
+    auto target_handle = pRecvPct->read<uint>();
+
+    auto pItem = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+    if(pItem == nullptr)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+        return;
+    }
+    if(target_handle != _player->GetHandle())
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, target_handle);
+        return;
+    }
+    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != ItemGroup::SkillCard || pItem->m_hBindedTarget != 0)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+        return;
+    }
+
+    _player->BindSkillCard(pItem);
+
+}
+
+void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
+{
+    pRecvPct->read_skip(7);
+    auto item_handle = pRecvPct->read<uint>();
+    auto target_handle = pRecvPct->read<uint>();
+
+    auto pItem = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+    if(pItem == nullptr)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
+        return;
+    }
+    if(target_handle != _player->GetHandle())
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, target_handle);
+        return;
+    }
+    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != ItemGroup::SkillCard || pItem->m_hBindedTarget == 0)
+    {
+        Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
+        return;
+    }
+
+    _player->UnBindSkillCard(pItem);
 }

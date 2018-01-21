@@ -108,6 +108,8 @@ class WorldSession
 
 		void onPutOnItem(XPacket *);
 		void onPutOffItem(XPacket *);
+		void onBindSkillCard(XPacket *);
+		void onUnBindSkilLCard(XPacket *);
 		void onEquipSummon(XPacket *);
 		void onSoulStoneCraft(XPacket *);
 

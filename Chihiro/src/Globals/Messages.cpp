@@ -1003,3 +1003,11 @@ void Messages::SendOpenStorageMessage(Player *pPlayer)
     // jk, packet is empty
     pPlayer->SendPacket(storagePct);
 }
+
+void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
+{
+    XPacket scPct(TS_SC_SKILLCARD_INFO);
+    scPct << pItem->GetHandle();
+    scPct << pItem->m_hBindedTarget;
+    pPlayer->SendPacket(scPct);
+}

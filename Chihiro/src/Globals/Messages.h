@@ -109,6 +109,7 @@ class Messages
         static void SendPartyInfo(Player *);
         static void SendRegionAckMessage(Player* pPlayer, uint rx, uint ry);
         static void SendOpenStorageMessage(Player* pPlayer);
+        static void SendSkillCardInfo(Player* pPlayer, Item *pItem);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };

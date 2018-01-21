@@ -165,6 +165,9 @@ class Unit : public WorldObject
         void SetHealth(int);
         void SetMana(int);
 
+        void BindSkillCard(Item *pItem);
+        void UnBindSkillCard(Item *pItem);
+
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
 
         void SetMaxMana(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_MANA, val); };
