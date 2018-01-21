@@ -1576,7 +1576,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
             || pSkillTarget->IsSummon()
                && dynamic_cast<Summon *>(pSkillTarget)->GetMaster()->GetHandle() == GetHandle())
         {
-            if (!pSkill->m_SkillBase->IsUsable(1))
+            if (!pSkill->m_SkillBase->IsUsable(0))
                 return TS_RESULT_NOT_ACTABLE;
         }
         else
