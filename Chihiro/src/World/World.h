@@ -27,6 +27,7 @@ class World
 {
 public:
     static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+    typedef ACE_Atomic_Op<ACE_Thread_Mutex, uint64> AtomicIndex;
 
 	World();
 	~World();
@@ -102,7 +103,6 @@ private:
 	static uint8 m_ExitCode;
 
 	SessionMap m_sessions;
-	uint64_t s_nItemIndex{0};
 	const uint startTime;
 
 	void AddSession_(WorldSession* s);
@@ -112,11 +112,12 @@ private:
     bool onSetMove(WorldObject* pObject, Position curPos, Position lastpos);
 	void enterProc(WorldObject* pUint, uint prx, uint pry);
     void step(WorldObject *obj, uint tm);
-	uint64_t s_nPlayerIndex{0};
-	uint64_t s_nPetIndex{0};
-	uint64_t s_nSummonIndex{0};
-	uint64_t s_nSkillIndex{0};
-	uint64_t s_nStateIndex{0};
+	AtomicIndex s_nPlayerIndex{0};
+	AtomicIndex s_nPetIndex{0};
+	AtomicIndex s_nSummonIndex{0};
+	AtomicIndex s_nSkillIndex{0};
+	AtomicIndex s_nStateIndex{0};
+	AtomicIndex s_nItemIndex{0};
 };
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
