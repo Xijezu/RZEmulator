@@ -313,7 +313,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << _player->GetUInt32Value(UNIT_FIELD_MODEL);
     packet.fill(result->szName, 19);
     packet << (uint32)sConfigMgr->GetIntDefault("Game.CellSize", 6);
-    packet << _player->GetUInt32Value(UNIT_FIELD_GUILD_ID);
+    packet << _player->GetUInt32Value(PLAYER_FIELD_GUILD_ID);
     GetSocket()->SendPacket(packet);
 
     _player->SendLoginProperties();

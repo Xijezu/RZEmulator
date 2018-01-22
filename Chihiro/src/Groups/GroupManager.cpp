@@ -51,7 +51,7 @@ bool GroupManager::DestroyParty(int nPartyID)
        auto player = Player::FindPlayer(tag.strName);
         if(player != nullptr)
         {
-            player->SetInt32Value(UNIT_FIELD_PARTY_ID, 0);
+            player->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
             Messages::SendChatMessage(100, "@PARTY", player, string_format("DESTROY|%s|", name));
         }
     });
@@ -220,7 +220,7 @@ bool GroupManager::JoinParty(int nPartyID, Player* pPlayer, uint nPass)
     tag.nJobID = pPlayer->GetCurrentJob();
     tag.strName = pPlayer->GetName();
     info->vMemberNameList.emplace_back(tag);
-    pPlayer->SetInt32Value(UNIT_FIELD_PARTY_ID, nPartyID);
+    pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, nPartyID);
     return true;
 }
 

@@ -38,6 +38,18 @@ Unit::~Unit()
     m_vSkillList.clear();
 }
 
+void Unit::_InitTimerFieldsAndStatus()
+{
+    auto ct = sWorld->GetArTime();
+    SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
+    SetUInt32Value(UNIT_LAST_UPDATE_TIME, ct);
+    SetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME, ct);
+    SetUInt32Value(UNIT_LAST_SAVE_TIME, ct);
+    SetUInt32Value(UNIT_LAST_HATE_UPDATE_TIME, ct);
+    SetFlag(UNIT_FIELD_STATUS, (StatusFlags::NeedToCalculateStat | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::Movable | StatusFlags::MagicCastable | StatusFlags::ItemUsable | StatusFlags::Mortal));
+}
+
+
 void Unit::AddToWorld()
 {
     if (!IsInWorld()) {
@@ -1328,19 +1340,23 @@ void Unit::processPendingMove()
 void Unit::OnUpdate()
 {
     uint ct = sWorld->GetArTime();
-    if (HasFlag(UNIT_FIELD_STATUS, NeedToCalculateStat)) {
+    if (HasFlag(UNIT_FIELD_STATUS, NeedToCalculateStat))
+    {
         CalculateStat();
         RemoveFlag(UNIT_FIELD_STATUS, NeedToCalculateStat);
     }
     this->regenHPMP(ct);
 
-    if(IsInWorld()) {
-        if(!m_vStateList.empty() && m_nLastStateProcTime + 100 < ct) {
+    if (IsInWorld())
+    {
+        if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct)
+        {
             procStateDamage(ct);
             //procState(ct);
-            if(ClearExpiredState(ct)) {
+            if (ClearExpiredState(ct))
+            {
                 CalculateStat();
-                m_nLastStateProcTime = ct;
+                SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
             }
         }
     }
@@ -1352,15 +1368,18 @@ void Unit::regenHPMP(uint t)
     int   prev_hp;
     float pt;
 
-    uint et = t - m_nLastUpdatedTime;
-    if (et >= 300) {
-        float etf = (float) et / 6000.0f;
+    uint et = t - GetUInt32Value(UNIT_LAST_UPDATE_TIME);
+    if (et >= 300)
+    {
+        float etf = (float)et / 6000.0f;
         //prev_mp = et;
 
-        if (GetHealth() != 0) {
+        if (GetHealth() != 0)
+        {
             prev_mp = GetHealth();
             prev_hp = GetMana();
-            if (!HasFlag(UNIT_FIELD_STATUS, HPRegenStopped)) {
+            if (!HasFlag(UNIT_FIELD_STATUS, HPRegenStopped))
+            {
                 pt     = GetMaxHealth() * m_Attribute.nHPRegenPercentage;
                 pt     = pt * 0.01f * etf;// + 0.0;
                 pt     = pt + m_Attribute.nHPRegenPoint * etf;
@@ -1372,7 +1391,8 @@ void Unit::regenHPMP(uint t)
                     pt = 1.0f;
                 pt *= GetFloatValue(UNIT_FIELD_HP_REGEN_MOD);
                 auto pti = static_cast<int>(pt);
-                if (pti != 0.0) {
+                if (pti != 0.0)
+                {
                     AddHealth(pti);
                 }
                 /*this.m_nHPDecPart = (int) ((pt - (double) pti) * 100.0 + (double) this.m_nHPDecPart);
@@ -1382,10 +1402,11 @@ void Unit::regenHPMP(uint t)
                     this.m_nHPDecPart = this.m_nHPDecPart % 100;
                 }*/
             }
-            if (!HasFlag(UNIT_FIELD_STATUS, MPRegenStopped)) {
+            if (!HasFlag(UNIT_FIELD_STATUS, MPRegenStopped))
+            {
                 pt = GetMaxMana() * m_Attribute.nMPRegenPercentage;
                 pt = pt * 0.01f * etf;// +0.0;
-                pt = pt + (float) m_Attribute.nMPRegenPoint * etf;
+                pt = pt + m_Attribute.nMPRegenPoint * etf;
 
                 /*if (this.IsSitDown())
                     pt = this.m_fMPHealRatioByRest * pt;*/
@@ -1393,23 +1414,26 @@ void Unit::regenHPMP(uint t)
                     pt = 1.0f;
                 pt     = GetFloatValue(UNIT_FIELD_MP_REGEN_MOD);
                 if (pt != 0.0)
-                    AddMana(pt);
+                    AddMana((int)pt);
             }
-            if (prev_hp != GetHealth() || prev_mp != GetMana()) {
+            if (prev_hp != GetHealth() || prev_mp != GetMana())
+            {
                 this->m_fRegenMP += (GetMana() - prev_mp);
                 this->m_nRegenHP += GetHealth() - prev_hp;
-                if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3) {
+                if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3)
+                {
                     XPacket hpmpPct(TS_SC_REGEN_HPMP);
-                    hpmpPct << (uint) GetHandle();
-                    hpmpPct << (int16) m_nRegenHP;
-                    hpmpPct << (int16) m_fRegenMP;
-                    hpmpPct << (int32) GetHealth();
-                    hpmpPct << (int16) GetMana();
+                    hpmpPct << (uint)GetHandle();
+                    hpmpPct << (int16)m_nRegenHP;
+                    hpmpPct << (int16)m_fRegenMP;
+                    hpmpPct << (int32)GetHealth();
+                    hpmpPct << (int16)GetMana();
 
                     this->m_nRegenHP = 0;
                     this->m_fRegenMP = 0;
-                    if (IsInWorld()) {
-                        sWorld->Broadcast((uint) (GetPositionX() / g_nRegionSize), (uint) (GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
+                    if (IsInWorld())
+                    {
+                        sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
                     }
                     /*if (this.IsSummon())
                     {
@@ -1427,7 +1451,7 @@ void Unit::regenHPMP(uint t)
                 }
             }
         }
-        m_nLastUpdatedTime = t;
+        SetUInt32Value(UNIT_LAST_UPDATE_TIME, t);
     }
 }
 

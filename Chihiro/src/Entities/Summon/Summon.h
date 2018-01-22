@@ -61,7 +61,6 @@ class Summon : public Unit
         //void onApplyStat
         void onCompleteCalculateStat() override;
     private:
-        uint m_nLastCantAttackTime;
         SummonResourceTemplate *m_tSummonBase{nullptr};
         Player *m_pMaster{nullptr};
 };

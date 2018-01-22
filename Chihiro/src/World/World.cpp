@@ -433,7 +433,7 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
     if(pPlayer->GetHealth() != 0) {
         float fJP = jp;
         // remove some immorality points here
-        if(pPlayer->GetInt32Value(UNIT_FIELD_IP) > 0) {
+        if(pPlayer->GetInt32Value(PLAYER_FIELD_IP) > 0) {
             if(pCorpse->GetLevel() >= pPlayer->GetLevel()) {
                 float fIPDec = -1.0f;
             }

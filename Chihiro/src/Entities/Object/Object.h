@@ -35,73 +35,86 @@ enum SubType : int {
     ST_Pet       = 7,
 };
 
-enum EUnitFields {
+enum EUnitFields
+{
     UNIT_FIELD_HANDLE                = 0x0000, // Size: 1
-    UNIT_FIELD_ACCOUNT_ID            = 0x0001, // Size: 1
+    UNIT_FIELD_UID                   = 0x0001, // Size: 1
     UNIT_FIELD_LEVEL                 = 0x0002, // Size: 1
-    UNIT_FIELD_STATUS                = 0x0003, // Size: 1>
-    UNIT_FIELD_PERMISSION            = 0x0004, // Size: 1
+    UNIT_FIELD_STATUS                = 0x0003, // Size: 1
     UNIT_FIELD_JOBPOINT              = 0x0005, // Size: 1
     UNIT_FIELD_HEALTH                = 0x0006, // Size: 1
     UNIT_FIELD_MANA                  = 0x0007, // Size: 1
     UNIT_FIELD_MAX_HEALTH            = 0x0008, // Size: 1
     UNIT_FIELD_MAX_MANA              = 0x0009, // Size: 1
     UNIT_FIELD_STAMINA               = 0x000A, // Size: 1
-    UNIT_FIELD_PARTY_ID              = 0x000B, // Size: 1
-    UNIT_FIELD_GUILD_ID              = 0x000C, // Size: 1
-    UNIT_FIELD_RACE                  = 0x000D, // Size: 1
-    UNIT_FIELD_SEX                   = 0x000E, // Size: 1
-    UNIT_FIELD_PREV_JOB              = 0x000F, // Size: 3
-    UNIT_FIELD_PREV_JLV              = 0x0012, // Size: 3
-    UNIT_FIELD_HAVOC                 = 0x0015, // Size: 1
-    UNIT_FIELD_JOB_DEPTH             = 0x0016, // Size: 1
-    UNIT_FIELD_IP                    = 0x0017, // Size: 1
-    UNIT_FIELD_CHA                   = 0x0018, // Size: 1
-    UNIT_FIELD_PKC                   = 0x0019, // Size: 1
-    UNIT_FIELD_DKC                   = 0x001A, // Size: 1
-    UNIT_FIELD_SKIN_COLOR            = 0x001B, // Size: 1
-    UNIT_FIELD_SUMMON                = 0x001C, // Size: 6
-    UNIT_FIELD_BELT                  = 0x0023, // Size: 6
-    UNIT_FIELD_MAX_CHAOS             = 0x0029, // Size: 1
-    UNIT_FIELD_CHAOS                 = 0x002A, // Size: 1
-    UNIT_FIELD_ACTIVE_SUMMON         = 0x002B, // Size: 1
-    UNIT_FIELD_REMAIN_SUMMON_TIME    = 0x002D, // Size: 1
-    UNIT_FIELD_PET                   = 0x002E, // Size: 1
-    UNIT_FIELD_CHAT_BLOCK_TIME       = 0x002F, // Size: 2
-    UNIT_FIELD_GUILD_BLOCK_TIME      = 0x0031, // Size: 2
-    UNIT_FIELD_PK_MODE               = 0x0033, // Size: 1
-    UNIT_FIELD_MODEL                 = 0x0034, // Size: 5
-    UNIT_FIELD_JOB                   = 0x0039, // Size: 1
-    UNIT_FIELD_JLV                   = 0x003A, // Size: 1
-    UNIT_FIELD_MAX_HEALTH_MODIFIER   = 0x003B, // Size: 1
-    UNIT_FIELD_MAX_MANA_MODIFIER     = 0x003C, // Size: 1
-    UNIT_FIELD_HP_REGEN_MOD          = 0x003D, // Size: 1
-    UNIT_FIELD_MP_REGEN_MOD          = 0x003E, // Size: 1
-    UNIT_FIELD_HEAL_RATIO            = 0x003F, // Size: 1
-    UNIT_FIELD_MP_HEAL_RATIO         = 0x0040, // Size: 1
-    UNIT_FIELD_HEAL_RATIO_BY_ITEM    = 0x0041, // Size: 1
-    UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM = 0x0042, // Size: 1
-    UNIT_FIELD_HEAL_RATIO_BY_REST    = 0x0043, // Size: 1
-    UNIT_FIELD_MP_HEAL_RATIO_BY_REST = 0x0044, // Size: 1
-    UNIT_FIELD_HATE_RATIO            = 0x0045, // Size: 1
-    UNIT_FIELD_ADDITIONAL_HEAL       = 0x0046, // Size: 1
-    UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0047, // Size: 1
-    UNIT_FIELD_UID                   = 0x0048, // Size: 1
-    UNIT_FIELD_EXP                   = 0x0049, // Size: 2
-    UNIT_FIELD_DEAD_TIME             = 0x004B, // Size: 1
-    UNIT_FIELD_GOLD                  = 0x004C, // Size: 2
-    UNIT_FIELD_STAMINA_REGEN_BONUS   = 0x004E, // Size: 1
-    UNIT_FIELD_STAMINA_REGEN_RATE    = 0x004F, // Size: 1
-    UNIT_FIELD_MAX_STAMINA           = 0x0050, // Size: 1
-    UNIT_FIELD_STORAGE_GOLD          = 0x0051, // Size: 2
-    UNIT_FIELD_STORAGE_GOLD_SID      = 0x0053, // Size: 2
-    UNIT_END                         = 0x0055
+    UNIT_FIELD_RACE                  = 0x000B, // Size: 1
+    UNIT_FIELD_SEX                   = 0x000C, // Size: 1
+    UNIT_FIELD_PREV_JOB              = 0x000D, // Size: 3
+    UNIT_FIELD_PREV_JLV              = 0x0010, // Size: 3
+    UNIT_FIELD_HAVOC                 = 0x0013, // Size: 1
+    UNIT_FIELD_JOB_DEPTH             = 0x0014, // Size: 1
+    UNIT_FIELD_SKIN_COLOR            = 0x0015, // Size: 1
+    UNIT_FIELD_MODEL                 = 0x0016, // Size: 5
+    UNIT_FIELD_JOB                   = 0x001B, // Size: 1
+    UNIT_FIELD_JLV                   = 0x001C, // Size: 1
+    UNIT_FIELD_MAX_HEALTH_MODIFIER   = 0x001D, // Size: 1
+    UNIT_FIELD_MAX_MANA_MODIFIER     = 0x001E, // Size: 1
+    UNIT_FIELD_HP_REGEN_MOD          = 0x001F, // Size: 1
+    UNIT_FIELD_MP_REGEN_MOD          = 0x0020, // Size: 1
+    UNIT_FIELD_HEAL_RATIO            = 0x0021, // Size: 1
+    UNIT_FIELD_MP_HEAL_RATIO         = 0x0022, // Size: 1
+    UNIT_FIELD_HEAL_RATIO_BY_ITEM    = 0x0023, // Size: 1
+    UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM = 0x0024, // Size: 1
+    UNIT_FIELD_HEAL_RATIO_BY_REST    = 0x0025, // Size: 1
+    UNIT_FIELD_MP_HEAL_RATIO_BY_REST = 0x0026, // Size: 1
+    UNIT_FIELD_HATE_RATIO            = 0x0027, // Size: 1
+    UNIT_FIELD_ADDITIONAL_HEAL       = 0x0028, // Size: 1
+    UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0029, // Size: 1
+    UNIT_FIELD_EXP                   = 0x002A, // Size: 2
+    UNIT_FIELD_DEAD_TIME             = 0x002C, // Size: 1
+    UNIT_LAST_UPDATE_TIME            = 0x002D, // Size: 1
+    UNIT_LAST_STATE_PROC_TIME        = 0x002E, // Size: 1
+    UNIT_LAST_CANT_ATTACK_TIME       = 0x002F, // Size: 1
+    UNIT_LAST_SAVE_TIME              = 0x0030, // Size: 1
+    UNIT_LAST_HATE_UPDATE_TIME       = 0x0031, // Size: 1
+    UNIT_END                         = 0x0032
 };
 
-enum EBattleFields {
-    BATTLE_FIELD_TARGET_HANDLE         = UNIT_END + 0x0001, // Size: 1
-    BATTLE_FIELD_NEXT_ATTACKABLE_TIME  = UNIT_END + 0x0002, // Size: 2
-    BATTLE_FIELD_END                   = UNIT_END + 0x0003
+enum EBattleFields
+{
+    BATTLE_FIELD_TARGET_HANDLE        = UNIT_END + 0x0000, // Size: 1
+    BATTLE_FIELD_NEXT_ATTACKABLE_TIME = UNIT_END + 0x0001, // Size: 1
+    BATTLE_FIELD_END                  = UNIT_END + 0x0002
+};
+
+enum EPlayerFields
+{
+    PLAYER_FIELD_ACCOUNT_ID          = BATTLE_FIELD_END + 0x0001, // Size: 1
+    PLAYER_FIELD_PERMISSION          = BATTLE_FIELD_END + 0x0002, // Size: 1
+    PLAYER_FIELD_PARTY_ID            = BATTLE_FIELD_END + 0x0003, // Size: 1
+    PLAYER_FIELD_GUILD_ID            = BATTLE_FIELD_END + 0x0004, // Size: 1
+    PLAYER_FIELD_GOLD                = BATTLE_FIELD_END + 0x0005, // Size: 2
+    PLAYER_FIELD_STAMINA_REGEN_BONUS = BATTLE_FIELD_END + 0x0007, // Size: 1
+    PLAYER_FIELD_STAMINA_REGEN_RATE  = BATTLE_FIELD_END + 0x0008, // Size: 1
+    PLAYER_FIELD_MAX_STAMINA         = BATTLE_FIELD_END + 0x0009, // Size: 1
+    PLAYER_FIELD_STORAGE_GOLD        = BATTLE_FIELD_END + 0x000A, // Size: 2
+    PLAYER_FIELD_STORAGE_GOLD_SID    = BATTLE_FIELD_END + 0x000C, // Size: 2
+    PLAYER_FIELD_SUMMON              = BATTLE_FIELD_END + 0x000E, // Size: 6
+    PLAYER_FIELD_BELT                = BATTLE_FIELD_END + 0x0014, // Size: 6
+    PLAYER_FIELD_MAX_CHAOS           = BATTLE_FIELD_END + 0x002A, // Size: 1
+    PLAYER_FIELD_CHAOS               = BATTLE_FIELD_END + 0x002B, // Size: 1
+    PLAYER_FIELD_ACTIVE_SUMMON       = BATTLE_FIELD_END + 0x002C, // Size: 1
+    PLAYER_FIELD_REMAIN_SUMMON_TIME  = BATTLE_FIELD_END + 0x002D, // Size: 1
+    PLAYER_FIELD_PET                 = BATTLE_FIELD_END + 0x002E, // Size: 1
+    PLAYER_FIELD_CHAT_BLOCK_TIME     = BATTLE_FIELD_END + 0x002F, // Size: 2
+    PLAYER_FIELD_GUILD_BLOCK_TIME    = BATTLE_FIELD_END + 0x0031, // Size: 2
+    PLAYER_FIELD_PK_MODE             = BATTLE_FIELD_END + 0x0033, // Size: 1
+    PLAYER_FIELD_IP                  = BATTLE_FIELD_END + 0x0034, // Size: 1
+    PLAYER_FIELD_CHA                 = BATTLE_FIELD_END + 0x0035, // Size: 1
+    PLAYER_FIELD_PKC                 = BATTLE_FIELD_END + 0x0036, // Size: 1
+    PLAYER_FIELD_DKC                 = BATTLE_FIELD_END + 0x0037, // Size: 1
+    PLAYER_LAST_STAMINA_UPDATE_TIME  = BATTLE_FIELD_END + 0x0038, // Size 1
+    PLAYER_END                       = BATTLE_FIELD_END + 0x0039
 };
 
 class ArRegion;
@@ -575,11 +588,9 @@ class WorldObject : public Object, public ArMoveVector
         explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
         std::vector<Position> m_PendingMovePos{ };
         uint8_t               m_nPendingMoveSpeed{ };
-        uint                  lastProcessTime{0};
         std::string           m_name;
         bool                  _isActive;
         const bool            m_isWorldObject;
-
 };
 
 #endif // _OBJECT_H_

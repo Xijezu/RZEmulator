@@ -144,7 +144,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
         MX_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
         return;
     }
-    pClient->SetInt32Value(UNIT_FIELD_PARTY_ID, partyID);
+    pClient->SetInt32Value(PLAYER_FIELD_PARTY_ID, partyID);
     Messages::SendChatMessage(100, "@PARTY", pClient, string_format("CREATE|%s|%s|", partyName.c_str(), pClient->GetName()));
     Messages::SendPartyInfo(pClient);
 }

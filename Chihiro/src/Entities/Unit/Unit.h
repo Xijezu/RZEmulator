@@ -68,12 +68,13 @@ enum DamageFlag : int
 
 class Unit : public WorldObject
 {
+    public:
         friend class Messages;
         friend class Skill;
         friend class Player;
         friend class XLua;
         friend class WorldSession;
-    public:
+
         virtual ~Unit();
         static void EnterPacket(XPacket &, Unit *, Player *);
         void AddToWorld() override;
@@ -295,11 +296,11 @@ class Unit : public WorldObject
         virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
         void processAttack();
         void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
-        uint               m_nLastUpdatedTime{ }, m_nLastStateProcTime{ };
         void onAfterAddState(State);
         void onUpdateState(State state, bool bIsExpire);
         void procMoveSpeedChange();
         void processPendingMove();
+        void _InitTimerFieldsAndStatus();
         std::vector<State> m_vStateList{ };
         uint32             m_unitTypeMask;
         //	typedef std::list<GameObject*> GameObjectList;

@@ -35,6 +35,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     _valuesCount = BATTLE_FIELD_END;
 
     _InitValues();
+    _InitTimerFieldsAndStatus();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
@@ -43,7 +44,6 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
-    SetFlag(UNIT_FIELD_STATUS, (StatusFlags::NeedToCalculateStat | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::Movable | StatusFlags::MagicCastable | StatusFlags::ItemUsable | StatusFlags::Mortal));
 
     m_nLastEnemyDistance = 0.0f;
     m_nLastTrackTime = 0;
@@ -362,7 +362,7 @@ void Monster::Update(uint diff)
         {
             if ((int)ms <= 3)
             {
-                if (m_nLastUpdatedTime + 50 < ct)
+                if(GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 50 < ct)
                     OnUpdate();
 
                 if (true/*IsActable*/)
@@ -385,7 +385,7 @@ void Monster::Update(uint diff)
     }
     else
     {
-        if (m_nLastUpdatedTime + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+        if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
         {
             OnUpdate();
 

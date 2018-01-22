@@ -1716,9 +1716,10 @@ NPC *ObjectMgr::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
 {
     auto npc = new NPC{npc_info};
     npc->SetLayer(layer);
-    npc->CalculateStat();
-    for(auto& ql : _questLinkStore) {
-        if(ql.nNPCID == npc->m_pBase->id) {
+    for (auto &ql : _questLinkStore)
+    {
+        if (ql.nNPCID == npc->m_pBase->id)
+        {
             npc->LinkQuest(&ql);
         }
     }

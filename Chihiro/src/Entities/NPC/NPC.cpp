@@ -25,8 +25,10 @@ NPC::NPC(NPCTemplate* base) : Unit(true)
     SetUInt32Value(UNIT_FIELD_UID, m_pBase->id);
     SetInt32Value(UNIT_FIELD_RACE, 0xac);
 
-    SetHealth(100);
-    SetMaxHealth(100);
+    CalculateStat();
+
+    SetHealth(GetMaxHealth());
+    SetMana(GetMaxMana());
     Relocate(m_pBase->x, m_pBase->y, m_pBase->z);
 }
 

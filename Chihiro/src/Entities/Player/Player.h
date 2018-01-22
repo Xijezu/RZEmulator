@@ -79,11 +79,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         /* ****************** QUEST END ****************** */
 
-        int GetPermission() const { return GetInt32Value(UNIT_FIELD_PERMISSION); }
-        int64 GetGold() const { return GetUInt64Value(UNIT_FIELD_GOLD); }
-        int64 GetStorageGold() const { return GetUInt64Value(UNIT_FIELD_STORAGE_GOLD); }
-        int GetPartyID() const { return GetInt32Value(UNIT_FIELD_PARTY_ID); }
-        int GetGuildID() const { return GetInt32Value(UNIT_FIELD_GUILD_ID); }
+        int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
+        int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
+        int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
+        int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
+        int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
         int AddStamina(int nStamina);
         int GetStaminaRegenRate();
         CONDITION_INFO GetCondition() const;
@@ -274,7 +274,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         WorldSession *m_session{nullptr};
         std::string  m_szAccount;
         QuestManager m_QuestManager{ };
-        uint         m_nLastStaminaUpdateTime{0};
         bool         m_bStaminaActive{false};
         bool         m_bUsingTent{false};
         float        m_fDistEXPMod{1.0f};
@@ -288,8 +287,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         std::vector<Summon *> m_vSummonList{};
         std::vector<Item*> m_vCharmList{};
-
-        uint m_nLastSaveTime{ }, m_nLastCantAttackTime{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 

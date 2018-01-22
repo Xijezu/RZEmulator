@@ -45,6 +45,7 @@ Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
     _valuesCount = BATTLE_FIELD_END;
 
     _InitValues();
+    _InitTimerFieldsAndStatus();
     SetInt32Value(UNIT_FIELD_HANDLE, pHandle);
     SetSummonInfo(pIdx);
 }
@@ -536,9 +537,9 @@ float Summon::GetScale() const
 
 void Summon::onCantAttack(uint handle, uint t)
 {
-    if(m_nLastCantAttackTime + 100 < t)
+    if(GetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME) + 100 < t)
     {
-        m_nLastCantAttackTime = t;
+        SetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME, t);
         Messages::SendCantAttackMessage(GetMaster(), GetHandle(), handle, TS_RESULT_TOO_FAR);
     }
 }

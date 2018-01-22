@@ -311,11 +311,11 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
         if(szKey == "gold") {
             return return_object((int64)player->GetGold());
         } else if(szKey == "guild_id") {
-            return return_object(player->GetInt32Value(UNIT_FIELD_GUILD_ID));
+            return return_object(player->GetInt32Value(PLAYER_FIELD_GUILD_ID));
         } else if(szKey == "permission") {
             return return_object(player->GetPermission());
         } else if(szKey == "chaos") {
-            return return_object(player->GetInt32Value(UNIT_FIELD_CHAOS));
+            return return_object(player->GetInt32Value(PLAYER_FIELD_CHAOS));
         }
     }
     MX_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
@@ -392,9 +392,9 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
         if(szKey == "gold") {
             player->ChangeGold(args[0].get<int64>());
         } else if(szKey == "permission") {
-            player->SetInt32Value(UNIT_FIELD_PERMISSION, args[0].get<uint>());
+            player->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint>());
         } else if(szKey == "chaos") {
-            player->SetInt32Value(UNIT_FIELD_CHAOS, args[0].get<uint>());
+            player->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint>());
             player->SendGoldChaosMessage();
         }
     }
