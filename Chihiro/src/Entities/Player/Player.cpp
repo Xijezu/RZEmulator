@@ -1318,7 +1318,7 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
     // TODO: UpdateWeightWithInventory();
 }
 
-void Player::onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
+void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
 {
     Messages::SendItemCountMessage(this, pItem);
     if (!bSkipUpdateItemToDB && pItem->IsInStorage())

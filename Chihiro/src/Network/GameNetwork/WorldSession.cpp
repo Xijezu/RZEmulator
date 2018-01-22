@@ -1269,8 +1269,6 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item->GetHandle());
         return;
     }
-    int64 nPrevGold = _player->GetGold();
-    int64 nNewGold  = _player->GetGold() + sell_count * nPrice;
     if (_player->ChangeGold(_player->GetGold() + sell_count * nPrice) != 0)
     {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
