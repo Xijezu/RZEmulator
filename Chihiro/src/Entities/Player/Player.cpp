@@ -1432,8 +1432,8 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
     }
     int     nl = sObjectMgr->GetLocationID(x, y);
     XPacket locPct(TS_SC_CHANGE_LOCATION);
-    locPct << (int)m_nWorldLocationId;
-    locPct << (int)nl;
+    locPct << m_nWorldLocationId;
+    locPct << nl;
     SendPacket(locPct);
 
     if (m_nWorldLocationId != nl)

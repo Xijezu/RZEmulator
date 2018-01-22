@@ -132,8 +132,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     int   nMP       = m_pOwner->GetMana();
     float decHP     = 0;
     float decMP     = 0;
-    int   hp_cost   = 0;
-    int   mana_cost = 0;
+    int hp_cost = 0;
+    int mana_cost = 0;
 
     if (m_pOwner->GetMaxHealth() != 0)
         decHP = 100 * nHP / m_pOwner->GetMaxHealth();
@@ -413,6 +413,7 @@ void Skill::ProcSkill()
     if(m_Status == SkillStatus::SS_FIRE)
     {
         bool bIsSuccess = false;
+
         FireSkill(sMemoryPool->GetObjectInWorld<Unit>(m_hTarget), bIsSuccess);
         broadcastSkillMessage(m_pOwner, 0, 0, 0);
 

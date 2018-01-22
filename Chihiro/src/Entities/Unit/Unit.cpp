@@ -2242,16 +2242,18 @@ uint Unit::GetCreatureGroup() const
 int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
 {
     int result{0};
-    if(GetHealth() != 0) {
+    if (GetHealth() != 0)
+    {
         //if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::Hiding))
-            //1RemoveState(StateCode::Hide, 65535);
+        //1RemoveState(StateCode::Hide, 65535);
 
-        if(GetHealth() <= nDamage)
+        if (GetHealth() <= nDamage)
             SetHealth(0);
         else
             AddHealth(-nDamage);
 
-        if(GetHealth() == 0) {
+        if (GetHealth() == 0)
+        {
             SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld->GetArTime());
             onDead(pFrom, decreaseEXPOnDead);
         }
@@ -2355,22 +2357,25 @@ void Unit::EndAttack()
 
 void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
-    Position pos{};
+    Position pos{ };
 
-    if(m_castingSkill != nullptr) {
+    if (m_castingSkill != nullptr)
+    {
         CancelSkill();
     }
-    if(bIsMoving && IsInWorld()) {
+    if (bIsMoving && IsInWorld())
+    {
         pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
         sWorld->SetMove(this, pos, pos, 0, true, sWorld->GetArTime(), true);
-        if(IsPlayer()) {
+        if (IsPlayer())
+        {
             // Ride handle
         }
     }
-    if(GetTargetHandle() != 0)
+    if (GetTargetHandle() != 0)
         EndAttack();
 
-    for(auto state : m_vStateList)
+    for (auto& state : m_vStateList)
     {
         Messages::BroadcastStateMessage(this, state, true);
     }
@@ -2702,8 +2707,6 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
                                             && stateInfo->value[2] == 0.0f && stateInfo->value[3] == 0.0f)
 
     }*/
-    if(m_castingSkill != nullptr)
-        CancelSkill();
 
     if(code == StateCode::SC_FEAR)
         ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
