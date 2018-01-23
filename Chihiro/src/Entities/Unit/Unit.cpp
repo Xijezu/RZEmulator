@@ -1415,7 +1415,8 @@ void Unit::regenHPMP(uint t)
                     pt = this.m_fMPHealRatioByRest * pt;*/
                 if (pt < 1.0f)
                     pt = 1.0f;
-                pt     = GetFloatValue(UNIT_FIELD_MP_REGEN_MOD);
+                pt *= GetFloatValue(UNIT_FIELD_MP_REGEN_MOD);
+
                 if (pt != 0.0)
                     AddMana((int)pt);
             }
@@ -2303,20 +2304,20 @@ int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
 void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack)
 {
     uint8 attack_count = 1;
-    if(bEndAttack || bCancelAttack)
+    if (bEndAttack || bCancelAttack)
         attack_count = 0;
 
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
+    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
     {
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             attack_count *= 2;
-        if(bIsDoubleAttack)
+        if (bIsDoubleAttack)
             attack_count *= 2;
     }
 
     XPacket pct(TS_SC_ATTACK_EVENT);
     pct << GetHandle();
-    if(pTarget != nullptr)
+    if (pTarget != nullptr)
         pct << pTarget->GetHandle();
     else
         pct << (uint)0;
@@ -2324,43 +2325,46 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
     pct << (uint16)delay;
 
     uint8 attack_flag = 0;
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged)) {
-        if(bIsDoubleAttack)
+    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
+    {
+        if (bIsDoubleAttack)
             attack_flag = AttackFlag::AF_DoubleAttack;
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
             attack_flag |= AttackFlag::AF_DoubleWeapon;
-        if(IsUsingBow() && IsPlayer())
+        if (IsUsingBow() && IsPlayer())
             attack_flag |= AttackFlag::AF_Bow;
-        if(IsUsingCrossBow() && IsPlayer())
+        if (IsUsingCrossBow() && IsPlayer())
             attack_flag |= AttackFlag::AF_CrossBow;
     }
 
     uint8 attack_action = AttackAction::AA_Attack;
-    if(bIsAiming)
+    if (bIsAiming)
         attack_action = AttackAction::AA_Aiming;
-    else if(bEndAttack)
+    else if (bEndAttack)
         attack_action = AttackAction::AA_End;
-    else if(bCancelAttack)
+    else if (bCancelAttack)
         attack_action = AttackAction::AA_Cancel;
 
     pct << attack_action;
     pct << attack_flag;
 
     pct << attack_count;
-    for(int i = 0; i < attack_count; ++i) {
+    for (int i = 0; i < attack_count; ++i)
+    {
         pct << (uint16)arDamage[i].nDamage;
         pct << (uint16)arDamage[i].mp_damage;
         uint8 flag = 0;
-        if(arDamage[i].bPerfectBlock)
+        if (arDamage[i].bPerfectBlock)
             flag = AFlag::AF_PerfectBlock;
-        if(arDamage[i].bBlock)
+        if (arDamage[i].bBlock)
             flag |= AFlag::AF_Block;
-        if(arDamage[i].bMiss)
+        if (arDamage[i].bMiss)
             flag |= AFlag::AF_Miss;
-        if(arDamage[i].bCritical)
+        if (arDamage[i].bCritical)
             flag |= AFlag::AF_Critical;
         pct << flag;
-        for(auto& ed : arDamage[i].elemental_damage) {
+        for (auto &ed : arDamage[i].elemental_damage)
+        {
             pct << (uint16)ed;
         }
         pct << arDamage[i].target_hp;
