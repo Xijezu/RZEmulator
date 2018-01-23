@@ -142,6 +142,8 @@ void State::init(int uid, int code)
 
 void State::DB_InsertState(Unit *pOwner, State &pState)
 {
+    if(pState.m_bAura)
+        return;
     uint ct = sWorld->GetArTime();
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STATE);
     stmt->setUInt64(0, sWorld->GetStateIndex());
