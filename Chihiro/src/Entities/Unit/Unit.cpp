@@ -502,6 +502,9 @@ void Unit::applyState(State &state)
             incParameter((uint) state.GetValue(12), (int) (state.GetValue(13) + (state.GetValue(14) * state.GetLevel())), false);
             incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) * state.GetLevel())), false);
             break;
+        case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
+            ampParameter2((uint)(0x200000 * (2 ^ (uint)state.GetValue(8))), state.GetValue(0) + (state.GetValue(1) * state.GetLevel()));
+            break;
         default:
             break;
     }
@@ -1984,29 +1987,36 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     int   nCritical{0};
     float fCritical{0};
 
-    if (damage_penalty != nullptr) {
+    if (damage_penalty != nullptr)
+    {
         nCritical = damage_penalty->nDamage;
         fCritical = damage_penalty->fCritical;
-    } else {
+    }
+    else
+    {
         nCritical = 0;
         fCritical = 0.0f;
     }
 
-    if (damage_advantage != nullptr) {
+    if (damage_advantage != nullptr)
+    {
         nCritical += damage_advantage->nCritical;
         fCritical += damage_advantage->fCritical - 1.0f;
     }
 
-    auto result = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus, fCritical + 1.0f, critical_bonus + nCritical, nFlag);
+    auto result        = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus, fCritical + 1.0f, critical_bonus + nCritical, nFlag);
 
-    if (!result.bMiss) {
-        if (damage_penalty != nullptr) {
+    if (!result.bMiss)
+    {
+        if (damage_penalty != nullptr)
+        {
             result.nDamage += damage_penalty->nDamage;
-            result.nDamage = (int) ((float) result.nDamage * damage_penalty->fDamage);
+            result.nDamage = (int)((float)result.nDamage * damage_penalty->fDamage);
         }
-        if (damage_advantage != nullptr) {
+        if (damage_advantage != nullptr)
+        {
             result.nDamage += damage_advantage->nDamage;
-            result.nDamage = (int) ((float) result.nDamage * damage_advantage->fDamage);
+            result.nDamage = (int)((float)result.nDamage * damage_advantage->fDamage);
         }
     }
     if (result.nDamage < 0)
@@ -2040,10 +2050,11 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     int   nDamageFlag{0};
     if (fDamageFlag < 0.0f)
         fDamageFlag = 0.0f;
-    if (fDamageFlag > 0.0f) {
+    if (fDamageFlag > 0.0f)
+    {
         if (fDamageFlag > 1.0f)
             fDamageFlag = 1.0f;
-        nDamageFlag     = (int) (result.nDamage * fDamageFlag);
+        nDamageFlag     = (int)(result.nDamage * fDamageFlag);
         if (GetMana() < nDamageFlag)
             nDamageFlag = GetMana();
         result.nDamage -= nDamageFlag;
@@ -2054,25 +2065,32 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     int real_damage = onDamage(pFrom, elemental_type, damageType, result.nDamage, result.bCritical);
     damage(pFrom, real_damage, true);
 
-    if(!result.bMiss) {
+    if (!result.bMiss)
+    {
         auto nPrevHP = pFrom->GetHealth();
         auto nPrevMP = pFrom->GetMana();
 
         Messages::BroadcastHPMPMessage(pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, false);
 
-        if(IsPlayer()) {
+        if (IsPlayer())
+        {
             Messages::SendHPMPMessage(dynamic_cast<Player *>(this), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
-        } else if(IsSummon()) {
-            auto s = dynamic_cast<Summon*>(this);
-            if(s != nullptr && s->GetMaster() != nullptr)
+        }
+        else if (IsSummon())
+        {
+            auto s = dynamic_cast<Summon *>(this);
+            if (s != nullptr && s->GetMaster() != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
         }
 
-        if(pFrom->IsPlayer()) {
+        if (pFrom->IsPlayer())
+        {
             Messages::SendHPMPMessage(dynamic_cast<Player *>(pFrom), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
-        } else if(pFrom->IsSummon()) {
-            auto s = dynamic_cast<Summon*>(pFrom);
-            if(s != nullptr && s->GetMaster() != nullptr)
+        }
+        else if (pFrom->IsSummon())
+        {
+            auto s = dynamic_cast<Summon *>(pFrom);
+            if (s != nullptr && s->GetMaster() != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), pFrom, pFrom->GetHealth() - nPrevHP, pFrom->GetMana() - nPrevMP, true);
         }
 
@@ -2100,24 +2118,26 @@ Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, i
 Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag)
 {
     Damage result{ };
-    if (damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical) {
+    if (damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical)
+    {
         // TODO how about no?
     }
 
-    auto nDamagec = int(m_Expert[GetCreatureGroup()].fDamage * nDamage + nDamage);
-    auto nDamagea = int(pTarget->m_Expert[GetCreatureGroup()].fAvoid * nDamagec + nDamagec);
+    auto nDamagec             = int(m_Expert[GetCreatureGroup()].fDamage * nDamage + nDamage);
+    auto nDamagea             = int(pTarget->m_Expert[GetCreatureGroup()].fAvoid * nDamagec + nDamagec);
 
     float fDefAdjustb{0}, fDefAdjustc{0}, fDefAdjust{0};
-    bool bIsPhysicalDamage   = damage_type == DamageType::NormalPhysical || damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::StatePhysical || damage_type ==DamageType::NormalPhysicalSkill;
-    bool bIsMagicalDamage    = damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical;
-    bool bIsAdditionalDamage = damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand || damage_type == DamageType::AdditionalLeftHand;
-    bool bIsLeftHandDamage   = damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::AdditionalLeftHand;
-    bool bDefAdjust          = damage_type == DamageType::StatePhysical || damage_type == DamageType::StateMagical;
+    bool  bIsPhysicalDamage   = damage_type == DamageType::NormalPhysical || damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::StatePhysical || damage_type == DamageType::NormalPhysicalSkill;
+    bool  bIsMagicalDamage    = damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical;
+    bool  bIsAdditionalDamage = damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand || damage_type == DamageType::AdditionalMagical;
+    bool  bIsLeftHandDamage   = damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::AdditionalLeftHand;
+    bool  bDefAdjust          = damage_type == DamageType::StatePhysical || damage_type == DamageType::StateMagical;
 
     int nAccuracy{0};
     int nPercentage{0};
 
-    if ((nFlag & 2) == 0 && bIsPhysicalDamage && !bDefAdjust) {
+    if ((nFlag & 2) == 0 && bIsPhysicalDamage && !bDefAdjust)
+    {
         if (bIsLeftHandDamage)
             nAccuracy = (int)m_Attribute.nAccuracyLeft;
         else
@@ -2127,110 +2147,128 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         if (nPercentage < 10)
             nPercentage = 10;
 
-        nPercentage = (int) (nAccuracy / pTarget->m_Attribute.nAvoid * (float) nPercentage + 7.0f + accuracy_bonus);
+        nPercentage = (int)(nAccuracy / pTarget->m_Attribute.nAvoid * (float)nPercentage + 7.0f + accuracy_bonus);
         //nAccuracy   = (int)pTarget->m_Attribute.nAvoid;
-        if((uint)rand32() % 100 > nPercentage) {
-            result.bMiss = true;
+        if ((uint)rand32() % 100 > nPercentage)
+        {
+            result.bMiss   = true;
             result.nDamage = 0;
             return result;
         }
     }
 
-    if((nFlag & 2) == 0 && bIsMagicalDamage && !bDefAdjust) {
-        nAccuracy = 2 * ((44 - pTarget->GetLevel()) + GetLevel());
-        nPercentage =(int)(m_Attribute.nMagicAccuracy / pTarget->m_Attribute.nMagicAvoid * nAccuracy + 7.0f + accuracy_bonus);
-        if(nAccuracy < 10)
+    if ((nFlag & 2) == 0 && bIsMagicalDamage && !bDefAdjust)
+    {
+        nAccuracy     = 2 * ((44 - pTarget->GetLevel()) + GetLevel());
+        nPercentage   = (int)(m_Attribute.nMagicAccuracy / pTarget->m_Attribute.nMagicAvoid * nAccuracy + 7.0f + accuracy_bonus);
+        if (nAccuracy < 10)
             nAccuracy = 10;
-        if((uint)rand32() % 100 > nPercentage) {
-            result.bMiss = true;
+        if ((uint)rand32() % 100 > nPercentage)
+        {
+            result.bMiss   = true;
             result.nDamage = 0;
             return result;
         }
     }
 
-    int nRandomDamage = 0;
-    float nDefence = 0;
-    if(bIsAdditionalDamage && bDefAdjust) {
+    int   nRandomDamage = 0;
+    float nDefence      = 0;
+    if (bIsAdditionalDamage && bDefAdjust)
+    {
         float fDefAdjusta = 1.0f;
-        if(bIsMagicalDamage && (m_Attribute.nMagicPoint < pTarget->m_Attribute.nMagicDefence)) {
-            if(pTarget->m_Attribute.nMagicDefence <= 0)
+        if (bIsMagicalDamage && (m_Attribute.nMagicPoint < pTarget->m_Attribute.nMagicDefence))
+        {
+            if (pTarget->m_Attribute.nMagicDefence <= 0)
                 fDefAdjusta = 1.0f;
             else
                 fDefAdjusta = pTarget->m_Attribute.nMagicDefence;
-            fDefAdjusta = 1.0f - ((pTarget->m_Attribute.nMagicDefence - m_Attribute.nMagicPoint) / (2 * fDefAdjusta));
-        } else if(bIsPhysicalDamage && (m_Attribute.nAttackPointRight < pTarget->m_Attribute.nDefence)) {
+            fDefAdjusta     = 1.0f - ((pTarget->m_Attribute.nMagicDefence - m_Attribute.nMagicPoint) / (2 * fDefAdjusta));
+        }
+        else if (bIsPhysicalDamage && (m_Attribute.nAttackPointRight < pTarget->m_Attribute.nDefence))
+        {
             if (pTarget->m_Attribute.nDefence <= 0)
                 fDefAdjusta = 1;
             else
                 fDefAdjusta = pTarget->m_Attribute.nDefence;
             fDefAdjusta     = 1.0f - ((pTarget->m_Attribute.nDefence - m_Attribute.nAttackPointRight) / (2 * fDefAdjusta));
-
         }
         fDefAdjust = (int)((float)nDamagea * fDefAdjusta);
-    } else {
+    }
+    else
+    {
         fDefAdjust = nDamagea;
-        if(!IsFieldProp()) {
-            if((nFlag & 4) == 0) {
-                if (bIsPhysicalDamage) {
+        if (!IsFieldProp())
+        {
+            if ((nFlag & 4) == 0)
+            {
+                if (bIsPhysicalDamage)
+                {
                     nDefence = pTarget->m_Attribute.nDefence;
                     // TODO Shield
-                } else if (bIsMagicalDamage) {
+                }
+                else if (bIsMagicalDamage)
+                {
                     nDefence = pTarget->m_Attribute.nMagicDefence;
                 }
             }
             float nDamageb = 1.0f - 0.4f * nDefence / nDamagea;
-            if(nDamageb < 0.3f)
+            if (nDamageb < 0.3f)
                 nDamageb = 0.3f;
 
-            fDefAdjustc = 1.0f - nDefence * 0.5f / nDamagea;
-            if(fDefAdjustc < 0.05f)
+            fDefAdjustc     = 1.0f - nDefence * 0.5f / nDamagea;
+            if (fDefAdjustc < 0.05f)
                 fDefAdjustc = 0.05f;
 
             int nDefencea = GetLevel();
-            fDefAdjust = (int)((float)nDefencea * 1.7f * nDamageb + nDamagea * fDefAdjustc);
-            if(fDefAdjust < 1)
+            fDefAdjust     = (int)((float)nDefencea * 1.7f * nDamageb + nDamagea * fDefAdjustc);
+            if (fDefAdjust < 1)
                 fDefAdjust = 1;
         }
         // TODO IgnoreRandomDamage
-        if(true) {
+        if (true)
+        {
             nRandomDamage = irand((int)(-(fDefAdjust * 0.05f)), (int)(fDefAdjust * 0.05f));
         }
     }
 
     fDefAdjustb = (fDefAdjust + nRandomDamage);
-    if(!bIsAdditionalDamage && (nFlag & 0x10) == 0) {
+    if (!bIsAdditionalDamage && (nFlag & 0x10) == 0)
+    {
         int cd = 0; // GetCriticalDamage
-        if (cd != 0) {
+        if (cd != 0)
+        {
             fDefAdjustb += cd;
             result.bCritical = true;
         }
     }
-    if((damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand) && HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
-        if(bIsLeftHandDamage)
+    if ((damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand) && HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    {
+        if (bIsLeftHandDamage)
             fDefAdjustb = (int)(fDefAdjustb * (float)1/*m_nDoubleWeaponMasteryLevel*/ * 0.02f + 0.44f);
         else
             fDefAdjustb *= (int)(fDefAdjustb * (float)1/*m_nDoubleWeaponMasteryLevel*/ * 0.001f + 0.9f);
     }
 
     float nDamaged = 1.0f - (pTarget->m_Resist.nResist[(int)elemental_type] / 300);
-    result.nDamage = (int)(nDamaged * fDefAdjustb);
+    result.nDamage         = (int)(nDamaged * fDefAdjustb);
     result.nResistedDamage = fDefAdjustb - result.nDamage;
 
-    if(bIsPhysicalDamage && pTarget->GetStateByEffectType(SEF_FORCE_CHIP) != nullptr)
+    if (bIsPhysicalDamage && pTarget->GetStateByEffectType(SEF_FORCE_CHIP) != nullptr)
         result.nDamage *= 2;
-    else if(bIsMagicalDamage && pTarget->GetStateByEffectType(SEF_SOUL_CHIP) != nullptr)
+    else if (bIsMagicalDamage && pTarget->GetStateByEffectType(SEF_SOUL_CHIP) != nullptr)
         result.nDamage *= 2;
-    else if(pTarget->GetStateByEffectType(SEF_LUNAR_CHIP) != nullptr)
+    else if (pTarget->GetStateByEffectType(SEF_LUNAR_CHIP) != nullptr)
         result.nDamage *= 2;
 
-    if((pTarget->IsPlayer() || pTarget->IsSummon()) && GetHandle() != pTarget->GetHandle()) {
-        if(IsPlayer())
+    if ((pTarget->IsPlayer() || pTarget->IsSummon()) && GetHandle() != pTarget->GetHandle())
+    {
+        if (IsPlayer())
             result.nDamage = (int)((float)result.nDamage * 1 /*PVPRateForPlayer*/);
-        else if(IsSummon())
+        else if (IsSummon())
             result.nDamage = (int)((float)result.nDamage * 1 /*PVPRateForSummon*/);
     }
-    if(bIsMagicalDamage && !bIsAdditionalDamage && fDefAdjustb < 1)
-        result.nDamage = 1;
+    if (bIsMagicalDamage && !bIsAdditionalDamage && fDefAdjustb < 1)
+        result.nDamage     = 1;
     return result;
 }
 
@@ -2693,13 +2731,15 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
 {
     SetFlag(UNIT_FIELD_STATUS, StatusFlags::NeedToUpdateState);
     auto stateInfo = sObjectMgr->GetStateInfo(code);
-    if (stateInfo == nullptr) {
+    if (stateInfo == nullptr)
+    {
         return TS_RESULT_NOT_EXIST;
     }
     if (GetHealth() == 0 && (stateInfo->state_time_type & 0x81) != 0)
         return TS_RESULT_NOT_ACTABLE;
 
-    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap */) {
+    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap */)
+    {
         return TS_RESULT_LIMIT_TARGET;
     } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL
                && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != 104) {
@@ -2708,67 +2748,84 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
 
     }*/
 
-    if(code == StateCode::SC_FEAR)
+    if (code == StateCode::SC_FEAR)
         ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
 
     //auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
-    auto pCaster = sMemoryPool->GetObjectInWorld<Unit>(caster);
-    int base_damage = 0;
-    if(pCaster != nullptr && stateInfo->base_effect_id > 0) {
+    auto pCaster     = sMemoryPool->GetObjectInWorld<Unit>(caster);
+    int  base_damage = 0;
+    if (pCaster != nullptr && stateInfo->base_effect_id > 0)
+    {
         // DAMAGES WOHOOOOOOOO
     }
 
-    bool bNotErasable = ((stateInfo->state_time_type >> 4) & 1) != 0;
-    std::vector<uint16> vDeleteStateUID{};
-    bool bAlreadyExist{false};
+    bool                bNotErasable = ((stateInfo->state_time_type >> 4) & 1) != 0;
+    std::vector<uint16> vDeleteStateUID{ };
+    bool                bAlreadyExist{false};
 
-    for(auto& s : m_vStateList) {
-        if(code == s.m_nCode) {
+    for (auto &s : m_vStateList)
+    {
+        if (code == s.m_nCode)
+        {
             bAlreadyExist = true;
-        } else {
-            bool bf = false;
-            for(int i = 0; i < 3; ++i) {
-                if(s.IsDuplicatedGroup(stateInfo->duplicate_group[i])) {
+        }
+        else
+        {
+            bool     bf = false;
+            for (int i  = 0; i < 3; ++i)
+            {
+                if (s.IsDuplicatedGroup(stateInfo->duplicate_group[i]))
+                {
                     bf = true;
                     break;
                 }
             }
-            if(!bf)
+            if (!bf)
                 continue;
         }
-        if(bNotErasable != (((s.GetTimeType() >> 4 ) & 1 ) != 0)) {
-            if(bNotErasable)
+        if (bNotErasable != (((s.GetTimeType() >> 4) & 1) != 0))
+        {
+            if (bNotErasable)
                 return TS_RESULT_ALREADY_EXIST;
             vDeleteStateUID.emplace_back(s.m_nUID);
-        } else {
-            if(s.GetLevel() > level)
+        }
+        else
+        {
+            if (s.GetLevel() > level)
                 return TS_RESULT_ALREADY_EXIST;
 
-            if(s.GetLevel() == level) {
+            if (s.GetLevel() == level)
+            {
                 uint et = s.m_nEndTime[1];
-                if(s.m_nEndTime[0] > et)
+                if (s.m_nEndTime[0] > et)
                     et = s.m_nEndTime[0];
-                if(et > end_time)
+                if (et > end_time)
                     return TS_RESULT_ALREADY_EXIST;
             }
-            if(code != s.m_nCode)
+            if (code != s.m_nCode)
                 vDeleteStateUID.emplace_back(s.m_nUID);
         }
     }
 
-    for(auto& id : vDeleteStateUID) {
-        for(int i = (int)m_vStateList.size() - 1; i >= 0; --i) {
+    for (auto &id : vDeleteStateUID)
+    {
+        for (int i = (int)m_vStateList.size() - 1; i >= 0; --i)
+        {
             State s = m_vStateList[i];
-            if(id == s.m_nUID) {
+            if (id == s.m_nUID)
+            {
                 m_vStateList.erase(m_vStateList.begin() + i);
                 CalculateStat();
                 break;
             }
         }
     }
-    if(bAlreadyExist) {
-        for(auto& s : m_vStateList) {
-            if(code == s.m_nCode) {
+    if (bAlreadyExist)
+    {
+        for (auto &s : m_vStateList)
+        {
+            if (code == s.m_nCode)
+            {
                 s.AddState(type, caster, (uint16)level, start_time, end_time, base_damage, bIsAura);
                 CalculateStat();
                 onUpdateState(s, false);
@@ -2776,15 +2833,18 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
                 break;
             }
         }
-    } else {
+    }
+    else
+    {
         m_nCurrentStateUID++;
-        State ns{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, false, nStateValue, std::move(szStateValue)};
+        State ns{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, bIsAura, nStateValue, std::move(szStateValue)};
         m_vStateList.emplace_back(ns);
         CalculateStat();
 
         onUpdateState(ns, false);
-        if(IsMonster() && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
-            if(m_Attribute.nAttackRange < 84)
+        if (IsMonster() && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable))
+        {
+            if (m_Attribute.nAttackRange < 84)
                 m_Attribute.nAttackRange = 83;
         }
         onAfterAddState(ns);
@@ -2965,7 +3025,7 @@ bool Unit::ClearExpiredState(uint t)
         uint et = m_vStateList[i].m_nEndTime[1];
         if(m_vStateList[i].m_nEndTime[0] > et)
             et = m_vStateList[i].m_nEndTime[0];
-        if(et < t) {
+        if(et < t && !m_vStateList[i].m_bAura) {
             //RemoveState(it);
             Messages::BroadcastStateMessage(this, m_vStateList[i], true);
             m_vStateList.erase(m_vStateList.begin() + i);
@@ -3457,4 +3517,59 @@ bool Unit::IsAlly(const Unit */*pTarget*/)
 bool Unit::IsVisible(const Unit *pTarget)
 {
     return !pTarget->HasFlag(UNIT_FIELD_STATUS, StatusFlags::Hiding);
+}
+
+bool Unit::IsActiveAura(Skill *pSkill) const
+{
+    for(const auto& aura : m_vAura)
+    {
+        if(aura.first == pSkill->m_SkillBase->toggle_group)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Unit::TurnOnAura(Skill *pSkill)
+{
+    if(pSkill == nullptr)
+        return false;
+
+    if(m_vAura.count(pSkill->m_SkillBase->toggle_group) != 0)
+    {
+        return false;
+    }
+
+    m_vAura[pSkill->m_SkillBase->toggle_group] = pSkill;
+    AddState(SG_NORMAL, (StateCode)pSkill->m_SkillBase->state_id, GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nSkillLevel, pSkill->GetSkillEnhance()), sWorld->GetArTime(), 0, true, 0, "");
+
+    Messages::SendToggleInfo(this, pSkill->m_nSkillID, true);
+    return true;
+}
+
+bool Unit::TurnOffAura(Skill *pSkill)
+{
+    if(pSkill == nullptr)
+        return false;
+
+    if(m_vAura.count(pSkill->m_SkillBase->toggle_group) == 0)
+        return false;
+
+    Messages::SendToggleInfo(this, pSkill->m_nSkillID, false);
+    m_vAura.erase(pSkill->m_SkillBase->toggle_group);
+    RemoveState((StateCode)pSkill->m_SkillBase->state_id, 255); // fuck this shit
+    return true;
+}
+
+void Unit::ToggleAura(Skill *pSkill)
+{
+    bool bNewAura = m_vAura.count(pSkill->m_SkillBase->toggle_group) == 0;
+    if(m_vAura.count(pSkill->m_SkillBase->toggle_group) != 0)
+    {
+        bNewAura = m_vAura[pSkill->m_SkillBase->toggle_group] != pSkill;
+        TurnOffAura(m_vAura[pSkill->m_SkillBase->toggle_group]);
+    }
+    if(bNewAura)
+        TurnOnAura(pSkill);
 }

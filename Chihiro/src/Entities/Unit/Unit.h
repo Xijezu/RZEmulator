@@ -240,8 +240,12 @@ class Unit : public WorldObject
         virtual CreatureStat *GetBaseStat() const { return nullptr; }
 
         virtual bool IsUsingBow() const { return false; }
-
         virtual bool IsUsingCrossBow() const { return false; }
+
+        bool TurnOnAura(Skill *pSkill);
+        bool TurnOffAura(Skill *pSkill);
+        void ToggleAura(Skill *pSkill);
+        bool IsActiveAura(Skill *pSkill) const;
 
         uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue);
         explicit Unit(bool isWorldObject);
@@ -331,6 +335,8 @@ class Unit : public WorldObject
         Skill *m_castingSkill{nullptr};
         float m_nRegenHP{ }, m_fRegenMP{ };
     private:
+        UNORDERED_MAP<int, Skill*> m_vAura;
+
         float m_fBowInterval{0};
         bool ClearExpiredState(uint t);
         uint  m_nCurrentStateUID{0};

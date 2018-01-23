@@ -81,6 +81,7 @@ class Skill
         void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);
 
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
+        void TOGGLE_AURA(Unit *pTarget);
 
         void HEALING_SKILL_FUNCTOR(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();

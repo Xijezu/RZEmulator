@@ -1011,3 +1011,22 @@ void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
     scPct << pItem->m_hBindedTarget;
     pPlayer->SendPacket(scPct);
 }
+
+void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
+{
+    if(pUnit == nullptr)
+        return;
+
+    auto player = dynamic_cast<Player*>(pUnit);
+    if(player == nullptr && pUnit->IsSummon())
+        player = dynamic_cast<Summon*>(pUnit)->GetMaster();
+
+    if(player == nullptr)
+        return;
+
+    XPacket auraPct(TS_SC_AURA);
+    auraPct << pUnit->GetHandle();
+    auraPct << (uint16)skill_id;
+    auraPct << (uint8)(status != 0 ? 1 : 0);
+    player->SendPacket(auraPct);
+}

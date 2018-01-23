@@ -140,7 +140,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     if (m_pOwner->GetMaxMana() != 0)
         decMP = 100 * nMP / m_pOwner->GetMaxMana();
 
-    if ((m_SkillBase->effect_type == EF_TOGGLE_AURA || m_SkillBase->effect_type == EF_TOGGLE_DIFFERENTIAL_AURA) /*&& m_pOwner->IsActiveAura(this)*/)
+    if ((m_SkillBase->effect_type == EF_TOGGLE_AURA || m_SkillBase->effect_type == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
     {
         mana_cost = 0;
     }
@@ -468,6 +468,10 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
             break;
         case SKILL_EFFECT_TYPE::EF_ACTIVATE_FIELD_PROP:
             ACTIVATE_FIELD_PROP();
+            break;
+        case EF_TOGGLE_AURA:
+        case EF_TOGGLE_DIFFERENTIAL_AURA:
+            TOGGLE_AURA(pTarget);
             break;
         case SKILL_EFFECT_TYPE::EF_ADD_HP:
             HEALING_SKILL_FUNCTOR(pTarget);
@@ -797,5 +801,15 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
                                                   (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)), 0);
     sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, Damage, pTarget->GetHandle());
     m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);
+}
+
+void Skill::TOGGLE_AURA(Unit *pTarget)
+{
+    m_pOwner->ToggleAura(this);
+    if(m_SkillBase->target == 21)
+    {
+        // TODO: Party functor
+    }
+    sWorld->AddSkillDamageResult(m_vResultList, true, 0, m_pOwner->GetHandle());
 }
 

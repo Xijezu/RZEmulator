@@ -454,7 +454,7 @@ void Monster::SetStatus(MonsterStatus status)
 
 void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty>& vPartyContribute, float fDropRatePenalty)
 {
-    long     item_count;
+    int64     item_count;
     for (int i = 0; i < 10; ++i)
     {
         if (m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], (int)m_Base->drop_percentage[i], fDropRatePenalty, 1))

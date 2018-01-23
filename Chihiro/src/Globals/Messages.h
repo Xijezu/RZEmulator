@@ -110,6 +110,7 @@ class Messages
         static void SendRegionAckMessage(Player* pPlayer, uint rx, uint ry);
         static void SendOpenStorageMessage(Player* pPlayer);
         static void SendSkillCardInfo(Player* pPlayer, Item *pItem);
+        static void SendToggleInfo(Unit *pUnit, int skill_id, bool status);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };
