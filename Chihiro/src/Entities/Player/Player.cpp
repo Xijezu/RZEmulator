@@ -957,7 +957,7 @@ void Player::Save(bool bOnlyPlayer)
     {
         for (auto &item : m_Inventory.m_vList)
         {
-            if (item->m_bIsNeedUpdateToDB)
+            //if (item->m_bIsNeedUpdateToDB)
                 item->DBUpdate();
         }
 
