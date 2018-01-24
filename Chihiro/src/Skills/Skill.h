@@ -86,6 +86,7 @@ class Skill
         void TOGGLE_AURA(Unit *pTarget);
 
         void HEALING_SKILL_FUNCTOR(Unit *pTarget);
+        void MANA_SKILL_FUNCTOR(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();
         void TOWN_PORTAL();
         void DO_SUMMON();

@@ -538,7 +538,7 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     if (code > 0)
     {
         if (sObjectMgr->GetItemBase(code)->group == 13)
-            fCreatureCardMod = /*pKiller->m_fCreatureCardChance;*/ 1.0f; // actual wtf?
+            fCreatureCardMod = /*pKiller->m_fCreatureCardChance;*/ 2.0f; // actual wtf?
         /*if (sObjectMgr->GetItemBase(code)->flaglist[FLAG_QUEST] != 0)
             fDropRatePenalty = 1.0f;*/
     }

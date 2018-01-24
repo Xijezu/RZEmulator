@@ -475,8 +475,13 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
         case EF_TOGGLE_DIFFERENTIAL_AURA:
             TOGGLE_AURA(pTarget);
             break;
-        case SKILL_EFFECT_TYPE::EF_ADD_HP:
+        case EF_ADD_HP:
+        case EF_ADD_HP_BY_ITEM:
             HEALING_SKILL_FUNCTOR(pTarget);
+            break;
+        case EF_ADD_MP:
+        case EF_ADD_MP_BY_ITEM:
+            MANA_SKILL_FUNCTOR(pTarget);
             break;
         default:
             bHandled = false;
@@ -858,4 +863,29 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
         // TODO: Party functor
     }
     sWorld->AddSkillDamageResult(m_vResultList, true, 0, m_pOwner->GetHandle());
+}
+
+void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
+{
+    if (pTarget == nullptr || m_pOwner == nullptr)
+        return;
+
+    bool v10           = m_SkillBase->is_physical_act != 0;
+    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+    auto magic_point   = m_pOwner->m_Attribute.nMagicPoint;
+    auto target_max_hp = pTarget->GetMaxHealth();
+
+    auto heal = magic_point *
+                (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel))
+                + m_SkillBase->var[2] + (m_SkillBase->var[3] * m_nRequestedSkillLevel) + (m_nEnhance * m_SkillBase->var[6])
+                + target_max_hp * (m_SkillBase->var[4] + (m_SkillBase->var[5] * m_nRequestedSkillLevel) + m_SkillBase->var[7] * m_nRequestedSkillLevel);
+
+    heal = pTarget->MPHeal((int)heal);
+
+    SkillResult skillResult{};
+    skillResult.type = SR_ResultType::SRT_AddMP;
+    skillResult.damage.hTarget = pTarget->GetHandle();
+    skillResult.addHPType.target_hp = pTarget->GetHealth();
+    skillResult.addHPType.nIncHP = (int)heal;
+    m_vResultList.emplace_back(skillResult);
 }
