@@ -80,6 +80,8 @@ class Skill
         void SINGLE_PHYSICAL_DAMAGE(Unit *pTarget);
         void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);
 
+        void SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget);
+
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void TOGGLE_AURA(Unit *pTarget);
 

@@ -340,9 +340,11 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     int fillSize = 45;
 
     if (!m_vResultList.empty()) {
-        for (auto &sr : m_vResultList) {
+        for (const auto &sr : m_vResultList) {
             // Odd fixed padding for the skill result
             auto pos = pct.wpos();
+            pct.fill("", fillSize);
+            pct.wpos(pos);
 
             pct << (uint8)sr.type;
             pct << (uint)sr.damage.hTarget;
@@ -356,14 +358,11 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
                     pct << sr.damage.flag;
                     for (uint16 i : sr.damage.elemental_damage)
                         pct << i;
-                    pos = pct.wpos() - pos;
-                    pct.fill("", fillSize - pos);
                     break;
                 case SR_ResultType::SRT_AddHP:
-                    pct << sr.damage.target_hp;
+                case SRT_AddMP:
+                    pct << sr.addHPType.target_hp;
                     pct << sr.addHPType.nIncHP;
-                    pos = pct.wpos() - pos;
-                    pct.fill("", fillSize - pos);
                 default:
                     break;
             }
@@ -458,6 +457,9 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
         case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE:
         case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
             SINGLE_MAGICAL_DAMAGE(pTarget);
+            break;
+        case EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP:
+            SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(pTarget);
             break;
         case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE:
         case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
@@ -725,6 +727,51 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
     sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
 }
 
+
+void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
+{
+    if(pTarget == nullptr)
+        return;
+
+    auto elemental_type = m_SkillBase->elemental;
+    //auto nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->elemental, this->m_SkillBase->is_physical_act == 0, m_SkillBase->is_harmful != 0);
+    auto nMagicPoint = m_pOwner->m_Attribute.nMagicPoint;
+    auto nDamage = (int)(nMagicPoint * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
+                    + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel)
+                    + (m_SkillBase->var[5] * m_nEnhance));
+
+    auto damage = pTarget->DealMagicalSkillDamage(m_pOwner,nDamage, (ElementalType)m_SkillBase->elemental,
+            m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
+            (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)),0);
+
+    sWorld->AddSkillDamageResult(m_vResultList, 1, (uint8)elemental_type, damage, pTarget->GetHandle());
+
+    auto nAddHP = (int)(((m_SkillBase->var[8] * m_nEnhance) + (m_SkillBase->var[6] + (m_SkillBase->var[7] * m_nRequestedSkillLevel))) * damage.nDamage);
+    auto nAddMP = (int)(((m_SkillBase->var[11] * m_nEnhance) + (m_SkillBase->var[9] + (m_SkillBase->var[10] * m_nRequestedSkillLevel))) * damage.nDamage);
+    m_pOwner->AddHealth(nAddHP);
+    m_pOwner->AddMana(nAddMP);
+
+    SkillResult skill_result{};
+    skill_result.type = (int)SRT_AddHP;
+    skill_result.hTarget = m_pOwner->GetHandle();
+    skill_result.addHPType.type = (int)SRT_AddHP;
+    skill_result.addHPType.hTarget = m_pOwner->GetHandle();
+    skill_result.addHPType.target_hp = m_pOwner->GetHealth();
+    skill_result.addHPType.nIncHP = nAddHP;
+
+    m_vResultList.emplace_back(skill_result);
+
+    SkillResult skillResult{};
+    skillResult.type = (int)SRT_AddMP;
+    skillResult.hTarget = m_pOwner->GetHandle();
+    skillResult.addHPType.type = (int)SRT_AddMP;
+    skillResult.addHPType.hTarget = m_pOwner->GetHandle();
+    skillResult.addHPType.target_hp = (int)m_pOwner->GetMana();
+    skillResult.addHPType.nIncHP = nAddHP;
+    m_vResultList.emplace_back(skillResult);
+}
+
+
 void Skill::ACTIVATE_FIELD_PROP()
 {
     auto fp = sMemoryPool->GetObjectInWorld<FieldProp>(m_hTarget);
@@ -754,7 +801,7 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
     SkillResult skillResult{};
     skillResult.type = SR_ResultType::SRT_AddHP;
     skillResult.damage.hTarget = pTarget->GetHandle();
-    skillResult.damage.target_hp = pTarget->GetHealth();
+    skillResult.addHPType.target_hp = pTarget->GetHealth();
     skillResult.addHPType.nIncHP = (int)heal;
     m_vResultList.emplace_back(skillResult);
     //sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
@@ -812,4 +859,3 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
     }
     sWorld->AddSkillDamageResult(m_vResultList, true, 0, m_pOwner->GetHandle());
 }
-
