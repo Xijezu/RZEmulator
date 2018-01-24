@@ -200,6 +200,7 @@ bool Player::ReadCharacter(std::string _name, int _race)
             return false;
 
         int      nSummonIdx = 0;
+        CalculateStat();
         for (int i          = 0; i < 6; ++i)
         {
             if (GetInt32Value(PLAYER_FIELD_SUMMON + i) != 0)
@@ -740,6 +741,7 @@ bool Player::ReadSummonList(int UID)
                 card->m_bIsNeedUpdateToDB        = true;
                 card->m_Instance.OwnSummonHandle = summon->GetHandle();
                 summon->m_pItem                  = card;
+                AddSummon(summon, false);
                 /*m_player.AddSummon(summon, false);
                 readCreatureSkillList(summon);
                 readStateInfo(summon);
@@ -752,8 +754,6 @@ bool Player::ReadSummonList(int UID)
                     delete summon;
                     return false;
                 }
-                m_vSummonList.push_back(summon);
-
             }
         } while (result->NextRow());
     }
@@ -798,14 +798,15 @@ void Player::SendLoginProperties()
     Messages::SendQuestList(this);
     for (auto &summon: m_vSummonList)
     {
+        summon->CalculateStat();
         Messages::SendAddSummonMessage(this, summon);
     }
 
     Messages::SendItemList(this, false);
-    Messages::SendItemCoolTimeInfo(this);
     Messages::SendCreatureEquipMessage(this, false);
 
     Messages::SendSkillList(this, this, -1);
+    Messages::SendItemCoolTimeInfo(this);
     // TODO Summon Skill Msg
 
     SendWearInfo();
@@ -2848,9 +2849,11 @@ void Player::applyPassiveSkillEffect(Skill *skill)
         switch (skill->m_SkillBase->effect_type)
         {
             case SKILL_EFFECT_TYPE::EF_INCREASE_SUMMON_HP_MP_SP:
+                m_vApplySummonPassive.emplace_back(skill);
                 return;
 
             case SKILL_EFFECT_TYPE::EF_AMPLIFY_SUMMON_HP_MP_SP:
+                m_vApmlifySummonPassive.emplace_back(skill);
                 return;
 
             case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:

@@ -57,16 +57,16 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
         return;
 
     XPacket statPct(TS_SC_HPMP);
-    statPct << (uint32_t)pUnit->GetHandle();
+    statPct << (uint32)pUnit->GetHandle();
 
-    statPct << (int32_t)add_hp;
-    statPct << (int32_t)pUnit->GetHealth();
-    statPct << (int32_t)pUnit->GetMaxHealth();
+    statPct << (int32)add_hp;
+    statPct << (int32)pUnit->GetHealth();
+    statPct << (int32)pUnit->GetMaxHealth();
 
-    statPct << (int32_t)add_mp;
-    statPct << (int32_t)pUnit->GetMana();
-    statPct << (int32_t)pUnit->GetMaxMana();
-    statPct << (uint8_t)(display ? 1 : 0);
+    statPct << (int32)add_mp;
+    statPct << (int32)pUnit->GetMana();
+    statPct << (int32)pUnit->GetMaxMana();
+    statPct << (uint8)(display ? 1 : 0);
     pPlayer->SendPacket(statPct);
 }
 

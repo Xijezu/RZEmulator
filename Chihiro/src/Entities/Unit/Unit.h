@@ -259,7 +259,7 @@ class Unit : public WorldObject
         virtual void onModifyStatAndAttribute() {};
 
         virtual void onBeforeCalculateStat() {};
-        void applyPassiveSkillEffect();
+        virtual void applyPassiveSkillEffect();
         void applyStatByState();
         void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
         void amplifyStatByState();
@@ -267,6 +267,7 @@ class Unit : public WorldObject
         void applyStateEffect();
         void applyStateAmplifyEffect();
         void applyPassiveSkillAmplifyEffect();
+        virtual void applyPassiveSkillAmplifyEffect(Skill *) {}
         void applyStateAmplify(State &state);
         void applyDoubeWeaponEffect();
 

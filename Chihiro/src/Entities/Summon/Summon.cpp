@@ -348,7 +348,7 @@ void Summon::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int s
     Messages::SendSkillList(GetMaster(), this, skill_id);
 }
 
-void Summon::Update(uint diff)
+void Summon::Update(uint /*diff*/)
 {
     if (!IsInWorld())
         return;
@@ -502,7 +502,7 @@ void Summon::applyJobLevelBonus()
     auto stat = sObjectMgr->GetSummonLevelBonus(m_tSummonBase->id, m_tSummonBase->form, GetLevel());
     m_cStat.strength += stat.strength;
     m_cStat.vital += stat.vital;
-    m_cStat.agility += stat.agility;// /run scv(get_creature_handle(0), "lv", 50)
+    m_cStat.agility += stat.agility;
     m_cStat.dexterity += stat.dexterity;
     m_cStat.intelligence += stat.intelligence;
     m_cStat.luck += stat.luck;
@@ -548,3 +548,46 @@ bool Summon::IsAlly(const Unit *pTarget)
 {
     return GetMaster()->IsAlly(pTarget);
 }
+
+void Summon::applyPassiveSkillEffect()
+{
+    if (GetMaster() == nullptr)
+        return;
+
+    for (const auto &x : GetMaster()->m_vApplySummonPassive)
+    {
+        applyPassiveSkillAmplifyEffect(x);
+    }
+
+    for (const auto &x : GetMaster()->m_vApmlifySummonPassive)
+    {
+        applyPassiveSkillAmplifyEffect(x);
+    }
+    Unit::applyPassiveSkillEffect();
+}
+
+void Summon::applyPassiveSkillAmplifyEffect(Skill *pSkill)
+{
+    switch(pSkill->m_SkillBase->effect_type)
+    {
+        case EF_AMPLIFY_SUMMON_HP_MP_SP:
+        {
+            auto test =  (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd)));
+            auto t2 = GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER);
+            auto res = test + t2;
+            SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER)
+                                                          + (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+            SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER)
+                                                          + (pSkill->m_SkillBase->var[2] + (pSkill->m_SkillBase->var[3] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+            // MAX SP var[4] var[5]
+            SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, GetFloatValue(UNIT_FIELD_HP_REGEN_MOD)
+                                                   + (pSkill->m_SkillBase->var[6] + (pSkill->m_SkillBase->var[7] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+            SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, GetFloatValue(UNIT_FIELD_MP_REGEN_MOD)
+                                                   + (pSkill->m_SkillBase->var[8] + (pSkill->m_SkillBase->var[9] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+        }
+        return;
+        default:
+            return;
+    }
+}
+

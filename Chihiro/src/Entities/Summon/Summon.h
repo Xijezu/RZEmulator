@@ -56,6 +56,8 @@ class Summon : public Unit
         void processWalk(uint t);
         void onExpChange() override;
         //void onAfterApplyStat() override;
+        void applyPassiveSkillEffect() override;
+        void applyPassiveSkillAmplifyEffect(Skill *) override;
         void onModifyStatAndAttribute() override;
         void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
         //void onApplyStat

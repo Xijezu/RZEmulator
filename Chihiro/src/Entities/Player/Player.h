@@ -41,6 +41,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 {
     public:
         friend class Messages;
+        friend class Summon;
         friend class WorldSession;
 
         explicit Player(uint32);
@@ -284,6 +285,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
         UNORDERED_MAP<std::string, std::string> m_hsContact{ };
+
+        std::vector<Skill *> m_vApplySummonPassive;
+        std::vector<Skill *> m_vApmlifySummonPassive;
 
         std::vector<Summon *> m_vSummonList{};
         std::vector<Item*> m_vCharmList{};

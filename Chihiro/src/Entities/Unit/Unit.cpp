@@ -289,8 +289,8 @@ void Unit::CalculateStat()
     SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, 1.0f);
 
-    SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, 0.0f);
-    SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, 0.0f);
+    SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, 1.0f);
+    SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, 1.0f);
 
     SetFloatValue(UNIT_FIELD_HEAL_RATIO, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO, 1.0f);
@@ -394,8 +394,8 @@ void Unit::CalculateStat()
     applyStateAmplifyEffect();
     getAmplifiedAttributeByAmplifier(m_Attribute);
     applyDoubeWeaponEffect();
-    SetMaxHealth((uint32_t)(GetInt32Value(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth());
-    SetMaxMana((uint32_t)(GetInt32Value(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana());
+    SetMaxHealth((uint32_t)GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) * GetMaxHealth());
+    SetMaxMana((uint32_t)GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) * GetMaxMana());
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
     auto hp = GetMaxHealth();
     auto mp = GetMaxMana();
@@ -413,7 +413,7 @@ void Unit::CalculateStat()
         {
             auto s = dynamic_cast<Summon *>(this);
             if (s != nullptr)
-                Messages::SendHPMPMessage(s->GetMaster(), s, hp, mp, false);
+                Messages::SendHPMPMessage(s->GetMaster(), this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
         }
     }
 }
@@ -503,7 +503,7 @@ void Unit::applyState(State &state)
             incParameter((uint) state.GetValue(15), (int) (state.GetValue(16) + (state.GetValue(17) * state.GetLevel())), false);
             break;
         case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
-            ampParameter2((uint)(0x200000 * (2 ^ (uint)state.GetValue(8))), state.GetValue(0) + (state.GetValue(1) * state.GetLevel()));
+            ampParameter2((uint)(0x200000 * (std::pow(2, (uint)state.GetValue(8)))), state.GetValue(0) + (state.GetValue(1) * state.GetLevel()));
             break;
         default:
             break;
