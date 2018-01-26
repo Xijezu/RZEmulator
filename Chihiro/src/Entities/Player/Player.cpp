@@ -3234,6 +3234,10 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
 {
     int64 nResultCnt = 0;
     Item *pNewItem{nullptr};
+
+    if(pItem->m_Instance.nWearInfo != WearNone)
+        Putoff(pItem->m_Instance.nWearInfo);
+
     if (/* IsErasable(pItem) && */
             (pItem->m_Instance.Flag & 0x20000000) == 0
             && m_bIsUsingStorage
