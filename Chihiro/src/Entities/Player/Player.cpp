@@ -3073,6 +3073,10 @@ void Player::onBeforeCalculateStat()
     SetInt32Value(PLAYER_FIELD_MAX_STAMINA, 500000);
     m_bUsingTent = false;
     SetInt32Value(PLAYER_FIELD_MAX_CHAOS, 0);
+
+    m_vApplySummonPassive.clear();
+    m_vApmlifySummonPassive.clear();
+
     Unit::onBeforeCalculateStat();
 }
 
