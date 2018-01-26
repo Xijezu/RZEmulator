@@ -88,6 +88,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         int AddStamina(int nStamina);
         int GetStaminaRegenRate();
         CONDITION_INFO GetCondition() const;
+        bool IsSitdownable() const;
+        bool IsSitdown() const override { return m_bSitdown; }
 
         uint GetJobDepth();
 
@@ -246,6 +248,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         int GetChaos() const;
         int GetMaxChaos() const;
         void AddChaos(int chaos);
+        bool m_bSitdown{false};
     protected:
 
         bool isInLocationType(uint8 nLocationType);
@@ -263,7 +266,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void onStartQuest(Quest *pQuest);
         void updateQuestStatus(Quest *pQuest);
         void onEndQuest(Quest *pQuest);
-
     private:
         void openStorage();
         Item *popItem(Item* pItem, int64 cnt, bool bSkipUpdateToDB);

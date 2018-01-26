@@ -33,6 +33,7 @@ const AllowedCommands commandHandler[] =
                               {
                                       {"/run",        true,  &AllowedCommandInfo::onRunScript},
                                       {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
+                                      {"/standup",    false, &AllowedCommandInfo::onCheatStandup},
                                       {"/position",   false, &AllowedCommandInfo::onCheatPosition},
                                       {"/battle",     false, &AllowedCommandInfo::onBattleMode},
                                       {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
@@ -62,7 +63,13 @@ void AllowedCommandInfo::onRunScript(Player *pClient, const std::string &pScript
 
 void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string&/* tokens*/)
 {
-
+    if(pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable())
+    {
+        if(pClient->GetTargetHandle() != 0)
+            pClient->CancelAttack();
+        pClient->m_bSitdown = true;
+        Messages::BroadcastStatusMessage(pClient);
+    }
 }
 
 void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string& tokens) {
@@ -214,4 +221,13 @@ void AllowedCommandInfo::onPartyDestroy(Player *pClient, const std::string &)
         return;
 
     sGroupManager->DestroyParty(pClient->GetPartyID());
+}
+
+void AllowedCommandInfo::onCheatStandup(Player *pClient, const std::string &)
+{
+    if(pClient == nullptr)
+        return;
+
+    pClient->m_bSitdown = false;
+    Messages::BroadcastStatusMessage(pClient);
 }

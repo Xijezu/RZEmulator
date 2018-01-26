@@ -1321,8 +1321,7 @@ void Unit::processPendingMove()
         if (m_nMovableTime < ct)
         {
             RemoveFlag(UNIT_FIELD_STATUS, MovePending);
-            //if (this.IsActable() && this.IsMovable())
-            if (true)
+            if (IsActable() && IsMovable())
             {
                 pos = GetCurrentPosition(ct);
                 sWorld->SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
@@ -1386,6 +1385,10 @@ void Unit::regenHPMP(uint t)
                 pt     = GetMaxHealth() * m_Attribute.nHPRegenPercentage;
                 pt     = pt * 0.01f * etf;// + 0.0;
                 pt     = pt + m_Attribute.nHPRegenPoint * etf;
+                if(IsSitdown())
+                {
+                    pt *= 2.0f;
+                }
                 /*if (this.IsSitDown()) {
                     pt *= this.m_fHealRatioByRest;
                     pt += (float) this.m_nAdditionalHealByRest;
@@ -1410,6 +1413,11 @@ void Unit::regenHPMP(uint t)
                 pt = GetMaxMana() * m_Attribute.nMPRegenPercentage;
                 pt = pt * 0.01f * etf;// +0.0;
                 pt = pt + m_Attribute.nMPRegenPoint * etf;
+
+                if(IsSitdown())
+                {
+                    pt *= 2.0f;
+                }
 
                 /*if (this.IsSitDown())
                     pt = this.m_fMPHealRatioByRest * pt;*/
@@ -3576,4 +3584,12 @@ void Unit::ToggleAura(Skill *pSkill)
     }
     if(bNewAura)
         TurnOnAura(pSkill);
+}
+
+bool Unit::IsActable() const
+{
+    return GetHealth() != 0
+           && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Feared)
+           && (GetUInt32Value(UNIT_FIELD_STATUS) & (StatusFlags::Movable | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::MagicCastable | StatusFlags::ItemUsable)) != 0;
+
 }

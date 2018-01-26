@@ -3333,3 +3333,8 @@ bool Player::ReadStorageSummonList(std::vector<Summon*>& vList)
     }
 }
 
+bool Player::IsSitdownable() const
+{
+    return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
+}
+

@@ -168,9 +168,11 @@ class Unit : public WorldObject
 
         void BindSkillCard(Item *pItem);
         void UnBindSkillCard(Item *pItem);
-        virtual bool IsEnemy(const Unit* pTarget, bool bIncludeHiding);
-        virtual bool IsAlly(const Unit* pTarget);
+        virtual bool IsEnemy(const Unit *pTarget, bool bIncludeHiding);
+        virtual bool IsAlly(const Unit *pTarget);
         bool IsVisible(const Unit *pTarget);
+        virtual bool IsActable() const;
+        virtual bool IsSitdown() const { return false; }
 
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
 
@@ -209,7 +211,6 @@ class Unit : public WorldObject
         float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
         float GetItemChance() const;
         uint64 GetEXP() const { return GetUInt64Value(UNIT_FIELD_EXP); }
-
         virtual uint GetCreatureGroup() const;
 
         void AddHealth(int hp) { SetHealth(GetHealth() + hp); }
@@ -227,7 +228,7 @@ class Unit : public WorldObject
         int GetArmorClass() const;
         // Event handler
         bool IsWornByCode(int code) const;
-        EventProcessor     _Events;
+        EventProcessor              _Events;
         virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
         Item *GetWornItem(ItemWearType);
         ushort Puton(ItemWearType pos, Item *item);
@@ -240,6 +241,7 @@ class Unit : public WorldObject
         virtual CreatureStat *GetBaseStat() const { return nullptr; }
 
         virtual bool IsUsingBow() const { return false; }
+
         virtual bool IsUsingCrossBow() const { return false; }
 
         bool TurnOnAura(Skill *pSkill);
@@ -267,7 +269,9 @@ class Unit : public WorldObject
         void applyStateEffect();
         void applyStateAmplifyEffect();
         void applyPassiveSkillAmplifyEffect();
+
         virtual void applyPassiveSkillAmplifyEffect(Skill *) {}
+
         void applyStateAmplify(State &state);
         void applyDoubeWeaponEffect();
 
@@ -306,8 +310,8 @@ class Unit : public WorldObject
         void procMoveSpeedChange();
         void processPendingMove();
         void _InitTimerFieldsAndStatus();
-        std::vector<State> m_vStateList{ };
-        uint32             m_unitTypeMask;
+        std::vector<State>          m_vStateList{ };
+        uint32                      m_unitTypeMask;
         //	typedef std::list<GameObject*> GameObjectList;
         //	GameObjectList m_gameObj;
 
@@ -336,7 +340,7 @@ class Unit : public WorldObject
         Skill *m_castingSkill{nullptr};
         float m_nRegenHP{ }, m_fRegenMP{ };
     private:
-        UNORDERED_MAP<int, Skill*> m_vAura;
+        UNORDERED_MAP<int, Skill *> m_vAura;
 
         float m_fBowInterval{0};
         bool ClearExpiredState(uint t);

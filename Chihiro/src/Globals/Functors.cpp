@@ -131,3 +131,8 @@ void KillALlRegionFunctor::Run(Region *region)
 {
     region->DoEachMovableObject(fn);
 }
+
+void BroadcastStatusRegionFunctor::Run(Region *region)
+{
+    region->DoEachClient(fn);
+}

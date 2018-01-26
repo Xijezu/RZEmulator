@@ -577,6 +577,15 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
                 v2 |= 0x100;
         }
             break;
+        case ST_Player:
+        {
+            auto player = dynamic_cast<Player*>(pObj);
+            if(player->IsSitdown())
+                v2 |= 0x100;
+            if(player->GetPermission() >= 100)
+                v2 |= 0x4000;
+        }
+        break;
         default:
             break;
     }
@@ -738,9 +747,9 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
         return;
 
     BroadcastStatusMessageObjectFunctor statusFunctor;
-    DoEachClientRegionFunctor           regionFunctor;
+    BroadcastStatusRegionFunctor        regionFunctor;
     statusFunctor.pObject = obj;
-    regionFunctor.pFo     = statusFunctor;
+    regionFunctor.fn     = statusFunctor;
 
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                  (uint)(obj->GetPositionY() / g_nRegionSize),

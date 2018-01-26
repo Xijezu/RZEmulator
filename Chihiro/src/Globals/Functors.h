@@ -18,12 +18,18 @@ struct RegionFunctor
 {
     virtual void Run(Region*) { };
 };
-
 struct BroadcastStatusMessageObjectFunctor : public WorldObjectFunctor
 {
     WorldObject* pObject;
     void Run(WorldObject* obj) override;
 };
+
+struct BroadcastStatusRegionFunctor : public RegionFunctor
+{
+    BroadcastStatusMessageObjectFunctor fn;
+    void Run(Region *region) override;
+};
+
 
 struct DoEachClientRegionFunctor : public RegionFunctor
 {
