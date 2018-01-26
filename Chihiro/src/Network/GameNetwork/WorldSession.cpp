@@ -1920,6 +1920,17 @@ void WorldSession::onStorage(XPacket *pRecvPct)
             }
             if (pItem->IsInInventory() && mode == ITEM_INVENTORY_TO_STORAGE)
             {
+                if(pItem->m_pSummon != nullptr)
+                {
+                    for(const auto& v : _player->m_aBindSummonCard)
+                    {
+                        if(v == pItem)
+                        {
+                            Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
+                            return;
+                        }
+                    }
+                }
                 /*if((pItem->m_Instance.Flag & 0x40) == 0 || _player->FindStorageItem(pItem->m_Instance.Code) == nullptr)
                 {
                     Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, handle); // too heavy??

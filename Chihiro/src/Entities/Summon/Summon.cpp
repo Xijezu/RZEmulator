@@ -87,8 +87,8 @@ void Summon::DB_UpdateSummon(Player *pMaster, Summon *pSummon)
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_SUMMON);
 
     uint8_t i = 0;
-    stmt->setInt32(i++, 0); // account id
-    stmt->setInt32(i++, pMaster->GetInt32Value(UNIT_FIELD_UID));
+    stmt->setInt32(i++, (pSummon->GetMaster() != nullptr ? 0 : pSummon->m_nAccountID)); // account id
+    stmt->setInt32(i++, (pSummon->GetMaster() != nullptr ? pSummon->GetMaster()->GetUInt32Value(UNIT_FIELD_UID) : 0));
     stmt->setInt32(i++, pSummon->GetSummonCode());
     stmt->setUInt64(i++, pSummon->GetEXP());
     stmt->setInt32(i++, pSummon->GetJP());

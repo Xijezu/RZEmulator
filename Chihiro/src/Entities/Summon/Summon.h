@@ -9,6 +9,7 @@ class Player;
 class Summon : public Unit
 {
     public:
+        friend class Player;
         static Summon *AllocSummon(Player *, uint);
         explicit Summon(uint, uint);
         ~Summon();
@@ -39,13 +40,14 @@ class Summon : public Unit
         float GetSize() const override;
         float GetScale() const override;
 
+        void SetSummonInfo(int);
+        bool DoEvolution();
+
         int m_nSummonInfo{ };
         int m_nCardUID{ };
         int m_nTransform{ };
-        Item    *m_pItem{nullptr};
-        void SetSummonInfo(int);
-        bool DoEvolution();
         uint8_t m_cSlotIdx{ };
+        Item    *m_pItem{nullptr};
     protected:
         void onCantAttack(uint handle, uint t) override;
         void onBeforeCalculateStat() override;
@@ -65,6 +67,8 @@ class Summon : public Unit
     private:
         SummonResourceTemplate *m_tSummonBase{nullptr};
         Player *m_pMaster{nullptr};
+
+        int m_nAccountID{};
 };
 
 

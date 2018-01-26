@@ -111,6 +111,7 @@ class Messages
         static void SendOpenStorageMessage(Player* pPlayer);
         static void SendSkillCardInfo(Player* pPlayer, Item *pItem);
         static void SendToggleInfo(Unit *pUnit, int skill_id, bool status);
+        static void SendRemoveSummonMessage(Player* pPlayer, Summon *pSummon);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };

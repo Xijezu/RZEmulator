@@ -1030,3 +1030,13 @@ void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
     auraPct << (uint8)(status != 0 ? 1 : 0);
     player->SendPacket(auraPct);
 }
+
+void Messages::SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon)
+{
+    if(pSummon == nullptr || pPlayer == nullptr)
+        return;
+
+    XPacket removePct(TS_SC_REMOVE_SUMMON_INFO);
+    removePct << pSummon->m_pItem->GetHandle();
+    pPlayer->SendPacket(removePct);
+}

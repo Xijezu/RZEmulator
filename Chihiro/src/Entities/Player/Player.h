@@ -102,6 +102,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool ReadSkillList(Unit *);
         bool ReadQuestList();
         bool ReadStateList(Unit *);
+        bool ReadStorageSummonList(std::vector<Summon*>&);
         void DB_ReadStorage();
         void DB_UpdateStorageGold();
         /* ****************** DATABASE END ****************** */
@@ -290,6 +291,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Skill *> m_vApmlifySummonPassive;
 
         std::vector<Summon *> m_vSummonList{};
+        std::vector<Summon *> m_vStorageSummonList{};
         std::vector<Item*> m_vCharmList{};
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };

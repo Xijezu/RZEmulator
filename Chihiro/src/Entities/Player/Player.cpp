@@ -59,6 +59,17 @@ void Player::CleanupsBeforeDelete()
         sWorld->RemoveObjectFromWorld(this);
     }
 
+    for(auto &t : m_vStorageSummonList)
+    {
+        if(t != nullptr)
+        {
+            auto pos = std::find(m_vSummonList.begin(), m_vSummonList.end(), t);
+            if (pos != m_vSummonList.end())
+                m_vSummonList.erase(pos);
+        }
+        t->DeleteThis();
+    }
+
     for (auto &t : m_Inventory.m_vList)
     {
         Item::PendFreeItem(t);
@@ -245,6 +256,8 @@ void Player::DB_ReadStorage()
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STORAGE);
     stmt->setInt32(0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
     int nItemIndex = 0;
+    std::vector<Summon *> vList{};
+    ReadStorageSummonList(vList);
     bool bIsGoldExist{false};
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
@@ -301,12 +314,12 @@ void Player::DB_ReadStorage()
                     {
                         if(newItem->m_pItemBase->group == ItemGroup::SummonCard)
                         {
-                            for (int i = 0; i < m_vSummonList.size(); i++)
+                            for (int i = 0; i < vList.size(); i++)
                             {
-                                Summon *sm = m_vSummonList[i];
+                                Summon *sm = vList[i];
                                 if (sm->GetUInt32Value(UNIT_FIELD_UID) == newItem->m_Instance.Socket[0])
                                 {
-                                    m_vSummonList.erase(m_vSummonList.begin() + i);
+                                    vList.erase(vList.begin() + i);
                                     sm->m_pItem        = newItem;
                                     newItem->m_pSummon = sm;
                                     newItem->m_Instance.Socket[0] = sm->GetUInt32Value(UNIT_FIELD_UID);
@@ -370,6 +383,19 @@ void Player::DB_ReadStorage()
     {
         DB_UpdateStorageGold();
     }
+
+    if(!vList.empty())
+    {
+        for (auto &i : vList)
+        {
+            auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), i);
+            if(pos != m_vStorageSummonList.end())
+                m_vStorageSummonList.erase(pos);
+            delete i;
+        }
+        vList.clear();
+    }
+
     m_bIsStorageLoaded = true;
     OpenStorage();
     m_bIsStorageRequested = false;
@@ -1489,7 +1515,7 @@ void Player::OnUpdate()
         SetUInt32Value(UNIT_LAST_SAVE_TIME, ct);
     }
 
-    for (auto summon : m_aBindSummonCard)
+    for (auto& summon : m_aBindSummonCard)
     {
         if (summon != nullptr && summon->m_pSummon != nullptr)
             summon->m_pSummon->OnUpdate();
@@ -3082,17 +3108,33 @@ void Player::onBeforeCalculateStat()
 
 bool Player::RemoveSummon(Summon *pSummon)
 {
-    return false;
+    auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), pSummon);
+    if(pos != m_vStorageSummonList.end())
+        m_vStorageSummonList.erase(pos);
+
+    pSummon->m_pMaster = nullptr;
+    Messages::SendRemoveSummonMessage(this, pSummon);
+    Summon::DB_UpdateSummon(this, pSummon);
 }
 
 void Player::AddSummonToStorage(Summon *pSummon)
 {
-
+    pSummon->m_nAccountID = GetUInt32Value(PLAYER_FIELD_ACCOUNT_ID);
+    m_vStorageSummonList.emplace_back(pSummon);
+    if(pSummon->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    {
+        Summon::DB_UpdateSummon(this, pSummon);
+    }
 }
 
 void Player::RemoveSummonFromStorage(Summon *pSummon)
 {
+    auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), pSummon);
+    if(pos != m_vStorageSummonList.end())
+        m_vStorageSummonList.erase(pos);
 
+    pSummon->m_nAccountID = 0;
+    Summon::DB_UpdateSummon(this, pSummon);
 }
 
 void Player::OpenStorage()
@@ -3225,5 +3267,69 @@ bool Player::IsAlly(const Unit *pUnit)
 {
     // TODO: Implement real function
     return !pUnit->IsMonster();
+}
+
+bool Player::ReadStorageSummonList(std::vector<Summon*>& vList)
+{
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STORAGE_SUMMONLIST);
+    stmt->setInt32(0, GetUInt32Value(PLAYER_FIELD_ACCOUNT_ID));
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+    {
+        do
+        {
+            Field       *fields            = result->Fetch();
+            int         i                  = 0;
+            //PrepareStatement(CHARACTER_GET_SUMMONLIST, "SELECT sid, account_id, code, card_uid, exp, jp,
+            // last_decreased_exp, name, transform, lv, jlv, max_level, fp, prev_level_01, prev_level_02,
+            // /run scv(get_creature_handle(0), "lv", 60)
+            // prev_id_01, prev_id_02, sp, hp, mp FROM Summon WHERE owner_id = ?", CONNECTION_SYNCH);
+            uint        sid                = fields[i++].GetUInt32();
+            int         account_id         = fields[i++].GetInt32();
+            int         code               = fields[i++].GetInt32();
+            uint        card_uid           = fields[i++].GetUInt32();
+            uint        exp                = fields[i++].GetUInt32();
+            int         jp                 = fields[i++].GetInt32();
+            uint        last_decreased_exp = fields[i++].GetUInt32();
+            std::string name               = fields[i++].GetString();
+            int         transform          = fields[i++].GetInt32();
+            int         lv                 = fields[i++].GetInt32();
+            int         jlv                = fields[i++].GetInt32();
+            int         max_level          = fields[i++].GetInt32();
+            int         fp                 = fields[i++].GetInt32();
+            int         prev_level_01      = fields[i++].GetInt32();
+            int         prev_level_02      = fields[i++].GetInt32();
+            int         prev_id_01         = fields[i++].GetInt32();
+            int         prev_id_02         = fields[i++].GetInt32();
+            int         sp                 = fields[i++].GetInt32();
+            int         hp                 = fields[i++].GetInt32();
+            int         mp                 = fields[i++].GetInt32();
+
+            auto summon = Summon::AllocSummon(this, code);
+            summon->SetUInt32Value(UNIT_FIELD_UID, sid);
+            summon->m_nSummonInfo = code;
+            summon->m_nCardUID    = card_uid;
+            summon->SetUInt64Value(UNIT_FIELD_EXP, exp);
+            summon->SetJP(jp);
+            summon->SetName(name);
+            summon->SetLevel(lv);
+            summon->SetCurrentJLv(jlv);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, prev_id_01);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, prev_id_02);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, prev_level_01);
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, prev_level_02);
+            summon->SetInt32Value(UNIT_FIELD_HEALTH, hp);
+            summon->SetInt32Value(UNIT_FIELD_MANA, mp);
+            summon->m_nTransform = transform;
+
+            auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [summon](Summon* const s) { return s->GetUInt32Value(UNIT_FIELD_UID) == summon->GetUInt32Value(UNIT_FIELD_UID); });
+            if(pos == m_vStorageSummonList.end())
+            {
+                ReadSkillList(summon);
+                m_vStorageSummonList.emplace_back(summon);
+            }
+            vList.emplace_back(summon);
+
+        } while(result->NextRow());
+    }
 }
 
