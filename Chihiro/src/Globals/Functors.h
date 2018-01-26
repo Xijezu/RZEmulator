@@ -61,6 +61,18 @@ struct BroadcastRegionFunctor : public RegionFunctor
     void Run(Region* region) override;
 };
 
+struct KillAllDoableObject : public WorldObjectFunctor
+{
+    Player *p{nullptr};
+    void Run(WorldObject *obj) override;
+};
+
+struct KillALlRegionFunctor : public RegionFunctor
+{
+    KillAllDoableObject fn;
+    void Run(Region *region) override;
+};
+
 struct SendEnterMessageEachOtherFunctor : public WorldObjectFunctor
 {
     WorldObject* obj;

@@ -8,7 +8,7 @@
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
 int GameRule::_chipLevelLimit[8] = {0, 20, 50, 80, 100, 120, 150, 180};
 float GameRule::_staminaExpRate[300] = { 0 };
-float GameRule::_itemDropRate = 1.0f;
+float GameRule::_itemDropRate = 10.0f;
 float GameRule::_GoldDropRate = 1.0f;
 float GameRule::_chaosDropRate = 1.0f;
 float GameRule::_expRate = 1.0f;

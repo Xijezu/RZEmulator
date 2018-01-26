@@ -20,6 +20,7 @@
 #include "RegionContainer.h"
 #include "Messages.h"
 #include "ClientPackets.h"
+#include "Monster.h"
 
 void DoEachClientRegionFunctor::Run(Region *region)
 {
@@ -118,4 +119,15 @@ void SendMoveMessageFunctor::Run(WorldObject *client)
 void BroadcastRegionFunctor::Run(Region *region)
 {
     region->DoEachClient(fn);
+}
+
+void KillAllDoableObject::Run(WorldObject *obj)
+{
+    if(obj != nullptr && p != nullptr && obj->IsMonster())
+        dynamic_cast<Monster*>(obj)->TriggerForceKill(p);
+}
+
+void KillALlRegionFunctor::Run(Region *region)
+{
+    region->DoEachMovableObject(fn);
 }

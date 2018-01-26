@@ -754,7 +754,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
 
 void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
 {
-    int    nMinLevel     = 0;
+    int    nMinLevel     = 255;
     int    nMaxLevel     = 0;
     int    nTotalLevel   = 0;
     int    nCount        = 0;

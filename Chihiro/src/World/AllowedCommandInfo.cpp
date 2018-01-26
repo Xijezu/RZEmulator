@@ -21,6 +21,7 @@
 #include "Scripting/XLua.h"
 #include "MemPool.h"
 #include "GroupManager.h"
+#include "RegionContainer.h"
 
 typedef struct AllowedCommands {
     std::string szCommand;
@@ -105,10 +106,7 @@ void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &
 
 void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
 {
-    pClient->CalculateStat();
-    if(pClient->m_pMainSummon != nullptr)
-        pClient->m_pMainSummon->CalculateStat();
-/*    sArRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer(),
+/*    sArRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer()
                                    [=](ArRegion* region) {
                                        region->DoEachMovableObject(
                                                [=](WorldObject* obj) {
@@ -119,6 +117,13 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
                                        );
                                    });*/
     // Causes deadlock
+
+    KillALlRegionFunctor fn;
+    KillAllDoableObject fn2;
+    fn2.p = pClient;
+    fn.fn = fn2;
+
+    sRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer(), fn);
 
 }
 

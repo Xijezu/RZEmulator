@@ -1566,7 +1566,7 @@ bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 
         int p = irand(1, 100000000);
         for(int i = 0; i < MAX_DROP_GROUP; ++i) {
             cp += dg->drop_percentage[i];
-            if(p < cp) {
+            if(p <= cp) {
                 nItemID = dg->drop_item_id[i];
                 nItemCount = 1;
                 return true;

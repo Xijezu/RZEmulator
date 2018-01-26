@@ -242,7 +242,6 @@ class Monster : public Unit
 
         void SetStatus(MonsterStatus status);
         void SetTamer(uint handle, int nTamingSkillLevel);
-        void ForceKill(Player *byPlayer);
 
         uint GetCreatureGroup() const override;
         bool IsEnvironmentMonster() const;
@@ -272,6 +271,7 @@ class Monster : public Unit
 
         int AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMonster);
         bool IsAlly(const Unit *pTarget) override;
+        void TriggerForceKill(Player *pPlayer);
 
         MonsterDeleteHandler *m_pDeleteHandler{nullptr};
     protected:
@@ -281,6 +281,7 @@ class Monster : public Unit
 
         void processWalk(uint t);
         void processMove(uint t);
+        void ForceKill(Player *byPlayer);
         void processFirstAttack(uint t);
         void FindAttackablePosition(Position &myPosition, Position &enemyPosition, float distance, float gap);
         void getMovePosition(Position &newPos);
@@ -331,6 +332,8 @@ class Monster : public Unit
         int  m_nTamingSkillLevel;
         uint m_hTamer;
         int  m_nTamedTime;
+        Player *pFCClient{nullptr};
+        bool bForceKill{false};
         bool m_bTamedSuccess;
 
         MonsterStatus m_nStatus;

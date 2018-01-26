@@ -356,6 +356,8 @@ void Monster::Update(uint diff)
 {
     uint          ct = sWorld->GetArTime();
     MonsterStatus ms = GetStatus();
+    if(bForceKill)
+        ForceKill(pFCClient);
     if (ms != MonsterStatus::MS_Normal)
     {
         if ((int)ms > 0)
@@ -457,7 +459,7 @@ void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, 
     int64     item_count;
     for (int i = 0; i < 10; ++i)
     {
-        if (m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], (int)m_Base->drop_percentage[i], fDropRatePenalty, 1))
+        if (m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1))
         {
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
             if (item_count < m_Base->drop_min_count[i])
@@ -534,28 +536,22 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 
 void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex)
 {
-    std::map<int, long> mapDropItem{};
-    int64 nItemCount;
-    int nItemID;
+    std::map<int, long> mapDropItem{ };
+    int64               nItemCount;
+    int                 nItemID;
 
-    for(int i = 0; i < count; ++i) {
-        nItemID = nDropGroupID;
+    for (int i = 0; i < count; ++i)
+    {
+        nItemID    = nDropGroupID;
         nItemCount = 1;
 
         do
             sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
-        while(nItemID < 0);
-        if(nItemID > 0) {
-            if(mapDropItem.count(nItemID) > 0) {
-                mapDropItem[nItemID] = mapDropItem[nItemID] + nItemCount;
-            } else {
-                mapDropItem.emplace(nItemID, nItemCount);
-            }
+        while (nItemID < 0);
+        if (nItemID > 0)
+        {
+            dropItem(pos, pKiller, pPriority, vPartyContribute, nItemID, nItemCount, level, false, nFlagIndex);
         }
-    }
-
-    for(auto& kvp : mapDropItem) {
-        dropItem(pos, pKiller, pPriority, vPartyContribute, kvp.first, kvp.second, level, false, nFlagIndex);
     }
 }
 
@@ -1250,4 +1246,10 @@ void Monster::procDropChaos(Unit *pKiller, takePriority pPriority, std::vector<V
 bool Monster::IsAlly(const Unit *pTarget)
 {
     return pTarget->IsMonster();
+}
+
+void Monster::TriggerForceKill(Player *pPlayer)
+{
+    pFCClient = pPlayer;
+    bForceKill = true;
 }
