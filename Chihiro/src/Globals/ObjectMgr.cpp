@@ -1533,7 +1533,7 @@ uint64 ObjectMgr::GetItemSellPrice(uint64 price, int rank, int lv, bool same_pri
         if (same_price_for_buying)
             return k;
         else
-            return k / 4;
+            return k / 2;
     }
     return 0;
 }
