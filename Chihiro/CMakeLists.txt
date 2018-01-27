@@ -1,35 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(Chihiro)
 
-file(GLOB_RECURSE sources_Entities src/Entities/*.cpp src/Entities/*.h)
-file(GLOB_RECURSE sources_Skills src/Skills/*.cpp src/Skills/*.h)
-file(GLOB_RECURSE sources_Scripting src/Scripting/*.cpp src/Scripting/*.h)
-file(GLOB_RECURSE sources_X2D src/X2D/*.cpp src/X2D/*.h)
-file(GLOB_RECURSE sources_Crafting src/Crafting/*.cpp src/Crafting/*.h)
-file(GLOB_RECURSE sources_Quests src/Quests/*.cpp src/Quests/*.h)
-file(GLOB_RECURSE sources_Dungeons src/Dungeons/*.cpp src/Dungeons/*.h)
-file(GLOB_RECURSE sources_Globals src/Globals/*.cpp src/Globals/*.h)
-file(GLOB_RECURSE sources_Groups src/Groups/*.cpp src/Groups/*.h)
-file(GLOB_RECURSE sources_Grids src/Grids/*.cpp src/Grids/*.h)
-file(GLOB_RECURSE sources_Map src/Map/*.cpp src/Map/*.h)
-file(GLOB_RECURSE sources_Network src/Network/*.cpp src/Network/*.h)
-file(GLOB_RECURSE sources_World src/World/*.cpp src/World/*.h)
-file(GLOB sources_localdir src/*.cpp src/*.h)
-
-set(SOURCE_FILES ${sources_Entities}
-                 ${sources_Scripting}
-                 ${sources_X2D}
-                 ${sources_Quests}
-                 ${sources_Crafting}
-                 ${sources_Globals}
-                 ${sources_Groups}
-                 ${sources_Grids}
-                 ${sources_Dungeons}
-                 ${sources_Map}
-                 ${sources_Skills}
-                 ${sources_Network}
-                 ${sources_localdir}
-                 ${sources_World})
+file(GLOB_RECURSE SOURCE_FILES src/*.*)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities
@@ -44,6 +16,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Unit
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Globals
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Grids
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Functors
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src/Account
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Groups
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Dungeons
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Map

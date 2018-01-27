@@ -28,33 +28,48 @@
 struct Player;
 
 // Handle the player network
-class AuthClientSession {
-public:
-    typedef WorldSocket<AuthClientSession> AuthSocket;
-    explicit AuthClientSession(AuthSocket *socket);
-    virtual ~AuthClientSession();
+class AuthClientSession
+{
+    public:
+        typedef WorldSocket<AuthClientSession> AuthSocket;
+        explicit AuthClientSession(AuthSocket *socket);
+        virtual ~AuthClientSession();
 
-    // Accept & Close handler
-    //void OnAccept() override;
-    void OnClose();
-    void ProcessIncoming(XPacket *);
+        void OnClose();
+        void ProcessIncoming(XPacket *);
 
-    void HandleLoginPacket(XPacket *packet);
-    void HandleVersion(XPacket *);
-    void HandleServerList(XPacket *);
-    void HandleSelectServer(XPacket *);
-    void HandleNullPacket(XPacket *){ }
-    void SendResultMsg(uint16 pctID, uint16 result, uint value);
+        /// \brief Handler for the Login packet - checks accountname and password
+        /// \param packet received packet
+        void HandleLoginPacket(XPacket *packet);
+        /// \brief Handler for the Version packet, not used yet
+        void HandleVersion(XPacket *);
+        /// \brief Handler for the server list packet - sends the client the currently connected gameserver(s)
+        void HandleServerList(XPacket *);
+        /// \brief Handler for the select server packet - generates one time key for gameserver login
+        void HandleSelectServer(XPacket *);
+        /// \brief Just a function to ignore packets
+        void HandleNullPacket(XPacket *) {}
+        /// \brief Sends a result message to the client
+        /// \param pctID Response to received pctID
+        /// \param result TS_RESULT code
+        /// \param value More informations
+        void SendResultMsg(uint16 pctID, uint16 result, uint value);
 
-    int GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
-    std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->szLoginName : "<null>"; }
-    AuthSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
-private:
-    AuthSocket *_socket{nullptr};
-    XDes _desCipther{};
+        /// \brief Gets the current players AccountID, used in WorldSocket
+        /// \return account id
+        int GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
+        /// \brief Gets the current players account name, used in WorldSocket
+        /// \return account name
+        std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->szLoginName : "<null>"; }
+        /// \brief Gets the Socket
+        /// \return AuthSocket
+        AuthSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
+    private:
+        AuthSocket *_socket{nullptr};
+        XDes       _desCipther{ };
 
-    Player*     m_pPlayer{nullptr};
-    bool        _isAuthed{false};
+        Player *m_pPlayer{nullptr};
+        bool _isAuthed{false};
 };
 
 #endif // _AUTHCLIENTSESSION_H_

@@ -52,17 +52,25 @@ struct DungeonTemplate
 
 class DungeonManager
 {
-public:
-    DungeonManager() = default;
-    ~DungeonManager() = default;
+    public:
+        DungeonManager() = default;
+        ~DungeonManager() = default;
 
-    Position GetRaidStartPosition(int nDungeonID);
-    int GetDungeonID(float x, float y);
-    void RegisterDungeonTemplate(DungeonTemplate);
-    /*Position GetSiegeStartPosition(int nDungeonID);
-    Position GetSiegeDefencePosition(int nDungeonID);*/
-private:
-    std::vector<DungeonTemplate> m_vDungeonInfo{};
+        /// \brief Gets the startlocation of the dungeon (used for enter_dungeon() for example)
+        /// \param nDungeonID DungeonID
+        /// \return the correct position
+        Position GetRaidStartPosition(int nDungeonID);
+        /// \brief Gets the dungeon ID from coordinates
+        /// \param x X coord
+        /// \param y Y coord
+        /// \return DungeonID on success, 0 on failure
+        int GetDungeonID(float x, float y);
+        /// \brief Registers our template to the list
+        void RegisterDungeonTemplate(DungeonTemplate);
+        /*Position GetSiegeStartPosition(int nDungeonID);
+        Position GetSiegeDefencePosition(int nDungeonID);*/
+    private:
+        std::vector<DungeonTemplate> m_vDungeonInfo{ };
 };
 
 #define sDungeonManager ACE_Singleton<DungeonManager, ACE_Thread_Mutex>::instance()

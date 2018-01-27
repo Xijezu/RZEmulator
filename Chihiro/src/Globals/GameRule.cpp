@@ -2,7 +2,6 @@
 // Created by xijezu on 17.12.17.
 //
 #include "GameRule.h"
-#include "Common.h"
 #include "Util.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
@@ -25,7 +24,13 @@ float GameRule::GetItemValue(float item_current_value, int item_rank_value, int 
     //return f1 * ilp;
 }
 
-// NO TOUCH, IS WORK! NO TOUCH IF NO BROKE
+/*
+ * NO TOUCH, IS WORK! NO TOUCH IF NO BROKE
+ * No seriously, I tried to reconstruct it from retails pseudocode
+ * but for some odd reasons I always got odd results
+ * finally I tried to reconstruct it more or less 1:1 and this is the result
+ * I fricking hate IDAs pseudocode plugin...
+ */
 float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_level)
 {
     float result      = 0;
@@ -88,8 +93,6 @@ int GameRule::GetRankLevel(int rank)
         default:
             return 0;
     }
-
-    return 0;
 }
 
 int GameRule::GetItemLevelLimit(int item_rank)

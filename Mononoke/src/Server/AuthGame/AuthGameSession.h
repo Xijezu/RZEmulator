@@ -30,30 +30,38 @@ class XPacket;
 // Handle login commands
 class AuthGameSession
 {
-public:
-	typedef WorldSocket<AuthGameSession> GameSocket;
-	explicit AuthGameSession(GameSocket *pSocket);
-	~AuthGameSession();
+	public:
+		typedef WorldSocket<AuthGameSession> GameSocket;
+		explicit AuthGameSession(GameSocket *pSocket);
+		~AuthGameSession();
 
-	// Network handlers
-	void OnClose();
-	void ProcessIncoming(XPacket *);
+		// Network handlers
+		void OnClose();
+		void ProcessIncoming(XPacket *);
 
-	// Packet handlers
-	void HandleGameLogin(XPacket *);
-	void HandleClientLogin(XPacket *);
-	void HandleClientLogout(XPacket *);
-	void HandleClientKickFailed(XPacket *);
+		/// \brief Handles game login (packet contains servername, ...)
+		void HandleGameLogin(XPacket *);
+		/// \brief Handles client login on server - checks one-time-key
+		void HandleClientLogin(XPacket *);
+		/// \brief Handles client logout on server - removes player from our list
+		void HandleClientLogout(XPacket *);
+		/// \brief Handles client kick failed - not used yet
+		void HandleClientKickFailed(XPacket *);
+		/// \brief Kicks a player from the gameserver
+		/// \param pPlayer The player to be kicked
+		void KickPlayer(Player *pPlayer);
 
-    void KickPlayer(Player* pPlayer);
+		/// \brief Gets the GameIDX - used in WorldSocket
+		/// \return GameIDX
+		int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
+		/// \brief Gets the server name - used in WorldSocket
+		/// \return server name
+		std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
 
-	int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
-	std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
-
-private:
-	GameSocket *m_pSocket;
-	Game       *m_pGame;
-	bool       m_bIsAuthed;
+	private:
+		GameSocket *m_pSocket;
+		Game       *m_pGame;
+		bool       m_bIsAuthed;
 };
 
 #endif // _GAMESOCKET_H

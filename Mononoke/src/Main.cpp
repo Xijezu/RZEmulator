@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldSocketMgr.h"
+#include "SignalHandler.h"
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 #include <ace/Dev_Poll_Reactor.h>
@@ -18,7 +19,7 @@ LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the a
 # define _MONONOKE_CORE_CONFIG  "authserver.conf"
 #endif //_MONONOKE_CORE_CONFIG
 
-/*class AuthServerSignalHandler : public SkyFire::SignalHandler
+class AuthServerSignalHandler : public Skyfire::SignalHandler
 {
 public:
 	virtual void HandleSignal(int SigNum)
@@ -29,9 +30,11 @@ public:
             case SIGTERM:
                 stopEvent = true;
 				break;
+            default:
+                break;
 		}
 	}
-};*/
+};
 extern int main(int argc, char **argv)
 {
 	//sLog->Initialize();
@@ -50,17 +53,17 @@ extern int main(int argc, char **argv)
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
 #endif
 
-	/*///- Initialize the signal handlers
+	///- Initialize the signal handlers
 	AuthServerSignalHandler SignalINT, SignalTERM;
 #ifdef _WIN32
 	AuthServerSignalHandler SignalBREAK;
 #endif /* _WIN32 */
 
-/*	///- Register worldserver's signal handlers
+	///- Register worldserver's signal handlers
 	ACE_Sig_Handler Handler;
 	Handler.register_handler(SIGINT, &SignalINT);
 	Handler.register_handler(SIGTERM, &SignalTERM);
-*/
+
 
 	auto authPort = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
 	std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
