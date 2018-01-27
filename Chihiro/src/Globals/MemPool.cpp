@@ -6,6 +6,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "FieldPropManager.h"
+#include "ItemCollector.h"
 
 template class HashMapHolder<Player>;
 template class HashMapHolder<WorldObject>;
@@ -156,6 +157,7 @@ void MemoryPoolMgr::Update(uint diff)
         //*&obj = nullptr;
     }
     sFieldPropManager->Update(diff);
+    sItemCollector->Update();
 }
 
 Item *MemoryPoolMgr::AllocGold(int64 gold, GenerateCode gcode)

@@ -15,6 +15,7 @@
 #include "Skill.h"
 #include "FieldPropManager.h"
 #include "GroupManager.h"
+#include "ItemCollector.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -466,7 +467,7 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
         }
     }
 
-    pPlayer->AddEXP(GameRule::GetIntValueByRandomInt64(GameRule::GetEXPRate() * exp), GameRule::GetIntValueByRandomInt(GameRule::GetEXPRate() * jp), true);
+    pPlayer->AddEXP(GameRule::GetIntValueByRandomInt64(GameRule::GetEXPRate() * exp), (uint)GameRule::GetIntValueByRandomInt(GameRule::GetEXPRate() * jp), true);
 }
 void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {
@@ -481,15 +482,20 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 
 void World::AddItemToWorld(Item *pItem)
 {
+    sItemCollector->RegisterItem(pItem);
     AddObjectToWorld(pItem);
     pItem->m_nDropTime = GetArTime();
 }
 // TODO: ItemCollector
 bool World::RemoveItemFromWorld(Item *pItem)
 {
-    RemoveObjectFromWorld(pItem);
-    pItem->m_nDropTime = 0;
-    return true;
+    if(sItemCollector->UnregisterItem(pItem))
+    {
+        RemoveObjectFromWorld(pItem);
+        pItem->m_nDropTime = 0;
+        return true;
+    }
+    return false;
 }
 
 uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
