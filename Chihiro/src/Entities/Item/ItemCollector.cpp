@@ -59,7 +59,7 @@ void ItemCollector::Update()
         next = itr;
         ++next;
 
-        if(itr->second->m_nDropTime + 3000 <= ct)
+        if(itr->second->m_nDropTime + 18000 <= ct)
         {
             if(itr->second->IsInWorld())
                 sWorld->RemoveObjectFromWorld(itr->second);
