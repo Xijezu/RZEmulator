@@ -2873,18 +2873,23 @@ void Unit::onAfterAddState(State)
 
 void Unit::procMoveSpeedChange()
 {
-    std::vector<Position> vMovePos{};
+    std::vector<Position> vMovePos{ };
 
-    if(bIsMoving && IsInWorld()) {
-        uint ct = sWorld->GetArTime();
+    if (bIsMoving && IsInWorld())
+    {
+        uint ct  = sWorld->GetArTime();
         auto pos = GetCurrentPosition(ct);
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable)) {
-            if(speed != m_Attribute.nMoveSpeed / 7) {
-                 for(auto mi : ends)
-                     vMovePos.emplace_back(mi.end);
+        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable))
+        {
+            if (speed != m_Attribute.nMoveSpeed / 7)
+            {
+                for (const auto& mi : ends)
+                    vMovePos.emplace_back(mi.end);
                 sWorld->SetMultipleMove(this, pos, vMovePos, (uint8)(m_Attribute.nMoveSpeed / 7), true, ct, true);
             }
-        } else {
+        }
+        else
+        {
             sWorld->SetMove(this, pos, pos, 0, true, ct, true);
         }
     }
@@ -2905,7 +2910,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
     uint prev_hp;
     uint prev_mp;
 
-    auto pPlayer = dynamic_cast<Player*>(pCaster);
+    auto pPlayer = this->As<Player>();
 
     switch(type) {
         case 1:

@@ -114,7 +114,8 @@ enum EPlayerFields
     PLAYER_FIELD_PKC                 = BATTLE_FIELD_END + 0x0036, // Size: 1
     PLAYER_FIELD_DKC                 = BATTLE_FIELD_END + 0x0037, // Size: 1
     PLAYER_LAST_STAMINA_UPDATE_TIME  = BATTLE_FIELD_END + 0x0038, // Size 1
-    PLAYER_END                       = BATTLE_FIELD_END + 0x0039
+    PLAYER_FIELD_RIDING_IDX          = BATTLE_FIELD_END + 0x0039, // Size 1
+    PLAYER_END                       = BATTLE_FIELD_END + 0x0040
 };
 
 class ArRegion;
@@ -559,6 +560,7 @@ class WorldObject : public Object, public ArMoveVector
 {
     public:
         ~WorldObject() override;
+        template<class T> T* As() { return dynamic_cast<T*>(this); }
 
         virtual void Update(uint32 /*time_diff*/) {}
 
