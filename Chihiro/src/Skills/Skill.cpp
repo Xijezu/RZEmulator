@@ -483,6 +483,9 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
         case EF_ADD_MP_BY_ITEM:
             MANA_SKILL_FUNCTOR(pTarget);
             break;
+        case EF_RESURRECTION:
+            SKILL_RESURRECTION(pTarget);
+            break;
         default:
             bHandled = false;
             break;
@@ -888,4 +891,12 @@ void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
     skillResult.addHPType.target_hp = pTarget->GetHealth();
     skillResult.addHPType.nIncHP = (int)heal;
     m_vResultList.emplace_back(skillResult);
+}
+
+void Skill::SKILL_RESURRECTION(Unit *pTarget)
+{
+    if(pTarget == nullptr || pTarget->GetHealth() != 0)
+        return;
+
+
 }

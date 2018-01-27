@@ -1755,6 +1755,7 @@ void Player::DoSummon(Summon *pSummon, Position pPosition)
     pSummon->SetCurrentXY(pPosition.GetPositionX(), pPosition.GetPositionY());
     pSummon->m_nLayer = this->GetLayer();
     pSummon->StopMove();
+    pSummon->_InitTimerFieldsAndStatus();
     sWorld->AddSummonToWorld(pSummon);
     pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::NeedToCalculateStat);
 }

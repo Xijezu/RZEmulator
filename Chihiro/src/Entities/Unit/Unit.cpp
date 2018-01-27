@@ -1607,6 +1607,8 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
         if (pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
             return TS_RESULT_NOT_ACTABLE;
+        if(pSkill->m_SkillBase->is_corpse == 0 && pSkillTarget->GetHealth() == 0)
+            return TS_RESULT_NOT_ACTABLE;
 
         if (pSkillTarget->GetHandle() == GetHandle()
             || pSkillTarget->IsSummon()
