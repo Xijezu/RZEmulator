@@ -363,6 +363,13 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
                 case SRT_AddMP:
                     pct << sr.addHPType.target_hp;
                     pct << sr.addHPType.nIncHP;
+                case SRT_Rebirth:
+                    pct << sr.rebirth.target_hp;
+                    pct << sr.rebirth.nIncHP;
+                    pct << sr.rebirth.nIncMP;
+                    pct << sr.rebirth.nRecoveryEXP;
+                    pct << sr.rebirth.target_mp;
+                    break;
                 default:
                     break;
             }
@@ -875,6 +882,7 @@ void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
 
     bool v10           = m_SkillBase->is_physical_act != 0;
     //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
+//    /run scv(get_creature_handle(0), "hp", 0)
     auto magic_point   = m_pOwner->m_Attribute.nMagicPoint;
     auto target_max_hp = pTarget->GetMaxHealth();
 
@@ -898,5 +906,19 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     if(pTarget == nullptr || pTarget->GetHealth() != 0)
         return;
 
+    auto prev_hp = pTarget->GetHealth();
+    auto prev_mp = pTarget->GetMana();
 
+    pTarget->AddHealth((int)CalculatePct(pTarget->GetMaxHealth(), (m_SkillBase->var[0] * 100)));
+    pTarget->AddMana((int)CalculatePct(pTarget->GetMaxMana(), (m_SkillBase->var[1] * 100)));
+
+    SkillResult skillResult{};
+    skillResult.type = SR_ResultType::SRT_Rebirth;
+    skillResult.damage.hTarget = pTarget->GetHandle();
+    skillResult.rebirth.target_hp = pTarget->GetHealth();
+    skillResult.rebirth.nIncHP = std::max((int)(pTarget->GetHealth() - prev_hp), 0);
+    skillResult.rebirth.nIncMP = std::max((int)(pTarget->GetMana() - prev_mp), 0);
+    skillResult.rebirth.nRecoveryEXP = 0;
+    skillResult.rebirth.target_mp = (int16)pTarget->GetMana();
+    m_vResultList.emplace_back(skillResult);
 }

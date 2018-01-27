@@ -40,6 +40,15 @@ struct SR_Result {
     int success_type;
 };
 
+struct SkillRebirth
+{
+    int target_hp;
+    int nIncHP;
+    int nIncMP;
+    int nRecoveryEXP;
+    int16 target_mp;
+};
+
 struct SkillResult {
     uint8 type;
     uint hTarget;
@@ -50,6 +59,7 @@ struct SkillResult {
     SR_Result result;
     SkillDamage damage;
     AddHPType addHPType;
+    SkillRebirth rebirth;
 };
 
 enum SkillState : short {
