@@ -65,13 +65,13 @@ Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int le
 ItemWearType Item::GetWearType()
 {
     if(m_pItemBase == nullptr)
-        return ItemWearType::WearNone;
+        return WEAR_NONE;
     return (ItemWearType) m_pItemBase->wear_type;
 }
 
 bool Item::IsWearable()
 {
-    if (GetWearType() == ItemWearType::WearCantWear)
+    if (GetWearType() == WEAR_CANTWEAR)
         return false;
     else
         return (~((m_Instance.Flag) >> 3) & 1) != 0;
@@ -188,12 +188,12 @@ int Item::GetLevelLimit()
 
 bool Item::IsBow()
 {
-    return m_pItemBase->iclass == ItemClass::ClassHeavyBow || m_pItemBase->iclass == ItemClass::ClassLightBow;
+    return m_pItemBase->iclass == CLASS_HEAVY_BOW || m_pItemBase->iclass == CLASS_LIGHT_BOW;
 }
 
 bool Item::IsCrossBow()
 {
-    return m_pItemBase->iclass == ItemClass::ClassCrossBow;
+    return m_pItemBase->iclass == CLASS_CROSSBOW;
 }
 
 int Item::GetItemRank() const

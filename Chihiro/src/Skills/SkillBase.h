@@ -4,201 +4,244 @@
 #include "Common.h"
 #include "ItemFields.h"
 
-enum SR_ResultType : int
+enum SKILL_RESULT_TYPE : int
 {
-    SRT_Damage = 0,
-    SRT_MagicDamage = 1,
-    SRT_DamageWithKnockBack = 2,
-    SRT_Result = 10,
-    SRT_AddHP = 20,
-    SRT_AddMP = 21,
-    SRT_AddHPMPSP = 22,
-    SRT_Rebirth = 23,
-    SRT_Rush = 30,
-    SRT_NotUse = 100,
+    SRT_DAMAGE                 = 0,
+    SRT_MAGIC_DAMAGE           = 1,
+    SRT_DAMAGE_WITH_KNOCK_BACK = 2,
+    SRT_RESULT                 = 10,
+    SRT_ADD_HP                 = 20,
+    SRT_ADD_MP                 = 21,
+    SRT_ADD_HP_MP_SP           = 22,
+    SRT_REBIRTH                = 23,
+    SRT_RUSH                   = 30,
+    SRT_CHAIN_DAMAGE           = 0x28,
+    SRT_CHAIN_MAGIC_DAMAGE     = 0x29,
+    SRT_CHAIN_HEAL             = 0x2A,
+    SRT_NOT_USE                = 100,
 };
 
-struct SkillDamage {
+struct SkillDamage
+{
+    uint8  type;
+    uint   hTarget;
+    int    target_hp;
+    uint8  damage_type;
+    int    damage;
+    int    flag;
+    uint16 elemental_damage[7];
+};
+
+struct AddHPType
+{
     uint8 type;
-    uint hTarget;
-    int target_hp;
-    uint8 damage_type;
-    int damage;
-    int flag;
-    uint16 elemental_damage[7]{};
+    uint  hTarget;
+    int   target_hp;
+    int   nIncHP;
 };
 
-struct AddHPType {
-    uint8 type;
-    uint hTarget;
-    int target_hp;
-    int nIncHP;
-};
-
-struct SR_Result {
+struct SR_Result
+{
     bool bResult;
-    int success_type;
+    int  success_type;
 };
 
 struct SkillRebirth
 {
-    int target_hp;
-    int nIncHP;
-    int nIncMP;
-    int nRecoveryEXP;
+    int   target_hp;
+    int   nIncHP;
+    int   nIncMP;
+    int   nRecoveryEXP;
     int16 target_mp;
 };
 
-struct SkillResult {
+struct SkillResult
+{
     uint8 type;
-    uint hTarget;
+    uint  hTarget;
 
     // Damage
-    int target_hp;
-    uint8 damage_type;
-    SR_Result result;
-    SkillDamage damage;
-    AddHPType addHPType;
+    int          target_hp;
+    uint8        damage_type;
+    SR_Result    result;
+    SkillDamage  damage;
+    AddHPType    addHPType;
     SkillRebirth rebirth;
 };
 
-enum SkillState : short {
-    ST_Fire          = 0,
-    ST_Casting       = 1,
-    ST_CastingUpdate = 2,
-    ST_Cancel        = 3,
-    ST_RegionFire    = 4,
-    ST_Complete      = 5
+enum SKILL_STATUS : short
+{
+    ST_FIRE           = 0,
+    ST_CASTING        = 1,
+    ST_CASTING_UPDATE = 2,
+    ST_CANCEL         = 3,
+    ST_REGION_FIRE    = 4,
+    ST_COMPLETE       = 5
 };
 
-enum TargetType : short {
-    TT_Misc                          = 0,
-    Target                           = 1,
-    RegionWithTarget                 = 2,
-    RegionWithoutTarget              = 3,
-    TT_Region                        = 4,
-    TargetExceptCaster               = 6,
-    Party                            = 21,
-    Guild                            = 22,
-    AttackTeam                       = 23,
-    TT_Summon                        = 31,
-    PartySummon                      = 32,
-    RegionNearMainSummonWithoutTaget = 44,
-    SelfWithSummon                   = 45,
-    PartyWithSummon                  = 51,
-    Master                           = 101,
-    SelfWithMaster                   = 102,
-    CreatureTypeNone                 = 201,
-    CreatureTypeFire                 = 202,
-    CreatureTypeWater                = 203,
-    CreatureTypeWind                 = 204,
-    CreatureTypeEarth                = 205,
-    CreatureTypeLight                = 206,
-    CreatureTypeDark                 = 207,
+enum TARGET_TYPE : short
+{
+    TARGET_MISC                                   = 0,
+    TARGET_TARGET                                 = 1,
+    TARGET_REGION_WITH_TARGET                     = 2,
+    TARGET_REGION_WITHOUT_TARGET                  = 3,
+    TARGET_REGION                                 = 4,
+    TARGET_TARGET_EXCEPT_CASTER                   = 6,
+    TARGET_PARTY                                  = 21,
+    TARGET_GUILD                                  = 22,
+    TARGET_ATTACKTEAM                             = 23,
+    TARGET_SUMMON                                 = 31,
+    TARGET_PARTY_SUMMON                           = 32,
+    TARGET_REGION_NEAR_MAIN_SUMMON_WITHOUT_TARGET = 44,
+    TARGET_SELF_WITH_SUMMON                       = 45,
+    TARGET_PARTY_WITH_SUMMON                      = 51,
+    TARGET_MASTER                                 = 101,
+    TARGET_SELF_WITH_MASTER                       = 102,
+    TARGET_CREATURE_TYPE_NONE                     = 201,
+    TARGET_CREATURE_TYPE_FIRE                     = 202,
+    TARGET_CREATURE_TYPE_WATER                    = 203,
+    TARGET_CREATURE_TYPE_WIND                     = 204,
+    TARGET_CREATURE_TYPE_EARTH                    = 205,
+    TARGET_CREATURE_TYPE_LIGHT                    = 206,
+    TARGET_CREATURE_TYPE_DARK                     = 207,
 };
 
-enum SkillId : int {
-    AdvWeaponExpert                       = 1022,
-    LifeOfDarkness                        = 1033,
-    IncreaseEnergy                        = 1082,
-    DualSwordExpert                       = 1181,
-    ArmorMastery                          = 1201,
-    CreatureControl                       = 1801,
-    CreatureMastery                       = 1811,
-    TechnicalCreatureControl              = 1881,
-    GaiaArmorMastery                      = 0x4B2,
-    RaiseExp                              = 0x2AFA,
-    RaiseJP                               = 0x2AFB,
-    GaiaForceSaving                       = 0xA47,
-    ItemResurrectionScroll                = 0x1771,
-    ItemRegenerationScroll                = 0x1772,
-    ItemHealingScroll                     = 0x1773,
-    ItemManaRecoveryScroll                = 0x1774,
-    ItemAntidoteScroll                    = 0x1775,
-    ItemRechargeScroll                    = 0x1776,
-    TownPortal                            = 0x1777,
-    Return                                = 0xEDA,
-    ForceChip                             = 0x1778,
-    SoulChip                              = 0x1779,
-    LunaChip                              = 0x177A,
-    ItemPerfectCreatureResurrectionScroll = 0x177D,
-    ItemPieceOfStrength                   = 0x177E,
-    ItemPieceOfVitality                   = 0x177F,
-    ItemPieceOfDexterity                  = 0x1780,
-    ItemPieceOfAgility                    = 0x1781,
-    ItemPieceOfIntelligence               = 0x1782,
-    ItemPieceOfMentality                  = 0x1783,
-    ReturnFeather                         = 0x1784,
-    ReturnBackFeather                     = 0x1785,
-    FireBombPhysical                      = -727,
-    FireBombMagical                       = -726,
-//             0x1786,SKILL_ITEM_REGENERATION_SCROLL_LV1
-//             0x1787,SKILL_ITEM_REGENERATION_SCROLL_LV2
-//             0x1788,SKILL_ITEM_REGENERATION_SCROLL_LV3
-//             0x1789,SKILL_ITEM_REGENERATION_SCROLL_LV4
-//             0x178A,SKILL_ITEM_REGENERATION_SCROLL_LV5
-//             0x178B,SKILL_ITEM_REGENERATION_SCROLL_LV6
-//             0x178C,SKILL_ITEM_REGENERATION_SCROLL_LV7
-//             0x178D,SKILL_ITEM_REGENERATION_SCROLL_LV8
-//             0x178E,SKILL_ITEM_HEALING_SCROLL_LV1
-//             0x178F,SKILL_ITEM_HEALING_SCROLL_LV2
-//             0x1790,SKILL_ITEM_HEALING_SCROLL_LV3
-//             0x1791,SKILL_ITEM_HEALING_SCROLL_LV4
-//             0x1792,SKILL_ITEM_HEALING_SCROLL_LV5
-//             0x1793,SKILL_ITEM_HEALING_SCROLL_LV6
-//             0x1794,SKILL_ITEM_HEALING_SCROLL_LV7
-//             0x1795,SKILL_ITEM_HEALING_SCROLL_LV8
-//             0x1796,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV1
-//             0x1797,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV2
-//             0x1798,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV3
-//             0x1799,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV4
-//             0x179A,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV5
-//             0x179B,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV6
-//             0x179C,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV7
-//             0x179D,SKILL_ITEM_MANA_RECOVERY_SCROLL_LV8
-//             0x179E,SKILL_CALL_BLACK_PINE_TEA
-//             0x179F,SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV1
-//             0x17A0,SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV2
-//             0x17A1,SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV3
-//             0x17AD,SKILL_ITEM_ALTERED_PIECE_OF_STRENGTH
-//             0x17AE,SKILL_ITEM_ALTERED_PIECE_OF_VITALITY
-//             0x17AF,SKILL_ITEM_ALTERED_PIECE_OF_DEXTERITY
-//             0x17B0,SKILL_ITEM_ALTERED_PIECE_OF_AGILITY
-//             0x17B1,SKILL_ITEM_ALTERED_PIECE_OF_INTELLIGENCE
-//             0x17B2,SKILL_ITEM_ALTERED_PIECE_OF_MENTALITY
-//             0x17B3,SKILL_ITEM_ALTERED_PIECE_OF_STRENGTH_QUEST
-//             0x17B4,SKILL_ITEM_ALTERED_PIECE_OF_VITALITY_QUEST
-//             0x17B5,SKILL_ITEM_ALTERED_PIECE_OF_DEXTERITY_QUEST
-//             0x17B6,SKILL_ITEM_ALTERED_PIECE_OF_AGILITY_QUEST
-//             0x17B7,SKILL_ITEM_ALTERED_PIECE_OF_INTELLIGENCE_QUEST
-//             0x17B8,SKILL_ITEM_ALTERED_PIECE_OF_MENTALITY_QUEST
-//             0x1AF5,SKILL_COLLECTING
-//             0x1AF6,SKILL_MINING
-//             0x1AF7,SKILL_OPERATING
-//             0x1AF8,SKILL_ACTIVATING
-//             0x1AF9,SKILL_OPERATE_DEVICE
-//             0x1AFA,SKILL_OPERATE_DUNGEON_CORE
-//             0x1AFD,SKILL_OPERATE_EXPLORATION
-//             0xFFFFFD26,SKILL_TREE_OF_HEALING_TYPE_A
-//             0xFFFFFD27,SKILL_TREE_OF_HEALING_TYPE_B
-    Shoveling                             = 6907,
-    PetTaming                             = 6908,
-    CreatureTaming                        = 4003,
-//             0x2719,SKILL_THROW_SMALL_SNOWBALL
-//             0x271A,SKILL_THROW_BIG_SNOWBALL
-//             0x2AF9,SKILL_CREATURE_RIDING
-//             0x2EE1,SKILL_UNIT_EXPERT_LV2
-//             0x2EE2,SKILL_UNIT_EXPERT_LV3
-//             0x2EE3,SKILL_UNIT_EXPERT_LV4
-//             0x2EE4,SKILL_UNIT_EXPERT_LV5
-//             0x2EE5,SKILL_UNIT_EXPERT_LV6
-//             0x36B1,SKILL_AMORY_UNIT
-    TwinBladeExpert                       = 61010,
-//             0xFFFFEE52,SKILL_TWIN_BLADE_EXPERT
-    TwinAxeExpert                         = 61015,
-//             0xFFFFFD28,SKILL_NEW_YEAR_CHAMPAGNE
-//             0xFFFFFD2D,SKILL_NAMUIR_LEAF_POISON
-//             0xFFFFFD2E,SKILL_NAMUIR_RIND_BLEEDING
+enum SKILL_UID : uint
+{
+    SKILL_INCREASE_ENERGY                           = 0x43A,
+    SKILL_DUAL_SWORD_EXPERT                         = 0x49D,
+    SKILL_ARMOR_MASTERY                             = 0x4B1,
+    SKILL_LIFE_OF_DARKNESS                          = 0x409,
+    SKILL_CREATURE_CONTROL                          = 0x709,
+    SKILL_CREATURE_MASTERY                          = 0x713,
+    SKILL_TECHNICAL_CREATURE_CONTROL                = 0x759,
+    SKILL_ADV_WEAPON_EXPERT                         = 0x3FE,
+    SKILL_GAIA_ARMOR_MASTERY                        = 0x4B2,
+    SKILL_RAISE_EXP                                 = 0x2AFA,
+    SKILL_RAISE_JP                                  = 0x2AFB,
+    SKILL_GAIA_FORCE_SAVING                         = 0xA47,
+    SKILL_ITEM_RESURRECTION_SCROLL                  = 0x1771,
+    SKILL_ITEM_REGENERATION_SCROLL                  = 0x1772,
+    SKILL_ITEM_HEALING_SCROLL                       = 0x1773,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL                 = 0x1774,
+    SKILL_ITEM_ANTIDOTE_SCROLL                      = 0x1775,
+    SKILL_ITEM_RECHARGE_SCROLL                      = 0x1776,
+    SKILL_TOWN_PORTAL                               = 0x1777,
+    SKILL_RETURN                                    = 0xEDA,
+    SKILL_FORCE_CHIP                                = 0x1778,
+    SKILL_SOUL_CHIP                                 = 0x1779,
+    SKILL_LUNA_CHIP                                 = 0x177A,
+    SKILL_ITEM_PERFECT_CREATURE_RESURRECTION_SCROLL = 0x177D,
+    SKILL_ITEM_PIECE_OF_STRENGTH                    = 0x177E,
+    SKILL_ITEM_PIECE_OF_VITALITY                    = 0x177F,
+    SKILL_ITEM_PIECE_OF_DEXTERITY                   = 0x1780,
+    SKILL_ITEM_PIECE_OF_AGILITY                     = 0x1781,
+    SKILL_ITEM_PIECE_OF_INTELLIGENCE                = 0x1782,
+    SKILL_ITEM_PIECE_OF_MENTALITY                   = 0x1783,
+    SKILL_RETURN_FEATHER                            = 0x1784,
+    SKILL_RETURN_BACK_FEATHER                       = 0x1785,
+    SKILL_FIRE_BOMB_PHYSICAL                        = 0xFFFFFD29,
+    SKILL_FIRE_BOMB_MAGICAL                         = 0xFFFFFD2A,
+    SKILL_ITEM_REGENERATION_SCROLL_LV1              = 0x1786,
+    SKILL_ITEM_REGENERATION_SCROLL_LV2              = 0x1787,
+    SKILL_ITEM_REGENERATION_SCROLL_LV3              = 0x1788,
+    SKILL_ITEM_REGENERATION_SCROLL_LV4              = 0x1789,
+    SKILL_ITEM_REGENERATION_SCROLL_LV5              = 0x178A,
+    SKILL_ITEM_REGENERATION_SCROLL_LV6              = 0x178B,
+    SKILL_ITEM_REGENERATION_SCROLL_LV7              = 0x178C,
+    SKILL_ITEM_REGENERATION_SCROLL_LV8              = 0x178D,
+    SKILL_ITEM_HEALING_SCROLL_LV1                   = 0x178E,
+    SKILL_ITEM_HEALING_SCROLL_LV2                   = 0x178F,
+    SKILL_ITEM_HEALING_SCROLL_LV3                   = 0x1790,
+    SKILL_ITEM_HEALING_SCROLL_LV4                   = 0x1791,
+    SKILL_ITEM_HEALING_SCROLL_LV5                   = 0x1792,
+    SKILL_ITEM_HEALING_SCROLL_LV6                   = 0x1793,
+    SKILL_ITEM_HEALING_SCROLL_LV7                   = 0x1794,
+    SKILL_ITEM_HEALING_SCROLL_LV8                   = 0x1795,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV1             = 0x1796,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV2             = 0x1797,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV3             = 0x1798,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV4             = 0x1799,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV5             = 0x179A,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV6             = 0x179B,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV7             = 0x179C,
+    SKILL_ITEM_MANA_RECOVERY_SCROLL_LV8             = 0x179D,
+    SKILL_CALL_BLACK_PINE_TEA                       = 0x179E,
+    SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV1           = 0x179F,
+    SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV2           = 0x17A0,
+    SKILL_ITEM_SUMMON_SPEED_UP_SCROLL_LV3           = 0x17A1,
+    SKILL_ITEM_ALTERED_PIECE_OF_STRENGTH            = 0x17AD,
+    SKILL_ITEM_ALTERED_PIECE_OF_VITALITY            = 0x17AE,
+    SKILL_ITEM_ALTERED_PIECE_OF_DEXTERITY           = 0x17AF,
+    SKILL_ITEM_ALTERED_PIECE_OF_AGILITY             = 0x17B0,
+    SKILL_ITEM_ALTERED_PIECE_OF_INTELLIGENCE        = 0x17B1,
+    SKILL_ITEM_ALTERED_PIECE_OF_MENTALITY           = 0x17B2,
+    SKILL_ITEM_ALTERED_PIECE_OF_STRENGTH_QUEST      = 0x17B3,
+    SKILL_ITEM_ALTERED_PIECE_OF_VITALITY_QUEST      = 0x17B4,
+    SKILL_ITEM_ALTERED_PIECE_OF_DEXTERITY_QUEST     = 0x17B5,
+    SKILL_ITEM_ALTERED_PIECE_OF_AGILITY_QUEST       = 0x17B6,
+    SKILL_ITEM_ALTERED_PIECE_OF_INTELLIGENCE_QUEST  = 0x17B7,
+    SKILL_ITEM_ALTERED_PIECE_OF_MENTALITY_QUEST     = 0x17B8,
+    SKILL_ITEM_ALTERED_MAX_LIFE_PIECE               = 0x17BF,
+    SKILL_ITEM_ALTERED_MAX_MANA_PIECE               = 0x17C0,
+    SKILL_ITEM_ALTERED_AGILENESS_PIECE              = 0x17C1,
+    SKILL_ITEM_ALTERED_GUARDIAN_PIECE               = 0x17C2,
+    SKILL_ITEM_ALTERED_QUICKNESS_PIECE              = 0x17C3,
+    SKILL_ITEM_ALTERED_IMPREGNABLENESS_PIECE        = 0x17C4,
+    SKILL_ITEM_ALTERED_CAREFULNESS_PIECE            = 0x17C5,
+    SKILL_ITEM_ALTERED_FATALNESS_PIECE              = 0x17C6,
+    SKILL_ITEM_ALTERED_MANA_PIECE                   = 0x17C7,
+    SKILL_ITEM_ALTERED_SHARPNESS_PIECE              = 0x17C8,
+    SKILL_ITEM_ALTERED_SPELL_PIECE                  = 0x17C9,
+    SKILL_ITEM_ALTERED_BRILLIANCE_PIECE             = 0x17CA,
+    SKILL_ITEM_ALTERED_INSIGHT_PIECE                = 0x17CB,
+    SKILL_COLLECTING                                = 0x1AF5,
+    SKILL_MINING                                    = 0x1AF6,
+    SKILL_OPERATING                                 = 0x1AF7,
+    SKILL_ACTIVATING                                = 0x1AF8,
+    SKILL_OPERATE_DEVICE                            = 0x1AF9,
+    SKILL_OPERATE_DUNGEON_CORE                      = 0x1AFA,
+    SKILL_OPERATE_EXPLORATION                       = 0x1AFD,
+    SKILL_TREE_OF_HEALING_TYPE_A                    = 0xFFFFFD26,
+    SKILL_TREE_OF_HEALING_TYPE_B                    = 0xFFFFFD27,
+    SKILL_SHOVELING                                 = 0x1AFB,
+    SKILL_PET_TAMING                                = 0x1AFC,
+    SKILL_CREATURE_TAMING                           = 0xFA3,
+    SKILL_THROW_SMALL_SNOWBALL                      = 0x2719,
+    SKILL_THROW_BIG_SNOWBALL                        = 0x271A,
+    SKILL_THROW_MARBLE                              = 0x271E,
+    SKILL_THROW_RED_TOMATO                          = 0x271F,
+    SKILL_THROW_GREEN_TOMATO                        = 0x2720,
+    SKILL_CREATURE_RIDING                           = 0x2AF9,
+    SKILL_UNIT_EXPERT_LV2                           = 0x2EE1,
+    SKILL_UNIT_EXPERT_LV3                           = 0x2EE2,
+    SKILL_UNIT_EXPERT_LV4                           = 0x2EE3,
+    SKILL_UNIT_EXPERT_LV5                           = 0x2EE4,
+    SKILL_UNIT_EXPERT_LV6                           = 0x2EE5,
+    SKILL_AMORY_UNIT                                = 0x36B1,
+    SKILL_RULER_OF_TIME                             = 0x7A5C,
+    SKILL_FRIENDSHIP_OF_CROWN                       = 0xFFFFB7B3,
+    SKILL_GRACE                                     = 0xFFFFC4E1,
+    SKILL_TWIN_BLADE_EXPERT                         = 0xFFFFEE52,
+    SKILL_TWIN_AXE_EXPERT                           = 0xFFFFEE57,
+    SKILL_NEW_YEAR_CHAMPAGNE                        = 0xFFFFFD28,
+    SKILL_NAMUIR_LEAF_POISON                        = 0xFFFFFD2D,
+    SKILL_NAMUIR_RIND_BLEEDING                      = 0xFFFFFD2E,
+    SKILL_TREE_OF_HEALING_ON_DEATHMATCH             = 0xFFFFFD2F,
+    SKILL_RANKED_DEATHMATCH_ENTER                   = 0xFFFFFD30,
+    SKILL_FREED_DEATHMATCH_ENTER                    = 0xFFFFFD31,
+    SKILL_WARP_TO_HUNTAHOLIC_LOBBY                  = 0xFFFFFD32,
+    SKILL_INSTANCE_GAME_EXIT                        = 0xFFFFFD3B,
+    SKILL_ITEM_RESPAWN_SCROLL_RANDOMLY1             = 0xFFFFFE24,
+    SKILL_ITEM_RESPAWN_SCROLL_WITH_DIFF_CODE1       = 0xFFFFFE25,
+    SKILL_ITEM_RESPAWN_SCROLL_WITH_DIFF_CODE2       = 0xFFFFFE26,
+    SKILL_PROP_RESPAWN1                             = 0xFFFFFE27,
+    SKILL_ITEM_REGENERATION_SCROLL_OF_VITALITY      = 0xFFFFFE4F,
+    SKILL_ITEM_MANA_SCROLL_OF_VITALITY              = 0xFFFFFE50,
+    SKILL_ITEM_HEALING_SCROLL_OF_VITALITY           = 0xFFFFFE51,
+    SKILL_ITEM_SPELL_BREAKER_SCROLL                 = 0x259B,
+    SKILL_ITEM_STONECURSE_SCROLL                    = 0x259C,
+    SKILL_ITEM_REGION_STONECURSE_SCROLL             = 0x259D
 };
 
 enum SKILL_EFFECT_TYPE : int
@@ -431,7 +474,8 @@ enum SKILL_EFFECT_TYPE : int
     EF_INC_PARAM_BASED_SUMMON_PARAM                          = 0x7E30
 };
 
-struct SkillTreeBase {
+struct SkillTreeBase
+{
     int   job_id{ };
     int   skill_id{ };
     int   min_skill_lv{ };
@@ -443,13 +487,15 @@ struct SkillTreeBase {
     int   need_skill_lv[3]{ };
 };
 
-struct SkillTreeGroup {
+struct SkillTreeGroup
+{
     int                        job_id{ };
     int                        skill_id{ };
     std::vector<SkillTreeBase> skillTrees{ };
 };
 
-struct SkillBase {
+struct SkillBase
+{
 
     int GetNeedJobPoint(int skill_lv);
     bool IsUseableWeapon(ItemClass cl);
@@ -565,6 +611,5 @@ struct SkillBase {
     float   projectile_speed{ };
     float   projectile_acceleration{ };
 };
-
 
 #endif // PROJECT_SKILLBASE_H

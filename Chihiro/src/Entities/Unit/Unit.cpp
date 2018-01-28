@@ -46,7 +46,7 @@ void Unit::_InitTimerFieldsAndStatus()
     SetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME, ct);
     SetUInt32Value(UNIT_LAST_SAVE_TIME, ct);
     SetUInt32Value(UNIT_LAST_HATE_UPDATE_TIME, ct);
-    SetFlag(UNIT_FIELD_STATUS, (StatusFlags::NeedToCalculateStat | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::Movable | StatusFlags::MagicCastable | StatusFlags::ItemUsable | StatusFlags::Mortal));
+    SetFlag(UNIT_FIELD_STATUS, (STATUS_NEED_TO_CALCULATE_STAT | STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MOVABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE | STATUS_MORTAL));
 }
 
 
@@ -91,7 +91,7 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player* pPlayer)
     pEnterPct << (int32_t) pUnit->GetLevel();
     pEnterPct << (uint8_t) pUnit->GetUInt32Value(UNIT_FIELD_RACE);
     pEnterPct << (uint32_t) pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter) ? 1 : 0);
+    pEnterPct << (uint8_t) (pUnit->HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER) ? 1 : 0);
     pEnterPct << (int32_t) 0;
 }
 
@@ -143,7 +143,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
         if ((nBitset & 0x80) != 0) {
             m_Attribute.nAttackPointRight += nValue;
             //m_nAttackPointRightWithoutWeapon += (short)nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
             {
                 m_Attribute.nAttackPointLeft += nValue;
                 //this.m_nAttackPointLeftWithoutWeapon += (short)nValue;
@@ -157,12 +157,12 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_Attribute.nMagicDefence += nValue;
         if ((nBitset & 0x800) != 0) {
             m_Attribute.nAttackSpeedRight += nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAttackSpeedLeft += nValue;
         }
         if ((nBitset & 0x1000) != 0)
             m_Attribute.nCastingSpeed += nValue;
-        if ((nBitset & 0x2000) != 0 && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+        if ((nBitset & 0x2000) != 0 && !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         {
             auto p = dynamic_cast<Player*>(this);
             if (p != nullptr /*|| p.m_nRidingStateUid == 0*/)
@@ -170,7 +170,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
         }
         if ((nBitset & 0x4000) != 0) {
             m_Attribute.nAccuracyRight += nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAccuracyLeft += nValue;
         }
         if ((nBitset & 0x8000) != 0)
@@ -235,45 +235,45 @@ void Unit::incParameter2(uint nBitset, float fValue)
     }
     if ((nBitset & 0x200000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
     }
     if ((nBitset & 0x400000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
     }
     if ((nBitset & 0x800000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
     }
     if ((nBitset & 0x1000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
     }
     if ((nBitset & 0x2000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
     }
     if ((nBitset & 0x4000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
     }
     if ((nBitset & 0x8000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
     }
     if ((nBitset & 0x10000000) != 0)
         m_Attribute.nCriticalPower += fValue;
     if ((nBitset & 0x20000000) != 0)
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::HPRegenStopped);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED);
     if ((nBitset & 0x40000000) != 0)
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::MPRegenStopped);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
 void Unit::CalculateStat()
@@ -487,7 +487,7 @@ void Unit::applyState(State &state)
             switch (state.m_nCode) {
                 case StateCode::SC_SLEEP:
                 case StateCode::SC_STUN:
-                    //this.m_StatusFlag &= ~(StatusFlags.Movable|StatusFlags.MagicCastable|StatusFlags.ItemUsable);
+                    //this.m_StatusFlag &= ~(CREATURE_STATUS.STATUS_MOVABLE|CREATURE_STATUS.STATUS_MAGIC_CASTABLE|CREATURE_STATUS.STATUS_ITEM_USABLE);
 
                     break;
                 default:
@@ -634,7 +634,7 @@ void Unit::applyStatByState()
 
 void Unit::applyItemEffect()
 {
-    Item *curItem = GetWornItem(ItemWearType::WearWeapon);
+    Item *curItem = GetWornItem(WEAR_WEAPON);
     if (curItem != nullptr && curItem->m_pItemBase != nullptr)
         m_Attribute.nAttackRange = curItem->m_pItemBase->range;
 
@@ -754,47 +754,47 @@ void Unit::ampParameter2(uint nBitset, float fValue)
     }
     if ((nBitset & 0x200000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeNone, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
     }
     if ((nBitset & 0x400000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeFire, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
     }
     if ((nBitset & 0x800000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWater, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
     }
     if ((nBitset & 0x1000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeWind, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
     }
     if ((nBitset & 0x2000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeEarth, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
     }
     if ((nBitset & 0x4000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeLight, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
     }
     if ((nBitset & 0x8000000) != 0)
     {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, ElementalType::TypeNone, ElementalType::TypeDark, fValue});
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
     }
     if ((nBitset & 0x10000000) != 0)
     {
         m_AttributeAmplifier.fCriticalPower += fValue;
     }
     if ((nBitset & 0x20000000) != 0)
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::HPRegenStopped);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED);
     if ((nBitset & 0x40000000) != 0)
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::MPRegenStopped);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 
 }
 
@@ -827,7 +827,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
         auto p = dynamic_cast<Player*>(this);
         if ((nBitset & 0x80) != 0) {
             m_AttributeAmplifier.fAttackPointRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON)) {
                 m_AttributeAmplifier.fAttackPointLeft += fValue;
             }
         }
@@ -842,7 +842,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
         }
         if ((nBitset & 0x800) != 0) {
             m_AttributeAmplifier.fAttackSpeedRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON)) {
                 m_AttributeAmplifier.fAttackSpeedLeft += fValue;
             }
         }
@@ -857,7 +857,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
         }
         if ((nBitset & 0x4000) != 0) {
             m_AttributeAmplifier.fAccuracyRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon)) {
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON)) {
                 m_AttributeAmplifier.fAccuracyLeft += fValue;
             }
         }
@@ -915,7 +915,7 @@ void Unit::getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute)
     attribute.nAvoid += (m_AttributeAmplifier.fAvoid * attribute.nAvoid);;
     attribute.nMagicAvoid += (m_AttributeAmplifier.fMagicAvoid * attribute.nMagicAvoid);
     attribute.nBlockChance += (m_AttributeAmplifier.fBlockChance * attribute.nBlockChance);
-    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         attribute.nMoveSpeed += (m_AttributeAmplifier.fMoveSpeed * attribute.nMoveSpeed);
 
     attribute.nAttackSpeed += (m_AttributeAmplifier.fAttackSpeed * attribute.nAttackSpeed);
@@ -1016,14 +1016,14 @@ void Unit::applyStateAmplify(State &state)
         if (state.m_nCode == StateCode::SC_SQUALL_OF_ARROW)
         {
             if(state.GetValue(1) == 0.0f)
-                SetFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+                SetFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
             else
-                ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+                ToggleFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
 
             if ((int)GetWeaponClass() == (int)state.GetValue(0))
             {
                 m_AttributeAmplifier.fAttackSpeedRight += state.GetValue(2) + (state.GetValue(3) * level);
-                if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 {
                     m_AttributeAmplifier.fAttackSpeedLeft += state.GetValue(2) + (state.GetValue(3) * level);
                 }
@@ -1076,7 +1076,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nMagicPoint += item_var_penalty;
                     return;
                 case 11:
-                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                     {
                         m_Attribute.nAttackPointRight += item_var_penalty;
                     }
@@ -1085,7 +1085,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                         m_Attribute.nAttackPointLeft += item_var_penalty;
                         m_Attribute.nAttackPointRight += item_var_penalty;
                     }
-                    else if (pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
+                    else if (pItem->m_Instance.nWearInfo != WEAR_SHIELD)
                     {
                         m_Attribute.nAttackPointRight += item_var_penalty;
                     }
@@ -1101,7 +1101,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nDefence += item_var_penalty;
                     return;
                 case 13:
-                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                     {
                         m_Attribute.nAccuracyRight += item_var_penalty;
                     }
@@ -1110,7 +1110,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                         m_Attribute.nAccuracyLeft += item_var_penalty;
                         m_Attribute.nAccuracyRight += item_var_penalty;
                     }
-                    else if (pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
+                    else if (pItem->m_Instance.nWearInfo != WEAR_SHIELD)
                     {
                         m_Attribute.nAccuracyRight += item_var_penalty;
                     }
@@ -1120,7 +1120,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     }
                     return;
                 case 14:
-                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+                    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                     {
                         m_Attribute.nAttackSpeedRight += item_var_penalty;
                     }
@@ -1129,7 +1129,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                         m_Attribute.nAttackSpeedRight += item_var_penalty;
                         m_Attribute.nAttackSpeedLeft += item_var_penalty;
                     }
-                    else if ( pItem->m_Instance.nWearInfo != ItemWearType::WearShield)
+                    else if ( pItem->m_Instance.nWearInfo != WEAR_SHIELD)
                     {
                         m_Attribute.nAttackSpeedRight += item_var_penalty;
                     }
@@ -1145,7 +1145,7 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, 
                     m_Attribute.nAvoid += item_var_penalty;
                     return;
                 case 18:
-                    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed) && (p == nullptr || true)) // TODO: RidingStateUID
+                    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED) && (p == nullptr || true)) // TODO: RidingStateUID
                         m_Attribute.nMoveSpeed += item_var_penalty;
                     return;
                 case 19:
@@ -1202,7 +1202,7 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     else
     {
         attribute.nAttackPointRight += (2.0f * m_cStat.strength) * fcm + b1;
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
             attribute.nAttackPointLeft += (2.0f * m_cStat.strength) * fcm + b1;
     }
 
@@ -1212,15 +1212,15 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     attribute.nMagicDefence += ((2.0f * m_cStat.mentality) * fcm + b1);
     attribute.nMaxWeight += 10 * (GetLevel() + m_cStat.strength);
     attribute.nAccuracyRight += ((m_cStat.dexterity) * 0.5f * fcm + b1);
-    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         attribute.nAccuracyLeft += ((m_StatAmplifier.dexterity) * 0.5f * fcm + b1);
     attribute.nMagicAccuracy += ((m_cStat.mentality * 0.4f + m_cStat.dexterity * 0.1f) * fcm + b1);
     attribute.nAvoid += (m_cStat.agility * 0.5f * fcm + b1);
     attribute.nMagicAvoid += (m_cStat.mentality * 0.5f * fcm + b1);
     attribute.nAttackSpeedRight += 100; /*(100 + (m_cStat.agility * 0.1f));*/
-    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         attribute.nAttackSpeedLeft += 100;/*((this->m_cStat.dexterity) * 0.5f + (fcm + b1));*/
-    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         attribute.nMoveSpeed += 120;
     attribute.nCastingSpeed += 100;
     attribute.nCoolTimeSpeed   = 100;
@@ -1278,7 +1278,7 @@ void Unit::applyStatByItem()
         Item* item = m_anWear[i1];
         if (item != nullptr && item->m_pItemBase != nullptr) {
             auto iwt = (ItemWearType)i1;
-            if (item->m_Instance.nWearInfo != ItemWearType::WearNone) {
+            if (item->m_Instance.nWearInfo != WEAR_NONE) {
                 if (TranslateWearPosition(iwt, item, ref_list)) {
                     for (int j = 0; j < 4; j++) {
                         short ot = item->m_pItemBase->opt_type[j];
@@ -1316,11 +1316,11 @@ void Unit::processPendingMove()
     Position pos{ };//             = ArPosition ptr -10h
 
 
-    if (HasFlag(UNIT_FIELD_STATUS, MovePending))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
     {
         if (m_nMovableTime < ct)
         {
-            RemoveFlag(UNIT_FIELD_STATUS, MovePending);
+            RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
             if (IsActable() && IsMovable())
             {
                 pos = GetCurrentPosition(ct);
@@ -1342,10 +1342,10 @@ void Unit::processPendingMove()
 void Unit::OnUpdate()
 {
     uint ct = sWorld->GetArTime();
-    if (HasFlag(UNIT_FIELD_STATUS, NeedToCalculateStat))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT))
     {
         CalculateStat();
-        RemoveFlag(UNIT_FIELD_STATUS, NeedToCalculateStat);
+        RemoveFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
     }
     this->regenHPMP(ct);
 
@@ -1380,7 +1380,7 @@ void Unit::regenHPMP(uint t)
         {
             prev_mp = GetHealth();
             prev_hp = GetMana();
-            if (!HasFlag(UNIT_FIELD_STATUS, HPRegenStopped))
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED))
             {
                 pt     = GetMaxHealth() * m_Attribute.nHPRegenPercentage;
                 pt     = pt * 0.01f * etf;// + 0.0;
@@ -1408,7 +1408,7 @@ void Unit::regenHPMP(uint t)
                     this.m_nHPDecPart = this.m_nHPDecPart % 100;
                 }*/
             }
-            if (!HasFlag(UNIT_FIELD_STATUS, MPRegenStopped))
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED))
             {
                 pt = GetMaxMana() * m_Attribute.nMPRegenPercentage;
                 pt = pt * 0.01f * etf;// +0.0;
@@ -1453,7 +1453,7 @@ void Unit::regenHPMP(uint t)
                         Player player = s.m_master;
                         if (player != null)
                         {
-                            if (player.bIsInWorld && (player.m_StatusFlag & StatusFlags.LoginComplete) != 0)
+                            if (player.bIsInWorld && (player.m_StatusFlag & CREATURE_STATUS.STATUS_LOGIN_COMPLETE) != 0)
                             {
                                 if (player.m_nLogoutTime == 0)
                                     player.Connection.SendTCP(pak);
@@ -1548,21 +1548,21 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
     switch (pSkill->m_SkillBase->target)
     {
-        case TargetType::Master:
+        case TARGET_MASTER:
             if (!IsSummon())
                 return TS_RESULT_NOT_ACTABLE;
             summon = dynamic_cast<Summon *>(this);
             if (summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
-        case TargetType::SelfWithMaster:
+        case TARGET_SELF_WITH_MASTER:
             if (!IsSummon() == ST_Summon)
                 return TS_RESULT_NOT_ACTABLE;
             summon = dynamic_cast<Summon *>(this);
             if (pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
-        case TargetType::TargetExceptCaster:
+        case TARGET_TARGET_EXCEPT_CASTER:
             if (pSkillTarget->GetHandle() == GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
@@ -1676,7 +1676,7 @@ bool Unit::StartAttack(uint target, bool bNeedFastReaction)
     else
     {
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
-        RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
+        RemoveFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
         if((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
             m_nNextAttackMode = 1;
         if (bNeedFastReaction)
@@ -1737,10 +1737,10 @@ void Unit::processAttack()
             return;
         }
 
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK))
         {
             enemy->OnUpdate();
-            RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+            RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
         }
 
         if (enemy->GetHealth() == 0)
@@ -1793,9 +1793,9 @@ void Unit::processAttack()
                 attInt = (uint)(GetBowAttackInterval()  * 0.8f);
                 SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, attInt + t);
                 m_nNextAttackMode = 0;
-                SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
+                SetFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
 
-                bool bFormChanged = HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged);
+                bool bFormChanged = HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED);
                 if(bFormChanged)
                 {
                     // @todo: form changed
@@ -1825,7 +1825,7 @@ void Unit::processAttack()
             m_nMovableTime = attInt + t;
             Attack(enemy, t, attack_interval, Damages, _bDoubleAttack);
         }
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
 
         if (next_mode != 1)
         {
@@ -1849,7 +1849,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
 
     int nHate        = 0;
     int nAttackCount = 1;
-    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         nAttackCount = 2;
     if (((uint)rand32() % 100) < m_Attribute.nDoubleAttackRatio)
     {
@@ -1864,7 +1864,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
     do
     {
         attack_interval = 0;
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         {
             if (((uint)i & 1) != 0)
                 attack_interval = 1;
@@ -1878,9 +1878,9 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
         // TODO Crit
 
         if (attack_interval != 0)
-            di = pTarget->DealPhysicalNormalLeftHandDamage(this, m_Attribute.nAttackPointLeft, ElementalType::TypeNone, 0, crit, 0);
+            di = pTarget->DealPhysicalNormalLeftHandDamage(this, m_Attribute.nAttackPointLeft, TYPE_NONE, 0, crit, 0);
         else
-            di = pTarget->DealPhysicalNormalDamage(this, m_Attribute.nAttackPointRight, ElementalType::TypeNone, 0, crit, 0);
+            di = pTarget->DealPhysicalNormalDamage(this, m_Attribute.nAttackPointRight, TYPE_NONE, 0, crit, 0);
         arDamage[i].SetDamageInfo(di);
 
         if (arDamage[i].bCritical)
@@ -1983,7 +1983,7 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
                     damage = addi.nDamage;
                 else
                     damage = (int)(addi.fDamage * (float)result.nDamage);
-                Damage dd = DealDamage(pFrom, damage, addi.type, DamageType::Additional, 0, 0, 0, nullptr, nullptr);
+                Damage dd = DealDamage(pFrom, damage, addi.type, DT_ADDITIONAL_DAMAGE, 0, 0, 0, nullptr, nullptr);
                 result.nDamage += dd.nDamage;
             }
         }
@@ -2033,11 +2033,11 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     if (result.nDamage < 0)
         result.nDamage = 0;
 
-    //             if (damageType == DamageType.NormalPhysical)
+    //             if (damageType == DamageType.DT_NORMAL_PHYSICAL_DAMAGE)
 //                 fDamageFlag = this.m_fPhysicalDamageManaShieldAbsorbRatio; // goto LABEL_26;
-//             else if ( damageType == DamageType.NormalMagical)
+//             else if ( damageType == DamageType.DT_NORMAL_MAGICAL_DAMAGE)
 //                 fDamageFlag = this.m_fMagicalDamageManaShieldAbsorbRatio; //goto LABEL_29;
-// //             if ( damageType <= DamageType.NormalMagical)
+// //             if ( damageType <= DamageType.DT_NORMAL_MAGICAL_DAMAGE)
 // //                 goto LABEL_36;
 //             else if ( damageType <= DamageType.AdditionalLeftHand)
 //             {
@@ -2112,24 +2112,24 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 
 Damage Unit::DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod* damage_penalty, StateMod* damage_advantage)
 {
-    return DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod* damage_advantage)
 {
-    return DealDamage(pFrom, nDamage, elemental_type, DamageType::NormalPhysicalLeftHand, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
-    return DealDamage(pFrom, nDamage, type, DamageType::NormalMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, type, DT_NORMAL_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 
 Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag)
 {
     Damage result{ };
-    if (damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical)
+    if (damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE)
     {
         // TODO how about no?
     }
@@ -2138,11 +2138,11 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     auto nDamagea             = int(pTarget->m_Expert[GetCreatureGroup()].fAvoid * nDamagec + nDamagec);
 
     float fDefAdjustb{0}, fDefAdjustc{0}, fDefAdjust{0};
-    bool  bIsPhysicalDamage   = damage_type == DamageType::NormalPhysical || damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::StatePhysical || damage_type == DamageType::NormalPhysicalSkill;
-    bool  bIsMagicalDamage    = damage_type == DamageType::NormalMagical || damage_type == DamageType::StateMagical;
-    bool  bIsAdditionalDamage = damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand || damage_type == DamageType::AdditionalMagical;
-    bool  bIsLeftHandDamage   = damage_type == DamageType::NormalPhysicalLeftHand || damage_type == DamageType::AdditionalLeftHand;
-    bool  bDefAdjust          = damage_type == DamageType::StatePhysical || damage_type == DamageType::StateMagical;
+    bool  bIsPhysicalDamage   = damage_type == DT_NORMAL_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_STATE_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_SKILL_DAMAGE;
+    bool  bIsMagicalDamage    = damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE;
+    bool  bIsAdditionalDamage = damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE || damage_type == DT_ADDITIONAL_MAGICAL_DAMAGE;
+    bool  bIsLeftHandDamage   = damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE;
+    bool  bDefAdjust          = damage_type == DT_STATE_PHYSICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE;
 
     int nAccuracy{0};
     int nPercentage{0};
@@ -2252,7 +2252,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
             result.bCritical = true;
         }
     }
-    if ((damage_type == DamageType::Additional || damage_type == DamageType::AdditionalLeftHand) && HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if ((damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE) && HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
     {
         if (bIsLeftHandDamage)
             fDefAdjustb = (int)(fDefAdjustb * (float)1/*m_nDoubleWeaponMasteryLevel*/ * 0.02f + 0.44f);
@@ -2293,7 +2293,7 @@ int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
     int result{0};
     if (GetHealth() != 0)
     {
-        //if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::Hiding))
+        //if(HasFlag(UNIT_FIELD_STATUS, STATUS_HIDING))
         //1RemoveState(StateCode::Hide, 65535);
 
         if (GetHealth() <= nDamage)
@@ -2317,9 +2317,9 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
     if (bEndAttack || bCancelAttack)
         attack_count = 0;
 
-    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED))
     {
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
             attack_count *= 2;
         if (bIsDoubleAttack)
             attack_count *= 2;
@@ -2335,25 +2335,25 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
     pct << (uint16)delay;
 
     uint8 attack_flag = 0;
-    if (!HasFlag(UNIT_FIELD_STATUS, StatusFlags::FormChanged))
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED))
     {
         if (bIsDoubleAttack)
-            attack_flag = AttackFlag::AF_DoubleAttack;
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
-            attack_flag |= AttackFlag::AF_DoubleWeapon;
+            attack_flag = ATTACK_FLAG_DOUBLE_ATTACK;
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
+            attack_flag |= ATTACK_FLAG_DOUBLE_WEAPON;
         if (IsUsingBow() && IsPlayer())
-            attack_flag |= AttackFlag::AF_Bow;
+            attack_flag |= ATTACK_FLAG_BOW;
         if (IsUsingCrossBow() && IsPlayer())
-            attack_flag |= AttackFlag::AF_CrossBow;
+            attack_flag |= ATTACK_FLAG_CROSS_BOW;
     }
 
-    uint8 attack_action = AttackAction::AA_Attack;
+    uint8 attack_action = ATTACK_ATTACK;
     if (bIsAiming)
-        attack_action = AttackAction::AA_Aiming;
+        attack_action = ATTACK_AIMING;
     else if (bEndAttack)
-        attack_action = AttackAction::AA_End;
+        attack_action = ATTACK_END;
     else if (bCancelAttack)
-        attack_action = AttackAction::AA_Cancel;
+        attack_action = ATTACK_CANCEL;
 
     pct << attack_action;
     pct << attack_flag;
@@ -2365,13 +2365,13 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         pct << (uint16)arDamage[i].mp_damage;
         uint8 flag = 0;
         if (arDamage[i].bPerfectBlock)
-            flag = AFlag::AF_PerfectBlock;
+            flag = FLAG_PERFECT_BLOCK;
         if (arDamage[i].bBlock)
-            flag |= AFlag::AF_Block;
+            flag |= FLAG_BLOCK;
         if (arDamage[i].bMiss)
-            flag |= AFlag::AF_Miss;
+            flag |= FLAG_MISS;
         if (arDamage[i].bCritical)
-            flag |= AFlag::AF_Critical;
+            flag |= FLAG_CRITICAL;
         pct << flag;
         for (auto &ed : arDamage[i].elemental_damage)
         {
@@ -2395,7 +2395,7 @@ void Unit::EndAttack()
         m_nNextAttackMode = 1;
         SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
     }
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
+    if(HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED)) {
         //auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
         auto target = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
         if(IsPlayer() || IsSummon()) {
@@ -2404,7 +2404,7 @@ void Unit::EndAttack()
         }
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
-    SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+    SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
 }
 
 void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
@@ -2439,7 +2439,7 @@ void Unit::AddEXP(int64 exp, uint jp, bool bApplyStanima)
     SetUInt64Value(UNIT_FIELD_EXP, GetEXP() + exp);
     SetUInt32Value(UNIT_FIELD_JOBPOINT, GetJP() + jp);
     // SetTotalJP
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    if(HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         onExpChange();
 }
 
@@ -2458,17 +2458,17 @@ void Unit::CancelAttack()
         m_nNextAttackMode = 1;
         SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
     }
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::AttackStarted)) {
+    if(HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED)) {
         this->broadcastAttackMessage(sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
-    SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+    SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
 }
 
 bool Unit::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
 {
     bool result;
-    if(item->GetWearType() != ItemWearType::WearCantWear && item->IsWearable()) {
+    if(item->GetWearType() != WEAR_CANTWEAR && item->IsWearable()) {
         int elevel = m_nUnitExpertLevel;
         int level = GetLevel();
         if(m_nUnitExpertLevel <= level)
@@ -2501,7 +2501,7 @@ uint16_t Unit::putonItem(ItemWearType pos, Item *item)
 
 ushort Unit::Puton(ItemWearType pos, Item *item)
 {
-    if(item->m_Instance.nWearInfo != ItemWearType::WearCantWear)
+    if(item->m_Instance.nWearInfo != WEAR_CANTWEAR)
         return 0;
 
     std::vector<int> vOverlapItemList{ };
@@ -2522,7 +2522,7 @@ uint16_t Unit::putoffItem(ItemWearType pos)
     if(item == nullptr)
         return TS_RESULT_ACCESS_DENIED;
 
-    item->m_Instance.nWearInfo = ItemWearType::WearNone;
+    item->m_Instance.nWearInfo = WEAR_NONE;
     item->m_bIsNeedUpdateToDB = true;
     // Binded Target
     m_anWear[pos] = nullptr;
@@ -2542,26 +2542,26 @@ ushort Unit::Putoff(ItemWearType pos)
 {
     int i;
 
-    if(pos == ItemWearType::WearTwoHand)
-        pos = ItemWearType::WearWeapon;
-    if(pos == ItemWearType::WearTwoFingerRing)
-        pos = ItemWearType::WearRing;
+    if(pos == WEAR_TWOHAND)
+        pos = WEAR_WEAPON;
+    if(pos == WEAR_TWOFINGER_RING)
+        pos = WEAR_RING;
     if(pos >= 24 || pos < 0)
         return TS_RESULT_NOT_ACTABLE;
     ItemWearType abspos = GetAbsoluteWearPos(pos);
-    if(abspos == ItemWearType::WearCantWear)
+    if(abspos == WEAR_CANTWEAR)
         return TS_RESULT_NOT_ACTABLE;
-    if(pos != ItemWearType::WearBagSlot)
+    if(pos != WEAR_BAG_SLOT)
         return putoffItem(abspos);
 
-    // TODO: Bag
+    // TODO: GROUP_BAG
 }
 
 ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
 {
     ItemWearType result = pos;
     if(m_anWear[pos] == nullptr)
-        result = ItemWearType::WearCantWear;
+        result = WEAR_CANTWEAR;
     return result;
 }
 
@@ -2572,16 +2572,16 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
     {
         case SKILL_EFFECT_TYPE::EF_WEAPON_MASTERY:
         {
-            auto weapon = GetWornItem(ItemWearType::WearWeapon);
+            auto weapon = GetWornItem(WEAR_WEAPON);
             if (weapon == nullptr)
                 return;
 
-            if (skill->m_SkillBase->id == SkillId::AdvWeaponExpert)
+            if (skill->m_SkillBase->id == SKILL_ADV_WEAPON_EXPERT)
                 if (weapon->GetItemRank() < 2)
                     return;
             atk = (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
             m_Attribute.nAttackPointRight += atk;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAttackPointLeft += atk;
 
             m_Attribute.nAttackSpeed += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel)));
@@ -2592,7 +2592,7 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
         {
             atk = (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             m_Attribute.nAttackPointRight += atk;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAttackPointLeft += atk;
 
             m_Attribute.nDefence += (skill->m_SkillBase->var[1] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
@@ -2601,7 +2601,7 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
 
             atk = (skill->m_SkillBase->var[6] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             m_Attribute.nAccuracyRight += atk;
-            if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAccuracyLeft += atk;
             m_Attribute.nMagicAccuracy += (skill->m_SkillBase->var[7] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
         }
@@ -2627,7 +2627,7 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
     {
         case 1201:
         case 1202: // Defense Practice
-            if(m_anWear[ItemWearType::WearArmor] != nullptr)
+            if(m_anWear[WEAR_ARMOR] != nullptr)
                 m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             break;
         default:
@@ -2649,20 +2649,20 @@ void Unit::applyPassiveSkillEffect()
 
 ItemClass Unit::GetWeaponClass()
 {
-    ItemClass result = ItemClass::ClassEtc;
-    auto itemRight = GetWornItem(ItemWearType::WearRightHand);
+    ItemClass result = CLASS_ETC;
+    auto itemRight = GetWornItem(WEAR_RIGHTHAND);
 
     if (itemRight != nullptr)
     {
-        if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+        if(HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         {
-            Item* itemLeft = GetWornItem(ItemWearType::WearLeftHand);
-            if (itemRight->m_pItemBase->iclass == ItemClass::ClassOneHandSword && itemLeft->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
-                return ItemClass::ClassDoubleSword;
-            if (itemRight->m_pItemBase->iclass == ItemClass::ClassDagger && itemLeft->m_pItemBase->iclass == ItemClass::ClassDagger)
-                return ItemClass::ClassDoubleDagger;
-            if (itemRight->m_pItemBase->iclass== ItemClass::ClassOneHandAxe && itemLeft->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
-                return ItemClass::ClassDoubleAxe;
+            Item* itemLeft = GetWornItem(WEAR_LEFTHAND);
+            if (itemRight->m_pItemBase->iclass == CLASS_ONEHAND_SWORD && itemLeft->m_pItemBase->iclass == CLASS_ONEHAND_SWORD)
+                return CLASS_DOUBLE_SWORD;
+            if (itemRight->m_pItemBase->iclass == CLASS_DAGGER && itemLeft->m_pItemBase->iclass == CLASS_DAGGER)
+                return CLASS_DOUBLE_DAGGER;
+            if (itemRight->m_pItemBase->iclass== CLASS_ONEHAND_AXE && itemLeft->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
+                return CLASS_DOUBLE_AXE;
         }
         result = (ItemClass)itemRight->m_pItemBase->iclass;
     }
@@ -2672,9 +2672,9 @@ ItemClass Unit::GetWeaponClass()
 bool Unit::IsWearShield()
 {
     bool result{false};
-    auto item = GetWornItem(ItemWearType::WearShield);
+    auto item = GetWornItem(WEAR_SHIELD);
     if(item != nullptr)
-        result = item->m_pItemBase->iclass == ItemClass::ClassShield;
+        result = item->m_pItemBase->iclass == CLASS_SHIELD;
     else
         result = false;
     return result;
@@ -2690,27 +2690,27 @@ void Unit::applyDoubeWeaponEffect()
     float fAddPerLevel{0};
     Skill *skill{nullptr};
 
-    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::UsingDoubleWeapon))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
     {
-        auto pSlot0 = GetWornItem(ItemWearType::WearWeapon);
-        auto pSlot1 = GetWornItem(ItemWearType::WearShield);
+        auto pSlot0 = GetWornItem(WEAR_WEAPON);
+        auto pSlot1 = GetWornItem(WEAR_SHIELD);
         if(pSlot0 != nullptr || pSlot1 != nullptr)
         {
             int skillLevel = 1;
-            if (pSlot1->m_pItemBase->iclass == ItemClass::ClassOneHandSword
-                && pSlot0->m_pItemBase->iclass == ItemClass::ClassOneHandSword)
+            if (pSlot1->m_pItemBase->iclass == CLASS_ONEHAND_SWORD
+                && pSlot0->m_pItemBase->iclass == CLASS_ONEHAND_SWORD)
             {
-                skill = GetSkill((int)SkillId::DualSwordExpert);
+                skill = GetSkill((int)SKILL_DUAL_SWORD_EXPERT);
             }
-            else if (pSlot1->m_pItemBase->iclass == ItemClass::ClassDagger
-                     && pSlot0->m_pItemBase->iclass == ItemClass::ClassDagger)
+            else if (pSlot1->m_pItemBase->iclass == CLASS_DAGGER
+                     && pSlot0->m_pItemBase->iclass == CLASS_DAGGER)
             {
-                skill = GetSkill((int)SkillId::TwinBladeExpert);
+                skill = GetSkill((int)SKILL_TWIN_BLADE_EXPERT);
             }
-            else if (pSlot1->m_pItemBase->iclass == ItemClass::ClassOneHandAxe
-                     && pSlot0->m_pItemBase->iclass == ItemClass::ClassOneHandAxe)
+            else if (pSlot1->m_pItemBase->iclass == CLASS_ONEHAND_AXE
+                     && pSlot0->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
             {
-                skill = GetSkill((int)SkillId::TwinAxeExpert);
+                skill = GetSkill((int)SKILL_TWIN_AXE_EXPERT);
             }
             if(skill != nullptr)
                 skillLevel = skill->m_nSkillLevel + skill->m_nSkillLevelAdd;
@@ -2743,7 +2743,7 @@ void Unit::applyDoubeWeaponEffect()
 
 uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
 {
-    SetFlag(UNIT_FIELD_STATUS, StatusFlags::NeedToUpdateState);
+    SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_UPDATE_STATE);
     auto stateInfo = sObjectMgr->GetStateInfo(code);
     if (stateInfo == nullptr)
     {
@@ -2763,7 +2763,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     }*/
 
     if (code == StateCode::SC_FEAR)
-        ToggleFlag(UNIT_FIELD_STATUS, StatusFlags::MovingByFear);
+        ToggleFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
 
     //auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
     auto pCaster     = sMemoryPool->GetObjectInWorld<Unit>(caster);
@@ -2856,7 +2856,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
         CalculateStat();
 
         onUpdateState(ns, false);
-        if (IsMonster() && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable))
+        if (IsMonster() && !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE))
         {
             if (m_Attribute.nAttackRange < 84)
                 m_Attribute.nAttackRange = 83;
@@ -2879,7 +2879,7 @@ void Unit::procMoveSpeedChange()
     {
         uint ct  = sWorld->GetArTime();
         auto pos = GetCurrentPosition(ct);
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE))
         {
             if (speed != m_Attribute.nMoveSpeed / 7)
             {
@@ -2978,7 +2978,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                         sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
                     if(nItemID != 0)
                     {
-                        auto pCItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::ByItem, -1, -1, -1, -1, 0, 0, 0, 0);
+                        auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
                         Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
                         if(pNewItem != nullptr)
                             Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());
@@ -3105,14 +3105,14 @@ void Unit::SetJP(int jp)
     if(jp < 0)
         jp = 0;
     SetInt32Value(UNIT_FIELD_JOBPOINT, jp);
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    if(HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         onExpChange();
 }
 
 void Unit::SetEXP(uint exp)
 {
     SetUInt64Value(UNIT_FIELD_EXP, exp);
-    if(HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    if(HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         onExpChange();
 }
 
@@ -3145,8 +3145,8 @@ int Unit::Heal(int hp)
 
 int64 Unit::GetBulletCount() const
 {
-    auto item = m_anWear[ItemWearType::WearShield];
-    if (item != nullptr && item->m_pItemBase->group == ItemGroup::Bullet)
+    auto item = m_anWear[WEAR_SHIELD];
+    if (item != nullptr && item->m_pItemBase->group == GROUP_BULLET)
     {
         return item->m_Instance.nCount;
     }
@@ -3163,7 +3163,7 @@ void Unit::applyPassiveSkillAmplifyEffect()
 
 int Unit::GetArmorClass() const
 {
-    return m_anWear[ItemWearType::WearArmor] != nullptr ? m_anWear[ItemWearType::WearArmor]->m_pItemBase->iclass : 0;
+    return m_anWear[WEAR_ARMOR] != nullptr ? m_anWear[WEAR_ARMOR]->m_pItemBase->iclass : 0;
 }
 
 void Unit::procStateDamage(uint t)
@@ -3413,12 +3413,12 @@ void Unit::procStateDamage(uint t)
 
 Damage Unit::DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
-    return DealDamage(pFrom, nDamage, elemental_type, DamageType::StatePhysical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
-    return DealDamage(pFrom, nDamage, elemental_type, DamageType::StateMagical, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+    return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 void Unit::RemoveState(StateCode code, int state_level)
@@ -3481,7 +3481,7 @@ bool Unit::IsMovable()
     if (GetHealth() == 0 || /*this.IsSitDown() ||*/ m_nMovableTime > sWorld->GetArTime() || m_castingSkill != nullptr)
         return false;
     else
-        return HasFlag(UNIT_FIELD_STATUS, StatusFlags::Movable);
+        return HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
 }
 
 bool Unit::OnCompleteSkill()
@@ -3535,7 +3535,7 @@ bool Unit::IsAlly(const Unit */*pTarget*/)
 
 bool Unit::IsVisible(const Unit *pTarget)
 {
-    return !pTarget->HasFlag(UNIT_FIELD_STATUS, StatusFlags::Hiding);
+    return !pTarget->HasFlag(UNIT_FIELD_STATUS, STATUS_HIDING);
 }
 
 bool Unit::IsActiveAura(Skill *pSkill) const
@@ -3596,7 +3596,7 @@ void Unit::ToggleAura(Skill *pSkill)
 bool Unit::IsActable() const
 {
     return GetHealth() != 0
-           && !HasFlag(UNIT_FIELD_STATUS, StatusFlags::Feared)
-           && (GetUInt32Value(UNIT_FIELD_STATUS) & (StatusFlags::Movable | StatusFlags::Attackable | StatusFlags::SkillCastable | StatusFlags::MagicCastable | StatusFlags::ItemUsable)) != 0;
+           && !HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED)
+           && (GetUInt32Value(UNIT_FIELD_STATUS) & (STATUS_MOVABLE | STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE)) != 0;
 
 }

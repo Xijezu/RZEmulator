@@ -40,8 +40,8 @@ class ItemInstance
         int64        tExpire{0};                                // 0x40
         //Elemental::Type eElementalEffectType;         // 0x48
         int          Flag{0};                                   // 0x60
-        GenerateCode GenerateInfo = GenerateCode::ByUnknown;      // 0x64
-        ItemWearType nWearInfo{WearCantWear};             // 0x68
+        GenerateCode GenerateInfo = BY_UNKNOWN;      // 0x64
+        ItemWearType nWearInfo{WEAR_CANTWEAR};             // 0x68
         int          Socket[4]{0};
 };
 

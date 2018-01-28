@@ -39,7 +39,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
-    m_nStatus = MonsterStatus::MS_Normal;
+    m_nStatus = STATUS_NORMAL;
     SetLevel((uint8)mb->level);
     CalculateStat();
     SetHealth(GetMaxHealth());
@@ -107,7 +107,7 @@ int Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damag
 void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
     Unit::onDead(pFrom, decreaseEXPOnDead);
-    SetStatus(MonsterStatus::MS_Dead);
+    SetStatus(STATUS_DEAD);
 
     std::vector<VirtualParty> vPartyContribute{ };
     takePriority              Priority{ };
@@ -355,10 +355,10 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
 void Monster::Update(uint diff)
 {
     uint          ct = sWorld->GetArTime();
-    MonsterStatus ms = GetStatus();
+    MONSTER_STATUS ms = GetStatus();
     if(bForceKill)
         ForceKill(pFCClient);
-    if (ms != MonsterStatus::MS_Normal)
+    if (ms != STATUS_NORMAL)
     {
         if ((int)ms > 0)
         {
@@ -377,7 +377,7 @@ void Monster::Update(uint diff)
             }
             else
             {
-                if (ms == MonsterStatus::MS_Dead)
+                if (ms == STATUS_DEAD)
                 {
                     processDead(ct);
                     return;
@@ -387,7 +387,7 @@ void Monster::Update(uint diff)
     }
     else
     {
-        if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+        if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
         {
             OnUpdate();
 
@@ -404,7 +404,7 @@ void Monster::Update(uint diff)
 
     if (GetHealth() != 0)
     {
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
         {
             if (IsInWorld())
                 processPendingMove();
@@ -442,9 +442,9 @@ void Monster::processDead(uint t)
     }
 }
 
-void Monster::SetStatus(MonsterStatus status)
+void Monster::SetStatus(MONSTER_STATUS status)
 {
-    if(m_nStatus != MonsterStatus::MS_Dead) {
+    if(m_nStatus != STATUS_DEAD) {
         //if((int)status != m_nStatus && (int)status != 4 && (int)status != 0 && m_nStatus == 0)
             //ResetTriggerCondition();
         if(m_nStatus != status) {
@@ -517,7 +517,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
     }
 
     if(player != nullptr && player->IsInWorld()) {
-        auto ni = Item::AllocItem(0, code, count, GenerateCode::ByMonster, level, -1, -1, 0, 0, 0, 0, 0);
+        auto ni = Item::AllocItem(0, code, count, BY_MONSTER, level, -1, -1, 0, 0, 0, 0, 0);
         if(ni == nullptr)
             return;
         ni->SetPickupOrder(pPriority.PickupOrder);
@@ -557,7 +557,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
 
 void Monster::ForceKill(Player *byPlayer)
 {
-    auto dmg = onDamage(byPlayer, ElementalType::TypeNone, DamageType::NormalPhysical, GetHealth(), false);
+    auto dmg = onDamage(byPlayer, TYPE_NONE, DT_NORMAL_PHYSICAL_DAMAGE, GetHealth(), false);
     damage(byPlayer, dmg, false);
     Messages::SendHPMPMessage(byPlayer, this, 0, 0, true);
 }
@@ -578,7 +578,7 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
 
     if(gold > 1000000)
         gold = 1000000;
-    auto gi = sMemoryPool->AllocGold(gold, GenerateCode::ByMonster);
+    auto gi = sMemoryPool->AllocGold(gold, BY_MONSTER);
     gi->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
     gi->SetLayer(GetLayer());
 
@@ -652,15 +652,15 @@ void Monster::findNextEnemy()
     } else {
         m_nMaxHate = nMaxHate;
         m_hEnemy   = target;
-        SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
     }
 }
 
 void Monster::comeBackHome(bool bInvincible)
 {
     std::vector<Position> pl{};
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::Feared)) {
-        SetStatus(MonsterStatus::MS_Normal);
+    if(!HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED)) {
+        SetStatus(STATUS_NORMAL);
         m_nLastHateUpdateTime = sWorld->GetArTime();
         m_hEnemy              = 0;
         m_nMaxHate            = 0;
@@ -668,7 +668,7 @@ void Monster::comeBackHome(bool bInvincible)
 
         pl.emplace_back(m_pRespawn);
         if (bInvincible)
-            SetFlag(UNIT_FIELD_STATUS, StatusFlags::Invincible);
+            SetFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE);
 
         SetPendingMove(pl, (uint8) (2 * m_Attribute.nMoveSpeed / 7));
     }
@@ -678,7 +678,7 @@ bool Monster::StartAttack(uint target, bool bNeedFastReaction)
 {
     bool result{false};
     if(Unit::StartAttack(target, bNeedFastReaction)) {
-        SetStatus(MonsterStatus::MS_Attack);
+        SetStatus(STATUS_ATTACK);
         result = true;
     }
     return result;
@@ -703,10 +703,10 @@ void Monster::AI_processAttack(uint t)
     }
     else
     {
-        if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack))
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK))
         {
             target->OnUpdate();
-            RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirsAttack);
+            RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
         }
         if (target->GetHealth() != 0)
         {
@@ -786,7 +786,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         else
             targetPosition = pEnemy->GetCurrentPosition(t + 15);
         // Pathfinding here
-        SetStatus(MonsterStatus::MS_Tracking);
+        SetStatus(STATUS_TRACKING);
         auto homePosition   = m_pRespawn.GetPosition();
         auto track_distance = myPosition.GetExactDist2d(&homePosition);
         if (/*isDungeonRaidMonster || */GetChaseRange() >= track_distance)
@@ -805,15 +805,15 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         comeBackHome(true);
         return;
     }
-    if (GetStatus() == MonsterStatus::MS_FindAttackPos && IsMoving(t))
+    if (GetStatus() == STATUS_FIND_ATTACK_POS && IsMoving(t))
     {
         return;
     }
 
-    if (!pEnemy->IsMoving(t) && (GetStatus() == MonsterStatus::MS_Tracking && irand(0, 99) < 5))
+    if (!pEnemy->IsMoving(t) && (GetStatus() == STATUS_TRACKING && irand(0, 99) < 5))
     {
         auto attack_pos = getNonDuplicateAttackPos(pEnemy);
-        SetStatus(MonsterStatus::MS_FindAttackPos);
+        SetStatus(STATUS_FIND_ATTACK_POS);
         if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
         {
             sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
@@ -822,11 +822,11 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     }
 
     int nPrevStatus = GetStatus();
-    SetStatus(MonsterStatus::MS_Attack);
+    SetStatus(STATUS_ATTACK);
     if (GetNextAttackableTime() > t)
     {
-        if (pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
-            SetStatus(MonsterStatus::MS_Tracking);
+        if (pEnemy->IsMoving(t) && nPrevStatus == STATUS_TRACKING)
+            SetStatus(STATUS_TRACKING);
         return;
     }
     // Checks for attackable
@@ -858,8 +858,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     }
     m_nMovableTime = (uint)((float)GetAttackInterval() * fMod + t);
     broadcastAttackMessage(pEnemy, Damages, (int)(10 * GetAttackInterval()), (int)(10 * (GetNextAttackableTime() - t)), bDoubleAttack, false, false, false);
-    if (pEnemy->IsMoving(t) && nPrevStatus == MonsterStatus::MS_Tracking)
-        SetStatus(MonsterStatus::MS_Tracking);
+    if (pEnemy->IsMoving(t) && nPrevStatus == STATUS_TRACKING)
+        SetStatus(STATUS_TRACKING);
 }
 
 uint Monster::GetCreatureGroup() const
@@ -1167,7 +1167,7 @@ Position Monster::getNonDuplicateAttackPos(Unit *pEnemy)
 
 void Monster::onBeforeCalculateStat()
 {
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+    if(!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         m_Attribute.nMoveSpeed += (m_Base->run_speed - 120);
 
     m_Attribute.nAttackRange = m_Base->attack_range;

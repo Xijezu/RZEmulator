@@ -354,11 +354,11 @@ void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
 
 void World::AddSummonToWorld(Summon *pSummon)
 {
-    pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    pSummon->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
     //pSummon->AddToWorld();
     AddObjectToWorld(pSummon);
     //pSummon->m_bIsSummoned = true;
-    pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    pSummon->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 }
 
 void World::WarpBegin(Player * pPlayer)
@@ -388,9 +388,9 @@ void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
 	if(pPlayer->m_pMainSummon != nullptr)
 		WarpEndSummon(pPlayer, pPosition, layer, pPlayer->m_pMainSummon, 0);
 
-	((Unit*)pPlayer)->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	((Unit*)pPlayer)->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 	AddObjectToWorld(pPlayer);
-	pPlayer->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	pPlayer->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 	Position pos = pPlayer->GetCurrentPosition(ct);
 	SetMove(pPlayer, pos, pos, 0, true, ct, true);
 	Messages::SendPropertyMessage(pPlayer,pPlayer, "channel", 0);
@@ -406,19 +406,19 @@ void World::WarpEndSummon(Player *pPlayer , Position pos, uint8_t layer, Summon 
 	pSummon->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
 	pSummon->SetLayer(layer);
 	pSummon->StopMove();
-	pSummon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	pSummon->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 	pSummon->AddNoise(rand32(), rand32(), 35);
 	AddObjectToWorld(pSummon);
-	pSummon->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+	pSummon->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 	auto position = pSummon->GetCurrentPosition(ct);
 	// Set move
 }
 
 void World::AddMonsterToWorld(Monster *pMonster)
 {
-    pMonster->SetFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    pMonster->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
     AddObjectToWorld(pMonster);
-    pMonster->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::FirstEnter);
+    pMonster->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 }
 
 void World::KickAll()
@@ -603,7 +603,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::FB_Taming, true);
+    Item* pItem = player->FindItem(nTameItemCode, (uint)FlagBits::ITEM_FLAG_TAMING, true);
     if(pItem == nullptr) {
         MX_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
         ClearTamer(pMonster, false);
@@ -619,7 +619,7 @@ bool World::ProcTame(Monster *pMonster)
      * lPenalty is multiplied with the TamePercentage here
      */
     float fTameProbability = pMonster->GetTamePercentage();
-    auto pSkill = player->GetSkill(SkillId::CreatureTaming);
+    auto pSkill = player->GetSkill(SKILL_CREATURE_TAMING);
     if(pSkill == nullptr) {
         // really, you shouldn't get here. If you do, you fucked up somewhere.
         ClearTamer(pMonster, false);
@@ -668,11 +668,11 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
     if (pMonster->GetHealth() == pMonster->GetMaxHealth()
         && pMonster->GetTamer() == 0
         && tameCode != 0) {
-        auto card = pPlayer->FindItem(tameCode, FlagBits::FB_Summon, false);
+        auto card = pPlayer->FindItem(tameCode, FlagBits::ITEM_FLAG_SUMMON, false);
         if(card != nullptr) {
             pMonster->SetTamer(pPlayer->GetHandle(), nSkillLevel);
             pPlayer->m_hTamingTarget = pMonster->GetHandle();
-            card->m_Instance.Flag |= FlagBits::FB_Taming;
+            card->m_Instance.Flag |= FlagBits::ITEM_FLAG_TAMING;
             Messages::BroadcastTamingMessage(pPlayer, pMonster, 0);
             return true;
         }
@@ -683,7 +683,7 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
 void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
 {
     SkillResult sr{};
-    sr.type = (int)SR_ResultType::SRT_Result;
+    sr.type = (int)SRT_RESULT;
     sr.hTarget = handle;
     sr.result.bResult = bIsSuccess;
     sr.result.success_type = nSuccessType;

@@ -527,7 +527,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
     item->m_bIsNeedUpdateToDB = true;
     Messages::SendItemMessage(dynamic_cast<Player*>(m_pUnit), item);
     dynamic_cast<Player*>(m_pUnit)->UpdateQuestStatusByItemUpgrade();
-    if(item->m_Instance.nWearInfo != WearNone) {
+    if(item->m_Instance.nWearInfo != WEAR_NONE) {
         if(item->m_Instance.OwnSummonHandle != 0) {
             // get summon
         } else {
@@ -607,7 +607,7 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
 
     uint handle = 0;
     if(player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0) {
-        auto item = Item::AllocItem(0, nCode, nCount, GenerateCode::ByScript, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
+        auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
 
         Item *pNewItem = player->PushItem(item, nCount, false);
         if(pNewItem != nullptr)

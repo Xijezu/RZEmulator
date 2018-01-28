@@ -46,23 +46,23 @@ bool FieldProp::IsUsable(Player *pPlayer) const
     bool bResult = true;
 
     // Class checks
-    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Hunter) != 0 && !pPlayer->IsHunter())
+    if ((m_pFieldPropBase->nLimit & LIMIT_HUNTER) != 0 && !pPlayer->IsHunter())
         bResult = false;
-    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Fighter) != 0 && !pPlayer->IsFighter())
+    if ((m_pFieldPropBase->nLimit & LIMIT_FIGHTER) != 0 && !pPlayer->IsFighter())
         bResult = false;
-    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Magician) != 0 && !pPlayer->IsMagician())
+    if ((m_pFieldPropBase->nLimit & LIMIT_MAGICIAN) != 0 && !pPlayer->IsMagician())
         bResult = false;
-    if ((m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Summoner) != 0 && !pPlayer->IsSummoner())
+    if ((m_pFieldPropBase->nLimit & LIMIT_SUMMONER) != 0 && !pPlayer->IsSummoner())
         bResult = false;
     if(!bResult)
         return false;
 
     // Race checks
-    if(pPlayer->GetRace() != 3 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Gaia) != 0)
+    if(pPlayer->GetRace() != 3 && (m_pFieldPropBase->nLimit & LIMIT_GAIA) != 0)
         bResult = false;
-    if(pPlayer->GetRace() != 4 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Deva) != 0)
+    if(pPlayer->GetRace() != 4 && (m_pFieldPropBase->nLimit & LIMIT_DEVA) != 0)
         bResult = false;
-    if(pPlayer->GetRace() != 5 && (m_pFieldPropBase->nLimit & FP_LimitFlag::FPLF_Asura) != 0)
+    if(pPlayer->GetRace() != 5 && (m_pFieldPropBase->nLimit & LIMIT_ASURA) != 0)
         bResult = false;
     if(!bResult)
         return false;
@@ -123,7 +123,7 @@ bool FieldProp::UseProp(Player * pPlayer)
                 {
                     int  nItemCount = irand(i.min_count, i.max_count);
                     int  nLevel     = irand(i.min_level, i.max_level + 1);
-                    auto ti         = Item::AllocItem(0, i.code, (uint64)nItemCount, GenerateCode::ByFieldProp, nLevel, -1, -1, 0, 0, 0, 0, 0);
+                    auto ti         = Item::AllocItem(0, i.code, (uint64)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
                     auto cnt = ti->m_Instance.nCount;
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);

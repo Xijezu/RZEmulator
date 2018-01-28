@@ -42,29 +42,30 @@ struct HateModifierTag {
 };
 
 
-enum MonsterFlag : uint16 {
-    MF_FIRST_ATTACK = 0,
-    MF_GROUP_FIRST_ATTACK,
-    MF_RESPONCE_CASTING,
-    MF_RESPONCE_RACE,
-    MF_RESPONCE_BATTLE
+enum ATTACK_TYPE_FLAG : uint16
+{
+    AT_FIRST_ATTACK       = 0x1,
+    AT_GROUP_FIRST_ATTACK = 0x2,
+    AT_RESPONSE_CASTING   = 0x4,
+    AT_RESPONSE_RACE      = 0x8,
+    AT_RESPONSE_BATTLE    = 0x10
 };
 
-enum MonsterGenerateCode : int
+enum MONSTER_GENERATE_CODE : int
 {
-    MGC_None = 0,
-    MGC_ByRespawn = 1,
-    MGC_ByScript = 2,
-    MGC_ByShoveling = 3,
+    MGC_NONE         = 0,
+    MGC_BY_RESPAWN   = 1,
+    MGC_BY_SCRIPT    = 2,
+    MGC_BY_SHOVELING = 3,
 };
 
-enum MonsterStatus : int
+enum MONSTER_STATUS : int
 {
-    MS_Normal = 0,
-    MS_Tracking = 1,
-    MS_FindAttackPos = 2,
-    MS_Attack = 3,
-    MS_Dead = 4,
+    STATUS_NORMAL          = 0,
+    STATUS_TRACKING        = 1,
+    STATUS_FIND_ATTACK_POS = 2,
+    STATUS_ATTACK          = 3,
+    STATUS_DEAD            = 4,
 };
 
 struct MonsterRespawnInfo {
@@ -238,9 +239,9 @@ class Monster : public Unit
 
         float GetScale() const override { return m_Base->scale; }
 
-        MonsterStatus GetStatus() const { return m_nStatus; }
+        MONSTER_STATUS GetStatus() const { return m_nStatus; }
 
-        void SetStatus(MonsterStatus status);
+        void SetStatus(MONSTER_STATUS status);
         void SetTamer(uint handle, int nTamingSkillLevel);
 
         uint GetCreatureGroup() const override;
@@ -336,7 +337,7 @@ class Monster : public Unit
         bool bForceKill{false};
         bool m_bTamedSuccess;
 
-        MonsterStatus m_nStatus;
+        MONSTER_STATUS m_nStatus;
 };
 
 

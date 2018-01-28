@@ -310,11 +310,11 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<in
 
     switch(item->m_pItemBase->group)
     {
-        case ItemGroup::Weapon:
-            pos = ItemWearType::WearWeapon;
+        case GROUP_WEAPON:
+            pos = WEAR_WEAPON;
             break;
-        case ItemGroup::Armor:
-            pos = ItemWearType::WearShield;
+        case GROUP_ARMOR:
+            pos = WEAR_SHIELD;
             break;
         default:
             return false;
@@ -374,7 +374,7 @@ void Summon::Update(uint /*diff*/)
         return;
     }
 
-    if (HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
     {
         processPendingMove();
     }
@@ -383,7 +383,7 @@ void Summon::Update(uint /*diff*/)
 uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
 {
     uint16 result = TS_RESULT_ACCESS_DENIED;
-    if(GetMaster() != nullptr && GetMaster()->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete) && (pItem->m_Instance.Flag & 1) != 0)
+    if(GetMaster() != nullptr && GetMaster()->HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE) && (pItem->m_Instance.Flag & 1) != 0)
     {
         result = Unit::putonItem(pos, pItem);
         if(result == TS_RESULT_SUCCESS)
@@ -401,7 +401,7 @@ uint16 Summon::putoffItem(ItemWearType pos)
 {
     uint16 result = TS_RESULT_ACCESS_DENIED;
 
-    if(GetMaster() != nullptr && GetMaster()->IsInWorld() && GetMaster()->HasFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete))
+    if(GetMaster() != nullptr && GetMaster()->IsInWorld() && GetMaster()->HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
     {
         if(pos < 0 || pos > 24)
             return TS_RESULT_ACCESS_DENIED;
@@ -521,7 +521,7 @@ float Summon::GetFCM() const
 
 void Summon::onBeforeCalculateStat()
 {
-    if(!HasFlag(UNIT_FIELD_STATUS, StatusFlags::MoveSpeedFixed))
+    if(!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - 120;
 }
 

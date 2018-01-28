@@ -223,7 +223,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     m_pOwner->SetMana(nMP - mana_cost);
 
     // Check for Creature Taming since it doesn't have an effect type
-    if (m_SkillBase->id == SkillId::CreatureTaming)
+    if (m_SkillBase->id == SKILL_CREATURE_TAMING)
     {
         m_nErrorCode = PrepareTaming(nSkillLevel, handle, pos, current_time);
     }
@@ -265,7 +265,7 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
 {
     //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
-    if (item == nullptr || item->m_pItemBase == nullptr || item->m_pItemBase->group != ItemGroup::SummonCard || item->m_Instance.OwnerHandle != m_pOwner->GetHandle())
+    if (item == nullptr || item->m_pItemBase == nullptr || item->m_pItemBase->group != GROUP_SUMMONCARD || item->m_Instance.OwnerHandle != m_pOwner->GetHandle())
     {
         return TS_RESULT_NOT_ACTABLE;
     }
@@ -314,20 +314,20 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     pct << (int)m_pOwner->GetHealth();
     pct << (int16)m_pOwner->GetMana();
 
-    if (nType != SkillState::ST_Fire) {
-        if (nType <= SkillState::ST_Fire)
+    if (nType != SKILL_STATUS::ST_FIRE) {
+        if (nType <= SKILL_STATUS::ST_FIRE)
             return;
-        if (nType <= SkillState::ST_CastingUpdate || nType == SkillState::ST_Complete) {
+        if (nType <= SKILL_STATUS::ST_CASTING_UPDATE || nType == SKILL_STATUS::ST_COMPLETE) {
             pct << (uint32)(m_nFireTime - m_nCastTime);
             pct << (uint16)m_nErrorCode;
             pct.fill("", 3);
             return;
         }
-        if (nType == SkillState::ST_Cancel) {
+        if (nType == SKILL_STATUS::ST_CANCEL) {
             pct << (uint8)0;
             return;
         }
-        if (nType != SkillState::ST_RegionFire)
+        if (nType != SKILL_STATUS::ST_REGION_FIRE)
             return;
     }
 
@@ -350,8 +350,8 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
             pct << (uint)sr.damage.hTarget;
 
             switch (sr.type) {
-                case SR_ResultType::SRT_Damage:
-                case SR_ResultType::SRT_MagicDamage:
+                case SRT_DAMAGE:
+                case SRT_MAGIC_DAMAGE:
                     pct << sr.damage.target_hp;
                     pct << sr.damage.damage_type;
                     pct << sr.damage.damage;
@@ -359,11 +359,11 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
                     for (uint16 i : sr.damage.elemental_damage)
                         pct << i;
                     break;
-                case SR_ResultType::SRT_AddHP:
-                case SRT_AddMP:
+                case SRT_ADD_HP:
+                case SRT_ADD_MP:
                     pct << sr.addHPType.target_hp;
                     pct << sr.addHPType.nIncHP;
-                case SRT_Rebirth:
+                case SRT_REBIRTH:
                     pct << sr.rebirth.target_hp;
                     pct << sr.rebirth.nIncHP;
                     pct << sr.rebirth.nIncMP;
@@ -500,12 +500,12 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
 
     if(!bHandled) {
         switch(m_SkillBase->id) {
-            case SkillId::CreatureTaming:
+            case SKILL_CREATURE_TAMING:
                 CREATURE_TAMING();
                 bHandled = true;
                 break;
-            case SkillId::Return:
-            case SkillId::TownPortal:
+            case SKILL_RETURN:
+            case SKILL_TOWN_PORTAL:
                 TOWN_PORTAL();
                 bHandled = true;
                 break;
@@ -543,7 +543,7 @@ void Skill::DO_SUMMON()
     if(item == nullptr)
         return;
 
-    if(item->m_pItemBase->group != ItemGroup::SummonCard)
+    if(item->m_pItemBase->group != GROUP_SUMMONCARD)
         return;
 
     auto summon = item->m_pSummon;
@@ -565,7 +565,7 @@ void Skill::DO_UNSUMMON()
     if(item == nullptr)
         return;
 
-    if(item->m_pItemBase->group != ItemGroup::SummonCard)
+    if(item->m_pItemBase->group != GROUP_SUMMONCARD)
         return;
 
     auto summon = item->m_pSummon;
@@ -579,7 +579,7 @@ void Skill::DO_UNSUMMON()
 bool Skill::Cancel()
 {
     Init();
-    broadcastSkillMessage(m_pOwner, 0, 0, SkillState::ST_Cancel);
+    broadcastSkillMessage(m_pOwner, 0, 0, SKILL_STATUS::ST_CANCEL);
     return true;
 }
 
@@ -630,7 +630,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
         return TS_RESULT_NOT_ACTABLE;
     }
 
-    auto item = player->FindItem((uint)nTameItemCode, FlagBits::FB_Summon, false);
+    auto item = player->FindItem((uint)nTameItemCode, FlagBits::ITEM_FLAG_SUMMON, false);
     if(item == nullptr)
     {
         return TS_RESULT_NOT_ACTABLE;
@@ -767,9 +767,9 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
     m_pOwner->AddMana(nAddMP);
 
     SkillResult skill_result{};
-    skill_result.type = (int)SRT_AddHP;
+    skill_result.type = (int)SRT_ADD_HP;
     skill_result.hTarget = m_pOwner->GetHandle();
-    skill_result.addHPType.type = (int)SRT_AddHP;
+    skill_result.addHPType.type = (int)SRT_ADD_HP;
     skill_result.addHPType.hTarget = m_pOwner->GetHandle();
     skill_result.addHPType.target_hp = m_pOwner->GetHealth();
     skill_result.addHPType.nIncHP = nAddHP;
@@ -777,9 +777,9 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
     m_vResultList.emplace_back(skill_result);
 
     SkillResult skillResult{};
-    skillResult.type = (int)SRT_AddMP;
+    skillResult.type = (int)SRT_ADD_MP;
     skillResult.hTarget = m_pOwner->GetHandle();
-    skillResult.addHPType.type = (int)SRT_AddMP;
+    skillResult.addHPType.type = (int)SRT_ADD_MP;
     skillResult.addHPType.hTarget = m_pOwner->GetHandle();
     skillResult.addHPType.target_hp = (int)m_pOwner->GetMana();
     skillResult.addHPType.nIncHP = nAddHP;
@@ -814,7 +814,7 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
     heal = pTarget->Heal((int)heal);
 
     SkillResult skillResult{};
-    skillResult.type = SR_ResultType::SRT_AddHP;
+    skillResult.type = SRT_ADD_HP;
     skillResult.damage.hTarget = pTarget->GetHandle();
     skillResult.addHPType.target_hp = pTarget->GetHealth();
     skillResult.addHPType.nIncHP = (int)heal;
@@ -894,7 +894,7 @@ void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
     heal = pTarget->MPHeal((int)heal);
 
     SkillResult skillResult{};
-    skillResult.type = SR_ResultType::SRT_AddMP;
+    skillResult.type = SRT_ADD_MP;
     skillResult.damage.hTarget = pTarget->GetHandle();
     skillResult.addHPType.target_hp = pTarget->GetHealth();
     skillResult.addHPType.nIncHP = (int)heal;
@@ -913,7 +913,7 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     pTarget->AddMana((int)CalculatePct(pTarget->GetMaxMana(), (m_SkillBase->var[1] * 100)));
 
     SkillResult skillResult{};
-    skillResult.type = SR_ResultType::SRT_Rebirth;
+    skillResult.type = SRT_REBIRTH;
     skillResult.damage.hTarget = pTarget->GetHandle();
     skillResult.rebirth.target_hp = pTarget->GetHealth();
     skillResult.rebirth.nIncHP = std::max((int)(pTarget->GetHealth() - prev_hp), 0);

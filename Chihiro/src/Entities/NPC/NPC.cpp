@@ -51,12 +51,12 @@ void NPC::LinkQuest(QuestLink *quest_link_info)
         m_vQuestLink_End.emplace_back(quest_link_info);
 }
 
-NPCStatus NPC::GetStatus() const
+NPC_STATUS NPC::GetStatus() const
 {
-    return (NPCStatus)m_nStatus;
+    return (NPC_STATUS)m_nStatus;
 }
 
-void NPC::SetStatus(NPCStatus status)
+void NPC::SetStatus(NPC_STATUS status)
 {
     m_nStatus = status;
 }

@@ -271,7 +271,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     int socket[4]{0};
     std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(socket));
 
-    if (item->m_pItemBase->group == ItemGroup::SummonCard)
+    if (item->m_pItemBase->group == GROUP_SUMMONCARD)
     {
         if (item->m_pSummon != nullptr)
         {

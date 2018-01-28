@@ -17,26 +17,26 @@ struct HateModifier {
 
 enum AFlag : int
 {
-    AF_PerfectBlock = 1,
-    AF_Block = 2,
-    AF_Miss = 4,
-    AF_Critical = 8
+    FLAG_PERFECT_BLOCK = 1,
+    FLAG_BLOCK         = 2,
+    FLAG_MISS          = 4,
+    FLAG_CRITICAL      = 8
 };
 
 enum AttackAction : int
 {
-    AA_End = 1,
-    AA_Aiming = 2,
-    AA_Attack = 3,
-    AA_Cancel = 4
+    ATTACK_END    = 1,
+    ATTACK_AIMING = 2,
+    ATTACK_ATTACK = 3,
+    ATTACK_CANCEL = 4
 };
 
 enum AttackFlag : int
 {
-    AF_Bow = 1,
-    AF_CrossBow = 2,
-    AF_DoubleWeapon = 4,
-    AF_DoubleAttack = 8
+    ATTACK_FLAG_BOW           = 1,
+    ATTACK_FLAG_CROSS_BOW     = 2,
+    ATTACK_FLAG_DOUBLE_WEAPON = 4,
+    ATTACK_FLAG_DOUBLE_ATTACK = 8
 };
 
 struct Damage {

@@ -467,8 +467,8 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                 {
                     if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) >= _player->GetCurrentPosition(ct).GetExactDist2d(&npos))
                     {
-                        if (mover->HasFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending))
-                            mover->RemoveFlag(UNIT_FIELD_STATUS, StatusFlags::MovePending);
+                        if (mover->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
+                            mover->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
                         npos.m_positionX = x;
                         npos.m_positionY = y;
                         npos.m_positionZ = 0.0f;
@@ -583,21 +583,21 @@ void WorldSession::onCreateCharacter(XPacket *pRecvPct)
         itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultWeaponCode);
-        itemStmt->setInt32(3, WearWeapon);
+        itemStmt->setInt32(3, WEAR_WEAPON);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
         itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultArmorCode);
-        itemStmt->setInt32(3, WearArmor);
+        itemStmt->setInt32(3, WEAR_ARMOR);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
         itemStmt->setInt32(0, sWorld->GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultBagCode);
-        itemStmt->setInt32(3, WearBagSlot);
+        itemStmt->setInt32(3, WEAR_BAG_SLOT);
         CharacterDatabase.Execute(itemStmt);
 
         _SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 0);
@@ -923,7 +923,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
 
             if (bJoinable)
             {
-                auto item = Item::AllocItem(0, mt.code, buy_count, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
+                auto item = Item::AllocItem(0, mt.code, buy_count, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
                 pNewItem = _player->PushItem(item, buy_count, false);
 
                 if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
@@ -933,7 +933,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
             {
                 for (int i = 0; i < buy_count; i++)
                 {
-                    auto item = Item::AllocItem(0, mt.code, 1, GenerateCode::ByMarket, -1, -1, -1, 0, 0, 0, 0, 0);
+                    auto item = Item::AllocItem(0, mt.code, 1, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
                     pNewItem = _player->PushItem(item, buy_count, false);
                     if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
                         Item::PendFreeItem(item);
@@ -1128,7 +1128,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
     if (false /*IsItemUseable()*/)
         return;
 
-    int nCFL = _player->GetCurrentSkillLevel(SkillId::CreatureControl);
+    int nCFL = _player->GetCurrentSkillLevel(SKILL_CREATURE_CONTROL);
     if (nCFL < 0)
         return;
 
@@ -1148,7 +1148,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
             {
                 if (pItem->m_pItemBase->group != 13 ||
                     _player->GetHandle() != pItem->m_Instance.OwnerHandle ||
-                    (pItem->m_Instance.Flag & (uint)FlagBits::FB_Summon) == 0)
+                    (pItem->m_Instance.Flag & (uint)FlagBits::ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
@@ -1182,13 +1182,13 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
 
         if (pItem != nullptr)
         {
-            if ((pItem->m_Instance.Flag & FlagBits::FB_Summon) != 0)
+            if ((pItem->m_Instance.Flag & FlagBits::ITEM_FLAG_SUMMON) != 0)
             {
                 summon = pItem->m_pSummon;
                 if (summon == nullptr)
                 {
                     summon = sMemoryPool->AllocNewSummon(_player, pItem);
-                    summon->SetFlag(UNIT_FIELD_STATUS, StatusFlags::LoginComplete);
+                    summon->SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
                     _player->AddSummon(summon, true);
                     Messages::SendItemMessage(_player, pItem);
 
@@ -1579,7 +1579,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
         return;
     }
 
-    if (item->m_pItemBase->type != ItemType::TypeUse && false /*!item->IsUsingItem()*/)
+    if (item->m_pItemBase->type != TYPE_USE && false /*!item->IsUsingItem()*/)
     {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
         MX_LOG_TRACE("network", "onUseItem: Not usable");
@@ -1797,9 +1797,9 @@ void WorldSession::onSoulStoneCraft(XPacket *pRecvPct)
                 Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, soulstone_handle[i]);
                 return;
             }
-            if (pSoulStoneList[i]->m_pItemBase->type != ItemType::TypeSoulStone
-                || pSoulStoneList[i]->m_pItemBase->group != ItemGroup::SoulStone
-                || pSoulStoneList[i]->m_pItemBase->iclass != ItemClass::ClassSoulStone)
+            if (pSoulStoneList[i]->m_pItemBase->type != TYPE_SOULSTONE
+                || pSoulStoneList[i]->m_pItemBase->group != GROUP_SOULSTONE
+                || pSoulStoneList[i]->m_pItemBase->iclass != CLASS_SOULSTONE)
             {
                 Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, soulstone_handle[i]);
                 return;
@@ -2007,7 +2007,7 @@ void WorldSession::onBindSkillCard(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, target_handle);
         return;
     }
-    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != ItemGroup::SkillCard || pItem->m_hBindedTarget != 0)
+    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
     {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
         return;
@@ -2034,7 +2034,7 @@ void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, target_handle);
         return;
     }
-    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != ItemGroup::SkillCard || pItem->m_hBindedTarget == 0)
+    if(!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != _player->GetHandle() || pItem->m_pItemBase->group != GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
     {
         Messages::SendResult(_player, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
         return;

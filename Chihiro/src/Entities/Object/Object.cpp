@@ -389,12 +389,12 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
 
 bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
 {
-    if (HasFlag(UNIT_FIELD_STATUS, MovePending)) {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
         return false;
     } else {
         m_PendingMovePos    = std::move(vMoveInfo);
         m_nPendingMoveSpeed = speed;
-        SetFlag(UNIT_FIELD_STATUS, MovePending);
+        SetFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
     }
     return true;
 }

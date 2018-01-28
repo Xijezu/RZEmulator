@@ -1730,7 +1730,7 @@ void ObjectMgr::AddNPCToWorld()
 {
     for (auto &npc : _npcTemplateStore)
     {
-        if (/*npc.second.spawn_type == NPC_ST_Normal &&*/ npc.second.local_flag == 0)
+        if (/*npc.second.spawn_type == SPAWN_NORMAL &&*/ npc.second.local_flag == 0)
         {
             auto nn = GetNewNPC(&npc.second, 0);
             sWorld->AddObjectToWorld(nn);

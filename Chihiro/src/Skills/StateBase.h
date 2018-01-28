@@ -73,7 +73,7 @@ enum StateGroup {
     GROUP_PHYSICAL_BOMB = 0x65,
     GROUP_MAGICAL_BOMB  = 0x66,
     GROUP_ASSASSIN      = 0xC9,
-    GROUP_RIDING        = 0x12D,
+    //GROUP_RIDING        = 0x12D,
     GROUP_MAGIC         = 0x191,
     GROUP_SKILL         = 0x192,
     GROUP_POISON        = 0x193,

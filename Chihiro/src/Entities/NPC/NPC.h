@@ -11,8 +11,8 @@ public:
     static void EnterPacket(XPacket& pEnterPct, NPC* pNPC, Player* pPlayer);
 
     void LinkQuest(QuestLink* quest_link_info);
-    NPCStatus GetStatus() const;
-    void SetStatus(NPCStatus status);
+    NPC_STATUS GetStatus() const;
+    void SetStatus(NPC_STATUS status);
     int GetNPCID() const;
     bool IsNPC() const override { return true; }
     bool HasStartableQuest(Player* player);

@@ -14,20 +14,22 @@ struct NPCTemplate {
     std::string contact_script;
 };
 
-enum NPCStatus : int {
-    NPCS_Normal        = 0,
-    NPCS_Tracking      = 1,
-    NPCS_FindAttackPos = 2,
-    NPCS_Attack        = 3,
-    NPCS_Dead          = 4,
+enum NPC_STATUS
+{
+    NPC_STATUS_NORMAL          = 0x0,
+    NPC_STATUS_TRACKING        = 0x1,
+    NPC_STATUS_FIND_ATTACK_POS = 0x2,
+    NPC_STATUS_ATTACK          = 0x3,
+    NPC_STATUS_DEAD            = 0x4
 };
 
-enum  NPC_SpawnType : int {
-    NPC_ST_Normal        = 0,
-    NPC_ST_DungeonSeige  = 1,
-    NPC_ST_DungeonNormal = 2,
-    NPC_ST_None          = 3,
-    NPC_ST_Cash          = 4,
+enum  NPC_SpawnType : int
+{
+    SPAWN_NORMAL         = 0,
+    SPAWN_SIEGE_DUNGEON  = 1,
+    SPAWN_NORMAL_DUNGEON = 2,
+    SPAWN_NONE           = 3,
+    SPAWN_CASH           = 4,
 };
 
 #endif // PROJECT_NPCBASE_H

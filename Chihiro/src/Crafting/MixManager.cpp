@@ -69,7 +69,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     Item* pPowder{nullptr};
     if(pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
     {
-        if(pSubMaterial[0] != nullptr && pSubMaterial[0]->m_pItemBase->type == ItemType::TypeCube)
+        if(pSubMaterial[0] != nullptr && pSubMaterial[0]->m_pItemBase->type == TYPE_CUBE)
         {
             pPowder = pSubMaterial[1];
         }
@@ -197,7 +197,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
             {
                 sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
             }
-            pItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::ByMix, pMixInfo->value[1], -1, -1, 0,0,0,0,0);
+            pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0,0,0,0,0);
             if(!pItem->m_pItemBase->flaglist[FLAG_DUPLICATE])
             {
                 //chatmsg
