@@ -16,7 +16,9 @@ before_install:
   - sudo apt-get install libace-dev
   - sudo apt-get install lua5.2 liblua5.2 liblua5.2-dev
   - sudo apt-get install build-essential autoconf libtool make cmake git-core
-  - sudo apt-get install openssl libssl-dev libmysqlclient15-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev
+  - sudo apt-get install libmysqlclient15-dev libmysql++-dev
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-6; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
 
 script:
   - mkdir build
