@@ -924,6 +924,11 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
             if (bJoinable)
             {
                 auto item = Item::AllocItem(0, mt.code, buy_count, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
+                if(item == nullptr)
+                {
+                    MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
+                    return;
+                }
                 pNewItem = _player->PushItem(item, buy_count, false);
 
                 if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
@@ -934,6 +939,11 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                 for (int i = 0; i < buy_count; i++)
                 {
                     auto item = Item::AllocItem(0, mt.code, 1, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
+                    if(item == nullptr)
+                    {
+                        MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
+                        return;
+                    }
                     pNewItem = _player->PushItem(item, buy_count, false);
                     if(pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
                         Item::PendFreeItem(item);

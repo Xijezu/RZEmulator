@@ -286,6 +286,11 @@ void Player::DB_ReadStorage()
             if (!m_bIsStorageLoaded || code == 0 || curItem == nullptr)
             {
                 Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
+                if(newItem == nullptr)
+                {
+                    MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                    continue;
+                }
                 newItem->m_Instance.Flag &= 0xDFFFFFFF;
                 newItem->SetCurrentEndurance(endurance);
                 newItem->SetOwnerInfo(GetHandle(), 0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
@@ -430,6 +435,11 @@ bool Player::ReadItemList(int sid)
 
             auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag,
                                         socket_0, socket_1, socket_2, socket_3, remain_time);
+            if(item == nullptr)
+            {
+                MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                continue;
+            }
             item->m_Instance.Flag &= 0xDFFFFFFF;
             //item->SetCurrentEndurance(endurance);
 

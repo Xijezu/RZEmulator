@@ -2979,6 +2979,11 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                     if(nItemID != 0)
                     {
                         auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
+                        if(pCItem == nullptr)
+                        {
+                            MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
+                            return TS_RESULT_NOT_ACTABLE;
+                        }
                         Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
                         if(pNewItem != nullptr)
                             Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());

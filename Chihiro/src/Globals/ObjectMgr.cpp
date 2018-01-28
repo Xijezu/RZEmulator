@@ -1557,23 +1557,29 @@ void ObjectMgr::UnloadAll()
 
 bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
 {
-    nItemID = 0;
+    nItemID    = 0;
     nItemCount = 1;
 
-    auto dg = GetDropGroupInfo(nDropGroupID);
-    if(dg != nullptr) {
-        int cp = 0;
-        int p = irand(1, 100000000);
-        for(int i = 0; i < MAX_DROP_GROUP; ++i) {
+    auto dg    = GetDropGroupInfo(nDropGroupID);
+    if (dg != nullptr)
+    {
+        int      cp = 0;
+        int      p  = irand(1, 100000000);
+        for (int i  = 0; i < MAX_DROP_GROUP; ++i)
+        {
             cp += dg->drop_percentage[i];
-            if(p <= cp) {
-                nItemID = dg->drop_item_id[i];
+            if (p <= cp)
+            {
+                // temporary workaround for dropgroup
+                if(dg->drop_item_id[i] > 0 && GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
+                    continue;
+                nItemID    = dg->drop_item_id[i];
                 nItemCount = 1;
                 return true;
             }
         }
     }
-    nItemID = 0;
+    nItemID    = 0;
     nItemCount = 1;
     return false;
 }
