@@ -191,12 +191,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     m_Status = SkillStatus::SS_CAST;
     switch(m_SkillBase->effect_type)
     {
-        case SKILL_EFFECT_TYPE::EF_SUMMON:
+        case EF_SUMMON:
             m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
             break;
-        case SKILL_EFFECT_TYPE::EF_ACTIVATE_FIELD_PROP:
-        case SKILL_EFFECT_TYPE::EF_REGION_HEAL_BY_FIELD_PROP:
-        case SKILL_EFFECT_TYPE::EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
+        case EF_ACTIVATE_FIELD_PROP:
+        case EF_REGION_HEAL_BY_FIELD_PROP:
+        case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
         {
             m_nErrorCode = TS_RESULT_NOT_ACTABLE;
             if(m_pOwner->IsPlayer())
@@ -204,7 +204,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
                 auto pProp = sMemoryPool->GetObjectInWorld<FieldProp>(handle);
                 if(pProp != nullptr && pProp->m_pFieldPropBase->nActivateSkillID == m_SkillBase->id )
                 {
-                    if(pProp->m_nUseCount >= 1 && pProp->IsUsable(dynamic_cast<Player*>(m_pOwner)))
+                    if(pProp->m_nUseCount >= 1 && pProp->IsUsable(m_pOwner->As<Player>()))
                     {
                         delay = pProp->GetCastingDelay();
                         if (sRegion->IsVisibleRegion(m_pOwner, pProp) == 0)
@@ -263,13 +263,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 
 uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
 {
-    //auto item = dynamic_cast<Item*>(sMemoryPool->getItemPtrFromId(handle));
     auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr || item->m_pItemBase->group != GROUP_SUMMONCARD || item->m_Instance.OwnerHandle != m_pOwner->GetHandle())
     {
         return TS_RESULT_NOT_ACTABLE;
     }
-    auto player = dynamic_cast<Player *>(m_pOwner);
+    auto player = m_pOwner->As<Player>();
     if (player == nullptr)
         return TS_RESULT_NOT_ACTABLE;
     int i = 0;
@@ -450,32 +449,32 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
     bool bHandled{true};
     m_vResultList.clear();
     switch(m_SkillBase->effect_type) {
-        case SKILL_EFFECT_TYPE::EF_SUMMON:
+        case EF_SUMMON:
             DO_SUMMON();
             break;
-        case SKILL_EFFECT_TYPE::EF_UNSUMMON:
+        case EF_UNSUMMON:
             DO_UNSUMMON();
             break;
-        case SKILL_EFFECT_TYPE::EF_ADD_STATE: {
+        case EF_ADD_STATE: {
             FireSkillStateSkillFunctor fn{ };
             fn.onCreature(this, sWorld->GetArTime(), m_pOwner, sMemoryPool->GetObjectInWorld<Unit>(m_hTarget));
         }
             break;
-        case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE:
-        case SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
+        case EF_MAGIC_SINGLE_DAMAGE:
+        case EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
             SINGLE_MAGICAL_DAMAGE(pTarget);
             break;
         case EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP:
             SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(pTarget);
             break;
-        case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE:
-        case SKILL_EFFECT_TYPE::EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
+        case EF_MAGIC_MULTIPLE_DAMAGE:
+        case EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
             MULTIPLE_MAGICAL_DAMAGE(pTarget);
             break;
         case 30001:// EffectType::PhysicalSingleDamage
             SINGLE_PHYSICAL_DAMAGE(pTarget);
             break;
-        case SKILL_EFFECT_TYPE::EF_ACTIVATE_FIELD_PROP:
+        case EF_ACTIVATE_FIELD_PROP:
             ACTIVATE_FIELD_PROP();
             break;
         case EF_TOGGLE_AURA:
@@ -513,17 +512,17 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
                 auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
                 MX_LOG_INFO("skill", result.c_str());
                 if(m_pOwner->IsPlayer())
-                    Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Player*>(m_pOwner), result);
+                    Messages::SendChatMessage(50,"@SYSTEM", m_pOwner->As<Player>(), result);
                 else if(m_pOwner->IsSummon())
                 {
-                    Messages::SendChatMessage(50,"@SYSTEM", dynamic_cast<Summon*>(m_pOwner)->GetMaster(), result);
+                    Messages::SendChatMessage(50,"@SYSTEM",m_pOwner->As<Summon>()->GetMaster(), result);
                 }
                 break;
         }
     }
     if (m_SkillBase->is_harmful != 0)
     {
-        auto mob = dynamic_cast<Monster*>(pTarget);
+        auto mob = pTarget->As<Monster>();
         if (mob != nullptr && mob->IsMonster() && mob->IsCastRevenger())
         {
             mob->AddHate(m_pOwner->GetHandle(), 1, true, true);
@@ -535,7 +534,7 @@ void Skill::FireSkill(Unit *pTarget, bool& bIsSuccess)
 
 void Skill::DO_SUMMON()
 {
-    auto player = dynamic_cast<Player*>(m_pOwner);
+    auto player = m_pOwner->As<Player>();
     if(player == nullptr)
         return;
 
@@ -557,7 +556,7 @@ void Skill::DO_SUMMON()
 
 void Skill::DO_UNSUMMON()
 {
-    auto player = dynamic_cast<Player*>(m_pOwner);
+    auto player = m_pOwner->As<Player>();
     if(player == nullptr)
         return;
 
@@ -617,7 +616,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
     if(!m_pOwner->IsPlayer())
         return TS_RESULT_NOT_ACTABLE;
 
-    auto player = dynamic_cast<Player*>(m_pOwner);
+    auto player = m_pOwner->As<Player>();
     auto monster = sMemoryPool->GetObjectInWorld<Monster>(handle);
     if(monster == nullptr)
     {
@@ -630,7 +629,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
         return TS_RESULT_NOT_ACTABLE;
     }
 
-    auto item = player->FindItem((uint)nTameItemCode, FlagBits::ITEM_FLAG_SUMMON, false);
+    auto item = player->FindItem((uint)nTameItemCode, ITEM_FLAG_SUMMON, false);
     if(item == nullptr)
     {
         return TS_RESULT_NOT_ACTABLE;
@@ -694,7 +693,7 @@ void Skill::CREATURE_TAMING()
     if(pTarget == nullptr || !pTarget->IsMonster() || !m_pOwner->IsPlayer())
         return;
 
-    bool bResult = sWorld->SetTamer(pTarget, dynamic_cast<Player*>(m_pOwner), m_nRequestedSkillLevel);
+    bool bResult = sWorld->SetTamer(pTarget, m_pOwner->As<Player>(), m_nRequestedSkillLevel);
     if(bResult) {
         pTarget->AddHate(m_pOwner->GetHandle(), 1, true, true);
     }
@@ -705,7 +704,7 @@ void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr || m_pOwner == nullptr)
         return;
 
-    if (m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_PHYSICAL_SINGLE_DAMAGE_RUSH || m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
+    if (m_SkillBase->effect_type == EF_PHYSICAL_SINGLE_DAMAGE_RUSH || m_SkillBase->effect_type == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
     {
 
     }
@@ -792,7 +791,7 @@ void Skill::ACTIVATE_FIELD_PROP()
     auto fp = sMemoryPool->GetObjectInWorld<FieldProp>(m_hTarget);
     if(fp != nullptr)
     {
-        sWorld->AddSkillDamageResult(m_vResultList, fp->UseProp(dynamic_cast<Player*>(m_pOwner)), 0, 0);
+        sWorld->AddSkillDamageResult(m_vResultList, fp->UseProp(m_pOwner->As<Player>()), 0, 0);
     }
 }
 
@@ -826,7 +825,7 @@ void Skill::TOWN_PORTAL()
 {
     if(m_pOwner->IsPlayer())
     {
-        auto pPlayer = dynamic_cast<Player*>(m_pOwner);
+        auto pPlayer = m_pOwner->As<Player>();
 
         auto pos = pPlayer->GetLastTownPosition();
         pPlayer->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);

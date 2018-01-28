@@ -5,6 +5,8 @@ This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/Sky
 
   I tried to keep the code as retail as possible (thanks to various matching .pdb's) and used Pyroks unfinished C# Emulator as a reference.
   
+  Join us on the [Emulator Discord Server](https://discord.gg/CBGVkdU) for access to a public Testserver, bug reports and more! :) 
+  
 ## Requirements
 * Platform: Linux, Windows or Mac
 * ACE = 6.1.4 (Windows / Linux)

@@ -1148,7 +1148,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
             {
                 if (pItem->m_pItemBase->group != 13 ||
                     _player->GetHandle() != pItem->m_Instance.OwnerHandle ||
-                    (pItem->m_Instance.Flag & (uint)FlagBits::ITEM_FLAG_SUMMON) == 0)
+                    (pItem->m_Instance.Flag & (uint)ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
@@ -1182,7 +1182,7 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
 
         if (pItem != nullptr)
         {
-            if ((pItem->m_Instance.Flag & FlagBits::ITEM_FLAG_SUMMON) != 0)
+            if ((pItem->m_Instance.Flag & ITEM_FLAG_SUMMON) != 0)
             {
                 summon = pItem->m_pSummon;
                 if (summon == nullptr)

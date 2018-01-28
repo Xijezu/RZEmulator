@@ -324,7 +324,7 @@ void Unit::CalculateStat()
     if (statptr != nullptr)
         basestat.Copy(*statptr);
     m_cStat.Copy(basestat);
-    onBeforeCalculateStat(); // TODO: Reset in Player
+    onBeforeCalculateStat();
     // checkAdditionalItemEffect(); -> Nonexistant in epic 4
     applyStatByItem();
     applyJobLevelBonus();

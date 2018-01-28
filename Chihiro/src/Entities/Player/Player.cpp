@@ -1053,7 +1053,6 @@ Item *Player::FindItemByHandle(uint32 handle)
     return m_Inventory.FindByHandle(handle);
 }
 
-// TODO
 uint16_t Player::putonItem(ItemWearType pos, Item *item)
 {
     uint16_t result;
@@ -2622,7 +2621,7 @@ void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1
             // @todo: set max beltslot
             break;
         case 27:
-            if ((pItem->m_Instance.Flag & FlagBits::ITEM_FLAG_NON_CHAOS_STONE) == 0)
+            if ((pItem->m_Instance.Flag & ITEM_FLAG_NON_CHAOS_STONE) == 0)
                 SetInt32Value(PLAYER_FIELD_MAX_CHAOS, (int)(var1 + pItem->m_pItemBase->level * var2));
             break;
         default:
