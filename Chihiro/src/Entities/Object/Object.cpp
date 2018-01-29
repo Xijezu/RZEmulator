@@ -6,6 +6,7 @@
 #include "Messages.h"
 #include "Summon.h"
 #include "NPC.h"
+#include "Item.h"
 #include "FieldPropManager.h"
 
 // used for creating values for respawn for example

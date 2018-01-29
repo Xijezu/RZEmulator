@@ -4,12 +4,11 @@
 #include "Common.h"
 #include "CreatureAttribute.h"
 #include "DamageTemplate.h"
-#include "Entities/Object/Object.h"
-#include "Item.h"
+#include "Object.h"
 #include "State.h"
-#include "Utilities/EventProcessor.h"
-#include "Utilities/Util.h"
+#include "Util.h"
 
+class State;
 class XPacket;
 class Item;
 class World;
@@ -227,7 +226,6 @@ class Unit : public WorldObject
         int GetArmorClass() const;
         // Event handler
         bool IsWornByCode(int code) const;
-        EventProcessor              _Events;
         virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
         Item *GetWornItem(ItemWearType);
         ushort Puton(ItemWearType pos, Item *item);

@@ -5,7 +5,6 @@
 #include "Item/Item.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
-#include "XPacket.h"
 #include "DatabaseEnv.h"
 #include "Messages.h"
 #include "GameRule.h"

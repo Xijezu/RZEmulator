@@ -24,6 +24,7 @@
 #include "ClientPackets.h"
 #include "RegionContainer.h"
 #include "Skill.h"
+
 // static
 void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player* pPlayer)
 {

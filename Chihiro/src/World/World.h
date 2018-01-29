@@ -15,6 +15,7 @@ enum ShutdownExitCode
 class WorldSession;
 class Unit;
 class Player;
+class Summon;
 class XPacket;
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;

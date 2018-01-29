@@ -2,16 +2,16 @@
 #define MEMORYPOOL_H
 
 #include "Common.h"
-#include <Item/Item.h>
-#include <Player/Player.h>
-#include "Summon/Summon.h"
 #include "Dynamic/UnorderedMap.h"
-#include "Monster.h"
 #include "SharedMutex.h"
 #include "HashMapHolder.h"
+#include "ItemFields.h"
+#include "Item.h"
+#include "Player.h"
+#include "Summon.h"
+#include "Monster.h"
 
 typedef UNORDERED_MAP<uint32, WorldObject*> UpdateMap;
-
 class MemoryPoolMgr
 {
     public:

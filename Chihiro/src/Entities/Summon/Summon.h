@@ -3,9 +3,9 @@
 
 #include "Common.h"
 #include "Unit.h"
+#include "SummonBase.h"
 
 class Player;
-
 class Summon : public Unit
 {
     public:

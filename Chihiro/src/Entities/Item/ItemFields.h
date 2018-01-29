@@ -7,6 +7,16 @@
 
 #define MAX_GOLD_FOR_INVENTORY  100000000000
 #define MAX_GOLD_FOR_STORAGE    100000000000
+#define MAX_OPTION_NUMBER 4
+#define MAX_ITEM_WEAR 24
+#define MAX_COOLTIME_GROUP 40
+#define MAX_SOCKET_NUMBER 4
+#define MAX_ITEM_NAME_LENGTH 32
+
+struct ItemPickupOrder {
+    uint hPlayer[3];
+    int  nPartyID[3];
+};
 
 enum ElementalType {
     TYPE_NONE  = 0,

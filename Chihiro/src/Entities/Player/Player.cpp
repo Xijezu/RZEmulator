@@ -10,12 +10,9 @@
 #include "Skill.h"
 #include "RegionContainer.h"
 #include "NPC.h"
-#include "MemPool.h"
-#include "SharedMutex.h"
 #include "GameRule.h"
 #include "DungeonManager.h"
 #include "GroupManager.h"
-#include "Item.h"
 #include "WorldLocation.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor

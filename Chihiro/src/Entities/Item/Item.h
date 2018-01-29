@@ -13,19 +13,7 @@
 
 class XPacket;
 class Unit;
-
-#define MAX_OPTION_NUMBER 4
-#define MAX_ITEM_WEAR 24
-#define MAX_COOLTIME_GROUP 40
-#define MAX_SOCKET_NUMBER 4
-#define MAX_ITEM_NAME_LENGTH 32
-
 class Summon;
-
-struct ItemPickupOrder {
-    uint hPlayer[3];
-    int  nPartyID[3];
-};
 
 class ItemInstance
 {

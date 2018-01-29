@@ -7,15 +7,19 @@
 #include "QuadTreeMapInfo.h"
 #include "Dynamic/UnorderedMap.h"
 #include "SkillBase.h"
-#include "Monster.h"
 #include "NPCBase.h"
 #include "StateBase.h"
 #include "QuestBase.h"
 #include "FieldPropBase.h"
+#include "SummonBase.h"
+#include "CreatureAttribute.h"
+#include "MonsterBase.h"
+#include "Object.h"
 
 class Player;
 class Item;
 class Monster;
+class Unit;
 class NPC;
 
 struct Waypoint {

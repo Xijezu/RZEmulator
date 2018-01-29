@@ -7,7 +7,6 @@
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Maploader.h"
-#include "RespawnObject.h"
 #include "WorldSession.h"
 #include "MemPool.h"
 #include "GameRule.h"

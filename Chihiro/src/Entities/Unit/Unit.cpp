@@ -6,7 +6,6 @@
 #include "ClientPackets.h"
 #include "Skill.h"
 #include "MemPool.h"
-#include "Item.h"
 #include "RegionContainer.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
@@ -73,9 +72,6 @@ void Unit::CleanupsBeforeDelete(bool finalCleanup)
 
 void Unit::Update(uint32 p_time)
 {
-    // WARNING! Order of execution here is important, do not change.
-    _Events.Update(p_time);
-
     if (!IsInWorld())
         return;
 }
