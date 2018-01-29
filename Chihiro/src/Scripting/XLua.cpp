@@ -603,8 +603,9 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
     int nEnhance = args.size() >= 3 ? args[2].get<int>() : 0;
     int nLevel = args.size() >= 4 ? args[3].get<int>() : 0;
     int nFlag = args.size() >= 5 ? args[4].get<int>() : 0;
-    auto player = dynamic_cast<Player*>(m_pUnit);
+    auto pName = args.size() >= 6 ? args[5].get<std::string>() : m_pUnit->GetNameAsString();
 
+    auto player = Player::FindPlayer(pName);
     uint handle = 0;
     if(player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0) {
         auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
