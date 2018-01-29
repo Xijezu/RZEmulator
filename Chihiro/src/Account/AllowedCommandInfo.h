@@ -25,6 +25,7 @@ class AllowedCommandInfo
         void onInviteParty(Player *pClient, const std::string &);
         void onJoinParty(Player *pClient, const std::string &);
         void onPartyInfo(Player *pClient, const std::string &);
+        void onLeaveParty(Player *pClient, const std::string &);
         void onPartyDestroy(Player *pClient, const std::string &);
 };
 

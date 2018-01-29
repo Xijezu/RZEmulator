@@ -44,7 +44,8 @@ const AllowedCommands commandHandler[] =
                                       {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
                                       {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
                                       {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
-                                      {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy}
+                                      {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy},
+                                      {"/pleave",     false, &AllowedCommandInfo::onLeaveParty}
                               };
 
 const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
@@ -207,7 +208,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID()).c_str()));
+    Messages::SendPartyChatMessage(100, "@PARTY", partyID, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID()).c_str()));
     Messages::SendPartyInfo(pClient);
     Messages::BroadcastPartyMemberInfo(pClient);
 }
@@ -232,4 +233,13 @@ void AllowedCommandInfo::onCheatStandup(Player *pClient, const std::string &)
 
     pClient->m_bSitdown = false;
     Messages::BroadcastStatusMessage(pClient);
+}
+
+void AllowedCommandInfo::onLeaveParty(Player *pClient, const std::string &)
+{
+    if(pClient == nullptr || pClient->GetPartyID() == 0)
+        return;
+
+    if(sGroupManager->LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
+        pClient->SetUInt32Value(PLAYER_FIELD_PARTY_ID, 0);
 }

@@ -214,6 +214,16 @@ void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, P
     }
 }
 
+void Messages::SendPartyChatMessage(int nChatType, const std::string &szSender, int nPartyID, const std::string &szMessage)
+{
+    sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag& tag) {
+        if(tag.bIsOnline && tag.pPlayer != nullptr)
+        {
+            Messages::SendChatMessage(nChatType, szSender, tag.pPlayer, szMessage);
+        }
+    });
+}
+
 void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::vector<MarketInfo> &pMarket)
 {
     if (pPlayer == nullptr || pMarket.empty())
@@ -1061,21 +1071,13 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
 
     auto buf = string_format("MINFO|%d|%s|%d|%d|%d|%d|%d|%d|%d|",
                              pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
-    sGroupManager->DoEachMemberTag(partyID, [&buf](PartyMemberTag& tag)
-    {
-        if(tag.bIsOnline && tag.pPlayer != nullptr)
-            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, buf);
-    });
+
+    SendPartyChatMessage(100, "@PARTY", partyID, buf);
 }
 
 void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName)
 {
     auto partyName = sGroupManager->GetPartyName(nPartyID);
     auto szMsg = bIsOnline ? string_format("LOGIN|%s|%s|", partyName.c_str(), szName.c_str()) : string_format("LOGOUT|%s|", szName.c_str());
-    sGroupManager->DoEachMemberTag(nPartyID, [&szMsg,szName](PartyMemberTag& tag) {
-       if(tag.bIsOnline && tag.pPlayer != nullptr && !iequals(tag.strName, szName))
-       {
-           Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, szMsg);
-       }
-    });
+    SendPartyChatMessage(100, "@PARTY", nPartyID, szMsg);
 }

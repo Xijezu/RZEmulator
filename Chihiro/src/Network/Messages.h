@@ -74,6 +74,7 @@ class Messages
         static void SendDialogMessage(Player *, uint32_t, int, const std::string &, const std::string &, const std::string &);
         static void SendSkillList(Player *, Unit *, int);
         static void SendChatMessage(int, const std::string &, Player *, const std::string &);
+        static void SendPartyChatMessage(int, const std::string&, int, const std::string&);
         static void SendMarketInfo(Player *, uint32_t, const std::vector<MarketInfo> &);
         static void SendItemList(Player *, bool);
         static void SendItemMessage(Player *, Item *);

@@ -108,7 +108,31 @@ std::string GroupManager::GetLeaderName(int nPartyID)
 
 bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
 {
-    return false;
+    PartyInfo* info{nullptr};
+    Messages::SendPartyChatMessage(100, "@PARTY", nPartyID, string_format("LEAVE|%s|", szName.c_str()));
+    {
+        MX_UNIQUE_GUARD writeLock(i_lock);
+        info = getPartyInfoNC(nPartyID);
+        if (info == nullptr || iequals(info->strLeaderName, szName))
+            return false;
+
+        for (auto it = info->vMemberNameList.begin(); it != info->vMemberNameList.end(); ++it)
+        {
+            if (iequals(szName, it->strName))
+            {
+                info->vMemberNameList.erase(it);
+                break;
+            }
+        }
+    }
+    for(auto& member : info->vMemberNameList)
+    {
+        if(member.bIsOnline && member.pPlayer != nullptr)
+        {
+            Messages::SendPartyInfo(member.pPlayer);
+        }
+    }
+    return true;
 }
 
 bool GroupManager::onLogin(int nPartyID, Player *pPlayer)
@@ -242,6 +266,7 @@ bool GroupManager::JoinParty(int nPartyID, Player* pPlayer, uint nPass)
     tag.nLevel = pPlayer->GetLevel();
     tag.sid = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
     tag.bIsOnline = true;
+    tag.pPlayer = pPlayer;
     tag.nJobID = pPlayer->GetCurrentJob();
     tag.strName = pPlayer->GetName();
     info->vMemberNameList.emplace_back(tag);
@@ -345,7 +370,6 @@ void GroupManager::AddGroupToDatabase(const PartyInfo &info)
 
 void GroupManager::LoadPartyInfo(PartyInfo &info)
 {
-    uint32_t    oldMSTime = getMSTime();
     QueryResult result    = CharacterDatabase.Query(string_format("SELECT sid, name, job, lv FROM `Character` WHERE party_id = %d;", info.nPartyID).c_str());
     if (!result)
     {
@@ -363,6 +387,7 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
         tag.nJobID = field[idx++].GetInt32();
         tag.nLevel = field[idx].GetInt32();
         tag.bIsOnline = 0;
+        tag.pPlayer = nullptr;
         if(tag.sid == info.nLeaderSID)
         {
             info.strLeaderName = tag.strName;
