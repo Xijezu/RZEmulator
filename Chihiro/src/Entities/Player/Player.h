@@ -1,16 +1,17 @@
 #ifndef _PLAYER_H_
 #define _PLAYER_H_
 
-#include "XPacket.h"
 #include "Common.h"
-#include "Object.h"
-#include "Item/Item.h"
-#include "Summon/Summon.h"
-#include "WorldLocation.h"
+#include "Unit.h"
 #include "TimeSync.h"
 #include "QuestManager.h"
 #include "Inventory.h"
+#include "XPacket.h"
+
 class WorldSession;
+class Item;
+class Summon;
+class WorldLocation;
 
 #define MAX_ITEM_COOLTIME_GROUP 20
 

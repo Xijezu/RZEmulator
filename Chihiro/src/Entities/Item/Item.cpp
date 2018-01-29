@@ -315,6 +315,16 @@ void Item::SetBindTarget(Unit *pUnit)
     m_bIsNeedUpdateToDB = true;
 }
 
+Item::Item() : WorldObject(true)
+{
+    _mainType = MT_StaticObject;
+    _subType  = ST_Object;
+    _objType  = OBJ_STATIC;
+
+    _valuesCount = UNIT_FIELD_HANDLE + 1;
+    _InitValues();
+}
+
 void ItemInstance::Copy(const ItemInstance &pFrom)
 {
     OwnerHandle = pFrom.OwnerHandle;

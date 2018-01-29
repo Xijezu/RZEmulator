@@ -491,7 +491,7 @@ int XLua::SCRIPT_GetWearItemHandle(int index)
     if(m_pUnit == nullptr)
         return 0;
 
-    if(index < 0 || index > Item::MAX_ITEM_WEAR)
+    if(index < 0 || index > MAX_ITEM_WEAR)
         return 0;
 
     return m_pUnit->m_anWear[index] == nullptr ? 0 : m_pUnit->m_anWear[index]->m_nHandle;

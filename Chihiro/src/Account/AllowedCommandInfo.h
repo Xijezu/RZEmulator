@@ -2,8 +2,8 @@
 #define PROJECT_ALLOWEDCOMMANDINFO_H
 
 #include "Common.h"
-#include "Player.h"
 
+class Player;
 class AllowedCommandInfo
 {
     public:

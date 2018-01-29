@@ -11,6 +11,15 @@
 #include "DatabaseTemplates.h"
 #include "Object.h"
 
+class XPacket;
+class Unit;
+
+#define MAX_OPTION_NUMBER 4
+#define MAX_ITEM_WEAR 24
+#define MAX_COOLTIME_GROUP 40
+#define MAX_SOCKET_NUMBER 4
+#define MAX_ITEM_NAME_LENGTH 32
+
 class Summon;
 
 struct ItemPickupOrder {
@@ -45,36 +54,17 @@ class ItemInstance
         int          Socket[4]{0};
 };
 
-class XPacket;
-class Unit;
-
 class Item : public WorldObject
 {
     public:
         static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-
-        Item() : WorldObject(true)
-        {
-            _mainType = MT_StaticObject;
-            _subType  = ST_Object;
-            _objType  = OBJ_STATIC;
-
-            _valuesCount = UNIT_FIELD_HANDLE + 1;
-            _InitValues();
-        };
-
-        static const int MAX_COOLTIME_GROUP   = 40;
-        static const int MAX_OPTION_NUMBER    = 4;
-        static const int MAX_SOCKET_NUMBER    = 4;
-        static const int MAX_ITEM_NAME_LENGTH = 32;
-        static const int MAX_ITEM_WEAR        = 24;
-
         static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
                 int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time);
         static void PendFreeItem(Item *pItem);
 
-        void SetCount(int64 count);
+        Item();
 
+        void SetCount(int64 count);
         bool IsWearable();
         bool IsExpireItem() const;
         bool IsJoinable() const;

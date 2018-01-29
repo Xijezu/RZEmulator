@@ -332,7 +332,7 @@ class Unit : public WorldObject
         std::vector<AdditionalDamageInfo> m_vPhysicalSkillAdditionalDamage{ };
         std::vector<AdditionalDamageInfo> m_vMagicialSkillAdditionalDamage{ };
 
-        Item  *m_anWear[Item::MAX_ITEM_WEAR]{nullptr};
+        Item  *m_anWear[MAX_ITEM_WEAR]{nullptr};
         uint  m_nMovableTime{0};
         int   m_nUnitExpertLevel{0};
         int   m_nNextAttackMode{0};

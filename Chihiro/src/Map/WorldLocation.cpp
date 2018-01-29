@@ -15,7 +15,8 @@
   *  with this program. If not, see <http://www.gnu.org/licenses/>.
   */
 
-#include <Entities/Player/Player.h>
+#include "WorldLocation.h"
+#include "Player.h"
 #include "ClientPackets.h"
 
 WorldLocation::WorldLocation(const WorldLocation& src)

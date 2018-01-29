@@ -1,9 +1,9 @@
-#include "Player/Player.h"
+#include "Player.h"
 #include "MemPool.h"
-#include "Database/DatabaseEnv.h"
-#include "Network/GameNetwork/WorldSession.h"
+#include "DatabaseEnv.h"
+#include "WorldSession.h"
 #include "ObjectMgr.h"
-#include "GameNetwork/ClientPackets.h"
+#include "ClientPackets.h"
 #include "Messages.h"
 #include "Scripting/XLua.h"
 #include "World.h"
@@ -15,6 +15,8 @@
 #include "GameRule.h"
 #include "DungeonManager.h"
 #include "GroupManager.h"
+#include "Item.h"
+#include "WorldLocation.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -924,7 +926,7 @@ void Player::SendWearInfo()
 {
     XPacket packet(TS_SC_WEAR_INFO);
     packet << GetHandle();
-    for (int  i = 0; i < Item::MAX_ITEM_WEAR; i++)
+    for (int  i = 0; i < MAX_ITEM_WEAR; i++)
     {
         int wear_info = (m_anWear[i] != nullptr ? m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
@@ -2281,7 +2283,7 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 
 
     uint16   result{0};
-    for (int i  = 0; i < Item::MAX_OPTION_NUMBER; ++i)
+    for (int i  = 0; i < MAX_OPTION_NUMBER; ++i)
     {
         if (pItem->m_pItemBase->base_type[i] != 0)
         {
@@ -3045,7 +3047,7 @@ void Player::onCompleteCalculateStat()
 
 void Player::applyCharm(Item *pItem)
 {
-    for (int i = 0; i < Item::MAX_OPTION_NUMBER; i++)
+    for (int i = 0; i < MAX_OPTION_NUMBER; i++)
     {
         switch (pItem->m_pItemBase->opt_type[i])
         {

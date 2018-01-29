@@ -2,9 +2,8 @@
 #define _OBJECT_H_
 
 #include "Common.h"
-//#include "ArRegion.h"
-#include "Dynamic/UnorderedMap.h"
-#include "Encryption/ByteBuffer.h"
+#include "UnorderedMap.h"
+#include "ByteBuffer.h"
 #include "Util.h"
 
 typedef unsigned long  DWORD;
@@ -204,8 +203,6 @@ class Object
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
 
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
-
-        void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
 
         void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
 

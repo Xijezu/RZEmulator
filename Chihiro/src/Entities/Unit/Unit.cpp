@@ -97,7 +97,7 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player* pPlayer)
 
 Item *Unit::GetWornItem(ItemWearType idx)
 {
-    if ((uint) idx >= Item::MAX_ITEM_WEAR || idx < 0)
+    if ((uint) idx >= MAX_ITEM_WEAR || idx < 0)
         return nullptr;
     return m_anWear[idx];
 }
@@ -652,7 +652,7 @@ void Unit::applyItemEffect()
                 if (curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
                     fItemRatio   = 0.40000001f;
 
-                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++)
+                for (int ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
                     if (curItem->m_pItemBase->base_type[ol] != 0)
                     {
@@ -660,7 +660,7 @@ void Unit::applyItemEffect()
                     }
                 }
 
-                for (int ol = 0; ol < Item::MAX_OPTION_NUMBER; ol++)
+                for (int ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
                     if (curItem->m_pItemBase->opt_type[ol] != 0)
                     {

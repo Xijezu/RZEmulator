@@ -1,17 +1,17 @@
 #include "ObjectMgr.h"
-#include "Database/DatabaseEnv.h"
-#include "Utilities/Timer.h"
-#include "MemPool.h"
 #include <fstream>
-#include "TS_MESSAGE.h"
+
+#include "DatabaseEnv.h"
+#include "Timer.h"
+#include "MemPool.h"
 #include "World.h"
-#include "Monster.h"
 #include "Maploader.h"
 #include "NPC.h"
 #include "DungeonManager.h"
 #include "MixManager.h"
 #include "GameRule.h"
 #include "Skill.h"
+#include "WorldLocation.h"
 
 bool ObjectMgr::InitGameContent()
 {

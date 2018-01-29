@@ -428,7 +428,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 {
     XPacket packet(TS_SC_WEAR_INFO);
     packet << pUnit->GetHandle();
-    for (int  i = 0; i < Item::MAX_ITEM_WEAR; i++)
+    for (int  i = 0; i < MAX_ITEM_WEAR; i++)
     {
         int wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
