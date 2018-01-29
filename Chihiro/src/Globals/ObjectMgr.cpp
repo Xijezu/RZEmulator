@@ -13,45 +13,35 @@
 #include "Skill.h"
 #include "WorldLocation.h"
 
-bool ObjectMgr::InitGameContent()
+void ObjectMgr::InitGameContent()
 {
-    if (!LoadStatResource())
-        return false;
-    if (!LoadItemResource())
-        return false;
-    if (!LoadNPCResource())
-        return false;
-    if (!LoadMarketResource())
-        return false;
-    if (!LoadDropGroupResource() || !LoadMonsterResource())
-        return false;
-    if(!LoadFieldPropResource())
-        return false;
-    if (!LoadJobLevelBonus())
-        return false;
-    if(!LoadStateResource())
-        return false;
-    if(!LoadQuestResource() || !LoadQuestLinkResource())
-        return false;
-    if (!LoadJobResource())
-        return false;
-    if(!LoadSummonLevelResource())
-        return false;
+    LoadStatResource();
+    LoadItemResource();
+    LoadNPCResource();
+    LoadMarketResource();
+    LoadDropGroupResource();
+    LoadMonsterResource();
+    LoadFieldPropResource();
+    LoadJobLevelBonus();
+    LoadStateResource();
+    LoadQuestResource();
+    LoadQuestLinkResource();
+    LoadLevelResource();
+    LoadJobResource();
+    LoadJobLevelBonus();
+    LoadSummonResource();
+    LoadSummonLevelResource();
     LoadSummonLevelBonus();
-    if (!LoadSummonResource())
-        return false;
-    if(!LoadDungeonResource())
-        return false;
-    if(!LoadEnhanceResource() || !LoadMixResource())
-        return false;
-    if (!LoadSkillResource() || !LoadSkillJP())
-        return false;
-    if(!LoadSkillTreeResource() || !LoadLevelResource())
-        return false;
-    return LoadWorldLocation();
+    LoadDungeonResource();
+    LoadEnhanceResource();
+    LoadMixResource();
+    LoadSkillResource();
+    LoadSkillJP();
+    LoadSkillTreeResource();
+    LoadWorldLocation();
 }
 
-bool ObjectMgr::LoadItemResource()
+void ObjectMgr::LoadItemResource()
 {
     uint32 oldMSTime = getMSTime();
 
@@ -71,8 +61,8 @@ bool ObjectMgr::LoadItemResource()
                                                     "cool_time_group, script_text, name_id FROM ItemResource;");
 
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 item templates. DB packetHandler `ItemResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Items. Table `ItemResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -152,17 +142,16 @@ bool ObjectMgr::LoadItemResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u item templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-bool ObjectMgr::LoadMonsterResource()
+void ObjectMgr::LoadMonsterResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM MonsterResource;");
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0, y = 0;
@@ -245,16 +234,15 @@ bool ObjectMgr::LoadMonsterResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
-bool ObjectMgr::LoadQuestResource()
+void ObjectMgr::LoadQuestResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestResource;");
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -335,18 +323,17 @@ bool ObjectMgr::LoadQuestResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadFieldPropResource()
+void ObjectMgr::LoadFieldPropResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM FieldPropResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `FieldPropResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 FieldProps. Table `FieldPropResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -417,17 +404,16 @@ bool ObjectMgr::LoadFieldPropResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u FieldProps in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadQuestLinkResource()
+void ObjectMgr::LoadQuestLinkResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestLinkResource;");
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -451,17 +437,16 @@ bool ObjectMgr::LoadQuestLinkResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u QuestLinks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadDropGroupResource()
+void ObjectMgr::LoadDropGroupResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM DropGroupResource;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 DropGrouptemplates. DB packetHandler `DropGroupResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 DropGroups. Table `DropGroupResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -478,18 +463,17 @@ bool ObjectMgr::LoadDropGroupResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u DropGrouptemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u DropGroups in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 
-bool ObjectMgr::LoadSkillTreeResource()
+void ObjectMgr::LoadSkillTreeResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillTreeResource;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltreetemplates. DB packetHandler `SkillTreeResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltrees. Table `SkillTreeResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -512,17 +496,16 @@ bool ObjectMgr::LoadSkillTreeResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skilltreetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillTrees in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-bool ObjectMgr::LoadSkillResource()
+void ObjectMgr::LoadSkillResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillResource");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltemplates. DB packetHandler `SkillResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skills. Table `SkillResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -641,17 +624,16 @@ bool ObjectMgr::LoadSkillResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skilltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skills in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-bool ObjectMgr::LoadDungeonResource()
+void ObjectMgr::LoadDungeonResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM DungeonResource;");
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -705,17 +687,16 @@ bool ObjectMgr::LoadDungeonResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadLevelResource()
+void ObjectMgr::LoadLevelResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM LevelResource;");
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -731,16 +712,15 @@ bool ObjectMgr::LoadLevelResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Leveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
-bool ObjectMgr::LoadStateResource()
+void ObjectMgr::LoadStateResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM StateResource;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stat templates. Table `StateResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 States. Table `StateResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -775,17 +755,16 @@ bool ObjectMgr::LoadStateResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u States in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadStatResource()
+void ObjectMgr::LoadStatResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, str, vit, dex, agi, `int`, men, luk FROM StatResource;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stat templates. DB packetHandler `StatResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stats. Table `StatResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -804,17 +783,17 @@ bool ObjectMgr::LoadStatResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Stat templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    return;
 }
 
-bool ObjectMgr::LoadMarketResource()
+void ObjectMgr::LoadMarketResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT sort_id, name, code, price_ratio, huntaholic_ratio FROM MarketResource ORDER BY name, sort_id;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. DB packetHandler `MarketResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. Table `MarketResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -850,19 +829,18 @@ bool ObjectMgr::LoadMarketResource()
     _marketResourceStore[lastMarket] = vContainer;
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Markettemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
-bool ObjectMgr::LoadJobResource()
+void ObjectMgr::LoadJobResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, stati_id, job_class, job_depth, up_lv, up_jlv,"
                                                        "available_job_0, available_job_1, available_job_2,"
                                                        "available_job_3 FROM JobResource;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 job templates. DB packetHandler `JobResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -883,17 +861,16 @@ bool ObjectMgr::LoadJobResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u job templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Jobs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-bool ObjectMgr::LoadSummonLevelResource()
+void ObjectMgr::LoadSummonLevelResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT level, normal_exp FROM SummonLevelResource ORDER BY level ASC");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. DB packetHandler `SummonLevelResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. Table `SummonLevelResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -906,7 +883,6 @@ bool ObjectMgr::LoadSummonLevelResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLeveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
@@ -940,7 +916,7 @@ void ObjectMgr::LoadSummonLevelBonus()
 }
 
 
-bool ObjectMgr::LoadJobLevelBonus()
+void ObjectMgr::LoadJobLevelBonus()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT job_id, "
@@ -950,8 +926,8 @@ bool ObjectMgr::LoadJobLevelBonus()
                                                        "strength_3, vital_3, dexterity_3, agility_3, intelligence_3, mentality_3, luck_3 "
                                                        "FROM JobLevelBonus;");
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. DB packetHandler `JobLevelBonus` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -975,17 +951,16 @@ bool ObjectMgr::LoadJobLevelBonus()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u job level bonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
-bool ObjectMgr::LoadNPCResource()
+void ObjectMgr::LoadNPCResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script, spawn_type FROM NPCResource;");
 
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. DB table `NPCResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. Table `NPCResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -1003,20 +978,22 @@ bool ObjectMgr::LoadNPCResource()
         npc.spawn_type     = field[7].GetInt32();
 
         _npcTemplateStore[npc.id] = npc;
+        ++count;
 
     } while (result->NextRow());
     MX_LOG_INFO("server.worldserver", ">> Loaded %u NPCs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
-bool ObjectMgr::LoadSkillJP()
+void ObjectMgr::LoadSkillJP()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillJPResource;");
 
 
-    if (!result) {
-        return false;
+    if (!result)
+    {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SkillJPTemplates. Table `SkillJPResource` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -1032,20 +1009,18 @@ bool ObjectMgr::LoadSkillJP()
         }
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
-}
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillJPTemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime)); }
 
 
 
-bool ObjectMgr::LoadWorldLocation()
+void ObjectMgr::LoadWorldLocation()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, location_type, time_id, weather_id, weather_ratio, weather_change_time FROM WorldLocation;");
 
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. DB packetHandler `NPCResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. Table `WorldLocation` is empty!");
+        return;
     }
 
     uint32 count = 0;
@@ -1060,20 +1035,19 @@ bool ObjectMgr::LoadWorldLocation()
         sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time,0);
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 
 
-bool ObjectMgr::LoadEnhanceResource()
+void ObjectMgr::LoadEnhanceResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM EnhanceResource");
 
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -1098,17 +1072,16 @@ bool ObjectMgr::LoadEnhanceResource()
         ++count;
     } while (result->NextRow());
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Enhancetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
-bool ObjectMgr::LoadMixResource()
+void ObjectMgr::LoadMixResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM MixResource");
 
     if (!result) {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
-        return false;
+        return;
     }
 
     uint32 count = 0;
@@ -1142,12 +1115,11 @@ bool ObjectMgr::LoadMixResource()
         ++count;
     } while (result->NextRow());
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Mixtemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
 }
 
 
 
-bool ObjectMgr::LoadSummonResource()
+void ObjectMgr::LoadSummonResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, type, magic_type, rate, stat_id, size, scale, standard_walk_speed, standard_run_speed,"
@@ -1155,8 +1127,8 @@ bool ObjectMgr::LoadSummonResource()
                                                        "form, evolve_target, card_id FROM SummonResource;");
 
     if (!result) {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Summon templates. DB packetHandler `SummonResource` is empty!");
-        return false;
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Summons. Table `SummonResource` is empty!");
+        return;
     }
 
 
@@ -1186,8 +1158,7 @@ bool ObjectMgr::LoadSummonResource()
         _summonResourceStore[summon.id] = summon;
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Summon templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return true;
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 CreatureStat* const ObjectMgr::GetStatInfo(const uint stat_id)
