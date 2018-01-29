@@ -9,6 +9,18 @@ class Unit;
 
 #include "XPacket.h"
 
+/*
+ * Note: I'm not a fan of this, either
+ * Previously I was using lambdas instead of this
+ * but due to changes to the Region class I decided to simply use this
+ * Apparentely lambdas seem to be pretty slow compared to abstract classes
+ * depending on the scale of this project we don't really want to use
+ * performance hitting stuff just for being easy or "good to read"
+ *
+ * However, some day this needs a revamp. How? I don't know.
+ * But it is annoying.
+ */
+
 struct WorldObjectFunctor
 {
     virtual void Run(WorldObject* obj) { };
