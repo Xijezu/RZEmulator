@@ -812,12 +812,15 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
         }
 
         int levelDiff = nMaxLevel - nMinLevel;
-        if (levelDiff < nTotalCount + 40 && levelDiff >= nTotalCount + 5)
+        if (levelDiff < nTotalCount + 40)
         {
-            fLevelPenalty = levelDiff - nCount - 5;
-            fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
-            exp           = (int)(exp * fLevelPenalty);
-            jp            = (int)(jp * fLevelPenalty);
+            if (levelDiff >= nTotalCount + 5)
+            {
+                fLevelPenalty = levelDiff - nCount - 5;
+                fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
+                exp           = (int)(exp * fLevelPenalty);
+                jp            = (int)(jp * fLevelPenalty);
+            }
         }
         else
         {
@@ -831,7 +834,7 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
             Player *player = Player::FindPlayer(tag.strName);
             if (player != nullptr)
             {
-                float ratio   = player->GetLevel() / nTotalLevel;
+                float ratio   = (float)player->GetLevel() / nTotalLevel;
                 float fEXP    = nSharedEXP * ratio;
                 float fJP     = nSharedJP * ratio;
                 float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - player->GetLevel()) * 0.1f);
