@@ -3,8 +3,8 @@
 
 #include "Common.h"
 #include "sol.hpp"
-#include "Player.h"
 
+class Unit;
 class XLua
 {
     public:
