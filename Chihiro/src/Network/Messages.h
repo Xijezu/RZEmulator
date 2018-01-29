@@ -113,6 +113,7 @@ class Messages
         static void SendToggleInfo(Unit *pUnit, int skill_id, bool status);
         static void SendRemoveSummonMessage(Player* pPlayer, Summon *pSummon);
         static void BroadcastPartyMemberInfo(Player* pClient);
+        static void BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string& szName);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };

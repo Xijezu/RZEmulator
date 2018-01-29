@@ -58,6 +58,9 @@ void Player::CleanupsBeforeDelete()
         sWorld->RemoveObjectFromWorld(this);
     }
 
+    if(GetPartyID() != 0)
+        sGroupManager->onLogout(GetPartyID(), this);
+
     for (auto &t : m_vStorageSummonList)
     {
         if (t != nullptr)

@@ -207,7 +207,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID())));
+    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID()).c_str()));
     Messages::SendPartyInfo(pClient);
     Messages::BroadcastPartyMemberInfo(pClient);
 }

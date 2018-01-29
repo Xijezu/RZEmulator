@@ -1063,8 +1063,19 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
                              pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
     sGroupManager->DoEachMemberTag(partyID, [&buf](PartyMemberTag& tag)
     {
-        auto player = Player::FindPlayer(tag.strName);
-        if(player != nullptr)
-            Messages::SendChatMessage(100, "@PARTY", player, buf);
+        if(tag.bIsOnline && tag.pPlayer != nullptr)
+            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, buf);
+    });
+}
+
+void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName)
+{
+    auto partyName = sGroupManager->GetPartyName(nPartyID);
+    auto szMsg = bIsOnline ? string_format("LOGIN|%s|%s|", partyName.c_str(), szName.c_str()) : string_format("LOGOUT|%s|", szName.c_str());
+    sGroupManager->DoEachMemberTag(nPartyID, [&szMsg,szName](PartyMemberTag& tag) {
+       if(tag.bIsOnline && tag.pPlayer != nullptr && !iequals(tag.strName, szName))
+       {
+           Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, szMsg);
+       }
     });
 }

@@ -48,11 +48,10 @@ bool GroupManager::DestroyParty(int nPartyID)
 {
     auto name = GetPartyName(nPartyID);
     DoEachMemberTag(nPartyID, [&name](PartyMemberTag& tag) {
-       auto player = Player::FindPlayer(tag.strName);
-        if(player != nullptr)
+        if(tag.bIsOnline && tag.pPlayer != nullptr)
         {
-            player->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
-            Messages::SendChatMessage(100, "@PARTY", player, string_format("DESTROY|%s|", name));
+            tag.pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
+            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, string_format("DESTROY|%s|", name));
         }
     });
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_PARTY);
@@ -115,28 +114,54 @@ bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
 bool GroupManager::onLogin(int nPartyID, Player *pPlayer)
 {
     bool result = false;
-    MX_UNIQUE_GUARD writeGuard(i_lock);
-    auto info = getPartyInfoNC(nPartyID);
-    if(info == nullptr)
-        return result;
-    for(auto& tag : info->vMemberNameList)
     {
-        if(tag.strName == pPlayer->GetName())
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        auto            info = getPartyInfoNC(nPartyID);
+        if (info == nullptr)
+            return result;
+        for (auto &tag : info->vMemberNameList)
         {
-            tag.bIsOnline = true;
-            result = true;
+            if (iequals(tag.strName, pPlayer->GetNameAsString()))
+            {
+                tag.bIsOnline = true;
+                tag.pPlayer   = pPlayer;
+                tag.nLevel    = pPlayer->GetLevel();
+                tag.nJobID    = pPlayer->GetCurrentJob();
+                result = true;
+            }
         }
     }
-    if(result)
+    if (result)
     {
-        // @todo do each party login info
+        Messages::BroadcastPartyLoginStatus(nPartyID, true, pPlayer->GetNameAsString());
+        Messages::BroadcastPartyMemberInfo(pPlayer);
     }
     return result;
 }
 
 bool GroupManager::onLogout(int nPartyID, Player *pPlayer)
 {
-    return false;
+    bool result = false;
+    {
+        MX_UNIQUE_GUARD writeGuard(i_lock);
+        auto            info = getPartyInfoNC(nPartyID);
+        if (info == nullptr)
+            return result;
+        for (auto &tag : info->vMemberNameList)
+        {
+            if (iequals(tag.strName, pPlayer->GetNameAsString()))
+            {
+                tag.bIsOnline = false;
+                tag.pPlayer   = nullptr;
+                result = true;
+            }
+        }
+    }
+    if (result)
+    {
+        Messages::BroadcastPartyLoginStatus(nPartyID, false, pPlayer->GetNameAsString());
+    }
+    return result;
 }
 
 void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Player *>& vList)
@@ -194,7 +219,7 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
         partyInfo.strLeaderName        = pPlayer->GetName();
         partyInfo.ePartyType           = partyType;
         partyInfo.nPartyID             = (int)++m_nMaxPartyID;
-        partyInfo.eShareMode           = ITEM_SHARE_MODE::ITEM_SHARE_RANDOM;
+        partyInfo.eShareMode           = ITEM_SHARE_RANDOM;
         partyInfo.nLastItemAcquirerIdx = 0;
         partyInfo.nLeaderSID           = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
         partyInfo.nLeaderJobID         = pPlayer->GetCurrentJob();

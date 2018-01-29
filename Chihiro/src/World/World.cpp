@@ -788,18 +788,20 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
     float  fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
     sGroupManager->DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
-        nTotalCount++;
-        auto player = Player::FindPlayer(tag.strName);
-        if (player != nullptr && player->IsInWorld() && pCorpse->GetLayer() == player->GetLayer() && pCorpse->GetExactDist2d(player) <= 500.0f)
+        if(tag.bIsOnline && tag.pPlayer != nullptr)
         {
-            pOneManPlayer = player;
-            int l         = player->GetLevel();
-            if (nMaxLevel < l)
-                nMaxLevel = l;
-            if (nMinLevel > l)
-                nMinLevel = l;
-            nTotalLevel += l;
-            nCount++;
+            nTotalCount++;
+            if (tag.pPlayer->IsInWorld() && pCorpse->GetLayer() == tag.pPlayer->GetLayer() && pCorpse->GetExactDist2d(tag.pPlayer) <= 500.0f)
+            {
+                pOneManPlayer = tag.pPlayer;
+                int l         = tag.pPlayer->GetLevel();
+                if (nMaxLevel < l)
+                    nMaxLevel = l;
+                if (nMinLevel > l)
+                    nMinLevel = l;
+                nTotalLevel += l;
+                nCount++;
+            }
         }
     });
 
@@ -831,19 +833,18 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
         auto  nSharedEXP = (int)(exp * lp);
         auto  nSharedJP  = (int)(jp * lp);
         sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
-            Player *player = Player::FindPlayer(tag.strName);
-            if (player != nullptr)
+            if (tag.bIsOnline && tag.pPlayer != nullptr)
             {
-                float ratio   = (float)player->GetLevel() / nTotalLevel;
+                float ratio   = (float)tag.pPlayer->GetLevel() / nTotalLevel;
                 float fEXP    = nSharedEXP * ratio;
                 float fJP     = nSharedJP * ratio;
-                float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - player->GetLevel()) * 0.1f);
+                float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - tag.pPlayer->GetLevel()) * 0.1f);
                 penalty  = std::max(0.0f, penalty >= 1.0f ? 1.0f : penalty);
                 fEXP     = (penalty * fEXP) * 1.0f; // @todo: partyexprate
                 fJP      = (penalty * fJP) * 1.0f;
                 if (fEXP < 1.0f)
                     fEXP = 1.0f;
-                addEXP(pCorpse, player, fEXP, fJP);
+                addEXP(pCorpse, tag.pPlayer, fEXP, fJP);
             }
         });
     }

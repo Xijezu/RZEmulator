@@ -22,11 +22,13 @@ enum ITEM_SHARE_MODE : int
     ITEM_SHARE_LINEAR   = 2
 };
 
+class Player;
 struct PartyMemberTag
 {
     bool bIsOnline;
     int sid;
     std::string strName;
+    Player *pPlayer;
     int nLevel;
     int nJobID;
 };
