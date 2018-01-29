@@ -76,6 +76,19 @@ std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
+struct iequal
+{
+    bool operator()(int c1, int c2) const
+    {
+        return std::toupper(c1) == std::toupper(c2);
+    }
+};
+
+inline bool iequals(const std::string& str1, const std::string& str2)
+{
+    return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
+}
+
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
 int32 irand(int32 min, int32 max);
 

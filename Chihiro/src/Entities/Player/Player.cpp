@@ -949,7 +949,7 @@ void Player::Save(bool bOnlyPlayer)
 {
     // "UPDATE `Character` SET x = ?, y = ?, z = ?, layer = ?, exp = ?, lv = ?, hp = ?, mp = ?, stamina = ?, jlv = ?, jp = ?, total_jp = ?, job_0 = ?, job_1 = ?, job_2 = ?,
     // jlv_0 = ?, jlv_1 = ?, jlv_2 = ?, permission = ?, job = ?, gold = ?, party_id = ?, guild_id = ? WHERE sid = ?"
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPDATE_CHARACTER);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_CHARACTER);
     uint8_t           i     = 0;
     stmt->setFloat(i++, GetPositionX());
     stmt->setFloat(i++, GetPositionY());
@@ -2337,7 +2337,7 @@ Player *Player::FindPlayer(const std::string &szName)
     HashMapHolder<Player>::MapType const &m = sMemoryPool->GetPlayers();
     for (auto                            itr : m)
     {
-        if (itr.second->GetName() == szName)
+        if (iequals(szName, itr.second->GetNameAsString()))
             return itr.second;
     }
     return nullptr;

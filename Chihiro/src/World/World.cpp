@@ -812,15 +812,12 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
         }
 
         int levelDiff = nMaxLevel - nMinLevel;
-        if (levelDiff < nTotalCount + 40)
+        if (levelDiff < nTotalCount + 40 && levelDiff >= nTotalCount + 5)
         {
-            if (levelDiff >= nTotalCount + 5)
-            {
-                fLevelPenalty = levelDiff - nCount - 5;
-                fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
-                exp           = (int)(exp * fLevelPenalty);
-                jp            = (int)(jp * fLevelPenalty);
-            }
+            fLevelPenalty = levelDiff - nCount - 5;
+            fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
+            exp           = (int)(exp * fLevelPenalty);
+            jp            = (int)(jp * fLevelPenalty);
         }
         else
         {
