@@ -23,6 +23,7 @@
 
 #include "Common.h"
 #include "GameList.h"
+#include "PlayerList.h"
 
 template<class T> class WorldSocket;
 class XPacket;

@@ -33,5 +33,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${MYSQL_INCLUDE_DIR}
                     ${ACE_INCLUDE_DIR})
 
-add_executable(Chihiro ${SOURCE_FILES} ${SHARED_SRC})
-target_link_libraries(Chihiro  ${MYSQL_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${ACE_LIBRARIES} ${LUA_LIBRARIES} stdc++fs)
+add_executable(Chihiro ${SOURCE_FILES})
+target_link_libraries(Chihiro shared ${MYSQL_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${ACE_LIBRARIES} ${LUA_LIBRARIES} stdc++fs)

@@ -29,35 +29,36 @@
 template<class T>
 class WorldSocketAcceptor : public ACE_Acceptor<WorldSocket<T>, ACE_SOCK_Acceptor>
 {
-public:
-    WorldSocketAcceptor(void) { }
-    virtual ~WorldSocketAcceptor(void)
-    {
-        if (this->reactor())
-            this->reactor()->cancel_timer(this, 1);
-    }
+    public:
+        WorldSocketAcceptor(void) {}
 
-protected:
-
-    virtual int handle_timeout(const ACE_Time_Value& /*current_time*/, const void* /*act = 0*/)
-    {
-        MX_LOG_DEBUG("misc", "Resuming acceptor");
-        this->reactor()->cancel_timer(this, 1);
-        return this->reactor()->register_handler(this, ACE_Event_Handler::ACCEPT_MASK);
-    }
-
-    virtual int handle_accept_error(void)
-    {
-#if defined(ENFILE) && defined(EMFILE)
-        if (errno == ENFILE || errno == EMFILE)
+        virtual ~WorldSocketAcceptor(void)
         {
-            MX_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
-            this->reactor()->remove_handler(this, ACE_Event_Handler::ACCEPT_MASK | ACE_Event_Handler::DONT_CALL);
-            this->reactor()->schedule_timer(this, NULL, ACE_Time_Value(10));
+            if (this->reactor())
+                this->reactor()->cancel_timer(this, 1);
         }
+
+    protected:
+
+        virtual int handle_timeout(const ACE_Time_Value & /*current_time*/, const void * /*act = 0*/)
+        {
+            MX_LOG_DEBUG("misc", "Resuming acceptor");
+            this->reactor()->cancel_timer(this, 1);
+            return this->reactor()->register_handler(this, ACE_Event_Handler::ACCEPT_MASK);
+        }
+
+        virtual int handle_accept_error(void)
+        {
+#if defined(ENFILE) && defined(EMFILE)
+            if (errno == ENFILE || errno == EMFILE)
+            {
+                MX_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
+                this->reactor()->remove_handler(this, ACE_Event_Handler::ACCEPT_MASK | ACE_Event_Handler::DONT_CALL);
+                this->reactor()->schedule_timer(this, NULL, ACE_Time_Value(10));
+            }
 #endif
-        return 0;
-    }
+            return 0;
+        }
 };
 
 #endif /* __WORLDSOCKETACCEPTOR_H_ */

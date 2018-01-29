@@ -2,12 +2,12 @@
 #define _AUTHSESSION_H_
 
 #include "Common.h"
+#include "Declarations.h"
 #include "Configuration/Config.h"
 #include "GameAuthSession.h"
 #include <ace/Connector.h>
 #include <ace/SOCK_Connector.h>
 #include "Encryption/ByteBuffer.h"
-#include "WorldSocket.h"
 /// Doing this inline, I really don't want to waste another file :p
 
 class AuthNetwork : public ACE_Connector<WorldSocket<GameAuthSession>, ACE_SOCK_Connector> {

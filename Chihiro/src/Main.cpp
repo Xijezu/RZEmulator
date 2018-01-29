@@ -1,18 +1,12 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "Configuration/Config.h"
 #include "Utilities/SignalHandler.h"
 #include "AuthNetwork.h"
 #include "World.h"
 #include "WorldRunnable.h"
 
-#include "WorldSocketMgr.h"
-#include <ace/Dev_Poll_Reactor.h>
-#include <ace/TP_Reactor.h>
-#include <ace/ACE.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Event_Handler.h>
 #include <fstream>
+
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
 #endif //_CHIHIRO_CORE_CONFIG

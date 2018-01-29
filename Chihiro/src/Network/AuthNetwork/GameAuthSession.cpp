@@ -1,9 +1,6 @@
 #include "Common.h"
 #include "GameAuthSession.h"
 #include "AuthNetwork.h"
-#include "WorldSocket.h"
-#include "XPacket.h"
-#include "WorldSession.h"
 #include "World.h"
 
 GameAuthSession::GameAuthSession(AuthSocket* socket) : m_pSocket(socket)

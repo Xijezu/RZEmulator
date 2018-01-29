@@ -2,6 +2,8 @@
 #include "Database/DatabaseEnv.h"
 #include "WorldSocketMgr.h"
 #include "SignalHandler.h"
+#include "AuthGameSession.h"
+#include "AuthClientSession.h"
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 #include <ace/Dev_Poll_Reactor.h>
@@ -35,6 +37,17 @@ public:
 		}
 	}
 };
+
+template class WorldSocketMgr<AuthClientSession>;
+template class WorldSocketMgr<AuthGameSession>;
+template class WorldSocket<AuthClientSession>;
+template class WorldSocket<AuthGameSession>;
+
+#define sAuthSocketMgr ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()
+#define sGameSocketMgr ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()
+
+
+
 extern int main(int argc, char **argv)
 {
 	//sLog->Initialize();

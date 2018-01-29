@@ -17,7 +17,6 @@
 
 #include "Common.h"
 #include "World.h"
-#include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
 #include "AuthNetwork.h"
 #include "Timer.h"

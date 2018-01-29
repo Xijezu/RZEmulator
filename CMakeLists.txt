@@ -45,5 +45,6 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
 
 file(GLOB_RECURSE SHARED_SRC shared/Utilities/SignalHandler.h shared/*.cpp ${ace_STAT_SRCS} )
 
+add_subdirectory(shared)
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)
