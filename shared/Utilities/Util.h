@@ -76,6 +76,7 @@ std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
+// See here: http://www.martinbroadhurst.com/case-insensitive-string-comparison-in-c.html
 struct iequal
 {
     bool operator()(int c1, int c2) const

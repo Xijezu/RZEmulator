@@ -184,30 +184,32 @@ void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPla
 
 void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
 {
-    if(pClient == nullptr)
+    if (pClient == nullptr)
         return;
-    if(pClient->GetPartyID() != 0)
+    if (pClient->GetPartyID() != 0)
     {
         Messages::SendChatMessage(100, "@PARTY", pClient, "ERROR_YOU_CAN_JOIN_ONLY_ONE_PARTY");
         return;
     }
     Tokenizer tokenizer(args, ' ');
-    if(tokenizer.size() != 2)
+    if (tokenizer.size() != 2)
         return;
 
-    if(!isNumeric(tokenizer[0]) || !isNumeric(tokenizer[1]))
+    if (!isMXNumeric(tokenizer[0]) || !isMXNumeric(tokenizer[1]))
         return;
 
-    int partyID = std::stoi(tokenizer[0]);
+    int  partyID = std::stoi(tokenizer[0]);
     uint partyPW = (uint)std::stoi(tokenizer[1]);
 
-    if(!sGroupManager->JoinParty(partyID, pClient, partyPW))
+    if (!sGroupManager->JoinParty(partyID, pClient, partyPW))
     {
         MX_LOG_ERROR("group", "JoinParty failed!");
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
+    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID())));
     Messages::SendPartyInfo(pClient);
+    Messages::BroadcastPartyMemberInfo(pClient);
 }
 
 void AllowedCommandInfo::onPartyInfo(Player *pClient, const std::string &)

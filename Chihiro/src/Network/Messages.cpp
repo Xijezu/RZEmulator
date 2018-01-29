@@ -1049,3 +1049,22 @@ void Messages::SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon)
     removePct << pSummon->m_pItem->GetHandle();
     pPlayer->SendPacket(removePct);
 }
+
+void Messages::BroadcastPartyMemberInfo(Player *pClient)
+{
+    if(pClient == nullptr || pClient->GetPartyID() == 0)
+        return;
+
+    int partyID = pClient->GetPartyID();
+    auto hp       = (int)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
+    auto mp       = (int)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
+
+    auto buf = string_format("MINFO|%d|%s|%d|%d|%d|%d|%d|%d|%d|",
+                             pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
+    sGroupManager->DoEachMemberTag(partyID, [&buf](PartyMemberTag& tag)
+    {
+        auto player = Player::FindPlayer(tag.strName);
+        if(player != nullptr)
+            Messages::SendChatMessage(100, "@PARTY", player, buf);
+    });
+}

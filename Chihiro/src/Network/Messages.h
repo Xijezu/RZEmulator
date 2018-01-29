@@ -112,6 +112,7 @@ class Messages
         static void SendSkillCardInfo(Player* pPlayer, Item *pItem);
         static void SendToggleInfo(Unit *pUnit, int skill_id, bool status);
         static void SendRemoveSummonMessage(Player* pPlayer, Summon *pSummon);
+        static void BroadcastPartyMemberInfo(Player* pClient);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };
