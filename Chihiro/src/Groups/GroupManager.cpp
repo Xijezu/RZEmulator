@@ -339,15 +339,16 @@ void GroupManager::InitGroupSystem()
         return;
     }
 
-    uint32 count = 0, idx = 0;
+    uint32 count = 0;
     do
     {
+        uint idx = 0;
         Field* field = result->Fetch();
         PartyInfo info{};
         info.nPartyID = field[idx++].GetInt32();
         info.strPartyName = field[idx++].GetString();
         info.nLeaderSID = field[idx++].GetInt32();
-        info.eShareMode = (ITEM_SHARE_MODE)field[idx++].GetInt32();
+        info.eShareMode = (ITEM_SHARE_MODE)field[idx].GetInt32();
         LoadPartyInfo(info);
         m_hshPartyID[info.nPartyID] = info;
         count++;
