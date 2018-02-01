@@ -7,20 +7,22 @@
 
 #define MAX_DROP_GROUP 10
 
-struct DropGroup {
-    int uid;
-    int drop_item_id[MAX_DROP_GROUP];
+struct DropGroup
+{
+    int   uid;
+    int   drop_item_id[MAX_DROP_GROUP];
     float drop_percentage[MAX_DROP_GROUP];
 };
 
-
-struct LevelResourceTemplate {
-    int level{};
-    int64 normal_exp{};
-    int jlv[4]{};
+struct LevelResourceTemplate
+{
+    int   level;
+    int64 normal_exp;
+    int   jlv[4];
 };
 
-struct ItemTemplate {
+struct ItemTemplate
+{
     int32       id;
     int32       name_id;
     int32       type;
@@ -51,17 +53,17 @@ struct ItemTemplate {
     int32       endurance;
     int32       material;
     int32       summon_id;
-    int8_t      flaglist[19]{0};
+    int8_t      flaglist[19];
     int32       available_period;
     int16       decrease_type;
     float       throw_range;
     int8_t      distribute_type;
-    int16       base_type[4]{0};
-    float       base_var[4][2]{0};
-    int16       opt_type[4]{0};
-    float       opt_var[4][2]{0};
-    int16       enhance_id[2]{0};
-    float       _enhance[2][4]{0};
+    int16       base_type[4];
+    float       base_var[4][2];
+    int16       opt_type[4];
+    float       opt_var[4][2];
+    int16       enhance_id[2];
+    float       _enhance[2][4];
     int32       skill_id;
     int32       state_id;
     int32       state_level;
@@ -72,7 +74,8 @@ struct ItemTemplate {
     std::string script_text;
 };
 
-struct JobLevelBonusTemplate {
+struct JobLevelBonusTemplate
+{
     int   job_id;
     float strength[4];
     float vital[4];
@@ -83,20 +86,22 @@ struct JobLevelBonusTemplate {
     float luck[4];
 };
 
-struct JobResourceTemplate {
-    int id;
+struct JobResourceTemplate
+{
+    int  id;
     uint stat_id;
-    int job_class;
+    int  job_class;
     uint job_depth;
-    int up_lv;
-    int up_jlv;
-    int available_job[4];
+    int  up_lv;
+    int  up_jlv;
+    int  available_job[4];
 };
 
-struct MarketInfo {
+struct MarketInfo
+{
     int         sort_id;
     std::string name;
-    uint         code;
+    uint        code;
     float       price_ratio;
     float       huntaholic_ratio;
 };

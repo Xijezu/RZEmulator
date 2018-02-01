@@ -2761,7 +2761,8 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
         if (bApplyStanima)
         {
             gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
-            if (GetStamina() >= gain_exp || m_bStaminaActive)
+            auto s = GetStamina();
+            if (s >= gain_exp || m_bStaminaActive)
             {
                 bonus_exp = (int64)((float)exp * GameRule::GetStaminaBonus());
                 bonus_jp  = (int)((float)jp * GameRule::GetStaminaBonus());
