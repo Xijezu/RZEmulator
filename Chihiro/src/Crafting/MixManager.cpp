@@ -151,7 +151,7 @@ bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial
         pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
 
-    pMainMaterial->m_Instance.Flag |= pMixInfo->value[2];
+    pMainMaterial->m_Instance.Flag = pMixInfo->value[2];
     Messages::SendItemMessage(pPlayer, pMainMaterial);
     std::vector<uint> handles{};
     handles.emplace_back(pMainMaterial->GetHandle());
