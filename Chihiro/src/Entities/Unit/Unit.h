@@ -220,7 +220,7 @@ class Unit : public WorldObject
         void CancelAttack();
         int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);
         bool OnCompleteSkill();
-        void SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time);
+        void SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time);
         void SetMove(Position _to, uint8 _speed, uint _start_time);
         void CalculateStat();
         int GetArmorClass() const;

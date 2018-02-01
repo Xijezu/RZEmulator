@@ -71,6 +71,7 @@ class Messages
         static void SendAddSummonMessage(Player *, Summon *);
         static void SendCreatureEquipMessage(Player *, bool);
         static void SendPropertyMessage(Player *, Unit *, const std::string &, int64);
+        static void SendPropertyMessage(Player *, Unit *, const std::string &, const std::string &);
         static void SendDialogMessage(Player *, uint32_t, int, const std::string &, const std::string &, const std::string &);
         static void SendSkillList(Player *, Unit *, int);
         static void SendChatMessage(int, const std::string &, Player *, const std::string &);

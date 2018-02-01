@@ -115,10 +115,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         void SetCharacterFlag(const std::string &key, const std::string& value);
 
-        // Network
-        void SendPropertyMessage(std::string key, std::string value);
-        void SendPropertyMessage(std::string key, int64 value);
-
         // Summon
         void LogoutNow(int callerIdx);
         void RemoveAllSummonFromWorld();

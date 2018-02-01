@@ -797,32 +797,6 @@ bool Player::ReadSummonList(int UID)
     return true;
 }
 
-void Player::SendPropertyMessage(std::string key, std::string value)
-{
-    XPacket packet(TS_SC_PROPERTY);
-    packet << GetUInt32Value(UNIT_FIELD_HANDLE);
-    packet << (uint8)0;
-    packet.fill(key, 16);
-#if EPIC > 4
-    packet << (uint64) 0;
-#else
-    packet << (uint32)0;
-#endif
-    packet << value;
-    packet << (uint8)0;
-    SendPacket(packet);
-}
-
-void Player::SendPropertyMessage(std::string key, int64 value)
-{
-    XPacket packet(TS_SC_PROPERTY);
-    packet << GetUInt32Value(UNIT_FIELD_HANDLE);
-    packet << (uint8)1;
-    packet.fill(key, 16);
-    packet << value;
-    SendPacket(packet);
-}
-
 void Player::SendLoginProperties()
 {
     Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
@@ -848,18 +822,18 @@ void Player::SendLoginProperties()
 
     SendWearInfo();
     SendGoldChaosMessage();
-    SendPropertyMessage("chaos", (int64)GetChaos());
+    Messages::SendPropertyMessage(this, this, "chaos", (int64)GetChaos());
     Messages::SendLevelMessage(this, this);
     Messages::SendEXPMessage(this, this);
     SendJobInfo();
 
     Messages::SendStatInfo(this, this);
 
-    SendPropertyMessage("pk_count", (int64)GetUInt32Value(PLAYER_FIELD_PKC));
-    SendPropertyMessage("dk_count", (int64)GetUInt32Value(PLAYER_FIELD_DKC));
-    SendPropertyMessage("immoral", (int64)GetUInt32Value(PLAYER_FIELD_IP));
-    SendPropertyMessage("channel", (int64)0);
-    SendPropertyMessage("client_info", m_szClientInfo);
+    Messages::SendPropertyMessage(this, this, "pk_count", (int64)GetUInt32Value(PLAYER_FIELD_PKC));
+    Messages::SendPropertyMessage(this, this, "dk_count", (int64)GetUInt32Value(PLAYER_FIELD_DKC));
+    Messages::SendPropertyMessage(this, this, "immoral", (int64)GetUInt32Value(PLAYER_FIELD_IP));
+    Messages::SendPropertyMessage(this, this, "channel", (int64)0);
+    Messages::SendPropertyMessage(this, this, "client_info", m_szClientInfo);
     Messages::SendGameTime(this);
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
 
@@ -913,12 +887,12 @@ void Player::SendGoldChaosMessage()
 
 void Player::SendJobInfo()
 {
-    SendPropertyMessage("job", GetCurrentJob());
-    SendPropertyMessage("jlv", GetCurrentJLv());
+    Messages::SendPropertyMessage(this, this, "job", GetCurrentJob());
+    Messages::SendPropertyMessage(this, this, "jlv", GetCurrentJLv());
     for (int i = 0; i < 3; ++i)
     {
-        SendPropertyMessage(formatString("job_%d", i), GetPrevJobId(i));
-        SendPropertyMessage(formatString("jlv_%d", i), GetPrevJobLv(i));
+        Messages::SendPropertyMessage(this, this, string_format("job_%d", i), GetPrevJobId(i));
+        Messages::SendPropertyMessage(this, this, string_format("jlv_%d", i), GetPrevJobLv(i));
     }
 }
 

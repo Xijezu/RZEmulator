@@ -542,7 +542,7 @@ bool ArMoveVector::Step(uint current_time)
     return res;
 }
 
-void ArMoveVector::SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time, uint current_time)
+void ArMoveVector::SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time, uint current_time)
 {
     ends.clear();
     if (!_to.empty()) {
@@ -554,11 +554,11 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> _to, uint8_t _speed, ui
         start_time = ct;
         proc_time  = ct;
         uint start_time2 = ct;
-        SetDirection(_to[0]);
+        SetDirection(_to.front());
         float before_x = m_positionX;
         float before_y = m_positionY;
 
-        for (auto pos : _to) {
+        for (const auto& pos : _to) {
             float cx = pos.m_positionX - before_x;
             float cy = pos.m_positionY - before_y;
 

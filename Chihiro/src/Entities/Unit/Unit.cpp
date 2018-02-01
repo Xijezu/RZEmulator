@@ -1294,7 +1294,7 @@ void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
 
 }
 
-void Unit::SetMultipleMove(std::vector<Position> _to, uint8_t _speed, uint _start_time)
+void Unit::SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time)
 {
     ArMoveVector::SetMultipleMove(_to, _speed, _start_time, sWorld->GetArTime());
     lastStepTime = start_time;
