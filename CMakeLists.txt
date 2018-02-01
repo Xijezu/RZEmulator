@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
-set (CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set RPATH-handing (CMake parameters)
@@ -26,7 +26,6 @@ find_package(MYSQL REQUIRED)
 find_package(Lua REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/shared
-                    ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
                     ${CMAKE_SOURCE_DIR}/shared/Configuration
                     ${CMAKE_SOURCE_DIR}/shared/Database
                     ${CMAKE_SOURCE_DIR}/shared/Dynamic
@@ -38,12 +37,7 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Logging
                     ${CMAKE_SOURCE_DIR}/shared/utf8
                     ${CMAKE_SOURCE_DIR}/shared/Server
-                    ${CMAKE_SOURCE_DIR}/shared/Utilities
-                    ${ACE_INCLUDE_DIR}
-                    ${LUA_INCLUDE_DIR}
-                    ${MYSQL_INCLUDE_DIR})
-
-file(GLOB_RECURSE SHARED_SRC shared/Utilities/SignalHandler.h shared/*.cpp ${ace_STAT_SRCS} )
+                    ${CMAKE_SOURCE_DIR}/shared/Utilities)
 
 add_subdirectory(shared)
 add_subdirectory(Mononoke)

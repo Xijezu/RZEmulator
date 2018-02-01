@@ -18,10 +18,6 @@ include_directories(
         ${MYSQL_INCLUDE_DIR}
 )
 
-add_library(shared STATIC
-        ${SHARED_SOURCE_FILES}
-        )
+add_library(shared STATIC ${SHARED_SOURCE_FILES})
 
-target_link_libraries(shared
-        ${ACE_LIBRARY}
-        )
+target_link_libraries(shared ${ACE_LIBRARY})

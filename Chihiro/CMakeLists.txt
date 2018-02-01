@@ -30,8 +30,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Skills
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/World
-                    ${MYSQL_INCLUDE_DIR}
-                    ${ACE_INCLUDE_DIR})
+                    ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
+                    ${ACE_INCLUDE_DIR}
+                    ${LUA_INCLUDE_DIR}
+                    ${MYSQL_INCLUDE_DIR})
 
 add_executable(Chihiro ${SOURCE_FILES})
 target_link_libraries(Chihiro shared ${MYSQL_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${ACE_LIBRARIES} ${LUA_LIBRARIES} stdc++fs)
