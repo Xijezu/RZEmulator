@@ -899,8 +899,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
     m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
     m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
-    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 1800);
-    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 0);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
+    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
     m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
 
     // Rates
