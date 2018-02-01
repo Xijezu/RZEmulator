@@ -20,44 +20,53 @@
 #include "Util.h"
 #include "Common.h"
 #include "utf8.h"
-#include "SFMT.h"
+#include <random>
 #include "Errors.h" // for ASSERT
-#include <ace/TSS_T.h>
 
-typedef ACE_TSS<SFMTRand> SFMTRandTSS;
-static SFMTRandTSS sfmtRand;
+std::random_device r;
+std::mt19937 randGenerator(r());
 
-int32 irand(int32 min, int32 max)
+int32 irand(const int32 min, const int32 max)
 {
-    ASSERT(max >= min);
-    return int32(sfmtRand->IRandom(min, max));
+            ASSERT(max >= min);
+    std::uniform_int_distribution<int32> distr(min, max);
+    return distr(randGenerator);
 }
 
-uint32 urand(uint32 min, uint32 max)
+uint32 urand(const uint32 min, const uint32 max)
 {
-    ASSERT(max >= min);
-    return sfmtRand->URandom(min, max);
+            ASSERT(max >= min);
+    std::uniform_int_distribution<uint32> distr(min, max);
+    return distr(randGenerator);
 }
 
-float frand(float min, float max)
+float frand(const float min, const float max)
 {
-    ASSERT(max >= min);
-    return float(sfmtRand->Random() * (max - min) + min);
+            ASSERT(max >= min);
+    std::uniform_real_distribution<float> distr(min, max);
+    return distr(randGenerator);
+}
+
+double drand(const double min, const double max)
+{
+            ASSERT(max >= min);
+    std::uniform_real_distribution<double> distr(min, max);
+    return distr(randGenerator);
 }
 
 int32 rand32()
 {
-    return int32(sfmtRand->BRandom());
+    return irand(INT_MIN, RAND_MAX);
 }
 
 double rand_norm(void)
 {
-    return sfmtRand->Random();
+    return drand(DBL_MIN, RAND_MAX);
 }
 
 double rand_chance(void)
 {
-    return sfmtRand->Random() * 100.0;
+    return drand(DBL_MIN, RAND_MAX) * 100.0;
 }
 
 bool isMXNumeric(std::string input)
