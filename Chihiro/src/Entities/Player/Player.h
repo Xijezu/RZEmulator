@@ -97,7 +97,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
         /* ****************** DATABASE ****************** */
-        bool ReadCharacter(std::string, int);
+        bool ReadCharacter(const std::string&, int);
         bool ReadItemList(int);
         bool ReadItemCoolTimeList(int);
         bool ReadSummonList(int);
@@ -170,13 +170,13 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool IsAlly(const Unit *pUnit) override;
 
         /* ****************** DIALOG ****************** */
-        void SetLastContact(std::string, uint32_t);
-        void SetLastContact(std::string, std::string);
-        std::string GetLastContactStr(std::string);
-        uint32_t GetLastContactLong(std::string);
-        void SetDialogTitle(std::string, int);
-        void SetDialogText(std::string);
-        void AddDialogMenu(std::string, std::string);
+        void SetLastContact(const std::string&, uint32_t);
+        void SetLastContact(const std::string&, const std::string&);
+        std::string GetLastContactStr(const std::string&);
+        uint32_t GetLastContactLong(const std::string&);
+        void SetDialogTitle(const std::string&, int);
+        void SetDialogText(const std::string&);
+        void AddDialogMenu(const std::string&, const std::string&);
         void ClearDialogMenu();
 
         bool IsFixedDialogTrigger(const std::string &szTrigger) { return false; }

@@ -122,7 +122,7 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
 }
 
-bool Player::ReadCharacter(std::string _name, int _race)
+bool Player::ReadCharacter(const std::string& _name, int _race)
 {
     int mainSummon = 0;
     int subSummon  = 0;
@@ -1116,31 +1116,31 @@ Summon *Player::GetSummon(int summon_sid)
     return nullptr;
 }
 
-void Player::SetLastContact(std::string szKey, std::string szValue)
+void Player::SetLastContact(const std::string& szKey, const std::string& szValue)
 {
-    m_hsContact[szKey] = std::move(szValue);
+    m_hsContact[szKey] = szValue;
 }
 
-void Player::SetLastContact(std::string szKey, uint32_t nValue)
+void Player::SetLastContact(const std::string& szKey, uint32_t nValue)
 {
-    SetLastContact(std::move(szKey), std::to_string(nValue));
+    SetLastContact(szKey, std::to_string(nValue));
 }
 
-std::string Player::GetLastContactStr(std::string szKey)
+std::string Player::GetLastContactStr(const std::string& szKey)
 {
-    std::string res = "";
+    std::string res{};
     if (m_hsContact.count(szKey) == 1)
         return m_hsContact[szKey];
     return res;
 }
 
-uint32_t Player::GetLastContactLong(std::string szKey)
+uint32_t Player::GetLastContactLong(const std::string& szKey)
 {
     auto szValue = GetLastContactStr(szKey);
     return (uint32_t)std::stoul(szValue);
 }
 
-void Player::SetDialogTitle(std::string szTitle, int type)
+void Player::SetDialogTitle(const std::string& szTitle, int type)
 {
     if (!szTitle.empty())
     {
@@ -1155,7 +1155,7 @@ void Player::SetDialogTitle(std::string szTitle, int type)
     }
 }
 
-void Player::SetDialogText(std::string szText)
+void Player::SetDialogText(const std::string& szText)
 {
     if (!szText.empty())
     {
@@ -1165,7 +1165,7 @@ void Player::SetDialogText(std::string szText)
     }
 }
 
-void Player::AddDialogMenu(std::string szKey, std::string szValue)
+void Player::AddDialogMenu(const std::string& szKey, const std::string& szValue)
 {
     if (!szKey.empty())
     {
