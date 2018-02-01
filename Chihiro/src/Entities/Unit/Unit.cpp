@@ -636,7 +636,8 @@ void Unit::applyItemEffect()
 
     m_nUnitExpertLevel = 0;
     std::vector<int> ref_list{ };
-    for (int         i = 0; i < 24; i++)
+
+    for (int         i = 0; i < MAX_ITEM_WEAR; i++)
     {
         curItem = GetWornItem((ItemWearType)i);
         if (curItem != nullptr && curItem->m_pItemBase != nullptr)
@@ -694,24 +695,6 @@ void Unit::applyItemEffect()
                         }
                     }
                 }
-                if(curItem->m_pItemBase->socket > 0)
-                {
-                    for (int x : curItem->m_Instance.Socket)
-                    {
-                        if(x != 0)
-                        {
-                            auto ibs = sObjectMgr->GetItemBase(x);
-                            if(ibs == nullptr)
-                                continue;
-
-                            if(ibs->use_min_level > GetLevel())
-                                continue;
-
-                            onItemWearEffect(curItem, true, ibs->opt_type[0], ibs->opt_var[0][0], ibs->opt_var[0][1], 1);
-                        }
-                    }
-                }
-                /// Soulstones here
             }
         }
     }
@@ -1270,18 +1253,41 @@ void Unit::applyStatByItem()
 {
     std::vector<int> ref_list{ };
 
-    for(int i1 = 0; i1 < 24; ++i1) {
-        Item* item = m_anWear[i1];
-        if (item != nullptr && item->m_pItemBase != nullptr) {
+    for (int i1 = 0; i1 < MAX_ITEM_WEAR; ++i1)
+    {
+        Item *item = m_anWear[i1];
+        if (item != nullptr && item->m_pItemBase != nullptr)
+        {
             auto iwt = (ItemWearType)i1;
-            if (item->m_Instance.nWearInfo != WEAR_NONE) {
-                if (TranslateWearPosition(iwt, item, ref_list)) {
-                    for (int j = 0; j < 4; j++) {
+            if (item->m_Instance.nWearInfo != WEAR_NONE)
+            {
+                if (TranslateWearPosition(iwt, item, ref_list))
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
                         short ot = item->m_pItemBase->opt_type[j];
-                        auto  bs = (uint) item->m_pItemBase->opt_var[j][0];
-                        auto  fv = (int) item->m_pItemBase->opt_var[j][1];
+                        auto  bs = (uint)item->m_pItemBase->opt_var[j][0];
+                        auto  fv = (int)item->m_pItemBase->opt_var[j][1];
                         if (ot == 96)
                             incParameter(bs, fv, true);
+                    }
+                }
+            }
+
+            if(item->m_pItemBase->socket > 0)
+            {
+                for (const auto& x : item->m_Instance.Socket)
+                {
+                    if(x != 0)
+                    {
+                        auto ibs = sObjectMgr->GetItemBase(x);
+                        if(ibs == nullptr)
+                            continue;
+
+                        if(ibs->use_min_level > GetLevel())
+                            continue;
+
+                        onItemWearEffect(item, true, ibs->opt_type[0], ibs->opt_var[0][0], ibs->opt_var[0][1], 1);
                     }
                 }
             }
@@ -2542,7 +2548,7 @@ ushort Unit::Putoff(ItemWearType pos)
         pos = WEAR_WEAPON;
     if(pos == WEAR_TWOFINGER_RING)
         pos = WEAR_RING;
-    if(pos >= 24 || pos < 0)
+    if(pos >= MAX_ITEM_WEAR || pos < 0)
         return TS_RESULT_NOT_ACTABLE;
     ItemWearType abspos = GetAbsoluteWearPos(pos);
     if(abspos == WEAR_CANTWEAR)
@@ -3339,13 +3345,13 @@ void Unit::procStateDamage(uint t)
                     nHealHP = HealByItem(sd.damage_hp);
                     break;
                 case 22:
-                    nHealMP = (int)MPHealByItem(sd.damage_mp);
+                    nHealMP = MPHealByItem(sd.damage_mp);
                     break;
                 case 24:
                 case 25:
                     nHealHP = HealByItem(sd.damage_hp);
-                    nHealMP = (int)MPHealByItem(sd.damage_mp);
-
+                    nHealMP = MPHealByItem(sd.damage_mp);
+                    break;
                 default:
                     continue;
             }
