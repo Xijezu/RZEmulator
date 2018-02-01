@@ -3,15 +3,11 @@
 //
 #include "GameRule.h"
 #include "Util.h"
+#include "World.h"
 
 int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
 int GameRule::_chipLevelLimit[8] = {0, 20, 50, 80, 100, 120, 150, 180};
 float GameRule::_staminaExpRate[300] = { 0 };
-float GameRule::_itemDropRate = 10.0f;
-float GameRule::_GoldDropRate = 1.0f;
-float GameRule::_chaosDropRate = 1.0f;
-float GameRule::_expRate = 1.0f;
-int GameRule::nCurrentLocalFlag = 4;
 int GameRule::nEnhanceFailType = 2;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
@@ -118,17 +114,17 @@ float GameRule::GetPickableRange()
 
 float GameRule::GetItemDropRate()
 {
-    return _itemDropRate;
+    return sWorld->getRate(RATES_ITEM_DROP);
 }
 
 float GameRule::GetGoldDropRate()
 {
-    return _GoldDropRate;
+    return sWorld->getRate(RATES_GOLD_DROP);
 }
 
 float GameRule::GetEXPRate()
 {
-    return _expRate;
+    return sWorld->getRate(RATES_EXP);
 }
 
 int GameRule::GetChipLevelLimit(int idx)
@@ -138,7 +134,7 @@ int GameRule::GetChipLevelLimit(int idx)
 
 float GameRule::GetChaosDropRate()
 {
-    return _chaosDropRate;
+    return sWorld->getRate(RATES_CHAOS_DROP);
 }
 
 int GameRule::GetIntValueByRandomInt(double fValue)
@@ -173,5 +169,10 @@ float GameRule::GetStaminaRatio(int level)
 
 float GameRule::GetStaminaBonus()
 {
-    return 1.0f;
+    return sWorld->getRate(RATES_STAMINA_BONUS);
+}
+
+int GameRule::GetLocalFlag()
+{
+    return sWorld->getIntConfig(CONFIG_LOCAL_FLAG);
 }

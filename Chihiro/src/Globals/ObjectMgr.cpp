@@ -1064,7 +1064,7 @@ void ObjectMgr::LoadEnhanceResource()
         info.nNeedItemCode = field[idx++].GetInt32();
         for(auto& perc : info.fPercentage)
             perc = field[idx++].GetFloat();
-        if((GameRule::nCurrentLocalFlag & info.nLocalFlag) != 0)
+        if((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
         {
             sMixManager->RegisterEnhanceInfo(info);
         }
@@ -1734,8 +1734,7 @@ bool ObjectMgr::IsBlocked(float x, float y)
 {
     if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
         return true;
-    //if(GameRule.bIsNoCollisionCheck)
-    if(false)
+    if(sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;
     return g_qtBlockInfo.Collision({x, y});
 }

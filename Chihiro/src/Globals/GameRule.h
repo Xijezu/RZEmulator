@@ -15,6 +15,7 @@ class GameRule
         static int GetItemLevelLimit(int item_rank);
         static int GetItemRecommendModTable(int item_rank);
         static int GetRankLevel(int rank);
+        static int GetLocalFlag();
         static float GetItemDropRate();
         static float GetGoldDropRate();
         static float GetChaosDropRate();
@@ -28,13 +29,8 @@ class GameRule
         static float GetStaminaRatio(int level);
         static float GetStaminaBonus();
         static int nEnhanceFailType;
-        static int nCurrentLocalFlag;
     private:
         static int   _chipLevelLimit[];
-        static float _itemDropRate;
-        static float _expRate;
-        static float _GoldDropRate;
-        static float _chaosDropRate;
         static int   _modtable[];
         static float _staminaExpRate[];
 };

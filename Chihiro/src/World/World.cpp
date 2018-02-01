@@ -38,6 +38,7 @@ uint World::GetArTime()
 void World::InitWorld()
 {
     MX_LOG_INFO("server.worldserver", "Initializing world...");
+    LoadConfigSettings(false);
 
     uint32_t oldTime = getMSTime(), oldFullTime = getMSTime();
     MX_LOG_INFO("server.worldserver", "Initializing region system...");
@@ -557,7 +558,7 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     if (code > 0)
     {
         if (sObjectMgr->GetItemBase(code)->group == 13)
-            fCreatureCardMod = /*pKiller->m_fCreatureCardChance;*/ 1.0f; // actual wtf?
+            fCreatureCardMod = sWorld->getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway? */
     }
     auto perc = percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod;
     auto rand = irand(1, 0x5F5E100u);
@@ -870,4 +871,45 @@ void World::procPartyShare(Player *pClient, Item *pItem)
         auto idx = irand(0, (int)vList.size() - 1);
         procAddItem(vList[idx], pItem, true);
     }
+}
+
+void World::LoadConfigSettings(bool reload)
+{
+    if (reload)
+    {
+        if (!sConfigMgr->Reload())
+        {
+            MX_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
+            return;
+        }
+        sLog->LoadFromConfig();
+    }
+
+    // Bool configs
+    m_bool_configs[CONFIG_PK_SERVER] = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
+    m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
+    m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
+    m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
+    m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
+    m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
+
+    // Int configs
+    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 1800);
+    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 0);
+    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+
+    // Rates
+    rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
+    rate_values[RATES_ITEM_DROP] = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
+    rate_values[RATES_CREATURE_DROP] = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
+    rate_values[RATES_CHAOS_DROP] = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
+    rate_values[RATES_GOLD_DROP] = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
+    rate_values[RATES_PVP_DAMAGE_FOR_PLAYER] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForPlayer", 1.0f);
+    rate_values[RATES_PVP_DAMAGE_FOR_SUMMON] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForSummon", 1.0f);
+    rate_values[RATES_STAMINA_BONUS] = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
 }
