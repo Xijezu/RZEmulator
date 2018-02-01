@@ -135,7 +135,10 @@ bool Player::ReadCharacter(const std::string& _name, int _race)
         SetName(_name);
         SetUInt32Value(UNIT_FIELD_UID, (*result)[0].GetUInt32());
         m_szAccount = (*result)[1].GetString();
-        SetInt32Value(PLAYER_FIELD_PERMISSION, (*result)[2].GetInt32());
+        int permission = (*result)[2].GetInt32();
+        if(m_session->m_nPermission > permission)
+            permission = m_session->m_nPermission;
+        SetInt32Value(PLAYER_FIELD_PERMISSION, permission);
         SetInt32Value(PLAYER_FIELD_PARTY_ID, (*result)[3].GetInt32());
         SetInt32Value(PLAYER_FIELD_GUILD_ID, (*result)[4].GetInt32());
         Relocate((float)(*result)[5].GetInt32(), (float)(*result)[6].GetInt32(), (float)(*result)[7].GetInt32(), 0);

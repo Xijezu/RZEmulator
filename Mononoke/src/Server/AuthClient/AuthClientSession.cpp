@@ -124,6 +124,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
         m_pPlayer->szLoginName    = (*dbResult)[1].GetString();
         m_pPlayer->nLastServerIDX = (*dbResult)[2].GetUInt32();
         m_pPlayer->bIsBlocked     = (*dbResult)[3].GetBool();
+        m_pPlayer->nPermission    = (*dbResult)[4].GetInt32();
         m_pPlayer->bIsInGame      = false;
 
         if (m_pPlayer->bIsBlocked)

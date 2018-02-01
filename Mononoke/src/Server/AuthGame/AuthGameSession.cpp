@@ -182,6 +182,7 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
     resultPct.fill((p != nullptr ? p->szLoginName : ""), 61);
     resultPct << (p != nullptr ? p->nAccountID : 0);
     resultPct << result;
+    resultPct << (uint)(p != nullptr ? p->nPermission : 0);
     resultPct << (uint8)0;  // PC Bang Mode
     resultPct << (uint32)0; // Age
     resultPct << (uint32)0; // Event Code

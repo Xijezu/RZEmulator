@@ -24,7 +24,8 @@ class AuthClientSession;
 struct Player
 {
 	Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
-			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1)
+			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
+			   nPermission(0)
 	{
 	}
 	uint32 nAccountID;
@@ -35,6 +36,7 @@ struct Player
 	bool bKickNextLogin;
 	uint64 nOneTimeKey;
 	int nGameIDX;
+	int nPermission;
 };
 
 /// Storage object for the list of players on the server

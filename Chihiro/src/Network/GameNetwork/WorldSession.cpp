@@ -264,6 +264,7 @@ void WorldSession::onAuthResult(XPacket *pGamePct)
     auto szAccount  = pGamePct->ReadString(61);
     auto nAccountID = pGamePct->read<uint>();
     auto result     = pGamePct->read<uint16>();
+    m_nPermission = pGamePct->read<int>();
     if (result == TS_RESULT_SUCCESS)
     {
         _isAuthed    = true;

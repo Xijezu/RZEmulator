@@ -58,6 +58,7 @@ enum STORAGE_MODE : int
 class WorldSession
 {
 	public:
+		friend class Player;
 		explicit WorldSession(WorldSocket<WorldSession> *socket);
 		virtual ~WorldSession();
 
@@ -141,6 +142,7 @@ class WorldSession
 		std::string _accountName{ };
 		Player      *_player{nullptr};
 		bool        _isAuthed{false};
+		int 		m_nPermission;
 };
 
 #endif // _GAMESESSION_H_

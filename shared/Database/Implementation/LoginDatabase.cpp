@@ -22,5 +22,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
 	if (!m_reconnecting)
 		m_stmts.resize(MAX_LOGINDATABASE_STATEMENTS);
 
-	PrepareStatement(LOGIN_GET_ACCOUNT, "SELECT account_id, login_name, last_login_server_idx, block FROM Accounts WHERE login_name = ? AND password = ?", CONNECTION_SYNCH);
+	PrepareStatement(LOGIN_GET_ACCOUNT, "SELECT account_id, login_name, last_login_server_idx, block, permission FROM Accounts WHERE login_name = ? AND password = ?", CONNECTION_SYNCH);
 }
