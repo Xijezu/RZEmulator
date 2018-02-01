@@ -12,6 +12,7 @@ struct SkillTargetFunctor {
 
 struct FireSkillStateSkillFunctor : public SkillTargetFunctor
 {
+    std::vector<SkillResult> pvList;
     void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
     {
         int  chanceRes = 1;
@@ -114,6 +115,7 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
                 }
             }
         }
+        sWorld->AddSkillDamageResult(pvList, bResult, 10, pTarget->GetHandle());
     }
 };
 

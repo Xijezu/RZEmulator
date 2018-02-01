@@ -16,6 +16,7 @@ enum SkillStatus : int
     SS_COMPLETE = 3
 };
 
+class SkillTargetFunctor;
 class Skill
 {
         friend class Unit;
@@ -72,7 +73,9 @@ class Skill
         void Init();
     private:
         std::vector<SkillResult> m_vResultList{ };
+        void process_target(uint t, SkillTargetFunctor& fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
+        void PostFireSkill(Unit *pTarget);
         uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time);
         uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time);
 

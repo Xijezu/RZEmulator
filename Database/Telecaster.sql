@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `AllowedCommandsForPermission` (
   `command` varchar(32) NOT NULL,
   `parameter` varchar(32) NOT NULL,
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 -- Exportiere Struktur von Tabelle Telecaster.Auction
@@ -278,7 +278,7 @@ CREATE TABLE IF NOT EXISTS `Friends` (
   PRIMARY KEY (`sid`),
   KEY `IDX_Friends_Friend_Id` (`friend_id`,`owner_id`),
   KEY `IDX_Friends_Owner_Id` (`owner_id`,`friend_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 -- Exportiere Struktur von Tabelle Telecaster.GlobalVariable
@@ -582,7 +582,7 @@ CREATE TABLE IF NOT EXISTS `State` (
   `enable` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`sid`),
   KEY `IX_State` (`owner_id`,`summon_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4;
 
 -- Daten Export vom Benutzer nicht ausgewählt
 -- Exportiere Struktur von Tabelle Telecaster.Summon
