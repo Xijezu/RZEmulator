@@ -107,6 +107,7 @@ class WorldSession
 		void onJobLevelUp(XPacket *);
 		void onLearnSkill(XPacket *);
 
+    void onTrade(XPacket *);
 		void onPutOnItem(XPacket *);
 		void onPutOffItem(XPacket *);
 		void onBindSkillCard(XPacket *);
