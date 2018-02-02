@@ -2073,8 +2073,7 @@ void WorldSession::onTrade(XPacket *pRecvPct)
     }
     else
     {
-        auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(target_handle);
-        if(tradeTarget == nullptr || tradeTarget->GetHandle() == _player->GetHandle())
+        if(target_handle == _player->GetHandle() )
         {
             //if ( StructPlayer__GetTradeTarget(pClient) )
             //{
@@ -2087,25 +2086,25 @@ void WorldSession::onTrade(XPacket *pRecvPct)
         switch (mode)
         {
             case 0:
-                onRequestTrade(tradeTarget);
+                onRequestTrade(target_handle);
                 break;
             case 1:
-                onAcceptTrade(tradeTarget);
+                onAcceptTrade(target_handle);
                 break;
             case 3:
                 onCancelTrade();
                 break;
             case 4:
-                onRejectTrade(tradeTarget);
+                onRejectTrade(target_handle);
                 break;
             case 5:
-                onAddItem(tradeTarget);
+                onAddItem(target_handle);
                 break;
             case 10:
-                onRemoveItem(tradeTarget);
+                onRemoveItem(target_handle);
                 break;
             case 6:
-                onAddGold(tradeTarget);
+                onAddGold(target_handle);
                 break;
             case 7:
                 onFreezeTrade();
@@ -2119,14 +2118,29 @@ void WorldSession::onTrade(XPacket *pRecvPct)
     }
 }
 
-void WorldSession::onRequestTrade(Player *pTradeTarget)
+void WorldSession::onRequestTrade(uint32 hTradeTarget)
 {
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
 
+    // Todo: if(bIsMoving || bTrading) false
+    // Todo: _player.IsTradableWith(tPlayer);
+
+    XPacket tradePct(TS_TRADE);
+    tradePct << _player->GetHandle();
+    tradePct << (uint8)0; // mode
+    tplayer->SendPacket(tradePct);
 }
 
-void WorldSession::onAcceptTrade(Player *pTradeTarget)
+void WorldSession::onAcceptTrade(uint32 hTradeTarget)
 {
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
 
+    // Todo: if bIsMoving || bTrading || GetTamingTarget() != 0
+    // StructPlayer::StartTrade, send mode 2 to both
 }
 
 void WorldSession::onCancelTrade()
@@ -2134,24 +2148,39 @@ void WorldSession::onCancelTrade()
 
 }
 
-void WorldSession::onRejectTrade(Player *pTradeTarget)
+void WorldSession::onRejectTrade(uint32 hTradeTarget)
 {
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
+
+    XPacket tradePct(TS_TRADE);
+    tradePct << _player->GetHandle();
+    tradePct << (uint8)4;
+    tplayer->SendPacket(tradePct);
+}
+
+void WorldSession::onAddItem(uint32 hTradeTarget)
+{
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
+
 
 }
 
-void WorldSession::onAddItem(Player *pTradeTarget)
+void WorldSession::onRemoveItem(uint32 hTradeTarget)
 {
-
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
 }
 
-void WorldSession::onRemoveItem(Player *pTradeTarget)
+void WorldSession::onAddGold(uint32 hTradeTarget)
 {
-
-}
-
-void WorldSession::onAddGold(Player *pTradeTarget)
-{
-
+    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tplayer))
+        return;
 }
 
 void WorldSession::onFreezeTrade()
@@ -2162,4 +2191,9 @@ void WorldSession::onFreezeTrade()
 void WorldSession::onConfirmTrade()
 {
 
+}
+
+bool WorldSession::isValidTradeTarget(Player *pTradeTarget)
+{
+    return !(pTradeTarget == nullptr || !pTradeTarget->IsInWorld() || pTradeTarget->GetExactDist2d(_player) > g_nRegionSize);
 }
