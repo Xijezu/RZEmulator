@@ -6,10 +6,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set RPATH-handing (CMake parameters)
-set(CMAKE_SKIP_BUILD_RPATH 0)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH 0)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
+
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH "${LIBS_DIR}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
     add_definitions(-fno-delete-null-pointer-checks)
@@ -20,10 +21,31 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-find_package(ACE REQUIRED)
-find_package(Threads REQUIRED)
+option(ACE_USE_EXTERNAL "Use external ACE" OFF)
+
+if(ACE_USE_EXTERNAL)
+    find_package(ACE)
+    if(NOT ACE_FOUND)
+        message(FATAL_ERROR
+                "This project requires ACE installed when ACE_USE_EXTERNAL is set. Please download the ACE Micro Release Kit from http://download.dre.vanderbilt.edu/ and install it. If this script didn't find ACE and it was correctly installed please set ACE_ROOT to the correct path."
+                )
+    endif()
+    if(EXISTS ${ACE_INCLUDE_DIR}/ace/Stack_Trace.h)
+        add_definitions(-DHAVE_ACE_STACK_TRACE_H)
+    endif()
+else()
+    include(cmake/ImportACE.cmake)
+    if(NOT(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD"))
+        add_definitions(-DHAVE_ACE_STACK_TRACE_H)
+    endif()
+endif()
+
+#Include platform/compiler-specific definitions
+include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
+
 find_package(MYSQL REQUIRED)
-find_package(Lua REQUIRED)
+#find_package(Lua REQUIRED)
+
 
 include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Configuration
@@ -39,6 +61,11 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Server
                     ${CMAKE_SOURCE_DIR}/shared/Utilities)
 
+if(NOT ACE_USE_EXTERNAL)
+    add_subdirectory(dep/acelite)
+endif()
+
+add_subdirectory(dep/liblua)
 add_subdirectory(shared)
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)

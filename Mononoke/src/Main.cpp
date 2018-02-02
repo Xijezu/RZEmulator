@@ -38,14 +38,6 @@ public:
 	}
 };
 
-template class WorldSocketMgr<AuthClientSession>;
-template class WorldSocketMgr<AuthGameSession>;
-template class WorldSocket<AuthClientSession>;
-template class WorldSocket<AuthGameSession>;
-
-#define sAuthSocketMgr ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()
-#define sGameSocketMgr ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()
-
 
 
 extern int main(int argc, char **argv)
@@ -80,7 +72,7 @@ extern int main(int argc, char **argv)
 
 	auto authPort = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
 	std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
-	if (sAuthSocketMgr->StartNetwork(authPort, authBindIp.c_str()) == -1)
+	if (ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()->StartNetwork(authPort, authBindIp.c_str()) == -1)
 	{
 		printf("Error creating acceptor at %s:%d\n", authBindIp.c_str(), authPort);
 		return 1;
@@ -88,7 +80,7 @@ extern int main(int argc, char **argv)
 
     auto gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
     std::string bindIp = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
-    if (sGameSocketMgr->StartNetwork(gamePort, bindIp.c_str()) == -1)
+    if (ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()->StartNetwork(gamePort, bindIp.c_str()) == -1)
     {
         printf("Error creating acceptor at %s:%d\n", bindIp.c_str(), gamePort);
         return 1;
