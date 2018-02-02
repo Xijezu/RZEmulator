@@ -186,8 +186,8 @@ void Unit::amplifyStatByState()
             {
                 if (s.GetValue(i) == 0.0f)
                 {
-                    break;
-                    vDecreaseList.emplace_back(std::make_pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+					break;
                 }
             }
         }
@@ -288,8 +288,8 @@ void Unit::applyStateEffect()
             {
                 if (s.GetValue(i) == 0.0f)
                 {
-                    break;
-                    vDecreaseList.emplace_back(std::make_pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+					break;
                 }
             }
         }
@@ -352,8 +352,8 @@ void Unit::applyStatByState()
             {
                 if (s.GetValue(i) == 0.0f)
                 {
-                    break;
-                    vDecreaseList.emplace_back(std::make_pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>(static_cast<int>(s.GetValue(1)), static_cast<int>(nDecreaseLevel)));
+					break;
                 }
             }
         }
@@ -905,8 +905,8 @@ void Unit::applyStateAmplifyEffect()
             {
                 if (s.GetValue(i) == 0.0f)
                 {
-                    break;
-                    vDecreaseList.emplace_back(std::make_pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+					break;
                 }
             }
         }

@@ -102,7 +102,7 @@ bool XLua::InitializeLua()
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
-            auto t = m_pState.do_file(it.path());
+            auto t = m_pState.do_file(it.path().string());
             if (!t.valid()) {
                 sol::error err = t;
                 MX_LOG_ERROR("scripting", err.what());
@@ -140,7 +140,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
 bool XLua::RunString(Unit *pObject, std::string pScript)
 {
     std::string buf{ };
-    RunString(pObject, pScript, buf);
+    return RunString(pObject, pScript, buf);
 }
 
 bool XLua::RunString(std::string szScript)
@@ -149,7 +149,9 @@ bool XLua::RunString(std::string szScript)
         m_pState.script(szScript);
     }catch(sol::error err) {
         MX_LOG_ERROR("scripting", "%s", err.what());
+		return false;
     }
+	return true;
 }
 
 void XLua::SCRIPT_SetWayPointType(int waypoint_id, int waypoint_type)

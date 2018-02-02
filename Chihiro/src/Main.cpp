@@ -30,7 +30,6 @@ public:
 			case SIGTERM:
 #ifdef _WIN32
 				case SIGBREAK:
-                    if (m_ServiceStatus != 1)
 #endif
 				World::StopNow(SHUTDOWN_EXIT_CODE);
 				break;
