@@ -409,7 +409,7 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
 
     if (nFailResult == 1)
     {
-        pItem->m_Instance.Flag = 8; /* Item is "destroyed" */
+        pItem->m_Instance.Flag = ITEM_FLAG_FAILED;
         Messages::SendItemMessage(pPlayer, pItem);
         pItem->DBUpdate();
         return;
