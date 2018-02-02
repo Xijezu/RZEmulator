@@ -2873,6 +2873,7 @@ int Player::AddStamina(int nStamina)
         if (GetStamina() != oldStamina)
             Messages::SendPropertyMessage(this, this, "stamina", GetStamina());
     }
+	return GetStamina();
 }
 
 int Player::GetStaminaRegenRate()
@@ -3068,6 +3069,7 @@ bool Player::RemoveSummon(Summon *pSummon)
     pSummon->m_pMaster = nullptr;
     Messages::SendRemoveSummonMessage(this, pSummon);
     Summon::DB_UpdateSummon(this, pSummon);
+	return true;
 }
 
 void Player::AddSummonToStorage(Summon *pSummon)
@@ -3287,6 +3289,7 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
 
         } while (result->NextRow());
     }
+	return true;
 }
 
 bool Player::IsSitdownable() const

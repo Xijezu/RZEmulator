@@ -62,6 +62,7 @@ bool GroupManager::DestroyParty(int nPartyID)
         MX_UNIQUE_GUARD writeGuard(i_lock);
         m_hshPartyID.erase(nPartyID);
     }
+	return true;
 }
 
 int GroupManager::GetMemberCount(int nPartyID)

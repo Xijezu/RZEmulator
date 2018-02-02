@@ -8,8 +8,12 @@
 
 typedef unsigned long  DWORD;
 typedef unsigned short WORD;
+#ifndef LOWORD
 #define LOWORD(a) ((WORD)(a))
+#endif
+#ifndef HIWORD
 #define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#endif
 
 enum ObjType : int {
     OBJ_STATIC  = 0, // Player (Pyrok)
