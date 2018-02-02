@@ -99,6 +99,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("show_soulstone_craft_window", &XLua::SCRIPT_ShowSoulStoneCraftWindow, this);
     m_pState.set_function("show_soulstone_repair_window", &XLua::SCRIPT_ShowSoulStoneRepairWindow, this);
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
+    m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
 
     for (auto &it : fs::directory_iterator("Resource/Script/"s)) {
         if (it.path().extension().string() == ".lua"s) {
@@ -870,4 +871,25 @@ void XLua::SCRIPT_OpenStorage()
     if(m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return;
     dynamic_cast<Player*>(m_pUnit)->OpenStorage();
+}
+
+void XLua::SCRIPT_AddState(sol::variadic_args args)
+{
+    if(args.size() < 3)
+    {
+        MX_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Parameters");
+        return;
+    }
+
+    int nStateCode = args[0].get<int>();
+    int nStateLevel = args[1].get<uint8>();
+    uint nStateTime = args[2].get<uint>();
+    Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
+    if(player == nullptr)
+    {
+        MX_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
+        return;
+    }
+
+    player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(), nStateLevel, sWorld->GetArTime(), sWorld->GetArTime() + nStateTime, false, 0, "");
 }
