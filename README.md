@@ -1,5 +1,6 @@
 # Xijezu's Epic 4 Rappelz Emulator
 
+[![Build Status](https://travis-ci.org/Xijezu/Rappelz-Emulator.svg?branch=master)](https://travis-ci.org/Xijezu/Rappelz-Emulator)
 
 This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/SkyFire.548), a World of Warcraft emulator. I used this project to get some of the external stuff running, like Database handling, Networking and so on.
 
