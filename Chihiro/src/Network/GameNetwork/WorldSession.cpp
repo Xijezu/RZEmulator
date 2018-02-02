@@ -90,26 +90,26 @@ const AuthGameSession packetHandler[] =
                                       {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
                                       {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
                                       {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
-                                      {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED, &WorldSession::onPutOffItem},
-                                      {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED, &WorldSession::onGetSummonSetupInfo},
-                                      {TS_CS_CONTACT,               STATUS_AUTHED, &WorldSession::onContact},
-                                      {TS_CS_DIALOG,                STATUS_AUTHED, &WorldSession::onDialog},
-                                      {TS_CS_BUY_ITEM,              STATUS_AUTHED, &WorldSession::onBuyItem},
-                                      {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED, &WorldSession::onChangeLocation},
-                                      {TS_TIMESYNC,                 STATUS_AUTHED, &WorldSession::onTimeSync},
-                                      {TS_CS_GAME_TIME,             STATUS_AUTHED, &WorldSession::onGameTime},
-                                      {TS_CS_QUERY,                 STATUS_AUTHED, &WorldSession::onQuery},
-                                      {TS_CS_MIX,                   STATUS_AUTHED, &WorldSession::onMixRequest},
-                                      {TS_TRADE,                    STATUS_AUTHED, &WorldSession::onTrade},
-                                      {TS_CS_UPDATE,                STATUS_AUTHED, &WorldSession::onUpdate},
-                                      {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED, &WorldSession::onJobLevelUp},
-                                      {TS_CS_LEARN_SKILL,           STATUS_AUTHED, &WorldSession::onLearnSkill},
-                                      {TS_EQUIP_SUMMON,             STATUS_AUTHED, &WorldSession::onEquipSummon},
-                                      {TS_CS_SELL_ITEM,             STATUS_AUTHED, &WorldSession::onSellItem},
-                                      {TS_CS_SKILL,                 STATUS_AUTHED, &WorldSession::onSkill},
-                                      {TS_CS_SET_PROPERTY,          STATUS_AUTHED, &WorldSession::onSetProperty},
-                                      {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED, &WorldSession::onAttackRequest},
-                                      {TS_CS_CANCEL_ACTION,         STATUS_AUTHED, &WorldSession::onCancelAction},
+                                      {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
+                                      {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
+                                      {TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
+                                      {TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
+                                      {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
+                                      {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
+                                      {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
+                                      {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
+                                      {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
+                                      {TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
+                                      {TS_TRADE,                    STATUS_AUTHED,    &WorldSession::onTrade},
+                                      {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
+                                      {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
+                                      {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
+                                      {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
+                                      {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
+                                      {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
+                                      {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
+                                      {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
+                                      {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
                                       {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
                                       {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
                                       {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
@@ -2054,56 +2054,109 @@ void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
     _player->UnBindSkillCard(pItem);
 }
 
-void WorldSession::onTrade(XPacket *pRecvPct) {
+void WorldSession::onTrade(XPacket *pRecvPct)
+{
     pRecvPct->read_skip(7);
 
-    if (!_player->m_bIsUsingStorage) {
-        if (_player->bIsMoving &&
-            _player->IsInWorld()) {
-            // TODO: Cancel Trade
-        } else {
-            auto target_handle = pRecvPct->read<uint>();
-            if (_player->GetHandle() == target_handle) {
-                //if ( StructPlayer__GetTradeTarget(pClient) )
-                //{
-                //    v2 = StructPlayer__GetTradeTarget(pClient);
-                //    StructPlayer__CancelTrade(v2, 0);
-                //}
-                //StructPlayer__CancelTrade(pClient, 0);
-            }
+    if (_player->m_bIsUsingStorage)
+    {
+        return;
+    }
+    if (_player->bIsMoving && _player->IsInWorld())
+    {
+        // TODO: Cancel Trade
+    }
+    else
+    {
+        auto target_handle = pRecvPct->read<uint>();
+        auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(target_handle);
+        if(tradeTarget == nullptr || tradeTarget->GetHandle() == _player->GetHandle())
+        {
+            //if ( StructPlayer__GetTradeTarget(pClient) )
+            //{
+            //    v2 = StructPlayer__GetTradeTarget(pClient);
+            //    StructPlayer__CancelTrade(v2, 0);
+            //}
+            //StructPlayer__CancelTrade(pClient, 0);
+        }
 
-            auto mode = pRecvPct->read<char>();
-            switch (mode) {
-                case 0:
-                    _player->onRequestTrade(target_handle);
-                    break;
-                case 1:
-                    _player->onAcceptTrade();
-                    break;
-                case 3:
-                    _player->onCancelTrade();
-                    break;
-                case 4:
-                    _player->onRejectTrade();
-                    break;
-                case 5:
-                    _player->onAddItem();
-                    break;
-                case 10:
-                    _player->onRemoveItem();
-                    break;
-                case 6:
-                    _player->onAddGold();
-                    break;
-                case 7:
-                    _player->onFreezeTrade();
-                    break;
-                case 8:
-                    _player->onConfirmTrade();
-                    break;
-                default:
-                    return;
-            }
+        auto mode = pRecvPct->read<char>();
+        switch (mode)
+        {
+            case 0:
+                onRequestTrade(tradeTarget);
+                break;
+            case 1:
+                onAcceptTrade(tradeTarget);
+                break;
+            case 3:
+                onCancelTrade();
+                break;
+            case 4:
+                onRejectTrade(tradeTarget);
+                break;
+            case 5:
+                onAddItem(tradeTarget);
+                break;
+            case 10:
+                onRemoveItem(tradeTarget);
+                break;
+            case 6:
+                onAddGold(tradeTarget);
+                break;
+            case 7:
+                onFreezeTrade();
+                break;
+            case 8:
+                onConfirmTrade();
+                break;
+            default:
+                return;
         }
     }
+}
+
+void WorldSession::onRequestTrade(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onAcceptTrade(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onCancelTrade()
+{
+
+}
+
+void WorldSession::onRejectTrade(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onAddItem(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onRemoveItem(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onAddGold(Player *pTradeTarget)
+{
+
+}
+
+void WorldSession::onFreezeTrade()
+{
+
+}
+
+void WorldSession::onConfirmTrade()
+{
+
 }

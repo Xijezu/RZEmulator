@@ -107,7 +107,20 @@ class WorldSession
 		void onJobLevelUp(XPacket *);
 		void onLearnSkill(XPacket *);
 
-    void onTrade(XPacket *);
+        /* Trade related */
+        void onTrade(XPacket *); // Main packet
+        // Those aren't actually packethandlers, but they get used by onTrade
+        void onRequestTrade(Player *);
+        void onAcceptTrade(Player *);
+        void onCancelTrade();
+        void onRejectTrade(Player*);
+        void onAddItem(Player*);
+        void onRemoveItem(Player*);
+        void onAddGold(Player*);
+        void onFreezeTrade();
+        void onConfirmTrade();
+
+
 		void onPutOnItem(XPacket *);
 		void onPutOffItem(XPacket *);
 		void onBindSkillCard(XPacket *);
