@@ -110,13 +110,13 @@ class WorldSession
         /* Trade related */
         void onTrade(XPacket *); // Main packet
         // Those aren't actually packethandlers, but they get used by onTrade
-        void onRequestTrade(Player *);
-        void onAcceptTrade(Player *);
+        void onRequestTrade(uint);
+        void onAcceptTrade(uint);
         void onCancelTrade();
-        void onRejectTrade(Player*);
-        void onAddItem(Player*);
-        void onRemoveItem(Player*);
-        void onAddGold(Player*);
+        void onRejectTrade(uint);
+        void onAddItem(uint);
+        void onRemoveItem(uint);
+        void onAddGold(uint);
         void onFreezeTrade();
         void onConfirmTrade();
 
@@ -150,6 +150,7 @@ class WorldSession
 		std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
 	private:
 		bool checkCharacterName(const std::string &);
+		bool isValidTradeTarget(Player*);
 		WorldSocket<WorldSession> *_socket{nullptr};
 
 		uint32      _accountId{ };
