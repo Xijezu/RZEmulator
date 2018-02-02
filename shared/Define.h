@@ -94,7 +94,9 @@ typedef ACE_UINT64 uint64;
 typedef ACE_UINT32 uint32;
 typedef ACE_UINT16 uint16;
 typedef ACE_UINT8 uint8;
+
 typedef uint32 uint;
+typedef uint16 ushort;
 
 
 enum DBCFormer

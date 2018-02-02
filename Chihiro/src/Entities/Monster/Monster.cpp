@@ -909,7 +909,7 @@ float Monster::GetChaseRange() const
 
 float Monster::GetFirstAttackRange()
 {
-    m_Base->visible_range;
+    return m_Base->visible_range;
 }
 
 bool Monster::IsFirstAttacker() const

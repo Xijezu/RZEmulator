@@ -29,6 +29,8 @@
 #include <list>
 #include <ace/INET_Addr.h>
 #include <memory>
+#include <cctype>
+#include <ace/OS_NS_time.h>
 
 // Searcher for map of structs
 template<typename T, class S> struct Finder

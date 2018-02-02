@@ -361,15 +361,15 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
     Item *item{nullptr};
     if (pPlayer->GetItemCount() > 0)
     {
-        ulong count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
-        ulong idx   = 0;
+        int64 count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
+		int64 idx   = 0;
         if (count != 0)
         {
             do
             {
                 XPacket packet(TS_SC_INVENTORY);
                 auto    lcnt   = idx;
-                ulong   mcount = 200;
+				int64   mcount = 200;
                 if (count - idx <= 200)
                     mcount = count - idx;
 

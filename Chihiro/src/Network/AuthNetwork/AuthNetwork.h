@@ -38,7 +38,7 @@ public:
 
      int close() override
 	 {
-		 ACE_Connector::close();
+		 return ACE_Connector::close();
 	 }
 
 	void SendAccountToAuth(WorldSession& session, const std::string& login_name, uint64 one_time_key)

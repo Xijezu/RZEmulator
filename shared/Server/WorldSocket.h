@@ -38,6 +38,7 @@
 #include "XPacket.h"
 #include "TS_MESSAGE.h"
 #include "Util.h"
+#include "WorldSocketMgr.h"
 
 template<class T> class WorldSocketMgr;
 class ACE_Message_Block;
