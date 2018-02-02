@@ -400,5 +400,34 @@ EnhanceInfo *MixManager::getenhanceInfo(int sid)
 
 void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
 {
+    //nFailResult is not calculated correctly atm so this needs to be done
+    if(nFailResult == 0){
+        nFailResult = 1;
+    }
 
+    if(nFailResult == 1){
+        pItem->m_Instance.Flag += 8;
+        Messages::SendItemMessage(pPlayer, pItem);
+        pItem->DBUpdate();
+        return;
+    } else if (nFailResult == 2){
+        if(pItem->m_Instance.nEnhance <= 3){
+            pPlayer->EraseItem(pItem, 1);
+            return;
+        } else {
+            pItem->m_Instance.nEnhance -= 3;
+            Messages::SendItemMessage(pPlayer, pItem);
+            pItem->DBUpdate();
+            return;
+        }
+    } else if (nFailResult == 3){
+        if(pItem->m_Instance.nEnhance > 3){
+            pItem->m_Instance.nEnhance -= 3;
+        } else{
+            pItem->m_Instance.nEnhance = 0;
+        }
+        Messages::SendItemMessage(pPlayer, pItem);
+        pItem->DBUpdate();
+        return;
+    }
 }
