@@ -16,11 +16,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-#Force set the default install path if it is default
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bin/" CACHE PATH "MaNGOS default install prefix" FORCE)
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 #Set config install path correctly from given path
 string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
 if(${CONF_DIR_ABSOLUTE} EQUAL -1)
@@ -55,7 +50,6 @@ if(WIN32)
             # Mark 32 bit executables large address aware so they can use > 2GB address space
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
 
-            add_definitions(/arch:SSE2)
         endif()
 
         if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
@@ -71,13 +65,6 @@ if(WIN32)
         string(REGEX REPLACE "/Zm[0-9]+ *" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm600" CACHE STRING "" FORCE)
     elseif(MINGW)
-        if(PLATFORM EQUAL 32)
-            set(SSE_FLAGS "-msse2 -mfpmath=sse")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
-        endif()
-        add_definitions(-DHAVE_SSE2 -D__SSE2__)
-
         if(NOT DEBUG)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --no-warnings")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings")
@@ -98,14 +85,6 @@ elseif(UNIX)
 
     if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
-
-        if(PLATFORM EQUAL 32)
-            set(SSE_FLAGS "-msse2 -mfpmath=sse")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
-        endif()
-        add_definitions(-DHAVE_SSE2)
-
         if(NOT DEBUG)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --no-warnings")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -std=c++11 -Wno-narrowing -Wno-deprecated-register")
@@ -115,12 +94,6 @@ elseif(UNIX)
         endif()
 
     elseif(CMAKE_C_COMPILER MATCHES "icc")
-        if(PLATFORM EQUAL 32)
-            add_definitions(-axSSE2)
-        else()
-            add_definitions(-xSSE2)
-        endif()
-
         if(DEBUG)
           add_definitions(-w1)
           add_definitions(-g)
