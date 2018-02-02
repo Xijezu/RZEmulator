@@ -23,6 +23,22 @@ enum BONUS_TYPE : int
     MAX_BONUS_TYPE       = 0x3,
 };
 
+enum TRADE_MODE : int
+{
+    TM_REQUEST_TRADE = 0,
+    TM_ACCEPT_TRADE,
+    TM_BEGIN_TRADE,
+    TM_CANCEL_TRADE,
+    TM_REJECT_TRADE,
+    TM_ADD_ITEM,
+    TM_ADD_GOLD,
+    TM_FREEZE_TRADE,
+    TM_CONFIRM_TRADE,
+    TM_PROCESS_TRADE,
+    TM_REMOVE_ITEM,
+    TM_MODIFY_COUNT
+};
+
 struct BonusInfo
 {
     int type;

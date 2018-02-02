@@ -2085,31 +2085,31 @@ void WorldSession::onTrade(XPacket *pRecvPct)
 
         switch (mode)
         {
-            case 0:
+            case TM_REQUEST_TRADE:
                 onRequestTrade(target_handle);
                 break;
-            case 1:
+            case TM_ACCEPT_TRADE:
                 onAcceptTrade(target_handle);
                 break;
-            case 3:
+            case TM_CANCEL_TRADE:
                 onCancelTrade();
                 break;
-            case 4:
+            case TM_REJECT_TRADE:
                 onRejectTrade(target_handle);
                 break;
-            case 5:
+            case TM_ADD_ITEM:
                 onAddItem(target_handle);
                 break;
-            case 10:
+            case TM_REMOVE_ITEM:
                 onRemoveItem(target_handle);
                 break;
-            case 6:
+            case TM_ADD_GOLD:
                 onAddGold(target_handle);
                 break;
-            case 7:
+            case TM_FREEZE_TRADE:
                 onFreezeTrade();
                 break;
-            case 8:
+            case TM_CONFIRM_TRADE:
                 onConfirmTrade();
                 break;
             default:
@@ -2129,7 +2129,7 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
 
     XPacket tradePct(TS_TRADE);
     tradePct << _player->GetHandle();
-    tradePct << (uint8)0; // mode
+    tradePct << (uint8)TM_REQUEST_TRADE; // mode
     tplayer->SendPacket(tradePct);
 }
 
@@ -2156,7 +2156,7 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
 
     XPacket tradePct(TS_TRADE);
     tradePct << _player->GetHandle();
-    tradePct << (uint8)4;
+    tradePct << (uint8)TM_REJECT_TRADE;
     tplayer->SendPacket(tradePct);
 }
 
