@@ -2056,7 +2056,12 @@ void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
 
 void WorldSession::onTrade(XPacket *pRecvPct)
 {
+    if(_player == nullptr)
+        return;
+
     pRecvPct->read_skip(7);
+    auto target_handle = pRecvPct->read<uint>();
+    auto mode = pRecvPct->read<uint8>();
 
     if (_player->m_bIsUsingStorage)
     {
@@ -2068,7 +2073,6 @@ void WorldSession::onTrade(XPacket *pRecvPct)
     }
     else
     {
-        auto target_handle = pRecvPct->read<uint>();
         auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(target_handle);
         if(tradeTarget == nullptr || tradeTarget->GetHandle() == _player->GetHandle())
         {
@@ -2080,7 +2084,6 @@ void WorldSession::onTrade(XPacket *pRecvPct)
             //StructPlayer__CancelTrade(pClient, 0);
         }
 
-        auto mode = pRecvPct->read<uint8>();
         switch (mode)
         {
             case 0:
