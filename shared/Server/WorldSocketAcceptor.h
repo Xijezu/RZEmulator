@@ -26,6 +26,8 @@
 #include <ace/SOCK_Acceptor.h>
 #include "WorldSocket.h"
 
+template<class T> class WorldSocket;
+
 template<class T>
 class WorldSocketAcceptor : public ACE_Acceptor<WorldSocket<T>, ACE_SOCK_Acceptor>
 {

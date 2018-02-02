@@ -10,6 +10,10 @@
 #include <ace/os_include/netinet/os_tcp.h>
 #include <ace/Dev_Poll_Reactor.h>
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 #include <set>
 
 #include "Log.h"
