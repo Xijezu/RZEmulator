@@ -36,7 +36,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${MYSQL_INCLUDE_DIR})
 
 add_executable(Chihiro ${SOURCE_FILES})
-target_link_libraries(Chihiro shared ${MYSQL_LIBRARY} lualib stdc++fs)
+target_link_libraries(Chihiro shared ${MYSQL_LIBRARY} lualib)
 
 
 if(NOT ACE_USE_EXTERNAL)
@@ -51,7 +51,8 @@ if(UNIX)
     if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
         set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
     elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
-        set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
+        set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt {EXECUTABLE_LINK_FLAGS}")
     endif()
     set_target_properties(Chihiro PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
+	target_link_libraries(Chihiro  stdc++fs)
 endif()
