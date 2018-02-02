@@ -2080,7 +2080,7 @@ void WorldSession::onTrade(XPacket *pRecvPct)
             //StructPlayer__CancelTrade(pClient, 0);
         }
 
-        auto mode = pRecvPct->read<char>();
+        auto mode = pRecvPct->read<uint8>();
         switch (mode)
         {
             case 0:
