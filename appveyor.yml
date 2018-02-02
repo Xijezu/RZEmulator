@@ -38,4 +38,4 @@ before_build:
 build_script:
   - cd c:\xijezu
   - cmake -DCMAKE_INSTALL_PREFIX="c:\xijezu\build\bin"
-  - ls
+  - msbuild /m Project.sln
