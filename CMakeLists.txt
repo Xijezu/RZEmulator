@@ -42,7 +42,7 @@ endif()
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
-
+find_package(Platform REQUIRED)
 find_package(MYSQL REQUIRED)
 #find_package(Lua REQUIRED)
 
