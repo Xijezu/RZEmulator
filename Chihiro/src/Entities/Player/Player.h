@@ -170,6 +170,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void MoveInventoryToStorage(Item *pItem, int64 count);
         bool EraseItem(Item* pItem, int64 count);
         bool EraseBullet(int64 count);
+        bool IsMixable(Item *pItem) const;
+        bool IsErasable(Item *pItem) const;
 
         // Storage Relevant
         bool RemoveSummon(Summon* pSummon);

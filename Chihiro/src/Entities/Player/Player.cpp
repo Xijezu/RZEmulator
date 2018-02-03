@@ -1198,7 +1198,7 @@ void Player::ShowDialog()
 bool Player::IsValidTrigger(const std::string &szTrigger)
 {
     Tokenizer tokenizer(m_szDialogMenu, '\t');
-    for (auto s : tokenizer)
+    for (const auto& s : tokenizer)
     {
         if (s == szTrigger)
             return true;
@@ -3192,7 +3192,7 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
         Putoff(pItem->m_Instance.nWearInfo);
 
-    if (/* IsErasable(pItem) && */
+    if (IsErasable(pItem) &&
             (pItem->m_Instance.Flag & 0x20000000) == 0
             && m_bIsUsingStorage
             && pItem->m_Instance.nCount >= count
@@ -3295,5 +3295,34 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
 bool Player::IsSitdownable() const
 {
     return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
+}
+
+bool Player::IsErasable(Item *pItem) const
+{
+    if(!pItem->IsInInventory())
+        return false;
+    if(pItem->m_Instance.OwnerHandle != GetHandle())
+        return false;
+    if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+        return false;
+    if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+        return false;
+
+    if(pItem->m_pItemBase->group == GROUP_SUMMONCARD)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            // TODO: Beltslots
+            if(m_aBindSummonCard[i] != nullptr && pItem->GetHandle() == m_aBindSummonCard[i]->GetHandle())
+                return false;
+        }
+    }
+
+    return !pItem->IsInStorage();
+}
+
+bool Player::IsMixable(Item *pItem) const
+{
+    return IsErasable(pItem);
 }
 
