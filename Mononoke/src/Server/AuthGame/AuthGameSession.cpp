@@ -23,21 +23,21 @@
 #include "AuthGame/AuthGameSession.h"
 
 // Constructor - set the default server name to <null>, also give it a socket
-AuthGameSession::AuthGameSession(GameSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{}), m_bIsAuthed(false)
+AuthGameSession::AuthGameSession(GameSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
 {
-    if(pSocket)
+    if (pSocket)
     {
         pSocket->AddReference();
     }
-    m_pGame->nIDX = 255;
+    m_pGame->nIDX   = 255;
     m_pGame->szName = "<null>";
 }
 
 AuthGameSession::~AuthGameSession()
 {
-    if(m_pGame)
+    if (m_pGame)
     {
-        if(m_bIsAuthed)
+        if (m_bIsAuthed)
         {
             auto g = sGameMapList->GetGame(m_pGame->nIDX);
             if (g != nullptr)
@@ -49,26 +49,25 @@ AuthGameSession::~AuthGameSession()
         delete m_pGame;
         m_pGame = nullptr;
     }
-    if(m_pSocket)
+    if (m_pSocket)
     {
         m_pSocket->RemoveReference();
     }
 }
 
-
 void AuthGameSession::OnClose()
 {
-    if(m_pGame == nullptr)
+    if (m_pGame == nullptr)
         return;
     auto g = sGameMapList->GetGame(m_pGame->nIDX);
-    if(g != nullptr && g->szName == m_pGame->szName)
+    if (g != nullptr && g->szName == m_pGame->szName)
     {
         {
             MX_UNIQUE_GUARD writeGuard(*sPlayerMapList->GetGuard());
-            auto map = sPlayerMapList->GetMap();
-            for(auto& player : *map)
+            auto            map = sPlayerMapList->GetMap();
+            for (auto &player : *map)
             {
-                if(player.second->nGameIDX == g->nIDX)
+                if (player.second->nGameIDX == g->nIDX)
                 {
                     map->erase(player.second->szLoginName);
                     delete player.second;
@@ -80,39 +79,42 @@ void AuthGameSession::OnClose()
     }
 }
 
-enum eStatus {
+enum eStatus
+{
     STATUS_CONNECTED = 0,
     STATUS_AUTHED
 };
 
-typedef struct GameHandler {
+typedef struct GameHandler
+{
     uint16_t cmd;
-    uint8_t status;
+    uint8_t  status;
 
     void (AuthGameSession::*handler)(XPacket *);
 } AuthHandler;
 
+constexpr AuthHandler packetHandler[] =
+                              {
+                                      {TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
+                                      {TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
+                                      {TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
+                                      {TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed}
+                              };
 
-const AuthHandler packetHandler[] =
-        {
-                {TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
-                {TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
-                {TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
-                {TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed}
-        };
-
-const int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
+constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
 // Handler for incoming packets
 void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
 {
-    ASSERT(pGamePct);
+            ASSERT(pGamePct);
 
     auto _cmd = pGamePct->GetPacketID();
-    int i = 0;
+    int  i    = 0;
 
-    for (i = 0; i < tableSize; i++) {
-        if ((uint16_t) packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED))) {
+    for (i = 0; i < tableSize; i++)
+    {
+        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED)))
+        {
             pGamePct->read_skip(7); // ignoring header
             (*this.*packetHandler[i].handler)(pGamePct);
             break;
@@ -120,7 +122,8 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     }
 
     // Report unknown packets in the error log
-    if (i == tableSize) {
+    if (i == tableSize)
+    {
         MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
         return;
     }
@@ -128,21 +131,21 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
 
 void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
 {
-    m_pGame->nIDX = pGamePct->read<uint16>();
-    m_pGame->szName = pGamePct->ReadString(21);
-    m_pGame->szSSU = pGamePct->ReadString(256);
+    m_pGame->nIDX           = pGamePct->read<uint16>();
+    m_pGame->szName         = pGamePct->ReadString(21);
+    m_pGame->szSSU          = pGamePct->ReadString(256);
     m_pGame->bIsAdultServer = pGamePct->read<bool>() != 0;
-    m_pGame->szIP = pGamePct->ReadString(16);
-    m_pGame->nPort = pGamePct->read<int>();
-    m_pGame->m_pSession = this;
+    m_pGame->szIP           = pGamePct->ReadString(16);
+    m_pGame->nPort          = pGamePct->read<int>();
+    m_pGame->m_pSession     = this;
 
     auto pGame = sGameMapList->GetGame(m_pGame->nIDX);
 
-    if(pGame == nullptr)
+    if (pGame == nullptr)
     {
         m_bIsAuthed = true;
         sGameMapList->AddGame(m_pGame);
-        MX_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.",m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
+        MX_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
         XPacket resultPct(TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_SUCCESS;
         m_pSocket->SendPacket(resultPct);
@@ -159,15 +162,15 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
 
 void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
 {
-    auto szAccount = pGamePct->ReadString(61);
+    auto szAccount   = pGamePct->ReadString(61);
     auto nOneTimeKey = pGamePct->read<uint64>();
 
-    auto p = sPlayerMapList->GetPlayer(szAccount);
+    auto   p      = sPlayerMapList->GetPlayer(szAccount);
     uint16 result = TS_RESULT_ACCESS_DENIED;
 
-    if(p != nullptr)
+    if (p != nullptr)
     {
-        if(nOneTimeKey == p->nOneTimeKey)
+        if (nOneTimeKey == p->nOneTimeKey)
         {
             p->bIsInGame = true;
             result = TS_RESULT_SUCCESS;
@@ -195,8 +198,9 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
 void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
 {
     auto szPlayer = pGamePct->ReadString(61);
-    auto p = sPlayerMapList->GetPlayer(szPlayer);
-    if(p != nullptr) {
+    auto p        = sPlayerMapList->GetPlayer(szPlayer);
+    if (p != nullptr)
+    {
         sPlayerMapList->RemovePlayer(szPlayer);
         delete p;
     }
@@ -205,8 +209,8 @@ void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
 void AuthGameSession::HandleClientKickFailed(XPacket *pGamePct)
 {
     auto szPlayer = pGamePct->ReadString(61);
-    auto p = sPlayerMapList->GetPlayer(szPlayer);
-    if(p != nullptr)
+    auto p        = sPlayerMapList->GetPlayer(szPlayer);
+    if (p != nullptr)
     {
         sPlayerMapList->RemovePlayer(szPlayer);
         delete p;
@@ -215,7 +219,7 @@ void AuthGameSession::HandleClientKickFailed(XPacket *pGamePct)
 
 void AuthGameSession::KickPlayer(Player *pPlayer)
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return;
 
     XPacket kickPct(TS_AG_KICK_CLIENT);
