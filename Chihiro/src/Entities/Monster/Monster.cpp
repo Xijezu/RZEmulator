@@ -367,7 +367,7 @@ void Monster::Update(uint diff)
                 if(GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 50 < ct)
                     OnUpdate();
 
-                if (true/*IsActable*/)
+                if (IsActable())
                 {
                     if (GetHealth() == 0)
                         return;
