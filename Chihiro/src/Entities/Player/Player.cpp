@@ -3297,3 +3297,38 @@ bool Player::IsSitdownable() const
     return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
 }
 
+void Player::StartTrade(Player *pTarget)
+{
+    if (!m_bTrading && m_bTradeFreezed)
+    {
+        ClearTradeInfo();
+        m_pTradeTarget = pTarget;
+    }
+}
+
+void Player::CancelTrade(bool bIsNeedBroadcast)
+{
+    if (bIsNeedBroadcast)
+        Messages::SendTradeCancelMessage(this);
+
+    ClearTradeInfo();
+}
+
+void Player::ClearTradeInfo()
+{
+    m_bTradeFreezed = false;
+    m_bTrading      = false;
+    // Todo: Implement clearing trade params as functions are implemented
+}
+
+Player *Player::GetTradeTarget()
+{
+    if (m_pTradeTarget == nullptr)
+        return nullptr;
+
+    // Is there currently a way to check if a character is deleted?
+    //if(m_pTradeTarget->IsDeleted)
+    //    return nullptr;
+
+    return m_pTradeTarget;
+}
