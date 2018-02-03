@@ -400,7 +400,7 @@ void Player::DB_ReadStorage()
             auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), i);
             if (pos != m_vStorageSummonList.end())
                 m_vStorageSummonList.erase(pos);
-            delete i;
+            i->DeleteThis();
         }
         vList.clear();
     }
@@ -771,7 +771,7 @@ bool Player::ReadSummonList(int UID)
             Item *card = FindItemBySID(card_uid);
             if (card == nullptr)
             {
-                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: , SummonUID: %d]", card_uid, sid);
+                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: %d , SummonUID: %d]", card_uid, sid);
                 summon->DeleteThis();
             }
             if (card != nullptr)
@@ -1617,6 +1617,19 @@ void Player::AddSummon(Summon *pSummon, bool bSendMsg)
         Summon::DB_UpdateSummon(this, pSummon);
     }
 }
+
+bool Player::RemoveSummon(Summon *pSummon)
+{
+    auto pos = std::find(m_vSummonList.begin(), m_vSummonList.end(), pSummon);
+    if (pos != m_vSummonList.end())
+        m_vSummonList.erase(pos);
+
+    pSummon->m_pMaster = nullptr;
+    Messages::SendRemoveSummonMessage(this, pSummon);
+    Summon::DB_UpdateSummon(this, pSummon);
+    return true;
+}
+
 
 Summon *Player::GetSummonByHandle(uint handle)
 {
@@ -3060,18 +3073,6 @@ void Player::onBeforeCalculateStat()
     Unit::onBeforeCalculateStat();
 }
 
-bool Player::RemoveSummon(Summon *pSummon)
-{
-    auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), pSummon);
-    if (pos != m_vStorageSummonList.end())
-        m_vStorageSummonList.erase(pos);
-
-    pSummon->m_pMaster = nullptr;
-    Messages::SendRemoveSummonMessage(this, pSummon);
-    Summon::DB_UpdateSummon(this, pSummon);
-	return true;
-}
-
 void Player::AddSummonToStorage(Summon *pSummon)
 {
     pSummon->m_nAccountID = GetUInt32Value(PLAYER_FIELD_ACCOUNT_ID);
@@ -3262,7 +3263,14 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
             int         hp                 = fields[i++].GetInt32();
             int         mp                 = fields[i++].GetInt32();
 
-            auto summon = Summon::AllocSummon(this, code);
+            auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [sid](Summon *const s) { return s->GetUInt32Value(UNIT_FIELD_UID) == sid; });
+            if (pos != m_vStorageSummonList.end())
+            {
+                vList.emplace_back(*pos);
+                continue;
+            }
+
+            auto summon = Summon::AllocSummon(nullptr, code);
             summon->SetUInt32Value(UNIT_FIELD_UID, sid);
             summon->m_nSummonInfo = code;
             summon->m_nCardUID    = card_uid;
@@ -3279,17 +3287,13 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
             summon->SetInt32Value(UNIT_FIELD_MANA, mp);
             summon->m_nTransform = transform;
 
-            auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [summon](Summon *const s) { return s->GetUInt32Value(UNIT_FIELD_UID) == summon->GetUInt32Value(UNIT_FIELD_UID); });
-            if (pos == m_vStorageSummonList.end())
-            {
-                ReadSkillList(summon);
-                m_vStorageSummonList.emplace_back(summon);
-            }
+            ReadSkillList(summon);
+            m_vStorageSummonList.emplace_back(summon);
             vList.emplace_back(summon);
 
         } while (result->NextRow());
     }
-	return true;
+    return true;
 }
 
 bool Player::IsSitdownable() const
