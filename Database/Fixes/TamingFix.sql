@@ -1,7 +1,7 @@
 UPDATE MonsterResource SET taming_id = 2201, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_turtle%';     
 UPDATE MonsterResource SET taming_id = 2101, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_chichen%';    
 UPDATE MonsterResource SET taming_id = 2301, taming_percentage = 0.80, taming_exp_mod = 1.50 WHERE model LIKE '%beast_panthera%';   
-UPDATE MonsterResource SET taming_id = 1801, taming_percentage = 0.25, taming_exp_mod = 2.00 WHERE model LIKE '%aion_yeti%';        
+UPDATE MonsterResource SET taming_id = 1801, taming_percentage = 0.25, taming_exp_mod = 2.00 WHERE model LIKE '%ain_yeti%';        
 UPDATE MonsterResource SET taming_id = 1021, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%spirit_water_pixi%';
 UPDATE MonsterResource SET taming_id = 1011, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%spirit_fiery_pixi%';
 UPDATE MonsterResource SET taming_id = 2401, taming_percentage = 0.25, taming_exp_mod = 1.50 WHERE model LIKE '%undead_skelfight%'; 
