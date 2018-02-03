@@ -5,13 +5,13 @@
 #ifndef PROJECT_ITEMFIELDS_H
 #define PROJECT_ITEMFIELDS_H
 
-#define MAX_GOLD_FOR_INVENTORY  100000000000
-#define MAX_GOLD_FOR_STORAGE    100000000000
-#define MAX_OPTION_NUMBER 4
-#define MAX_ITEM_WEAR 24
-#define MAX_COOLTIME_GROUP 40
-#define MAX_SOCKET_NUMBER 4
-#define MAX_ITEM_NAME_LENGTH 32
+constexpr int64 MAX_GOLD_FOR_INVENTORY = 100000000000;
+constexpr int64 MAX_GOLD_FOR_STORAGE   = 100000000000;
+constexpr int   MAX_OPTION_NUMBER      = 4;
+constexpr int   MAX_ITEM_WEAR          = 24;
+constexpr int   MAX_COOLTIME_GROUP     = 40;
+constexpr int   MAX_SOCKET_NUMBER      = 4;
+constexpr int   MAX_ITEM_NAME_LENGTH   = 32;
 
 struct ItemPickupOrder {
     uint hPlayer[3];
