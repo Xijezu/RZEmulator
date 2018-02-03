@@ -52,6 +52,7 @@ Player::~Player()
 
 void Player::CleanupsBeforeDelete()
 {
+    CharacterDatabase.DirectPExecute("UPDATE `Character` SET logout_time = NOW() WHERE sid = %u", GetUInt32Value(UNIT_FIELD_UID));
     if (IsInWorld())
     {
         RemoveAllSummonFromWorld();
@@ -804,7 +805,7 @@ void Player::SendLoginProperties()
 {
     Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
     CalculateStat();
-    // Login();
+    CharacterDatabase.DirectPExecute("UPDATE `Character` SET login_time = NOW() WHERE sid = %u", GetUInt32Value(UNIT_FIELD_UID));
 
     if (GetPartyID() != 0)
         sGroupManager->onLogin(GetPartyID(), this);

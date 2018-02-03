@@ -86,7 +86,7 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
                 case 314:
                 {
                     int       nLevel    = pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, pSkill->GetSkillEnhance());
-                    StateCode stateCode = (StateCode)pSkill->m_SkillBase->state_id;
+                    auto stateCode = (StateCode)pSkill->m_SkillBase->state_id;
                     if (stateCode != StateCode::SC_NONE)
                         bResult = pTarget->AddState((StateType)pSkill->m_SkillBase->state_type, stateCode, pCaster->GetHandle(),
                                                     nLevel, t, end_time, false, 0, "") == 0;
