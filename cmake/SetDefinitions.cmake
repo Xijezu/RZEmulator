@@ -16,6 +16,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+# Set build-directive (used in core to tell which buildtype we used)
+add_definitions(-D_BUILD_DIRECTIVE="'${CMAKE_BUILD_TYPE}'")
+
 #Set config install path correctly from given path
 string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
 if(${CONF_DIR_ABSOLUTE} EQUAL -1)

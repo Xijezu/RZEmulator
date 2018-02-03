@@ -44,10 +44,12 @@ endif()
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 find_package(Platform REQUIRED)
 find_package(MYSQL REQUIRED)
+find_package(Git)
 #find_package(Lua REQUIRED)
 
 
-include_directories(${CMAKE_SOURCE_DIR}/shared
+include_directories(${CMAKE_BINARY_DIR}
+                    ${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Configuration
                     ${CMAKE_SOURCE_DIR}/shared/Database
                     ${CMAKE_SOURCE_DIR}/shared/Dynamic
@@ -64,6 +66,14 @@ include_directories(${CMAKE_SOURCE_DIR}/shared
 if(NOT ACE_USE_EXTERNAL)
     add_subdirectory(dep/acelite)
 endif()
+
+# Find revision ID and hash of the sourcetree
+include(cmake/genrev.cmake)
+
+add_custom_target(revision.h ALL
+        COMMAND ${CMAKE_COMMAND} -DNO_GIT=${WITHOUT_GIT} -DGIT_EXEC=${GIT_EXECUTABLE} -DBUILDDIR=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/genrev.cmake
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
 
 add_subdirectory(dep/liblua)
 add_subdirectory(shared)
