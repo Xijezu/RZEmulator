@@ -3,6 +3,7 @@
 #include "Utilities/SignalHandler.h"
 #include "AuthNetwork.h"
 #include "World.h"
+#include "SystemConfigs.h"
 #include "WorldRunnable.h"
 
 #include <fstream>
@@ -61,6 +62,8 @@ int main(int argc, char **argv)
 		MX_LOG_ERROR("server.worldserver","Verify that the file exists and has \'[chihiro]' written in the top of the file!");
 		return 1;
 	}
+
+    MX_LOG_INFO("server.worldserver", "%s (worldserver)", _FULLVERSION);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
