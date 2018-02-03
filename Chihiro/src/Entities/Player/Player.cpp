@@ -3326,3 +3326,35 @@ bool Player::IsMixable(Item *pItem) const
     return IsErasable(pItem);
 }
 
+bool Player::DropQuest(int code)
+{
+    auto q = m_QuestManager.FindQuest(code);
+    if(q == nullptr)
+        return false;
+
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_QUEST);
+    stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
+    stmt->setInt32(1, q->m_Instance.nID);
+    CharacterDatabase.Execute(stmt);
+
+    onDropQuest(q);
+    Messages::SendQuestList(this);
+    return true;
+}
+
+void Player::onDropQuest(Quest *pQuest)
+{
+    if(pQuest->m_QuestBase->nType == QuestType::QT_Parameter)
+    {
+        for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+        {
+            if(pQuest->GetValue(i) == 99 && GetChaos() != 0 && pQuest->GetValue(i + 1) == 1)
+            {
+                AddChaos(-pQuest->GetValue(i + 2));
+            }
+        }
+    }
+    m_QuestManager.PopFromActiveQuest(pQuest);
+    Messages::SendNPCStatusInVisibleRange(this);
+}
+

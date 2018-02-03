@@ -74,9 +74,9 @@ class WorldSession
 
 		uint32 GetAccountId() const { return _accountId; }
 
-		std::string GetAccountName() const { return _player != nullptr ? _player->GetName() : "<null>"; }
+		std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->GetName() : "<null>"; }
 
-		Player *GetPlayer() const { return _player != nullptr ? _player : nullptr; }
+		Player *GetPlayer() const { return m_pPlayer != nullptr ? m_pPlayer : nullptr; }
 
 		WorldSocket<WorldSession> *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
 
@@ -130,6 +130,7 @@ class WorldSession
 
 		void onContact(XPacket *);
 		void onDialog(XPacket *);
+        void onDropQuest(XPacket*);
 
 		void onBuyItem(XPacket *);
 		void onSellItem(XPacket *);
@@ -155,7 +156,7 @@ class WorldSession
 
 		uint32      _accountId{ };
 		std::string _accountName{ };
-		Player      *_player{nullptr};
+		Player      *m_pPlayer{nullptr};
 		bool        _isAuthed{false};
 		int 		m_nPermission;
 };
