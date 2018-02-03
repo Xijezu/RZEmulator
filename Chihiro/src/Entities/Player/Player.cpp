@@ -3297,12 +3297,13 @@ bool Player::IsSitdownable() const
     return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
 }
 
-void Player::StartTrade(Player *pTarget)
+void Player::StartTrade(uint32
+pTargetHandle)
 {
     if (!m_bTrading && m_bTradeFreezed)
     {
         ClearTradeInfo();
-        m_pTradeTarget = pTarget;
+                    m_pTradeTargetHandle = pTarget;
     }
 }
 
@@ -3316,19 +3317,13 @@ void Player::CancelTrade(bool bIsNeedBroadcast)
 
 void Player::ClearTradeInfo()
 {
-    m_bTradeFreezed = false;
-    m_bTrading      = false;
+    m_pTradeTargetHandle = 0;
+    m_bTradeFreezed      = false;
+    m_bTrading           = false;
     // Todo: Implement clearing trade params as functions are implemented
 }
 
-Player *Player::GetTradeTarget()
+uint32 Player::GetTradeTargetHandle()
 {
-    if (m_pTradeTarget == nullptr)
-        return nullptr;
-
-    // Is there currently a way to check if a character is deleted?
-    //if(m_pTradeTarget->IsDeleted)
-    //    return nullptr;
-
     return m_pTradeTarget;
 }

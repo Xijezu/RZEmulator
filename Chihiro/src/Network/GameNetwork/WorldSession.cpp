@@ -2074,8 +2074,11 @@ void WorldSession::onTrade(XPacket *pRecvPct)
 
     if (target_handle == _player->GetHandle())
     {
-        if (_player->GetTradeTarget() != nullptr)
-            _player->GetTradeTarget()->CancelTrade(false);
+        if (_player->GetTradeTargetHandle() != 0)
+        {
+            auto pTarget = sMemoryPool->GetObjectInWorld<Player>(_player->GetTradeTargetHandle());
+            pTarget->CancelTrade(false);
+        }
 
         _player->CancelTrade(false);
         return;
