@@ -1105,7 +1105,7 @@ void Messages::SendTradeCancelMessage(Player *pClient)
         return;
 
     XPacket tradePct(TS_TRADE);
-    tradePct << (uint32)pClient->GetTradeTarget()->GetHandle();
+    tradePct << (uint32)pClient->GetTradeTargetHandle();
     tradePct << (uint8)TM_CANCEL_TRADE;
     pClient->SendPacket(tradePct);
 }
