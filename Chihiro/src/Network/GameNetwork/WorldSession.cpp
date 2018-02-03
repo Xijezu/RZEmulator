@@ -1587,20 +1587,17 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     if (item == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
-        MX_LOG_TRACE("network", "onUseItem: Not own item!!!");
         return;
     }
 
     if (item->m_pItemBase->type != TYPE_USE && false /*!item->IsUsingItem()*/)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, item_handle);
-        MX_LOG_TRACE("network", "onUseItem: Not usable");
         return;
     }
 
     if ((item->m_pItemBase->flaglist[FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
     {
-        MX_LOG_TRACE("network", "onUseItem: Not usable while moving");
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, item_handle);
         return;
     }
@@ -1614,9 +1611,8 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     uint16 nResult = m_pPlayer->IsUseableItem(item, nullptr);
     if (nResult != TS_RESULT_SUCCESS)
     {
-        /*if(nResult == TS_RESULT_COOL_TIME)
-            Messages::SendItemCoolTimeInfo(m_pPlayer);*/
-        MX_LOG_TRACE("network", "onUseItem: Not usable item: %d", nResult);
+        if(nResult == TS_RESULT_COOL_TIME)
+            Messages::SendItemCoolTimeInfo(m_pPlayer);
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), nResult, item_handle);
         return;
     }
@@ -1624,7 +1620,6 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     if (item->m_pItemBase->flaglist[FLAG_TARGET_USE] == 0)
     {
         nResult = m_pPlayer->UseItem(item, nullptr, szParameter);
-        MX_LOG_TRACE("network", "onUseItem: nResult: %d", nResult);
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), nResult, item_handle);
         if (nResult != 0)
             return;
@@ -1647,12 +1642,10 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
 
         if (nResult != TS_RESULT_SUCCESS)
         {
-            MX_LOG_TRACE("network", "onItemUse: IsUseableItem failed: %d", nResult);
             return;
         }
     }
 
-    MX_LOG_TRACE("network", "onItemUse: Final nResult: %d", nResult);
     XPacket resPct(TS_SC_USE_ITEM_RESULT);
     resPct << item_handle;
     resPct << target_handle;
