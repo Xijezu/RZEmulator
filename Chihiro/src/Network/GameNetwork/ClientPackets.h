@@ -32,6 +32,7 @@ enum CSPACKETS {
     TS_SC_DISCONNECT_DESC                           = 28,
     TS_SC_CHANGE_NAME                               = 30,
     TS_CS_CHANGE_ALIAS                              = 31,
+    TS_CS_UNKN                                      = 50,
     TS_CS_VERSION                                   = 51,
     TS_CS_VERSION2                                  = 52,
     TS_SC_ANTI_HACK                                 = 53,

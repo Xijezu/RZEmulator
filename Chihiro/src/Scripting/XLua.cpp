@@ -278,6 +278,8 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
         return return_object(m_pUnit->GetPositionX());
     } else if (szKey == "y") {
         return return_object(m_pUnit->GetPositionY());
+    } else if(szKey == "auto_user") {
+        return return_object((int)0);
     } else if (szKey == "level" || szKey == "lv") {
         return return_object(m_pUnit->GetLevel());
     } else if (szKey == "job_depth") {
