@@ -3,9 +3,9 @@
 
 #include "Common.h"
 
-#define MATERIAL_INFO_COUNT 5
-#define MIX_VALUE_COUNT 6
-#define MAX_SUB_MATERIAL_COUNT 9
+constexpr int MATERIAL_INFO_COUNT    = 5;
+constexpr int MIX_VALUE_COUNT        = 6;
+constexpr int MAX_SUB_MATERIAL_COUNT = 9;
 
 enum MIX_TYPE
 {

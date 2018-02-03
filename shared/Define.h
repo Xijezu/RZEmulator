@@ -81,6 +81,15 @@
 #define UI64FMTD ACE_UINT64_FORMAT_SPECIFIER
 #define UI64LIT(N) ACE_UINT64_LITERAL(N)
 
+typedef unsigned long  DWORD;
+typedef unsigned short WORD;
+#ifndef LOWORD
+#define LOWORD(a) ((WORD)(a))
+#endif
+#ifndef HIWORD
+#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#endif
+
 #define SI64FMTD ACE_INT64_FORMAT_SPECIFIER
 #define SI64LIT(N) ACE_INT64_LITERAL(N)
 
@@ -97,20 +106,4 @@ typedef ACE_UINT8 uint8;
 
 typedef uint32 uint;
 typedef uint16 ushort;
-
-
-enum DBCFormer
-{
-    FT_NA='x',                                              //not used or unknown, 4 byte size
-    FT_NA_BYTE='X',                                         //not used or unknown, byte
-    FT_STRING='s',                                          //char*
-    FT_FLOAT='f',                                           //float
-    FT_INT='i',                                             //uint32
-    FT_BYTE='b',                                            //uint8
-    FT_SORT='d',                                            //sorted by this field, field is not included
-    FT_IND='n',                                             //the same, but parsed to data
-    FT_SQL_PRESENT='p',                                     //Used in sql format to mark column present in sql dbc
-    FT_SQL_ABSENT='a'                                       //Used in sql format to mark column absent in sql dbc
-};
-
 #endif //SKYFIRE_DEFINE_H

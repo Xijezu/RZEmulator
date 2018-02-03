@@ -13,7 +13,7 @@ class Item;
 class Summon;
 class WorldLocation;
 
-#define MAX_ITEM_COOLTIME_GROUP 20
+constexpr int MAX_ITEM_COOLTIME_GROUP = 20;
 
 enum BONUS_TYPE : int
 {

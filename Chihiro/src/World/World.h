@@ -56,10 +56,10 @@ class Summon;
 class XPacket;
 
 typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
-const int g_nRegionSize = 180;
-const int g_nMapWidth = 700000;
-const int g_nMapHeight = 1000000;
-const float g_fMapLength = 16128.0f;
+constexpr int g_nRegionSize = 180;
+constexpr int g_nMapWidth = 700000;
+constexpr int g_nMapHeight = 1000000;
+constexpr float g_fMapLength = 16128.0f;
 
 class World
 {
