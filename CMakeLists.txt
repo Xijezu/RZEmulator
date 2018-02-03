@@ -21,7 +21,8 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-option(ACE_USE_EXTERNAL "Use external ACE" OFF)
+option(ACE_USE_EXTERNAL "Use external ACE"                                            0)
+option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 
 if(ACE_USE_EXTERNAL)
     find_package(ACE)
@@ -44,8 +45,17 @@ endif()
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 find_package(Platform REQUIRED)
 find_package(MYSQL REQUIRED)
-find_package(Git)
-#find_package(Lua REQUIRED)
+
+IF(NOT WITHOUT_GIT)
+    find_package(Git)
+ENDIF()
+
+# Find revision ID and hash of the sourcetree
+include(cmake/genrev.cmake)
+add_custom_target(revision.h ALL
+        COMMAND ${CMAKE_COMMAND} -DNO_GIT=${WITHOUT_GIT} -DGIT_EXEC=${GIT_EXECUTABLE} -DBUILDDIR=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/genrev.cmake
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        )
 
 
 include_directories(${CMAKE_BINARY_DIR}
@@ -66,14 +76,6 @@ include_directories(${CMAKE_BINARY_DIR}
 if(NOT ACE_USE_EXTERNAL)
     add_subdirectory(dep/acelite)
 endif()
-
-# Find revision ID and hash of the sourcetree
-include(cmake/genrev.cmake)
-
-add_custom_target(revision.h ALL
-        COMMAND ${CMAKE_COMMAND} -DNO_GIT=${WITHOUT_GIT} -DGIT_EXEC=${GIT_EXECUTABLE} -DBUILDDIR=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/genrev.cmake
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        )
 
 add_subdirectory(dep/liblua)
 add_subdirectory(shared)
