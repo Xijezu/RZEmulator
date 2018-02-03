@@ -329,9 +329,6 @@ void World::UpdateSessions(uint diff)
 
         if (!pSession->Update(diff))    // As interval = 0
         {
-            /*if (!RemoveQueuedPlayer(itr->second) && itr->second && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
-                m_disconnects[itr->second->GetAccountId()] = time(NULL);*/
-            //RemoveQueuedPlayer(pSession);
             m_sessions.erase(itr);
             delete pSession;
         }
@@ -534,22 +531,6 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
     }
     return item_handle;
 }
-
-/*
- bool __usercall checkDrop@<al>(StructCreature *pKiller@<esi>, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
-{
-  float fMod; // [sp+4h] [bp-8h]@1
-  float fCreatureCardMod; // [sp+8h] [bp-4h]@1
-  float fItemDropRate; // [sp+14h] [bp+8h]@4
-
-  fCreatureCardMod = 1.0;
-  fMod = (double)pKiller->vfptr[10].IsDeleteable((ArSchedulerObject *)pKiller) * 0.009999999776482582 + 1.0;
-  if ( code > 0 && StructItem::GetItemBase(code)->nGroup == 13 )
-    fCreatureCardMod = pKiller->m_fCreatureCardChance;
-  fItemDropRate = GameRule::fItemDropRate;
-  return (double)percentage * fMod * fItemDropRate * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod >= (double)XRandom(1u, 0x5F5E100u);
-}
- */
 
 bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
 {

@@ -64,63 +64,63 @@ enum eStatus
     STATUS_AUTHED
 };
 
-typedef struct AuthGameSession
+typedef struct WorldSessionHandler
 {
     uint16_t cmd;
     uint8_t  status;
     void (WorldSession::*handler)(XPacket *);
 } GameHandler;
 
-const AuthGameSession packetHandler[] =
-                              {
-                                      {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                      {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                      {TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                      {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
-                                      {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
-                                      {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
-                                      {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
-                                      {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
-                                      {TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &WorldSession::onCharacterList},
-                                      {TS_CS_LOGIN,                 STATUS_AUTHED,    &WorldSession::onLogin},
-                                      {TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &WorldSession::onCharacterName},
-                                      {TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onCreateCharacter},
-                                      {TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onDeleteCharacter},
-                                      {TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &WorldSession::onMoveRequest},
-                                      {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
-                                      {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
-                                      {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
-                                      {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
-                                      {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
-                                      {TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
-                                      {TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
-                                      {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
-                                      {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
-                                      {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
-                                      {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
-                                      {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
-                                      {TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
-                                      {TS_TRADE,                    STATUS_AUTHED,    &WorldSession::onTrade},
-                                      {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
-                                      {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
-                                      {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
-                                      {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
-                                      {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
-                                      {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
-                                      {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
-                                      {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
-                                      {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
-                                      {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
-                                      {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
-                                      {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
-                                      {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
-                                      {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
-                                      {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
-                                      {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
-                                      {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard}
-                              };
+constexpr WorldSessionHandler packetHandler[] =
+                                  {
+                                          {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                          {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                          {TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                          {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
+                                          {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
+                                          {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                          {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                          {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
+                                          {TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &WorldSession::onCharacterList},
+                                          {TS_CS_LOGIN,                 STATUS_AUTHED,    &WorldSession::onLogin},
+                                          {TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &WorldSession::onCharacterName},
+                                          {TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onCreateCharacter},
+                                          {TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onDeleteCharacter},
+                                          {TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &WorldSession::onMoveRequest},
+                                          {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
+                                          {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
+                                          {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
+                                          {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
+                                          {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
+                                          {TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
+                                          {TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
+                                          {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
+                                          {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
+                                          {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
+                                          {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
+                                          {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
+                                          {TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
+                                          {TS_TRADE,                    STATUS_AUTHED,    &WorldSession::onTrade},
+                                          {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
+                                          {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
+                                          {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
+                                          {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
+                                          {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
+                                          {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
+                                          {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
+                                          {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
+                                          {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
+                                          {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
+                                          {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
+                                          {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
+                                          {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
+                                          {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
+                                          {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
+                                          {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
+                                          {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard}
+                                  };
 
-const int tableSize = (sizeof(packetHandler) / sizeof(AuthGameSession));
+constexpr int tableSize = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
 
 /// Handler for incoming packets
 void WorldSession::ProcessIncoming(XPacket *pRecvPct)
@@ -1658,7 +1658,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     _player->SendPacket(resPct);
 }
 
-bool WorldSession::Update(uint diff)
+bool WorldSession::Update(uint /*diff*/)
 {
     if (_socket && _socket->IsClosed())
     {
@@ -1666,10 +1666,7 @@ bool WorldSession::Update(uint diff)
         _socket = nullptr;
     }
 
-    if (!_socket)
-        return false;
-
-    return true;
+    return _socket != nullptr;
 }
 
 void WorldSession::onRevive(XPacket *)

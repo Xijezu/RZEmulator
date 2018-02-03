@@ -23,36 +23,37 @@
 #include "GroupManager.h"
 #include "RegionContainer.h"
 
-typedef struct AllowedCommands {
+typedef struct AllowedCommands
+{
     std::string szCommand;
-    bool bNeedsPermission;
-    void (AllowedCommandInfo::*handler)(Player*,const std::string&);
+    bool        bNeedsPermission;
+    void (AllowedCommandInfo::*handler)(Player *, const std::string &);
 } GameHandler;
 
 const AllowedCommands commandHandler[] =
-                              {
-                                      {"/run",        true,  &AllowedCommandInfo::onRunScript},
-                                      {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
-                                      {"/standup",    false, &AllowedCommandInfo::onCheatStandup},
-                                      {"/position",   false, &AllowedCommandInfo::onCheatPosition},
-                                      {"/battle",     false, &AllowedCommandInfo::onBattleMode},
-                                      {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
-                                      {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
-                                      {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
-                                      {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
-                                      {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
-                                      {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
-                                      {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
-                                      {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
-                                      {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy},
-                                      {"/pleave",     false, &AllowedCommandInfo::onLeaveParty}
-                              };
+                                  {
+                                          {"/run",        true,  &AllowedCommandInfo::onRunScript},
+                                          {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
+                                          {"/standup",    false, &AllowedCommandInfo::onCheatStandup},
+                                          {"/position",   false, &AllowedCommandInfo::onCheatPosition},
+                                          {"/battle",     false, &AllowedCommandInfo::onBattleMode},
+                                          {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
+                                          {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
+                                          {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
+                                          {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
+                                          {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
+                                          {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
+                                          {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
+                                          {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
+                                          {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy},
+                                          {"/pleave",     false, &AllowedCommandInfo::onLeaveParty}
+                                  };
 
-const int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
+constexpr int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
-void AllowedCommandInfo::onCheatPosition(Player *pClient, const std::string&/* tokens*/)
+void AllowedCommandInfo::onCheatPosition(Player *pClient, const std::string &/* tokens*/)
 {
-    auto pos = pClient->GetCurrentPosition(sWorld->GetArTime());
+    auto pos     = pClient->GetCurrentPosition(sWorld->GetArTime());
     auto message = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)pos.GetPositionX(), (int)pos.GetPositionY(), (int)pos.GetLayer());
     Messages::SendChatMessage(30, "@SYSTEM", pClient, message);
 }
@@ -62,26 +63,23 @@ void AllowedCommandInfo::onRunScript(Player *pClient, const std::string &pScript
     sScriptingMgr->RunString(pClient, pScript);
 }
 
-void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string&/* tokens*/)
+void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string &/* tokens*/)
 {
-    if(pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable())
+    if (pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable())
     {
-        if(pClient->GetTargetHandle() != 0)
+        if (pClient->GetTargetHandle() != 0)
             pClient->CancelAttack();
         pClient->m_bSitdown = true;
         Messages::BroadcastStatusMessage(pClient);
     }
 }
 
-void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string& tokens) {
-    try {
-        auto target_handle = (uint)std::stoul(tokens);
-        auto unit = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
-        if (unit != nullptr)
-            Messages::BroadcastStatusMessage(unit);
-    } catch (std::exception &ex) {
-        MX_LOG_ERROR("world", "AllowedCommandInfo::onBattleMode: Exception thrown!");
-    }
+void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string &tokens)
+{
+    auto target_handle = (uint)std::stoul(tokens);
+    auto unit          = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
+    if (unit != nullptr)
+        Messages::BroadcastStatusMessage(unit);
 }
 
 void AllowedCommandInfo::onCheatNotice(Player *pClient, const std::string &)
@@ -96,17 +94,20 @@ void AllowedCommandInfo::onCheatParty(Player *pClient, const std::string &)
 
 void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
 {
-    Tokenizer tokenizer(szMessage, ' ');
-    for (const auto &i : commandHandler) {
-        if(i.szCommand == tokenizer[0] && (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100))) {
+    Tokenizer       tokenizer(szMessage, ' ');
+    for (const auto &i : commandHandler)
+    {
+        if (i.szCommand == tokenizer[0] && (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100)))
+        {
             auto pos = szMessage.find(' ');
-            if(pos != std::string::npos)
-                (*this.*i.handler)(pClient, szMessage.substr(pos+1));
+            if (pos != std::string::npos)
+                (*this.*i.handler)(pClient, szMessage.substr(pos + 1));
             else
-                (*this.*i.handler)(pClient,"");
+                (*this.*i.handler)(pClient, "");
         }
     }
 }
+
 void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &/*szMessage*/)
 {
     World::StopNow(SHUTDOWN_EXIT_CODE);
@@ -127,7 +128,7 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
     // Causes deadlock
 
     KillALlRegionFunctor fn;
-    KillAllDoableObject fn2;
+    KillAllDoableObject  fn2;
     fn2.p = pClient;
     fn.fn = fn2;
 
@@ -135,27 +136,27 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
 
 }
 
-void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string& str)
+void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string &str)
 {
-    int cnt = 1;
+    int       cnt = 1;
     Tokenizer tokens(str, ' ');
-    if(tokens.size() < 1)
+    if (tokens.size() < 1)
         return;
     auto i = std::stoi(tokens[0]);
-    if(tokens.size() == 2)
+    if (tokens.size() == 2)
         cnt = std::stoi(tokens[1]);
     auto pos = pClient->GetCurrentPosition(sWorld->GetArTime());
-    auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(),i, cnt);
+    auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
     sScriptingMgr->RunString(pClient, res);
 }
 
 void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &partyName)
 {
-    if(pClient->GetPartyID() != 0)
+    if (pClient->GetPartyID() != 0)
         return;
 
     auto partyID = sGroupManager->CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
-    if(partyID == -1)
+    if (partyID == -1)
     {
         MX_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
         return;
@@ -167,15 +168,15 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
 
 void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPlayer)
 {
-    if(pClient->GetPartyID() == 0)
+    if (pClient->GetPartyID() == 0)
         return;
 
     auto player = Player::FindPlayer(szPlayer);
-    if(player == nullptr)
+    if (player == nullptr)
         return;
 
     auto partyname = sGroupManager->GetPartyName(pClient->GetPartyID());
-    if(partyname.empty())
+    if (partyname.empty())
         return;
 
     auto nPW = sGroupManager->GetPassword(pClient->GetPartyID());
@@ -220,7 +221,7 @@ void AllowedCommandInfo::onPartyInfo(Player *pClient, const std::string &)
 
 void AllowedCommandInfo::onPartyDestroy(Player *pClient, const std::string &)
 {
-    if(pClient->GetPartyID() != 0 && !sGroupManager->IsLeader(pClient->GetPartyID(), pClient->GetName()))
+    if (pClient->GetPartyID() != 0 && !sGroupManager->IsLeader(pClient->GetPartyID(), pClient->GetName()))
         return;
 
     sGroupManager->DestroyParty(pClient->GetPartyID());
@@ -228,7 +229,7 @@ void AllowedCommandInfo::onPartyDestroy(Player *pClient, const std::string &)
 
 void AllowedCommandInfo::onCheatStandup(Player *pClient, const std::string &)
 {
-    if(pClient == nullptr)
+    if (pClient == nullptr)
         return;
 
     pClient->m_bSitdown = false;
@@ -237,9 +238,9 @@ void AllowedCommandInfo::onCheatStandup(Player *pClient, const std::string &)
 
 void AllowedCommandInfo::onLeaveParty(Player *pClient, const std::string &)
 {
-    if(pClient == nullptr || pClient->GetPartyID() == 0)
+    if (pClient == nullptr || pClient->GetPartyID() == 0)
         return;
 
-    if(sGroupManager->LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
+    if (sGroupManager->LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
         pClient->SetUInt32Value(PLAYER_FIELD_PARTY_ID, 0);
 }
