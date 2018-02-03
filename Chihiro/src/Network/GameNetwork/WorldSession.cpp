@@ -76,6 +76,8 @@ constexpr WorldSessionHandler packetHandler[] =
                                               {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
                                               {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
                                               {TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_CS_UNKN,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_CS_REPORT,                STATUS_CONNECTED, &WorldSession::HandleNullPacket},
                                               {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
                                               {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
                                               {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
@@ -119,7 +121,6 @@ constexpr WorldSessionHandler packetHandler[] =
                                               {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
                                               {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard},
                                               {TS_CS_TARGETING,             STATUS_AUTHED,    &WorldSession::HandleNullPacket}, // @Todo: Do proper handling here
-                                              {TS_CS_REPORT,                STATUS_AUTHED,    &WorldSession::HandleNullPacket},
                                               {TS_CS_DROP_QUEST,            STATUS_AUTHED,    &WorldSession::onDropQuest}
                                       };
 
