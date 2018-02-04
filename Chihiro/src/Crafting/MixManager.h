@@ -145,10 +145,20 @@ class MixManager
         /// \param pItem failed item
         /// \param nFailResult fail type
         void procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult);
+        /// \brief Repair broken Items
+        /// \param pPlayer The owner of the item
+        /// \param pMainMaterial Main material to be used
+        /// \param nSubMaterialCountItem count of submaterials
+        /// \param pSubItem submaterials
+        /// \param pCountList Usable amount of pSubItem[IDX]
+        /// \return true on success, false on failure
+        bool RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
 
     private:
         std::vector<MixBase>     m_vMixInfo{ };
         std::vector<EnhanceInfo> m_vEnhanceInfo{ };
+        /// \brief Check if a mix makes sense
+        bool CompatibilityCheck(int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
 };
 
 #define sMixManager ACE_Singleton<MixManager, ACE_Null_Mutex>::instance()
