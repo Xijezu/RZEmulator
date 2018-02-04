@@ -22,7 +22,8 @@ class Monster;
 class Unit;
 class NPC;
 
-struct Waypoint {
+struct Waypoint
+{
     int                   way_point_speed;
     int                   way_point_type;
     int                   way_point_id;
@@ -35,24 +36,24 @@ class ObjectMgr
         ObjectMgr();
         ~ObjectMgr() = default;
 
-        typedef UNORDERED_MAP<uint32, ItemTemplate>                 ItemTemplateContainer;
-        typedef UNORDERED_MAP<uint32, uint64>                       SummonLevelBaseContainer;
-        typedef UNORDERED_MAP<uint32, CreatureStat>                 CreatureBaseStat;
-        typedef UNORDERED_MAP<uint32, JobLevelBonusTemplate>        JobLevelBonusTemplateContainer;
-        typedef UNORDERED_MAP<uint32, SummonLevelBonus>             SummonBonusTemplateContainer;
-        typedef UNORDERED_MAP<uint32, JobResourceTemplate>          JobResourceTemplateContainer;
-        typedef UNORDERED_MAP<uint32, SummonResourceTemplate>       SummonResourceTemplateContainer;
+        typedef UNORDERED_MAP<int32, ItemTemplate>                  ItemTemplateContainer;
+        typedef UNORDERED_MAP<int32, uint64>                        SummonLevelBaseContainer;
+        typedef UNORDERED_MAP<int32, CreatureStat>                  CreatureBaseStat;
+        typedef UNORDERED_MAP<int32, JobLevelBonusTemplate>         JobLevelBonusTemplateContainer;
+        typedef UNORDERED_MAP<int32, SummonLevelBonus>              SummonBonusTemplateContainer;
+        typedef UNORDERED_MAP<int32, JobResourceTemplate>           JobResourceTemplateContainer;
+        typedef UNORDERED_MAP<int32, SummonResourceTemplate>        SummonResourceTemplateContainer;
         typedef std::vector<SkillTreeGroup>                         SkillTreeTemplateContainer;
-        typedef UNORDERED_MAP<uint32, SkillBase>                    SkillBaseContainer;
-        typedef UNORDERED_MAP<uint32, MonsterBase>                  MonsterBaseContainer;
-        typedef UNORDERED_MAP<uint32, LevelResourceTemplate>        LevelTemplateContainer;
+        typedef UNORDERED_MAP<int32, SkillBase>                     SkillBaseContainer;
+        typedef UNORDERED_MAP<int32, MonsterBase>                   MonsterBaseContainer;
+        typedef UNORDERED_MAP<int32, LevelResourceTemplate>         LevelTemplateContainer;
         typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
         typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
         typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
         typedef UNORDERED_MAP<int, FieldPropTemplate>               FieldPropTemplateContainer;
         typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
         typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
-        typedef UNORDERED_MAP<uint, StateTemplate>                  StateTemplateContainer;
+        typedef UNORDERED_MAP<int, StateTemplate>                  StateTemplateContainer;
 
         void LoadStatResource();
         void LoadJobResource();
@@ -88,15 +89,15 @@ class ObjectMgr
         NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
         void AddNPCToWorld();
 
-        CreatureStat *const GetStatInfo(uint stat_id);
-        ItemTemplate *const GetItemBase(uint item_id);
-        uint64 GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying);
-        SkillBase *const GetSkillBase(uint);
+        CreatureStat *const GetStatInfo(int stat_id);
+        ItemTemplate *const GetItemBase(int item_id);
+        int64 GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying);
+        SkillBase *const GetSkillBase(int);
         CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
         CreatureStat GetSummonLevelBonus(int summon_code, int growth_depth, int level);
-        JobResourceTemplate *const GetJobInfo(uint job_id);
-        SummonResourceTemplate *const GetSummonBase(uint idx);
-        MonsterBase *const GetMonsterInfo(uint idx);
+        JobResourceTemplate *const GetJobInfo(int job_id);
+        SummonResourceTemplate *const GetSummonBase(int idx);
+        MonsterBase *const GetMonsterInfo(int idx);
         FieldPropTemplate *const GetFieldPropBase(int idx);
         std::vector<MarketInfo> *const GetMarketInfo(const std::string &);
         QuestBaseServer *const GetQuestBase(int code);
@@ -104,18 +105,18 @@ class ObjectMgr
         StateTemplate *const GetStateInfo(int code);
         bool checkQuestTypeFlag(QuestType type, int flag);
 
-        int GetNeedJpForJobLevelUp(uint, uint);
+        int GetNeedJpForJobLevelUp(int, int);
         int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
-        long GetNeedExp(int level);
+        int64 GetNeedExp(int level);
         uint64 GetNeedSummonExp(int level);
-        Monster *RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
+        Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
         bool IsInRandomPoolMonster(int group_id, int monster_id);
         bool LearnAllSkill(Player *pPlayer);
 
         DropGroup *GetDropGroupInfo(int drop_group_id);
         bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);
 
-        ushort IsLearnableSkill(Unit *, uint, int, int &);
+        ushort IsLearnableSkill(Unit *, int, int, int &);
         int GetLocationID(float x, float y) const;
         bool IsBlocked(float x, float y);
         bool CollisionToLine(float x1, float y1, float x2, float y2);
@@ -146,7 +147,7 @@ class ObjectMgr
         SummonBonusTemplateContainer    _summonBonusStore;
         StateTemplateContainer          _stateTemplateStore;
 
-        ushort isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level);
+        ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
         void RegisterSkillTree(SkillTreeBase base);
 
         std::vector<SkillTreeBase> getSkillTree(int job_id);

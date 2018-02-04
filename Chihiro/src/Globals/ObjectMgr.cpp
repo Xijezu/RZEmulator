@@ -60,15 +60,17 @@ void ObjectMgr::LoadItemResource()
                                                     "enhance_1_03, enhance_1_04, skill_id, state_id, state_level, state_time, state_type, cool_time, "
                                                     "cool_time_group, script_text, name_id FROM ItemResource;");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Items. Table `ItemResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field        *fields = result->Fetch();
-        ItemTemplate itemTemplate{};
+        ItemTemplate itemTemplate{ };
 
         itemTemplate.id               = fields[0].GetInt32();
         itemTemplate.type             = fields[1].GetInt32();
@@ -99,7 +101,8 @@ void ObjectMgr::LoadItemResource()
         itemTemplate.endurance        = fields[26].GetInt32();
         itemTemplate.material         = fields[27].GetInt32();
         itemTemplate.summon_id        = fields[28].GetInt32();
-        for (int i = 0; i < 19; i++) {
+        for (int i = 0; i < 19; i++)
+        {
             itemTemplate.flaglist[i] = fields[29 + i].GetUInt8();
         }
         itemTemplate.available_period = fields[48].GetInt32();
@@ -107,19 +110,22 @@ void ObjectMgr::LoadItemResource()
         itemTemplate.throw_range      = fields[50].GetFloat();
         itemTemplate.distribute_type  = fields[51].GetUInt8();
         int      y = 52;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             itemTemplate.base_type[i]   = fields[y++].GetInt16();
             itemTemplate.base_var[i][0] = fields[y++].GetFloat();
             itemTemplate.base_var[i][1] = fields[y++].GetFloat();
         }
         y = 64;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             itemTemplate.opt_type[i]   = fields[y++].GetInt16();
             itemTemplate.opt_var[i][0] = fields[y++].GetFloat();
             itemTemplate.opt_var[i][1] = fields[y++].GetFloat();
         }
         y = 76;
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++)
+        {
             itemTemplate.enhance_id[i]  = fields[y++].GetInt16();
             itemTemplate._enhance[i][0] = fields[y++].GetFloat();
             itemTemplate._enhance[i][1] = fields[y++].GetFloat();
@@ -149,83 +155,89 @@ void ObjectMgr::LoadMonsterResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM MonsterResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
         return;
     }
 
     uint32 count = 0, y = 0;
-    do {
-        Field        *field = result->Fetch();
-        int idx = 0;
-        MonsterBase base{};
-        base.id = field[idx++].GetInt32();
+    do
+    {
+        Field       *field = result->Fetch();
+        int         idx    = 0;
+        MonsterBase base{ };
+        base.id            = field[idx++].GetInt32();
         base.monster_group = field[idx++].GetInt32();
         idx++;
         base.location_id = field[idx++].GetInt32();
         idx += 5; // 14 unused columns, mostly for rendering clientside
-        base.size = field[idx++].GetFloat();
+        base.size  = field[idx++].GetFloat();
         base.scale = field[idx++].GetFloat();
         idx += 7;
-        base.level = field[idx++].GetInt32();
-        base.grp = field[idx++].GetInt32();
-        base.magic_type = field[idx++].GetInt32();
-        base.race = field[idx++].GetInt32();
+        base.level         = field[idx++].GetInt32();
+        base.grp           = field[idx++].GetInt32();
+        base.magic_type    = field[idx++].GetInt32();
+        base.race          = field[idx++].GetInt32();
         base.visible_range = field[idx++].GetInt32() * 12;
-        base.chase_range = field[idx++].GetInt32();
-        for(auto& curr : base.flag) {
+        base.chase_range   = field[idx++].GetInt32();
+        for (auto &curr : base.flag)
+        {
             curr = field[idx++].GetInt32();
         }
         base.monster_type = field[idx++].GetInt32();
-        base.stat_id = field[idx++].GetInt32();
-        base.fight_type = field[idx++].GetInt32();
+        base.stat_id      = field[idx++].GetInt32();
+        base.fight_type   = field[idx++].GetInt32();
         idx += 9;
-        base.weapon_type = field[idx++].GetInt32();
+        base.weapon_type         = field[idx++].GetInt32();
         base.attack_motion_speed = field[idx++].GetInt32();
-        base.ability = field[idx++].GetInt32();
+        base.ability             = field[idx++].GetInt32();
         base.standard_walk_speed = field[idx++].GetInt32();
-        base.standard_run_speed = field[idx++].GetInt32();
-        base.walk_speed = field[idx++].GetInt32();
-        base.run_speed = field[idx++].GetInt32();
-        base.attack_range = field[idx++].GetFloat() * 100;
-        base.hp = field[idx++].GetInt32();
-        base.mp = field[idx++].GetInt32();
-        base.attacK_point = field[idx++].GetInt32();
-        base.magic_point = field[idx++].GetInt32();
-        base.defence = field[idx++].GetInt32();
-        base.magic_defence = field[idx++].GetInt32();
-        base.attack_speed = field[idx++].GetInt32();
-        base.magic_speed = field[idx++].GetInt32();
-        base.accuracy = field[idx++].GetInt32();
-        base.magic_accuracy = field[idx++].GetInt32();
-        base.avoid = field[idx++].GetInt32();
-        base.magic_avoid = field[idx++].GetInt32();
-        base.taming_id = field[idx++].GetInt32();
-        base.taming_percentage = field[idx++].GetFloat();
-        base.taming_exp_mod = field[idx++].GetFloat();
-        for(y = 0; y < 2; y++) {
+        base.standard_run_speed  = field[idx++].GetInt32();
+        base.walk_speed          = field[idx++].GetInt32();
+        base.run_speed           = field[idx++].GetInt32();
+        base.attack_range        = field[idx++].GetFloat() * 100;
+        base.hp                  = field[idx++].GetInt32();
+        base.mp                  = field[idx++].GetInt32();
+        base.attacK_point        = field[idx++].GetInt32();
+        base.magic_point         = field[idx++].GetInt32();
+        base.defence             = field[idx++].GetInt32();
+        base.magic_defence       = field[idx++].GetInt32();
+        base.attack_speed        = field[idx++].GetInt32();
+        base.magic_speed         = field[idx++].GetInt32();
+        base.accuracy            = field[idx++].GetInt32();
+        base.magic_accuracy      = field[idx++].GetInt32();
+        base.avoid               = field[idx++].GetInt32();
+        base.magic_avoid         = field[idx++].GetInt32();
+        base.taming_id           = field[idx++].GetInt32();
+        base.taming_percentage   = field[idx++].GetFloat();
+        base.taming_exp_mod      = field[idx++].GetFloat();
+        for (y = 0; y < 2; y++)
+        {
             base.exp[y] = field[idx++].GetInt32();
-            base.jp[y] = field[idx++].GetInt32();
-            if(y == 0)
+            base.jp[y]  = field[idx++].GetInt32();
+            if (y == 0)
                 base.gold_drop_percentage = field[idx++].GetInt32();
             base.gold_min[y] = field[idx++].GetInt32();
             base.gold_max[y] = field[idx++].GetInt32();
-            if(y == 0)
+            if (y == 0)
                 base.chaos_drop_percentage = field[idx++].GetInt32();
             base.chaos_min[y] = field[idx++].GetInt32();
             base.chaos_max[y] = field[idx++].GetInt32();
         }
-        for(y = 0; y < 10; y++) {
-            base.drop_item_id[y] = field[idx++].GetInt32();
+        for (y = 0; y < 10; y++)
+        {
+            base.drop_item_id[y]    = field[idx++].GetInt32();
             base.drop_percentage[y] = (int)(field[idx++].GetFloat() * 100000000);
-            base.drop_min_count[y] = field[idx++].GetInt32();
-            base.drop_max_count[y] = field[idx++].GetInt32();
-            base.drop_min_level[y] = field[idx++].GetInt32();
-            base.drop_max_level[y] = field[idx++].GetInt32();
+            base.drop_min_count[y]  = field[idx++].GetInt32();
+            base.drop_max_count[y]  = field[idx++].GetInt32();
+            base.drop_min_level[y]  = field[idx++].GetInt32();
+            base.drop_max_level[y]  = field[idx++].GetInt32();
         }
-        for( y = 0; y < 4; y++) {
-            base.skill_id[y] = field[idx++].GetInt32();
-            base.skill_lv[y] = field[idx++].GetInt32();
+        for (y = 0; y < 4; y++)
+        {
+            base.skill_id[y]          = field[idx++].GetInt32();
+            base.skill_lv[y]          = field[idx++].GetInt32();
             base.skill_probability[y] = field[idx++].GetFloat();
         }
         base.local_flag = field[idx].GetInt32();
@@ -240,67 +252,72 @@ void ObjectMgr::LoadQuestResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field *field = result->Fetch();
-        int idx = 0;
+        int   idx    = 0;
 
-        QuestBaseServer q{};
-        q.nCode = field[idx++].GetInt32();
-        q.nQuestTextID = field[idx++].GetInt32();
-        q.nSummaryTextID = field[idx++].GetInt32();
-        q.nStatusTextID = field[idx++].GetInt32();
-        q.nLimitLevel = field[idx++].GetInt32();
-        q.nLimitJobLevel = field[idx++].GetInt32();
+        QuestBaseServer q{ };
+        q.nCode            = field[idx++].GetInt32();
+        q.nQuestTextID     = field[idx++].GetInt32();
+        q.nSummaryTextID   = field[idx++].GetInt32();
+        q.nStatusTextID    = field[idx++].GetInt32();
+        q.nLimitLevel      = field[idx++].GetInt32();
+        q.nLimitJobLevel   = field[idx++].GetInt32();
         q.nLimitIndication = field[idx++].GetUInt8();
 
-        int limit_deva = field[idx++].GetInt32();
+        int limit_deva  = field[idx++].GetInt32();
         int limit_asura = field[idx++].GetInt32();
-        int limit_gaia = field[idx++].GetInt32();
+        int limit_gaia  = field[idx++].GetInt32();
 
-        int limit_fighter = field[idx++].GetInt32();
-        int limit_hunter = field[idx++].GetInt32();
+        int limit_fighter  = field[idx++].GetInt32();
+        int limit_hunter   = field[idx++].GetInt32();
         int limit_magician = field[idx++].GetInt32();
         int limit_summoner = field[idx++].GetInt32();
 
-        q.nLimitJob = field[idx++].GetInt32();
+        q.nLimitJob          = field[idx++].GetInt32();
         q.nLimitFavorGroupID = field[idx++].GetInt32();
-        q.nLimitFavor = field[idx++].GetInt32();
-        q.bIsRepeatable = field[idx++].GetUInt8() == 1;
-        q.nInvokeCondition = field[idx++].GetInt32();
-        q.nInvokeValue = field[idx++].GetInt32();
-        q.nType = (QuestType)field[idx++].GetInt32();
-        for (int &i : q.nValue) {
+        q.nLimitFavor        = field[idx++].GetInt32();
+        q.bIsRepeatable      = field[idx++].GetUInt8() == 1;
+        q.nInvokeCondition   = field[idx++].GetInt32();
+        q.nInvokeValue       = field[idx++].GetInt32();
+        q.nType              = (QuestType)field[idx++].GetInt32();
+        for (int &i : q.nValue)
+        {
             i = field[idx++].GetInt32();
         }
-        q.nDropGroupID = field[idx++].GetInt32();
-        q.nQuestDifficulty = field[idx++].GetInt32();
-        q.nFavorGroupID = field[idx++].GetInt32();
-        q.nHateGroupID = field[idx++].GetInt32();
-        q.nFavor = field[idx++].GetInt32();
-        q.nEXP = field[idx++].GetUInt64();
-        q.nJP = field[idx++].GetInt32();
-        q.nGold = field[idx++].GetInt64();
+        q.nDropGroupID            = field[idx++].GetInt32();
+        q.nQuestDifficulty        = field[idx++].GetInt32();
+        q.nFavorGroupID           = field[idx++].GetInt32();
+        q.nHateGroupID            = field[idx++].GetInt32();
+        q.nFavor                  = field[idx++].GetInt32();
+        q.nEXP                    = field[idx++].GetUInt64();
+        q.nJP                     = field[idx++].GetInt32();
+        q.nGold                   = field[idx++].GetInt64();
         q.DefaultReward.nItemCode = field[idx++].GetInt32();
-        q.DefaultReward.nLevel = field[idx++].GetInt32();
+        q.DefaultReward.nLevel    = field[idx++].GetInt32();
         q.DefaultReward.nQuantity = field[idx++].GetInt32();
-        for (auto &i : q.OptionalReward) {
+        for (auto &i : q.OptionalReward)
+        {
             i.nItemCode = field[idx++].GetInt32();
-            i.nLevel = field[idx++].GetInt32();
+            i.nLevel    = field[idx++].GetInt32();
             i.nQuantity = field[idx++].GetInt32();
         }
-        for (int &i : q.nForeQuest) {
+        for (int  &i : q.nForeQuest)
+        {
             i = field[idx++].GetInt32();
         }
         q.bForceCheckType = field[idx++].GetUInt8() != 0;
         q.strAcceptScript = field[idx++].GetString();
-        q.strClearScript = field[idx++].GetString();
-        q.strScript = field[idx].GetString();
+        q.strClearScript  = field[idx++].GetString();
+        q.strScript       = field[idx].GetString();
 
         if (limit_asura != 0)
             q.LimitFlag |= 4;
@@ -324,7 +341,6 @@ void ObjectMgr::LoadQuestResource()
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
-
 
 void ObjectMgr::LoadFieldPropResource()
 {
@@ -352,7 +368,7 @@ void ObjectMgr::LoadFieldPropResource()
         propTemplate.nUseCount    = field[idx++].GetInt32();
         propTemplate.nRegenTime   = field[idx++].GetUInt32() * 100;
         propTemplate.nLifeTime    = field[idx++].GetUInt32() * 100;
-        idx+= 2; // casting range & target_fx_size
+        idx += 2; // casting range & target_fx_size
         propTemplate.nMinLevel = field[idx++].GetInt32();
         propTemplate.nMaxLevel = field[idx++].GetInt32();
         int limit_deva     = field[idx++].GetUInt8();
@@ -406,30 +422,31 @@ void ObjectMgr::LoadFieldPropResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u FieldProps in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadQuestLinkResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestLinkResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field *field = result->Fetch();
-        int idx = 0;
+        int   idx    = 0;
 
-        QuestLink ql{};
-        ql.nNPCID = field[idx++].GetInt32();
-        ql.code = field[idx++].GetInt32();
-        ql.bLF_Start = field[idx++].GetUInt8() == 1;
-        ql.bLF_Progress = field[idx++].GetUInt8() == 1;
-        ql.bLF_End = field[idx++].GetUInt8() == 1;
-        ql.nStartTextID = field[idx++].GetInt32();
+        QuestLink ql{ };
+        ql.nNPCID            = field[idx++].GetInt32();
+        ql.code              = field[idx++].GetInt32();
+        ql.bLF_Start         = field[idx++].GetUInt8() == 1;
+        ql.bLF_Progress      = field[idx++].GetUInt8() == 1;
+        ql.bLF_End           = field[idx++].GetUInt8() == 1;
+        ql.nStartTextID      = field[idx++].GetInt32();
         ql.nInProgressTextID = field[idx++].GetInt32();
-        ql.nEndTextID = field[idx].GetInt32();
+        ql.nEndTextID        = field[idx].GetInt32();
 
         _questLinkStore.emplace_back(ql);
 
@@ -439,24 +456,26 @@ void ObjectMgr::LoadQuestLinkResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u QuestLinks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadDropGroupResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM DropGroupResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 DropGroups. Table `DropGroupResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field        *field = result->Fetch();
-        int idx = 0;
-        DropGroup dg{};
+    do
+    {
+        Field     *field = result->Fetch();
+        int       idx    = 0;
+        DropGroup dg{ };
         dg.uid = field[idx++].GetInt32();
-        for(int i = 0; i < MAX_DROP_GROUP; i++) {
-            dg.drop_item_id[i] = field[idx++].GetInt32();
+        for (int i                 = 0; i < MAX_DROP_GROUP; i++)
+        {
+            dg.drop_item_id[i]    = field[idx++].GetInt32();
             dg.drop_percentage[i] = (int)(field[idx++].GetFloat() * 100000000);
         }
         _dropTemplateStore[dg.uid] = dg;
@@ -466,29 +485,31 @@ void ObjectMgr::LoadDropGroupResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u DropGroups in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadSkillTreeResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillTreeResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltrees. Table `SkillTreeResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field        *field = result->Fetch();
-        int idx = 0;
+    do
+    {
+        Field         *field = result->Fetch();
+        int           idx    = 0;
         SkillTreeBase base{ };
-        base.job_id = field[idx++].GetInt32();
-        base.skill_id = field[idx++].GetInt32();
+        base.job_id       = field[idx++].GetInt32();
+        base.skill_id     = field[idx++].GetInt32();
         base.min_skill_lv = field[idx++].GetInt32();
         base.max_skill_lv = field[idx++].GetInt32();
-        base.lv = field[idx++].GetInt32();
-        base.job_lv = field[idx++].GetInt32();
-        base.jp_ratio = field[idx++].GetFloat();
-        for(int i = 0; i < 3; i++) {
+        base.lv           = field[idx++].GetInt32();
+        base.job_lv       = field[idx++].GetInt32();
+        base.jp_ratio     = field[idx++].GetFloat();
+        for (int i = 0; i < 3; i++)
+        {
             base.need_skill_id[i] = field[idx++].GetInt32();
             base.need_skill_lv[i] = field[idx++].GetInt32();
         }
@@ -503,122 +524,124 @@ void ObjectMgr::LoadSkillResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillResource");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skills. Table `SkillResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        int idx = 0;
-        Field        *field = result->Fetch();
+    do
+    {
+        int       idx    = 0;
+        Field     *field = result->Fetch();
         SkillBase base{ };
-        base.id = field[idx++].GetInt32();
+        base.id      = field[idx++].GetInt32();
         base.text_id = field[idx++].GetInt32();
         idx += 2;
-        base.is_valid = field[idx++].GetInt16();
-        base.elemental = field[idx++].GetUInt8();
-        base.is_passive = field[idx++].GetUInt8();
-        base.is_physical_act = field[idx++].GetUInt8();
-        base.is_harmful = field[idx++].GetUInt8();
-        base.is_need_target = field[idx++].GetUInt8();
-        base.is_corpse = field[idx++].GetUInt8();
-        base.is_toggle = field[idx++].GetUInt8();
-        base.toggle_group = field[idx++].GetInt32();
-        base.casting_type = field[idx++].GetUInt8();
-        base.casting_level = field[idx++].GetUInt8();
-        base.cast_range = field[idx++].GetInt32();
-        base.valid_range = field[idx++].GetInt32();
-        base.cost_hp = field[idx++].GetInt32();
-        base.cost_hp_per_skl = field[idx++].GetInt32();
-        base.cost_mp = field[idx++].GetInt32();
-        base.cost_mp_per_skl = field[idx++].GetInt32();
-        base.cost_mp_per_enhance = field[idx++].GetInt32();
-        base.cost_hp_per = field[idx++].GetFloat();
-        base.cost_hp_per_skl_per = field[idx++].GetFloat();
-        base.cost_mp_per = field[idx++].GetFloat();
-        base.cost_mp_per_skl_per = field[idx++].GetFloat();
-        base.cost_havoc = field[idx++].GetInt32();
-        base.cost_havoc_per_skl = field[idx++].GetInt32();
-        base.cost_energy = field[idx++].GetFloat();
-        base.cost_energy_per_skl = field[idx++].GetFloat();
-        base.cost_exp = field[idx++].GetInt32();
-        base.cost_exp_per_enhance = field[idx++].GetInt32();
-        base.cost_jp = field[idx++].GetInt32();
-        base.cost_jp_per_enhance = field[idx++].GetInt32();
-        base.cost_item = field[idx++].GetInt32();
-        base.cost_item_count = field[idx++].GetInt32();
-        base.cost_item_count_per = field[idx++].GetInt32();
-        base.need_level = field[idx++].GetInt32();
-        base.need_hp = field[idx++].GetInt32();
-        base.need_mp = field[idx++].GetInt32();
-        base.need_havoc = field[idx++].GetInt32();
-        base.need_havoc_burst = field[idx++].GetInt32();
-        base.need_state_id = field[idx++].GetInt16();
-        base.need_state_level = field[idx++].GetInt16();
-        base.need_state_exhaust = field[idx++].GetInt16();
-        base.vf_one_hand_sword = field[idx++].GetUInt8();
-        base.vf_two_hand_sword = field[idx++].GetUInt8();
-        base.vf_double_sword = field[idx++].GetUInt8();
-        base.vf_dagger = field[idx++].GetUInt8();
-        base.vf_double_dagger = field[idx++].GetUInt8();
-        base.vf_spear = field[idx++].GetUInt8();
-        base.vf_axe = field[idx++].GetUInt8();
-        base.vf_one_hand_axe = field[idx++].GetUInt8();
-        base.vf_double_axe = field[idx++].GetUInt8();
-        base.vf_one_hand_mace = field[idx++].GetUInt8();
-        base.vf_two_hand_mace = field[idx++].GetUInt8();
-        base.vf_lightbow =field[idx++].GetUInt8();
-        base.vf_heavybow = field[idx++].GetUInt8();
-        base.vf_crossbow = field[idx++].GetUInt8();
-        base.vf_one_hand_staff = field[idx++].GetUInt8();
-        base.vf_two_hand_staff = field[idx++].GetUInt8();
-        base.vf_shield_only = field[idx++].GetUInt8();
-        base.vf_is_not_need_weapon = field[idx++].GetUInt8();
-        base.delay_cast = field[idx++].GetFloat() * 100;
-        base.delay_cast_per_skl = field[idx++].GetFloat() * 100;
-        base.delay_cast_mode_per = field[idx++].GetFloat()* 100;
-        base.delay_common = field[idx++].GetFloat()* 100;
-        base.delay_cooltime = field[idx++].GetFloat()* 100;
-        base.delay_cooltime_mode = field[idx++].GetFloat()* 100;
-        base.cool_time_group_id = field[idx++].GetInt32();
-        base.uf_self = field[idx++].GetUInt8();
-        base.uf_party = field[idx++].GetUInt8();
-        base.uf_guild = field[idx++].GetUInt8();
-        base.uf_neutral = field[idx++].GetUInt8();
-        base.uf_purple = field[idx++].GetUInt8();
-        base.uf_enemy = field[idx++].GetUInt8();
-        base.tf_avatar = field[idx++].GetUInt8();
-        base.tf_summon = field[idx++].GetUInt8();
-        base.tf_monster = field[idx++].GetUInt8();
-        base.target = field[idx++].GetInt16();
-        base.effect_type = field[idx++].GetInt16();
-        base.state_id = field[idx++].GetInt32();
-        base.state_level_base = field[idx++].GetInt32();
-        base.state_level_per_skl = field[idx++].GetFloat();
-        base.state_level_per_enhance = field[idx++].GetFloat();
-        base.state_second = field[idx++].GetFloat();
-        base.state_second_per_level = field[idx++].GetFloat();
+        base.is_valid                 = field[idx++].GetInt16();
+        base.elemental                = field[idx++].GetUInt8();
+        base.is_passive               = field[idx++].GetUInt8();
+        base.is_physical_act          = field[idx++].GetUInt8();
+        base.is_harmful               = field[idx++].GetUInt8();
+        base.is_need_target           = field[idx++].GetUInt8();
+        base.is_corpse                = field[idx++].GetUInt8();
+        base.is_toggle                = field[idx++].GetUInt8();
+        base.toggle_group             = field[idx++].GetInt32();
+        base.casting_type             = field[idx++].GetUInt8();
+        base.casting_level            = field[idx++].GetUInt8();
+        base.cast_range               = field[idx++].GetInt32();
+        base.valid_range              = field[idx++].GetInt32();
+        base.cost_hp                  = field[idx++].GetInt32();
+        base.cost_hp_per_skl          = field[idx++].GetInt32();
+        base.cost_mp                  = field[idx++].GetInt32();
+        base.cost_mp_per_skl          = field[idx++].GetInt32();
+        base.cost_mp_per_enhance      = field[idx++].GetInt32();
+        base.cost_hp_per              = field[idx++].GetFloat();
+        base.cost_hp_per_skl_per      = field[idx++].GetFloat();
+        base.cost_mp_per              = field[idx++].GetFloat();
+        base.cost_mp_per_skl_per      = field[idx++].GetFloat();
+        base.cost_havoc               = field[idx++].GetInt32();
+        base.cost_havoc_per_skl       = field[idx++].GetInt32();
+        base.cost_energy              = field[idx++].GetFloat();
+        base.cost_energy_per_skl      = field[idx++].GetFloat();
+        base.cost_exp                 = field[idx++].GetInt32();
+        base.cost_exp_per_enhance     = field[idx++].GetInt32();
+        base.cost_jp                  = field[idx++].GetInt32();
+        base.cost_jp_per_enhance      = field[idx++].GetInt32();
+        base.cost_item                = field[idx++].GetInt32();
+        base.cost_item_count          = field[idx++].GetInt32();
+        base.cost_item_count_per      = field[idx++].GetInt32();
+        base.need_level               = field[idx++].GetInt32();
+        base.need_hp                  = field[idx++].GetInt32();
+        base.need_mp                  = field[idx++].GetInt32();
+        base.need_havoc               = field[idx++].GetInt32();
+        base.need_havoc_burst         = field[idx++].GetInt32();
+        base.need_state_id            = field[idx++].GetInt16();
+        base.need_state_level         = field[idx++].GetInt16();
+        base.need_state_exhaust       = field[idx++].GetInt16();
+        base.vf_one_hand_sword        = field[idx++].GetUInt8();
+        base.vf_two_hand_sword        = field[idx++].GetUInt8();
+        base.vf_double_sword          = field[idx++].GetUInt8();
+        base.vf_dagger                = field[idx++].GetUInt8();
+        base.vf_double_dagger         = field[idx++].GetUInt8();
+        base.vf_spear                 = field[idx++].GetUInt8();
+        base.vf_axe                   = field[idx++].GetUInt8();
+        base.vf_one_hand_axe          = field[idx++].GetUInt8();
+        base.vf_double_axe            = field[idx++].GetUInt8();
+        base.vf_one_hand_mace         = field[idx++].GetUInt8();
+        base.vf_two_hand_mace         = field[idx++].GetUInt8();
+        base.vf_lightbow              = field[idx++].GetUInt8();
+        base.vf_heavybow              = field[idx++].GetUInt8();
+        base.vf_crossbow              = field[idx++].GetUInt8();
+        base.vf_one_hand_staff        = field[idx++].GetUInt8();
+        base.vf_two_hand_staff        = field[idx++].GetUInt8();
+        base.vf_shield_only           = field[idx++].GetUInt8();
+        base.vf_is_not_need_weapon    = field[idx++].GetUInt8();
+        base.delay_cast               = field[idx++].GetFloat() * 100;
+        base.delay_cast_per_skl       = field[idx++].GetFloat() * 100;
+        base.delay_cast_mode_per      = field[idx++].GetFloat() * 100;
+        base.delay_common             = field[idx++].GetFloat() * 100;
+        base.delay_cooltime           = field[idx++].GetFloat() * 100;
+        base.delay_cooltime_mode      = field[idx++].GetFloat() * 100;
+        base.cool_time_group_id       = field[idx++].GetInt32();
+        base.uf_self                  = field[idx++].GetUInt8();
+        base.uf_party                 = field[idx++].GetUInt8();
+        base.uf_guild                 = field[idx++].GetUInt8();
+        base.uf_neutral               = field[idx++].GetUInt8();
+        base.uf_purple                = field[idx++].GetUInt8();
+        base.uf_enemy                 = field[idx++].GetUInt8();
+        base.tf_avatar                = field[idx++].GetUInt8();
+        base.tf_summon                = field[idx++].GetUInt8();
+        base.tf_monster               = field[idx++].GetUInt8();
+        base.target                   = field[idx++].GetInt16();
+        base.effect_type              = field[idx++].GetInt16();
+        base.state_id                 = field[idx++].GetInt32();
+        base.state_level_base         = field[idx++].GetInt32();
+        base.state_level_per_skl      = field[idx++].GetFloat();
+        base.state_level_per_enhance  = field[idx++].GetFloat();
+        base.state_second             = field[idx++].GetFloat();
+        base.state_second_per_level   = field[idx++].GetFloat();
         base.state_second_per_enhance = field[idx++].GetFloat();
-        base.state_type = field[idx++].GetUInt8();
-        base.probability_on_hit = field[idx++].GetInt32();
-        base.probability_inc_by_slv = field[idx++].GetInt32();
-        base.hit_bonus = field[idx++].GetInt16();
-        base.hit_bonus_per_enhance = field[idx++].GetInt16();
-        base.percentage = field[idx++].GetInt16();
-        base.hate_mod = field[idx++].GetFloat();
-        base.hate_basic = field[idx++].GetInt16();
-        base.hate_per_skl = field[idx++].GetFloat();
-        base.hate_per_enhance = field[idx++].GetFloat();
-        base.critical_bonus = field[idx++].GetInt32();
-        base.critical_bonus_per_skl = field[idx++].GetInt32();
+        base.state_type               = field[idx++].GetUInt8();
+        base.probability_on_hit       = field[idx++].GetInt32();
+        base.probability_inc_by_slv   = field[idx++].GetInt32();
+        base.hit_bonus                = field[idx++].GetInt16();
+        base.hit_bonus_per_enhance    = field[idx++].GetInt16();
+        base.percentage               = field[idx++].GetInt16();
+        base.hate_mod                 = field[idx++].GetFloat();
+        base.hate_basic               = field[idx++].GetInt16();
+        base.hate_per_skl             = field[idx++].GetFloat();
+        base.hate_per_enhance         = field[idx++].GetFloat();
+        base.critical_bonus           = field[idx++].GetInt32();
+        base.critical_bonus_per_skl   = field[idx++].GetInt32();
         for (float &i : base.var)
         {
             i = field[idx++].GetFloat();
         }
         idx += 2;
-        base.is_projectile = field[idx++].GetInt16();
-        base.projectile_speed = field[idx++].GetFloat();
+        base.is_projectile           = field[idx++].GetInt16();
+        base.projectile_speed        = field[idx++].GetFloat();
         base.projectile_acceleration = field[idx].GetFloat();
         _skillBaseStore[base.id] = base;
         ++count;
@@ -631,25 +654,27 @@ void ObjectMgr::LoadDungeonResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM DungeonResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field        *field = result->Fetch();
-        int idx = 0;
-        DungeonTemplate base{};
+    do
+    {
+        Field           *field = result->Fetch();
+        int             idx    = 0;
+        DungeonTemplate base{ };
         base.id = field[idx++].GetInt32();
-        idx+=2;
+        idx += 2;
         int start_pos_x = field[idx++].GetInt32();
         int start_pos_y = field[idx++].GetInt32();
         base.raid_start_pos = Position{(float)start_pos_x, (float)start_pos_y};
         int defense_pos_x = field[idx++].GetInt32();
         int defense_pos_y = field[idx++].GetInt32();
         base.siege_defense_pos = Position{(float)defense_pos_x, (float)defense_pos_y};
-        base.connector_id = field[idx++].GetInt32();
+        base.connector_id      = field[idx++].GetInt32();
         int connector_x = field[idx++].GetInt32();
         int connector_y = field[idx++].GetInt32();
         base.connector_pos = Position{(float)connector_x, (float)connector_y};
@@ -657,31 +682,31 @@ void ObjectMgr::LoadDungeonResource()
         base.core_id = field[idx++].GetInt32();
         int core_pos_x = field[idx++].GetInt32();
         int core_pos_y = field[idx++].GetInt32();
-        base.core_pos = Position{(float)core_pos_x, (float)core_pos_y};
-        base.core_offset_x = field[idx++].GetFloat();
-        base.core_offset_y = field[idx++].GetFloat();
-        base.core_offset_z = field[idx++].GetFloat();
-        base.core_around_x = field[idx++].GetFloat();
-        base.core_around_y = field[idx++].GetFloat();
-        base.core_around_z = field[idx++].GetFloat();
-        base.core_scale_x = field[idx++].GetFloat();
-        base.core_scale_y = field[idx++].GetFloat();
-        base.core_scale_z = field[idx++].GetFloat();
+        base.core_pos            = Position{(float)core_pos_x, (float)core_pos_y};
+        base.core_offset_x       = field[idx++].GetFloat();
+        base.core_offset_y       = field[idx++].GetFloat();
+        base.core_offset_z       = field[idx++].GetFloat();
+        base.core_around_x       = field[idx++].GetFloat();
+        base.core_around_y       = field[idx++].GetFloat();
+        base.core_around_z       = field[idx++].GetFloat();
+        base.core_scale_x        = field[idx++].GetFloat();
+        base.core_scale_y        = field[idx++].GetFloat();
+        base.core_scale_z        = field[idx++].GetFloat();
         base.core_is_lock_height = field[idx++].GetUInt8() != 0;
-        base.core_lock_height = field[idx++].GetFloat();
-        for(auto& boss : base.boss_id)
+        base.core_lock_height    = field[idx++].GetFloat();
+        for (auto &boss : base.boss_id)
             boss = field[idx++].GetInt32();
         base.raid_start_time = field[idx++].GetInt32();
-        base.raid_end_time = field[idx++].GetInt32();
-        base.start_time = field[idx++].GetInt32();
-        base.end_time = field[idx++].GetInt32();
+        base.raid_end_time   = field[idx++].GetInt32();
+        base.start_time      = field[idx++].GetInt32();
+        base.end_time        = field[idx++].GetInt32();
         int seamless_x = field[idx++].GetInt32();
         int seamless_y = field[idx++].GetInt32();
         base.max_guild_party = field[idx++].GetInt32();
         idx++;
         base.max_raid_party = field[idx].GetInt32();
-        base.box.begin = {seamless_x * g_fMapLength, seamless_y * g_fMapLength};
-        base.box.end = {(seamless_x + 1) * g_fMapLength, (seamless_y + 1) * g_fMapLength};
+        base.box.begin      = {seamless_x * g_fMapLength, seamless_y * g_fMapLength};
+        base.box.end        = {(seamless_x + 1) * g_fMapLength, (seamless_y + 1) * g_fMapLength};
         sDungeonManager->RegisterDungeonTemplate(base);
         ++count;
     } while (result->NextRow());
@@ -689,24 +714,25 @@ void ObjectMgr::LoadDungeonResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadLevelResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM LevelResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field        *field = result->Fetch();
-        LevelResourceTemplate base{};
-        base.level = field[0].GetInt32();
+    do
+    {
+        Field                 *field = result->Fetch();
+        LevelResourceTemplate base{ };
+        base.level      = field[0].GetInt32();
         base.normal_exp = field[1].GetInt64();
-        for(int i = 0; i < 4; i++)
-            base.jlv[i] = field[2+i].GetInt32();
+        for (int i = 0; i < 4; i++)
+            base.jlv[i]                 = field[2 + i].GetInt32();
         _levelResourceStore[base.level] = base;
         ++count;
     } while (result->NextRow());
@@ -718,36 +744,38 @@ void ObjectMgr::LoadStateResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM StateResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 States. Table `StateResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field        *field = result->Fetch();
-        int idx = 0;
+    do
+    {
+        Field         *field = result->Fetch();
+        int           idx    = 0;
         StateTemplate state{ };
-        state.state_id = field[idx++].GetInt32();
-        state.text_id = field[idx++].GetInt32();
-        state.tooltip_id = field[idx++].GetInt32();
-        state.is_harmful = field[idx++].GetUInt8();
+        state.state_id        = field[idx++].GetInt32();
+        state.text_id         = field[idx++].GetInt32();
+        state.tooltip_id      = field[idx++].GetInt32();
+        state.is_harmful      = field[idx++].GetUInt8();
         state.state_time_type = field[idx++].GetInt32();
-        state.state_group = field[idx++].GetInt32();
-        for(auto& dg : state.duplicate_group)
+        state.state_group     = field[idx++].GetInt32();
+        for (auto &dg : state.duplicate_group)
             dg = field[idx++].GetInt32();
-        state.uf_avatar = field[idx++].GetUInt8();
-        state.uf_summon = field[idx++].GetUInt8();
-        state.uf_monster = field[idx++].GetUInt8();
-        state.base_effect_id = field[idx++].GetInt32();
-        state.fire_interval = field[idx++].GetInt32();
-        state.elemental_type = field[idx++].GetInt32();
-        state.amplify_base = field[idx++].GetFloat();
-        state.amplify_per_skl = field[idx++].GetFloat();
-        state.add_damage_base = field[idx++].GetInt32();
+        state.uf_avatar          = field[idx++].GetUInt8();
+        state.uf_summon          = field[idx++].GetUInt8();
+        state.uf_monster         = field[idx++].GetUInt8();
+        state.base_effect_id     = field[idx++].GetInt32();
+        state.fire_interval      = field[idx++].GetInt32();
+        state.elemental_type     = field[idx++].GetInt32();
+        state.amplify_base       = field[idx++].GetFloat();
+        state.amplify_per_skl    = field[idx++].GetFloat();
+        state.add_damage_base    = field[idx++].GetInt32();
         state.add_damage_per_skl = field[idx++].GetInt32();
-        state.effect_type = field[idx++].GetInt32();
-        for(auto& val : state.value)
+        state.effect_type        = field[idx++].GetInt32();
+        for (auto &val : state.value)
             val = field[idx++].GetFloat();
 
         _stateTemplateStore[state.state_id] = state;
@@ -757,18 +785,19 @@ void ObjectMgr::LoadStateResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u States in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadStatResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, str, vit, dex, agi, `int`, men, luk FROM StatResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stats. Table `StatResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field        *field = result->Fetch();
         CreatureStat stat{ };
         stat.stat_id      = field[0].GetInt16();
@@ -784,39 +813,41 @@ void ObjectMgr::LoadStatResource()
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    return;
 }
 
 void ObjectMgr::LoadMarketResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT sort_id, name, code, price_ratio, huntaholic_ratio FROM MarketResource ORDER BY name, sort_id;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. Table `MarketResource` is empty!");
         return;
     }
 
-    uint32 count = 0;
-    std::string lastMarket{};
-    std::vector<MarketInfo> vContainer{};
-    do {
+    uint32                  count = 0;
+    std::string             lastMarket{ };
+    std::vector<MarketInfo> vContainer{ };
+    do
+    {
         Field *field = result->Fetch();
 
-        MarketInfo info {};
-        info.sort_id = field[0].GetInt32();
-        info.name = field[1].GetString();
-        info.code = field[2].GetUInt32();
-        info.price_ratio = field[3].GetFloat();
+        MarketInfo info{ };
+        info.sort_id          = field[0].GetInt32();
+        info.name             = field[1].GetString();
+        info.code             = field[2].GetUInt32();
+        info.price_ratio      = field[3].GetFloat();
         info.huntaholic_ratio = field[4].GetFloat();
 
         auto itemBase = GetItemBase(info.code);
-        info.price_ratio = floor(info.price_ratio * itemBase->price);
+        info.price_ratio      = floor(info.price_ratio * itemBase->price);
         info.huntaholic_ratio = 0;
 
-        if(lastMarket.empty())
+        if (lastMarket.empty())
             lastMarket = info.name;
 
-        if(lastMarket != info.name) {
+        if (lastMarket != info.name)
+        {
             _marketResourceStore[lastMarket] = vContainer;
             lastMarket = info.name;
             vContainer.clear();
@@ -831,20 +862,21 @@ void ObjectMgr::LoadMarketResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Markettemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadJobResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, stati_id, job_class, job_depth, up_lv, up_jlv,"
                                                        "available_job_0, available_job_1, available_job_2,"
                                                        "available_job_3 FROM JobResource;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         int                 i      = 0;
         Field               *field = result->Fetch();
         JobResourceTemplate job{ };
@@ -854,7 +886,8 @@ void ObjectMgr::LoadJobResource()
         job.job_depth = field[i++].GetUInt32();
         job.up_lv     = field[i++].GetInt32();
         job.up_jlv    = field[i++].GetInt32();
-        for (int &j : job.available_job) {
+        for (int &j : job.available_job)
+        {
             j = field[i++].GetInt32();
         }
         _jobTemplateStore[job.id] = job;
@@ -868,16 +901,18 @@ void ObjectMgr::LoadSummonLevelResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT level, normal_exp FROM SummonLevelResource ORDER BY level ASC");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. Table `SummonLevelResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field                 *field = result->Fetch();
-        auto level = field[0].GetInt32();
-        auto exp = field[1].GetUInt64();
+    do
+    {
+        Field *field = result->Fetch();
+        auto  level  = field[0].GetInt32();
+        auto  exp    = field[1].GetUInt64();
         _summonLevelStore[level] = exp;
         ++count;
     } while (result->NextRow());
@@ -885,36 +920,37 @@ void ObjectMgr::LoadSummonLevelResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLeveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
 void ObjectMgr::LoadSummonLevelBonus()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT summon_id, strength, vital, dexterity, agility, intelligence, mentality, luck FROM CreatureLevelBonus;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLevelBonus templates. Table `CreatureLevelBonus` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field                 *field = result->Fetch();
+    do
+    {
+        Field            *field = result->Fetch();
         SummonLevelBonus bonus{ };
-        int i = 0, j = 0;
-        bonus.summon_id = field[i++].GetInt32();
-        bonus.strength = field[i++].GetFloat();
-        bonus.vital = field[i++].GetFloat();
-        bonus.dexterity = field[i++].GetFloat();
-        bonus.agility = field[i++].GetFloat();
+
+        int i = 0;
+        bonus.summon_id    = field[i++].GetInt32();
+        bonus.strength     = field[i++].GetFloat();
+        bonus.vital        = field[i++].GetFloat();
+        bonus.dexterity    = field[i++].GetFloat();
+        bonus.agility      = field[i++].GetFloat();
         bonus.intelligence = field[i++].GetFloat();
-        bonus.mentality = field[i++].GetFloat();
-        bonus.luck = field[i].GetFloat();
+        bonus.mentality    = field[i++].GetFloat();
+        bonus.luck         = field[i].GetFloat();
         _summonBonusStore[bonus.summon_id] = bonus;
         ++count;
     } while (result->NextRow());
 
     MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLevelBonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
-
 
 void ObjectMgr::LoadJobLevelBonus()
 {
@@ -925,19 +961,22 @@ void ObjectMgr::LoadJobLevelBonus()
                                                        "strength_2, vital_2, dexterity_2, agility_2, intelligence_2, mentality_2, luck_2, "
                                                        "strength_3, vital_3, dexterity_3, agility_3, intelligence_3, mentality_3, luck_3 "
                                                        "FROM JobLevelBonus;");
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field                 *field = result->Fetch();
         JobLevelBonusTemplate bonus{ };
 
         int i = 0, j = 0;
         bonus.job_id = field[i++].GetInt32();
-        for (j                       = 0; j < 4; j++) {
+        for (j                       = 0; j < 4; j++)
+        {
             bonus.strength[j]     = field[i++].GetFloat();
             bonus.vital[j]        = field[i++].GetFloat();
             bonus.dexterity[j]    = field[i++].GetFloat();
@@ -958,13 +997,15 @@ void ObjectMgr::LoadNPCResource()
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script, spawn_type FROM NPCResource;");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. Table `NPCResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field       *field = result->Fetch();
         NPCTemplate npc{ };
         // SELECT id, x, y, z, face, local_flag, contact_script FROM npcresource;
@@ -989,7 +1030,6 @@ void ObjectMgr::LoadSkillJP()
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillJPResource;");
 
-
     if (!result)
     {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 SkillJPTemplates. Table `SkillJPResource` is empty!");
@@ -997,74 +1037,78 @@ void ObjectMgr::LoadSkillJP()
     }
 
     uint32 count = 0;
-    do {
-        Field *field = result->Fetch();
-        int off = 0;
-        int skill_id = field[off++].GetInt32();
-        SkillBase* sb = &_skillBaseStore[skill_id];
-        if(sb->id != 0) {
-            for (int &v : sb->m_need_jp) {
+    do
+    {
+        Field *field   = result->Fetch();
+        int   off      = 0;
+        int   skill_id = field[off++].GetInt32();
+        SkillBase *sb = &_skillBaseStore[skill_id];
+        if (sb->id != 0)
+        {
+            for (int &v : sb->m_need_jp)
+            {
                 v = field[off++].GetInt32();
             }
         }
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillJPTemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime)); }
-
-
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillJPTemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
 
 void ObjectMgr::LoadWorldLocation()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, location_type, time_id, weather_id, weather_ratio, weather_change_time FROM WorldLocation;");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. Table `WorldLocation` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
-        Field *field = result->Fetch();
-        auto idx = field[0].GetUInt32();
-        auto location_type = field[1].GetUInt8();
-        auto time_idx = field[2].GetUInt32();
-        auto weather_id = field[3].GetUInt32();
-        auto weather_ratio = field[4].GetUInt8();
-        auto weather_change_time = (field[5].GetUInt32()) * 6000;
-        sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time,0);
+    do
+    {
+        Field *field              = result->Fetch();
+        auto  idx                 = field[0].GetUInt32();
+        auto  location_type       = field[1].GetUInt8();
+        auto  time_idx            = field[2].GetUInt32();
+        auto  weather_id          = field[3].GetUInt32();
+        auto  weather_ratio       = field[4].GetUInt8();
+        auto  weather_change_time = (field[5].GetUInt32()) * 6000;
+        sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time, 0);
         ++count;
     } while (result->NextRow());
     MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
-
-
 
 void ObjectMgr::LoadEnhanceResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM EnhanceResource");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field *field = result->Fetch();
-        int idx = 0;
+        int   idx    = 0;
 
-        EnhanceInfo info{};
-        info.nSID = field[idx++].GetInt32();
-        info.Flag = field[idx++].GetUInt32();
-        info.nFailResult = field[idx++].GetUInt8();
-        info.nMaxEnhance = field[idx++].GetInt32();
-        info.nLocalFlag = field[idx++].GetUInt32();
+        EnhanceInfo info{ };
+        info.nSID          = field[idx++].GetInt32();
+        info.Flag          = field[idx++].GetUInt32();
+        info.nFailResult   = field[idx++].GetUInt8();
+        info.nMaxEnhance   = field[idx++].GetInt32();
+        info.nLocalFlag    = field[idx++].GetUInt32();
         info.nNeedItemCode = field[idx++].GetInt32();
-        for(auto& perc : info.fPercentage)
+        for (auto &perc : info.fPercentage)
             perc = field[idx++].GetFloat();
-        if((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
+        if ((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
         {
             sMixManager->RegisterEnhanceInfo(info);
         }
@@ -1079,34 +1123,36 @@ void ObjectMgr::LoadMixResource()
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT * FROM MixResource");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
         return;
     }
 
     uint32 count = 0;
-    do {
+    do
+    {
         Field *field = result->Fetch();
-        int idx = 0;
+        int   idx    = 0;
 
-        MixBase info{};
-        info.id = field[idx++].GetInt32();
+        MixBase info{ };
+        info.id   = field[idx++].GetInt32();
         info.type = field[idx++].GetInt32();
         for (int &i : info.value)
         {
             i = field[idx++].GetInt32();
         }
         info.sub_material_cnt = field[idx++].GetInt32();
-        for(int i = 0; i < MATERIAL_INFO_COUNT; ++i)
+        for (int  i = 0; i < MATERIAL_INFO_COUNT; ++i)
         {
-            info.main_material.type[i] = field[idx++].GetInt32();
+            info.main_material.type[i]  = field[idx++].GetInt32();
             info.main_material.value[i] = field[idx++].GetInt32();
         }
         for (auto &i : info.sub_material)
         {
-            for(int j = 0; j < MATERIAL_INFO_COUNT; ++j)
+            for (int j = 0; j < MATERIAL_INFO_COUNT; ++j)
             {
-                i.type[j] = field[idx++].GetInt32();
+                i.type[j]  = field[idx++].GetInt32();
                 i.value[j] = field[idx++].GetInt32();
             }
         }
@@ -1117,8 +1163,6 @@ void ObjectMgr::LoadMixResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Mixtemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-
-
 void ObjectMgr::LoadSummonResource()
 {
     uint32      oldMSTime = getMSTime();
@@ -1126,14 +1170,15 @@ void ObjectMgr::LoadSummonResource()
                                                        "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
                                                        "form, evolve_target, card_id FROM SummonResource;");
 
-    if (!result) {
+    if (!result)
+    {
         MX_LOG_INFO("server.worldserver", ">> Loaded 0 Summons. Table `SummonResource` is empty!");
         return;
     }
 
-
     uint32 count = 0;
-    do {
+    do
+    {
         Field                  *field = result->Fetch();
         SummonResourceTemplate summon{ };
         int                    i      = 0;
@@ -1142,8 +1187,8 @@ void ObjectMgr::LoadSummonResource()
         summon.magic_type          = field[i++].GetInt32();
         summon.rate                = field[i++].GetInt32();
         summon.stat_id             = field[i++].GetInt32();
-        summon.size = field[i++].GetFloat();
-        summon.scale = field[i++].GetFloat();
+        summon.size                = field[i++].GetFloat();
+        summon.scale               = field[i++].GetFloat();
         summon.standard_walk_speed = field[i++].GetInt32();
         summon.standard_run_speed  = field[i++].GetInt32();
         summon.walk_speed          = field[i++].GetInt32();
@@ -1161,16 +1206,17 @@ void ObjectMgr::LoadSummonResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-CreatureStat* const ObjectMgr::GetStatInfo(const uint stat_id)
+CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
         return &_creatureBaseStore[stat_id];
     return nullptr;
 }
 
-ItemTemplate* const ObjectMgr::GetItemBase(const uint item_id)
+ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
 {
-    if (_itemTemplateStore.count(item_id) == 1) {
+    if (_itemTemplateStore.count(item_id) == 1)
+    {
         return &_itemTemplateStore[item_id];
     }
     return nullptr;
@@ -1179,9 +1225,12 @@ ItemTemplate* const ObjectMgr::GetItemBase(const uint item_id)
 CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels[])
 {
     CreatureStat stat{ };
-    if (depth >= 0) {
-        for (int i = 0; i < 4; i++) {
-            if (_jobBonusStore.count((uint)jobs[i])) {
+    if (depth >= 0)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (_jobBonusStore.count((uint)jobs[i]))
+            {
                 auto jlb = _jobBonusStore[jobs[i]];
 
                 float v1 = (levels[i] - 20);
@@ -1201,37 +1250,39 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
 
                 if (v2 <= 0)
                     v2 = 0;
-                stat.strength += (int) ((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
-                stat.vital += (int) ((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
-                stat.dexterity += (int) ((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
-                stat.agility += (int) ((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
-                stat.intelligence += (int) ((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
-                stat.mentality += (int) ((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
-                stat.luck += (int) ((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
+                stat.strength += (int)((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
+                stat.vital += (int)((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
+                stat.dexterity += (int)((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
+                stat.agility += (int)((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
+                stat.intelligence += (int)((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
+                stat.mentality += (int)((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
+                stat.luck += (int)((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
             }
         }
     }
     return stat;
 }
 
-JobResourceTemplate* const ObjectMgr::GetJobInfo(const uint job_id)
+JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
 {
-    if (_jobTemplateStore.count(job_id) == 1) {
+    if (_jobTemplateStore.count(job_id) == 1)
+    {
         return &_jobTemplateStore[job_id];
     }
     return nullptr;
 }
 
-SummonResourceTemplate* const ObjectMgr::GetSummonBase(const uint idx)
+SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
 {
     if (_summonResourceStore.count(idx) == 1)
         return &_summonResourceStore[idx];
     return nullptr;
 }
 
-std::vector<MarketInfo>* const ObjectMgr::GetMarketInfo(const std::string &szKey)
+std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
-    if(_marketResourceStore.count(szKey) == 1) {
+    if (_marketResourceStore.count(szKey) == 1)
+    {
         return &_marketResourceStore[szKey];
     }
     return nullptr;
@@ -1239,98 +1290,113 @@ std::vector<MarketInfo>* const ObjectMgr::GetMarketInfo(const std::string &szKey
 
 int ObjectMgr::GetLocationID(const float x, const float y) const
 {
-    int loc_id = 0;
-    int priority = 0x7fffffff;
-    X2D::Pointf pt{};
+    int         loc_id   = 0;
+    int         priority = 0x7fffffff;
+    X2D::Pointf pt{ };
     pt.x = x;
     pt.y = y;
-    X2D::QuadTreeMapInfo::FunctorAdaptor fn{};
+    X2D::QuadTreeMapInfo::FunctorAdaptor fn{ };
     sMapContent->g_qtLocationInfo->Enum(pt, fn);
 
-    for(auto& info : fn.pResult)
+    for (auto &info : fn.pResult)
     {
-        if(info.priority < priority)
+        if (info.priority < priority)
         {
-            loc_id = info.location_id;
+            loc_id   = info.location_id;
             priority = info.priority;
         }
     }
     return loc_id;
 }
 
-int ObjectMgr::GetNeedJpForJobLevelUp(const uint jlv, const uint depth)
+int ObjectMgr::GetNeedJpForJobLevelUp(const int jlv, const int depth)
 {
-    if(depth > 3 || jlv > 49)
+    if (depth > 3 || jlv > 49)
         return 0;
     return _levelResourceStore[jlv].jlv[depth];
 }
 
-ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int &job_id)
+ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
 {
-    ushort ilsResult = TS_RESULT_ACCESS_DENIED;
-    for(int i = 0; i < 4; ++i) {
-        if(pUnit->GetPrevJobLv(i) != 0) {
+    ushort   ilsResult = TS_RESULT_ACCESS_DENIED;
+    for (int i         = 0; i < 4; ++i)
+    {
+        if (pUnit->GetPrevJobLv(i) != 0)
+        {
             ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetPrevJobId(i), pUnit->GetPrevJobLv(i));
-            if(ilsResult == TS_RESULT_SUCCESS) {
+            if (ilsResult == TS_RESULT_SUCCESS)
+            {
                 job_id = pUnit->GetPrevJobId(i);
                 break;
             }
-            if(ilsResult != TS_RESULT_ACCESS_DENIED && ilsResult != TS_RESULT_LIMIT_MAX && ilsResult != TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
+            if (ilsResult != TS_RESULT_ACCESS_DENIED && ilsResult != TS_RESULT_LIMIT_MAX && ilsResult != TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
                 break;
         }
     }
-    if(ilsResult == TS_RESULT_ACCESS_DENIED || ilsResult == TS_RESULT_LIMIT_MAX || ilsResult == TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
+    if (ilsResult == TS_RESULT_ACCESS_DENIED || ilsResult == TS_RESULT_LIMIT_MAX || ilsResult == TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
     {
-        ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
-        if(ilsResult == TS_RESULT_SUCCESS)
+        ilsResult  = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
+        if (ilsResult == TS_RESULT_SUCCESS)
             job_id = pUnit->GetCurrentJob();
     }
     return ilsResult;
 }
 
-ushort ObjectMgr::isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, int nJobID, int unit_job_level)
+ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
 {
     bool bMaxLimit = false;
-    bool bFound = false;
+    bool bFound    = false;
 
     auto st = getSkillTree(nJobID);
-    if(st.empty()) {
+    if (st.empty())
+    {
         return TS_RESULT_ACCESS_DENIED;
     }
-    for(auto stree : st) {
-        if(stree.skill_id == skill_id) {
-            if(stree.max_skill_lv >= skill_level) {
-                if(stree.lv > pUnit->GetLevel()) {
+    for (auto stree : st)
+    {
+        if (stree.skill_id == skill_id)
+        {
+            if (stree.max_skill_lv >= skill_level)
+            {
+                if (stree.lv > pUnit->GetLevel())
+                {
                     return TS_RESULT_NOT_ENOUGH_LEVEL;
                 }
-                if(stree.job_lv <= unit_job_level)
+                if (stree.job_lv <= unit_job_level)
                 {
-                    for(int nsi = 0; nsi < 3; nsi++) {
-                        if(stree.need_skill_id[nsi] == 0)
+                    for (int nsi = 0; nsi < 3; nsi++)
+                    {
+                        if (stree.need_skill_id[nsi] == 0)
                             break;
-                        if(pUnit->GetCurrentSkillLevel(stree.need_skill_id[nsi]) < stree.need_skill_lv[nsi]) {
+                        if (pUnit->GetCurrentSkillLevel(stree.need_skill_id[nsi]) < stree.need_skill_lv[nsi])
+                        {
                             return TS_RESULT_NOT_ENOUGH_SKILL;
                         }
                     }
-                    auto sb =  GetSkillBase(skill_id);
-                    if(sb->id == 0)
+                    auto     sb  = GetSkillBase(skill_id);
+                    if (sb->id == 0)
                         return TS_RESULT_ACCESS_DENIED;
 
-                    if(pUnit->GetJP() < (int)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio)) {
+                    if (pUnit->GetJP() < (int)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio))
+                    {
                         return TS_RESULT_NOT_ENOUGH_JP;
                     }
                     return TS_RESULT_SUCCESS;
                 }
                 bFound = true;
-            } else {
+            }
+            else
+            {
                 bMaxLimit = true;
             }
         }
     }
-    if(bFound) {
+    if (bFound)
+    {
         return TS_RESULT_NOT_ENOUGH_JOB_LEVEL;
     }
-    if(bMaxLimit) {
+    if (bMaxLimit)
+    {
         return TS_RESULT_LIMIT_MAX;
     }
     return TS_RESULT_ACCESS_DENIED;
@@ -1338,14 +1404,16 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, uint skill_id, int skill_level, 
 
 void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
 {
-    for(auto& stg : _skillTreeResourceStore) {
-        if(stg.skill_id == base.skill_id && stg.job_id == base.job_id) {
+    for (auto &stg : _skillTreeResourceStore)
+    {
+        if (stg.skill_id == base.skill_id && stg.job_id == base.job_id)
+        {
             stg.skillTrees.emplace_back(base);
             return;
         }
     }
-    SkillTreeGroup g{};
-    g.job_id = base.job_id;
+    SkillTreeGroup g{ };
+    g.job_id   = base.job_id;
     g.skill_id = base.skill_id;
     g.skillTrees.emplace_back(base);
     _skillTreeResourceStore.emplace_back(g);
@@ -1353,10 +1421,13 @@ void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
 
 std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
 {
-    std::vector<SkillTreeBase> skills { };
-    for(auto& stg : _skillTreeResourceStore) {
-        if(stg.job_id == job_id) {
-            for(auto st : stg.skillTrees)  {
+    std::vector<SkillTreeBase> skills{ };
+    for (auto &stg : _skillTreeResourceStore)
+    {
+        if (stg.job_id == job_id)
+        {
+            for (auto st : stg.skillTrees)
+            {
                 skills.emplace_back(st);
             }
         }
@@ -1366,88 +1437,93 @@ std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
 
 int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID)
 {
-    auto pSkillBase = GetSkillBase((uint)skill_id);
-    std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
-    float jp_ratio = -1.0f;
-    if(pSkillBase->id != 0 && skill_level <= 50 && !trees.empty()) {
-        for(auto st : trees) {
-            if(st.skill_id == skill_id && st.max_skill_lv >= skill_level) {
+    auto                       pSkillBase = GetSkillBase((uint)skill_id);
+    std::vector<SkillTreeBase> trees      = getSkillTree(nJobID);
+    float                      jp_ratio   = -1.0f;
+    if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty())
+    {
+        for (auto st : trees)
+        {
+            if (st.skill_id == skill_id && st.max_skill_lv >= skill_level)
+            {
                 jp_ratio = st.jp_ratio;
             }
         }
-        if(jp_ratio == -1.0f)
+        if (jp_ratio == -1.0f)
             jp_ratio = 1.0f;
         return (int)(pSkillBase->GetNeedJobPoint(skill_level) * jp_ratio);
     }
     return -1;
 }
 
-SkillBase* const ObjectMgr::GetSkillBase(const uint skill_id)
+SkillBase *const ObjectMgr::GetSkillBase(const int skill_id)
 {
-    if(_skillBaseStore.count(skill_id) == 1)
+    if (_skillBaseStore.count(skill_id) == 1)
         return &_skillBaseStore[skill_id];
     return nullptr;
 }
 
-long ObjectMgr::GetNeedExp(int level)
+int64 ObjectMgr::GetNeedExp(int level)
 {
     int l = level;
-    if(l < 1)
+    if (l < 1)
         l = 1;
-    if(l > 300)
+    if (l > 300)
         l = 300;
-    if(_levelResourceStore.size() < l)
-        l = (int)(_levelResourceStore.size() -1);
-    return _levelResourceStore[l-1].normal_exp;
+    if (_levelResourceStore.size() < l)
+        l = (int)(_levelResourceStore.size() - 1);
+    return _levelResourceStore[l - 1].normal_exp;
 }
 
 void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
 {
-    Position pos{};
-    pos.Relocate(x,y);
+    Position pos{ };
+    pos.Relocate(x, y);
 
-    if(g_vWayPoint.count(waypoint_id) >= 1) {
+    if (g_vWayPoint.count(waypoint_id) >= 1)
+    {
         g_vWayPoint[waypoint_id].vWayPoint.emplace_back(pos);
         return;
     }
-    Waypoint wp{};
-    wp.way_point_id = waypoint_id;
+    Waypoint wp{ };
+    wp.way_point_id    = waypoint_id;
     wp.way_point_speed = 0;
-    wp.way_point_type = 1;
+    wp.way_point_type  = 1;
     wp.vWayPoint.emplace_back(pos);
     g_vWayPoint[waypoint_id] = wp;
 }
 
 void ObjectMgr::SetWayPointType(int waypoint_id, int type)
 {
-    if(g_vWayPoint.count(waypoint_id) == 0)
+    if (g_vWayPoint.count(waypoint_id) == 0)
         return;
     g_vWayPoint[waypoint_id].way_point_type = type;
 }
 
 void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
 {
-    if(_monsterBaseStore.count(info.monster_id))
+    if (_monsterBaseStore.count(info.monster_id))
         g_vRespawnInfo.emplace_back(info);
     else
         MX_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
 }
 
-MonsterBase* const ObjectMgr::GetMonsterInfo(uint idx)
+MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
 {
-    if(_monsterBaseStore.count(idx) == 1)
+    if (_monsterBaseStore.count(idx) == 1)
         return &_monsterBaseStore[idx];
     return nullptr;
 }
 
-Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool is_wandering, int way_point_id, MonsterDeleteHandler*  pDeleteHandler, bool bNeedLock)
+Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock)
 {
     auto mob = sMemoryPool->AllocMonster(id);
-    if(mob != nullptr) {
+    if (mob != nullptr)
+    {
         mob->SetCurrentXY(x, y);
         mob->SetLayer(layer);
         mob->m_pDeleteHandler = pDeleteHandler;
-        mob->SetRespawnPosition({(float)x, (float)y, 0});
+        mob->SetRespawnPosition({x, y, 0});
         sWorld->AddMonsterToWorld(mob);
     }
     return mob;
@@ -1455,16 +1531,16 @@ Monster* ObjectMgr::RespawnMonster(uint x, uint y, uint8_t layer, uint id, bool 
 
 uint64 ObjectMgr::GetNeedSummonExp(int level)
 {
-    if(level <= 300 && level > 0)
+    if (level <= 300 && level > 0)
         return _summonLevelStore[level];
     return 0;
 }
 
-uint64 ObjectMgr::GetItemSellPrice(uint64 price, int rank, int lv, bool same_price_for_buying)
+int64 ObjectMgr::GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying)
 {
-    uint64 k;
+    int64 k;
     float f[8]{0};
-    int i;
+    int   i;
 
     k = price;
     if (rank <= 8)
@@ -1482,24 +1558,23 @@ uint64 ObjectMgr::GetItemSellPrice(uint64 price, int rank, int lv, bool same_pri
             i = lv - 1;
             do
             {
-                if (rank != 0 && rank != 1 )
+                if (rank != 0 && rank != 1)
                 {
-                    if ( rank == 2 )
+                    if (rank == 2)
                     {
-                        k += (long)((k * 0.4f * 0.01f) * 100);
+                        k += (int64)((k * 0.4f * 0.01f) * 100);
                     }
                     else
                     {
-                        k += (long)((f[rank] * k * 0.001f) * 1000);
+                        k += (int64)((f[rank] * k * 0.001f) * 1000);
                     }
                 }
                 else
                 {
-                    k += (long)((k * 1.35f * 0.1f) * 10);
+                    k += (int64)((k * 1.35f * 0.1f) * 10);
                 }
                 --i;
-            }
-            while (i > 0);
+            } while (i > 0);
         }
         if (same_price_for_buying)
             return k;
@@ -1542,7 +1617,7 @@ bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 
             if (p <= cp)
             {
                 // temporary workaround for dropgroup
-                if(dg->drop_item_id[i] > 0 && GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
+                if (dg->drop_item_id[i] > 0 && GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
                     continue;
                 nItemID    = dg->drop_item_id[i];
                 nItemCount = 1;
@@ -1557,21 +1632,21 @@ bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 
 
 DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
 {
-    if(_dropTemplateStore.count(drop_group_id) == 1)
+    if (_dropTemplateStore.count(drop_group_id) == 1)
         return &_dropTemplateStore[drop_group_id];
     return nullptr;
 }
 
-QuestBaseServer* const ObjectMgr::GetQuestBase(int code)
+QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
 {
-    if(_questTemplateStore.count(code) == 1)
+    if (_questTemplateStore.count(code) == 1)
         return &_questTemplateStore[code];
     return nullptr;
 }
 
 bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
 {
-    switch(type)
+    switch (type)
     {
         case QuestType::QT_Misc:
             return (flag & 1) != 0;
@@ -1717,8 +1792,9 @@ void ObjectMgr::AddNPCToWorld()
 
 QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
 {
-    for(auto& l : _questLinkStore) {
-        if(l.code == code && (l.nStartTextID == start_id || start_id == 0))
+    for (auto &l : _questLinkStore)
+    {
+        if (l.code == code && (l.nStartTextID == start_id || start_id == 0))
             return &l;
     }
     return nullptr;
@@ -1726,25 +1802,27 @@ QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
 
 StateTemplate *const ObjectMgr::GetStateInfo(int code)
 {
-    if(_stateTemplateStore.count(code) == 1)
+    if (_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];
     return nullptr;
 }
+
 bool ObjectMgr::IsBlocked(float x, float y)
 {
     if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
         return true;
-    if(sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
+    if (sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;
     return g_qtBlockInfo.Collision({x, y});
 }
+
 ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
 {
 }
 
 FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
 {
-    if(_fieldPropTemplateStore.count(idx) == 1)
+    if (_fieldPropTemplateStore.count(idx) == 1)
         return &_fieldPropTemplateStore[idx];
     return nullptr;
 }
@@ -1757,19 +1835,19 @@ bool ObjectMgr::CollisionToLine(float x1, float y1, float x2, float y2)
 
 bool ObjectMgr::LearnAllSkill(Player *pPlayer)
 {
-    auto depth = pPlayer->GetJobDepth();
-    for(int i = 0; i <= depth; ++i)
+    auto     depth = pPlayer->GetJobDepth();
+    for (int i     = 0; i <= depth; ++i)
     {
-        int nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
-        auto tree = getSkillTree(nCurrJob);
-        if(tree.empty())
+        int  nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
+        auto tree     = getSkillTree(nCurrJob);
+        if (tree.empty())
             continue;
 
-        if(i == depth)
+        if (i == depth)
             pPlayer->SetCurrentJLv(depth == 0 ? 10 : 50);
         else
             pPlayer->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
-        for(auto& s : tree)
+        for (auto &s : tree)
         {
             auto currSkill      = pPlayer->GetSkill(s.skill_id);
             int  currSkillLevel = 0;
@@ -1792,24 +1870,24 @@ bool ObjectMgr::LearnAllSkill(Player *pPlayer)
 
 CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type */, int level)
 {
-    if(_summonBonusStore.count(summon_code) == 0)
-        return CreatureStat{};
+    if (_summonBonusStore.count(summon_code) == 0)
+        return CreatureStat{ };
 
-    CreatureStat stat {};
-    auto bonus = _summonBonusStore[summon_code];
-    if(growth_depth != 1)
+    CreatureStat stat{ };
+    auto         bonus = _summonBonusStore[summon_code];
+    if (growth_depth != 1)
     {
         level = level - 50 * growth_depth + 51;
     }
 
-    stat.stat_id = summon_code;
-    stat.strength = bonus.strength * level;
-    stat.vital = bonus.vital * level;
-    stat.dexterity = bonus.dexterity * level;
-    stat.agility = bonus.agility * level;
+    stat.stat_id      = (short)summon_code;
+    stat.strength     = bonus.strength * level;
+    stat.vital        = bonus.vital * level;
+    stat.dexterity    = bonus.dexterity * level;
+    stat.agility      = bonus.agility * level;
     stat.intelligence = bonus.intelligence * level;
-    stat.mentality = bonus.mentality * level;
-    stat.luck = bonus.luck * level;
+    stat.mentality    = bonus.mentality * level;
+    stat.luck         = bonus.luck * level;
 
     return stat;
 }

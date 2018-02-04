@@ -178,7 +178,7 @@ class Unit : public WorldObject
 
         void SetFullHealth() { SetHealth(GetMaxHealth()); }
 
-        void SetEXP(uint exp);
+        void SetEXP(int64 exp);
 
         // eh
         int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) const;
