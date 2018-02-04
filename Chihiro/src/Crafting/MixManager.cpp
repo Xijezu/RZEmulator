@@ -496,20 +496,21 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMateri
     if(pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-    for(int i = 0; i < nSubMaterialCountItem; ++i)
-    {
-        pPlayer->EraseItem(pSubItem[i], pCountList[i]);
-    }
 
     if(pMainMaterial->m_Instance.Flag == ITEM_FLAG_FAILED)
     {
-        pMainMaterial->m_Instance.Flag = 0;
-    }
+    	for(int i = 0; i < nSubMaterialCountItem; ++i)
+    	{
+    		pPlayer->EraseItem(pSubItem[i], pCountList[i]);
+    	}
 
-    Messages::SendItemMessage(pPlayer, pMainMaterial);
-    std::vector<uint> handles{};
-    handles.emplace_back(pMainMaterial->GetHandle());
-    Messages::SendMixResult(pPlayer, &handles);
-    pMainMaterial->DBUpdate();
+        pMainMaterial->m_Instance.Flag = 0;
+        Messages::SendItemMessage(pPlayer, pMainMaterial);
+        std::vector<uint> handles{};
+        handles.emplace_back(pMainMaterial->GetHandle());
+        Messages::SendMixResult(pPlayer, &handles);
+        pMainMaterial->DBUpdate();
+        return true;
+    }
     return true;
 }
