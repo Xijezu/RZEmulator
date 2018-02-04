@@ -6,6 +6,7 @@ class Monster;
 
 struct MonsterBase {
     int   id;
+    int   name_id;
     int   monster_group;
     int   location_id;
     int   level;

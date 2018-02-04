@@ -1253,3 +1253,8 @@ void Monster::TriggerForceKill(Player *pPlayer)
     pFCClient = pPlayer;
     bForceKill = true;
 }
+
+const std::string &Monster::GetNameAsString()
+{
+    return sObjectMgr->GetValueFromNameID(m_Base->name_id);
+}

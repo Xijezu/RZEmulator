@@ -64,14 +64,13 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 {
     if (pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
         return nullptr;
-    std::string szName = "HurrDurr!"s;
     Summon *s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
     s->SetUInt32Value(UNIT_FIELD_UID, (uint)sWorld->GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
     s->CalculateStat();
     s->SetJP(10);
-    s->SetName(szName);
+    s->SetName(sObjectMgr->GetSummonName());
 
     s->SetFullHealth();
     s->SetMana(s->GetMaxMana());
