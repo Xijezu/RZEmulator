@@ -158,7 +158,7 @@ class MixManager
         std::vector<MixBase>     m_vMixInfo{ };
         std::vector<EnhanceInfo> m_vEnhanceInfo{ };
         /// \brief Check if a mix makes sense
-        bool CompatibilityCheck(int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
+        bool CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
 };
 
 #define sMixManager ACE_Singleton<MixManager, ACE_Null_Mutex>::instance()

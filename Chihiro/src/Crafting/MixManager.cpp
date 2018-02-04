@@ -451,7 +451,7 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
     }
 }
 
-bool MixManager::CompatibilityCheck(int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem)
+bool MixManager::CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem)
 {
 	if(*nSubMaterialCount == 1)
 	{
