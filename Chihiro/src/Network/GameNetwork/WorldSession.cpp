@@ -1753,6 +1753,9 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
         case 311:
             sMixManager->MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
+        case 501:
+        	sMixManager->RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
+        	return;
         default:
             break;
     }
