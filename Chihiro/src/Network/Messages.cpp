@@ -896,10 +896,10 @@ void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::strin
 
 void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 {
-    DoEachMovableRegionFunctor         movableRegionFunctor;
+    SendNPCStatusRegionFunctor         movableRegionFunctor;
     SendNPCStatusInVisibleRangeFunctor npcStatusFunctor;
     npcStatusFunctor.player  = pPlayer;
-    movableRegionFunctor.pFo = npcStatusFunctor;
+    movableRegionFunctor.fn = npcStatusFunctor;
 
     sRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
                                  (uint)(pPlayer->GetPositionY() / g_nRegionSize),
