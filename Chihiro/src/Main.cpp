@@ -92,6 +92,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+    CharacterDatabase.PExecute("UPDATE `Character` SET logout_time = NOW() WHERE login_time > logout_time;");
+
 	sWorld->InitWorld();
 
 	ACE_Singleton<WorldSocketMgr<GameAuthSession>, ACE_Thread_Mutex>::instance()->StartNetwork(0, "0.0.0.0");
