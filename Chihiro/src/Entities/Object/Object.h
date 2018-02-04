@@ -572,7 +572,7 @@ class WorldObject : public Object, public ArMoveVector
         Position GetCurrentPosition(uint t);
 
         const char *GetName() const { return m_name.c_str(); }
-        std::string& GetNameAsString() { return m_name; }
+        virtual const std::string& GetNameAsString() { return m_name; }
         void SetName(const std::string &newname) { m_name = newname; }
 
         Region *pRegion;

@@ -81,6 +81,7 @@ class Monster : public Unit
         float GetSize() const override { return m_Base->size; }
 
         float GetScale() const override { return m_Base->scale; }
+        const std::string& GetNameAsString() override;
 
         MONSTER_STATUS GetStatus() const { return m_nStatus; }
 
