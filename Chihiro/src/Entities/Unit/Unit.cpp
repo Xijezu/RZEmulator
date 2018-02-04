@@ -1798,7 +1798,7 @@ void Unit::SetJP(int jp)
         onExpChange();
 }
 
-void Unit::SetEXP(uint exp)
+void Unit::SetEXP(int64 exp)
 {
     SetUInt64Value(UNIT_FIELD_EXP, exp);
     if(HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))

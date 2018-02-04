@@ -597,8 +597,7 @@ bool Player::ReadSkillList(Unit *pUnit)
         {
             Field *fields     = result->Fetch();
             auto  sid         = fields[0].GetInt32();
-            auto  owner_id    = fields[1].GetInt32();
-            auto  summon_id   = fields[2].GetInt32();
+            // idx 1 = owner_id, idx 2 = summon_id
             auto  skill_id    = fields[3].GetInt32();
             auto  skill_level = fields[4].GetInt32();
             auto  cool_time   = fields[5].GetInt32();
@@ -1526,7 +1525,6 @@ void Player::onExpChange()
 {
     int  level   = 1;
     auto exp     = GetEXP();
-    long calcExp = 0;
     if (sObjectMgr->GetNeedExp(1) <= exp)
     {
         do
@@ -1542,7 +1540,7 @@ void Player::onExpChange()
     int oldLevel = GetLevel();
     if (level != 0 && level != oldLevel)
     {
-        SetLevel(level);
+        SetLevel((uint8)level);
         if (level < oldLevel)
         {
             this->CalculateStat();
@@ -1670,7 +1668,7 @@ void Player::ClearDialogMenu()
     m_szDialogMenu = "";
 }
 
-void Player::LogoutNow(int callerIdx)
+void Player::LogoutNow(int /*callerIdx*/)
 {
     if (IsInWorld())
     {
@@ -2316,9 +2314,10 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
-    MX_SHARED_GUARD                                     readGuard(*HashMapHolder<Player>::GetLock());
-    HashMapHolder<Player>::MapType const                &m  = sMemoryPool->GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    MX_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType const &m  = sMemoryPool->GetPlayers();
+
+    for (auto itr = m.begin(); itr != m.end(); ++itr)
     {
         if (itr->second != nullptr)
             fn(itr->second);
@@ -3165,7 +3164,6 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
     {
         if (pItem->IsJoinable())
         {
-            int64 nResultCnt = pItem->m_Instance.nCount - count;
             Item  *pNewItem  = m_Storage.Pop(pItem, count, false);
             pNewItem->m_Instance.nIdx     = ++m_Inventory.m_nIndex;
             pNewItem->m_bIsNeedUpdateToDB = true;

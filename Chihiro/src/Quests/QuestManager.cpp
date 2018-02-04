@@ -369,7 +369,7 @@ void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> 
     }
 }
 
-void QuestManager::UpdateQuestStatusByItemCount(int code, uint64 count)
+void QuestManager::UpdateQuestStatusByItemCount(int code, int64 count)
 {
     std::vector<Quest *> vQuestList{ };
     int                  i{0};
@@ -386,7 +386,7 @@ void QuestManager::UpdateQuestStatusByItemCount(int code, uint64 count)
                 {
                     auto qv = q->GetRandomValue(i);
                     if (count > qv)
-                        count = (uint64)qv;
+                        count = (int64)qv;
                     q->UpdateStatus(i, (int)count);
                     return;
                 }
@@ -399,7 +399,7 @@ void QuestManager::UpdateQuestStatusByItemCount(int code, uint64 count)
                 {
                     auto qv = q->GetValue((2 * i) + 1);
                     if (count > qv)
-                        count = (uint64)qv;
+                        count = (int64)qv;
                     q->UpdateStatus(i, (int)count);
                     return;
                 }
