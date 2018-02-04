@@ -119,6 +119,7 @@ class Monster : public Unit
         void TriggerForceKill(Player *pPlayer);
 
         MonsterDeleteHandler *m_pDeleteHandler{nullptr};
+        bool m_bNearClient;
     protected:
         HateTag *getHateTag(uint handle, uint t);
         HateTag *addHate(uint handle, int nHate);

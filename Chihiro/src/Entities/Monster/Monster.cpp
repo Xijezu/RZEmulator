@@ -45,6 +45,7 @@ Monster::Monster(uint handle, MonsterBase* mb) : Unit(true)
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
 
+    m_bNearClient = false;
     m_nLastEnemyDistance = 0.0f;
     m_nLastTrackTime = 0;
     m_bComeBackHome = false;
@@ -1114,7 +1115,7 @@ void Monster::processFirstAttack(uint t)
     }
     else
     {
-        // TODO: EnumMovableObject
+        sWorld->EnumMovableObject(this->GetPosition(), GetLayer(), GetFirstAttackRange(), vResult, true, true);
 
         auto distance = GetFirstAttackRange() + 1.0f;
         for (const auto &handle : vResult)
@@ -1305,7 +1306,7 @@ void Monster::procDropChaos(Unit *pKiller, takePriority pPriority, std::vector<V
 
 bool Monster::IsAlly(const Unit *pTarget)
 {
-    return pTarget->IsMonster();
+    return pTarget->IsMonster() || pTarget->IsNPC();
 }
 
 void Monster::TriggerForceKill(Player *pPlayer)
