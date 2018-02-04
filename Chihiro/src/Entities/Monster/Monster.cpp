@@ -914,22 +914,22 @@ float Monster::GetFirstAttackRange()
 
 bool Monster::IsFirstAttacker() const
 {
-    return true;//(m_Base.attack)
+    return m_Base->flag[0] != 0;
 }
 
 bool Monster::IsGroupFirstAttacker() const
 {
-    return true;
+    return m_Base->flag[1] != 0;
 }
 
 bool Monster::IsCastRevenger() const
 {
-    return true;
+    return m_Base->flag[2] != 0;
 }
 
 bool Monster::IsBattleRevenger() const
 {
-    return true;
+    return m_Base->flag[4] != 0;
 }
 
 int Monster::GetMonsterGroup() const
@@ -1101,7 +1101,67 @@ void Monster::processMove(uint t)
 
 void Monster::processFirstAttack(uint t)
 {
+    if (GetStatus() != STATUS_NORMAL || !(IsAgent() || IsFirstAttacker() || IsBattleRevenger()))
+        return;
 
+    std::vector<uint> vResult{ };
+    std::vector<Monster*> vSameGroup{};
+    uint target{0};
+
+    if(IsAgent())
+    {
+
+    }
+    else
+    {
+        // TODO: EnumMovableObject
+
+        auto distance = GetFirstAttackRange() + 1.0f;
+        for (const auto &handle : vResult)
+        {
+            auto unit = sMemoryPool->GetObjectInWorld<Unit>(handle);
+            if(unit != nullptr && unit->GetHealth() != 0)
+            {
+                if(!IsFirstAttacker() && unit->IsMonster() && unit->GetTargetHandle() != 0)
+                    target = unit->GetTargetHandle();
+
+                if(IsGroupFirstAttacker() && unit->IsMonster() && unit != this)
+                {
+                    auto mob = unit->As<Monster>();
+                    if(mob->GetMonsterGroup() == GetMonsterGroup())
+                        vSameGroup.emplace_back(mob);
+                }
+
+                if(IsFirstAttacker() && IsEnemy(unit, false))
+                {
+                    auto _distance = unit->GetCurrentPosition(t).GetExactDist2d(this);
+                    if(!unit->IsSummon() || GetFirstAttackRange() * 0.5f >= _distance && distance > _distance)
+                    {
+                        distance = _distance;
+                        target = handle;
+                    }
+                }
+
+            }
+        }
+    }
+
+    if(target == 0)
+        return;
+
+    if(IsFirstAttacker())
+    {
+        AddHate(target, 1, false, true);
+        if(IsGroupFirstAttacker())
+        {
+            for(const auto& m : vSameGroup)
+                m->AddHate(target, 1, false, true);
+        }
+        else
+        {
+            AddHate(target, 1, true, true);
+        }
+    }
 }
 
 void Monster::FindAttackablePosition(Position& myPosition, Position& enemyPosition, float distance, float gap)
