@@ -1678,7 +1678,7 @@ void WorldSession::onDropItem(XPacket *pRecvPct)
 {
     return;
     
-    uint target = pRecvPct->read<uint>();
+    auto target = pRecvPct->read<uint>();
 
     auto item = sMemoryPool->GetObjectInWorld<Item>(target);
     if (item != nullptr)

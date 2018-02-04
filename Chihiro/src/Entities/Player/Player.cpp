@@ -3190,7 +3190,21 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     Item  *pNewItem{nullptr};
 
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
-        Putoff(pItem->m_Instance.nWearInfo);
+    {
+        if(pItem->m_Instance.OwnSummonHandle != 0)
+        {
+            auto summon = sMemoryPool->GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
+            if(summon != nullptr)
+                summon->Putoff(pItem->m_Instance.nWearInfo);
+            else
+                return;
+
+        }
+        else
+        {
+            Putoff(pItem->m_Instance.nWearInfo);
+        }
+    }
 
     if (IsErasable(pItem) &&
             (pItem->m_Instance.Flag & 0x20000000) == 0
