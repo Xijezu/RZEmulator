@@ -136,3 +136,8 @@ void BroadcastStatusRegionFunctor::Run(Region *region)
 {
     region->DoEachClient(fn);
 }
+
+void SendNPCStatusRegionFunctor::Run(Region *pRegion)
+{
+    pRegion->DoEachMovableObject(fn);
+}

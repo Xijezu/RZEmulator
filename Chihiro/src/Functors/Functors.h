@@ -67,6 +67,12 @@ struct SendNPCStatusInVisibleRangeFunctor : public WorldObjectFunctor
     void Run(WorldObject* obj) override;
 };
 
+struct SendNPCStatusRegionFunctor : public RegionFunctor
+{
+    SendNPCStatusInVisibleRangeFunctor fn;
+    void Run(Region *pRegion) override;
+};
+
 struct BroadcastFunctor : public WorldObjectFunctor
 {
     XPacket packet;
