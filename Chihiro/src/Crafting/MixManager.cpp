@@ -16,6 +16,7 @@
   */
 
 #include "Item.h"
+#include "ItemFields.h"
 #include "MixManager.h"
 #include "Messages.h"
 #include "Player.h"
@@ -225,7 +226,12 @@ MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount
         if(m_vMixInfo[i].sub_material_cnt == nSubMaterialCount)
         {
             if(getProperMixInfoSub(&m_vMixInfo[i], nSubMaterialCount, pSubItem, pCountList))
-                return &m_vMixInfo[i];
+            {
+            	if(CompatibilityCheck(&nSubMaterialCount,pSubItem, pMainMaterial))
+            	{
+                	return &m_vMixInfo[i];
+            	}
+            }
         }
     }
     return nullptr;
@@ -443,4 +449,68 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
         pItem->DBUpdate();
         return;
     }
+}
+
+bool MixManager::CompatibilityCheck(int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem)
+{
+	if(*nSubMaterialCount == 1)
+	{
+		if(pItem->m_Instance.Flag % 2 == ITEM_FLAG_CARD)
+		{
+			switch(pSubItem[0]->m_Instance.Code)
+			{
+				case UNIT_CARD:
+					return false;
+				default:
+					break;
+			}
+		}
+		else if(pItem->m_Instance.Flag % 2 == ITEM_FLAG_NORMAL)
+		{
+			switch(pSubItem[0]->m_Instance.Code)
+			{
+				case CHALK_OF_RESTORATION:
+					return false;
+				default:
+					break;
+			}
+		}
+
+		if(pItem->m_Instance.Flag == ITEM_FLAG_FAILED)
+		{
+			if(pSubItem[0]->m_Instance.Code == E_REPAIR_POWDER)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+{
+    if(pPlayer == nullptr || pMainMaterial == nullptr)
+        return false;
+
+
+    if(pMainMaterial->m_Instance.Flag == ITEM_FLAG_FAILED)
+    {
+    	for(int i = 0; i < nSubMaterialCountItem; ++i)
+    	{
+    		pPlayer->EraseItem(pSubItem[i], pCountList[i]);
+    	}
+
+        pMainMaterial->m_Instance.Flag = 0;
+        Messages::SendItemMessage(pPlayer, pMainMaterial);
+        std::vector<uint> handles{};
+        handles.emplace_back(pMainMaterial->GetHandle());
+        Messages::SendMixResult(pPlayer, &handles);
+        pMainMaterial->DBUpdate();
+        return true;
+    }
+    return true;
 }
