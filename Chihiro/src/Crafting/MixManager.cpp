@@ -231,6 +231,10 @@ MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount
             	{
                 	return &m_vMixInfo[i];
             	}
+            	else
+            	{
+            		return nullptr;
+            	}
             }
         }
     }
@@ -510,7 +514,6 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMateri
         handles.emplace_back(pMainMaterial->GetHandle());
         Messages::SendMixResult(pPlayer, &handles);
         pMainMaterial->DBUpdate();
-        return true;
     }
     return true;
 }
