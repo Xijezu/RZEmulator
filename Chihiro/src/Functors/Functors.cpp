@@ -103,6 +103,10 @@ void AddObjectRegionFunctor::Run(Region *region)
 void SendEnterMessageFunctor::Run(WorldObject *client)
 {
     Messages::sendEnterMessage(obj, client, false);
+    if(client->IsMonster())
+    {
+        client->As<Monster>()->m_bNearClient = true;
+    }
 }
 
 void SetMoveFunctor::Run(Region *region)

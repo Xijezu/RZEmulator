@@ -355,10 +355,15 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
 
 void Monster::Update(uint diff)
 {
-    uint          ct = sWorld->GetArTime();
-    MONSTER_STATUS ms = GetStatus();
     if(bForceKill)
         ForceKill(pFCClient);
+
+    if(!m_bNearClient)
+        return;
+
+    uint          ct = sWorld->GetArTime();
+    MONSTER_STATUS ms = GetStatus();
+
     if (ms != STATUS_NORMAL)
     {
         if ((int)ms > 0)
