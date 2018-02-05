@@ -210,6 +210,11 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
             sRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
                                          (uint)(pUnit->GetPositionY() / g_nRegionSize),
                                          pUnit->GetLayer(), fn);
+
+            if(pUnit->IsMonster())
+            {
+                pUnit->As<Monster>()->m_bNearClient = fn.nCnt != 0;
+            }
         }
         result = true;
     }
@@ -243,6 +248,11 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
             sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                          (uint)(obj->GetPositionY() / g_nRegionSize),
                                          obj->GetLayer(), fn);
+
+            if(obj->IsMonster())
+            {
+                obj->As<Monster>()->m_bNearClient = fn.nCnt != 0;
+            }
 
         }
         return true;
