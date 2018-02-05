@@ -872,7 +872,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         return;
     }
     // Checks for attackable
-    if (IsMoving(t) && IsInWorld())
+    if (bIsMoving && IsInWorld())
     {
         sWorld->SetMove(this, myPosition, GetCurrentPosition(t + 10), 0, true, sWorld->GetArTime(), true);
     }
@@ -1159,7 +1159,7 @@ void Monster::processWalk(uint t)
 
     if ((uint)(tmp_mv->GetPositionX() / g_nRegionSize) != (uint)(GetPositionX() / g_nRegionSize)
         || (uint)(tmp_mv->GetPositionY() / g_nRegionSize) != (uint)(GetPositionY() / g_nRegionSize)
-           && !tmp_mv->bIsMoving)
+        || !tmp_mv->bIsMoving)
     {
         if (!IsInWorld())
             return;
