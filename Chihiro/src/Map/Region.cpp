@@ -100,16 +100,9 @@ void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
 void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
 {
     MX_UNIQUE_GUARD writeGuard(i_lock);
-    if(v->empty())
-    {
-        MX_LOG_ERROR("map", "RemoveObject Error 1");
-        return;
-    }
-    if((*v)[obj->region_index]->GetHandle() != obj->GetHandle())
-    {
-        MX_LOG_ERROR("map", "RemoveObject Error 2");
-        return;
-    }
+    ASSERT(!v->empty());
+    ASSERT((*v)[obj->region_index]->GetHandle() == obj->GetHandle());
+
     if(v->back()->GetHandle() != obj->GetHandle())
     {
         auto lbo = v->back();
