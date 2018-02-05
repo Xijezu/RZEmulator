@@ -1101,7 +1101,7 @@ void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std
 
 void Messages::SendTradeCancelMessage(Player *pClient)
 {
-    if (pClient->GetTradeTarget() == nullptr)
+    if (pClient->GetTradeTargetHandle() == -1)
         return;
 
     XPacket tradePct(TS_TRADE);
