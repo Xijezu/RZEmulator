@@ -1534,14 +1534,19 @@ int64 ObjectMgr::GetNeedExp(int level)
 void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
 {
     Position pos{ };
-    pos.Relocate(x, y);
+    pos.Relocate(x, y, 0);
 
-    if (g_vWayPoint.count(waypoint_id) >= 1)
+
+    for(auto& wpi : g_vWayPoint)
     {
-        g_vWayPoint[waypoint_id].vWayPoint.emplace_back(pos);
-        return;
+        if(wpi.first == waypoint_id)
+        {
+            wpi.second.vWayPoint.emplace_back(pos);
+            return;
+        }
     }
-    Waypoint wp{ };
+
+    WayPointInfo wp{ };
     wp.way_point_id    = waypoint_id;
     wp.way_point_speed = 0;
     wp.way_point_type  = 1;
@@ -1551,9 +1556,25 @@ void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
 
 void ObjectMgr::SetWayPointType(int waypoint_id, int type)
 {
-    if (g_vWayPoint.count(waypoint_id) == 0)
-        return;
-    g_vWayPoint[waypoint_id].way_point_type = type;
+    for(const auto& wpi : g_vWayPoint)
+    {
+        if(wpi.first == waypoint_id)
+            return;
+    }
+
+    WayPointInfo info{};
+    info.way_point_speed = 0;
+    info.way_point_type = type;
+    info.way_point_id = waypoint_id;
+    g_vWayPoint[waypoint_id] = info;
+
+}
+
+WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
+{
+    if(g_vWayPoint.count(waypoint_id) != 0)
+        return &g_vWayPoint[waypoint_id];
+    return nullptr;
 }
 
 void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
@@ -1579,6 +1600,9 @@ Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool
         mob->SetCurrentXY(x, y);
         mob->SetLayer(layer);
         mob->m_pDeleteHandler = pDeleteHandler;
+        mob->m_bIsWandering = is_wandering;
+        if(way_point_id != 0)
+            mob->m_pWayPointInfo = GetWayPoint(way_point_id);
         mob->SetRespawnPosition({x, y, 0});
         sWorld->AddMonsterToWorld(mob);
     }
@@ -1962,3 +1986,4 @@ std::string ObjectMgr::GetSummonName()
     int post = irand(0, (int)_summonPostfixStore.size() -1);
     return string_format("%s%s", GetValueFromNameID(_summonPrefixStore[pre]).c_str(), GetValueFromNameID(_summonPostfixStore[post]).c_str());
 }
+
