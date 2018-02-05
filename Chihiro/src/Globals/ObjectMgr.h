@@ -22,13 +22,14 @@ class Monster;
 class Unit;
 class NPC;
 
-struct Waypoint
+struct WayPointInfo
 {
     int                   way_point_speed;
     int                   way_point_type;
     int                   way_point_id;
     std::vector<Position> vWayPoint;
 };
+
 
 class ObjectMgr
 {
@@ -87,6 +88,7 @@ class ObjectMgr
 
         void AddWayPoint(int waypoint_id, float x, float y);
         void SetWayPointType(int waypoint_id, int type);
+        WayPointInfo *GetWayPoint(int waypoint_id);
         void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
 
         NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
@@ -129,7 +131,7 @@ class ObjectMgr
 
         int                             g_currentLocationId{0};
 
-        UNORDERED_MAP<int, Waypoint> g_vWayPoint{ };
+        UNORDERED_MAP<int, WayPointInfo> g_vWayPoint{ };
         //UNORDERED_MAP<int,MonsterRespawnInfo> g_vRespawnInfo{};
         std::vector<MonsterRespawnInfo> g_vRespawnInfo{ };
         X2D::QuadTreeMapInfo            g_qtBlockInfo;

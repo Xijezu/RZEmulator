@@ -59,9 +59,11 @@ struct DamageTag {
     int  nDamage;
 };
 
+struct WayPointInfo;
 class Monster : public Unit
 {
         friend class World;
+        friend class ObjectMgr;
     public:
 
         static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
@@ -181,6 +183,9 @@ class Monster : public Unit
         Player *pFCClient{nullptr};
         bool bForceKill{false};
         bool m_bTamedSuccess;
+        int m_nWayPointIdx;
+        bool m_bIsWandering;
+        WayPointInfo *m_pWayPointInfo;
 
         MONSTER_STATUS m_nStatus;
 };
