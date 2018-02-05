@@ -44,6 +44,7 @@ Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
     CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
+    SetOrientation((float)(rand32() / 100));
 
     m_bNearClient         = false;
     m_nLastEnemyDistance  = 0.0f;
@@ -371,7 +372,7 @@ void Monster::Update(uint diff)
     if (bForceKill)
         ForceKill(pFCClient);
 
-    if (!m_bNearClient)
+    if(!m_bNearClient)
         return;
 
     uint           ct = sWorld->GetArTime();
@@ -455,7 +456,7 @@ void Monster::processDead(uint t)
         m_pDeleteHandler->onMonsterDelete(this);
     }
 
-    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t)
+    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 12000 < t)
     {
         if (IsInWorld())
             sWorld->RemoveObjectFromWorld(this);
@@ -1168,14 +1169,16 @@ void Monster::processWalk(uint t)
         {
             if (tmp_mv->bIsMoving)
             {
-                sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv->bIsMoving);
+                sWorld->onRegionChange(this, t - lastStepTime, tmp_mv->bIsMoving == 0);
                 return;
             }
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE))
                 RemoveFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE);
             m_bComeBackHome = false;
         }
+        MX_LOG_INFO("misc", "BeforeRegionChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
         sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv->bIsMoving);
+        MX_LOG_INFO("misc", "AfterRegionChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
     }
 }
 
@@ -1187,7 +1190,39 @@ void Monster::processMove(uint t)
     std::vector<Position> vMoveInfo{ };
     Position              targetPos{ };
 
-    if (m_pWayPointInfo != nullptr)
+    if (m_pWayPointInfo == nullptr)
+    {
+        if (GetStatus() != STATUS_NORMAL || m_bNearClient || !m_vHateList.empty())
+        {
+            if (m_bIsWandering)
+            {
+                int rnd = rand32();
+                if (GetStatus() == STATUS_NORMAL
+                    && GetHealth() != 0
+                    && (!bIsMoving || !IsInWorld())
+                    && rnd % 500 + lastStepTime + 200 < t
+                    && (rnd % 3) != 0)
+                {
+                    getMovePosition(targetPos);
+                    if (!sObjectMgr->IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
+                    {
+                        auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
+                        MX_LOG_INFO("misc", "BeforeMoveChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
+                        sWorld->SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld->GetArTime(), true);
+                        MX_LOG_INFO("misc", "AfterMoveChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
+                        m_pRespawn.m_positionX = targetPos.GetPositionX();
+                        m_pRespawn.m_positionY = targetPos.GetPositionY();
+                    }
+                }
+            }
+        }
+        else
+        {
+            sWorld->ClearTamer(this, true);
+            SetStatus(STATUS_NORMAL);
+        }
+    }
+    else
     {
         if (!bIsMoving || !IsInWorld())
         {
@@ -1214,42 +1249,12 @@ void Monster::processMove(uint t)
             }
 
             t = sWorld->GetArTime();
-            auto speed = (uint8)(m_pWayPointInfo->way_point_speed % 7);
+            auto speed = (uint8)(m_pWayPointInfo->way_point_speed / 7);
 
             if (speed == 0)
                 speed = (uint8)(m_Attribute.nMoveSpeed / 7);
 
             sWorld->SetMultipleMove(this, GetCurrentPosition(t), vMoveInfo, speed, true, t, true);
-        }
-    }
-    else
-    {
-        if (GetStatus() != STATUS_NORMAL || m_bNearClient || !m_vHateList.empty())
-        {
-            if (m_bIsWandering)
-            {
-                int rnd = rand32();
-                if (GetStatus() == STATUS_NORMAL && GetHealth() != 0 && (!bIsMoving || !IsInWorld()))
-                {
-                    if ((rnd % 500) + lastStepTime + 2000 < t && (rnd % 3) != 0)
-                    {
-                        getMovePosition(targetPos);
-                        if (!sObjectMgr->IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
-                        {
-                            auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
-                            t = sWorld->GetArTime();
-                            sWorld->SetMove(this, GetCurrentPosition(t), targetPos, speed, true, t, true);
-                            m_pRespawn.m_positionX = targetPos.GetPositionX();
-                            m_pRespawn.m_positionY = targetPos.GetPositionY();
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            sWorld->ClearTamer(this, true);
-            SetStatus(STATUS_NORMAL);
         }
     }
 }
