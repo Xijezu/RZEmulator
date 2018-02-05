@@ -334,7 +334,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         // Trade stuff
         bool   m_bTrading      = false;
         bool   m_bTradeFreezed = false;
-        uint32 m_pTradeTargetHandle;
+        uint32 m_pTradeTargetHandle = -1;
 };
 
 #endif // _PLAYER_H_

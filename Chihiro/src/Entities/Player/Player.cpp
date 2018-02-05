@@ -3297,13 +3297,12 @@ bool Player::IsSitdownable() const
     return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
 }
 
-void Player::StartTrade(uint32
-pTargetHandle)
+void Player::StartTrade(uint32 pTargetHandle)
 {
     if (!m_bTrading && m_bTradeFreezed)
     {
         ClearTradeInfo();
-                    m_pTradeTargetHandle = pTarget;
+                    m_pTradeTargetHandle = pTargetHandle;
     }
 }
 
@@ -3317,7 +3316,7 @@ void Player::CancelTrade(bool bIsNeedBroadcast)
 
 void Player::ClearTradeInfo()
 {
-    m_pTradeTargetHandle = 0;
+    m_pTradeTargetHandle = -1;
     m_bTradeFreezed      = false;
     m_bTrading           = false;
     // Todo: Implement clearing trade params as functions are implemented
@@ -3325,5 +3324,5 @@ void Player::ClearTradeInfo()
 
 uint32 Player::GetTradeTargetHandle()
 {
-    return m_pTradeTarget;
+    return m_pTradeTargetHandle;
 }
