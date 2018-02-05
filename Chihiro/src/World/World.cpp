@@ -306,6 +306,7 @@ void World::AddObjectToWorld(WorldObject *obj)
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
 {
+    MX_LOG_INFO("misc", "update_time %u", update_time);
     auto oldx = (uint)(obj->GetPositionX() / g_nRegionSize);
     auto oldy = (uint)(obj->GetPositionY() / g_nRegionSize);
     step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
