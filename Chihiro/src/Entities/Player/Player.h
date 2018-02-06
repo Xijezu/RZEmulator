@@ -180,6 +180,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void RemoveSummonFromStorage(Summon* pSummon);
         void OpenStorage();
 
+        void StartTrade(uint32 pTargetHandle);
+        void CancelTrade(bool bIsNeedBroadcast);
+        void ClearTradeInfo();
+        uint32 GetTradeTargetHandle();
+
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
         uint16_t putoffItem(ItemWearType) override;
@@ -329,6 +334,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::string m_szDialogMenu{ };
         std::string m_szSpecialDialogMenu{ };
         std::string m_szClientInfo{ };
+
+        // Trade stuff
+        bool   m_bTrading      = false;
+        bool   m_bTradeFreezed = false;
+        uint32 m_pTradeTargetHandle = -1;
 };
 
 #endif // _PLAYER_H_
