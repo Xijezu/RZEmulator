@@ -100,7 +100,7 @@ class MixManager
         /// \return true on success, false on failure
         bool MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
         /// Not implemented yet
-        bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
+        bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubItem);
         /// Not implemented yet
         bool CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
 

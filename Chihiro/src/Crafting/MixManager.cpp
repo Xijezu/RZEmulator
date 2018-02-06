@@ -137,8 +137,63 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     return bResult;
 }
 
-bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount,std::vector<Item*> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount,std::vector<Item*> &pSubMaterial)
 {
+	if(nSubMaterialCount != 3)
+		return false;
+
+	Item *skillCardMain = nullptr;
+	Item *skillCardSec  = nullptr;
+	Item *skillCube     = nullptr;
+
+	for(int i=0; i<nSubMaterialCount; i++)
+	{
+		if(pSubMaterial[i]->m_pItemBase->group == GROUP_SKILLCARD)
+		{
+			if(skillCardMain == nullptr)
+				skillCardMain = pSubMaterial[i];
+
+			else
+				skillCardSec = pSubMaterial[i];
+		}
+		else if(pSubMaterial[i]->m_pItemBase->group == GROUP_SKILL_CUBE)
+		{
+			skillCube = pSubMaterial[i];
+		}
+	}
+
+
+	EnhanceInfo *pInfo = getenhanceInfo(pMixInfo->value[0]);
+	if(pInfo == nullptr 											        ||
+	   skillCardSec == nullptr 										        ||
+	   skillCardMain->m_Instance.Code != skillCardSec->m_Instance.Code      ||
+	   skillCardMain->m_Instance.nEnhance != skillCardSec->m_Instance.nEnhance)
+	{
+		Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+		return false;
+	}
+
+	pPlayer->EraseItem(skillCube, 1);
+
+    auto nRandom = (uint)(pInfo->fPercentage[skillCardMain->m_Instance.nEnhance] * 100000.0f);
+    if(irand(0, 100000) > nRandom)
+    {
+    	pPlayer->EraseItem(skillCardMain, 1);
+    	pPlayer->EraseItem(skillCardSec, 1);
+    	Messages::SendMixResult(pPlayer, nullptr);
+    }
+    else
+    {
+    	pPlayer->EraseItem(skillCardSec, 1);
+        skillCardMain->m_Instance.nEnhance = skillCardMain->m_Instance.nEnhance + 1;
+        skillCardMain->m_bIsNeedUpdateToDB = true;
+        Messages::SendItemMessage(pPlayer, skillCardMain);
+        std::vector<uint> handles{};
+        handles.emplace_back(skillCardSec->GetHandle());
+        Messages::SendMixResult(pPlayer, &handles);
+        skillCardMain->DBUpdate();
+        return true;
+    }
     return false;
 }
 
@@ -508,7 +563,7 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMateri
     		pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     	}
 
-        pMainMaterial->m_Instance.Flag = 0;
+        pMainMaterial->m_Instance.Flag = ITEM_FLAG_NORMAL;
         Messages::SendItemMessage(pPlayer, pMainMaterial);
         std::vector<uint> handles{};
         handles.emplace_back(pMainMaterial->GetHandle());
