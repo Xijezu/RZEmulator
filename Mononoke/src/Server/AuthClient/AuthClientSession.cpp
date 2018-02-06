@@ -28,7 +28,7 @@
 AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket), m_pPlayer(nullptr)
 {
     _desCipther.Init("MERONG");
-    if(_socket)
+    if (_socket)
     {
         _socket->AddReference();
     }
@@ -37,7 +37,7 @@ AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket), m_pP
 // Close patch file descriptor before leaving
 AuthClientSession::~AuthClientSession()
 {
-    if(_socket)
+    if (_socket)
         _socket->RemoveReference();
 }
 
@@ -53,32 +53,34 @@ void AuthClientSession::OnClose()
     }
 }
 
-enum eStatus {
+enum eStatus
+{
     STATUS_CONNECTED = 0,
     STATUS_AUTHED
 };
 
-typedef struct AuthHandler {
+typedef struct AuthHandler
+{
     uint16_t cmd;
-    uint8_t status;
+    uint8_t  status;
     void (AuthClientSession::*handler)(XPacket *);
 } AuthHandler;
 
-const AuthHandler packetHandler[] =
-                          {
-                                  {TS_CA_VERSION,       STATUS_CONNECTED, &AuthClientSession::HandleVersion},
-                                  {TS_CA_PING,          STATUS_CONNECTED, &AuthClientSession::HandleNullPacket},
-                                  {TS_CA_ACCOUNT,       STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket},
-                                  {TS_CA_SERVER_LIST,   STATUS_AUTHED,    &AuthClientSession::HandleServerList},
-                                  {TS_CA_SELECT_SERVER, STATUS_AUTHED,    &AuthClientSession::HandleSelectServer}
-                          };
+constexpr AuthHandler packetHandler[] =
+                              {
+                                      {TS_CA_VERSION,       STATUS_CONNECTED, &AuthClientSession::HandleVersion},
+                                      {TS_CA_PING,          STATUS_CONNECTED, &AuthClientSession::HandleNullPacket},
+                                      {TS_CA_ACCOUNT,       STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket},
+                                      {TS_CA_SERVER_LIST,   STATUS_AUTHED,    &AuthClientSession::HandleServerList},
+                                      {TS_CA_SELECT_SERVER, STATUS_AUTHED,    &AuthClientSession::HandleSelectServer}
+                              };
 
-const int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
+constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
 
 /// Handler for incoming packets
 void AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 {
-    ASSERT(pRecvPct);
+            ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
 
@@ -139,7 +141,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
             if (pOldPlayer->bIsInGame)
             {
                 auto game = sGameMapList->GetGame((uint)pOldPlayer->nGameIDX);
-                if(game != nullptr && game->m_pSession != nullptr)
+                if (game != nullptr && game->m_pSession != nullptr)
                     game->m_pSession->KickPlayer(pOldPlayer);
             }
             SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
@@ -164,32 +166,33 @@ void AuthClientSession::HandleVersion(XPacket *pRecvPct)
 void AuthClientSession::HandleServerList(XPacket *)
 {
     MX_SHARED_GUARD readGuard(*sGameMapList->GetGuard());
-    auto map = sGameMapList->GetMap();
-    XPacket packet(TS_AC_SERVER_LIST);
-    packet << (uint16) 0;
-    packet << (uint16) map->size();
-    for (auto &x : *map) {
-        packet << (uint16) x.second->nIDX;
+    auto            map = sGameMapList->GetMap();
+    XPacket         packet(TS_AC_SERVER_LIST);
+    packet << (uint16)0;
+    packet << (uint16)map->size();
+    for (auto &x : *map)
+    {
+        packet << (uint16)x.second->nIDX;
         packet.fill(x.second->szName, 21);
-        packet << (uint8) (x.second->bIsAdultServer ? 1 : 0);
+        packet << (uint8)(x.second->bIsAdultServer ? 1 : 0);
         packet.fill(x.second->szSSU, 256);
         packet.fill(x.second->szIP, 16);
-        packet << (int32) x.second->nPort;
-        packet << (uint16) 0;
+        packet << (int32)x.second->nPort;
+        packet << (uint16)0;
     }
     _socket->SendPacket(packet);
 }
 
 void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
 {
-    m_pPlayer->nGameIDX = pRecvPct->read<uint16>();
-    m_pPlayer->nOneTimeKey = ((uint64) rand32()) * rand32() * rand32() * rand32();
-    m_pPlayer->bIsInGame = true;
-    bool bExist = sGameMapList->GetGame((uint)m_pPlayer->nGameIDX) != 0;
+    m_pPlayer->nGameIDX    = pRecvPct->read<uint16>();
+    m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
+    m_pPlayer->bIsInGame   = true;
+    bool    bExist = sGameMapList->GetGame((uint)m_pPlayer->nGameIDX) != 0;
     XPacket packet(TS_AC_SELECT_SERVER);
-    packet << (uint16) (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
-    packet << (int64) (bExist ? m_pPlayer->nOneTimeKey : 0);
-    packet << (uint32) 0;
+    packet << (uint16)(bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
+    packet << (int64)(bExist ? m_pPlayer->nOneTimeKey : 0);
+    packet << (uint32)0;
     _socket->SendPacket(packet);
 }
 

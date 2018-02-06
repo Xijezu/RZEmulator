@@ -1,6 +1,7 @@
 file(GLOB_RECURSE SHARED_SOURCE_FILES *.h *.cpp)
 
 include_directories(
+        ${CMAKE_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/Configuration
         ${CMAKE_CURRENT_SOURCE_DIR}/Encryption

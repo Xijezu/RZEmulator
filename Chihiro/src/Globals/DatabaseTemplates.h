@@ -5,7 +5,7 @@
 #ifndef PROJECT_DATABASETEMPLATES_H
 #define PROJECT_DATABASETEMPLATES_H
 
-#define MAX_DROP_GROUP 10
+constexpr int MAX_DROP_GROUP = 10;
 
 struct DropGroup
 {

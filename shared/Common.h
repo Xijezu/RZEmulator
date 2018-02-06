@@ -21,7 +21,6 @@
 #define SKYFIRE_COMMON_H
 
 #include "Define.h"
-#include <assert.h>
 #include <ace/Stack_Trace.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Null_Mutex.h>

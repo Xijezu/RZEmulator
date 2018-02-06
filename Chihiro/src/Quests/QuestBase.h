@@ -3,14 +3,14 @@
 
 #include "Common.h"
 
-#define MAX_VALUE_NUMBER 12
-#define MAX_OPTIONAL_REWARD 3
-#define MAX_FOREQUEST 3
-#define MAX_KEY_VALUE 3
-#define MAX_QUEST_STATUS 3
-#define MAX_RANDOM_QUEST_VALUE 3
-#define QUEST_PARAMETER_CHAOS 99
-#define FAVOR_GROUP_ID_CONTACT 999
+constexpr int MAX_VALUE_NUMBER = 12;
+constexpr int MAX_OPTIONAL_REWARD = 3;
+constexpr int MAX_FOREQUEST = 3;
+constexpr int MAX_KEY_VALUE = 3;
+constexpr int MAX_QUEST_STATUS = 3;
+constexpr int MAX_RANDOM_QUEST_VALUE = 3;
+constexpr int QUEST_PARAMETER_CHAOS = 99;
+constexpr int FAVOR_GROUP_ID_CONTACT = 999;
 
 enum QB_LimitFlags : int {
     QB_LimitDeva     = 1,

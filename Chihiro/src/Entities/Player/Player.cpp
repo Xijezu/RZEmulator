@@ -52,6 +52,7 @@ Player::~Player()
 
 void Player::CleanupsBeforeDelete()
 {
+    CharacterDatabase.DirectPExecute("UPDATE `Character` SET logout_time = NOW() WHERE sid = %u", GetUInt32Value(UNIT_FIELD_UID));
     if (IsInWorld())
     {
         RemoveAllSummonFromWorld();
@@ -400,7 +401,7 @@ void Player::DB_ReadStorage()
             auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), i);
             if (pos != m_vStorageSummonList.end())
                 m_vStorageSummonList.erase(pos);
-            delete i;
+            i->DeleteThis();
         }
         vList.clear();
     }
@@ -596,8 +597,7 @@ bool Player::ReadSkillList(Unit *pUnit)
         {
             Field *fields     = result->Fetch();
             auto  sid         = fields[0].GetInt32();
-            auto  owner_id    = fields[1].GetInt32();
-            auto  summon_id   = fields[2].GetInt32();
+            // idx 1 = owner_id, idx 2 = summon_id
             auto  skill_id    = fields[3].GetInt32();
             auto  skill_level = fields[4].GetInt32();
             auto  cool_time   = fields[5].GetInt32();
@@ -771,7 +771,7 @@ bool Player::ReadSummonList(int UID)
             Item *card = FindItemBySID(card_uid);
             if (card == nullptr)
             {
-                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: , SummonUID: %d]", card_uid, sid);
+                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: %d , SummonUID: %d]", card_uid, sid);
                 summon->DeleteThis();
             }
             if (card != nullptr)
@@ -804,7 +804,7 @@ void Player::SendLoginProperties()
 {
     Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
     CalculateStat();
-    // Login();
+    CharacterDatabase.DirectPExecute("UPDATE `Character` SET login_time = NOW() WHERE sid = %u", GetUInt32Value(UNIT_FIELD_UID));
 
     if (GetPartyID() != 0)
         sGroupManager->onLogin(GetPartyID(), this);
@@ -1198,7 +1198,7 @@ void Player::ShowDialog()
 bool Player::IsValidTrigger(const std::string &szTrigger)
 {
     Tokenizer tokenizer(m_szDialogMenu, '\t');
-    for (auto s : tokenizer)
+    for (const auto& s : tokenizer)
     {
         if (s == szTrigger)
             return true;
@@ -1525,7 +1525,6 @@ void Player::onExpChange()
 {
     int  level   = 1;
     auto exp     = GetEXP();
-    long calcExp = 0;
     if (sObjectMgr->GetNeedExp(1) <= exp)
     {
         do
@@ -1541,7 +1540,7 @@ void Player::onExpChange()
     int oldLevel = GetLevel();
     if (level != 0 && level != oldLevel)
     {
-        SetLevel(level);
+        SetLevel((uint8)level);
         if (level < oldLevel)
         {
             this->CalculateStat();
@@ -1618,6 +1617,19 @@ void Player::AddSummon(Summon *pSummon, bool bSendMsg)
     }
 }
 
+bool Player::RemoveSummon(Summon *pSummon)
+{
+    auto pos = std::find(m_vSummonList.begin(), m_vSummonList.end(), pSummon);
+    if (pos != m_vSummonList.end())
+        m_vSummonList.erase(pos);
+
+    pSummon->m_pMaster = nullptr;
+    Messages::SendRemoveSummonMessage(this, pSummon);
+    Summon::DB_UpdateSummon(this, pSummon);
+    return true;
+}
+
+
 Summon *Player::GetSummonByHandle(uint handle)
 {
     for (auto s : m_vSummonList)
@@ -1656,7 +1668,7 @@ void Player::ClearDialogMenu()
     m_szDialogMenu = "";
 }
 
-void Player::LogoutNow(int callerIdx)
+void Player::LogoutNow(int /*callerIdx*/)
 {
     if (IsInWorld())
     {
@@ -2302,9 +2314,10 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
-    MX_SHARED_GUARD                                     readGuard(*HashMapHolder<Player>::GetLock());
-    HashMapHolder<Player>::MapType const                &m  = sMemoryPool->GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    MX_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType const &m  = sMemoryPool->GetPlayers();
+
+    for (auto itr = m.begin(); itr != m.end(); ++itr)
     {
         if (itr->second != nullptr)
             fn(itr->second);
@@ -3060,18 +3073,6 @@ void Player::onBeforeCalculateStat()
     Unit::onBeforeCalculateStat();
 }
 
-bool Player::RemoveSummon(Summon *pSummon)
-{
-    auto pos = std::find(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), pSummon);
-    if (pos != m_vStorageSummonList.end())
-        m_vStorageSummonList.erase(pos);
-
-    pSummon->m_pMaster = nullptr;
-    Messages::SendRemoveSummonMessage(this, pSummon);
-    Summon::DB_UpdateSummon(this, pSummon);
-	return true;
-}
-
 void Player::AddSummonToStorage(Summon *pSummon)
 {
     pSummon->m_nAccountID = GetUInt32Value(PLAYER_FIELD_ACCOUNT_ID);
@@ -3163,7 +3164,6 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
     {
         if (pItem->IsJoinable())
         {
-            int64 nResultCnt = pItem->m_Instance.nCount - count;
             Item  *pNewItem  = m_Storage.Pop(pItem, count, false);
             pNewItem->m_Instance.nIdx     = ++m_Inventory.m_nIndex;
             pNewItem->m_bIsNeedUpdateToDB = true;
@@ -3190,9 +3190,23 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     Item  *pNewItem{nullptr};
 
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
-        Putoff(pItem->m_Instance.nWearInfo);
+    {
+        if(pItem->m_Instance.OwnSummonHandle != 0)
+        {
+            auto summon = sMemoryPool->GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
+            if(summon != nullptr)
+                summon->Putoff(pItem->m_Instance.nWearInfo);
+            else
+                return;
 
-    if (/* IsErasable(pItem) && */
+        }
+        else
+        {
+            Putoff(pItem->m_Instance.nWearInfo);
+        }
+    }
+
+    if (IsErasable(pItem) &&
             (pItem->m_Instance.Flag & 0x20000000) == 0
             && m_bIsUsingStorage
             && pItem->m_Instance.nCount >= count
@@ -3262,7 +3276,14 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
             int         hp                 = fields[i++].GetInt32();
             int         mp                 = fields[i++].GetInt32();
 
-            auto summon = Summon::AllocSummon(this, code);
+            auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [sid](Summon *const s) { return s->GetUInt32Value(UNIT_FIELD_UID) == sid; });
+            if (pos != m_vStorageSummonList.end())
+            {
+                vList.emplace_back(*pos);
+                continue;
+            }
+
+            auto summon = Summon::AllocSummon(nullptr, code);
             summon->SetUInt32Value(UNIT_FIELD_UID, sid);
             summon->m_nSummonInfo = code;
             summon->m_nCardUID    = card_uid;
@@ -3279,22 +3300,79 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
             summon->SetInt32Value(UNIT_FIELD_MANA, mp);
             summon->m_nTransform = transform;
 
-            auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [summon](Summon *const s) { return s->GetUInt32Value(UNIT_FIELD_UID) == summon->GetUInt32Value(UNIT_FIELD_UID); });
-            if (pos == m_vStorageSummonList.end())
-            {
-                ReadSkillList(summon);
-                m_vStorageSummonList.emplace_back(summon);
-            }
+            ReadSkillList(summon);
+            m_vStorageSummonList.emplace_back(summon);
             vList.emplace_back(summon);
 
         } while (result->NextRow());
     }
-	return true;
+    return true;
 }
 
 bool Player::IsSitdownable() const
 {
     return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
+}
+
+bool Player::IsErasable(Item *pItem) const
+{
+    if(!pItem->IsInInventory())
+        return false;
+    if(pItem->m_Instance.OwnerHandle != GetHandle())
+        return false;
+    if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+        return false;
+    if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+        return false;
+
+    if(pItem->m_pItemBase->group == GROUP_SUMMONCARD)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            // TODO: Beltslots
+            if(m_aBindSummonCard[i] != nullptr && pItem->GetHandle() == m_aBindSummonCard[i]->GetHandle())
+                return false;
+        }
+    }
+
+    return !pItem->IsInStorage();
+}
+
+bool Player::IsMixable(Item *pItem) const
+{
+    return IsErasable(pItem);
+}
+
+bool Player::DropQuest(int code)
+{
+    auto q = m_QuestManager.FindQuest(code);
+    if(q == nullptr)
+        return false;
+
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_QUEST);
+    stmt->setInt32(0, GetUInt32Value(UNIT_FIELD_UID));
+    stmt->setInt32(1, q->m_Instance.nID);
+    CharacterDatabase.Execute(stmt);
+
+    onDropQuest(q);
+    Messages::SendQuestList(this);
+    return true;
+}
+
+void Player::onDropQuest(Quest *pQuest)
+{
+    if(pQuest->m_QuestBase->nType == QuestType::QT_Parameter)
+    {
+        for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+        {
+            if(pQuest->GetValue(i) == 99 && GetChaos() != 0 && pQuest->GetValue(i + 1) == 1)
+            {
+                AddChaos(-pQuest->GetValue(i + 2));
+            }
+        }
+    }
+    m_QuestManager.PopFromActiveQuest(pQuest);
+    Messages::SendNPCStatusInVisibleRange(this);
 }
 
 void Player::StartTrade(uint32 pTargetHandle)

@@ -13,7 +13,7 @@ class Item;
 class Summon;
 class WorldLocation;
 
-#define MAX_ITEM_COOLTIME_GROUP 20
+constexpr int MAX_ITEM_COOLTIME_GROUP = 20;
 
 enum BONUS_TYPE : int
 {
@@ -94,6 +94,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool IsFinishableQuest(int code);
         bool CheckFinishableQuestAndGetQuestStruct(int code);
         Quest *FindQuest(int code);
+        bool DropQuest(int code);
 
         /* ****************** QUEST END ****************** */
 
@@ -170,6 +171,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void MoveInventoryToStorage(Item *pItem, int64 count);
         bool EraseItem(Item* pItem, int64 count);
         bool EraseBullet(int64 count);
+        bool IsMixable(Item *pItem) const;
+        bool IsErasable(Item *pItem) const;
 
         // Storage Relevant
         bool RemoveSummon(Summon* pSummon);
@@ -285,6 +288,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void updateQuestStatus(Quest *pQuest);
         void onEndQuest(Quest *pQuest);
     private:
+        void onDropQuest(Quest* pQuest);
         void openStorage();
         Item *popItem(Item* pItem, int64 cnt, bool bSkipUpdateToDB);
 

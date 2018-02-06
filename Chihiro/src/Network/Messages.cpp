@@ -206,7 +206,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
             return;
         skillPct << (ushort)1; // Size
         skillPct << (uint8_t)0; // reset | modification_type?
-        skillPct << (int)skill_id;
+        skillPct << skill_id;
         skillPct << (int8_t)pUnit->GetBaseSkillLevel(skill_id);
         skillPct << (int8_t)pUnit->GetCurrentSkillLevel(skill_id);
         skillPct << (uint32_t)pUnit->GetTotalCoolTime(skill_id);
@@ -419,7 +419,7 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
     worldSession->GetSocket()->SendPacket(packet);
 }
 
-void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool bAbsolute)
+void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbsolute*/)
 {
     if (pObj == nullptr || pPlayer == nullptr)
         return;
@@ -629,11 +629,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
     int         type = 3;
 
     auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
-    if (npc == nullptr)
-    {
-
-    }
-    if (true /*npc != nullptr*/)
+    if (npc != nullptr)
     {
         int progress = 0;
         if (text != 0)
@@ -654,7 +650,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
         Quest *q     = pPlayer->FindQuest(code);
         int   textID = text;
         if (textID == 0)
-            textID = npc != nullptr ? npc->GetQuestTextID(code, progress) : q->m_Instance.nStartID;
+            textID = npc->GetQuestTextID(code, progress);
         if (npc == nullptr)
         {
             if (q->m_QuestBase->nEndType != 1 || progress != 2)
@@ -753,14 +749,15 @@ void Messages::SendQuestList(Player *pPlayer)
         }
         else
         {
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
             {
                 questPct << pQuest->m_QuestBase->nValue[i];
             }
         }
-        for (int i = 0; i < 3; ++i)
+
+        for (int& nStatu : pQuest->m_Instance.nStatus)
         {
-            questPct << pQuest->m_Instance.nStatus[i];
+            questPct << nStatu;
         }
     };
     /* FUNCTOR END */
@@ -809,7 +806,7 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
         }
         else
         {
-            statePct << (int)-1;
+            statePct << -1;
         }
 
         t     = pState.m_nStartTime[1];
@@ -840,15 +837,15 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     switch (mode)
     {
         case 0:
-            chatMsg = string_format("TAMING_START|%s|", "Random Monster");
+            chatMsg = string_format("TAMING_START|%s|", pMonster->GetNameAsString().c_str());
             break;
 
         case 1:
         case 3:
-            chatMsg = string_format("TAMING_FAILED|%s|", "Random Monster");
+            chatMsg = string_format("TAMING_FAILED|%s|", pMonster->GetNameAsString().c_str());
             break;
         case 2:
-            chatMsg = string_format("TAMING_SUCCESS|%s|", "Random Monster");
+            chatMsg = string_format("TAMING_SUCCESS|%s|", pMonster->GetNameAsString().c_str());
             break;
         default:
             return;
@@ -896,10 +893,10 @@ void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::strin
 
 void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 {
-    DoEachMovableRegionFunctor         movableRegionFunctor;
+    SendNPCStatusRegionFunctor         movableRegionFunctor;
     SendNPCStatusInVisibleRangeFunctor npcStatusFunctor;
     npcStatusFunctor.player  = pPlayer;
-    movableRegionFunctor.pFo = npcStatusFunctor;
+    movableRegionFunctor.fn = npcStatusFunctor;
 
     sRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
                                  (uint)(pPlayer->GetPositionY() / g_nRegionSize),

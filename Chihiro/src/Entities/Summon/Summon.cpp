@@ -80,7 +80,7 @@ uint32_t Summon::GetCardHandle()
         return 0;
 }
 
-void Summon::DB_UpdateSummon(Player *pMaster, Summon *pSummon)
+void Summon::DB_UpdateSummon(Player */*pMaster*/, Summon *pSummon)
 {
     // PrepareStatement(CHARACTER_UPD_SUMMON, "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?,
     // exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?,

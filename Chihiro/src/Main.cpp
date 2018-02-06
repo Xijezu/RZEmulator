@@ -3,6 +3,7 @@
 #include "Utilities/SignalHandler.h"
 #include "AuthNetwork.h"
 #include "World.h"
+#include "SystemConfigs.h"
 #include "WorldRunnable.h"
 
 #include <fstream>
@@ -62,6 +63,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+    MX_LOG_INFO("server.worldserver", "%s (worldserver)", _FULLVERSION);
+
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
 #else
@@ -88,6 +91,8 @@ int main(int argc, char **argv)
 		MX_LOG_ERROR("server.worldserver","Cannot connect to database.");
 		return 1;
 	}
+
+    CharacterDatabase.PExecute("UPDATE `Character` SET logout_time = NOW() WHERE login_time > logout_time;");
 
 	sWorld->InitWorld();
 
