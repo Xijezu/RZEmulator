@@ -3375,10 +3375,12 @@ void Player::onDropQuest(Quest *pQuest)
     Messages::SendNPCStatusInVisibleRange(this);
 }
 
-void Player::StartTrade(uint32 pTargetHandle) {
-    if (!m_bTrading && !m_bTradeFreezed) {
+void Player::StartTrade(uint32 pTargetHandle)
+{
+    if (!m_bTrading && !m_bTradeFreezed)
+    {
         ClearTradeInfo();
-        m_pTradeTargetHandle = pTargetHandle;
+        SetUInt32Value(PLAYER_FIELD_TRADE_TARGET, pTargetHandle);
     }
 }
 
@@ -3392,13 +3394,14 @@ void Player::CancelTrade(bool bIsNeedBroadcast)
 
 void Player::ClearTradeInfo()
 {
-    m_pTradeTargetHandle = -1;
     m_bTradeFreezed      = false;
     m_bTrading           = false;
     // Todo: Implement clearing trade params as functions are implemented
 }
 
-uint32 Player::GetTradeTargetHandle()
+Player* Player::GetTradeTarget()
 {
-    return m_pTradeTargetHandle;
+    if(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
+        return nullptr;
+    return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
 }
