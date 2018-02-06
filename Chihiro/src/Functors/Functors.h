@@ -2,7 +2,7 @@
 #define PROJECT_FUNCTORS_H
 
 #include "Common.h"
-class WorldObject;
+#include "Object.h"
 class Region;
 class Player;
 class Unit;
@@ -67,6 +67,12 @@ struct SendNPCStatusInVisibleRangeFunctor : public WorldObjectFunctor
     void Run(WorldObject* obj) override;
 };
 
+struct SendNPCStatusRegionFunctor : public RegionFunctor
+{
+    SendNPCStatusInVisibleRangeFunctor fn;
+    void Run(Region *pRegion) override;
+};
+
 struct BroadcastFunctor : public WorldObjectFunctor
 {
     XPacket packet;
@@ -120,6 +126,32 @@ struct SetMoveFunctor : public RegionFunctor
     uint nCnt{0};
     Unit* obj;
     void Run(Region* region) override;
+};
+
+struct EnumMovableObjectRegionFunctor : public RegionFunctor
+{
+    std::vector<uint> &pvResult;
+    uint t;
+    Position pos;
+    float left;
+    float right;
+    float top;
+    float bottom;
+    float range;
+    bool bIncludeClient;
+    bool bIncludeNPC;
+
+
+    struct SubFunctor : public WorldObjectFunctor
+    {
+        SubFunctor() : pParent(nullptr) { }
+        void Run(WorldObject* obj) override;
+
+        EnumMovableObjectRegionFunctor *pParent;
+    };
+
+    EnumMovableObjectRegionFunctor(std::vector<uint>& _pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
+    void Run(Region *region) override;
 };
 
 

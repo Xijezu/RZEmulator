@@ -6,15 +6,6 @@
 #include "ByteBuffer.h"
 #include "Util.h"
 
-typedef unsigned long  DWORD;
-typedef unsigned short WORD;
-#ifndef LOWORD
-#define LOWORD(a) ((WORD)(a))
-#endif
-#ifndef HIWORD
-#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
-#endif
-
 enum ObjType : int {
     OBJ_STATIC  = 0, // Player (Pyrok)
     OBJ_MOVABLE = 1, // NPC (Pyrok)
@@ -581,7 +572,7 @@ class WorldObject : public Object, public ArMoveVector
         Position GetCurrentPosition(uint t);
 
         const char *GetName() const { return m_name.c_str(); }
-        std::string& GetNameAsString() { return m_name; }
+        virtual const std::string& GetNameAsString() { return m_name; }
         void SetName(const std::string &newname) { m_name = newname; }
 
         Region *pRegion;

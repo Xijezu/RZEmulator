@@ -35,7 +35,8 @@ void WorldRunnable::run()
     World::m_worldLoopCounter = 0;
 
     // is Stopped event
-    while (!World::IsStopped()) {
+    while (!World::IsStopped())
+    {
         ++World::m_worldLoopCounter;
 
         realCurrTime = getMSTime();
@@ -44,10 +45,12 @@ void WorldRunnable::run()
         sWorld->Update(diff);
         realPrevTime = realCurrTime;
 
-        if (diff <= WORLD_SLEEP_CONST + prevSleepTime) {
+        if (diff <= WORLD_SLEEP_CONST + prevSleepTime)
+        {
             prevSleepTime = WORLD_SLEEP_CONST + prevSleepTime - diff;
             ACE_Based::Thread::Sleep(prevSleepTime);
-        } else
+        }
+        else
             prevSleepTime = 0;
     }
 

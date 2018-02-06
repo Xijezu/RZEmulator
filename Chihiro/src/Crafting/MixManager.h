@@ -3,9 +3,9 @@
 
 #include "Common.h"
 
-#define MATERIAL_INFO_COUNT 5
-#define MIX_VALUE_COUNT 6
-#define MAX_SUB_MATERIAL_COUNT 9
+constexpr int MATERIAL_INFO_COUNT    = 5;
+constexpr int MIX_VALUE_COUNT        = 6;
+constexpr int MAX_SUB_MATERIAL_COUNT = 9;
 
 enum MIX_TYPE
 {
@@ -100,7 +100,7 @@ class MixManager
         /// \return true on success, false on failure
         bool MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
         /// Not implemented yet
-        bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
+        bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubItem);
         /// Not implemented yet
         bool CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
 
@@ -145,10 +145,20 @@ class MixManager
         /// \param pItem failed item
         /// \param nFailResult fail type
         void procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult);
+        /// \brief Repair broken Items
+        /// \param pPlayer The owner of the item
+        /// \param pMainMaterial Main material to be used
+        /// \param nSubMaterialCountItem count of submaterials
+        /// \param pSubItem submaterials
+        /// \param pCountList Usable amount of pSubItem[IDX]
+        /// \return true on success, false on failure
+        bool RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList);
 
     private:
         std::vector<MixBase>     m_vMixInfo{ };
         std::vector<EnhanceInfo> m_vEnhanceInfo{ };
+        /// \brief Check if a mix makes sense
+        bool CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
 };
 
 #define sMixManager ACE_Singleton<MixManager, ACE_Null_Mutex>::instance()

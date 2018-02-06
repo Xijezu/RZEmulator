@@ -5,13 +5,13 @@
 #ifndef PROJECT_ITEMFIELDS_H
 #define PROJECT_ITEMFIELDS_H
 
-#define MAX_GOLD_FOR_INVENTORY  100000000000
-#define MAX_GOLD_FOR_STORAGE    100000000000
-#define MAX_OPTION_NUMBER 4
-#define MAX_ITEM_WEAR 24
-#define MAX_COOLTIME_GROUP 40
-#define MAX_SOCKET_NUMBER 4
-#define MAX_ITEM_NAME_LENGTH 32
+constexpr int64 MAX_GOLD_FOR_INVENTORY = 100000000000;
+constexpr int64 MAX_GOLD_FOR_STORAGE   = 100000000000;
+constexpr int   MAX_OPTION_NUMBER      = 4;
+constexpr int   MAX_ITEM_WEAR          = 24;
+constexpr int   MAX_COOLTIME_GROUP     = 40;
+constexpr int   MAX_SOCKET_NUMBER      = 4;
+constexpr int   MAX_ITEM_NAME_LENGTH   = 32;
 
 struct ItemPickupOrder {
     uint hPlayer[3];
@@ -31,6 +31,7 @@ enum ElementalType {
 
 enum FlagBits : uint
 {
+	ITEM_FLAG_NORMAL		  = 0x00,
     ITEM_FLAG_CARD            = 0x01,
     ITEM_FLAG_FULL            = 0x02,
     ITEM_FLAG_INSERTED        = 0x04,
@@ -240,6 +241,13 @@ enum LIMIT_FLAG : int
     LIMIT_HUNTER   = 0x800,
     LIMIT_MAGICIAN = 0x1000,
     LIMIT_SUMMONER = 0x2000
+};
+
+enum ItemMixCode : int
+{
+	CHALK_OF_RESTORATION 	= 800000,
+	UNIT_CARD				= 800001,
+	E_REPAIR_POWDER			= 950021
 };
 
 #endif //PROJECT_ITEMFIELDS_H

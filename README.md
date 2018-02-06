@@ -9,11 +9,9 @@ This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/Sky
   
   Join us on the [Emulator Discord Server](https://discord.gg/CBGVkdU) for access to a public Testserver, bug reports and more! :) 
   
-## Requirements
+## Dependencies
 * Platform: Linux, Windows or Mac
-* ACE = 6.1.4 (Windows / Linux)
 * MySQL = 5.6.36 (Windows / Linux)
-* Lua = 5.2 (Windows / Linux)
 * A C++14 Compiler (GCC or MSVC)
 
 ## Current Status

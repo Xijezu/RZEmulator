@@ -599,10 +599,9 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     if((start_time & 0x80000000) != 0)
         v10 = v10 + 4294967300.0f;
 
-    MoveInfo mi{_to, start_time};
-    mi.end_time = (uint)(v9+v10);
-    
+    MoveInfo mi{_to, (uint)(v9+v10)};
     ends.emplace_back(mi);
+
     bIsMoving = true;
 }
 
