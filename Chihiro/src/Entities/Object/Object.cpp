@@ -466,7 +466,7 @@ Position WorldObject::GetCurrentPosition(uint t)
     return result;
 }
 
-ArMoveVector::ArMoveVector(const ArMoveVector &src)
+void ArMoveVector::Copy(const ArMoveVector &src)
 {
     this->m_positionX = src.m_positionX;
     this->m_positionY = src.m_positionY;
