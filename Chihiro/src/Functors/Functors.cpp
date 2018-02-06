@@ -21,6 +21,7 @@
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Monster.h"
+#include "World.h"
 
 void DoEachClientRegionFunctor::Run(Region *region)
 {
@@ -102,6 +103,10 @@ void AddObjectRegionFunctor::Run(Region *region)
 void SendEnterMessageFunctor::Run(WorldObject *client)
 {
     Messages::sendEnterMessage(obj, client, false);
+    if(client->IsMonster())
+    {
+        client->As<Monster>()->m_bNearClient = true;
+    }
 }
 
 void SetMoveFunctor::Run(Region *region)
@@ -140,4 +145,40 @@ void BroadcastStatusRegionFunctor::Run(Region *region)
 void SendNPCStatusRegionFunctor::Run(Region *pRegion)
 {
     pRegion->DoEachMovableObject(fn);
+}
+
+void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
+{
+
+    auto c_pos = obj->GetCurrentPosition(pParent->t);
+    if (c_pos.GetPositionX() >= pParent->left && c_pos.GetPositionX() <= pParent->right
+        && c_pos.GetPositionY() >= pParent->top && c_pos.GetPositionY() <= pParent->bottom
+        && pParent->range > c_pos.GetExactDist2d(&pParent->pos))
+    {
+        pParent->pvResult.emplace_back(obj->GetHandle());
+    }
+
+}
+
+EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC)
+    : pvResult(_pvResult), pos(_pos), range(_range), bIncludeClient(_bIncludeClient), bIncludeNPC(_bIncludeNPC)
+{
+    left = pos.GetPositionX() - range;
+    right = pos.GetPositionX() + range;
+    top = pos.GetPositionY() - range;
+    bottom = pos.GetPositionY() + range;
+    t = sWorld->GetArTime();
+}
+
+void EnumMovableObjectRegionFunctor::Run(Region *region)
+{
+    if(region == nullptr)
+        return;
+
+    SubFunctor fn{};
+    fn.pParent = this;
+    if(bIncludeClient)
+        region->DoEachClient(fn);
+    if(bIncludeNPC)
+        region->DoEachMovableObject(fn);
 }

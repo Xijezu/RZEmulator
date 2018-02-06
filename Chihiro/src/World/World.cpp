@@ -79,6 +79,47 @@ void World::InitWorld()
     MX_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }
 
+void World::LoadConfigSettings(bool reload)
+{
+    if (reload)
+    {
+        if (!sConfigMgr->Reload())
+        {
+            MX_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
+            return;
+        }
+        sLog->LoadFromConfig();
+    }
+
+    // Bool configs
+    m_bool_configs[CONFIG_PK_SERVER] = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
+    m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
+    m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
+    m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
+    m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
+    m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
+
+    // Int configs
+    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
+    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
+    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+
+    // Rates
+    rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
+    rate_values[RATES_ITEM_DROP] = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
+    rate_values[RATES_CREATURE_DROP] = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
+    rate_values[RATES_CHAOS_DROP] = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
+    rate_values[RATES_GOLD_DROP] = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
+    rate_values[RATES_PVP_DAMAGE_FOR_PLAYER] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForPlayer", 1.0f);
+    rate_values[RATES_PVP_DAMAGE_FOR_SUMMON] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForSummon", 1.0f);
+    rate_values[RATES_STAMINA_BONUS] = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
+}
+
 /// Find a session by its id
 WorldSession *World::FindSession(uint32 id) const
 {
@@ -169,6 +210,11 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
             sRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
                                          (uint)(pUnit->GetPositionY() / g_nRegionSize),
                                          pUnit->GetLayer(), fn);
+
+            if(pUnit->IsMonster())
+            {
+                pUnit->As<Monster>()->m_bNearClient = fn.nCnt != 0;
+            }
         }
         result = true;
     }
@@ -202,6 +248,11 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
             sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                          (uint)(obj->GetPositionY() / g_nRegionSize),
                                          obj->GetLayer(), fn);
+
+            if(obj->IsMonster())
+            {
+                obj->As<Monster>()->m_bNearClient = fn.nCnt != 0;
+            }
 
         }
         return true;
@@ -255,6 +306,7 @@ void World::AddObjectToWorld(WorldObject *obj)
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
 {
+    MX_LOG_INFO("misc", "update_time %u", update_time);
     auto oldx = (uint)(obj->GetPositionX() / g_nRegionSize);
     auto oldy = (uint)(obj->GetPositionY() / g_nRegionSize);
     step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
@@ -854,43 +906,9 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     }
 }
 
-void World::LoadConfigSettings(bool reload)
+
+void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
-    if (reload)
-    {
-        if (!sConfigMgr->Reload())
-        {
-            MX_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
-            return;
-        }
-        sLog->LoadFromConfig();
-    }
-
-    // Bool configs
-    m_bool_configs[CONFIG_PK_SERVER] = sConfigMgr->GetBoolDefault("Game.PKServer", true);
-    m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
-    m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
-    m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
-    m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
-    m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
-    m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
-
-    // Int configs
-    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
-    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
-    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
-    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
-    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
-    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
-
-    // Rates
-    rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
-    rate_values[RATES_ITEM_DROP] = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
-    rate_values[RATES_CREATURE_DROP] = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
-    rate_values[RATES_CHAOS_DROP] = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
-    rate_values[RATES_GOLD_DROP] = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
-    rate_values[RATES_PVP_DAMAGE_FOR_PLAYER] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForPlayer", 1.0f);
-    rate_values[RATES_PVP_DAMAGE_FOR_SUMMON] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForSummon", 1.0f);
-    rate_values[RATES_STAMINA_BONUS] = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
+    EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
+    sRegion->DoEachVisibleRegion((uint)(pos.GetPositionX() / g_nRegionSize), (uint)(pos.GetPositionY() / g_nRegionSize), layer, fn);
 }

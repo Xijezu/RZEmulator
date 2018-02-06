@@ -652,13 +652,10 @@ void XLua::SCRIPT_CPrint(sol::variadic_args)
 
 void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
 {
-    for(int i = 0; i < amount; i++) {
-        auto mob = sMemoryPool->AllocMonster(id);
-        if(mob == nullptr)
-            return;
-        mob->SetCurrentXY(x, y);
-        mob->SetRespawnPosition({(float)(x + irand(-10, 10)), (float)(y + irand(-10, 10)), 0});
-        sWorld->AddMonsterToWorld(mob);
+    for (int i = 0; i < amount; i++)
+    {
+        auto mob = sObjectMgr->RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
+        mob->m_bNearClient = true;
     }
 }
 
