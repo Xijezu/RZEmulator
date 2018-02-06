@@ -1095,3 +1095,14 @@ void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std
     auto szMsg = bIsOnline ? string_format("LOGIN|%s|%s|", partyName.c_str(), szName.c_str()) : string_format("LOGOUT|%s|", szName.c_str());
     SendPartyChatMessage(100, "@PARTY", nPartyID, szMsg);
 }
+
+void Messages::SendTradeCancelMessage(Player *pClient)
+{
+    if (pClient->GetTradeTargetHandle() == -1)
+        return;
+
+    XPacket tradePct(TS_TRADE);
+    tradePct << (uint32)pClient->GetTradeTargetHandle();
+    tradePct << (uint8)TM_CANCEL_TRADE;
+    pClient->SendPacket(tradePct);
+}

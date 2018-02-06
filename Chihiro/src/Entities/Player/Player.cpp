@@ -3375,3 +3375,30 @@ void Player::onDropQuest(Quest *pQuest)
     Messages::SendNPCStatusInVisibleRange(this);
 }
 
+void Player::StartTrade(uint32 pTargetHandle) {
+    if (!m_bTrading && !m_bTradeFreezed) {
+        ClearTradeInfo();
+        m_pTradeTargetHandle = pTargetHandle;
+    }
+}
+
+void Player::CancelTrade(bool bIsNeedBroadcast)
+{
+    if (bIsNeedBroadcast)
+        Messages::SendTradeCancelMessage(this);
+
+    ClearTradeInfo();
+}
+
+void Player::ClearTradeInfo()
+{
+    m_pTradeTargetHandle = -1;
+    m_bTradeFreezed      = false;
+    m_bTrading           = false;
+    // Todo: Implement clearing trade params as functions are implemented
+}
+
+uint32 Player::GetTradeTargetHandle()
+{
+    return m_pTradeTargetHandle;
+}

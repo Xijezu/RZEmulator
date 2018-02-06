@@ -116,6 +116,7 @@ class Messages
         static void SendRemoveSummonMessage(Player* pPlayer, Summon *pSummon);
         static void BroadcastPartyMemberInfo(Player* pClient);
         static void BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string& szName);
+        static void SendTradeCancelMessage(Player *);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };
