@@ -1200,7 +1200,7 @@ void Monster::processMove(uint t)
                 if (GetStatus() == STATUS_NORMAL
                     && GetHealth() != 0
                     && (!bIsMoving || !IsInWorld())
-                    && rnd % 500 + lastStepTime + 200 < t
+                    && rnd % 500 + lastStepTime + 1000 < t
                     && (rnd % 3) != 0)
                 {
                     getMovePosition(targetPos);
