@@ -1746,10 +1746,15 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
     {
         case 0:
             break;
-        case 101:
-        case 103:
-            sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
-            return;
+        case 101: //EnchantItem without E-Protect Powder
+        	sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+        	return;
+        case 102:
+        	sMixManager->EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
+        	return;
+        case 103: //EnchantItem WITH E-Protect Powder
+        	sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+        	return;
         case 311:
             sMixManager->MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
