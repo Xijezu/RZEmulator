@@ -22,13 +22,14 @@ class Monster;
 class Unit;
 class NPC;
 
-struct Waypoint
+struct WayPointInfo
 {
     int                   way_point_speed;
     int                   way_point_type;
     int                   way_point_id;
     std::vector<Position> vWayPoint;
 };
+
 
 class ObjectMgr
 {
@@ -49,11 +50,12 @@ class ObjectMgr
         typedef UNORDERED_MAP<int32, LevelResourceTemplate>         LevelTemplateContainer;
         typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
         typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
+        typedef UNORDERED_MAP<int, std::string>                     StringContainer;
         typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
         typedef UNORDERED_MAP<int, FieldPropTemplate>               FieldPropTemplateContainer;
         typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
         typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
-        typedef UNORDERED_MAP<int, StateTemplate>                  StateTemplateContainer;
+        typedef UNORDERED_MAP<int, StateTemplate>                   StateTemplateContainer;
 
         void LoadStatResource();
         void LoadJobResource();
@@ -77,17 +79,22 @@ class ObjectMgr
         void LoadDungeonResource();
         void LoadEnhanceResource();
         void LoadMixResource();
+        void LoadStringResource();
         void LoadSkillJP();
+        void LoadSummonNameResource();
         void InitGameContent();
 
         void UnloadAll();
 
         void AddWayPoint(int waypoint_id, float x, float y);
         void SetWayPointType(int waypoint_id, int type);
+        WayPointInfo *GetWayPoint(int waypoint_id);
         void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
 
         NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
         void AddNPCToWorld();
+
+        const std::string &GetValueFromNameID(int name_id);
 
         CreatureStat *const GetStatInfo(int stat_id);
         ItemTemplate *const GetItemBase(int item_id);
@@ -104,6 +111,7 @@ class ObjectMgr
         QuestLink *const GetQuestLink(int code, int start_id);
         StateTemplate *const GetStateInfo(int code);
         bool checkQuestTypeFlag(QuestType type, int flag);
+        std::string GetSummonName();
 
         int GetNeedJpForJobLevelUp(int, int);
         int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
@@ -123,7 +131,7 @@ class ObjectMgr
 
         int                             g_currentLocationId{0};
 
-        UNORDERED_MAP<int, Waypoint> g_vWayPoint{ };
+        UNORDERED_MAP<int, WayPointInfo> g_vWayPoint{ };
         //UNORDERED_MAP<int,MonsterRespawnInfo> g_vRespawnInfo{};
         std::vector<MonsterRespawnInfo> g_vRespawnInfo{ };
         X2D::QuadTreeMapInfo            g_qtBlockInfo;
@@ -136,6 +144,7 @@ class ObjectMgr
         MarketResourceTemplateContainer _marketResourceStore;
         SkillTreeTemplateContainer      _skillTreeResourceStore;
         SummonLevelBaseContainer        _summonLevelStore;
+        StringContainer                 _stringResourceStore;
         LevelTemplateContainer          _levelResourceStore;
         SkillBaseContainer              _skillBaseStore;
         MonsterBaseContainer            _monsterBaseStore;
@@ -144,6 +153,8 @@ class ObjectMgr
         QuestLinkTemplateContainer      _questLinkStore;
         NPCTemplateContainer            _npcTemplateStore;
         FieldPropTemplateContainer      _fieldPropTemplateStore;
+        std::vector<int>          _summonPrefixStore;
+        std::vector<int>          _summonPostfixStore;
         SummonBonusTemplateContainer    _summonBonusStore;
         StateTemplateContainer          _stateTemplateStore;
 

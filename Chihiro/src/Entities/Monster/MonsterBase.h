@@ -2,10 +2,13 @@
 #define PROJECT_MONSTERBASE_H
 
 #include "Common.h"
+
 class Monster;
 
-struct MonsterBase {
+struct MonsterBase
+{
     int   id;
+    int   name_id;
     int   monster_group;
     int   location_id;
     int   level;
@@ -65,14 +68,17 @@ struct MonsterBase {
 
 struct MonsterDeleteHandler
 {
-    virtual void onMonsterDelete(Monster* mob) = 0;
+    virtual void onMonsterDelete(Monster *mob) = 0;
 };
 
-struct takePriority {
-    ItemPickupOrder PickupOrder{};
+struct takePriority
+{
+    ItemPickupOrder PickupOrder{ };
 };
 
-struct HateTag {
+
+struct HateTag
+{
     HateTag(uint _uid, uint _time, int _hate)
     {
         uid   = _uid;
@@ -88,7 +94,8 @@ struct HateTag {
     int  nLastMaxHate;
 };
 
-struct HateModifierTag {
+struct HateModifierTag
+{
     HateModifierTag(uint _uid, int _hate)
     {
         uid   = _uid;
@@ -98,7 +105,6 @@ struct HateModifierTag {
     uint uid;
     int  nHate;
 };
-
 
 enum ATTACK_TYPE_FLAG : uint16
 {
@@ -126,40 +132,40 @@ enum MONSTER_STATUS : int
     STATUS_DEAD            = 4,
 };
 
-struct MonsterRespawnInfo {
-    uint interval;
+struct MonsterRespawnInfo
+{
+    uint  interval;
     float left;
     float top;
     float right;
     float bottom;
     uint8 layer;
-    uint monster_id;
-    uint max_num;
-    uint inc;
-    uint id;
-    bool is_wandering;
-    int dungeon_id;
-    int way_point_id;
+    uint  monster_id;
+    uint  max_num;
+    uint  inc;
+    uint  id;
+    bool  is_wandering;
+    int   dungeon_id;
+    int   way_point_id;
 
     MonsterRespawnInfo() = default;
 
     MonsterRespawnInfo(uint _id, uint _interval, float _left, float _top, float _right, float _bottom, uint _monster_id, uint _max_num, uint _inc, bool _is_wandering, int _way_point_id)
     {
-        id = _id;
-        interval = _interval;
-        left = _left;
-        top = _top;
-        right = _right;
-        bottom = _bottom;
-        layer = 0;
-        dungeon_id = 0;
-        monster_id = _monster_id;
-        max_num = _max_num;
-        inc = _inc;
+        id           = _id;
+        interval     = _interval;
+        left         = _left;
+        top          = _top;
+        right        = _right;
+        bottom       = _bottom;
+        layer        = 0;
+        dungeon_id   = 0;
+        monster_id   = _monster_id;
+        max_num      = _max_num;
+        inc          = _inc;
         is_wandering = _is_wandering;
         way_point_id = _way_point_id;
     }
 };
-
 
 #endif // PROJECT_MONSTERBASE_H

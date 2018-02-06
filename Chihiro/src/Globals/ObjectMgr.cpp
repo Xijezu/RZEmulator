@@ -39,6 +39,8 @@ void ObjectMgr::InitGameContent()
     LoadSkillJP();
     LoadSkillTreeResource();
     LoadWorldLocation();
+    LoadStringResource();
+    LoadSummonNameResource();
 }
 
 void ObjectMgr::LoadItemResource()
@@ -169,7 +171,7 @@ void ObjectMgr::LoadMonsterResource()
         MonsterBase base{ };
         base.id            = field[idx++].GetInt32();
         base.monster_group = field[idx++].GetInt32();
-        idx++;
+        base.name_id       = field[idx++].GetInt32();
         base.location_id = field[idx++].GetInt32();
         idx += 5; // 14 unused columns, mostly for rendering clientside
         base.size  = field[idx++].GetFloat();
@@ -1206,6 +1208,60 @@ void ObjectMgr::LoadSummonResource()
     MX_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadStringResource()
+{
+    uint32      oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT code, value FROM StringResource;");
+
+    if (!result)
+    {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Strings. Table `StringResource` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field *field = result->Fetch();
+
+        int code = field[0].GetInt32();
+        const std::string value = field[1].GetString();
+        _stringResourceStore[code] = value;
+
+        ++count;
+    } while (result->NextRow());
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u Strings in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadSummonNameResource()
+{
+    uint32      oldMSTime = getMSTime();
+    QueryResult result    = GameDatabase.Query("SELECT is_post_fix, text_id FROM SummonDefaultNameResource;");
+
+    if (!result)
+    {
+        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonDefaultNames. Table `SummonDefaultNameResource` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field *field = result->Fetch();
+
+        bool isPostFix = field[0].GetInt32() != 0;
+        int  text_id   = field[1].GetInt32();
+        if (!isPostFix)
+            _summonPrefixStore.emplace_back(text_id);
+        else
+            _summonPostfixStore.emplace_back(text_id);
+
+        ++count;
+    } while (result->NextRow());
+    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+
 CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
@@ -1478,14 +1534,19 @@ int64 ObjectMgr::GetNeedExp(int level)
 void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
 {
     Position pos{ };
-    pos.Relocate(x, y);
+    pos.Relocate(x, y, 0);
 
-    if (g_vWayPoint.count(waypoint_id) >= 1)
+
+    for(auto& wpi : g_vWayPoint)
     {
-        g_vWayPoint[waypoint_id].vWayPoint.emplace_back(pos);
-        return;
+        if(wpi.first == waypoint_id)
+        {
+            wpi.second.vWayPoint.emplace_back(pos);
+            return;
+        }
     }
-    Waypoint wp{ };
+
+    WayPointInfo wp{ };
     wp.way_point_id    = waypoint_id;
     wp.way_point_speed = 0;
     wp.way_point_type  = 1;
@@ -1495,9 +1556,25 @@ void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
 
 void ObjectMgr::SetWayPointType(int waypoint_id, int type)
 {
-    if (g_vWayPoint.count(waypoint_id) == 0)
-        return;
-    g_vWayPoint[waypoint_id].way_point_type = type;
+    for(const auto& wpi : g_vWayPoint)
+    {
+        if(wpi.first == waypoint_id)
+            return;
+    }
+
+    WayPointInfo info{};
+    info.way_point_speed = 0;
+    info.way_point_type = type;
+    info.way_point_id = waypoint_id;
+    g_vWayPoint[waypoint_id] = info;
+
+}
+
+WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
+{
+    if(g_vWayPoint.count(waypoint_id) != 0)
+        return &g_vWayPoint[waypoint_id];
+    return nullptr;
 }
 
 void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
@@ -1523,6 +1600,9 @@ Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool
         mob->SetCurrentXY(x, y);
         mob->SetLayer(layer);
         mob->m_pDeleteHandler = pDeleteHandler;
+        mob->m_bIsWandering = is_wandering;
+        if(way_point_id != 0)
+            mob->m_pWayPointInfo = GetWayPoint(way_point_id);
         mob->SetRespawnPosition({x, y, 0});
         sWorld->AddMonsterToWorld(mob);
     }
@@ -1891,3 +1971,19 @@ CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /*
 
     return stat;
 }
+
+const std::string &ObjectMgr::GetValueFromNameID(const int name_id)
+{
+    static const std::string empty = {};
+    if(_stringResourceStore.count(name_id) != 0)
+        return _stringResourceStore[name_id];
+    return empty;
+}
+
+std::string ObjectMgr::GetSummonName()
+{
+    int pre = irand(0, (int)_summonPrefixStore.size() - 1);
+    int post = irand(0, (int)_summonPostfixStore.size() -1);
+    return string_format("%s%s", GetValueFromNameID(_summonPrefixStore[pre]).c_str(), GetValueFromNameID(_summonPostfixStore[post]).c_str());
+}
+

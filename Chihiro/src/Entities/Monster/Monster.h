@@ -59,9 +59,11 @@ struct DamageTag {
     int  nDamage;
 };
 
+struct WayPointInfo;
 class Monster : public Unit
 {
         friend class World;
+        friend class ObjectMgr;
     public:
 
         static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
@@ -81,6 +83,7 @@ class Monster : public Unit
         float GetSize() const override { return m_Base->size; }
 
         float GetScale() const override { return m_Base->scale; }
+        const std::string& GetNameAsString() override;
 
         MONSTER_STATUS GetStatus() const { return m_nStatus; }
 
@@ -118,6 +121,7 @@ class Monster : public Unit
         void TriggerForceKill(Player *pPlayer);
 
         MonsterDeleteHandler *m_pDeleteHandler{nullptr};
+        bool m_bNearClient;
     protected:
         HateTag *getHateTag(uint handle, uint t);
         HateTag *addHate(uint handle, int nHate);
@@ -179,6 +183,9 @@ class Monster : public Unit
         Player *pFCClient{nullptr};
         bool bForceKill{false};
         bool m_bTamedSuccess;
+        int m_nWayPointIdx;
+        bool m_bIsWandering;
+        WayPointInfo *m_pWayPointInfo;
 
         MONSTER_STATUS m_nStatus;
 };
