@@ -2053,67 +2053,62 @@ void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
     m_pPlayer->UnBindSkillCard(pItem);
 }
 
-void WorldSession::onTrade(XPacket *pRecvPct)
-{
-    if(m_pPlayer == nullptr)
+void WorldSession::onTrade(XPacket *pRecvPct) {
+    if (m_pPlayer == nullptr)
         return;
 
-    
+
     auto target_handle = pRecvPct->read<uint>();
     auto mode = pRecvPct->read<uint8>();
 
     if (m_pPlayer->m_bIsUsingStorage)
-    {
+        return;
+
+    if (m_pPlayer->bIsMoving && m_pPlayer->IsInWorld()) {
+        m_pPlayer->CancelTrade(false);
         return;
     }
-    if (m_pPlayer->bIsMoving && m_pPlayer->IsInWorld())
-    {
-        // TODO: Cancel Trade
-    }
-    else
-    {
-        if(target_handle == m_pPlayer->GetHandle() )
-        {
-            //if ( StructPlayer__GetTradeTarget(pClient) )
-            //{
-            //    v2 = StructPlayer__GetTradeTarget(pClient);
-            //    StructPlayer__CancelTrade(v2, 0);
-            //}
-            //StructPlayer__CancelTrade(pClient, 0);
-        }
 
-        switch (mode)
+    if (target_handle == m_pPlayer->GetHandle()) {
+        if(m_pPlayer->GetTargetHandle() != -1)
         {
-            case TM_REQUEST_TRADE:
-                onRequestTrade(target_handle);
-                break;
-            case TM_ACCEPT_TRADE:
-                onAcceptTrade(target_handle);
-                break;
-            case TM_CANCEL_TRADE:
-                onCancelTrade();
-                break;
-            case TM_REJECT_TRADE:
-                onRejectTrade(target_handle);
-                break;
-            case TM_ADD_ITEM:
-                onAddItem(target_handle);
-                break;
-            case TM_REMOVE_ITEM:
-                onRemoveItem(target_handle);
-                break;
-            case TM_ADD_GOLD:
-                onAddGold(target_handle);
-                break;
-            case TM_FREEZE_TRADE:
-                onFreezeTrade();
-                break;
-            case TM_CONFIRM_TRADE:
-                onConfirmTrade();
-                break;
-            default:
-                return;
+            auto pTarget = sMemoryPool->GetObjectInWorld<Player>(m_pPlayer->GetTargetHandle());
+            pTarget->CancelTrade(false);
         }
+        m_pPlayer->CancelTrade(false);
+        return;
+    }
+
+    switch (mode) {
+        case TM_REQUEST_TRADE:
+            onRequestTrade(target_handle);
+            break;
+        case TM_ACCEPT_TRADE:
+            onAcceptTrade(target_handle);
+            break;
+        case TM_CANCEL_TRADE:
+            onCancelTrade();
+            break;
+        case TM_REJECT_TRADE:
+            onRejectTrade(target_handle);
+            break;
+        case TM_ADD_ITEM:
+            onAddItem(target_handle);
+            break;
+        case TM_REMOVE_ITEM:
+            onRemoveItem(target_handle);
+            break;
+        case TM_ADD_GOLD:
+            onAddGold(target_handle);
+            break;
+        case TM_FREEZE_TRADE:
+            onFreezeTrade();
+            break;
+        case TM_CONFIRM_TRADE:
+            onConfirmTrade();
+            break;
+        default:
+            return;
     }
 }
 
