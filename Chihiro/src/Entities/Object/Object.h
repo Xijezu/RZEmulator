@@ -109,7 +109,8 @@ enum EPlayerFields
     PLAYER_FIELD_DKC                 = BATTLE_FIELD_END + 0x0037, // Size: 1
     PLAYER_LAST_STAMINA_UPDATE_TIME  = BATTLE_FIELD_END + 0x0038, // Size 1
     PLAYER_FIELD_RIDING_IDX          = BATTLE_FIELD_END + 0x0039, // Size 1
-    PLAYER_END                       = BATTLE_FIELD_END + 0x0040
+    PLAYER_FIELD_TRADE_TARGET        = BATTLE_FIELD_END + 0x0040, // Size 1
+    PLAYER_END                       = BATTLE_FIELD_END + 0x0041
 };
 
 class ArRegion;

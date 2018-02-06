@@ -183,7 +183,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void StartTrade(uint32 pTargetHandle);
         void CancelTrade(bool bIsNeedBroadcast);
         void ClearTradeInfo();
-        uint32 GetTradeTargetHandle();
+        Player* GetTradeTarget();
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
@@ -338,7 +338,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         // Trade stuff
         bool   m_bTrading      = false;
         bool   m_bTradeFreezed = false;
-        uint32 m_pTradeTargetHandle = -1;
 };
 
 #endif // _PLAYER_H_
