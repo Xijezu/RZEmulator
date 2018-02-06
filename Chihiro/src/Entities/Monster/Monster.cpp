@@ -37,6 +37,7 @@ Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
     _InitValues();
     _InitTimerFieldsAndStatus();
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
+    SetInt32Value(UNIT_FIELD_UID, mb->id);
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
     m_nStatus = STATUS_NORMAL;
@@ -456,7 +457,7 @@ void Monster::processDead(uint t)
         m_pDeleteHandler->onMonsterDelete(this);
     }
 
-    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 12000 < t)
+    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t)
     {
         if (IsInWorld())
             sWorld->RemoveObjectFromWorld(this);
@@ -1143,42 +1144,41 @@ bool Monster::removeFromHateList(uint handle)
 
 void Monster::processWalk(uint t)
 {
-    auto tmp_mv = dynamic_cast<ArMoveVector *>(this);
-    tmp_mv->Step(t);
+    ArMoveVector tmp_mv{};
+    tmp_mv.Copy(*this);
+    tmp_mv.Step(t);
     int wpi{0};
     if (GetStatus() == STATUS_NORMAL && !m_bComeBackHome && m_pWayPointInfo != nullptr)
     {
-        m_pRespawn.m_positionX = tmp_mv->GetPositionX();
-        m_pRespawn.m_positionY = tmp_mv->GetPositionY();
+        m_pRespawn.m_positionX = tmp_mv.GetPositionX();
+        m_pRespawn.m_positionY = tmp_mv.GetPositionY();
         if (m_nWayPointIdx < 0 && m_pWayPointInfo->way_point_type == 1)
-            wpi -= tmp_mv->ends.size();
+            wpi -= tmp_mv.ends.size();
         else
-            wpi        = (int)(m_pWayPointInfo->vWayPoint.size() - tmp_mv->ends.size() - 1);
+            wpi        = (int)(m_pWayPointInfo->vWayPoint.size() - tmp_mv.ends.size() - 1);
         m_nWayPointIdx = wpi;
 
     }
 
-    if ((uint)(tmp_mv->GetPositionX() / g_nRegionSize) != (uint)(GetPositionX() / g_nRegionSize)
-        || (uint)(tmp_mv->GetPositionY() / g_nRegionSize) != (uint)(GetPositionY() / g_nRegionSize)
-        || !tmp_mv->bIsMoving)
+    if ((uint)(tmp_mv.GetPositionX() / g_nRegionSize) != (uint)(GetPositionX() / g_nRegionSize)
+        || (uint)(tmp_mv.GetPositionY() / g_nRegionSize) != (uint)(GetPositionY() / g_nRegionSize)
+        || !tmp_mv.bIsMoving)
     {
         if (!IsInWorld())
             return;
 
         if (m_bComeBackHome && !IsBattleMode())
         {
-            if (tmp_mv->bIsMoving)
+            if (tmp_mv.bIsMoving)
             {
-                sWorld->onRegionChange(this, t - lastStepTime, tmp_mv->bIsMoving == 0);
+                sWorld->onRegionChange(this, t - lastStepTime, tmp_mv.bIsMoving == 0);
                 return;
             }
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE))
                 RemoveFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE);
             m_bComeBackHome = false;
         }
-        MX_LOG_INFO("misc", "BeforeRegionChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
-        sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv->bIsMoving);
-        MX_LOG_INFO("misc", "AfterRegionChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
+        sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
     }
 }
 
@@ -1207,9 +1207,7 @@ void Monster::processMove(uint t)
                     if (!sObjectMgr->IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
                     {
                         auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
-                        MX_LOG_INFO("misc", "BeforeMoveChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
                         sWorld->SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld->GetArTime(), true);
-                        MX_LOG_INFO("misc", "AfterMoveChange: X: %d, Y: %d, Idx: %d", (uint)(GetPositionX() / g_nRegionSize),  (uint)(GetPositionY() / g_nRegionSize), region_index);
                         m_pRespawn.m_positionX = targetPos.GetPositionX();
                         m_pRespawn.m_positionY = targetPos.GetPositionY();
                     }

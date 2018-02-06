@@ -499,10 +499,10 @@ class ArMoveVector : public Position
 {
     public:
         ArMoveVector() = default;
-        ArMoveVector(const ArMoveVector &);
         ~ArMoveVector() = default;
 
         virtual bool Step(uint current_time);
+        void Copy(const ArMoveVector &);
         virtual void SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time, uint current_time);
         virtual void SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time);
         void SetDirection(Position pos);

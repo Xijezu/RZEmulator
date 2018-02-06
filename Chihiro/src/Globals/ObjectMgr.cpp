@@ -1605,6 +1605,7 @@ Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool
             mob->m_pWayPointInfo = GetWayPoint(way_point_id);
         mob->SetRespawnPosition({x, y, 0});
         sWorld->AddMonsterToWorld(mob);
+        sWorld->SetMove(mob, mob->GetPosition(), mob->GetPosition(), 0, true, sWorld->GetArTime(), false);
     }
     return mob;
 }

@@ -262,8 +262,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
 
 void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 {
-    auto prev_rx = (uint)(oldPos.m_positionX / g_nRegionSize);
-    auto prev_ry = (uint)(oldPos.m_positionY / g_nRegionSize);
+    auto prev_rx = (uint)(oldPos.GetPositionX() / g_nRegionSize);
+    auto prev_ry = (uint)(oldPos.GetPositionY() / g_nRegionSize);
     if (prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
     {
         auto oldRegion = sRegion->GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
@@ -306,7 +306,6 @@ void World::AddObjectToWorld(WorldObject *obj)
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
 {
-    MX_LOG_INFO("misc", "update_time %u", update_time);
     auto oldx = (uint)(obj->GetPositionX() / g_nRegionSize);
     auto oldy = (uint)(obj->GetPositionY() / g_nRegionSize);
     step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
