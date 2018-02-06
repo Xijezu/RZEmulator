@@ -3375,12 +3375,10 @@ void Player::onDropQuest(Quest *pQuest)
     Messages::SendNPCStatusInVisibleRange(this);
 }
 
-void Player::StartTrade(uint32 pTargetHandle)
-{
-    if (!m_bTrading && m_bTradeFreezed)
-    {
+void Player::StartTrade(uint32 pTargetHandle) {
+    if (!m_bTrading && !m_bTradeFreezed) {
         ClearTradeInfo();
-                    m_pTradeTargetHandle = pTargetHandle;
+        m_pTradeTargetHandle = pTargetHandle;
     }
 }
 
