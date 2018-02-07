@@ -99,14 +99,20 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         /* ****************** QUEST END ****************** */
 
         int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
+
         int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
+
         int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
+
         int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
+
         int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
+
         int AddStamina(int nStamina);
         int GetStaminaRegenRate();
         CONDITION_INFO GetCondition() const;
         bool IsSitdownable() const;
+
         bool IsSitdown() const override { return m_bSitdown; }
 
         uint GetJobDepth();
@@ -114,7 +120,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
         /* ****************** DATABASE ****************** */
-        bool ReadCharacter(const std::string&, int);
+        bool ReadCharacter(const std::string &, int);
         bool ReadItemList(int);
         bool ReadItemCoolTimeList(int);
         bool ReadSummonList(int);
@@ -122,7 +128,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool ReadSkillList(Unit *);
         bool ReadQuestList();
         bool ReadStateList(Unit *);
-        bool ReadStorageSummonList(std::vector<Summon*>&);
+        bool ReadStorageSummonList(std::vector<Summon *> &);
         void DB_ReadStorage();
         void DB_UpdateStorageGold();
         /* ****************** DATABASE END ****************** */
@@ -130,7 +136,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         // Warping
         void PendWarp(int x, int y, uint8_t layer);
 
-        void SetCharacterFlag(const std::string &key, const std::string& value);
+        void SetCharacterFlag(const std::string &key, const std::string &value);
 
         // Summon
         void LogoutNow(int callerIdx);
@@ -157,9 +163,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Item *FindItem(uint code, uint flag, bool bFlag);
         Item *FindStorageItem(int code);
         /* InventoryEventReceiver Start */
-        void onAdd(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
-        void onRemove(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
-        void onChangeCount(Inventory* pInventory, Item* pItem, bool bSkipUpdateItemToDB) override;
+        void onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
+        void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
+        void onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
         /* InventoryEventReceiver End */
         Item *PushItem(Item *, int64, bool);
         Item *PopItem(Item *, int64, bool);
@@ -169,21 +175,22 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         uint GetStorageItemCount() const;
         void MoveStorageToInventory(Item *pItem, int64 count);
         void MoveInventoryToStorage(Item *pItem, int64 count);
-        bool EraseItem(Item* pItem, int64 count);
+        bool EraseItem(Item *pItem, int64 count);
         bool EraseBullet(int64 count);
         bool IsMixable(Item *pItem) const;
         bool IsErasable(Item *pItem) const;
 
         // Storage Relevant
-        bool RemoveSummon(Summon* pSummon);
-        void AddSummonToStorage(Summon* pSummon);
-        void RemoveSummonFromStorage(Summon* pSummon);
+        bool RemoveSummon(Summon *pSummon);
+        void AddSummonToStorage(Summon *pSummon);
+        void RemoveSummonFromStorage(Summon *pSummon);
         void OpenStorage();
 
         void StartTrade(uint32 pTargetHandle);
         void CancelTrade(bool bIsNeedBroadcast);
         void ClearTradeInfo();
-        Player* GetTradeTarget();
+        Player *GetTradeTarget();
+        bool IsTradableWith(Player *pTarget);
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
@@ -194,13 +201,13 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool IsAlly(const Unit *pUnit) override;
 
         /* ****************** DIALOG ****************** */
-        void SetLastContact(const std::string&, uint32_t);
-        void SetLastContact(const std::string&, const std::string&);
-        std::string GetLastContactStr(const std::string&);
-        uint32_t GetLastContactLong(const std::string&);
-        void SetDialogTitle(const std::string&, int);
-        void SetDialogText(const std::string&);
-        void AddDialogMenu(const std::string&, const std::string&);
+        void SetLastContact(const std::string &, uint32_t);
+        void SetLastContact(const std::string &, const std::string &);
+        std::string GetLastContactStr(const std::string &);
+        uint32_t GetLastContactLong(const std::string &);
+        void SetDialogTitle(const std::string &, int);
+        void SetDialogText(const std::string &);
+        void AddDialogMenu(const std::string &, const std::string &);
         void ClearDialogMenu();
 
         bool IsFixedDialogTrigger(const std::string &szTrigger) { return false; }
@@ -253,8 +260,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
 
         void SendPacket(XPacket pPacket);
+
         WorldSession &GetSession() const { return *m_session; }
+
         void SetClientInfo(const std::string &value) { m_szClientInfo = value; }
+
         void SetSession(WorldSession *session) { m_session = session; }
 
         void applyJobLevelBonus() override;
@@ -265,11 +275,13 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         TimeSynch     m_TS{200, 2, 10};
 
         Summon *m_pMainSummon{nullptr};
-        uint m_hTamingTarget{ };
+        uint   m_hTamingTarget{ };
         int GetChaos() const;
         int GetMaxChaos() const;
         void AddChaos(int chaos);
-        bool m_bSitdown{false};
+        bool   m_bSitdown{false};
+        bool   m_bTrading{false};
+        bool   m_bTradeFreezed{false};
     protected:
 
         bool isInLocationType(uint8 nLocationType);
@@ -288,9 +300,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void updateQuestStatus(Quest *pQuest);
         void onEndQuest(Quest *pQuest);
     private:
-        void onDropQuest(Quest* pQuest);
+        void onDropQuest(Quest *pQuest);
         void openStorage();
-        Item *popItem(Item* pItem, int64 cnt, bool bSkipUpdateToDB);
+        Item *popItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB);
 
         void applyCharm(Item *pItem);
         void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP);
@@ -314,17 +326,17 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Skill *> m_vApplySummonPassive;
         std::vector<Skill *> m_vApmlifySummonPassive;
 
-        std::vector<Summon *> m_vSummonList{};
-        std::vector<Summon *> m_vStorageSummonList{};
-        std::vector<Item*> m_vCharmList{};
+        std::vector<Summon *> m_vSummonList{ };
+        std::vector<Summon *> m_vStorageSummonList{ };
+        std::vector<Item *>   m_vCharmList{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 
         Inventory m_Inventory;
         Inventory m_Storage;
-        bool m_bIsStorageRequested{false};
-        bool m_bIsStorageLoaded{false};
-        bool m_bIsUsingStorage{false};
+        bool      m_bIsStorageRequested{false};
+        bool      m_bIsStorageLoaded{false};
+        bool      m_bIsUsingStorage{false};
 
         // Dialog stuff
         int         m_nDialogType{ };
@@ -334,10 +346,6 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::string m_szDialogMenu{ };
         std::string m_szSpecialDialogMenu{ };
         std::string m_szClientInfo{ };
-
-        // Trade stuff
-        bool   m_bTrading      = false;
-        bool   m_bTradeFreezed = false;
 };
 
 #endif // _PLAYER_H_

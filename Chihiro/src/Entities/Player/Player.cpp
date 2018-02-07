@@ -3405,3 +3405,66 @@ Player* Player::GetTradeTarget()
         return nullptr;
     return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
 }
+
+bool Player::IsTradableWith(Player *pTarget)
+{
+    // Todo: Implement this one PKing is implemented. See below.
+    return true;
+}
+
+/*
+bool __thiscall StructPlayer__IsTradableWith(StructPlayer *this, StructPlayer *pTarget)
+{
+  bool v2; // bl@1
+  StructPlayer *v3; // ebp@1
+  StructPlayer *v4; // esi@1
+  int v5; // edi@11
+  int v6; // ebx@12
+  int v7; // ST00_4@12
+  GuildManager *v8; // eax@12
+  int v9; // ST00_4@13
+  GuildManager *v10; // eax@13
+  bool result; // al@14
+  int v12; // eax@15
+  char v13; // [sp+13h] [bp-1h]@8
+  char v14; // [sp+18h] [bp+4h]@4
+
+  v2 = GameRule__bIsPKServer;
+  v3 = pTarget;
+  v4 = this;
+  if ( !GameRule__bIsPKServer && (StructPlayer__IsDemoniacCharacter(this) || StructPlayer__IsBloodyCharacter(v4)) )
+  {
+    v14 = 1;
+  }
+  else
+  {
+    v14 = 0;
+    if ( v2 )
+    {
+LABEL_9:
+      v13 = 0;
+      goto LABEL_10;
+    }
+  }
+  if ( !StructPlayer__IsDemoniacCharacter(v3) && !StructPlayer__IsBloodyCharacter(v3) )
+    goto LABEL_9;
+  v13 = 1;
+LABEL_10:
+  if ( v4->m_nGuildId
+    && (v5 = (int)&v3->m_nGuildId, v3->m_nGuildId)
+    && ((v7 = v4->m_nGuildId,
+         v8 = GuildManager__GetInstance(),
+         v6 = GuildManager__GetAllianceID(v8, v7),
+         v4->m_nGuildId == *(_DWORD *)v5)
+     || (v9 = *(_DWORD *)v5, v10 = GuildManager__GetInstance(), v6 == GuildManager__GetAllianceID(v10, v9))) )
+  {
+    result = v4->m_bIsPK == v3->m_bIsPK;
+  }
+  else
+  {
+    v12 = v4->m_nPartyId;
+    result = (v12 && v12 == v3->m_nPartyId || !v14 && !v13) && !v4->m_bIsPK && !v3->m_bIsPK;
+  }
+  return result;
+}
+ */
