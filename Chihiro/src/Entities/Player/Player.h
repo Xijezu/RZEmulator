@@ -188,6 +188,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         void StartTrade(uint32 pTargetHandle);
         void CancelTrade(bool bIsNeedBroadcast);
+        void FreezeTrade();
         void ClearTradeInfo();
         Player *GetTradeTarget();
         bool IsTradableWith(Player *pTarget);
