@@ -2153,10 +2153,6 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
         tradeTargetPct << m_pPlayer->GetHandle();
         tradeTargetPct << (uint8)TM_BEGIN_TRADE; // mode
         tplayer->SendPacket(tradeTargetPct);
-
-        // I guess set boolean here? ¯\_(ツ)_/¯
-        m_pPlayer->m_bTrading = true;
-        tplayer->m_bTrading   = true;
     }
 }
 

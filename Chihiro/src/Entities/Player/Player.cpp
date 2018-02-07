@@ -3380,6 +3380,7 @@ void Player::StartTrade(uint32 pTargetHandle)
     if (!m_bTrading && !m_bTradeFreezed)
     {
         ClearTradeInfo();
+        m_bTrading = true;
         SetUInt32Value(PLAYER_FIELD_TRADE_TARGET, pTargetHandle);
     }
 }
