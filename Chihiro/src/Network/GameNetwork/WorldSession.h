@@ -114,9 +114,9 @@ class WorldSession
         void onAcceptTrade(uint);
         void onCancelTrade();
         void onRejectTrade(uint);
-        void onAddItem(uint);
-        void onRemoveItem(uint);
-        void onAddGold(uint);
+        void onAddItem(uint, XPacket *);
+        void onRemoveItem(uint, XPacket *);
+        void onAddGold(uint, XPacket *);
         void onFreezeTrade();
         void onConfirmTrade();
 

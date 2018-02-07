@@ -2093,13 +2093,13 @@ void WorldSession::onTrade(XPacket *pRecvPct) {
             onRejectTrade(target_handle);
             break;
         case TM_ADD_ITEM:
-            onAddItem(target_handle);
+            onAddItem(target_handle, pRecvPct);
             break;
         case TM_REMOVE_ITEM:
-            onRemoveItem(target_handle);
+            onRemoveItem(target_handle, pRecvPct);
             break;
         case TM_ADD_GOLD:
-            onAddGold(target_handle);
+            onAddGold(target_handle, pRecvPct);
             break;
         case TM_FREEZE_TRADE:
             onFreezeTrade();
@@ -2180,7 +2180,7 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
     tplayer->SendPacket(tradePct);
 }
 
-void WorldSession::onAddItem(uint32 hTradeTarget)
+void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
     auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
     if(!isValidTradeTarget(tplayer))
@@ -2189,18 +2189,50 @@ void WorldSession::onAddItem(uint32 hTradeTarget)
 
 }
 
-void WorldSession::onRemoveItem(uint32 hTradeTarget)
+void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
     auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
     if(!isValidTradeTarget(tplayer))
         return;
 }
 
-void WorldSession::onAddGold(uint32 hTradeTarget)
+void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
-        return;
+    if (!m_pPlayer->m_bTradeFreezed)
+    {
+        auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+        if (!isValidTradeTarget(tplayer))
+            return;
+
+        pRecvPct->read<uint32>(); // Handle
+        pRecvPct->read<int32>(); // Code
+        pRecvPct->read<int64>(); // ID
+
+        int64 gold = pRecvPct->read<int32>();
+        if (gold <= 0)
+        {
+            // Print debug message?
+            // Register block account in game rule?
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+            return;
+        }
+
+        m_pPlayer->AddGoldToTradeWindow(gold);
+
+        XPacket tradePct(TS_TRADE);
+        tradePct << m_pPlayer->GetHandle();
+        tradePct << (uint8)TM_ADD_GOLD;
+        tradePct << (uint32_t)0; // Handle
+        tradePct << (int32_t)0; // Code
+        tradePct << (int64)0; // ID
+        tradePct << (int64)gold;
+        tplayer->SendPacket(tradePct);
+        m_pPlayer->SendPacket(tradePct);
+    }
+    else
+    {
+        m_pPlayer->CancelTrade(false);
+    }
 }
 
 void WorldSession::onFreezeTrade()

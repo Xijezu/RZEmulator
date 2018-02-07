@@ -3474,3 +3474,9 @@ LABEL_10:
   return result;
 }
  */
+
+void Player::AddGoldToTradeWindow(int64 nGold)
+{
+    if (!m_bTradeFreezed)
+        m_nTradeGold = nGold;
+}
