@@ -2118,13 +2118,17 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
     if(!isValidTradeTarget(tplayer))
         return;
 
-    // Todo: if(bIsMoving || bTrading) false
-    // Todo: m_pPlayer.IsTradableWith(tPlayer);
-
-    XPacket tradePct(TS_TRADE);
-    tradePct << m_pPlayer->GetHandle();
-    tradePct << (uint8)TM_REQUEST_TRADE; // mode
-    tplayer->SendPacket(tradePct);
+    if (tplayer->m_bTrading || m_pPlayer->m_bTrading)
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tplayer->GetHandle());
+    else if (!m_pPlayer->IsTradableWith(tplayer))
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tplayer->GetHandle());
+    else
+    {
+        XPacket tradePct(TS_TRADE);
+        tradePct << m_pPlayer->GetHandle();
+        tradePct << (uint8)TM_REQUEST_TRADE; // mode
+        tplayer->SendPacket(tradePct);
+    }
 }
 
 void WorldSession::onAcceptTrade(uint32 hTradeTarget)
@@ -2133,8 +2137,27 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
     if(!isValidTradeTarget(tplayer))
         return;
 
-    // Todo: if bIsMoving || bTrading || GetTamingTarget() != 0
-    // StructPlayer::StartTrade, send mode 2 to both
+    if (m_pPlayer->m_bTrading || tplayer->m_bTrading || m_pPlayer->m_hTamingTarget || tplayer->m_hTamingTarget)
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
+    else
+    {
+        m_pPlayer->StartTrade(tplayer->GetHandle());
+        tplayer->StartTrade(m_pPlayer->GetHandle());
+
+        XPacket tradePlayerPct(TS_TRADE);
+        tradePlayerPct << tplayer->GetHandle();
+        tradePlayerPct << (uint8)TM_BEGIN_TRADE; // mode
+        m_pPlayer->SendPacket(tradePlayerPct);
+
+        XPacket tradeTargetPct(TS_TRADE);
+        tradeTargetPct << m_pPlayer->GetHandle();
+        tradeTargetPct << (uint8)TM_BEGIN_TRADE; // mode
+        tplayer->SendPacket(tradeTargetPct);
+
+        // I guess set boolean here? ¯\_(ツ)_/¯
+        m_pPlayer->m_bTrading = true;
+        tplayer->m_bTrading   = true;
+    }
 }
 
 void WorldSession::onCancelTrade()
