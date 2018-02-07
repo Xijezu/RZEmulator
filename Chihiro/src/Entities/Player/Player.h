@@ -331,6 +331,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Summon *> m_vStorageSummonList{ };
         std::vector<Item *>   m_vCharmList{ };
 
+        int64               m_nTradeGold{ };
+        std::vector<Item *> m_vTradeItemList{ };
+
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 
         Inventory m_Inventory;
