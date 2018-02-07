@@ -2209,7 +2209,19 @@ void WorldSession::onAddGold(uint32 hTradeTarget)
 
 void WorldSession::onFreezeTrade()
 {
+    auto tplayer = m_pPlayer->GetTradeTarget();
+    if (tplayer != nullptr)
+    {
+        m_pPlayer->FreezeTrade();
 
+        XPacket tradePct(TS_TRADE);
+        tradePct << m_pPlayer->GetHandle();
+        tradePct << (uint8)TM_FREEZE_TRADE;
+        tplayer->SendPacket(tradePct);
+        m_pPlayer->SendPacket(tradePct);
+    }
+    else
+        m_pPlayer->CancelTrade(false);
 }
 
 void WorldSession::onConfirmTrade()

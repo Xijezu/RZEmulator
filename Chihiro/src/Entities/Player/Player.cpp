@@ -3392,6 +3392,11 @@ void Player::CancelTrade(bool bIsNeedBroadcast)
     ClearTradeInfo();
 }
 
+void Player::FreezeTrade()
+{
+    m_bTradeFreezed = true;
+}
+
 void Player::ClearTradeInfo()
 {
     m_bTradeFreezed      = false;
