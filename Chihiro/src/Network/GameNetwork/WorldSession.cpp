@@ -2162,7 +2162,14 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
 
 void WorldSession::onCancelTrade()
 {
+    if (!m_pPlayer->m_bTrading)
+        return;
 
+    auto tplayer = m_pPlayer->GetTradeTarget();
+    if (tplayer != nullptr)
+        tplayer->CancelTrade(true);
+
+    m_pPlayer->CancelTrade(true);
 }
 
 void WorldSession::onRejectTrade(uint32 hTradeTarget)
