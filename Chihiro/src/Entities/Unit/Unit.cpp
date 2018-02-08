@@ -2289,3 +2289,8 @@ bool Unit::IsActable() const
            && (GetUInt32Value(UNIT_FIELD_STATUS) & (STATUS_MOVABLE | STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE)) != 0;
 
 }
+
+int Unit::GetMoveSpeed()
+{
+    return (int)m_Attribute.nMoveSpeed;
+}

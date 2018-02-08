@@ -1056,10 +1056,10 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
     {
         if (m_anWear[pos] != nullptr && m_anWear[pos]->GetHandle() == item->GetHandle())
         {
-            // Weight modifier
+            m_Inventory.m_fWeightModifier -= item->GetWeight();
         }
-        // UpdateWeight
-//        UpdateQuestStatusByItemUpgrade();
+        UpdateWeightWithInventory();
+        UpdateQuestStatusByItemUpgrade();
         result = 0;
     }
     return result;
@@ -1095,7 +1095,12 @@ uint16_t Player::putoffItem(ItemWearType pos)
         default:
             break;
     }
-    return Unit::putoffItem(pos);
+    auto result = Unit::putoffItem(pos);
+    if(item != nullptr)
+        m_Inventory.m_fWeightModifier += item->GetWeight();
+    UpdateWeightWithInventory();
+    UpdateQuestStatusByItemUpgrade();
+    return result;
 }
 
 void Player::SendItemWearInfoMessage(Item *item, Unit *u)
@@ -1274,14 +1279,14 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         {
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
                 Messages::SendItemMessage(this, pItem);
-            // TODO: UpdateWeightWithInventory();
+            UpdateWeightWithInventory();
             return;
         }
 
         pItem->DBUpdate();
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
             Messages::SendItemMessage(this, pItem);
-        // TODO: UpdateWeightWithInventory();
+        UpdateWeightWithInventory();
         return;
     }
     sMemoryPool->AllocItemHandle(pItem);
@@ -1291,7 +1296,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
     }
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         Messages::SendItemMessage(this, pItem);
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
@@ -1320,7 +1325,12 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
                     // TODO: Ride Handle
                 }
             }
-            // TODO: GROUP_SKILLCARD
+            if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+            {
+                auto scu = sMemoryPool->GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
+                if(scu != nullptr)
+                    scu->UnBindSkillCard(pItem);
+            }
         }
         else
         {
@@ -1329,7 +1339,7 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
         }
         Messages::SendItemDestroyMessage(this, pItem);
     }
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
@@ -1338,7 +1348,7 @@ void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpd
     if (!bSkipUpdateItemToDB && pItem->IsInStorage())
         pItem->DBUpdate();
 
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
@@ -2229,9 +2239,19 @@ Quest *Player::FindQuest(int code)
     return m_QuestManager.FindQuest(code);
 }
 
-float Player::GetMoveSpeed() const
+int Player::GetMoveSpeed()
 {
-    return m_Attribute.nMoveSpeed;
+    float fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
+    if(fWT >= 1.0f || fWT < 0.0f)
+    {
+        return (int)((float)Unit::GetMoveSpeed() * 0.1f);
+    }
+    else
+    {
+        if(fWT < 0.75f)
+            return Unit::GetMoveSpeed();
+        return (int)((float)Unit::GetMoveSpeed() * 0.5f);
+    }
 }
 
 void Player::onModifyStatAndAttribute()
@@ -2246,7 +2266,6 @@ uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
     if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || pItem->m_pItemBase->cool_time_group != 0
                                                                                                && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct)
         return TS_RESULT_COOL_TIME;
-    // Weight
     // Ride IDX
     if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
         return TS_RESULT_LIMIT_MAX;
@@ -3404,4 +3423,9 @@ Player* Player::GetTradeTarget()
     if(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
         return nullptr;
     return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
+}
+
+void Player::UpdateWeightWithInventory()
+{
+    SetFloatValue(PLAYER_FIELD_WEIGHT, m_Inventory.m_fWeightModifier + m_Inventory.m_fWeight);
 }
