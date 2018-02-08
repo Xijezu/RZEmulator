@@ -1557,7 +1557,7 @@ void Player::onExpChange()
         }
         else
         {
-//            sScriptingMgr->RunString(this, "on_player_level_up()");
+            sScriptingMgr->RunString(this, "on_player_level_up()");
 
             /*if(GetLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
                 SetUInt64Value(UNIT_FIELD_MAX_REACHED_LEVEL)*/
@@ -1911,7 +1911,16 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 if (nCurrentVarIdx2 == -1)
                     return false;
 
-                // TODO Check Capacity
+                auto curr_capacity = item1->m_pItemBase->opt_var[nCurrentVarIdx][0];
+                auto new_capacity  = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
+                if (curr_capacity != new_capacity
+                    && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight
+                    && GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
+                    || GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
+                       && curr_capacity > new_capacity)
+                {
+                    return false;
+                }
             }
         }
     }
