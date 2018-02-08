@@ -697,7 +697,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 else
                 {
 #if EPIC <= 4
-                    ///- Hack for epic 4, use proper workaround instead @todo
+                    ///- Hack for epic 4, use proper workaround instead
                     pPlayer->AddDialogMenu("Confirm", string_format("end_quest(%u, -1)", code));
                     return;
 #else
