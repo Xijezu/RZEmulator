@@ -425,7 +425,7 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbso
         return;
     pObj->SendEnterMsg(pPlayer);
 
-    if (pObj->GetObjType() != 0 && pObj->bIsMoving /*&& pObj->IsInWorld()*/)
+    if (pObj->GetObjType() != 0 && pObj->bIsMoving && pObj->IsInWorld())
         SendMoveMessage(pPlayer, dynamic_cast<Unit *>(pObj));
 }
 
