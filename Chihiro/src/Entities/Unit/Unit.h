@@ -115,7 +115,7 @@ class Unit : public WorldObject
         void EndAttack();
 
         uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
-
+        virtual int GetMoveSpeed();
         uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
         float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }

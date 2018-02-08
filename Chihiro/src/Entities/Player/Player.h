@@ -238,7 +238,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         bool IsPlayer() const override { return true; }
 
-        float GetMoveSpeed() const;
+        int GetMoveSpeed() override;
 
         bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList) override;
 
@@ -258,6 +258,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void SetSession(WorldSession *session) { m_session = session; }
 
         void applyJobLevelBonus() override;
+        void UpdateWeightWithInventory();
 
         Item          *m_aBindSummonCard[6]{nullptr};
         WorldLocation *m_WorldLocation{nullptr};
