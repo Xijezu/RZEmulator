@@ -89,7 +89,8 @@ void AddObjectRegionFunctor::Run(Region *region)
 {
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
-    region->DoEachClient(fn);
+    if(region->DoEachClient(fn) != 0)
+        bSend = true;
 
     if(newObj->IsPlayer())
     {
