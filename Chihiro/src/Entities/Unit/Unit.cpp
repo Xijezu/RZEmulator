@@ -1718,7 +1718,7 @@ std::pair<float, int> Unit::GetHateMod(int nHateModType, bool bIsHarmful)
                 continue;
         }
 
-        if((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 33 && hm.bIsApplyToPhysicalAttack)) {
+        if((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 3 && hm.bIsApplyToPhysicalAttack)) {
             fAmpValue += hm.fAmpValue;
             nIncValue += hm.nIncValue;
         }
