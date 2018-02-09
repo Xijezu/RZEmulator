@@ -29,7 +29,7 @@
 
 /** ObjectRegistry holds all registry item of the same type
  */
-template<class T, class Key = std::string>
+template<class T, class Key = int32_t>
 class ObjectRegistry
 {
     public:
@@ -39,7 +39,7 @@ class ObjectRegistry
         const T* GetRegistryItem(Key key) const
         {
             typename RegistryMapType::const_iterator iter = i_registeredObjects.find(key);
-            return( iter == i_registeredObjects.end() ? NULL : iter->second );
+            return( iter == i_registeredObjects.end() ? nullptr : iter->second );
         }
 
         /// Inserts a registry item
@@ -92,7 +92,7 @@ class ObjectRegistry
             return i_registeredObjects;
         }
 
-        ObjectRegistry() {}
+        ObjectRegistry() = default;
         ~ObjectRegistry()
         {
             for (typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)

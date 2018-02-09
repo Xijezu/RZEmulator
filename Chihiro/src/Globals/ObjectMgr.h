@@ -30,7 +30,6 @@ struct WayPointInfo
     std::vector<Position> vWayPoint;
 };
 
-
 class ObjectMgr
 {
     public:
@@ -153,8 +152,8 @@ class ObjectMgr
         QuestLinkTemplateContainer      _questLinkStore;
         NPCTemplateContainer            _npcTemplateStore;
         FieldPropTemplateContainer      _fieldPropTemplateStore;
-        std::vector<int>          _summonPrefixStore;
-        std::vector<int>          _summonPostfixStore;
+        std::vector<int>                _summonPrefixStore;
+        std::vector<int>                _summonPostfixStore;
         SummonBonusTemplateContainer    _summonBonusStore;
         StateTemplateContainer          _stateTemplateStore;
 
