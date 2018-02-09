@@ -544,25 +544,69 @@ void Skill::PostFireSkill(Unit *pTarget)
     std::vector<Unit*> vNeedStateList{};
     for(const auto& sr : m_vResultList)
     {
-        // Add State Result begin
-        if(sr.type == 0 || sr.type == 1 || sr.type == 2 || sr.type == 20 || sr.type == 21 || sr.type == 22 || sr.type == 10)
+        auto pDealTarget = sMemoryPool->GetObjectInWorld<Unit>(sr.hTarget);
+        if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
         {
-            auto pDealTarget = sMemoryPool->GetObjectInWorld<Unit>(sr.hTarget);
-            if(pDealTarget != nullptr && pDealTarget->GetHealth() != 0
-               && m_SkillBase->effect_type != EF_ADD_STATE
-               && m_SkillBase->effect_type != EF_ADD_REGION_STATE
-               && m_SkillBase->effect_type != EF_ADD_STATE_BY_USING_ITEM
-               && m_SkillBase->effect_type != EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD
-               && m_SkillBase->effect_type != EF_ADD_STATE_BY_SELF_COST
-               && m_SkillBase->effect_type != EF_ADD_REGION_STATE_BY_SELF_COST
-               && m_SkillBase->effect_type != EF_REMOVE_STATE_GROUP
-               && m_SkillBase->state_id != 0
-               && (sr.damage.flag ^ 2) != 0)
+
+            // Add State Result begin)
+            if (sr.type == 0 || sr.type == 1 || sr.type == 2 || sr.type == 20 || sr.type == 21 || sr.type == 22 || sr.type == 10)
             {
-                vNeedStateList.emplace_back(pDealTarget);
+
+                if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0
+                    && m_SkillBase->effect_type != EF_ADD_STATE
+                    && m_SkillBase->effect_type != EF_ADD_REGION_STATE
+                    && m_SkillBase->effect_type != EF_ADD_STATE_BY_USING_ITEM
+                    && m_SkillBase->effect_type != EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD
+                    && m_SkillBase->effect_type != EF_ADD_STATE_BY_SELF_COST
+                    && m_SkillBase->effect_type != EF_ADD_REGION_STATE_BY_SELF_COST
+                    && m_SkillBase->effect_type != EF_REMOVE_STATE_GROUP
+                    && m_SkillBase->state_id != 0
+                    && (sr.damage.flag ^ 2) != 0)
+                {
+                    vNeedStateList.emplace_back(pDealTarget);
+                }
+            }
+            // Add State Result end
+            int nDamage{0};
+            if (!m_pOwner->IsMonster() && m_SkillBase->effect_type != EF_REGION_REMOVE_HATE && m_SkillBase->effect_type != EF_REMOVE_HATE)
+            {
+                if (sr.type != SRT_DAMAGE && sr.type != SRT_MAGIC_DAMAGE && sr.type != SRT_DAMAGE_WITH_KNOCK_BACK)
+                {
+                    if (sr.type == SRT_ADD_HP || sr.type == SRT_ADD_MP)
+                    {
+//                                                 nDamage = sr.*(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.z
+//                                                       + 1);
+                    }
+                    else if (sr.type == SRT_ADD_HP_MP_SP)
+                    {
+//                                                 v54 = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.z
+//                                                       + 1);
+//                                                 v55 = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.face
+//                                                       + 1)
+//                                                     + v54;
+//                                                 nDamage = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end_time
+//                                                       + 1)
+//                                                     + v55;
+                    }
+                }
+                else
+                {
+                    nDamage = sr.damage.damage;
+                }
+
+                float hm      = 1.0f; // (m_pOwner->GetMagicalHateMod((ElementalType)m_SkillBase.elemental, m_SkillBase.is_spell_act == 0, m_SkillBase.is_harmful != 0)
+                // * (this.m_SkillBase.GetHatePoint(m_nRequestedSkillLevel, nDamage, m_nEnhance) * m_pOwner->m_fHateRatio));
+                auto  HateMod = m_pOwner->GetHateMod(m_SkillBase->is_physical_act == 0 ? 2 : 1, m_SkillBase->is_harmful != 0);
+                nDamage     = (int)((hm + HateMod.second) * HateMod.first);
+                if (nDamage == 0)
+                    nDamage = 1;
+
+                if (pDealTarget->IsMonster())
+                {
+                    pDealTarget->As<Monster>()->AddHate(m_pOwner->GetHandle(), nDamage, true, true);
+                }
             }
         }
-        // Add State Result end
     }
 
     if(!vNeedStateList.empty())
