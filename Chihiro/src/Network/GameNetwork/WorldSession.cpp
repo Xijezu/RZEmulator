@@ -265,7 +265,7 @@ std::vector<LobbyCharacterInfo> WorldSession::_PrepareCharacterList(uint32 accou
 
 void WorldSession::onAuthResult(XPacket *pGamePct)
 {
-    
+
     auto szAccount  = pGamePct->ReadString(61);
     auto nAccountID = pGamePct->read<uint>();
     auto result     = pGamePct->read<uint16>();
@@ -327,7 +327,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
 
 void WorldSession::onMoveRequest(XPacket *pRecvPct)
 {
-    
+
     std::vector<Position> vPctInfo{ }, vMoveInfo{ };
 
     auto handle     = pRecvPct->read<uint32_t>();
@@ -512,7 +512,7 @@ void WorldSession::onReturnToLobby(XPacket *pRecvPct)
 
 void WorldSession::onCreateCharacter(XPacket *pRecvPct)
 {
-    
+
     LobbyCharacterInfo info{ };
     *pRecvPct >> info.sex;
     *pRecvPct >> info.race;
@@ -625,7 +625,7 @@ bool WorldSession::checkCharacterName(const std::string &szName)
 
 void WorldSession::onCharacterName(XPacket *pRecvPct)
 {
-    
+
     std::string szName = pRecvPct->read<std::string>();
     if (!checkCharacterName(szName))
     {
@@ -815,14 +815,14 @@ void WorldSession::onRegionUpdate(XPacket *pRecvPct)
 
 void WorldSession::onGetSummonSetupInfo(XPacket *pRecvPct)
 {
-    
+
     bool showDialog = pRecvPct->read<uint8_t>() == 1;
     Messages::SendCreatureEquipMessage(m_pPlayer, showDialog);
 }
 
 void WorldSession::onContact(XPacket *pRecvPct)
 {
-    
+
     auto handle = pRecvPct->read<uint32_t>();
     auto npc    = sMemoryPool->GetObjectInWorld<NPC>(handle);
 
@@ -835,7 +835,7 @@ void WorldSession::onContact(XPacket *pRecvPct)
 
 void WorldSession::onDialog(XPacket *pRecvPct)
 {
-    
+
     auto        size    = pRecvPct->read<uint16_t>();
     std::string trigger = pRecvPct->ReadString(size);
 
@@ -866,7 +866,7 @@ void WorldSession::onDialog(XPacket *pRecvPct)
 
 void WorldSession::onBuyItem(XPacket *pRecvPct)
 {
-    
+
     auto item_code = pRecvPct->read<uint>();
     auto buy_count = pRecvPct->read<uint16_t>();
 
@@ -969,7 +969,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
 
 void WorldSession::onDeleteCharacter(XPacket *pRecvPct)
 {
-    
+
     auto name = pRecvPct->ReadString(19);
     auto stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_CHARACTER);
     stmt->setString(0, name);
@@ -981,7 +981,7 @@ void WorldSession::onDeleteCharacter(XPacket *pRecvPct)
 
 void WorldSession::onChangeLocation(XPacket *pRecvPct)
 {
-    
+
     auto x = pRecvPct->read<float>();
     auto y = pRecvPct->read<float>();
 
@@ -990,7 +990,7 @@ void WorldSession::onChangeLocation(XPacket *pRecvPct)
 
 void WorldSession::onTimeSync(XPacket *pRecvPct)
 {
-    
+
     auto packet_time = pRecvPct->read<int>();
     uint ct          = sWorld->GetArTime();
     m_pPlayer->m_TS.onEcho(ct - packet_time);
@@ -1013,7 +1013,7 @@ void WorldSession::onGameTime(XPacket */*pRecvPct*/)
 
 void WorldSession::onQuery(XPacket *pRecvPct)
 {
-    
+
     auto handle = pRecvPct->read<uint>();
 
     //WorldObject* obj = sMemoryPool->getPtrFromId(handle);
@@ -1026,7 +1026,7 @@ void WorldSession::onQuery(XPacket *pRecvPct)
 
 void WorldSession::onUpdate(XPacket *pRecvPct)
 {
-    
+
     auto handle = pRecvPct->read<uint>();
 
     auto unit = dynamic_cast<Unit *>(m_pPlayer);
@@ -1043,7 +1043,7 @@ void WorldSession::onUpdate(XPacket *pRecvPct)
 
 void WorldSession::onJobLevelUp(XPacket *pRecvPct)
 {
-    
+
     auto target = pRecvPct->read<uint>();
 
     Unit *cr = dynamic_cast<Player *>(m_pPlayer);
@@ -1087,7 +1087,7 @@ void WorldSession::onJobLevelUp(XPacket *pRecvPct)
 
 void WorldSession::onLearnSkill(XPacket *pRecvPct)
 {
-    
+
     auto target_handle = pRecvPct->read<uint>();
     auto skill_id      = pRecvPct->read<int>();
     //auto skill_level = pRecvPct->read<int16>();
@@ -1127,8 +1127,6 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
 {
     if (m_pPlayer == nullptr)
         return;
-
-    
 
     auto     bShowDialog    = pRecvPct->read<bool>();
     int      card_handle[6] = {0};
@@ -1240,7 +1238,6 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    
     auto handle     = pRecvPct->read<uint>();
     auto sell_count = pRecvPct->read<uint16>();
 
@@ -1302,7 +1299,6 @@ void WorldSession::onSkill(XPacket *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    
     auto skill_id    = pRecvPct->read<uint16>();
     auto caster      = pRecvPct->read<uint32>();
     auto target      = pRecvPct->read<uint32>();
@@ -1371,7 +1367,7 @@ void WorldSession::onSkill(XPacket *pRecvPct)
 
 void WorldSession::onSetProperty(XPacket *pRecvPct)
 {
-    
+
     std::string key = pRecvPct->ReadString(16);
     if (key != "client_info"s)
         return;
@@ -1391,7 +1387,6 @@ void WorldSession::onAttackRequest(XPacket *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    
     auto handle = pRecvPct->read<uint>();
     auto target = pRecvPct->read<uint>();
 
@@ -1443,7 +1438,6 @@ void WorldSession::onCancelAction(XPacket *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    
     auto handle = pRecvPct->read<uint>();
     Unit *cancellor = m_pPlayer->GetSummonByHandle(handle);
     if (cancellor == nullptr || !cancellor->IsInWorld())
@@ -1467,7 +1461,6 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    
     auto item_handle = pRecvPct->read<uint>();
 
     uint ct = sWorld->GetArTime();
@@ -1576,7 +1569,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 
 void WorldSession::onUseItem(XPacket *pRecvPct)
 {
-    
+
     auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
     auto szParameter   = pRecvPct->ReadString(32);
@@ -1677,7 +1670,7 @@ void WorldSession::onRevive(XPacket *)
 void WorldSession::onDropItem(XPacket *pRecvPct)
 {
     return;
-    
+
     auto target = pRecvPct->read<uint>();
 
     auto item = sMemoryPool->GetObjectInWorld<Item>(target);
@@ -1692,7 +1685,7 @@ void WorldSession::onDropItem(XPacket *pRecvPct)
 
 void WorldSession::onMixRequest(XPacket *pRecvPct)
 {
-    
+
     struct MixInfo
     {
         uint   handle;
@@ -1747,20 +1740,20 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
         case 0:
             break;
         case 101: //EnchantItem without E-Protect Powder
-        	sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
-        	return;
+            sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            return;
         case 102:
-        	sMixManager->EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
-        	return;
+            sMixManager->EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
+            return;
         case 103: //EnchantItem WITH E-Protect Powder
-        	sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
-        	return;
+            sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            return;
         case 311:
             sMixManager->MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         case 501:
-        	sMixManager->RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
-        	return;
+            sMixManager->RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            return;
         default:
             break;
     }
@@ -1768,7 +1761,6 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
 
 void WorldSession::onSoulStoneCraft(XPacket *pRecvPct)
 {
-    
 
     if (m_pPlayer->GetLastContactLong("SoulStoneCraft") == 0)
         return;
@@ -1894,7 +1886,6 @@ void WorldSession::onStorage(XPacket *pRecvPct)
 {
     if(m_pPlayer == nullptr)
         return;
-    
 
     auto handle = pRecvPct->read<uint>();
     auto mode = pRecvPct->read<uint8>();
@@ -2002,7 +1993,6 @@ void WorldSession::onBindSkillCard(XPacket *pRecvPct)
     if(m_pPlayer == nullptr)
         return;
 
-    
     auto item_handle = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
 
@@ -2029,7 +2019,7 @@ void WorldSession::onBindSkillCard(XPacket *pRecvPct)
 
 void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
 {
-    
+
     auto item_handle = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
 
@@ -2186,7 +2176,21 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
     if(!isValidTradeTarget(tplayer))
         return;
 
+    if (!m_pPlayer->m_bTradeFreezed)
+    {
+        uint32 handle = pRecvPct->read<uint32>();
+        pRecvPct->read<int32>(); // Code
+        pRecvPct->read<int64>(); // ID
+        int32 count = pRecvPct->read<int32>();
 
+        if (count <= 0)
+        {
+            // Print debug message?
+            // Register block account in game rule?
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+            return;
+        }
+    }
 }
 
 void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
@@ -2222,10 +2226,11 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
         XPacket tradePct(TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_ADD_GOLD;
-        tradePct << (uint32_t)0; // Handle
-        tradePct << (int32_t)0; // Code
+        tradePct << (uint32)0; // Handle
+        tradePct << (int32)0; // Code
         tradePct << (int64)0; // ID
-        tradePct << (int64)gold;
+        tradePct << (int32)gold;
+        tradePct.fill("", 44);
         tplayer->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
@@ -2267,7 +2272,6 @@ void WorldSession::onDropQuest(XPacket *pRecvPct)
     if(m_pPlayer == nullptr)
         return;
 
-    
     auto quest_id = pRecvPct->read<uint>();
     if(m_pPlayer->DropQuest(quest_id))
     {

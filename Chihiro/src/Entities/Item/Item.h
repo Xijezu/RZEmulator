@@ -54,6 +54,7 @@ class Item : public WorldObject
 
         void SetCount(int64 count);
         bool IsWearable();
+        bool IsTradable();
         bool IsExpireItem() const;
         bool IsJoinable() const;
         bool IsQuestItem() const;
