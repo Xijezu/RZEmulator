@@ -3480,3 +3480,9 @@ void Player::AddGoldToTradeWindow(int64 nGold)
     if (!m_bTradeFreezed)
         m_nTradeGold = nGold;
 }
+
+bool Player::IsTradable(Item *pItem)
+{
+    return this->IsErasable(pItem) && pItem->IsTradable();
+
+}

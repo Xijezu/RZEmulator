@@ -193,6 +193,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Player *GetTradeTarget();
         bool IsTradableWith(Player *pTarget);
         void AddGoldToTradeWindow(int64 nGold);
+        bool IsTradable(Item *pItem);
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
