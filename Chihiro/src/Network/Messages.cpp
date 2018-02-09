@@ -26,6 +26,7 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "GroupManager.h"
+#include "Monster.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -423,6 +424,12 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbso
 {
     if (pObj == nullptr || pPlayer == nullptr)
         return;
+
+    if(pObj->IsMonster())
+    {
+        pObj->As<Monster>()->m_bNearClient = true;
+    }
+
     pObj->SendEnterMsg(pPlayer);
 
     if (pObj->GetObjType() != 0 && pObj->bIsMoving && pObj->IsInWorld())
