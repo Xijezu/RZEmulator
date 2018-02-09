@@ -112,6 +112,7 @@ struct SendEnterMessageFunctor : public WorldObjectFunctor
 struct AddObjectRegionFunctor : public RegionFunctor
 {
     WorldObject* newObj;
+    bool bSend{false};
     void Run(Region* region) override;
 };
 
