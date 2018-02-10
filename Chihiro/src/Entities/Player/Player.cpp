@@ -2433,15 +2433,15 @@ void Player::updateQuestStatus(Quest *pQuest)
     int nItemCode                = 0;
 
     QuestType qt = pQuest->m_QuestBase->nType;
-    if (qt == QuestType::QT_Collect || qt == QuestType::QT_HuntItem || qt == QuestType::QT_HuntItemFromAnyMonsters)
+    if (qt == QuestType::QUEST_COLLECT || qt == QuestType::QUEST_HUNT_ITEM || qt == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
     {
         switch (qt)
         {
-            case QuestType::QT_Collect:
+            case QuestType::QUEST_COLLECT:
                 nMaxItemCollectTypeCount = 2;
                 break;
-            case QuestType::QT_HuntItemFromAnyMonsters:
-            case QuestType::QT_HuntItem:
+            case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
+            case QuestType::QUEST_HUNT_ITEM:
                 nMaxItemCollectTypeCount = 3;
                 break;
             default:
@@ -2461,17 +2461,17 @@ void Player::updateQuestStatus(Quest *pQuest)
             }
         }
     }
-    if (qt == QuestType::QT_LearnSkill)
+    if (qt == QuestType::QUEST_LEARN_SKILL)
     {
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(0), GetBaseSkillLevel(pQuest->GetValue(0)));
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(2), GetBaseSkillLevel(pQuest->GetValue(2)));
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(4), GetBaseSkillLevel(pQuest->GetValue(4)));
     }
-    if (qt == QuestType::QT_JobLevel)
+    if (qt == QuestType::QUEST_JOB_LEVEL)
     {
         m_QuestManager.UpdateQuestStatusByJobLevel(GetJobDepth(), GetCurrentJLv());
     }
-    if (qt == QuestType::QT_Parameter)
+    if (qt == QuestType::QUEST_PARAMETER)
     {
         m_QuestManager.UpdateQuestStatusByParameter(99, GetChaos());
     }
@@ -2548,10 +2548,10 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         Unit::AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
         // @todo: favor
 
-        if (q->m_QuestBase->nType == QuestType::QT_Collect || q->m_QuestBase->nType == QuestType::QT_HuntItem || q->m_QuestBase->nType == QuestType::QT_HuntItemFromAnyMonsters)
+        if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
         {
             int      nItemCode{0};
-            for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QT_Collect) ? 6 : 3); ++i)
+            for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QUEST_COLLECT) ? 6 : 3); ++i)
             {
                 nItemCode = q->GetValue(2 * i);
                 if (nItemCode != 0)
@@ -2954,7 +2954,7 @@ void Player::applyState(State &state)
     {
         if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
             m_Attribute.nMoveSpeed += state.GetValue(0);
-        // Riding State UID @todo
+        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state.m_nUID);
         return;
     }
     if (stateType == 0)
@@ -3389,7 +3389,7 @@ bool Player::DropQuest(int code)
 
 void Player::onDropQuest(Quest *pQuest)
 {
-    if(pQuest->m_QuestBase->nType == QuestType::QT_Parameter)
+    if(pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
     {
         for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
         {

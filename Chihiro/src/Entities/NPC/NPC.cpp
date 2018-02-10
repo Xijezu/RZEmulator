@@ -77,7 +77,7 @@ bool NPC::HasStartableQuest(Player *player)
         if (b == nullptr)
             continue;
         auto qt = b->nType;
-        if (qt == QuestType::QT_RandomKillIndividual || qt == QuestType::QT_RandomCollect)
+        if (qt == QuestType::QUEST_RANDOM_KILL_INDIVIDUAL || qt == QuestType::QUEST_RANDOM_COLLECT)
         {
             if (player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code))
             {

@@ -1362,8 +1362,6 @@ uint16_t Unit::putoffItem(ItemWearType pos)
 
 ushort Unit::Putoff(ItemWearType pos)
 {
-    int i;
-
     if(pos == WEAR_TWOHAND)
         pos = WEAR_WEAPON;
     if(pos == WEAR_TWOFINGER_RING)
@@ -1376,7 +1374,7 @@ ushort Unit::Putoff(ItemWearType pos)
     if(pos != WEAR_BAG_SLOT)
         return putoffItem(abspos);
 
-    // TODO: GROUP_BAG
+    // Todo: Bag
 }
 
 ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
@@ -1586,20 +1584,21 @@ void Unit::onUpdateState(State state, bool bIsExpire)
 
 uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, float var2, const std::string &szParameter)
 {
-    uint16 result{TS_RESULT_ACCESS_DENIED};
-    uint target_handle{0};
-    Position pos{};
-    std::string error{};
-    uint ct = sWorld->GetArTime();
-    uint prev_hp;
-    uint prev_mp;
+    uint16      result{TS_RESULT_ACCESS_DENIED};
+    uint        target_handle{0};
+    Position    pos{ };
+    std::string error{ };
+    uint        ct = sWorld->GetArTime();
+    uint        prev_hp;
+    uint        prev_mp;
 
     auto pPlayer = this->As<Player>();
 
-    switch(type) {
+    switch (type)
+    {
         case 1:
             prev_hp = GetHealth();
-            Heal((int)var1);
+            HealByItem((int)var1);
             Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
             return TS_RESULT_SUCCESS;
         case 2:
@@ -1608,8 +1607,8 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
             return TS_RESULT_SUCCESS;
         case 5: // Skillcast (e.g. Force/Soul Chips)
-            target_handle = GetHandle();
-            if(var1 == 6020.0f || var1 == 6021.0f )
+            target_handle     = GetHandle();
+            if (var1 == 6020.0f || var1 == 6021.0f)
                 target_handle = pItem->GetHandle();
             pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
             return (uint16)pCaster->CastSkill((int)var1, (int)var2, target_handle, pos, GetLayer(), true);
@@ -1637,41 +1636,80 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             result = TS_RESULT_ACCESS_DENIED;
         }
             break;
-        case 80:
-            if(IsPlayer())
+        case 7:
+            RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+            break;
+        case 8:
+        {
+            auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
+            if(GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem->GetHandle() == pWornItem->GetHandle())
             {
-                dynamic_cast<Player*>(this)->AddStamina((int)var1);
+                RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+                break;
+            }
+            if (pPlayer != nullptr)
+            {
+                if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
+                {
+                    auto si = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
+                    if(si != nullptr && si->effect_type == 200)
+                        return TS_RESULT_ACCESS_DENIED;
+                }
+                if (pWornItem != nullptr)
+                {
+                    if (pItem->GetHandle() != pWornItem->GetHandle())
+                    {
+                        if (pPlayer->Putoff(ItemWearType::WEAR_RIDE_ITEM) != 0)
+                            return TS_RESULT_ACCESS_DENIED;
+                        if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != 0)
+                            return TS_RESULT_ACCESS_DENIED;
+                    }
+                }
+                else
+                {
+                    if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != 0)
+                        return TS_RESULT_ACCESS_DENIED;
+                }
+                pPlayer->AddState((StateType)0, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
+                                  pItem->m_pItemBase->state_level, ct, 0xffffffff, true, 0, "");
+            }
+        }
+            break;
+        case 80:
+            if (IsPlayer())
+            {
+                dynamic_cast<Player *>(this)->AddStamina((int)var1);
                 return TS_RESULT_SUCCESS;
             }
             return TS_RESULT_ACCESS_DENIED;
         case 94:
         {
-            if(!pCaster->IsPlayer())
+            if (!pCaster->IsPlayer())
                 return TS_RESULT_ACCESS_DENIED;
-            if(var1 != 0.0f)
+            if (var1 != 0.0f)
             {
                 int total = 1;
-                if(var1 < 0.0f)
+                if (var1 < 0.0f)
                     total = (int)var2;
 
-                for(int i = 0; i < total; ++i)
+                for (int i = 0; i < total; ++i)
                 {
-                    auto nItemID = (int)var1;
+                    auto nItemID    = (int)var1;
                     auto nItemCount = (int64)var2;
-                    while(nItemID < 0)
+                    while (nItemID < 0)
                         sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
-                    if(nItemID != 0)
+                    if (nItemID != 0)
                     {
                         auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
-                        if(pCItem == nullptr)
+                        if (pCItem == nullptr)
                         {
                             MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
                             return TS_RESULT_NOT_ACTABLE;
                         }
                         Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
-                        if(pNewItem != nullptr)
+                        if (pNewItem != nullptr)
                             Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());
-                        if(pNewItem != nullptr && pNewItem->GetHandle() != pCItem->GetHandle())
+                        if (pNewItem != nullptr && pNewItem->GetHandle() != pCItem->GetHandle())
                             Item::PendFreeItem(pCItem);
                     }
                 }
@@ -1679,18 +1717,18 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             else
             {
                 auto gold = pPlayer->GetGold() + (int64)var2;
-                if(pPlayer->ChangeGold(gold) != TS_RESULT_SUCCESS)
+                if (pPlayer->ChangeGold(gold) != TS_RESULT_SUCCESS)
                     return 53;
             }
             return TS_RESULT_SUCCESS;
         }
-        break;
+            break;
         default:
             error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
             MX_LOG_ERROR("entites.unit", error.c_str());
-            Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player*>(pCaster), error);
+            Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
             result = TS_RESULT_UNKNOWN;
-        break;
+            break;
     }
     return result;
 }
@@ -2112,21 +2150,13 @@ Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType el
 
 void Unit::RemoveState(StateCode code, int state_level)
 {
-    for(int i = 0; i < m_vStateList.size(); ++i)
+    auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [code, state_level](State s) { return s.m_nCode == code && s.GetLevel() <= state_level; });
+    if(state != m_vStateList.end())
     {
-        State s = m_vStateList[i];
-        if(s.m_nCode == code)
-        {
-            int level = s.GetLevel();
-            if(level <= state_level)
-            {
-                onUpdateState(s, true);
-                m_vStateList.erase(m_vStateList.begin() + i);
-                CalculateStat();
-                onAfterAddState(s); // @todo: onafterremovestate
-            }
-            return;
-        }
+        onUpdateState(*state, true);
+        m_vStateList.erase(state);
+        CalculateStat();
+        onAfterAddState(*state); // @todo: onafterremovestate
     }
 }
 
@@ -2160,14 +2190,14 @@ int Unit::HealByItem(int hp)
 
 int Unit::MPHealByItem(int mp)
 {
-    int result = (int)(GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
+    auto result = (int)(GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO) * mp + GetFloatValue(UNIT_FIELD_ADDITIONAL_MP_HEAL));
     AddMana(result);
     return result;
 }
 
 bool Unit::IsMovable()
 {
-    if (GetHealth() == 0 || /*this.IsSitDown() ||*/ m_nMovableTime > sWorld->GetArTime() || m_castingSkill != nullptr)
+    if (GetHealth() == 0 || IsSitdown() || m_nMovableTime > sWorld->GetArTime() || m_castingSkill != nullptr)
         return false;
     else
         return HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
@@ -2293,4 +2323,12 @@ bool Unit::IsActable() const
 int Unit::GetMoveSpeed()
 {
     return (int)m_Attribute.nMoveSpeed;
+}
+
+State *Unit::GetState(StateCode code)
+{
+    auto var = std::find_if(m_vStateList.begin(), m_vStateList.end(), [&code](State s) { return s.m_nCode == code; });
+    if(var != m_vStateList.end())
+        return &*var; // iterator to State (*var), State to "pointer" (&var)
+    return nullptr;
 }
