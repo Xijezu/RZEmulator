@@ -51,7 +51,7 @@ bool Quest::IsRandomQuest(int code)
         return false;
     }
     QuestType qt = base->nType;
-    return qt == QuestType::QT_RandomCollect || qt == QuestType::QT_RandomKillIndividual;
+    return qt == QuestType::QUEST_RANDOM_COLLECT || qt == QuestType::QUEST_RANDOM_KILL_INDIVIDUAL;
 }
 
 void Quest::FreeQuest()
@@ -150,15 +150,15 @@ int Quest::GetRandomValue(int idx) const
 bool Quest::IsFinishable() const
 {
     switch(m_QuestBase->nType) {
-        case QuestType::QT_Misc:
+        case QuestType::QUEST_MISC:
             break;
 
-        case QuestType::QT_KillTotal:
+        case QuestType::QUEST_KILL_TOTAL:
             if(m_Instance.nStatus[0] >= m_QuestBase->nValue[1])
                 return true;
             return false;
 
-        case QuestType::QT_KillIndividual:
+        case QuestType::QUEST_KILL_INDIVIDUAL:
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                 && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
                 && m_Instance.nStatus[2] >= m_QuestBase->nValue[5]) {
@@ -166,7 +166,7 @@ bool Quest::IsFinishable() const
             }
             return false;
 
-        case QuestType::QT_Collect:
+        case QuestType::QUEST_COLLECT:
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                 && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
                 && m_Instance.nStatus[2] >= m_QuestBase->nValue[5]
@@ -175,37 +175,37 @@ bool Quest::IsFinishable() const
                 return true;
             return false;
 
-        case QuestType::QT_HuntItem:
-        case QuestType::QT_HuntItemFromAnyMonsters:
+        case QuestType::QUEST_HUNT_ITEM:
+        case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                 && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
                 && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
                 return true;
             return false;
 
-        case QuestType::QT_LearnSkill:
+        case QuestType::QUEST_LEARN_SKILL:
             if ((m_QuestBase->nValue[0] == 0 || m_Instance.nStatus[0] >= m_QuestBase->nValue[1])
                 && (m_QuestBase->nValue[2] == 0 || m_Instance.nStatus[1] >= m_QuestBase->nValue[3])
                 && (m_QuestBase->nValue[4] == 0 || m_Instance.nStatus[2] >= m_QuestBase->nValue[5]))
                 return true;
             return false;
 
-        case QuestType::QT_UpgradeItem:
+        case QuestType::QUEST_UPGRADE_ITEM:
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                 && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
                 && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
                 return true;
             return false;
 
-        case QuestType::QT_Contact:
+        case QuestType::QUEST_CONTACT:
             return true;
 
-        case QuestType::QT_JobLevel:
+        case QuestType::QUEST_JOB_LEVEL:
             if(m_Instance.nStatus[0] < m_QuestBase->nValue[0])
                 return false;
             return m_Instance.nStatus[1] >= m_QuestBase->nValue[1];
 
-        case QuestType::QT_Parameter:
+        case QuestType::QUEST_PARAMETER:
             if (m_QuestBase->nValue[0] == 0
                 || m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2]
                 || m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2]
@@ -230,7 +230,7 @@ bool Quest::IsFinishable() const
             }
             return false;
 
-        case QuestType::QT_EndViaScript:
+        case QuestType::QUEST_END_VIA_SCRIPT:
             if(m_QuestBase->nEndType == 3) {
                 if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                     && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
@@ -239,10 +239,8 @@ bool Quest::IsFinishable() const
             }
             return m_QuestBase->nEndType < 2;
 
-        case QuestType::QT_RandomKillIndividual:
-        case QuestType::QT_RandomCollect:
-            break;
-        default:
+        case QuestType::QUEST_RANDOM_KILL_INDIVIDUAL:
+        case QuestType::QUEST_RANDOM_COLLECT:
             break;
     }
     return false;
@@ -258,6 +256,6 @@ void Quest::DB_Insert(Player* pPlayer, Quest *pQuest)
     stmt->setInt32(4, pQuest->m_Instance.nStatus[0]);
     stmt->setInt32(5, pQuest->m_Instance.nStatus[1]);
     stmt->setInt32(6, pQuest->m_Instance.nStatus[2]);
-    stmt->setInt32(7, pQuest->m_Instance.nProgress);
+    stmt->setInt32(7, (int)pQuest->m_Instance.nProgress);
     CharacterDatabase.Execute(stmt);
 }
