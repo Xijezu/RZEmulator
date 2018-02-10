@@ -1667,11 +1667,13 @@ bool WorldSession::Update(uint /*diff*/)
 {
     if (_socket && _socket->IsClosed())
     {
+        if(m_pPlayer != nullptr)
+            onReturnToLobby(nullptr);
         _socket->RemoveReference();
         _socket = nullptr;
     }
 
-    return _socket != nullptr;
+    return _socket != nullptr && !_socket->IsClosed();
 }
 
 void WorldSession::onRevive(XPacket *)
