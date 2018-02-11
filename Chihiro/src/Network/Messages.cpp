@@ -756,13 +756,13 @@ void Messages::SendQuestList(Player *pPlayer)
         }
         else
         {
-            for (int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+            for (int i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
             {
                 questPct << pQuest->m_QuestBase->nValue[i];
             }
         }
 
-        for (int& nStatu : pQuest->m_Instance.nStatus)
+        for (const auto& nStatu : pQuest->m_Instance.nStatus)
         {
             questPct << nStatu;
         }
