@@ -912,7 +912,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                 return;
             }
 
-            if(m_pPlayer->m_Attribute.nMaxWeight - m_pPlayer->GetFloatValue(PLAYER_FIELD_WEIGHT) < ibs->weight * buy_count)
+            if (m_pPlayer->m_Attribute.nMaxWeight - m_pPlayer->GetFloatValue(PLAYER_FIELD_WEIGHT) < ibs->weight * buy_count)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, item_code);
                 return;
@@ -1424,9 +1424,9 @@ void WorldSession::onAttackRequest(XPacket *pRecvPct)
         return;
     }
 
-    if(!unit->IsEnemy(pTarget, false))
+    if (!unit->IsEnemy(pTarget, false))
     {
-        if(unit->GetTargetHandle() != 0)
+        if (unit->GetTargetHandle() != 0)
         {
             unit->EndAttack();
             return;
@@ -1660,7 +1660,7 @@ bool WorldSession::Update(uint /*diff*/)
 {
     if (_socket && _socket->IsClosed())
     {
-        if(m_pPlayer != nullptr)
+        if (m_pPlayer != nullptr)
             onReturnToLobby(nullptr);
         _socket->RemoveReference();
         _socket = nullptr;
@@ -1904,7 +1904,7 @@ void WorldSession::onStorage(XPacket *pRecvPct)
     auto mode = pRecvPct->read<uint8>();
     int64 count = (int64)pRecvPct->read<int32>();
 
-    if(!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr || m_pPlayer->GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) != 0 || !m_pPlayer->IsActable())
+    if (!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr || m_pPlayer->GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) != 0 || !m_pPlayer->IsActable())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, handle);
         return;
