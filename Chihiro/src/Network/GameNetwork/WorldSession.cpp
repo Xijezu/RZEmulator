@@ -2141,7 +2141,9 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
         return;
 
     if (m_pPlayer->m_bTrading || tplayer->m_bTrading || m_pPlayer->m_hTamingTarget || tplayer->m_hTamingTarget)
+    {
         Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
+    }
     else
     {
         m_pPlayer->StartTrade(tplayer->GetHandle());
