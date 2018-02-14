@@ -115,7 +115,7 @@ class Unit : public WorldObject
         void EndAttack();
 
         uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
-
+        virtual int GetMoveSpeed();
         uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
         float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
@@ -124,7 +124,7 @@ class Unit : public WorldObject
 
         /* FloatCreatureMastery */
         virtual float GetFCM() const { return 1.0f; }
-
+        State *GetState(StateCode code);
         Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
         DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
         DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);

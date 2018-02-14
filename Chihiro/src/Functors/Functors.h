@@ -32,7 +32,7 @@ struct RegionFunctor
 };
 struct BroadcastStatusMessageObjectFunctor : public WorldObjectFunctor
 {
-    WorldObject* pObject;
+    WorldObject* pObject{nullptr};
     void Run(WorldObject* obj) override;
 };
 
@@ -63,7 +63,7 @@ struct DoEachStaticRegionFunctor : public RegionFunctor
 
 struct SendNPCStatusInVisibleRangeFunctor : public WorldObjectFunctor
 {
-    Player* player;
+    Player* player{nullptr};
     void Run(WorldObject* obj) override;
 };
 
@@ -99,32 +99,33 @@ struct KillALlRegionFunctor : public RegionFunctor
 
 struct SendEnterMessageEachOtherFunctor : public WorldObjectFunctor
 {
-    WorldObject* obj;
+    WorldObject* obj{nullptr};
     void Run(WorldObject* obj) override;
 };
 
 struct SendEnterMessageFunctor : public WorldObjectFunctor
 {
-    Player* obj;
+    Player* obj{nullptr};
     void Run(WorldObject* obj) override;
 };
 
 struct AddObjectRegionFunctor : public RegionFunctor
 {
-    WorldObject* newObj;
+    WorldObject* newObj{nullptr};
+    bool bSend{false};
     void Run(Region* region) override;
 };
 
 struct SendMoveMessageFunctor : public WorldObjectFunctor
 {
-    Unit* obj;
+    Unit* obj{nullptr};
     void Run(WorldObject* client) override;
 };
 
 struct SetMoveFunctor : public RegionFunctor
 {
     uint nCnt{0};
-    Unit* obj;
+    Unit* obj{nullptr};
     void Run(Region* region) override;
 };
 

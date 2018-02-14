@@ -89,7 +89,8 @@ void AddObjectRegionFunctor::Run(Region *region)
 {
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
-    region->DoEachClient(fn);
+    if(region->DoEachClient(fn) != 0)
+        bSend = true;
 
     if(newObj->IsPlayer())
     {
@@ -103,9 +104,9 @@ void AddObjectRegionFunctor::Run(Region *region)
 void SendEnterMessageFunctor::Run(WorldObject *client)
 {
     Messages::sendEnterMessage(obj, client, false);
-    if(client->IsMonster())
+    if (obj->IsMonster())
     {
-        client->As<Monster>()->m_bNearClient = true;
+        obj->As<Monster>()->m_bNearClient = true;
     }
 }
 
