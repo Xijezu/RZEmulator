@@ -873,7 +873,6 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
     auto szMarketName = m_pPlayer->GetLastContactStr("market");
     if (buy_count == 0)
     {
-        MX_LOG_TRACE("network", "onBuyItem - %s: buy_count was 0!", m_pPlayer->GetName());
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
         return;
     }
@@ -881,7 +880,6 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
     auto market = sObjectMgr->GetMarketInfo(szMarketName);
     if (market->empty())
     {
-        MX_LOG_TRACE("network", "onBuyItem - %s: market was empty!", m_pPlayer->GetName());
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
         return;
     }
@@ -913,7 +911,12 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                 Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
                 return;
             }
-            // TODO Add Weight Check
+
+            if(m_pPlayer->m_Attribute.nMaxWeight - m_pPlayer->GetFloatValue(PLAYER_FIELD_WEIGHT) < ibs->weight * buy_count)
+            {
+                Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, item_code);
+                return;
+            }
             uint32_t uid = 0;
 
             auto result = m_pPlayer->ChangeGold(m_pPlayer->GetGold() - nTotalPrice);
@@ -1409,8 +1412,7 @@ void WorldSession::onAttackRequest(XPacket *pRecvPct)
         return;
     }
 
-    //auto pTarget = sMemoryPool->getPtrFromId(target);
-    auto pTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target);
+    auto pTarget = sMemoryPool->GetObjectInWorld<Unit>(target);
     if (pTarget == nullptr)
     {
         if (unit->GetTargetHandle() != 0)
@@ -1422,8 +1424,17 @@ void WorldSession::onAttackRequest(XPacket *pRecvPct)
         return;
     }
 
-    // TODO isEnemy
-    // Todo various checks
+    if(!unit->IsEnemy(pTarget, false))
+    {
+        if(unit->GetTargetHandle() != 0)
+        {
+            unit->EndAttack();
+            return;
+        }
+        Messages::SendCantAttackMessage(m_pPlayer, pRecvPct->GetPacketID(), target, 0);
+        return;
+    }
+
     if ((unit->IsUsingCrossBow() || unit->IsUsingBow()) && unit->IsPlayer() && unit->GetBulletCount() < 1)
     {
         Messages::SendCantAttackMessage(m_pPlayer, handle, target, 0);
@@ -1649,11 +1660,13 @@ bool WorldSession::Update(uint /*diff*/)
 {
     if (_socket && _socket->IsClosed())
     {
+        if(m_pPlayer != nullptr)
+            onReturnToLobby(nullptr);
         _socket->RemoveReference();
         _socket = nullptr;
     }
 
-    return _socket != nullptr;
+    return _socket != nullptr && !_socket->IsClosed();
 }
 
 void WorldSession::onRevive(XPacket *)
@@ -1891,7 +1904,7 @@ void WorldSession::onStorage(XPacket *pRecvPct)
     auto mode = pRecvPct->read<uint8>();
     int64 count = (int64)pRecvPct->read<int32>();
 
-    if(!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr /* TODO tradeTarget, Actable */)
+    if(!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr || m_pPlayer->GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) != 0 || !m_pPlayer->IsActable())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, handle);
         return;

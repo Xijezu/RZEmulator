@@ -340,7 +340,11 @@ Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCou
         return nullptr;
     }
 
-    // todo: is mixable
+    if(!pPlayer->IsMixable(retItem))
+    {
+        Messages::SendResult(pPlayer, 256, TS_RESULT_NOT_EXIST, 0);
+        return nullptr;
+    }
     return retItem;
 }
 

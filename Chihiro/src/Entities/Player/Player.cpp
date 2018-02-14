@@ -1056,10 +1056,10 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
     {
         if (m_anWear[pos] != nullptr && m_anWear[pos]->GetHandle() == item->GetHandle())
         {
-            // Weight modifier
+            m_Inventory.m_fWeightModifier -= item->GetWeight();
         }
-        // UpdateWeight
-//        UpdateQuestStatusByItemUpgrade();
+        UpdateWeightWithInventory();
+        UpdateQuestStatusByItemUpgrade();
         result = 0;
     }
     return result;
@@ -1095,7 +1095,12 @@ uint16_t Player::putoffItem(ItemWearType pos)
         default:
             break;
     }
-    return Unit::putoffItem(pos);
+    auto result = Unit::putoffItem(pos);
+    if(item != nullptr)
+        m_Inventory.m_fWeightModifier += item->GetWeight();
+    UpdateWeightWithInventory();
+    UpdateQuestStatusByItemUpgrade();
+    return result;
 }
 
 void Player::SendItemWearInfoMessage(Item *item, Unit *u)
@@ -1274,14 +1279,14 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         {
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
                 Messages::SendItemMessage(this, pItem);
-            // TODO: UpdateWeightWithInventory();
+            UpdateWeightWithInventory();
             return;
         }
 
         pItem->DBUpdate();
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
             Messages::SendItemMessage(this, pItem);
-        // TODO: UpdateWeightWithInventory();
+        UpdateWeightWithInventory();
         return;
     }
     sMemoryPool->AllocItemHandle(pItem);
@@ -1291,7 +1296,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
     }
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         Messages::SendItemMessage(this, pItem);
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
@@ -1320,7 +1325,12 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
                     // TODO: Ride Handle
                 }
             }
-            // TODO: GROUP_SKILLCARD
+            if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+            {
+                auto scu = sMemoryPool->GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
+                if(scu != nullptr)
+                    scu->UnBindSkillCard(pItem);
+            }
         }
         else
         {
@@ -1329,7 +1339,7 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
         }
         Messages::SendItemDestroyMessage(this, pItem);
     }
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
@@ -1338,7 +1348,7 @@ void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpd
     if (!bSkipUpdateItemToDB && pItem->IsInStorage())
         pItem->DBUpdate();
 
-    // TODO: UpdateWeightWithInventory();
+    UpdateWeightWithInventory();
 }
 
 Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
@@ -1547,7 +1557,7 @@ void Player::onExpChange()
         }
         else
         {
-//            sScriptingMgr->RunString(this, "on_player_level_up()");
+            sScriptingMgr->RunString(this, "on_player_level_up()");
 
             /*if(GetLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
                 SetUInt64Value(UNIT_FIELD_MAX_REACHED_LEVEL)*/
@@ -1901,7 +1911,16 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 if (nCurrentVarIdx2 == -1)
                     return false;
 
-                // TODO Check Capacity
+                auto curr_capacity = item1->m_pItemBase->opt_var[nCurrentVarIdx][0];
+                auto new_capacity  = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
+                if (curr_capacity != new_capacity
+                    && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight
+                    && GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
+                    || GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
+                       && curr_capacity > new_capacity)
+                {
+                    return false;
+                }
             }
         }
     }
@@ -2229,9 +2248,19 @@ Quest *Player::FindQuest(int code)
     return m_QuestManager.FindQuest(code);
 }
 
-float Player::GetMoveSpeed() const
+int Player::GetMoveSpeed()
 {
-    return m_Attribute.nMoveSpeed;
+    float fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
+    if(fWT >= 1.0f || fWT < 0.0f)
+    {
+        return (int)((float)Unit::GetMoveSpeed() * 0.1f);
+    }
+    else
+    {
+        if(fWT < 0.75f)
+            return Unit::GetMoveSpeed();
+        return (int)((float)Unit::GetMoveSpeed() * 0.5f);
+    }
 }
 
 void Player::onModifyStatAndAttribute()
@@ -2246,7 +2275,6 @@ uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
     if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || pItem->m_pItemBase->cool_time_group != 0
                                                                                                && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct)
         return TS_RESULT_COOL_TIME;
-    // Weight
     // Ride IDX
     if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
         return TS_RESULT_LIMIT_MAX;
@@ -2405,15 +2433,15 @@ void Player::updateQuestStatus(Quest *pQuest)
     int nItemCode                = 0;
 
     QuestType qt = pQuest->m_QuestBase->nType;
-    if (qt == QuestType::QT_Collect || qt == QuestType::QT_HuntItem || qt == QuestType::QT_HuntItemFromAnyMonsters)
+    if (qt == QuestType::QUEST_COLLECT || qt == QuestType::QUEST_HUNT_ITEM || qt == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
     {
         switch (qt)
         {
-            case QuestType::QT_Collect:
+            case QuestType::QUEST_COLLECT:
                 nMaxItemCollectTypeCount = 2;
                 break;
-            case QuestType::QT_HuntItemFromAnyMonsters:
-            case QuestType::QT_HuntItem:
+            case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
+            case QuestType::QUEST_HUNT_ITEM:
                 nMaxItemCollectTypeCount = 3;
                 break;
             default:
@@ -2433,17 +2461,17 @@ void Player::updateQuestStatus(Quest *pQuest)
             }
         }
     }
-    if (qt == QuestType::QT_LearnSkill)
+    if (qt == QuestType::QUEST_LEARN_SKILL)
     {
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(0), GetBaseSkillLevel(pQuest->GetValue(0)));
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(2), GetBaseSkillLevel(pQuest->GetValue(2)));
         m_QuestManager.UpdateQuestStatusBySkillLevel(pQuest->GetValue(4), GetBaseSkillLevel(pQuest->GetValue(4)));
     }
-    if (qt == QuestType::QT_JobLevel)
+    if (qt == QuestType::QUEST_JOB_LEVEL)
     {
         m_QuestManager.UpdateQuestStatusByJobLevel(GetJobDepth(), GetCurrentJLv());
     }
-    if (qt == QuestType::QT_Parameter)
+    if (qt == QuestType::QUEST_PARAMETER)
     {
         m_QuestManager.UpdateQuestStatusByParameter(99, GetChaos());
     }
@@ -2520,10 +2548,10 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         Unit::AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
         // @todo: favor
 
-        if (q->m_QuestBase->nType == QuestType::QT_Collect || q->m_QuestBase->nType == QuestType::QT_HuntItem || q->m_QuestBase->nType == QuestType::QT_HuntItemFromAnyMonsters)
+        if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
         {
             int      nItemCode{0};
-            for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QT_Collect) ? 6 : 3); ++i)
+            for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QUEST_COLLECT) ? 6 : 3); ++i)
             {
                 nItemCode = q->GetValue(2 * i);
                 if (nItemCode != 0)
@@ -2926,7 +2954,7 @@ void Player::applyState(State &state)
     {
         if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
             m_Attribute.nMoveSpeed += state.GetValue(0);
-        // Riding State UID @todo
+        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state.m_nUID);
         return;
     }
     if (stateType == 0)
@@ -3361,7 +3389,7 @@ bool Player::DropQuest(int code)
 
 void Player::onDropQuest(Quest *pQuest)
 {
-    if(pQuest->m_QuestBase->nType == QuestType::QT_Parameter)
+    if(pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
     {
         for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
         {
@@ -3410,6 +3438,11 @@ Player* Player::GetTradeTarget()
     if(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
         return nullptr;
     return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
+}
+
+void Player::UpdateWeightWithInventory()
+{
+    SetFloatValue(PLAYER_FIELD_WEIGHT, m_Inventory.m_fWeightModifier + m_Inventory.m_fWeight);
 }
 
 bool Player::IsTradableWith(Player *pTarget)

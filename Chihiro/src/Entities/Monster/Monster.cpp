@@ -26,6 +26,7 @@
 #include "GameRule.h"
 #include "RegionContainer.h"
 #include "Skill.h"
+#include "GroupManager.h"
 
 Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
 {
@@ -1416,7 +1417,16 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
             auto player = sMemoryPool->GetObjectInWorld<Player>(vPartyContribute.front().hPlayer);
             if (player != nullptr)
                 vPlayer.emplace_back(player);
-        } // else do party @todo
+        }
+        else
+        {
+            sGroupManager->DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag& tag) {
+                if(tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f)
+                {
+                    vPlayer.emplace_back(tag.pPlayer);
+                }
+            });
+        }
         for (auto &p : vPlayer)
         {
             p->UpdateQuestStatusByMonsterKill(m_Base->id);

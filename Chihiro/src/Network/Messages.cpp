@@ -26,6 +26,7 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "GroupManager.h"
+#include "Monster.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -423,9 +424,15 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbso
 {
     if (pObj == nullptr || pPlayer == nullptr)
         return;
+
+    if(pObj->IsMonster())
+    {
+        pObj->As<Monster>()->m_bNearClient = true;
+    }
+
     pObj->SendEnterMsg(pPlayer);
 
-    if (pObj->GetObjType() != 0 && pObj->bIsMoving /*&& pObj->IsInWorld()*/)
+    if (pObj->GetObjType() != 0 && pObj->bIsMoving && pObj->IsInWorld())
         SendMoveMessage(pPlayer, dynamic_cast<Unit *>(pObj));
 }
 
@@ -697,7 +704,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 else
                 {
 #if EPIC <= 4
-                    ///- Hack for epic 4, use proper workaround instead @todo
+                    ///- Hack for epic 4, use proper workaround instead
                     pPlayer->AddDialogMenu("Confirm", string_format("end_quest(%u, -1)", code));
                     return;
 #else
@@ -749,13 +756,13 @@ void Messages::SendQuestList(Player *pPlayer)
         }
         else
         {
-            for (int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+            for (int i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
             {
                 questPct << pQuest->m_QuestBase->nValue[i];
             }
         }
 
-        for (int& nStatu : pQuest->m_Instance.nStatus)
+        for (const auto& nStatu : pQuest->m_Instance.nStatus)
         {
             questPct << nStatu;
         }

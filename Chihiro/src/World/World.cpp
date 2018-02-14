@@ -282,6 +282,10 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
         AddObjectRegionFunctor fn;
         fn.newObj = pUnit;
         sRegion->DoEachNewRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
+        if(fn.bSend && pUnit->IsMonster())
+        {
+            pUnit->As<Monster>()->m_bNearClient = true;
+        }
         if (pUnit->IsPlayer())
         {
             Messages::SendRegionAckMessage(dynamic_cast<Player *>(pUnit), rx, ry);
@@ -608,7 +612,7 @@ int World::ShowQuestMenu(Player *pPlayer)
             std::string szBuf{ };
             std::string szButtonName{ };
             auto        qbs = sObjectMgr->GetQuestBase(linkInfo->code);
-            if ((qbs->nType != QuestType::QT_RandomKillIndividual && qbs->nType != QuestType::QT_RandomCollect) || (m_QuestProgress != 0))
+            if ((qbs->nType != QuestType::QUEST_RANDOM_KILL_INDIVIDUAL && qbs->nType != QuestType::QUEST_RANDOM_COLLECT) || (m_QuestProgress != 0))
             {
                 int qpid = linkInfo->nStartTextID;
                 if (m_QuestProgress == 1)

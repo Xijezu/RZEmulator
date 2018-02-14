@@ -32,9 +32,9 @@ Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
         auto ji = FindByCode(item->m_Instance.Code);
         if(ji != nullptr)
         {
-            m_fWeight += item->GetWeight() * (float)cnt;
+            m_fWeight += item->m_pItemBase->weight * (float)cnt;
             if(ji->m_Instance.nWearInfo != WEAR_NONE)
-                m_fWeightModifier -= ji->GetWeight() * (float)cnt;
+                m_fWeightModifier -= item->m_pItemBase->weight * (float)cnt;
             int64 new_cnt = cnt + ji->m_Instance.nCount;
             setCount(ji, new_cnt, bSkipUpdateItemToDB);
             return ji;
@@ -57,12 +57,14 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
 {
     int64 new_cnt;
 
-    check(pItem);
+    if(!check(pItem))
+        return nullptr;
+
     if(pItem->m_Instance.nCount == cnt)
     {
-        m_fWeight -= pItem->GetWeight() * cnt;
+        m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
         if(pItem->m_Instance.nWearInfo != WEAR_NONE)
-            m_fWeightModifier += pItem->GetWeight();
+            m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
         pop(pItem, bSkipUpdateItemToDB);
         return pItem;
     }
@@ -72,9 +74,9 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
         auto pNewItem = Item::AllocItem(0, pItem->m_Instance.Code,new_cnt, BY_DIVIDE, -1, -1, -1 -1 ,0 ,0 ,0 ,0 ,0);
         pNewItem->CopyFrom(pItem);
         pNewItem->SetCount(cnt);
-        m_fWeight -= pItem->GetWeight() * cnt;
+        m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
         if(pItem->m_Instance.nWearInfo != WEAR_NONE)
-            m_fWeightModifier += pItem->GetWeight() * cnt;
+            m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
         new_cnt = pItem->m_Instance.nCount - cnt;
         setCount(pItem, new_cnt, bSkipUpdateItemToDB);
         return pNewItem;
@@ -97,9 +99,9 @@ bool Inventory::Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB)
         return true;
     }
 
-    m_fWeight -= pItem->GetWeight() * count;
+    m_fWeight -= pItem->m_pItemBase->weight * (float)count;
     if(pItem->m_Instance.nWearInfo != WEAR_NONE)
-        m_fWeightModifier += pItem->GetWeight() * count;
+        m_fWeightModifier += pItem->m_pItemBase->weight * (float)count;
     int64 nc = pItem->m_Instance.nCount - count;
     setCount(pItem, nc, bSkipUpdateItemToDB);
     return true;

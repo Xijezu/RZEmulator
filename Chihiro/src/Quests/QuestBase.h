@@ -3,67 +3,49 @@
 
 #include "Common.h"
 
-constexpr int MAX_VALUE_NUMBER = 12;
-constexpr int MAX_OPTIONAL_REWARD = 3;
-constexpr int MAX_FOREQUEST = 3;
-constexpr int MAX_KEY_VALUE = 3;
-constexpr int MAX_QUEST_STATUS = 3;
+constexpr int MAX_VALUE_NUMBER       = 12;
+constexpr int MAX_OPTIONAL_REWARD    = 3;
+constexpr int MAX_FOREQUEST          = 3;
+constexpr int MAX_KEY_VALUE          = 3;
+constexpr int MAX_QUEST_STATUS       = 3;
 constexpr int MAX_RANDOM_QUEST_VALUE = 3;
-constexpr int QUEST_PARAMETER_CHAOS = 99;
+constexpr int QUEST_PARAMETER_CHAOS  = 99;
 constexpr int FAVOR_GROUP_ID_CONTACT = 999;
 
-enum QB_LimitFlags : int {
-    QB_LimitDeva     = 1,
-    QB_LimitAsura    = 2,
-    QB_LimitGaia     = 3,
-    QB_LimitFighter  = 4,
-    QB_LimitHunter   = 5,
-    QB_LimitMagician = 6,
-    QB_LimitSummoner = 7
+enum class QuestType : int
+{
+    QUEST_MISC                        = 100,
+    QUEST_KILL_TOTAL                  = 101,
+    QUEST_KILL_INDIVIDUAL             = 102,
+    QUEST_COLLECT                     = 103,
+    QUEST_HUNT_ITEM                   = 106,
+    QUEST_HUNT_ITEM_FROM_ANY_MONSTERS = 107,
+    QUEST_LEARN_SKILL                 = 201,
+    QUEST_UPGRADE_ITEM                = 301,
+    QUEST_CONTACT                     = 401,
+    QUEST_JOB_LEVEL                   = 501,
+    QUEST_PARAMETER                   = 601,
+    QUEST_END_VIA_SCRIPT              = 701,
+    QUEST_RANDOM_KILL_INDIVIDUAL      = 901,
+    QUEST_RANDOM_COLLECT              = 902,
 };
 
-enum QuestTypeFlag : int {
-    QTF_Misc                   = 0x1,
-    QTF_KillTotal              = 0x2,
-    QTF_KillIndividual         = 0x4,
-    QTF_FlagCollect            = 0x8,
-    QTF_HuntItem               = 0x10,
-    QTF_LearnSkill             = 0x20,
-    QTF_UpgradeItem            = 0x40,
-    QTF_Contact                = 0x80,
-    QTF_JobLevel               = 0x100,
-    QTF_Paramater              = 0x200,
-    QTF_RandomKillIndividual   = 0x400,
-    QTF_RandomCollect          = 0x800,
-    QTF_HuntItemFromAnyMonster = 0x1000,
-    QTF_Kill                   = 0x406,
-    QTF_All                    = 0xff,
+enum class QuestProgress : int
+{
+    QUEST_IS_STARTABLE   = 0,
+    QUEST_IS_IN_PROGRESS = 1,
+    QUEST_IS_FINISHABLE  = 255
 };
 
-enum QuestType : int {
-    QT_Misc                    = 100,
-    QT_KillTotal               = 101,
-    QT_KillIndividual          = 102,
-    QT_Collect                 = 103,
-    QT_HuntItem                = 106,
-    QT_HuntItemFromAnyMonsters = 107,
-    QT_LearnSkill              = 201,
-    QT_UpgradeItem             = 301,
-    QT_Contact                 = 401,
-    QT_JobLevel                = 501,
-    QT_Parameter               = 601,
-    QT_EndViaScript            = 701,
-    QT_RandomKillIndividual    = 901,
-    QT_RandomCollect           = 902,
-};
-
-struct Reward {
+struct Reward
+{
     int nItemCode;
     int nLevel;
     int nQuantity;
 };
 
-struct QuestBase {
+struct QuestBase
+{
     int       nCode;
     int       nQuestTextID;
     int       nSummaryTextID;
@@ -95,7 +77,8 @@ struct QuestBase {
     int       nEndType;
 };
 
-struct QuestBaseServer : public QuestBase {
+struct QuestBaseServer : public QuestBase
+{
     int         nLimitFavorGroupID;
     int         nFavorGroupID;
     int         nHateGroupID;
@@ -104,7 +87,8 @@ struct QuestBaseServer : public QuestBase {
     std::string strScript;
 };
 
-struct QuestLink {
+struct QuestLink
+{
     int  nNPCID;
     int  code;
     bool bLF_Start;
@@ -115,29 +99,25 @@ struct QuestLink {
     int  nEndTextID;
 };
 
-enum QuestProgress : int {
-    QP_NotStarted = 0,
-    QP_InProgress = 1,
-    QP_Finished   = 255
-};
-
 class NPC;
-struct QuestInstance {
-    int nID;
-    int Code;
-    uint nTime;
-    int nStatus[MAX_QUEST_STATUS];
+struct QuestInstance
+{
+    int           nID;
+    int           Code;
+    uint          nTime;
+    int           nStatus[MAX_QUEST_STATUS];
     QuestProgress nProgress;
-    int nStartID;
-    int nRandomKey[MAX_RANDOM_QUEST_VALUE];
-    int nRandomValue[MAX_RANDOM_QUEST_VALUE];
-    NPC* start_npc{nullptr};
+    int           nStartID;
+    int           nRandomKey[MAX_RANDOM_QUEST_VALUE];
+    int           nRandomValue[MAX_RANDOM_QUEST_VALUE];
+    NPC           *start_npc{nullptr};
 };
 
-struct RandomQuestInfo {
-    int code;
-    int key[MAX_RANDOM_QUEST_VALUE];
-    int value[MAX_RANDOM_QUEST_VALUE];
+struct RandomQuestInfo
+{
+    int  code;
+    int  key[MAX_RANDOM_QUEST_VALUE];
+    int  value[MAX_RANDOM_QUEST_VALUE];
     bool is_dropped;
 };
 
