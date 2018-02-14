@@ -2183,12 +2183,28 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
         pRecvPct->read<int64>(); // ID
         int32 count = pRecvPct->read<int32>();
 
-        if (count <= 0)
+        auto item = m_pPlayer->FindItemByHandle(handle);
+
+        if (item == nullptr || item->m_pItemBase == nullptr)
+            return;
+
+        if (count <= 0 || count > item->m_Instance.nCount)
         {
             // Print debug message?
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
+        }
+
+        if (!m_pPlayer->IsTradable(item))
+        {
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
+            return;
+        }
+
+        if (m_pPlayer->AddItemToTradeWindow(item, count))
+        {
+            Messages::SendTradeItemInfo(TM_ADD_ITEM, item, count, m_pPlayer, tplayer);
         }
     }
 }
@@ -2197,7 +2213,32 @@ void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
     auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
     if(!isValidTradeTarget(tplayer))
+    {
+        m_pPlayer->CancelTrade(false);
         return;
+    }
+
+    if (!m_pPlayer->m_bTradeFreezed)
+    {
+        uint32 handle = pRecvPct->read<uint32>();
+        pRecvPct->read<int32>(); // Code
+        pRecvPct->read<int64>(); // ID
+        int32 count = pRecvPct->read<int32>();
+
+        auto item = m_pPlayer->FindItemByHandle(handle);
+
+        if (item == nullptr || item->m_pItemBase == nullptr)
+            return;
+
+        if (m_pPlayer->RemoveItemFromTradeWindow(item, count))
+        {
+            Messages::SendTradeItemInfo(TM_REMOVE_ITEM, item, count, m_pPlayer, tplayer);
+        }
+        else
+        {
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+        }
+    }
 }
 
 void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)

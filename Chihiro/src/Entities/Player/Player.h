@@ -193,6 +193,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Player *GetTradeTarget();
         bool IsTradableWith(Player *pTarget);
         void AddGoldToTradeWindow(int64 nGold);
+        bool AddItemToTradeWindow(Item *item, int32 count);
+        bool RemoveItemFromTradeWindow(Item *item, int32 count);
         bool IsTradable(Item *pItem);
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
@@ -319,7 +321,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool         m_bUsingTent{false};
         float        m_fDistEXPMod{1.0f};
         float        m_fActiveSummonExpAmp{0.0f};
-        float        m_fDeactiveSummonExpAmp{0.0f};
+        float                                   m_fDeactiveSummonExpAmp{0.0f};
 
         uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 
@@ -334,7 +336,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Item *>   m_vCharmList{ };
 
         int64               m_nTradeGold{ };
-        std::vector<Item *> m_vTradeItemList{ };
+        UNORDERED_MAP<uint32, int32>            m_vTradeItemList{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 

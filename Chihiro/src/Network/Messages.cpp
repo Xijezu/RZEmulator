@@ -1107,3 +1107,21 @@ void Messages::SendTradeCancelMessage(Player *pClient)
     tradePct << (uint8)TM_CANCEL_TRADE;
     pClient->SendPacket(tradePct);
 }
+
+void Messages::SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget)
+{
+    XPacket tradePct(TS_TRADE);
+    tradePct << (uint32)pPlayer->GetHandle();
+    tradePct << (uint8)nTradeMode;
+    fillItemInfo(tradePct, pItem);
+
+    // Change the count of the item to the trade count
+    tradePct.wpos(28);
+#if EPIC >= 5
+    tradePct << (int64)nCount;
+#else
+    tradePct << (int32)nCount;
+#endif
+    pPlayer->SendPacket(tradePct);
+    pTarget->SendPacket(tradePct);
+}
