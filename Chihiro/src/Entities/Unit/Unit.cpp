@@ -1642,7 +1642,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
         case 8:
         {
             auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
-            if(GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem->GetHandle() == pWornItem->GetHandle())
+            if (GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem->GetHandle() == pWornItem->GetHandle())
             {
                 RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
                 break;
@@ -1652,7 +1652,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                 if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
                 {
                     auto si = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
-                    if(si != nullptr && si->effect_type == 200)
+                    if (si != nullptr && si->effect_type == 200)
                         return TS_RESULT_ACCESS_DENIED;
                 }
                 if (pWornItem != nullptr)
@@ -1756,7 +1756,8 @@ std::pair<float, int> Unit::GetHateMod(int nHateModType, bool bIsHarmful)
                 continue;
         }
 
-        if((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 3 && hm.bIsApplyToPhysicalAttack)) {
+        if ((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 3 && hm.bIsApplyToPhysicalAttack))
+        {
             fAmpValue += hm.fAmpValue;
             nIncValue += hm.nIncValue;
         }
@@ -2151,7 +2152,7 @@ Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType el
 void Unit::RemoveState(StateCode code, int state_level)
 {
     auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [code, state_level](State s) { return s.m_nCode == code && s.GetLevel() <= state_level; });
-    if(state != m_vStateList.end())
+    if (state != m_vStateList.end())
     {
         onUpdateState(*state, true);
         m_vStateList.erase(state);
@@ -2328,7 +2329,7 @@ int Unit::GetMoveSpeed()
 State *Unit::GetState(StateCode code)
 {
     auto var = std::find_if(m_vStateList.begin(), m_vStateList.end(), [&code](State s) { return s.m_nCode == code; });
-    if(var != m_vStateList.end())
+    if (var != m_vStateList.end())
         return &*var; // iterator to State (*var), State to "pointer" (&var)
     return nullptr;
 }

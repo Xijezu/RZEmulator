@@ -425,7 +425,7 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbso
     if (pObj == nullptr || pPlayer == nullptr)
         return;
 
-    if(pObj->IsMonster())
+    if (pObj->IsMonster())
     {
         pObj->As<Monster>()->m_bNearClient = true;
     }
@@ -762,7 +762,7 @@ void Messages::SendQuestList(Player *pPlayer)
             }
         }
 
-        for (const auto& nStatu : pQuest->m_Instance.nStatus)
+        for (const auto &nStatu : pQuest->m_Instance.nStatus)
         {
             questPct << nStatu;
         }

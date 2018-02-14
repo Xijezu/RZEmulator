@@ -282,7 +282,7 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
         AddObjectRegionFunctor fn;
         fn.newObj = pUnit;
         sRegion->DoEachNewRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
-        if(fn.bSend && pUnit->IsMonster())
+        if (fn.bSend && pUnit->IsMonster())
         {
             pUnit->As<Monster>()->m_bNearClient = true;
         }

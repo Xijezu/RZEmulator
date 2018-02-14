@@ -1096,7 +1096,7 @@ uint16_t Player::putoffItem(ItemWearType pos)
             break;
     }
     auto result = Unit::putoffItem(pos);
-    if(item != nullptr)
+    if (item != nullptr)
         m_Inventory.m_fWeightModifier += item->GetWeight();
     UpdateWeightWithInventory();
     UpdateQuestStatusByItemUpgrade();
@@ -1325,10 +1325,10 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
                     // TODO: Ride Handle
                 }
             }
-            if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+            if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
             {
                 auto scu = sMemoryPool->GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
-                if(scu != nullptr)
+                if (scu != nullptr)
                     scu->UnBindSkillCard(pItem);
             }
         }
@@ -2251,13 +2251,13 @@ Quest *Player::FindQuest(int code)
 int Player::GetMoveSpeed()
 {
     float fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
-    if(fWT >= 1.0f || fWT < 0.0f)
+    if (fWT >= 1.0f || fWT < 0.0f)
     {
         return (int)((float)Unit::GetMoveSpeed() * 0.1f);
     }
     else
     {
-        if(fWT < 0.75f)
+        if (fWT < 0.75f)
             return Unit::GetMoveSpeed();
         return (int)((float)Unit::GetMoveSpeed() * 0.5f);
     }
@@ -3389,7 +3389,7 @@ bool Player::DropQuest(int code)
 
 void Player::onDropQuest(Quest *pQuest)
 {
-    if(pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
+    if (pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
     {
         for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
         {
