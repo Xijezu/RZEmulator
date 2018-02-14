@@ -324,6 +324,14 @@ Item::Item() : WorldObject(true)
     _InitValues();
 }
 
+bool Item::IsTradable()
+{
+    if (m_pItemBase == nullptr)
+        return false;
+
+    return m_pItemBase->flaglist[FLAG_TRADE] == 0;
+}
+
 void ItemInstance::Copy(const ItemInstance &pFrom)
 {
     OwnerHandle = pFrom.OwnerHandle;

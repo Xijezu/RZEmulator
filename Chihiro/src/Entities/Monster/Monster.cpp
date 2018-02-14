@@ -1420,8 +1420,8 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
         }
         else
         {
-            sGroupManager->DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag& tag) {
-                if(tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f)
+            sGroupManager->DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag &tag) {
+                if (tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f)
                 {
                     vPlayer.emplace_back(tag.pPlayer);
                 }

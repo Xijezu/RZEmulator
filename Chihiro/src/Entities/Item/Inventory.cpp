@@ -57,7 +57,7 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
 {
     int64 new_cnt;
 
-    if(!check(pItem))
+    if (!check(pItem))
         return nullptr;
 
     if(pItem->m_Instance.nCount == cnt)
