@@ -49,7 +49,8 @@ bool QuestManager::AddQuest(Quest *quest)
         }
     }
 
-    if(quest->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE) {
+    if (quest->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE)
+    {
         if(m_hsFinishedQuest.count(nQuestCode) > 0 && !quest->m_QuestBase->bIsRepeatable) {
             return false;
         }
@@ -105,9 +106,9 @@ bool QuestManager::StartQuest(int code, int nStartID)
 {
     if(code == 0 || FindQuest(code) != nullptr)
         return false;
-    int qid = allocQuestID();
-    int tmp[MAX_QUEST_STATUS]{0};
-    auto q = Quest::AllocQuest(m_pHandler, qid, code, tmp, QuestProgress::QUEST_IS_IN_PROGRESS, nStartID);
+    int  qid = allocQuestID();
+    int  tmp[MAX_QUEST_STATUS]{0};
+    auto q   = Quest::AllocQuest(m_pHandler, qid, code, tmp, QuestProgress::QUEST_IS_IN_PROGRESS, nStartID);
     if(Quest::IsRandomQuest(q->m_Instance.Code)) {
 //                 v12 = v4->m_vRandomQuestInfo._Myfirst;
 //                 v13 = &v4->m_vRandomQuestInfo;
@@ -275,7 +276,9 @@ bool QuestManager::IsTakeableQuestItem(int code)
                 || q->GetRandomKey(1) == code
                 || q->GetRandomKey(2) == code)
                 return true;
-        } else if(q->m_QuestBase->nType == QuestType::QUEST_COLLECT) {
+        }
+        else if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT)
+        {
             if (q->GetValue(0) == code
                 || q->GetValue(2) == code
                 || q->GetValue(4) == code
@@ -296,7 +299,8 @@ bool QuestManager::IsTakeableQuestItem(int code)
 void QuestManager::GetRelatedQuest(std::vector<Quest*> &vQuestList, int flag)
 {
     for(auto& q : m_vActiveQuest) {
-        if(q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE)
+        {
             if(sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag)) {
                 vQuestList.emplace_back(q);
             }
@@ -307,7 +311,7 @@ void QuestManager::GetRelatedQuest(std::vector<Quest*> &vQuestList, int flag)
 void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest*> &vQuest, int flag)
 {
     for(auto& q : m_vActiveQuest) {
-        if(q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE || !sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag))
+        if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE || !sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag))
             continue;
 
         switch(q->m_QuestBase->nType) {
@@ -345,14 +349,17 @@ void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest*> &vQuest, 
 void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> &vQuest, int flag)
 {
     for (auto &q :m_vActiveQuest) {
-        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag)) {
-            if (q->m_QuestBase->nType == QuestType::QUEST_KILL_TOTAL || q->m_QuestBase->nType == QuestType::QUEST_KILL_INDIVIDUAL) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag))
+        {
+            if (q->m_QuestBase->nType == QuestType::QUEST_KILL_TOTAL || q->m_QuestBase->nType == QuestType::QUEST_KILL_INDIVIDUAL)
+            {
                 if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
                     || sObjectMgr->IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
                     || sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID))
                     vQuest.emplace_back(q);
             } else {
-                if (q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM) {
+                if (q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM)
+                {
                     if (q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
                         vQuest.emplace_back(q);
                 } else {
@@ -414,7 +421,8 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
     GetRelatedQuest(vQuestList, 1030);
 
     for(auto& q : vQuestList) {
-        if(q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && !q->IsFinishable()) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && !q->IsFinishable())
+        {
             switch(q->m_QuestBase->nType) {
                 case QuestType::QUEST_KILL_TOTAL:
                     if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
@@ -453,7 +461,8 @@ void QuestManager::UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel)
 {
     int v{0};
     for(auto& q : m_vActiveQuest) {
-        if(q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_LEARN_SKILL) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_LEARN_SKILL)
+        {
             if(q->GetValue(0) == nSkillID) {
                 v = q->GetValue(1);
                 if(nSkillID > v)
@@ -481,7 +490,8 @@ void QuestManager::UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel)
     GetRelatedQuest(vQuestList, 256);
 
     for(auto& q : vQuestList) {
-        if(q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_JOB_LEVEL) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_JOB_LEVEL)
+        {
             v = q->GetValue(0);
             if(nJobDepth > v)
                 nJobDepth = v;
@@ -502,7 +512,8 @@ void QuestManager::UpdateQuestStatusByParameter(int parameter_id, int value)
     GetRelatedQuest(vQuestList, 512);
 
     for(auto& q : vQuestList) {
-        if(q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_PARAMETER) {
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
+        {
             if(q->GetValue(0) == parameter_id)
                 q->UpdateStatus(0, value);
             if(q->GetValue(3) == parameter_id)

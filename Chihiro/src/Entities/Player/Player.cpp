@@ -1096,7 +1096,7 @@ uint16_t Player::putoffItem(ItemWearType pos)
             break;
     }
     auto result = Unit::putoffItem(pos);
-    if(item != nullptr)
+    if (item != nullptr)
         m_Inventory.m_fWeightModifier += item->GetWeight();
     UpdateWeightWithInventory();
     UpdateQuestStatusByItemUpgrade();
@@ -1325,10 +1325,10 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
                     // TODO: Ride Handle
                 }
             }
-            if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+            if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
             {
                 auto scu = sMemoryPool->GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
-                if(scu != nullptr)
+                if (scu != nullptr)
                     scu->UnBindSkillCard(pItem);
             }
         }
@@ -2251,13 +2251,13 @@ Quest *Player::FindQuest(int code)
 int Player::GetMoveSpeed()
 {
     float fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
-    if(fWT >= 1.0f || fWT < 0.0f)
+    if (fWT >= 1.0f || fWT < 0.0f)
     {
         return (int)((float)Unit::GetMoveSpeed() * 0.1f);
     }
     else
     {
-        if(fWT < 0.75f)
+        if (fWT < 0.75f)
             return Unit::GetMoveSpeed();
         return (int)((float)Unit::GetMoveSpeed() * 0.5f);
     }
@@ -3389,7 +3389,7 @@ bool Player::DropQuest(int code)
 
 void Player::onDropQuest(Quest *pQuest)
 {
-    if(pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
+    if (pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
     {
         for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
         {
@@ -3408,6 +3408,7 @@ void Player::StartTrade(uint32 pTargetHandle)
     if (!m_bTrading && !m_bTradeFreezed)
     {
         ClearTradeInfo();
+        m_bTrading = true;
         SetUInt32Value(PLAYER_FIELD_TRADE_TARGET, pTargetHandle);
     }
 }
@@ -3418,6 +3419,11 @@ void Player::CancelTrade(bool bIsNeedBroadcast)
         Messages::SendTradeCancelMessage(this);
 
     ClearTradeInfo();
+}
+
+void Player::FreezeTrade()
+{
+    m_bTradeFreezed = true;
 }
 
 void Player::ClearTradeInfo()
@@ -3437,4 +3443,104 @@ Player* Player::GetTradeTarget()
 void Player::UpdateWeightWithInventory()
 {
     SetFloatValue(PLAYER_FIELD_WEIGHT, m_Inventory.m_fWeightModifier + m_Inventory.m_fWeight);
+}
+
+bool Player::IsTradableWith(Player *pTarget)
+{
+    // Todo: Implement this one PKing is implemented. See below.
+    return true;
+}
+
+/*
+bool __thiscall StructPlayer__IsTradableWith(StructPlayer *this, StructPlayer *pTarget)
+{
+  bool v2; // bl@1
+  StructPlayer *v3; // ebp@1
+  StructPlayer *v4; // esi@1
+  int v5; // edi@11
+  int v6; // ebx@12
+  int v7; // ST00_4@12
+  GuildManager *v8; // eax@12
+  int v9; // ST00_4@13
+  GuildManager *v10; // eax@13
+  bool result; // al@14
+  int v12; // eax@15
+  char v13; // [sp+13h] [bp-1h]@8
+  char v14; // [sp+18h] [bp+4h]@4
+
+  v2 = GameRule__bIsPKServer;
+  v3 = pTarget;
+  v4 = this;
+  if ( !GameRule__bIsPKServer && (StructPlayer__IsDemoniacCharacter(this) || StructPlayer__IsBloodyCharacter(v4)) )
+  {
+    v14 = 1;
+  }
+  else
+  {
+    v14 = 0;
+    if ( v2 )
+    {
+LABEL_9:
+      v13 = 0;
+      goto LABEL_10;
+    }
+  }
+  if ( !StructPlayer__IsDemoniacCharacter(v3) && !StructPlayer__IsBloodyCharacter(v3) )
+    goto LABEL_9;
+  v13 = 1;
+LABEL_10:
+  if ( v4->m_nGuildId
+    && (v5 = (int)&v3->m_nGuildId, v3->m_nGuildId)
+    && ((v7 = v4->m_nGuildId,
+         v8 = GuildManager__GetInstance(),
+         v6 = GuildManager__GetAllianceID(v8, v7),
+         v4->m_nGuildId == *(_DWORD *)v5)
+     || (v9 = *(_DWORD *)v5, v10 = GuildManager__GetInstance(), v6 == GuildManager__GetAllianceID(v10, v9))) )
+  {
+    result = v4->m_bIsPK == v3->m_bIsPK;
+  }
+  else
+  {
+    v12 = v4->m_nPartyId;
+    result = (v12 && v12 == v3->m_nPartyId || !v14 && !v13) && !v4->m_bIsPK && !v3->m_bIsPK;
+  }
+  return result;
+}
+ */
+
+void Player::AddGoldToTradeWindow(int64 nGold)
+{
+    if (!m_bTradeFreezed)
+        m_nTradeGold = nGold;
+}
+
+bool Player::IsTradable(Item *pItem)
+{
+    return IsErasable(pItem) && pItem->IsTradable();
+
+}
+
+bool Player::AddItemToTradeWindow(Item *item, int32 count)
+{
+    if (!m_bTradeFreezed && count <= item->m_Instance.nCount)
+    {
+        m_vTradeItemList[item->GetHandle()] = count;
+        return true;
+    }
+    return false;
+}
+
+bool Player::RemoveItemFromTradeWindow(Item *item, int32 count)
+{
+    if (m_bTradeFreezed)
+        return false;
+
+    auto handle = item->GetHandle();
+    if (count >= 1 && m_vTradeItemList.count(handle) == 1)
+    {
+        m_vTradeItemList.erase(handle);
+        return true;
+    }
+
+    return false;
 }

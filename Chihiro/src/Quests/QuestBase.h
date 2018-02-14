@@ -14,27 +14,27 @@ constexpr int FAVOR_GROUP_ID_CONTACT = 999;
 
 enum class QuestType : int
 {
-    QUEST_MISC                        = 100,
-    QUEST_KILL_TOTAL                  = 101,
-    QUEST_KILL_INDIVIDUAL             = 102,
-    QUEST_COLLECT                     = 103,
-    QUEST_HUNT_ITEM                   = 106,
-    QUEST_HUNT_ITEM_FROM_ANY_MONSTERS = 107,
-    QUEST_LEARN_SKILL                 = 201,
-    QUEST_UPGRADE_ITEM                = 301,
-    QUEST_CONTACT                     = 401,
-    QUEST_JOB_LEVEL                   = 501,
-    QUEST_PARAMETER                   = 601,
-    QUEST_END_VIA_SCRIPT              = 701,
-    QUEST_RANDOM_KILL_INDIVIDUAL      = 901,
-    QUEST_RANDOM_COLLECT              = 902,
+        QUEST_MISC                        = 100,
+        QUEST_KILL_TOTAL                  = 101,
+        QUEST_KILL_INDIVIDUAL             = 102,
+        QUEST_COLLECT                     = 103,
+        QUEST_HUNT_ITEM                   = 106,
+        QUEST_HUNT_ITEM_FROM_ANY_MONSTERS = 107,
+        QUEST_LEARN_SKILL                 = 201,
+        QUEST_UPGRADE_ITEM                = 301,
+        QUEST_CONTACT                     = 401,
+        QUEST_JOB_LEVEL                   = 501,
+        QUEST_PARAMETER                   = 601,
+        QUEST_END_VIA_SCRIPT              = 701,
+        QUEST_RANDOM_KILL_INDIVIDUAL      = 901,
+        QUEST_RANDOM_COLLECT              = 902,
 };
 
 enum class QuestProgress : int
 {
-    QUEST_IS_STARTABLE   = 0,
-    QUEST_IS_IN_PROGRESS = 1,
-    QUEST_IS_FINISHABLE  = 255
+        QUEST_IS_STARTABLE   = 0,
+        QUEST_IS_IN_PROGRESS = 1,
+        QUEST_IS_FINISHABLE  = 255
 };
 
 struct Reward
