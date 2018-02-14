@@ -117,6 +117,7 @@ class Messages
         static void BroadcastPartyMemberInfo(Player* pClient);
         static void BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string& szName);
         static void SendTradeCancelMessage(Player *);
+        static void SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget);
     private:
         static void fillItemInfo(XPacket &, Item *);
 };

@@ -3486,3 +3486,31 @@ bool Player::IsTradable(Item *pItem)
     return this->IsErasable(pItem) && pItem->IsTradable();
 
 }
+
+bool Player::AddItemToTradeWindow(Item *item, int32 count)
+{
+    if (!m_bTradeFreezed)
+    {
+        if (count <= item->m_Instance.nCount)
+        {
+            m_vTradeItemList[item->GetHandle()] = count;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Player::RemoveItemFromTradeWindow(Item *item, int32 count)
+{
+    if (m_bTradeFreezed)
+        return false;
+
+    auto handle = item->GetHandle();
+    if (count >= 1 && m_vTradeItemList.count(handle) == 1)
+    {
+        m_vTradeItemList.erase(handle);
+        return true;
+    }
+
+    return false;
+}
