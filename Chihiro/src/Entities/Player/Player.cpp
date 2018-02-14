@@ -3516,19 +3516,16 @@ void Player::AddGoldToTradeWindow(int64 nGold)
 
 bool Player::IsTradable(Item *pItem)
 {
-    return this->IsErasable(pItem) && pItem->IsTradable();
+    return IsErasable(pItem) && pItem->IsTradable();
 
 }
 
 bool Player::AddItemToTradeWindow(Item *item, int32 count)
 {
-    if (!m_bTradeFreezed)
+    if (!m_bTradeFreezed && count <= item->m_Instance.nCount)
     {
-        if (count <= item->m_Instance.nCount)
-        {
-            m_vTradeItemList[item->GetHandle()] = count;
-            return true;
-        }
+        m_vTradeItemList[item->GetHandle()] = count;
+        return true;
     }
     return false;
 }
