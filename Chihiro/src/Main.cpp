@@ -25,6 +25,7 @@ class WorldServerSignalHandler : public Skyfire::SignalHandler
 public:
 	void HandleSignal(int sigNum) override
 	{
+		MX_LOG_INFO("server.worldserver", "Received signal: %d", sigNum);
 		switch (sigNum)
 		{
 			case SIGINT:
@@ -43,8 +44,7 @@ public:
 				 */
 				ACE_Stack_Trace st;
 				MX_LOG_FATAL("server.worldserver", st.c_str());
-				sLog->Close();
-				*((volatile int*)NULL) = 0;
+				exit(sigNum);
 			}
 				break;
 			default:
@@ -146,7 +146,9 @@ int main(int argc, char **argv)
 
     StopDB();
 
-	return 0;
+	MX_LOG_INFO("server.worldserver", "Exiting with code %d", World::GetExitCode());
+
+	return World::GetExitCode();
 }
 
 ///- Initialize connection to the databases
