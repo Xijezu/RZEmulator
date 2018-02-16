@@ -48,14 +48,19 @@ WorldSession::~WorldSession()
 {
     if (m_pPlayer)
         onReturnToLobby(nullptr);
+
+    if(_socket)
+    {
+        _socket->CloseSocket();
+        _socket->RemoveReference();
+        _socket = nullptr;
+    }
 }
 
 void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork->SendClientLogoutToAuth(_accountName);
-    if (m_pPlayer)
-        onReturnToLobby(nullptr);
 }
 
 enum eStatus
@@ -501,7 +506,6 @@ void WorldSession::onReturnToLobby(XPacket *pRecvPct)
     if (m_pPlayer != nullptr)
     {
         m_pPlayer->LogoutNow(2);
-        m_pPlayer->Save(false);
         m_pPlayer->CleanupsBeforeDelete();
         m_pPlayer->DeleteThis();
         m_pPlayer = nullptr;
@@ -1660,13 +1664,12 @@ bool WorldSession::Update(uint /*diff*/)
 {
     if (_socket && _socket->IsClosed())
     {
-        if (m_pPlayer != nullptr)
-            onReturnToLobby(nullptr);
         _socket->RemoveReference();
         _socket = nullptr;
     }
 
-    return _socket != nullptr && !_socket->IsClosed();
+    return _socket != nullptr;
+
 }
 
 void WorldSession::onRevive(XPacket *)
