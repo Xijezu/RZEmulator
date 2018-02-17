@@ -295,6 +295,7 @@ class Object
         virtual bool IsFieldProp() const { return false; }
         virtual bool IsItem() const { return false; }
         virtual bool IsNPC() const { return false; }
+        virtual bool IsSkillProp() const { return false; }
 
     protected:
         Object();

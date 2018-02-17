@@ -376,7 +376,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp) {
     }
 }
 
-void Skill::broadcastSkillMessage(Unit* pUnit, int cost_hp, int cost_mp, int nType)
+void Skill::broadcastSkillMessage(WorldObject* pUnit, int cost_hp, int cost_mp, int nType)
 {
     if(pUnit == nullptr)
         return;
