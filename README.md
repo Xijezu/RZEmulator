@@ -12,7 +12,7 @@ This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/Sky
 ## Dependencies
 * Platform: Linux, Windows or Mac
 * MySQL = 5.6.36 (Windows / Linux)
-* A C++14 Compiler (GCC or MSVC)
+* A C++14 Compiler
 
 ## Current Status
 This project is far from finished, but it's a huge base so far. The Emulator is pretty stable so far.
@@ -20,7 +20,6 @@ This project is far from finished, but it's a huge base so far. The Emulator is 
 * Riding (mounts) do not work
 * Dungeon Sieges do not work
 * Guilds
-* Monster roaming
 
 ## Additional informations
 * I'm not really a fan of how the networking works yet (see template'd version of WorldSocket) as well as the GameAuth session, may need a revamp some day
