@@ -19,6 +19,7 @@ enum SkillStatus : int
 class SkillTargetFunctor;
 class Skill
 {
+        friend class SkillProp;
         friend class Unit;
     public:
         friend struct SkillTargetFunctor;
@@ -47,7 +48,7 @@ class Skill
 
         SkillBase *m_SkillBase{nullptr};
 
-        void broadcastSkillMessage(Unit *pUnit, int cost_hp, int cost_mp, int nType);
+        void broadcastSkillMessage(WorldObject *pObject, int cost_hp, int cost_mp, int nType);
         void broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int cost_mp, int nType);
 
         // For processing skill
