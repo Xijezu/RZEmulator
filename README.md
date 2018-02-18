@@ -22,5 +22,5 @@ This project is far from finished, but it's a huge base so far. The Emulator is 
 * Dungeon Sieges do not work
 * Guilds
 
-* If you have the possibility, feel free to contribute by reporting bugs or sending in fixes/additions
+If you have the possibility, feel free to contribute by reporting bugs or sending in fixes/additions
  
