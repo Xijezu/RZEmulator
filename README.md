@@ -1,4 +1,4 @@
-# RZEmulator - An Open Source Rappelz Emulator for Epic 4
+# RZEmulator - An Open Source Rappelz Emulator
 
 [![Build Status](https://travis-ci.org/NGemity/RZEmulator.svg?branch=master)](https://travis-ci.org/NGemity/RZEmulator) 
 [![Build status](https://ci.appveyor.com/api/projects/status/oelq5cfbeh6iw101/branch/master?svg=true)](https://ci.appveyor.com/project/Xijezu/rzemulator-x6qer/branch/master) 
