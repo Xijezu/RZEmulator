@@ -1,7 +1,7 @@
 # RZEmulator - An Open Source Rappelz Emulator for Epic 4
 
-[![Build Status](https://travis-ci.org/Xijezu/Rappelz-Emulator.svg?branch=master)](https://travis-ci.org/Xijezu/Rappelz-Emulator) 
-[![Build status](https://ci.appveyor.com/api/projects/status/74llg3lfl75fcy2i/branch/master?svg=true)](https://ci.appveyor.com/project/Xijezu/rappelz-emulator/branch/master) 
+[![Build Status](https://travis-ci.org/NGemity/RZEmulator.svg?branch=master)](https://travis-ci.org/NGemity/RZEmulator) 
+[![Build status](https://ci.appveyor.com/api/projects/status/o8boked0sft4r5w8/branch/master?svg=true)](https://ci.appveyor.com/project/Xijezu/rzemulator/branch/master) 
 
 This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/SkyFire.548), a World of Warcraft emulator.  
 We used it to get a proper base for networking & database, see /shared/README.md 
@@ -12,7 +12,7 @@ We used it to get a proper base for networking & database, see /shared/README.md
   
 ## Dependencies
 * Platform: Linux, Windows or Mac
-* MySQL = 5.6.36 (Windows / Linux)
+* MySQL >= 5.6.36 (Windows / Linux)
 * A C++14 Compiler
 
 ## Current Status
