@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -20,14 +21,14 @@
 
 #if COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1900
 #include <shared_mutex>
-#define MX_SHARED_MUTEX std::shared_mutex
-#define MX_SHARED_GUARD std::shared_lock<std::shared_mutex>
-#define MX_UNIQUE_GUARD std::unique_lock<std::shared_mutex>
+#define NG_SHARED_MUTEX std::shared_mutex
+#define NG_SHARED_GUARD std::shared_lock<std::shared_mutex>
+#define NG_UNIQUE_GUARD std::unique_lock<std::shared_mutex>
 #else
 #include <mutex>
-#define MX_SHARED_MUTEX std::mutex
-#define MX_SHARED_GUARD std::lock_guard<std::mutex>
-#define MX_UNIQUE_GUARD std::unique_lock<std::mutex>
+#define NG_SHARED_MUTEX std::mutex
+#define NG_SHARED_GUARD std::lock_guard<std::mutex>
+#define NG_UNIQUE_GUARD std::unique_lock<std::mutex>
 #endif
 
 #endif

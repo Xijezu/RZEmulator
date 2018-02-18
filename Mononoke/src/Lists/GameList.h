@@ -1,22 +1,22 @@
 /*
-  *  Copyright (C) 2016-2016 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef _GAMELIST_H
-#define _GAMELIST_H
+#ifndef NGEMITY_GAMELIST_H
+#define NGEMITY_GAMELIST_H
 
 #include "Common.h"
 #include "SharedMutex.h"
@@ -47,7 +47,7 @@ public:
 	{
 		// Adds a game to the list
 		{
-			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			NG_UNIQUE_GUARD writeGuard(*GetGuard());
 			m_games[pNewGame->nIDX] = pNewGame;
 		}
 	}
@@ -56,13 +56,13 @@ public:
 	{
 		// Removes a game from the list
 		{
-			MX_UNIQUE_GUARD writeGuard(*GetGuard());
+			NG_UNIQUE_GUARD writeGuard(*GetGuard());
 			if (m_games.count(nIDX) == 1)
 				m_games.erase(nIDX);
 		}
 	}
 
-	MX_SHARED_MUTEX *GetGuard()
+	NG_SHARED_MUTEX *GetGuard()
 	{
 		return &i_lock;
 	}
@@ -81,10 +81,10 @@ public:
 	}
 
 private:
-	MX_SHARED_MUTEX i_lock{};
+	NG_SHARED_MUTEX i_lock{};
 	GameMap         m_games;
 };
 
 #define sGameMapList ACE_Singleton<GameList, ACE_Null_Mutex>::instance()
 
-#endif // _GAMELIST_H
+#endif // NGEMITY_GAMELIST_H

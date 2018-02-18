@@ -70,7 +70,7 @@ int XSocket::open(void * a)
 
     if (peer().get_remote_addr(remote_addr) == -1)
     {
-        MX_LOG_ERROR("network", "XSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror(errno));
+        NG_LOG_ERROR("network", "XSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror(errno));
         return -1;
     }
 
@@ -80,7 +80,7 @@ int XSocket::open(void * a)
     // Register with ACE Reactor
     if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
     {
-        MX_LOG_ERROR("network", "XSocket::open: unable to register client handler errno = %s", ACE_OS::strerror(errno));
+        NG_LOG_ERROR("network", "XSocket::open: unable to register client handler errno = %s", ACE_OS::strerror(errno));
         return -1;
     }
 
@@ -180,7 +180,7 @@ int XSocket::SendPacket(const char *buf, size_t len)
 
         if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
-            MX_LOG_ERROR("network", "XSocket::SendPacket enqueue_tail failed");
+            NG_LOG_ERROR("network", "XSocket::SendPacket enqueue_tail failed");
             mb->release();
             return -1;
         }
@@ -244,7 +244,7 @@ int XSocket::handle_output_queue(GuardType& g)
 
     if (msg_queue()->dequeue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
     {
-        MX_LOG_ERROR("network", "XSocket::handle_output_queue dequeue_head");
+        NG_LOG_ERROR("network", "XSocket::handle_output_queue dequeue_head");
         return -1;
     }
 
@@ -279,7 +279,7 @@ int XSocket::handle_output_queue(GuardType& g)
 
         if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
         {
-            MX_LOG_ERROR("network", "XSocket::handle_output_queue enqueue_head");
+            NG_LOG_ERROR("network", "XSocket::handle_output_queue enqueue_head");
             mblk->release();
             return -1;
         }
@@ -332,14 +332,14 @@ int XSocket::handle_input(ACE_HANDLE)
                 return Update();                           // interesting line, isn't it ?
             }
 
-            MX_LOG_DEBUG("network", "XSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror(errno));
+            NG_LOG_DEBUG("network", "XSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror(errno));
 
             errno = ECONNRESET;
             return -1;
         }
         case 0:
         {
-            MX_LOG_DEBUG("network", "XSocket::handle_input: Peer has closed connection");
+            NG_LOG_DEBUG("network", "XSocket::handle_input: Peer has closed connection");
 
             errno = ECONNRESET;
             return -1;
@@ -373,7 +373,7 @@ int XSocket::handle_input_header(void)
 
     if ((header.size < 7) || (header.size > 0xFFFF) || (header.id > 0xFFFF))
     {
-        MX_LOG_ERROR("network", "XSocket::handle_input_header() - Malfunctioned header");
+        NG_LOG_ERROR("network", "XSocket::handle_input_header() - Malfunctioned header");
         errno = EINVAL;
         return -1;
     }
@@ -439,7 +439,7 @@ int XSocket::handle_input_missing_data(void)
         // hope this is not hack, as proper m_RecvWPct is asserted around
         if (!m_RecvWPct)
         {
-            MX_LOG_ERROR("network", "Forcing close on input m_RecvWPct = NULL");
+            NG_LOG_ERROR("network", "Forcing close on input m_RecvWPct = NULL");
             errno = EINVAL;
             return -1;
         }
@@ -524,7 +524,7 @@ int XSocket::cancel_wakeup_output(GuardType& g)
                          (this, ACE_Event_Handler::WRITE_MASK) == -1)
     {
         // would be good to store errno from reactor with errno guard
-        MX_LOG_ERROR("network", "XSocket::cancel_wakeup_output");
+        NG_LOG_ERROR("network", "XSocket::cancel_wakeup_output");
         return -1;
     }
 
@@ -543,7 +543,7 @@ int XSocket::schedule_wakeup_output(GuardType& g)
     if (reactor()->schedule_wakeup
                          (this, ACE_Event_Handler::WRITE_MASK) == -1)
     {
-        MX_LOG_ERROR("network", "XSocket::schedule_wakeup_output");
+        NG_LOG_ERROR("network", "XSocket::schedule_wakeup_output");
         return -1;
     }
 

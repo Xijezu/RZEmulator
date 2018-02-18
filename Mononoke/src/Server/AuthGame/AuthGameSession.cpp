@@ -63,7 +63,7 @@ void AuthGameSession::OnClose()
     if (g != nullptr && g->szName == m_pGame->szName)
     {
         {
-            MX_UNIQUE_GUARD writeGuard(*sPlayerMapList->GetGuard());
+            NG_UNIQUE_GUARD writeGuard(*sPlayerMapList->GetGuard());
             auto            map = sPlayerMapList->GetMap();
             for (auto &player : *map)
             {
@@ -75,7 +75,7 @@ void AuthGameSession::OnClose()
             }
         }
         sGameMapList->RemoveGame(g->nIDX);
-        MX_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
+        NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
     }
 }
 
@@ -124,7 +124,7 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
         return;
     }
 }
@@ -145,14 +145,14 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
     {
         m_bIsAuthed = true;
         sGameMapList->AddGame(m_pGame);
-        MX_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
         XPacket resultPct(TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_SUCCESS;
         m_pSocket->SendPacket(resultPct);
     }
     else
     {
-        MX_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
         XPacket resultPct(TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_ACCESS_DENIED;
         m_pSocket->SendPacket(resultPct);
@@ -177,7 +177,7 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
         }
         else
         {
-            MX_LOG_ERROR("network", "AuthGameSession::HandleClientLogin: Client [%d:%s] tried to login with wrong key!!!", p->nAccountID, p->szLoginName.c_str());
+            NG_LOG_ERROR("network", "AuthGameSession::HandleClientLogin: Client [%d:%s] tried to login with wrong key!!!", p->nAccountID, p->szLoginName.c_str());
         }
     }
 

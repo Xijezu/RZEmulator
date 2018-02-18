@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Utilities/SignalHandler.h"
@@ -25,7 +42,7 @@ class WorldServerSignalHandler : public Skyfire::SignalHandler
 public:
 	void HandleSignal(int sigNum) override
 	{
-		MX_LOG_INFO("server.worldserver", "Received signal: %d", sigNum);
+		NG_LOG_INFO("server.worldserver", "Received signal: %d", sigNum);
 		switch (sigNum)
 		{
 			case SIGINT:
@@ -43,7 +60,7 @@ public:
 				 * was a segmentation fault
 				 */
 				ACE_Stack_Trace st;
-				MX_LOG_FATAL("server.worldserver", st.c_str());
+				NG_LOG_FATAL("server.worldserver", st.c_str());
 				exit(sigNum);
 			}
 				break;
@@ -58,12 +75,12 @@ int main(int argc, char **argv)
 {
 	if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG))
 	{
-		MX_LOG_ERROR("server.worldserver", "Invalid or missing configuration file : %s", _CHIHIRO_CORE_CONFIG);
-		MX_LOG_ERROR("server.worldserver","Verify that the file exists and has \'[chihiro]' written in the top of the file!");
+		NG_LOG_ERROR("server.worldserver", "Invalid or missing configuration file : %s", _CHIHIRO_CORE_CONFIG);
+		NG_LOG_ERROR("server.worldserver","Verify that the file exists and has \'[chihiro]' written in the top of the file!");
 		return 1;
 	}
 
-    MX_LOG_INFO("server.worldserver", "%s (worldserver)", _FULLVERSION);
+    NG_LOG_INFO("server.worldserver", "%s (worldserver)", _FULLVERSION);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
@@ -88,7 +105,7 @@ int main(int argc, char **argv)
 
 	if (!StartDB())
 	{
-		MX_LOG_ERROR("server.worldserver","Cannot connect to database.");
+		NG_LOG_ERROR("server.worldserver","Cannot connect to database.");
 		return 1;
 	}
 
@@ -100,7 +117,7 @@ int main(int argc, char **argv)
 	ACE_INET_Addr auth_addr(sConfigMgr->GetIntDefault("AuthServer.Port", 4502), sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1").c_str());
 	if (sAuthNetwork->InitializeNetwork(auth_addr) != 0)
 	{
-		MX_LOG_ERROR("server.worldserver","Cannot connect to the auth server!");
+		NG_LOG_ERROR("server.worldserver","Cannot connect to the auth server!");
 		return 1;
 	}
 
@@ -109,7 +126,7 @@ int main(int argc, char **argv)
 	//WorldSockAcceptor acceptor;
 	if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)
 	{
-		MX_LOG_ERROR("server.worldserver", "Failed to start network");
+		NG_LOG_ERROR("server.worldserver", "Failed to start network");
 		return -1;
 		// go down and shutdown the server
 	}
@@ -135,7 +152,7 @@ int main(int argc, char **argv)
 		{
 			loopCounter = 0;
 
-			MX_LOG_INFO("misc", "Ping MySQL to keep connection alive");
+			NG_LOG_INFO("misc", "Ping MySQL to keep connection alive");
 			CharacterDatabase.KeepAlive();
 		}
 	}
@@ -146,7 +163,7 @@ int main(int argc, char **argv)
 
     StopDB();
 
-	MX_LOG_INFO("server.worldserver", "Exiting with code %d", World::GetExitCode());
+	NG_LOG_INFO("server.worldserver", "Exiting with code %d", World::GetExitCode());
 
 	return World::GetExitCode();
 }
@@ -162,14 +179,14 @@ bool StartDB()
 	dbstring = sConfigMgr->GetStringDefault("CharacterDB.CString", "");
 	if (dbstring.empty())
 	{
-		MX_LOG_ERROR("server.worldserver","Character database not specified in configuration file");
+		NG_LOG_ERROR("server.worldserver","Character database not specified in configuration file");
 		return false;
 	}
 
 	async_threads = (uint8)sConfigMgr->GetIntDefault("CharacterDB.WorkerThreads", 2);
 	if (async_threads < 1 || async_threads > 32)
 	{
-		MX_LOG_ERROR("server.worldserver","Character database: invalid number of worker threads specified. "
+		NG_LOG_ERROR("server.worldserver","Character database: invalid number of worker threads specified. "
 			"Please pick a value between 1 and 32.");
 		return false;
 	}
@@ -186,7 +203,7 @@ bool StartDB()
 	dbstring = sConfigMgr->GetStringDefault("GameDB.CString", "");
 	if (dbstring.empty())
 	{
-		MX_LOG_ERROR("server.worldserver","Arcadia database not specified in configuration file");
+		NG_LOG_ERROR("server.worldserver","Arcadia database not specified in configuration file");
 		return false;
 	}
 

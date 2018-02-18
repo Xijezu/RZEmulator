@@ -1,5 +1,22 @@
-#ifndef _UNIT_H_
-#define _UNIT_H_
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NGEMITY_UNIT_H_
+#define NGEMITY_UNIT_H_
 
 #include "Common.h"
 #include "CreatureAttribute.h"
@@ -350,4 +367,4 @@ class Unit : public WorldObject
         void ampParameter2(uint nBitset, float fValue);
         void ampParameter(uint nBitset, float fValue, bool bStat);
 };
-#endif // !_UNIT_H_
+#endif // !NGEMITY_UNIT_H_

@@ -1,5 +1,22 @@
-#ifndef PROJECT_XLUA_H
-#define PROJECT_XLUA_H
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NGEMITY_XLUA_H
+#define NGEMITY_XLUA_H
 
 #include "Common.h"
 #include "sol.hpp"
@@ -108,4 +125,4 @@ class XLua
 };
 
 #define sScriptingMgr ACE_Singleton<XLua, ACE_Thread_Mutex>::instance()
-#endif // PROJECT_XLUA_H
+#endif // NGEMITY_XLUA_H

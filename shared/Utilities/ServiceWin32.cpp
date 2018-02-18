@@ -256,7 +256,7 @@ bool WinServiceRun()
 
     if (!StartServiceCtrlDispatcher(serviceTable))
     {
-        MX_LOG_ERROR("server.worldserver", "StartService Failed. Error [%u]", ::GetLastError());
+        NG_LOG_ERROR("server.worldserver", "StartService Failed. Error [%u]", ::GetLastError());
         return false;
     }
     return true;

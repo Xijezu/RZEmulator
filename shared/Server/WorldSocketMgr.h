@@ -1,5 +1,5 @@
-#ifndef PROJECT_WORLDSOCKETMGR_H
-#define PROJECT_WORLDSOCKETMGR_H
+#ifndef NGEMITY_WORLDSOCKETMGR_H
+#define NGEMITY_WORLDSOCKETMGR_H
 
 #include <ace/Basic_Types.h>
 #include <ace/Singleton.h>
@@ -128,7 +128,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         virtual int svc()
         {
-            MX_LOG_DEBUG("misc", "Network Thread Starting");
+            NG_LOG_DEBUG("misc", "Network Thread Starting");
 
             ACE_ASSERT (m_Reactor);
 
@@ -161,7 +161,7 @@ class ReactorRunnable : protected ACE_Task_Base
                 }
             }
 
-            MX_LOG_DEBUG("misc", "Network Thread exits");
+            NG_LOG_DEBUG("misc", "Network Thread exits");
 
             return 0;
         }
@@ -238,7 +238,7 @@ class WorldSocketMgr
                                             (void *)&m_SockOutKBuff,
                                             sizeof(int)) == -1 && errno != ENOTSUP)
                 {
-                    MX_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
+                    NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen set_option SO_SNDBUF");
                     return -1;
                 }
             }
@@ -253,7 +253,7 @@ class WorldSocketMgr
                                             (void *)&ndoption,
                                             sizeof(int)) == -1)
                 {
-                    MX_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror(errno));
+                    NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen: peer().set_option TCP_NODELAY errno = %s", ACE_OS::strerror(errno));
                     return -1;
                 }
             }
@@ -280,7 +280,7 @@ class WorldSocketMgr
 
             if (num_threads <= 0)
             {
-                MX_LOG_ERROR("misc", "Network.Threads is wrong in your config file");
+                NG_LOG_ERROR("misc", "Network.Threads is wrong in your config file");
                 return -1;
             }
 
@@ -288,7 +288,7 @@ class WorldSocketMgr
 
             m_NetThreads = new ReactorRunnable<T>[m_NetThreadsCount];
 
-            MX_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
+            NG_LOG_DEBUG("misc", "Max allowed socket connections %d", ACE::max_handles());
 
             // -1 means use default
             m_SockOutKBuff = sConfigMgr->GetIntDefault("Network.OutKBuff", -1);
@@ -297,7 +297,7 @@ class WorldSocketMgr
 
             if (m_SockOutUBuff <= 0)
             {
-                MX_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
+                NG_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
                 return -1;
             }
 
@@ -309,7 +309,7 @@ class WorldSocketMgr
 
                 if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1)
                 {
-                    MX_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
+                    NG_LOG_ERROR("misc", "Failed to open acceptor, check if the port is free");
                     return -1;
                 }
             }

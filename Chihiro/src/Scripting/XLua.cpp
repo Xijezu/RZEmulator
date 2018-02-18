@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "XLua.h"
 #include <experimental/filesystem>
@@ -109,7 +109,7 @@ bool XLua::InitializeLua()
             if (!t.valid())
             {
                 sol::error err = t;
-                MX_LOG_ERROR("scripting", err.what());
+                NG_LOG_ERROR("scripting", err.what());
             }
         }
     }
@@ -118,7 +118,7 @@ bool XLua::InitializeLua()
         m_pState.script("on_server_init()");
     } catch (sol::error &ex)
     {
-        MX_LOG_ERROR("scripting", ex.what());
+        NG_LOG_ERROR("scripting", ex.what());
         return false;
     }
     return true;
@@ -138,7 +138,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     catch (std::exception &ex)
     {
         Messages::SendChatMessage(50, "@SCRIPT", dynamic_cast<Player *>(m_pUnit), ex.what());
-        MX_LOG_ERROR("scripting", ex.what());
+        NG_LOG_ERROR("scripting", ex.what());
     }
     return true;
 }
@@ -156,7 +156,7 @@ bool XLua::RunString(std::string szScript)
         m_pState.script(szScript);
     } catch (sol::error err)
     {
-        MX_LOG_ERROR("scripting", "%s", err.what());
+        NG_LOG_ERROR("scripting", "%s", err.what());
         return false;
     }
     return true;
@@ -364,7 +364,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
             return return_object(player->GetInt32Value(PLAYER_FIELD_CHAOS));
         }
     }
-    MX_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
+    NG_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
     return return_object("");
 }
 
@@ -980,7 +980,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
 {
     if (args.size() < 3)
     {
-        MX_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Parameters");
+        NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Parameters");
         return;
     }
 
@@ -990,7 +990,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     Player *player     = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr)
     {
-        MX_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
+        NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
         return;
     }
 

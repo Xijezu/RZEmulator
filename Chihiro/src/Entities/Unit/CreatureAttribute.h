@@ -1,5 +1,22 @@
-#ifndef PROJECT_CREATUREATTRIBUTE_H
-#define PROJECT_CREATUREATTRIBUTE_H
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NGEMITY_CREATUREATTRIBUTE_H
+#define NGEMITY_CREATUREATTRIBUTE_H
 
 #include "Common.h"
 
@@ -10,8 +27,9 @@ struct CreatureElementalResist {
 
     void Reset(uint16 v)
     {
-        for (int i = 0; i < 7; ++i) {
-            nResist[i] = v;
+        for (unsigned short &i : nResist)
+        {
+            i = v;
         }
     }
 };
@@ -273,11 +291,12 @@ public:
 // Function       :   struct CreatureElementalResistAmplifier & operator=(const struct CreatureElementalResistAmplifier &)
     void Reset(float v)
     {
-        for (int i = 0; i < 7; ++i) {
-            fResist[i] = v;
+        for (float &i : fResist)
+        {
+            i = v;
         }
     }
 };
 
 
-#endif // PROJECT_CREATUREATTRIBUTE_H
+#endif // NGEMITY_CREATUREATTRIBUTE_H

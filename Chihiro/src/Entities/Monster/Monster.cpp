@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "Monster.h"
 #include "Messages.h"
@@ -491,7 +491,7 @@ void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, 
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
             if (item_count < m_Base->drop_min_count[i])
             {
-                MX_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
+                NG_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
             }
             else
             {
@@ -511,7 +511,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 {
     if (count == 0)
     {
-        MX_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %u, y: %u, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
+        NG_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %u, y: %u, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
         return;
     }
 

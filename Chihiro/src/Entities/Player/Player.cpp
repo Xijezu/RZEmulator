@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Player.h"
 #include "MemPool.h"
 #include "DatabaseEnv.h"
@@ -233,7 +250,7 @@ bool Player::ReadCharacter(const std::string& _name, int _race)
                 }
                 else
                 {
-                    MX_LOG_ERROR("entities", "Invalid Summon Bind!");
+                    NG_LOG_ERROR("entities", "Invalid Summon Bind!");
                 }
             }
         }
@@ -294,7 +311,7 @@ void Player::DB_ReadStorage()
                 Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
                 if(newItem == nullptr)
                 {
-                    MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                    NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                     continue;
                 }
                 newItem->m_Instance.Flag &= 0xDFFFFFFF;
@@ -368,7 +385,7 @@ void Player::DB_ReadStorage()
                     }
                     if (ChangeStorageGold(cnt) != TS_RESULT_SUCCESS)
                     {
-                        MX_LOG_ERROR("entites.player", "DB_ReadStorage: Setting storage gold failed! [%d:%s]", GetInt32Value(PLAYER_FIELD_ACCOUNT_ID), GetName());
+                        NG_LOG_ERROR("entites.player", "DB_ReadStorage: Setting storage gold failed! [%d:%s]", GetInt32Value(PLAYER_FIELD_ACCOUNT_ID), GetName());
                     }
                     Item::PendFreeItem(newItem);
                 }
@@ -443,7 +460,7 @@ bool Player::ReadItemList(int sid)
                                         socket_0, socket_1, socket_2, socket_3, remain_time);
             if(item == nullptr)
             {
-                MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                 continue;
             }
             item->m_Instance.Flag &= 0xDFFFFFFF;
@@ -564,7 +581,7 @@ bool Player::ReadQuestList()
                 if (!m_QuestManager.AddQuest(q))
                 {
                     delete q;
-                    MX_LOG_ERROR("entities.player", "Player::ReadQuestList: Failed to alloc Quest!");
+                    NG_LOG_ERROR("entities.player", "Player::ReadQuestList: Failed to alloc Quest!");
                     return false;
                 }
             } while (result->NextRow());
@@ -771,7 +788,7 @@ bool Player::ReadSummonList(int UID)
             Item *card = FindItemBySID(card_uid);
             if (card == nullptr)
             {
-                MX_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: %d , SummonUID: %d]", card_uid, sid);
+                NG_LOG_ERROR("entities.player", "Invalid summon: Not itembound, owner still exists! [UID: %d , SummonUID: %d]", card_uid, sid);
                 summon->DeleteThis();
             }
             if (card != nullptr)
@@ -1355,7 +1372,7 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
 {
     if (pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID))
     {
-        MX_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
+        NG_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
         return nullptr;
     }
 
@@ -1366,7 +1383,7 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
         int64 gold            = GetGold() + pItem->m_Instance.nCount;
         if (ChangeGold(gold) != TS_RESULT_SUCCESS)
         {
-            MX_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
+            NG_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
         }
         Item::PendFreeItem(pItem);
         return nullptr;
@@ -2342,7 +2359,7 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
-    MX_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
+    NG_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const &m  = sMemoryPool->GetPlayers();
 
     for (auto itr = m.begin(); itr != m.end(); ++itr)
@@ -2354,7 +2371,7 @@ void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 
 Player *Player::FindPlayer(const std::string &szName)
 {
-    MX_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
+    NG_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const &m = sMemoryPool->GetPlayers();
     for (auto                            itr : m)
     {
@@ -2596,7 +2613,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         if (ChangeGold(nPrevGold) != TS_RESULT_SUCCESS)
         {
-            MX_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nPrevGold);
+            NG_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nPrevGold);
         }
         Messages::SendQuestMessage(120, this, "END|FAIL|0");
     }

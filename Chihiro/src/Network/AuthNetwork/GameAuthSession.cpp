@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Common.h"
 #include "GameAuthSession.h"
 #include "AuthNetwork.h"
@@ -57,7 +74,7 @@ void GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
         return;
     }
 }
@@ -104,7 +121,7 @@ std::string GameAuthSession::GetAccountName()
 
 void GameAuthSession::OnClose()
 {
-    MX_LOG_ERROR("network", "Authserver has closed connection!");
+    NG_LOG_ERROR("network", "Authserver has closed connection!");
 }
 
 void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
@@ -112,7 +129,7 @@ void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
     auto result = pRecvPct->read<uint16>();
     if (result != TS_RESULT_SUCCESS)
     {
-        MX_LOG_ERROR("network", "Authserver refused login! Shutting down...");
+        NG_LOG_ERROR("network", "Authserver refused login! Shutting down...");
         World::StopNow(ERROR_EXIT_CODE);
     }
 }

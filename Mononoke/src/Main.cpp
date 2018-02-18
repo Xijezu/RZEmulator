@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldSocketMgr.h"
@@ -47,11 +64,11 @@ extern int main(int argc, char **argv)
 
 	if (!sConfigMgr->LoadInitial(_MONONOKE_CORE_CONFIG))
     {
-        MX_LOG_ERROR("server.authserver", "Invalid or missing configuration file : %s", _MONONOKE_CORE_CONFIG);
-        MX_LOG_ERROR("server.authserver", "Verify that the file exists and has \'[authserver]' written in the top of the file!");
+        NG_LOG_ERROR("server.authserver", "Invalid or missing configuration file : %s", _MONONOKE_CORE_CONFIG);
+        NG_LOG_ERROR("server.authserver", "Verify that the file exists and has \'[authserver]' written in the top of the file!");
         return 1;
     }
-	MX_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+	NG_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
@@ -107,7 +124,7 @@ extern int main(int argc, char **argv)
 		if ((++loopCounter) == numLoops)
 		{
 			loopCounter = 0;
-			MX_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
+			NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
 			LoginDatabase.KeepAlive();
 		}
 	}
@@ -126,28 +143,28 @@ bool StartDB()
 	std::string dbstring = sConfigMgr->GetStringDefault("AuthDatabase.CString", "");
 	if (dbstring.empty())
 	{
-		MX_LOG_ERROR("server.authserver","Database not specified");
+		NG_LOG_ERROR("server.authserver","Database not specified");
 		return false;
 	}
 
 	auto worker_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.WorkerThreads", 1);
 	if (worker_threads < 1 || worker_threads > 32)
 	{
-		MX_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
+		NG_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
 		worker_threads = 1;
 	}
 
 	auto synch_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.SynchThreads", 1);;
 	if (synch_threads < 1 || synch_threads > 32)
 	{
-		MX_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
+		NG_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
 		synch_threads = 1;
 	}
 
 	// NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
 	if (!LoginDatabase.Open(dbstring, worker_threads, synch_threads))
 	{
-		MX_LOG_ERROR("server.authserver","Cannot connect to database");
+		NG_LOG_ERROR("server.authserver","Cannot connect to database");
 		return false;
 	}
 
