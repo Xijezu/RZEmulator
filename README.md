@@ -1,11 +1,12 @@
-# Xijezu's Epic 4 Rappelz Emulator
+# RZEmulator - An Open Source Rappelz Emulator for Epic 4
 
 [![Build Status](https://travis-ci.org/Xijezu/Rappelz-Emulator.svg?branch=master)](https://travis-ci.org/Xijezu/Rappelz-Emulator) 
 [![Build status](https://ci.appveyor.com/api/projects/status/74llg3lfl75fcy2i/branch/master?svg=true)](https://ci.appveyor.com/project/Xijezu/rappelz-emulator/branch/master) 
 
-This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/SkyFire.548), a World of Warcraft emulator. I used this project to get some of the external stuff running, like Database handling, Networking and so on.
+This project is based on [Project Skyfire](https://github.com/ProjectSkyfire/SkyFire.548), a World of Warcraft emulator.  
+We used it to get a proper base for networking & database, see /shared/README.md 
 
-  I tried to keep the code as retail as possible (thanks to various matching .pdb's) and used Pyroks unfinished C# Emulator as a reference.
+  We tried to keep the code as retail as possible (thanks to various matching .pdb's) and used Pyroks unfinished C# Emulator as a reference.
   
   Join us on the [Emulator Discord Server](https://discord.gg/CBGVkdU) for access to a public Testserver, bug reports and more! :) 
   
@@ -21,8 +22,5 @@ This project is far from finished, but it's a huge base so far. The Emulator is 
 * Dungeon Sieges do not work
 * Guilds
 
-## Additional informations
-* I'm not really a fan of how the networking works yet (see template'd version of WorldSocket) as well as the GameAuth session, may need a revamp some day
 * If you have the possibility, feel free to contribute by reporting bugs or sending in fixes/additions
-* No requests - I intend to keep the code base as retail as possible for now
  
