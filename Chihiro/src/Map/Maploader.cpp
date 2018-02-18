@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "Maploader.h"
 #include "ObjectMgr.h"
@@ -25,13 +25,13 @@ bool Maploader::LoadMapContent()
 {
     if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false))
     {
-        MX_LOG_FATAL("server.worldserver", "TerrainSeamlessWorld.cfg read error !");
+        NG_LOG_FATAL("server.worldserver", "TerrainSeamlessWorld.cfg read error !");
         return false;
     }
 
     if (!propInfo.Initialize("terrainpropinfo.cfg"))
     {
-        MX_LOG_FATAL("server.worldserver", "TerrainPropInfo.cfg read error !");
+        NG_LOG_FATAL("server.worldserver", "TerrainPropInfo.cfg read error !");
         return false;
     }
 
@@ -221,11 +221,11 @@ void Maploader::LoadScriptFile(const std::string&  szFilename, int x, int y, flo
     header.dwPropScriptOffset = buffer.read<uint>();
 
     if(header.szSign != "nFlavor Script"s) {
-        MX_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Sign: %s", szFilename.c_str(), header.szSign.c_str());
+        NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Sign: %s", szFilename.c_str(), header.szSign.c_str());
         return;
     }
     if(header.dwVersion != 2) {
-        MX_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Version: %d", szFilename.c_str(), header.dwVersion);
+        NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Version: %d", szFilename.c_str(), header.dwVersion);
         return;
     }
 

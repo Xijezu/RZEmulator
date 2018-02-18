@@ -1,5 +1,22 @@
-#ifndef PROJECT_GROUPMANAGER_H
-#define PROJECT_GROUPMANAGER_H
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NGEMITY_GROUPMANAGER_H
+#define NGEMITY_GROUPMANAGER_H
 
 #include "Common.h"
 #include "SharedMutex.h"
@@ -95,8 +112,8 @@ class GroupManager
     private:
         uint64                   m_nMaxPartyID{0};
         std::map<int, PartyInfo> m_hshPartyID{ };
-        MX_SHARED_MUTEX i_lock;
+        NG_SHARED_MUTEX i_lock;
 };
 
 #define sGroupManager ACE_Singleton<GroupManager, ACE_Thread_Mutex>::instance()
-#endif // PROJECT_GROUPMANAGER_H
+#endif // NGEMITY_GROUPMANAGER_H

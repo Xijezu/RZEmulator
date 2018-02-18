@@ -35,7 +35,7 @@ class MySQL
         static void Thread_Init()
         {
             mysql_thread_init();
-            MX_LOG_WARN("sql.sql", "Core thread with ID [" UI64FMTD "] initializing MySQL thread.",
+            NG_LOG_WARN("sql.sql", "Core thread with ID [" UI64FMTD "] initializing MySQL thread.",
                     (uint64)ACE_Based::Thread::currentId());
         }
 
@@ -46,7 +46,7 @@ class MySQL
         static void Thread_End()
         {
             mysql_thread_end();
-            MX_LOG_WARN("sql.sql", "Core thread with ID [" UI64FMTD "] shutting down MySQL thread.",
+            NG_LOG_WARN("sql.sql", "Core thread with ID [" UI64FMTD "] shutting down MySQL thread.",
                 (uint64)ACE_Based::Thread::currentId());
         }
 

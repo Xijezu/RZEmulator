@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "WorldLocation.h"
 #include "Player.h"
@@ -40,7 +40,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
     if (player->m_WorldLocation != nullptr)
         RemoveFromLocation(player);
 
-    MX_UNIQUE_GUARD writeGuard(i_lock);
+    NG_UNIQUE_GUARD writeGuard(i_lock);
     for(int i = 0; i < m_vWorldLocation.size(); i++)
     {
         if (m_vWorldLocation[i].idx == idx) {
@@ -57,7 +57,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
 
 bool WorldLocationManager::RemoveFromLocation(Player *player)
 {
-    MX_UNIQUE_GUARD writeLock(i_lock);
+    NG_UNIQUE_GUARD writeLock(i_lock);
 
     for (auto &wl : m_vWorldLocation)
     {
@@ -77,7 +77,7 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
     if(player == nullptr)
         return;
 
-    MX_SHARED_GUARD readGuard(i_lock);
+    NG_SHARED_GUARD readGuard(i_lock);
     for(auto& wl : m_vWorldLocation)
     {
         if(wl.idx == idx)

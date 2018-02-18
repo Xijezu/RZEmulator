@@ -155,7 +155,7 @@ void WorldSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        MX_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteAddress().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteAddress().c_str());
         return;
     }
     aptr.release();
@@ -850,7 +850,7 @@ void WorldSession::onDialog(XPacket *pRecvPct)
     {
         if (!m_pPlayer->IsFixedDialogTrigger(trigger))
         {
-            MX_LOG_ERROR("scripting", "INVALID SCRIPT TRIGGER!!! [%s][%s]", m_pPlayer->GetName(), trigger.c_str());
+            NG_LOG_ERROR("scripting", "INVALID SCRIPT TRIGGER!!! [%s][%s]", m_pPlayer->GetName(), trigger.c_str());
             return;
         }
     }
@@ -859,7 +859,7 @@ void WorldSession::onDialog(XPacket *pRecvPct)
     auto npc = sMemoryPool->GetObjectInWorld<NPC>(m_pPlayer->GetLastContactLong("npc"));
     if (npc == nullptr)
     {
-        MX_LOG_TRACE("scripting", "onDialog: NPC not found!");
+        NG_LOG_TRACE("scripting", "onDialog: NPC not found!");
         return;
     }
 
@@ -935,7 +935,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                 auto item = Item::AllocItem(0, mt.code, buy_count, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
                 if(item == nullptr)
                 {
-                    MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
+                    NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
                     return;
                 }
                 pNewItem = m_pPlayer->PushItem(item, buy_count, false);
@@ -950,7 +950,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                     auto item = Item::AllocItem(0, mt.code, 1, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
                     if(item == nullptr)
                     {
-                        MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
+                        NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
                         return;
                     }
                     pNewItem = m_pPlayer->PushItem(item, buy_count, false);
@@ -1491,7 +1491,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     // TODO: Weight
     if (item->m_Instance.OwnerHandle != 0)
     {
-        MX_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
+        NG_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
         return;
     }
 

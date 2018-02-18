@@ -26,7 +26,7 @@ bool SQLQueryHolder::SetQuery(size_t index, const char *sql)
 {
     if (m_queries.size() <= index)
     {
-        MX_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for query: %s", uint32(index), (uint32)m_queries.size(), sql);
+        NG_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for query: %s", uint32(index), (uint32)m_queries.size(), sql);
         return false;
     }
 
@@ -46,7 +46,7 @@ bool SQLQueryHolder::SetPQuery(size_t index, const char *format, ...)
 {
     if (!format)
     {
-        MX_LOG_ERROR("sql.sql", "Query (index: %u) is empty.", uint32(index));
+        NG_LOG_ERROR("sql.sql", "Query (index: %u) is empty.", uint32(index));
         return false;
     }
 
@@ -58,7 +58,7 @@ bool SQLQueryHolder::SetPQuery(size_t index, const char *format, ...)
 
     if (res == -1)
     {
-        MX_LOG_ERROR("sql.sql", "SQL Query truncated (and not execute) for format: %s", format);
+        NG_LOG_ERROR("sql.sql", "SQL Query truncated (and not execute) for format: %s", format);
         return false;
     }
 
@@ -69,7 +69,7 @@ bool SQLQueryHolder::SetPreparedQuery(size_t index, PreparedStatement* stmt)
 {
     if (m_queries.size() <= index)
     {
-        MX_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for prepared statement", uint32(index), (uint32)m_queries.size());
+        NG_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for prepared statement", uint32(index), (uint32)m_queries.size());
         return false;
     }
 

@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ObjectMgr.h"
 #include <fstream>
 
@@ -64,7 +81,7 @@ void ObjectMgr::LoadItemResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Items. Table `ItemResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Items. Table `ItemResource` is empty!");
         return;
     }
 
@@ -150,7 +167,7 @@ void ObjectMgr::LoadItemResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Items in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadMonsterResource()
@@ -159,7 +176,7 @@ void ObjectMgr::LoadMonsterResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM MonsterResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
         return;
     }
 
@@ -247,7 +264,7 @@ void ObjectMgr::LoadMonsterResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Monstertemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadQuestResource()
@@ -256,7 +273,7 @@ void ObjectMgr::LoadQuestResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
         return;
     }
 
@@ -341,7 +358,7 @@ void ObjectMgr::LoadQuestResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Quests in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadFieldPropResource()
@@ -350,7 +367,7 @@ void ObjectMgr::LoadFieldPropResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM FieldPropResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 FieldProps. Table `FieldPropResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 FieldProps. Table `FieldPropResource` is empty!");
         return;
     }
 
@@ -421,7 +438,7 @@ void ObjectMgr::LoadFieldPropResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u FieldProps in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u FieldProps in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadQuestLinkResource()
@@ -430,7 +447,7 @@ void ObjectMgr::LoadQuestLinkResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM QuestLinkResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
         return;
     }
 
@@ -455,7 +472,7 @@ void ObjectMgr::LoadQuestLinkResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u QuestLinks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u QuestLinks in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadDropGroupResource()
@@ -464,7 +481,7 @@ void ObjectMgr::LoadDropGroupResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM DropGroupResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 DropGroups. Table `DropGroupResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 DropGroups. Table `DropGroupResource` is empty!");
         return;
     }
 
@@ -484,7 +501,7 @@ void ObjectMgr::LoadDropGroupResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u DropGroups in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u DropGroups in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSkillTreeResource()
@@ -493,7 +510,7 @@ void ObjectMgr::LoadSkillTreeResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillTreeResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltrees. Table `SkillTreeResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltrees. Table `SkillTreeResource` is empty!");
         return;
     }
 
@@ -519,7 +536,7 @@ void ObjectMgr::LoadSkillTreeResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillTrees in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u SkillTrees in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSkillResource()
@@ -528,7 +545,7 @@ void ObjectMgr::LoadSkillResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM SkillResource");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Skills. Table `SkillResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Skills. Table `SkillResource` is empty!");
         return;
     }
 
@@ -649,7 +666,7 @@ void ObjectMgr::LoadSkillResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Skills in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Skills in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadDungeonResource()
@@ -658,7 +675,7 @@ void ObjectMgr::LoadDungeonResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM DungeonResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
         return;
     }
 
@@ -713,7 +730,7 @@ void ObjectMgr::LoadDungeonResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadLevelResource()
@@ -722,7 +739,7 @@ void ObjectMgr::LoadLevelResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM LevelResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
         return;
     }
 
@@ -739,7 +756,7 @@ void ObjectMgr::LoadLevelResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Leveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Leveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadStateResource()
@@ -748,7 +765,7 @@ void ObjectMgr::LoadStateResource()
     QueryResult result    = GameDatabase.Query("SELECT * FROM StateResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 States. Table `StateResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 States. Table `StateResource` is empty!");
         return;
     }
 
@@ -784,7 +801,7 @@ void ObjectMgr::LoadStateResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u States in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u States in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadStatResource()
@@ -793,7 +810,7 @@ void ObjectMgr::LoadStatResource()
     QueryResult result    = GameDatabase.Query("SELECT id, str, vit, dex, agi, `int`, men, luk FROM StatResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Stats. Table `StatResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Stats. Table `StatResource` is empty!");
         return;
     }
 
@@ -814,7 +831,7 @@ void ObjectMgr::LoadStatResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Stats in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadMarketResource()
@@ -823,7 +840,7 @@ void ObjectMgr::LoadMarketResource()
     QueryResult result    = GameDatabase.Query("SELECT sort_id, name, code, price_ratio, huntaholic_ratio FROM MarketResource ORDER BY name, sort_id;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. Table `MarketResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. Table `MarketResource` is empty!");
         return;
     }
 
@@ -861,7 +878,7 @@ void ObjectMgr::LoadMarketResource()
 
     _marketResourceStore[lastMarket] = vContainer;
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Markettemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Markettemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadJobResource()
@@ -872,7 +889,7 @@ void ObjectMgr::LoadJobResource()
                                                        "available_job_3 FROM JobResource;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
         return;
     }
 
@@ -896,7 +913,7 @@ void ObjectMgr::LoadJobResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Jobs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Jobs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSummonLevelResource()
@@ -905,7 +922,7 @@ void ObjectMgr::LoadSummonLevelResource()
     QueryResult result    = GameDatabase.Query("SELECT level, normal_exp FROM SummonLevelResource ORDER BY level ASC");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. Table `SummonLevelResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. Table `SummonLevelResource` is empty!");
         return;
     }
 
@@ -919,7 +936,7 @@ void ObjectMgr::LoadSummonLevelResource()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLeveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonLeveltemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSummonLevelBonus()
@@ -928,7 +945,7 @@ void ObjectMgr::LoadSummonLevelBonus()
     QueryResult result    = GameDatabase.Query("SELECT summon_id, strength, vital, dexterity, agility, intelligence, mentality, luck FROM CreatureLevelBonus;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLevelBonus templates. Table `CreatureLevelBonus` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLevelBonus templates. Table `CreatureLevelBonus` is empty!");
         return;
     }
 
@@ -951,7 +968,7 @@ void ObjectMgr::LoadSummonLevelBonus()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonLevelBonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonLevelBonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadJobLevelBonus()
@@ -965,7 +982,7 @@ void ObjectMgr::LoadJobLevelBonus()
                                                        "FROM JobLevelBonus;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
         return;
     }
 
@@ -991,7 +1008,7 @@ void ObjectMgr::LoadJobLevelBonus()
         ++count;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u job level bonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u job level bonus templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadNPCResource()
@@ -1001,7 +1018,7 @@ void ObjectMgr::LoadNPCResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. Table `NPCResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. Table `NPCResource` is empty!");
         return;
     }
 
@@ -1024,7 +1041,7 @@ void ObjectMgr::LoadNPCResource()
         ++count;
 
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u NPCs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u NPCs in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSkillJP()
@@ -1034,7 +1051,7 @@ void ObjectMgr::LoadSkillJP()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SkillJPTemplates. Table `SkillJPResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 SkillJPTemplates. Table `SkillJPResource` is empty!");
         return;
     }
 
@@ -1054,7 +1071,7 @@ void ObjectMgr::LoadSkillJP()
         }
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SkillJPTemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u SkillJPTemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadWorldLocation()
@@ -1064,7 +1081,7 @@ void ObjectMgr::LoadWorldLocation()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. Table `WorldLocation` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. Table `WorldLocation` is empty!");
         return;
     }
 
@@ -1081,7 +1098,7 @@ void ObjectMgr::LoadWorldLocation()
         sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time, 0);
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadEnhanceResource()
@@ -1091,7 +1108,7 @@ void ObjectMgr::LoadEnhanceResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
         return;
     }
 
@@ -1117,7 +1134,7 @@ void ObjectMgr::LoadEnhanceResource()
 
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Enhancetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Enhancetemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadMixResource()
@@ -1127,7 +1144,7 @@ void ObjectMgr::LoadMixResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
         return;
     }
 
@@ -1162,7 +1179,7 @@ void ObjectMgr::LoadMixResource()
 
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Mixtemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Mixtemplates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSummonResource()
@@ -1174,7 +1191,7 @@ void ObjectMgr::LoadSummonResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Summons. Table `SummonResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Summons. Table `SummonResource` is empty!");
         return;
     }
 
@@ -1205,7 +1222,7 @@ void ObjectMgr::LoadSummonResource()
         _summonResourceStore[summon.id] = summon;
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadStringResource()
@@ -1215,7 +1232,7 @@ void ObjectMgr::LoadStringResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Strings. Table `StringResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Strings. Table `StringResource` is empty!");
         return;
     }
 
@@ -1230,7 +1247,7 @@ void ObjectMgr::LoadStringResource()
 
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Strings in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Strings in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void ObjectMgr::LoadSummonNameResource()
@@ -1240,7 +1257,7 @@ void ObjectMgr::LoadSummonNameResource()
 
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 SummonDefaultNames. Table `SummonDefaultNameResource` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonDefaultNames. Table `SummonDefaultNameResource` is empty!");
         return;
     }
 
@@ -1258,7 +1275,7 @@ void ObjectMgr::LoadSummonNameResource()
 
         ++count;
     } while (result->NextRow());
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
@@ -1580,7 +1597,7 @@ void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
     if (_monsterBaseStore.count(info.monster_id))
         g_vRespawnInfo.emplace_back(info);
     else
-        MX_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
+        NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
 }
 
 MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)

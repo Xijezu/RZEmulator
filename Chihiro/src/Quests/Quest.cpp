@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2018 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "Quest.h"
 #include "ObjectMgr.h"
@@ -28,7 +28,7 @@ Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const in
         result->m_bIsNeedUpdateToDB = false;
         result->m_QuestBase = sObjectMgr->GetQuestBase(code);
         if(result->m_QuestBase == nullptr) {
-            MX_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
+            NG_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
             delete result;
             return nullptr;
         }
@@ -47,7 +47,7 @@ bool Quest::IsRandomQuest(int code)
 {
     auto base = sObjectMgr->GetQuestBase(code);
     if(base == nullptr) {
-        MX_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
+        NG_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
         return false;
     }
     QuestType qt = base->nType;
@@ -91,7 +91,7 @@ int Quest::GetValue(int idx) const
 {
     int result{0};
     if(idx > MAX_VALUE_NUMBER - 1) {
-        MX_LOG_ERROR("quest", "Quest::GetValue - Invald Index %u", idx);
+        NG_LOG_ERROR("quest", "Quest::GetValue - Invald Index %u", idx);
         result = 0;
     } else {
         result = m_QuestBase->nValue[idx];
@@ -103,7 +103,7 @@ int Quest::GetStatus(int idx) const
 {
     int result{0};
     if (idx > 5) {
-        MX_LOG_ERROR("quest", "Quest::GetStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("quest", "Quest::GetStatus - Invald Index %u", idx);
         result = 0;
     } else {
         result = m_Instance.nStatus[idx];
@@ -114,7 +114,7 @@ int Quest::GetStatus(int idx) const
 void Quest::UpdateStatus(int idx, int value)
 {
     if(idx > 5) {
-        MX_LOG_ERROR("quest", "Quest::UpdateStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("quest", "Quest::UpdateStatus - Invald Index %u", idx);
     } else {
         int old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] = value;
@@ -127,7 +127,7 @@ void Quest::UpdateStatus(int idx, int value)
 void Quest::IncStatus(int idx, int value)
 {
     if(idx > 5) {
-        MX_LOG_ERROR("quest", "Quest::IncStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("quest", "Quest::IncStatus - Invald Index %u", idx);
     } else {
         int old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] += value;

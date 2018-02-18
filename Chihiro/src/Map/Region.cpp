@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2018 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "Region.h"
 #include "Object.h"
@@ -60,7 +60,7 @@ void Region::RemoveObject(WorldObject *obj)
 
 uint Region::DoEachClient(WorldObjectFunctor &fn)
 {
-    MX_UNIQUE_GUARD lock(i_lock);
+    NG_UNIQUE_GUARD lock(i_lock);
     for(auto& obj : m_vClientObjects)
     {
         fn.Run(obj);
@@ -70,7 +70,7 @@ uint Region::DoEachClient(WorldObjectFunctor &fn)
 
 uint Region::DoEachStaticObject(WorldObjectFunctor &fn)
 {
-    MX_UNIQUE_GUARD lock(i_lock);
+    NG_UNIQUE_GUARD lock(i_lock);
     for(auto& obj : m_vStaticObjects)
     {
         fn.Run(obj);
@@ -80,7 +80,7 @@ uint Region::DoEachStaticObject(WorldObjectFunctor &fn)
 
 uint Region::DoEachMovableObject(WorldObjectFunctor &fn)
 {
-    MX_UNIQUE_GUARD lock(i_lock);
+    NG_UNIQUE_GUARD lock(i_lock);
     for(auto& obj : m_vMovableObjects)
     {
         fn.Run(obj);
@@ -90,7 +90,7 @@ uint Region::DoEachMovableObject(WorldObjectFunctor &fn)
 
 void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
 {
-    MX_UNIQUE_GUARD writeGuard(i_lock);
+    NG_UNIQUE_GUARD writeGuard(i_lock);
     // The region has to be correct
     // No matter what. So we're ASSERTing
     // to just crash if it isn't.
@@ -106,7 +106,7 @@ void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
 
 void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
 {
-    MX_UNIQUE_GUARD writeGuard(i_lock);
+    NG_UNIQUE_GUARD writeGuard(i_lock);
     // The region has to be correct
     // No matter what. So we're ASSERTing
     // to just crash if it isn't.

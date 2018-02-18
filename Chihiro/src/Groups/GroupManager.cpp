@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2018 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "GroupManager.h"
 #include "Player.h"
@@ -59,7 +59,7 @@ bool GroupManager::DestroyParty(int nPartyID)
     CharacterDatabase.Execute(stmt);
 
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         m_hshPartyID.erase(nPartyID);
     }
 	return true;
@@ -112,7 +112,7 @@ bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
     PartyInfo* info{nullptr};
     Messages::SendPartyChatMessage(100, "@PARTY", nPartyID, string_format("LEAVE|%s|", szName.c_str()));
     {
-        MX_UNIQUE_GUARD writeLock(i_lock);
+        NG_UNIQUE_GUARD writeLock(i_lock);
         info = getPartyInfoNC(nPartyID);
         if (info == nullptr || iequals(info->strLeaderName, szName))
             return false;
@@ -140,7 +140,7 @@ bool GroupManager::onLogin(int nPartyID, Player *pPlayer)
 {
     bool result = false;
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         auto            info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
@@ -168,7 +168,7 @@ bool GroupManager::onLogout(int nPartyID, Player *pPlayer)
 {
     bool result = false;
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         auto            info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
@@ -209,7 +209,7 @@ PartyInfo* GroupManager::getPartyInfo(int nPartyID)
 {
     PartyInfo* info{nullptr};
     {
-        MX_SHARED_GUARD readLock(i_lock);
+        NG_SHARED_GUARD readLock(i_lock);
         if(m_hshPartyID.count(nPartyID) != 0)
             info = &m_hshPartyID[nPartyID];
     }
@@ -231,7 +231,7 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
 {
     PartyInfo partyInfo{ };
     {
-        MX_UNIQUE_GUARD writeLock(i_lock);
+        NG_UNIQUE_GUARD writeLock(i_lock);
         for (auto &party : m_hshPartyID)
         {
             if (party.second.strPartyName == szName)
@@ -258,7 +258,7 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
 
 bool GroupManager::JoinParty(int nPartyID, Player* pPlayer, uint nPass)
 {
-    MX_UNIQUE_GUARD writeLock(i_lock);
+    NG_UNIQUE_GUARD writeLock(i_lock);
     auto info = getPartyInfoNC(nPartyID);
     if(info == nullptr || info->vMemberNameList.size() >= 8 || nPass != info->nPartyPassword)
         return false;
@@ -278,7 +278,7 @@ bool GroupManager::JoinParty(int nPartyID, Player* pPlayer, uint nPass)
 void GroupManager::DoEachMemberTag(int nPartyID, std::function<void (PartyMemberTag&)> fn)
 {
     {
-        MX_SHARED_GUARD readGuard(i_lock);
+        NG_SHARED_GUARD readGuard(i_lock);
         auto            info = getPartyInfoNC(nPartyID);
         if (info != nullptr)
         {
@@ -336,7 +336,7 @@ void GroupManager::InitGroupSystem()
     QueryResult result    = CharacterDatabase.Query("SELECT * FROM Party;");
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", ">> Loaded 0 Parties. Table `Party` is empty!");
+        NG_LOG_INFO("server.worldserver", ">> Loaded 0 Parties. Table `Party` is empty!");
         return;
     }
 
@@ -355,7 +355,7 @@ void GroupManager::InitGroupSystem()
         count++;
     } while (result->NextRow());
 
-    MX_LOG_INFO("server.worldserver", ">> Loaded %u Parties in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    NG_LOG_INFO("server.worldserver", ">> Loaded %u Parties in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 void GroupManager::AddGroupToDatabase(const PartyInfo &info)
@@ -375,7 +375,7 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
     QueryResult result    = CharacterDatabase.Query(string_format("SELECT sid, name, job, lv FROM `Character` WHERE party_id = %d;", info.nPartyID).c_str());
     if (!result)
     {
-        MX_LOG_INFO("server.worldserver", "Invalid party ID %d!", info.nPartyID);
+        NG_LOG_INFO("server.worldserver", "Invalid party ID %d!", info.nPartyID);
         return;
     }
 

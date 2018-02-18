@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
@@ -220,7 +221,7 @@ class WorldSocket : public WorldHandler
 
                 if (msg_queue()->enqueue_tail(mb, (ACE_Time_Value *)&ACE_Time_Value::zero) == -1)
                 {
-                    MX_LOG_ERROR("network", "WorldSocket::SendPacket enqueue_tail failed");
+                    NG_LOG_ERROR("network", "WorldSocket::SendPacket enqueue_tail failed");
                     mb->release();
                     return -1;
                 }
@@ -268,7 +269,7 @@ class WorldSocket : public WorldHandler
 
             if (peer().get_remote_addr(remote_addr) == -1)
             {
-                MX_LOG_ERROR("network", "WorldSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror(errno));
+                NG_LOG_ERROR("network", "WorldSocket::open: peer().get_remote_addr errno = %s", ACE_OS::strerror(errno));
                 return -1;
             }
 
@@ -277,7 +278,7 @@ class WorldSocket : public WorldHandler
             // Register with ACE Reactor
             if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
             {
-                MX_LOG_ERROR("network", "WorldSocket::open: unable to register client handler errno = %s", ACE_OS::strerror(errno));
+                NG_LOG_ERROR("network", "WorldSocket::open: unable to register client handler errno = %s", ACE_OS::strerror(errno));
                 return -1;
             }
 
@@ -321,14 +322,14 @@ class WorldSocket : public WorldHandler
                         return Update();                           // interesting line, isn't it ?
                     }
 
-                    MX_LOG_TRACE("network", "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror(errno));
+                    NG_LOG_TRACE("network", "WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror(errno));
 
                     errno = ECONNRESET;
                     return -1;
                 }
                 case 0:
                 {
-                    MX_LOG_TRACE("network", "WorldSocket::handle_input: Peer has closed connection");
+                    NG_LOG_TRACE("network", "WorldSocket::handle_input: Peer has closed connection");
 
                     errno = ECONNRESET;
                     return -1;
@@ -449,7 +450,7 @@ class WorldSocket : public WorldHandler
 
             if (header.size > 10236)
             {
-                MX_LOG_INFO("network", "WorldSocket::handle_input_header(): client (account: %u, char [Name: %s]) sent malformed packet (size: %d, cmd: %d)",
+                NG_LOG_INFO("network", "WorldSocket::handle_input_header(): client (account: %u, char [Name: %s]) sent malformed packet (size: %d, cmd: %d)",
                             m_Session ? m_Session->GetAccountId() : 0,
                             m_Session ? m_Session->GetAccountName().c_str() : "<none>",
                             header.size, header.id);
@@ -552,7 +553,7 @@ class WorldSocket : public WorldHandler
                 // hope this is not hack, as proper m_RecvWPct is asserted around
                 if (!m_RecvWPct)
                 {
-                    MX_LOG_ERROR("network", "Forcing close on input m_RecvWPct = NULL");
+                    NG_LOG_ERROR("network", "Forcing close on input m_RecvWPct = NULL");
                     errno = EINVAL;
                     return -1;
                 }
@@ -600,7 +601,7 @@ class WorldSocket : public WorldHandler
                                  (this, ACE_Event_Handler::WRITE_MASK) == -1)
             {
                 // would be good to store errno from reactor with errno guard
-                MX_LOG_ERROR("network", "WorldSocket::cancel_wakeup_output");
+                NG_LOG_ERROR("network", "WorldSocket::cancel_wakeup_output");
                 return -1;
             }
 
@@ -619,7 +620,7 @@ class WorldSocket : public WorldHandler
             if (reactor()->schedule_wakeup
                                  (this, ACE_Event_Handler::WRITE_MASK) == -1)
             {
-                MX_LOG_ERROR("network", "WorldSocket::schedule_wakeup_output");
+                NG_LOG_ERROR("network", "WorldSocket::schedule_wakeup_output");
                 return -1;
             }
 
@@ -636,7 +637,7 @@ class WorldSocket : public WorldHandler
 
             if (msg_queue()->dequeue_head(mblk, (ACE_Time_Value *)&ACE_Time_Value::zero) == -1)
             {
-                MX_LOG_ERROR("network", "WorldSocket::handle_output_queue dequeue_head");
+                NG_LOG_ERROR("network", "WorldSocket::handle_output_queue dequeue_head");
                 return -1;
             }
 
@@ -671,7 +672,7 @@ class WorldSocket : public WorldHandler
 
                 if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value *)&ACE_Time_Value::zero) == -1)
                 {
-                    MX_LOG_ERROR("network", "WorldSocket::handle_output_queue enqueue_head");
+                    NG_LOG_ERROR("network", "WorldSocket::handle_output_queue enqueue_head");
                     mblk->release();
                     return -1;
                 }
@@ -713,7 +714,7 @@ class WorldSocket : public WorldHandler
                     ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
                     if (m_Session == nullptr)
                     {
-                        MX_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed packet_id = %u", uint32(new_pct->GetPacketID()));
+                        NG_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed packet_id = %u", uint32(new_pct->GetPacketID()));
                         return -1;
                     }
 
@@ -727,7 +728,7 @@ class WorldSocket : public WorldHandler
             }
             catch (ByteBufferException &)
             {
-                MX_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %d from client %s, accountid=%i. Disconnected client.",
+                NG_LOG_ERROR("network", "WorldSocket::ProcessIncoming ByteBufferException occured while parsing an instant handled packet %d from client %s, accountid=%i. Disconnected client.",
                              new_pct->GetPacketID(), GetRemoteAddress().c_str(), m_Session ? int32(m_Session->GetAccountId()) : -1);
                 return -1;
             }

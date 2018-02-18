@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
@@ -44,7 +45,7 @@ class WorldSocketAcceptor : public ACE_Acceptor<WorldSocket<T>, ACE_SOCK_Accepto
 
         virtual int handle_timeout(const ACE_Time_Value & /*current_time*/, const void * /*act = 0*/)
         {
-            MX_LOG_DEBUG("misc", "Resuming acceptor");
+            NG_LOG_DEBUG("misc", "Resuming acceptor");
             this->reactor()->cancel_timer(this, 1);
             return this->reactor()->register_handler(this, ACE_Event_Handler::ACCEPT_MASK);
         }
@@ -54,7 +55,7 @@ class WorldSocketAcceptor : public ACE_Acceptor<WorldSocket<T>, ACE_SOCK_Accepto
 #if defined(ENFILE) && defined(EMFILE)
             if (errno == ENFILE || errno == EMFILE)
             {
-                MX_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
+                NG_LOG_ERROR("misc", "Out of file descriptors, suspending incoming connections for 10 seconds");
                 this->reactor()->remove_handler(this, ACE_Event_Handler::ACCEPT_MASK | ACE_Event_Handler::DONT_CALL);
                 this->reactor()->schedule_timer(this, NULL, ACE_Time_Value(10));
             }

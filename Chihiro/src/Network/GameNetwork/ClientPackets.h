@@ -1,10 +1,28 @@
-#ifndef __CLIENTPACKETS_H
-#define __CLIENTPACKETS_H
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef NGEMITY_CLIENTPACKETS_H
+#define NGEMITY_CLIENTPACKETS_H
 
 #include "Server/TS_MESSAGE.h"
 #include "Server/XPacket.h"
 
-enum CSPACKETS {
+enum CSPACKETS
+{
     TS_SC_RESULT                                    = 0,
     TS_CS_LOGIN                                     = 1,
     TS_TIMESYNC                                     = 2,
@@ -289,7 +307,8 @@ enum CSPACKETS {
 #else
 #pragma pack(push, 1)
 #endif
-typedef struct TS_CS_ACCOUNT_WITH_AUTH : public TS_MESSAGE {
+typedef struct TS_CS_ACCOUNT_WITH_AUTH : public TS_MESSAGE
+{
 #if EPIC == 4
     char account[19];
 #else
@@ -298,17 +317,19 @@ typedef struct TS_CS_ACCOUNT_WITH_AUTH : public TS_MESSAGE {
     unsigned long long one_time_key;
 } s_ClientWithAuth_CS;
 
-typedef struct TS_CS_LOGIN : public TS_MESSAGE {
+typedef struct TS_CS_LOGIN : public TS_MESSAGE
+{
     char szName[19];
     char race;
 } s_ClientLogin_CS;
 
-typedef struct TS_CS_CHATREQUET : public TS_MESSAGE {
-    char                 szTarget[21];
-    uint8_t              request_id;
-    uint8_t              len;
-    uint8_t              type;
-    std::string          szMsg;
+typedef struct TS_CS_CHATREQUET : public TS_MESSAGE
+{
+    char        szTarget[21];
+    uint8_t     request_id;
+    uint8_t     len;
+    uint8_t     type;
+    std::string szMsg;
 } CS_CHATREQUEST;
 
 
@@ -319,4 +340,4 @@ typedef struct TS_CS_CHATREQUET : public TS_MESSAGE {
 #pragma pack(pop)
 #endif
 
-#endif // __CLIENTPACKETS_H
+#endif // NGEMITY_CLIENTPACKETS_H

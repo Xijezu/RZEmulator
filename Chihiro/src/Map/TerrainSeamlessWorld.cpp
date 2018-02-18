@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "TerrainSeamlessWorld.h"
 #include <fstream>
@@ -35,7 +35,8 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
 
     std::ifstream ifstream(("Resource/NewMap/"s + szFilename).c_str(), std::ios::in);
     std::string   row;
-    while (std::getline(ifstream, row)) {
+    while (std::getline(ifstream, row))
+    {
         if (!row.empty() || row[0] == ';')
             TextLines.push_back(row);
     }
@@ -44,28 +45,42 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
     if (TextLines.empty())
         return false;
 
-    for (auto &s : TextLines) {
+    for (auto &s : TextLines)
+    {
         Tokenizer lines(s, '=');
         if (lines.size() < 2)
             continue;
 
-        if (lines[0] == "TILE_LENGTH"s) {
+        if (lines[0] == "TILE_LENGTH"s)
+        {
             fTileLength = std::stof(lines[1]);
-        } else if (lines[0] == "TILECOUNT_PER_SEGMENT"s) {
+        }
+        else if (lines[0] == "TILECOUNT_PER_SEGMENT"s)
+        {
             nTileCountPerSegment = std::stoi(lines[1]);
-        } else if (lines[0] == "SEGMENTCOUNT_PER_MAP"s) {
+        }
+        else if (lines[0] == "SEGMENTCOUNT_PER_MAP"s)
+        {
             nSegmentCountPerMap = std::stoi(lines[1]);
-        } else if (lines[0] == "SETFOV"s) {
+        }
+        else if (lines[0] == "SETFOV"s)
+        {
             pStream = std::stof(lines[1]);
-        } else if (lines[0] == "MAPLAYER"s) {
+        }
+        else if (lines[0] == "MAPLAYER"s)
+        {
             nMapLayer = std::stoi(lines[1]);
-        } else if (lines[0] == "MAPSIZE"s) {
+        }
+        else if (lines[0] == "MAPSIZE"s)
+        {
             Tokenizer tokens(std::string(lines[1]), ',');
             if (tokens.size() != 2)
                 return false;
             nMapCountX = std::stoi(tokens[0]);
             nMapCountY = std::stoi(tokens[1]);
-        } else if (lines[0] == "MAPFILE"s) {
+        }
+        else if (lines[0] == "MAPFILE"s)
+        {
             Tokenizer vars(std::string(lines[1]), ',');
             if (vars.size() != 5)
                 return false;
@@ -131,7 +146,7 @@ std::string TerrainSeamlessWorldInfo::GetAttributePolygonFileName(int nMapPosX, 
 
 std::string TerrainSeamlessWorldInfo::GetLocationFileName(int nMapPosX, int nMapPosY)
 {
-    return GetFileNameWithExt(nMapPosX,nMapPosY,"nfc");
+    return GetFileNameWithExt(nMapPosX, nMapPosY, "nfc");
 }
 
 std::string TerrainSeamlessWorldInfo::GetScriptFileName(int nMapPosX, int nMapPosY)

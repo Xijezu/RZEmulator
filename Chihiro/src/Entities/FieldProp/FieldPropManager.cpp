@@ -1,19 +1,19 @@
 /*
-  *  Copyright (C) 2018 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "FieldPropManager.h"
 #include "ObjectMgr.h"
@@ -26,7 +26,7 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int l
         return;
 
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         m_vRespawnInfo.emplace_back(prop);
 
         FieldPropRegenInfo ri = FieldPropRegenInfo{0, (uint)lifeTime};
@@ -44,7 +44,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
         return;
 
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         info.nPropID = nPropID;
         info.layer   = 0; // Layer management
         m_vRespawnInfo.emplace_back(info);
@@ -62,7 +62,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 {
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         for (int        i = 0; i < m_vExpireObject.size(); i++)
         {
             auto fp = m_vExpireObject[i];
@@ -89,7 +89,7 @@ void FieldPropManager::Update(uint/* diff*/)
 
     // "Critical section" for lock (yeah, I prefer those)
     {
-        MX_UNIQUE_GUARD writeGuard(i_lock);
+        NG_UNIQUE_GUARD writeGuard(i_lock);
         for (int i = 0; i < m_vRespawnList.size(); ++i)
         {
             FieldPropRegenInfo regen = m_vRespawnList[i];

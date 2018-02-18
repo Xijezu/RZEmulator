@@ -94,7 +94,7 @@ inline Logger const* Log::GetLoggerByType(std::string const& type) const
         return NULL;
 
     std::string parentLogger = LOGGER_ROOT;
-    size_t found = type.find_last_of(".");
+    size_t found = type.find_last_of('.');
     if (found != std::string::npos)
         parentLogger = type.substr(0,found);
 
@@ -118,13 +118,13 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
 #define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()
 
 #if COMPILER != COMPILER_MICROSOFT
-#define MX_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
+#define NG_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         do {                                                        \
             if (sLog->ShouldLog(filterType__, level__))             \
                 sLog->call__(filterType__, __VA_ARGS__);            \
         } while (0)
 #else
-#define MX_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
+#define NG_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         __pragma(warning(push))                                     \
         __pragma(warning(disable:4127))                             \
         do {                                                        \
@@ -134,22 +134,22 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         __pragma(warning(pop))
 #endif
 
-#define MX_LOG_TRACE(filterType__, ...) \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_TRACE, outTrace, filterType__, __VA_ARGS__)
+#define NG_LOG_TRACE(filterType__, ...) \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_TRACE, outTrace, filterType__, __VA_ARGS__)
 
-#define MX_LOG_DEBUG(filterType__, ...) \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_DEBUG, outDebug, filterType__, __VA_ARGS__)
+#define NG_LOG_DEBUG(filterType__, ...) \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_DEBUG, outDebug, filterType__, __VA_ARGS__)
 
-#define MX_LOG_INFO(filterType__, ...)  \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_INFO, outInfo, filterType__, __VA_ARGS__)
+#define NG_LOG_INFO(filterType__, ...)  \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_INFO, outInfo, filterType__, __VA_ARGS__)
 
-#define MX_LOG_WARN(filterType__, ...)  \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_WARN, outWarn, filterType__, __VA_ARGS__)
+#define NG_LOG_WARN(filterType__, ...)  \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_WARN, outWarn, filterType__, __VA_ARGS__)
 
-#define MX_LOG_ERROR(filterType__, ...) \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_ERROR, outError, filterType__, __VA_ARGS__)
+#define NG_LOG_ERROR(filterType__, ...) \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_ERROR, outError, filterType__, __VA_ARGS__)
 
-#define MX_LOG_FATAL(filterType__, ...) \
-    MX_LOG_MESSAGE_BODY(LOG_LEVEL_FATAL, outFatal, filterType__, __VA_ARGS__)
+#define NG_LOG_FATAL(filterType__, ...) \
+    NG_LOG_MESSAGE_BODY(LOG_LEVEL_FATAL, outFatal, filterType__, __VA_ARGS__)
 
 #endif

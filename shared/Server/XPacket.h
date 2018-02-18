@@ -1,5 +1,5 @@
-#ifndef SKYFIRE_WORLDPACKET_H
-#define SKYFIRE_WORLDPACKET_H
+#ifndef NGEMITY_XPACKET_H
+#define NGEMITY_XPACKET_H
 
 #include "Common.h"
 #include "Encryption/ByteBuffer.h"
@@ -13,7 +13,7 @@ public:
 	{
 	}
 
-	XPacket(uint16 packID) : ByteBuffer(0), m_nPacketID(packID)
+	explicit XPacket(uint16 packID) : ByteBuffer(0), m_nPacketID(packID)
 	{
 		resize(7);
 		put(4, packID);
@@ -25,6 +25,7 @@ public:
 	// copy constructor
 	XPacket(const XPacket &packet) : ByteBuffer(packet), m_nPacketID(packet.m_nPacketID)
 	{
+
 	}
 
 	void FinalizePacket() {

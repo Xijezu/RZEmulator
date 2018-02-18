@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "World.h"
 #include "DatabaseEnv.h"
 #include "RegionContainer.h"
@@ -37,16 +54,16 @@ uint World::GetArTime()
 
 void World::InitWorld()
 {
-    MX_LOG_INFO("server.worldserver", "Initializing world...");
+    NG_LOG_INFO("server.worldserver", "Initializing world...");
     LoadConfigSettings(false);
 
     uint32_t oldTime = getMSTime(), oldFullTime = getMSTime();
-    MX_LOG_INFO("server.worldserver", "Initializing region system...");
+    NG_LOG_INFO("server.worldserver", "Initializing region system...");
     sRegion->InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
-    MX_LOG_INFO("server.worldserver", "Initialized region system in %u ms", GetMSTimeDiffToNow(oldTime));
+    NG_LOG_INFO("server.worldserver", "Initialized region system in %u ms", GetMSTimeDiffToNow(oldTime));
 
     oldTime = getMSTime();
-    MX_LOG_INFO("server.worldserver", "Initializing game content...");
+    NG_LOG_INFO("server.worldserver", "Initializing game content...");
 
     // Dörti häckz, plz ihgnoar
     s_nItemIndex   = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();
@@ -57,14 +74,14 @@ void World::InitWorld()
     sGroupManager->InitGroupSystem();
 
     sObjectMgr->InitGameContent();
-    MX_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));
+    NG_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));
 
     oldTime = getMSTime();
-    MX_LOG_INFO("server.worldserver", "Initializing scripting...");
+    NG_LOG_INFO("server.worldserver", "Initializing scripting...");
     sScriptingMgr->InitializeLua();
     sMapContent->LoadMapContent();
     sMapContent->InitMapInfo();
-    MX_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
+    NG_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
 
     for (auto &ri : sObjectMgr->g_vRespawnInfo)
     {
@@ -76,7 +93,7 @@ void World::InitWorld()
     }
     sObjectMgr->AddNPCToWorld();
 
-    MX_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
+    NG_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }
 
 void World::LoadConfigSettings(bool reload)
@@ -85,7 +102,7 @@ void World::LoadConfigSettings(bool reload)
     {
         if (!sConfigMgr->Reload())
         {
-            MX_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
+            NG_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
             return;
         }
         sLog->LoadFromConfig();
@@ -304,7 +321,7 @@ void World::AddObjectToWorld(WorldObject *obj)
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize), (uint)(obj->GetPositionY() / g_nRegionSize), obj->GetLayer(), rf);
 
     if (obj->pRegion != nullptr)
-        MX_LOG_INFO("map", "Region not nullptr!!!");
+        NG_LOG_INFO("map", "Region not nullptr!!!");
     region->AddObject(obj);
 }
 
@@ -657,7 +674,7 @@ bool World::ProcTame(Monster *pMonster)
     Item *pItem = player->FindItem(nTameItemCode, (uint)ITEM_FLAG_TAMING, true);
     if (pItem == nullptr)
     {
-        MX_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
+        NG_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
         ClearTamer(pMonster, false);
         Messages::BroadcastTamingMessage(player, pMonster, 3);
         return false;
@@ -681,7 +698,7 @@ bool World::ProcTame(Monster *pMonster)
     }
 
     fTameProbability *= (((pSkill->m_SkillBase->var[1] * pSkill->GetSkillEnhance()) + (pSkill->m_SkillBase->var[0] * pMonster->m_nTamingSkillLevel) + 1) * 1000000);
-    MX_LOG_INFO("taming", "You have a success rate of %f percent.", fTameProbability / 1000000);
+    NG_LOG_INFO("taming", "You have a success rate of %f percent.", fTameProbability / 1000000);
     if (fTameProbability < irand(1, 1000000))
     {
         player->EraseItem(pItem, 1);

@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "Unit.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -1703,7 +1720,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                         auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
                         if (pCItem == nullptr)
                         {
-                            MX_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
+                            NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
                             return TS_RESULT_NOT_ACTABLE;
                         }
                         Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
@@ -1725,7 +1742,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             break;
         default:
             error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
-            MX_LOG_ERROR("entites.unit", error.c_str());
+            NG_LOG_ERROR("entites.unit", error.c_str());
             Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
             result = TS_RESULT_UNKNOWN;
             break;

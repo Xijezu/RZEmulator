@@ -1,9 +1,22 @@
-//
-// Created by xijezu on 17.12.17.
-//
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#ifndef PROJECT_ITEMFIELDS_H
-#define PROJECT_ITEMFIELDS_H
+#ifndef NGEMITY_ITEMFIELDS_H
+#define NGEMITY_ITEMFIELDS_H
 
 constexpr int64 MAX_GOLD_FOR_INVENTORY = 100000000000;
 constexpr int64 MAX_GOLD_FOR_STORAGE   = 100000000000;
@@ -250,4 +263,4 @@ enum ItemMixCode : int
 	E_REPAIR_POWDER			= 950021
 };
 
-#endif //PROJECT_ITEMFIELDS_H
+#endif //NGEMITY_ITEMFIELDS_H
