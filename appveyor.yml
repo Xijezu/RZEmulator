@@ -22,7 +22,7 @@ install:
             7z e -y mysql-5.6.28-win32.zip mysql-5.6.28-win32/include -o"C:\Program Files (x86)\MySql\MySQL Server 5.6\include"
         }
 # Clone to the specified folder below, and only clone the latest commit without history.
-clone_folder: c:\xijezu\
+clone_folder: c:\ngemity\
 
 clone_depth: 1
 
@@ -37,5 +37,5 @@ before_build:
 # Build core.
 build_script:
   - cd c:\xijezu
-  - cmake -DCMAKE_INSTALL_PREFIX="c:\xijezu\build\bin"
-  - msbuild /m Project.sln
+  - cmake -DCMAKE_INSTALL_PREFIX="c:\ngemity\build\bin"
+  - msbuild /m NGemity.sln
