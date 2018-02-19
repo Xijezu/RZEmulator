@@ -162,7 +162,6 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::stri
     pPlayer->SendPacket(packet);
 }
 
-
 void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string &szTitle, const std::string &szText, const std::string &szMenu)
 {
     if (pPlayer == nullptr)
@@ -234,8 +233,8 @@ void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, P
 
 void Messages::SendPartyChatMessage(int nChatType, const std::string &szSender, int nPartyID, const std::string &szMessage)
 {
-    sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag& tag) {
-        if(tag.bIsOnline && tag.pPlayer != nullptr)
+    sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
+        if (tag.bIsOnline && tag.pPlayer != nullptr)
         {
             Messages::SendChatMessage(nChatType, szSender, tag.pPlayer, szMessage);
         }
@@ -326,7 +325,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
 #endif // EPIC < 6
     packet << (int32_t)item->m_Instance.tExpire;
 
-    if(item->IsInStorage())
+    if (item->IsInStorage())
         packet << (int16_t)-2;
     else
         packet << (int16_t)item->m_Instance.nWearInfo;
@@ -363,14 +362,14 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
     if (pPlayer->GetItemCount() > 0)
     {
         int64 count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
-		int64 idx   = 0;
+        int64 idx   = 0;
         if (count != 0)
         {
             do
             {
                 XPacket packet(TS_SC_INVENTORY);
                 auto    lcnt   = idx;
-				int64   mcount = 200;
+                int64   mcount = 200;
                 if (count - idx <= 200)
                     mcount = count - idx;
 
@@ -613,13 +612,13 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
             break;
         case ST_Player:
         {
-            auto player = dynamic_cast<Player*>(pObj);
-            if(player->IsSitdown())
+            auto player = dynamic_cast<Player *>(pObj);
+            if (player->IsSitdown())
                 v2 |= 0x100;
-            if(player->GetPermission() >= 100)
+            if (player->GetPermission() >= 100)
                 v2 |= 0x4000;
         }
-        break;
+            break;
         default:
             break;
     }
@@ -742,7 +741,7 @@ void Messages::SendQuestList(Player *pPlayer)
     questPct << (uint16)pPlayer->GetActiveQuestCount();
 
     /* FUNCTOR BEGIN */
-    auto functor = [&questPct](Quest *pQuest) {
+    auto functor = [&questPct](Quest *pQuest) -> void {
         questPct << pQuest->m_Instance.Code;
         questPct << pQuest->m_Instance.nStartID;
         if (Quest::IsRandomQuest(pQuest->m_Instance.Code))
@@ -777,14 +776,21 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
     if (obj == nullptr)
         return;
 
-    BroadcastStatusMessageObjectFunctor statusFunctor;
-    BroadcastStatusRegionFunctor        regionFunctor;
-    statusFunctor.pObject = obj;
-    regionFunctor.fn     = statusFunctor;
+    auto functor = [&obj](RegionType &list) -> void {
+        for (auto &pObject : list)
+        {
+            XPacket statusMsg(TS_SC_STATUS_CHANGE);
+            statusMsg << obj->GetHandle();
+            statusMsg << Messages::GetStatusCode(obj, pObject->As<Player>());
+            obj->As<Player>()->SendPacket(statusMsg);
+        }
+    };
 
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                  (uint)(obj->GetPositionY() / g_nRegionSize),
-                                 obj->GetLayer(), regionFunctor);
+                                 obj->GetLayer(),
+                                 functor,
+                                 (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
@@ -872,7 +878,7 @@ void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderNa
     Player::DoEachPlayer([=](Player *pPlayer) {
         pPlayer->SendPacket(chatPct);
     });
-    auto sender = Player::FindPlayer(szSenderName);
+    auto    sender = Player::FindPlayer(szSenderName);
     if (sender != nullptr)
         Messages::SendResult(sender, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
 }
@@ -900,16 +906,25 @@ void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::strin
 
 void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 {
-    SendNPCStatusRegionFunctor         movableRegionFunctor;
-    SendNPCStatusInVisibleRangeFunctor npcStatusFunctor;
-    npcStatusFunctor.player  = pPlayer;
-    movableRegionFunctor.fn = npcStatusFunctor;
+    auto functor = [&pPlayer](RegionType &regionType) -> void {
+        for (const auto &obj : regionType)
+        {
+            if (obj != nullptr && obj->IsNPC())
+            {
+                XPacket statusMsg(TS_SC_STATUS_CHANGE);
+                statusMsg << obj->GetHandle();
+                statusMsg << Messages::GetStatusCode(obj, pPlayer);
+                pPlayer->SendPacket(statusMsg);
+            }
+        }
+    };
 
     sRegion->DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
                                  (uint)(pPlayer->GetPositionY() / g_nRegionSize),
                                  pPlayer->GetLayer(),
-                                 movableRegionFunctor);
-};
+                                 functor,
+                                 (uint8_t)RegionVisitor::MovableVisitor);
+}
 
 void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {
@@ -927,8 +942,9 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    uint              ct = sWorld->GetArTime();
-    XPacket           coolTimePct(TS_SC_ITEM_COOL_TIME);
+    uint    ct = sWorld->GetArTime();
+    XPacket coolTimePct(TS_SC_ITEM_COOL_TIME);
+
     for (unsigned int coolTime : pPlayer->m_nItemCooltime)
     {
         int cool_time = coolTime - ct;
@@ -1018,7 +1034,6 @@ void Messages::SendPartyInfo(Player *pPlayer)
             info.race     = player->GetRace();
             info.isOnline = 2;
         }
-        // handle|name|level|job_id|hp_pct|mp_pct|x|y|
         msg.append(string_format("%d|%s|%d|%d|%d|%d|%d|%d|%d|", info.handle, tag.strName.c_str(), info.race, tag.nJobID, info.hp, info.mp, info.x, info.y, info.isOnline));
     });
     SendChatMessage(100, "@PARTY", pPlayer, msg);
@@ -1054,14 +1069,14 @@ void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
 
 void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
 {
-    if(pUnit == nullptr)
+    if (pUnit == nullptr)
         return;
 
-    auto player = dynamic_cast<Player*>(pUnit);
-    if(player == nullptr && pUnit->IsSummon())
-        player = dynamic_cast<Summon*>(pUnit)->GetMaster();
+    auto player = pUnit->As<Player>();
+    if (player == nullptr && pUnit->IsSummon())
+        player = pUnit->As<Summon>()->GetMaster();
 
-    if(player == nullptr)
+    if (player == nullptr)
         return;
 
     XPacket auraPct(TS_SC_AURA);
@@ -1073,7 +1088,7 @@ void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
 
 void Messages::SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon)
 {
-    if(pSummon == nullptr || pPlayer == nullptr)
+    if (pSummon == nullptr || pPlayer == nullptr)
         return;
 
     XPacket removePct(TS_SC_REMOVE_SUMMON_INFO);
@@ -1083,12 +1098,12 @@ void Messages::SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon)
 
 void Messages::BroadcastPartyMemberInfo(Player *pClient)
 {
-    if(pClient == nullptr || pClient->GetPartyID() == 0)
+    if (pClient == nullptr || pClient->GetPartyID() == 0)
         return;
 
-    int partyID = pClient->GetPartyID();
-    auto hp       = (int)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
-    auto mp       = (int)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
+    int  partyID = pClient->GetPartyID();
+    auto hp      = (int)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
+    auto mp      = (int)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
 
     auto buf = string_format("MINFO|%d|%s|%d|%d|%d|%d|%d|%d|%d|",
                              pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
@@ -1099,13 +1114,13 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
 void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName)
 {
     auto partyName = sGroupManager->GetPartyName(nPartyID);
-    auto szMsg = bIsOnline ? string_format("LOGIN|%s|%s|", partyName.c_str(), szName.c_str()) : string_format("LOGOUT|%s|", szName.c_str());
+    auto szMsg     = bIsOnline ? string_format("LOGIN|%s|%s|", partyName.c_str(), szName.c_str()) : string_format("LOGOUT|%s|", szName.c_str());
     SendPartyChatMessage(100, "@PARTY", nPartyID, szMsg);
 }
 
 void Messages::SendTradeCancelMessage(Player *pClient)
 {
-    Player* tradeTarget = pClient->GetTradeTarget();
+    Player *tradeTarget = pClient->GetTradeTarget();
     if (tradeTarget == nullptr)
         return;
 

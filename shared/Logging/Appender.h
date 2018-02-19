@@ -27,7 +27,7 @@
 #include <string>
 
 // Values assigned have their equivalent in enum ACE_Log_Priority
-enum LogLevel
+enum LogLevel : int
 {
     LOG_LEVEL_DISABLED                           = 0,
     LOG_LEVEL_TRACE                              = 1,

@@ -541,14 +541,7 @@ bool MixManager::CompatibilityCheck(const int *nSubMaterialCount, std::vector<It
 
 		if(pItem->m_Instance.Flag == ITEM_FLAG_FAILED)
 		{
-			if(pSubItem[0]->m_Instance.Code == E_REPAIR_POWDER)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+            return pSubItem[0]->m_Instance.Code == E_REPAIR_POWDER;
 		}
 	}
 	return true;

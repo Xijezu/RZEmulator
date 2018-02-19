@@ -296,9 +296,9 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
     auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
     if (rx != prx || ry != pry)
     {
-        AddObjectRegionFunctor fn;
-        fn.newObj = pUnit;
-        sRegion->DoEachNewRegion(rx, ry, prx, pry, pUnit->GetLayer(), fn);
+        AddObjectFunctor fn(rx, ry, prx, pry, pUnit->GetLayer(), pUnit);
+        fn.Run2();
+
         if (fn.bSend && pUnit->IsMonster())
         {
             pUnit->As<Monster>()->m_bNearClient = true;
@@ -316,9 +316,11 @@ void World::AddObjectToWorld(WorldObject *obj)
     if (region == nullptr)
         return;
 
-    AddObjectRegionFunctor rf;
-    rf.newObj = obj;
-    sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize), (uint)(obj->GetPositionY() / g_nRegionSize), obj->GetLayer(), rf);
+    AddObjectFunctor rf((uint)(obj->GetPositionX() / g_nRegionSize),
+                        (uint)(obj->GetPositionY() / g_nRegionSize),
+                        obj->GetLayer(),
+                        obj);
+    rf.Run();
 
     if (obj->pRegion != nullptr)
         NG_LOG_INFO("map", "Region not nullptr!!!");
@@ -343,16 +345,18 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     XPacket leavePct(TS_SC_LEAVE);
     leavePct << obj->GetHandle();
 
-    BroadcastRegionFunctor clientFunctor;
-    BroadcastFunctor       broadcastFunctor;
+    BroadcastFunctor broadcastFunctor;
     broadcastFunctor.packet = leavePct;
-    clientFunctor.fn        = broadcastFunctor;
 
+    // Remove the object from the region
     sRegion->GetRegion(obj)->RemoveObject(obj);
+
     // Send one to each player in visible region
     sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
                                  (uint)(obj->GetPositionY() / g_nRegionSize),
-                                 obj->GetLayer(), clientFunctor);
+                                 obj->GetLayer(),
+                                 NG_REGION_FUNCTOR(broadcastFunctor),
+                                 (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -409,21 +413,25 @@ void World::UpdateSessions(uint diff)
 
 void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
 {
-    BroadcastRegionFunctor clientFunctor;
-    BroadcastFunctor       broadcastFunctor;
+    BroadcastFunctor broadcastFunctor;
     broadcastFunctor.packet = packet;
-    clientFunctor.fn        = broadcastFunctor;
-    sRegion->DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, clientFunctor);
+
+    sRegion->DoEachVisibleRegion(rx1, ry1,
+                                 rx2, ry2,
+                                 layer,
+                                 NG_REGION_FUNCTOR(broadcastFunctor),
+                                 (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
 {
-    BroadcastRegionFunctor clientFunctor;
-    BroadcastFunctor       broadcastFunctor;
+    BroadcastFunctor broadcastFunctor;
     broadcastFunctor.packet = packet;
-    clientFunctor.fn        = broadcastFunctor;
 
-    sRegion->DoEachVisibleRegion(rx, ry, layer, clientFunctor);
+    sRegion->DoEachVisibleRegion(rx, ry,
+                                 layer,
+                                 NG_REGION_FUNCTOR(broadcastFunctor),
+                                 (uint8_t)RegionVisitor::ClientVisitor);
 
 }
 

@@ -23,90 +23,86 @@
 #include "Monster.h"
 #include "World.h"
 
-void DoEachClientRegionFunctor::Run(Region *region)
+void BroadcastFunctor::Run(RegionType &list)
 {
-    if(region != nullptr)
+    for (const auto &obj : list)
     {
-        region->DoEachClient(pFo);
+        if (obj != nullptr && obj->IsPlayer())
+        {
+            obj->As<Player>()->SendPacket(packet);
+        }
     }
 }
 
-
-void DoEachMovableRegionFunctor::Run(Region *region)
+void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
 {
-    if(region != nullptr)
+    for (const auto &client : regionType)
     {
-        region->DoEachMovableObject(pFo);
+        if (client != nullptr && client->GetHandle() != obj->GetHandle())
+        {
+            Messages::sendEnterMessage(dynamic_cast<Player *>(client), obj, false);
+            if (obj->IsPlayer())
+                Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
+            bSent = true;
+        }
     }
 }
 
-void DoEachStaticRegionFunctor::Run(Region *region)
+void SendEnterMessageFunctor::Run(RegionType &regionType)
 {
-    if(region != nullptr)
+    for (const auto &client : regionType)
     {
-        region->DoEachStaticObject(pFo);
+        Messages::sendEnterMessage(obj, client, false);
+        if (obj->IsMonster())
+        {
+            obj->As<Monster>()->m_bNearClient = true;
+        }
     }
 }
 
-void BroadcastStatusMessageObjectFunctor::Run(WorldObject *obj)
-{
-    XPacket statusMsg(TS_SC_STATUS_CHANGE);
-    statusMsg << pObject->GetHandle();
-    statusMsg << Messages::GetStatusCode(pObject, dynamic_cast<Player*>(obj));
-    dynamic_cast<Player*>(obj)->SendPacket(statusMsg);
-}
-
-void SendNPCStatusInVisibleRangeFunctor::Run(WorldObject *obj)
-{
-    if(obj != nullptr && obj->IsNPC())
-    {
-        XPacket statusMsg(TS_SC_STATUS_CHANGE);
-        statusMsg << obj->GetHandle();
-        statusMsg << Messages::GetStatusCode(obj, player);
-        player->SendPacket(statusMsg);
-    }
-}
-
-void BroadcastFunctor::Run(WorldObject *obj)
-{
-    if(obj != nullptr && obj->IsPlayer())
-    {
-        dynamic_cast<Player*>(obj)->SendPacket(packet);
-    }
-}
-
-void SendEnterMessageEachOtherFunctor::Run(WorldObject *client)
-{
-    if(client != nullptr && client->GetHandle() != obj->GetHandle())
-    {
-        Messages::sendEnterMessage(dynamic_cast<Player*>(client), obj, false);
-        if(obj->IsPlayer())
-            Messages::sendEnterMessage(dynamic_cast<Player*>(obj), client, false);
-    }
-}
-
-void AddObjectRegionFunctor::Run(Region *region)
+void AddObjectFunctor::Run()
 {
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
-    if (region->DoEachClient(fn) != 0)
+
+    sRegion->DoEachVisibleRegion(x, y, layer,
+                                 NG_REGION_FUNCTOR(fn),
+                                 (uint8_t)RegionVisitor::ClientVisitor);
+    if (fn.bSent)
         bSend = true;
 
-    if(newObj->IsPlayer())
+    if (newObj->IsPlayer())
     {
         SendEnterMessageFunctor fn2;
-        fn2.obj = dynamic_cast<Player*>(newObj);
-        region->DoEachStaticObject(fn2);
-        region->DoEachMovableObject(fn2);
+        fn2.obj = newObj->As<Player>();
+        sRegion->DoEachVisibleRegion(x, y, layer,
+                                     NG_REGION_FUNCTOR(fn2),
+                                     (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 
-void SendEnterMessageFunctor::Run(WorldObject *client)
+void AddObjectFunctor::Run2()
 {
-    Messages::sendEnterMessage(obj, client, false);
-    if (obj->IsMonster())
+    SendEnterMessageEachOtherFunctor fn;
+    fn.obj = newObj;
+
+    sRegion->DoEachNewRegion(x, y,
+                             x2, y2,
+                             layer,
+                             NG_REGION_FUNCTOR(fn),
+                             (uint8_t)RegionVisitor::ClientVisitor);
+    if (fn.bSent)
+        bSend = true;
+
+    if (newObj->IsPlayer())
     {
-        obj->As<Monster>()->m_bNearClient = true;
+        SendEnterMessageFunctor fn2;
+        fn2.obj = newObj->As<Player>();
+        sRegion->DoEachNewRegion(x, y,
+                                 x2, y2,
+                                 layer,
+                                 NG_REGION_FUNCTOR(fn2),
+                                 (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 
@@ -119,33 +115,7 @@ void SetMoveFunctor::Run(Region *region)
 
 void SendMoveMessageFunctor::Run(WorldObject *client)
 {
-    Messages::SendMoveMessage(dynamic_cast<Player*>(client), obj);
-}
-
-void BroadcastRegionFunctor::Run(Region *region)
-{
-    region->DoEachClient(fn);
-}
-
-void KillAllDoableObject::Run(WorldObject *obj)
-{
-    if(obj != nullptr && p != nullptr && obj->IsMonster())
-        dynamic_cast<Monster*>(obj)->TriggerForceKill(p);
-}
-
-void KillALlRegionFunctor::Run(Region *region)
-{
-    region->DoEachMovableObject(fn);
-}
-
-void BroadcastStatusRegionFunctor::Run(Region *region)
-{
-    region->DoEachClient(fn);
-}
-
-void SendNPCStatusRegionFunctor::Run(Region *pRegion)
-{
-    pRegion->DoEachMovableObject(fn);
+    Messages::SendMoveMessage(dynamic_cast<Player *>(client), obj);
 }
 
 void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
@@ -162,24 +132,24 @@ void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
 }
 
 EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC)
-    : pvResult(_pvResult), pos(_pos), range(_range), bIncludeClient(_bIncludeClient), bIncludeNPC(_bIncludeNPC)
+        : pvResult(_pvResult), pos(_pos), range(_range), bIncludeClient(_bIncludeClient), bIncludeNPC(_bIncludeNPC)
 {
-    left = pos.GetPositionX() - range;
-    right = pos.GetPositionX() + range;
-    top = pos.GetPositionY() - range;
+    left   = pos.GetPositionX() - range;
+    right  = pos.GetPositionX() + range;
+    top    = pos.GetPositionY() - range;
     bottom = pos.GetPositionY() + range;
-    t = sWorld->GetArTime();
+    t      = sWorld->GetArTime();
 }
 
 void EnumMovableObjectRegionFunctor::Run(Region *region)
 {
-    if(region == nullptr)
+    if (region == nullptr)
         return;
 
-    SubFunctor fn{};
+    SubFunctor fn{ };
     fn.pParent = this;
-    if(bIncludeClient)
+    if (bIncludeClient)
         region->DoEachClient(fn);
-    if(bIncludeNPC)
+    if (bIncludeNPC)
         region->DoEachMovableObject(fn);
 }

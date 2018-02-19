@@ -115,24 +115,19 @@ void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &
 
 void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
 {
-/*    sArRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer()
-                                   [=](ArRegion* region) {
-                                       region->DoEachMovableObject(
-                                               [=](WorldObject* obj) {
-                                                   if(obj->GetSubType() == ST_Mob) {
-                                                       dynamic_cast<Monster*>(obj)->ForceKill(pClient);
-                                                   }
-                                               }
-                                       );
-                                   });*/
-    // Causes deadlock
+    auto functor = [&pClient] (RegionType& list) -> void {
+        for (const auto &obj : list)
+        {
+            if (obj != nullptr && pClient != nullptr && obj->IsMonster())
+                obj->As<Monster>()->TriggerForceKill(pClient);
+        }
+    };
 
-    KillALlRegionFunctor fn;
-    KillAllDoableObject  fn2;
-    fn2.p = pClient;
-    fn.fn = fn2;
-
-    sRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize, (uint)(pClient->GetPositionY() / g_nRegionSize), pClient->GetLayer(), fn);
+    sRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize,
+                                 (uint)(pClient->GetPositionY() / g_nRegionSize),
+                                 pClient->GetLayer(),
+                                 functor,
+                                 (uint8_t)RegionVisitor::MovableVisitor);
 
 }
 
