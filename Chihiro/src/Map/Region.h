@@ -23,6 +23,8 @@
 #include "Functors.h"
 
 class WorldObject;
+using RegionType = std::vector<WorldObject*>;
+
 class Region
 {
     public:
@@ -30,26 +32,52 @@ class Region
         Region() = default;
         ~Region() = default;
 
-        void AddObject(WorldObject* obj);
-        void RemoveObject(WorldObject* obj);
-        uint DoEachClient(WorldObjectFunctor& fn);
-        uint DoEachStaticObject(WorldObjectFunctor& fn);
-        uint DoEachMovableObject(WorldObjectFunctor& fn);
+        void AddObject(WorldObject *obj);
+        void RemoveObject(WorldObject *obj);
+        /* Deprecated */
+        uint DoEachClient(WorldObjectFunctor &fn);
+        uint DoEachStaticObject(WorldObjectFunctor &fn);
+        uint DoEachMovableObject(WorldObjectFunctor &fn);
+
+        template<typename Visitor>
+        void DoEachClient2(Visitor &&visitor)
+        {
+            {
+                NG_UNIQUE_GUARD lock(i_lock);
+                visitor(m_vClientObjects);
+            }
+        }
+
+        template<typename Visitor>
+        void DoEachStaticObject2(Visitor &&visitor)
+        {
+            {
+                NG_UNIQUE_GUARD lock(i_lock);
+                visitor(m_vStaticObjects);
+            }
+        }
+
+        template<typename Visitor>
+        void DoEachMovableObject2(Visitor &&visitor)
+        {
+            {
+                NG_UNIQUE_GUARD lock(i_lock);
+                visitor(m_vMovableObjects);
+            }
+        }
 
     private:
-        typedef std::vector<WorldObject*> RegionType;
-        void addObject(WorldObject* obj, RegionType* v);
-        void removeObject(WorldObject* obj, RegionType* v);
-
+        void addObject(WorldObject *obj, RegionType *v);
+        void removeObject(WorldObject *obj, RegionType *v);
 
         RegionType m_vStaticObjects;
         RegionType m_vMovableObjects;
         RegionType m_vClientObjects;
 
         NG_SHARED_MUTEX i_lock;
-        uint x;
-        uint y;
-        uint8 layer;
+        uint       x;
+        uint       y;
+        uint8      layer;
 };
 
 #endif // NGEMITY_REGION_H

@@ -122,7 +122,7 @@ inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
         do {                                                        \
             if (sLog->ShouldLog(filterType__, level__))             \
                 sLog->call__(filterType__, __VA_ARGS__);            \
-        } while (0)
+        } while (false)
 #else
 #define NG_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
         __pragma(warning(push))                                     \

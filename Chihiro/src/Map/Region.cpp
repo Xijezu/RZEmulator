@@ -88,6 +88,7 @@ uint Region::DoEachMovableObject(WorldObjectFunctor &fn)
     return (uint)m_vMovableObjects.size();
 }
 
+
 void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);

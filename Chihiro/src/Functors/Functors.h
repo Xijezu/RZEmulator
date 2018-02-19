@@ -20,6 +20,8 @@
 
 #include "Common.h"
 #include "Object.h"
+
+using RegionType = std::vector<WorldObject *>;
 class Region;
 class Player;
 class Unit;
@@ -38,139 +40,94 @@ class Unit;
  * But it is annoying.
  */
 
+
 struct WorldObjectFunctor
 {
-    virtual void Run(WorldObject* obj) { };
+    virtual void Run(WorldObject *obj) {};
 };
 
 struct RegionFunctor
 {
-    virtual void Run(Region*) { };
-};
-struct BroadcastStatusMessageObjectFunctor : public WorldObjectFunctor
-{
-    WorldObject *pObject{nullptr};
-    void Run(WorldObject* obj) override;
+    virtual void Run(Region *) {};
 };
 
-struct BroadcastStatusRegionFunctor : public RegionFunctor
-{
-    BroadcastStatusMessageObjectFunctor fn;
-    void Run(Region *region) override;
-};
-
-
-struct DoEachClientRegionFunctor : public RegionFunctor
-{
-    WorldObjectFunctor pFo;
-    void Run(Region* region) override;
-};
-
-struct DoEachMovableRegionFunctor : public RegionFunctor
-{
-    WorldObjectFunctor pFo;
-    void Run(Region* region) override;
-};
-
-struct DoEachStaticRegionFunctor : public RegionFunctor
-{
-    WorldObjectFunctor pFo;
-    void Run(Region* region) override;
-};
-
-struct SendNPCStatusInVisibleRangeFunctor : public WorldObjectFunctor
-{
-    Player *player{nullptr};
-    void Run(WorldObject* obj) override;
-};
-
-struct SendNPCStatusRegionFunctor : public RegionFunctor
-{
-    SendNPCStatusInVisibleRangeFunctor fn;
-    void Run(Region *pRegion) override;
-};
-
-struct BroadcastFunctor : public WorldObjectFunctor
+struct BroadcastFunctor
 {
     XPacket packet;
-    void Run(WorldObject* obj) override;
+    void Run(RegionType &list);
 };
 
-struct BroadcastRegionFunctor : public RegionFunctor
-{
-    BroadcastFunctor fn;
-    void Run(Region* region) override;
-};
-
-struct KillAllDoableObject : public WorldObjectFunctor
-{
-    Player *p{nullptr};
-    void Run(WorldObject *obj) override;
-};
-
-struct KillALlRegionFunctor : public RegionFunctor
-{
-    KillAllDoableObject fn;
-    void Run(Region *region) override;
-};
-
-struct SendEnterMessageEachOtherFunctor : public WorldObjectFunctor
+struct SendEnterMessageEachOtherFunctor
 {
     WorldObject *obj{nullptr};
-    void Run(WorldObject* obj) override;
+    bool        bSent{false};
+    void Run(RegionType &client);
 };
 
-struct SendEnterMessageFunctor : public WorldObjectFunctor
+struct SendEnterMessageFunctor
 {
     Player *obj{nullptr};
-    void Run(WorldObject* obj) override;
+    void Run(RegionType &regionType);
 };
 
-struct AddObjectRegionFunctor : public RegionFunctor
+struct AddObjectFunctor
 {
-    WorldObject *newObj{nullptr};
-    bool        bSend{false};
-    void Run(Region* region) override;
+    explicit AddObjectFunctor(uint _x, uint _y, uint8_t _layer, WorldObject *obj)
+            : x(_x), y(_y), x2(0), y2(0), layer(_layer), newObj(obj), bSend(false) {}
+
+    explicit AddObjectFunctor(uint _x, uint _y, uint _x2, uint _y2, uint8_t _layer, WorldObject *obj)
+            : x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer), newObj(obj), bSend(false) {}
+
+    void Run();
+    void Run2();
+
+    WorldObject *newObj;
+
+    bool    bSend;
+    uint    x;
+    uint    y;
+    uint    x2;
+    uint    y2;
+    uint8_t layer;
 };
 
 struct SendMoveMessageFunctor : public WorldObjectFunctor
 {
     Unit *obj{nullptr};
-    void Run(WorldObject* client) override;
+    void Run(WorldObject *client) override;
 };
 
 struct SetMoveFunctor : public RegionFunctor
 {
     uint nCnt{0};
     Unit *obj{nullptr};
-    void Run(Region* region) override;
+    void Run(Region *region) override;
 };
 
 struct EnumMovableObjectRegionFunctor : public RegionFunctor
 {
     std::vector<uint> &pvResult;
-    uint t;
-    Position pos;
-    float left;
-    float right;
-    float top;
-    float bottom;
-    float range;
-    bool bIncludeClient;
-    bool bIncludeNPC;
-
+    uint              t;
+    Position          pos;
+    float             left;
+    float             right;
+    float             top;
+    float             bottom;
+    float             range;
+    bool              bIncludeClient;
+    bool              bIncludeNPC;
 
     struct SubFunctor : public WorldObjectFunctor
     {
-        SubFunctor() : pParent(nullptr) { }
-        void Run(WorldObject* obj) override;
+        SubFunctor() : pParent(nullptr) {}
+
+        void Run(WorldObject *obj) override;
 
         EnumMovableObjectRegionFunctor *pParent;
     };
 
-    EnumMovableObjectRegionFunctor(std::vector<uint>& _pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
+    EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
     void Run(Region *region) override;
 };
-
 
 #endif // NGEMITY_FUNCTORS_H
