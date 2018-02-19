@@ -19,7 +19,6 @@
 #include "Player.h"
 #include "RegionContainer.h"
 #include "Messages.h"
-#include "ClientPackets.h"
 #include "Monster.h"
 #include "World.h"
 

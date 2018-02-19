@@ -68,8 +68,8 @@ void ByteBuffer::print_storage() const
 
 void ByteBuffer::textlike() const
 {
-    //if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
-        //return;
+    if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
+        return;
 
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
@@ -85,8 +85,8 @@ void ByteBuffer::textlike() const
 
 void ByteBuffer::hexlike() const
 {
-    //if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
-      //  return;
+    if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
+        return;
 
     uint32 j = 1, k = 1;
 
