@@ -119,6 +119,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
 
+        int64 GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
+
         int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
 
         int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
@@ -206,6 +208,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void StartTrade(uint32 pTargetHandle);
         void CancelTrade(bool bIsNeedBroadcast);
         void FreezeTrade();
+        void ConfirmTrade();
+        bool ProcessTrade();
         void ClearTradeInfo();
         Player *GetTradeTarget();
         bool IsTradableWith(Player *pTarget);
@@ -213,6 +217,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool AddItemToTradeWindow(Item *item, int32 count);
         bool RemoveItemFromTradeWindow(Item *item, int32 count);
         bool IsTradable(Item *pItem);
+        bool CheckTradeWeight();
+        bool CheckTradeItem();
 
         void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
         uint16_t putonItem(ItemWearType, Item *) override;
@@ -303,8 +309,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         int GetMaxChaos() const;
         void AddChaos(int chaos);
         bool   m_bSitdown{false};
-        bool   m_bTrading{false};
-        bool   m_bTradeFreezed{false};
+        bool m_bTrading{false};
+        bool m_bTradeFreezed{false};
+        bool m_bTradeAccepted{false};
     protected:
 
         bool isInLocationType(uint8 nLocationType);
@@ -332,6 +339,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void clearPendingBonusMsg();
         void sendBonusEXPJPMsg();
 
+        uint16 processTradeGold();
+        uint16 processTradeItem();
+
         WorldSession *m_session{nullptr};
         std::string  m_szAccount;
         QuestManager m_QuestManager{ };
@@ -353,8 +363,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Summon *> m_vStorageSummonList{ };
         std::vector<Item *>   m_vCharmList{ };
 
-        int64               m_nTradeGold{ };
-        UNORDERED_MAP<uint32, int32>            m_vTradeItemList{ };
+        UNORDERED_MAP<uint32, int32> m_vTradeItemList{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 
