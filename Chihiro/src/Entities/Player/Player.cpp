@@ -3644,7 +3644,7 @@ uint16 Player::processTradeGold()
 
     if(IsInWorld())
     {
-        int64 tradeGold = GetUInt64Value(PLAYER_FIELD_TRADE_GOLD);
+        int64 tradeGold = GetTradeGold();
         int64 prevGold = GetGold();
 
         if(tradeGold == 0)
