@@ -76,14 +76,26 @@ int main(int argc, char **argv)
 	if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG))
 	{
 		NG_LOG_ERROR("server.worldserver", "Invalid or missing configuration file : %s", _CHIHIRO_CORE_CONFIG);
-		NG_LOG_ERROR("server.worldserver","Verify that the file exists and has \'[chihiro]' written in the top of the file!");
+		NG_LOG_ERROR("server.worldserver", "Verify that the file exists and has \'[chihiro]' written in the top of the file!");
 		return 1;
 	}
 
     NG_LOG_INFO("server.worldserver", "%s (worldserver)", _FULLVERSION);
 
+    NG_LOG_INFO("server.worldserver", "       _   _  _____                _ _");
+    NG_LOG_INFO("server.worldserver", "      | \\ | |/ ____|              (_) |");
+    NG_LOG_INFO("server.worldserver", "      |  \\| | |  __  ___ _ __ ___  _| |_ _   _");
+    NG_LOG_INFO("server.worldserver", "      | . ` | | |_ |/ _ \\ '_ ` _ \\| | __| | | |");
+    NG_LOG_INFO("server.worldserver", "      | |\\  | |__| |  __/ | | | | | | |_| |_| |");
+    NG_LOG_INFO("server.worldserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
+    NG_LOG_INFO("server.worldserver", "                                          __/ |");
+    NG_LOG_INFO("server.worldserver", "                                         |___/");
+    NG_LOG_INFO("server.worldserver", "           NGemity (c) 2018 - For Rappelz");
+    NG_LOG_INFO("server.worldserver", "               <https://ngemity.org/>");
+
+
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
+	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), true), true), true);
 #else
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
 #endif
