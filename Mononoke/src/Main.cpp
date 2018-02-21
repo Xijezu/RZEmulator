@@ -31,7 +31,7 @@
 bool StartDB();
 void StopDB();
 
-bool stopEvent = false;                                     // Setting it to true stops the server
+bool stopEvent{false};                                     // Setting it to true stops the server
 LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the auth server database
 
 
@@ -42,7 +42,7 @@ LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the a
 class AuthServerSignalHandler : public Skyfire::SignalHandler
 {
 public:
-	virtual void HandleSignal(int SigNum)
+	void HandleSignal(int SigNum) override
 	{
 		switch (SigNum)
 		{
@@ -69,9 +69,19 @@ extern int main(int argc, char **argv)
         return 1;
     }
 	NG_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+	NG_LOG_INFO("server.authserver", "       _   _  _____                _ _");
+	NG_LOG_INFO("server.authserver", "      | \\ | |/ ____|              (_) |");
+	NG_LOG_INFO("server.authserver", "      |  \\| | |  __  ___ _ __ ___  _| |_ _   _");
+	NG_LOG_INFO("server.authserver", "      | . ` | | |_ |/ _ \\ '_ ` _ \\| | __| | | |");
+	NG_LOG_INFO("server.authserver", "      | |\\  | |__| |  __/ | | | | | | |_| |_| |");
+	NG_LOG_INFO("server.authserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
+	NG_LOG_INFO("server.authserver", "                                          __/ |");
+	NG_LOG_INFO("server.authserver", "                                         |___/");
+	NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
+	NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
+	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), true), true), true);
 #else
 	ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
 #endif
