@@ -57,12 +57,11 @@ void World::InitWorld()
     NG_LOG_INFO("server.worldserver", "Initializing world...");
     LoadConfigSettings(false);
 
-    uint32_t oldTime = getMSTime(), oldFullTime = getMSTime();
+    uint32_t oldFullTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing region system...");
     sRegion->InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
-    NG_LOG_INFO("server.worldserver", "Initialized region system in %u ms", GetMSTimeDiffToNow(oldTime));
 
-    oldTime = getMSTime();
+    auto oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing game content...");
 
     // Dörti häckz, plz ihgnoar
@@ -92,6 +91,9 @@ void World::InitWorld()
         m_vRespawnList.emplace_back(ro);
     }
     sObjectMgr->AddNPCToWorld();
+
+    // Set timers:
+    m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_PINGDB) * MINUTE * IN_MILLISECONDS);    // Mysql ping time in minutes
 
     NG_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }
@@ -125,6 +127,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
     m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
     m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    // MySQL ping time interval
+    m_int_configs[CONFIG_PINGDB] = (uint)sConfigMgr->GetIntDefault("MaxPingTime", 30);
+
 
     // Rates
     rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
@@ -376,15 +381,36 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
 
 void World::Update(uint diff)
 {
+    ///- Update Sessions
     UpdateSessions(diff);
 
+    ///- Update for WorldObjects (Player, Monster, ...)
     sMemoryPool->Update(diff);
 
+    ///- Temporary hack for respawn list
+    ///- @todo Rewrite (re)spawning
     for (auto &ro : m_vRespawnList)
     {
         ro->Update(diff);
         //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
+
+    ///- Ping to keep MySQL connections alive
+    if (m_timers[WUPDATE_PINGDB].Passed())
+    {
+        m_timers[WUPDATE_PINGDB].Reset();
+        NG_LOG_DEBUG("misc", "Ping MySQL to keep connection alive");
+        CharacterDatabase.KeepAlive();
+        GameDatabase.KeepAlive();
+    }
+
+    /*
+    if(m_timers[WUPDATE_WORLDLOCATION].Passed())
+    {
+        m_timers[WUPDATE_WORLDLOCATION].Reset();
+        // @todo: Update worldlocation
+    }
+    */
 }
 
 void World::UpdateSessions(uint diff)
