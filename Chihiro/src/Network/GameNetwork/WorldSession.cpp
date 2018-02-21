@@ -2111,7 +2111,7 @@ void WorldSession::onTrade(XPacket *pRecvPct) {
             onFreezeTrade();
             break;
         case TM_CONFIRM_TRADE:
-            onConfirmTrade();
+            onConfirmTrade(target_handle);
             break;
         default:
             return;
@@ -2120,47 +2120,47 @@ void WorldSession::onTrade(XPacket *pRecvPct) {
 
 void WorldSession::onRequestTrade(uint32 hTradeTarget)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tradeTarget))
         return;
 
-    if (tplayer->m_bTrading || m_pPlayer->m_bTrading)
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tplayer->GetHandle());
-    else if (!m_pPlayer->IsTradableWith(tplayer))
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tplayer->GetHandle());
+    if (tradeTarget->m_bTrading || m_pPlayer->m_bTrading)
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tradeTarget->GetHandle());
+    else if (!m_pPlayer->IsTradableWith(tradeTarget))
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
     else
     {
         XPacket tradePct(TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_REQUEST_TRADE; // mode
-        tplayer->SendPacket(tradePct);
+        tradeTarget->SendPacket(tradePct);
     }
 }
 
 void WorldSession::onAcceptTrade(uint32 hTradeTarget)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tradeTarget))
         return;
 
-    if (m_pPlayer->m_bTrading || tplayer->m_bTrading || m_pPlayer->m_hTamingTarget || tplayer->m_hTamingTarget)
+    if (m_pPlayer->m_bTrading || tradeTarget->m_bTrading || m_pPlayer->m_hTamingTarget || tradeTarget->m_hTamingTarget)
     {
         Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
     }
     else
     {
-        m_pPlayer->StartTrade(tplayer->GetHandle());
-        tplayer->StartTrade(m_pPlayer->GetHandle());
+        m_pPlayer->StartTrade(tradeTarget->GetHandle());
+        tradeTarget->StartTrade(m_pPlayer->GetHandle());
 
         XPacket tradePlayerPct(TS_TRADE);
-        tradePlayerPct << tplayer->GetHandle();
+        tradePlayerPct << tradeTarget->GetHandle();
         tradePlayerPct << (uint8)TM_BEGIN_TRADE; // mode
         m_pPlayer->SendPacket(tradePlayerPct);
 
         XPacket tradeTargetPct(TS_TRADE);
         tradeTargetPct << m_pPlayer->GetHandle();
         tradeTargetPct << (uint8)TM_BEGIN_TRADE; // mode
-        tplayer->SendPacket(tradeTargetPct);
+        tradeTarget->SendPacket(tradeTargetPct);
     }
 }
 
@@ -2169,29 +2169,29 @@ void WorldSession::onCancelTrade()
     if (!m_pPlayer->m_bTrading)
         return;
 
-    auto tplayer = m_pPlayer->GetTradeTarget();
-    if (tplayer != nullptr)
-        tplayer->CancelTrade(true);
+    auto tradeTarget = m_pPlayer->GetTradeTarget();
+    if (tradeTarget != nullptr)
+        tradeTarget->CancelTrade(true);
 
     m_pPlayer->CancelTrade(true);
 }
 
 void WorldSession::onRejectTrade(uint32 hTradeTarget)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tradeTarget))
         return;
 
     XPacket tradePct(TS_TRADE);
     tradePct << m_pPlayer->GetHandle();
     tradePct << (uint8)TM_REJECT_TRADE;
-    tplayer->SendPacket(tradePct);
+    tradeTarget->SendPacket(tradePct);
 }
 
 void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tradeTarget))
         return;
 
     if (!m_pPlayer->m_bTradeFreezed)
@@ -2222,15 +2222,15 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
         if (m_pPlayer->AddItemToTradeWindow(item, count))
         {
-            Messages::SendTradeItemInfo(TM_ADD_ITEM, item, count, m_pPlayer, tplayer);
+            Messages::SendTradeItemInfo(TM_ADD_ITEM, item, count, m_pPlayer, tradeTarget);
         }
     }
 }
 
 void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
-    auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-    if(!isValidTradeTarget(tplayer))
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if(!isValidTradeTarget(tradeTarget))
     {
         m_pPlayer->CancelTrade(false);
         return;
@@ -2250,7 +2250,7 @@ void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
         if (m_pPlayer->RemoveItemFromTradeWindow(item, count))
         {
-            Messages::SendTradeItemInfo(TM_REMOVE_ITEM, item, count, m_pPlayer, tplayer);
+            Messages::SendTradeItemInfo(TM_REMOVE_ITEM, item, count, m_pPlayer, tradeTarget);
         }
         else
         {
@@ -2263,8 +2263,8 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
 {
     if (!m_pPlayer->m_bTradeFreezed)
     {
-        auto tplayer = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
-        if (!isValidTradeTarget(tplayer))
+        auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+        if (!isValidTradeTarget(tradeTarget))
             return;
 
         pRecvPct->read<uint32>(); // Handle
@@ -2290,7 +2290,7 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
         tradePct << (int64)0; // ID
         tradePct << (int32)gold;
         tradePct.fill("", 44);
-        tplayer->SendPacket(tradePct);
+        tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
     else
@@ -2301,24 +2301,118 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
 
 void WorldSession::onFreezeTrade()
 {
-    auto tplayer = m_pPlayer->GetTradeTarget();
-    if (tplayer != nullptr)
+    auto tradeTarget = m_pPlayer->GetTradeTarget();
+    if (tradeTarget != nullptr)
     {
         m_pPlayer->FreezeTrade();
 
         XPacket tradePct(TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_FREEZE_TRADE;
-        tplayer->SendPacket(tradePct);
+        tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
     else
         m_pPlayer->CancelTrade(false);
 }
 
-void WorldSession::onConfirmTrade()
+void WorldSession::onConfirmTrade(uint hTradeTarget)
 {
+    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    if (!isValidTradeTarget(tradeTarget))
+        return;
 
+    if(   !m_pPlayer->m_bTrading
+       || !tradeTarget->m_bTrading
+       || !m_pPlayer->m_bTradeFreezed
+       || !tradeTarget->m_bTradeFreezed
+       || tradeTarget->GetTradeTarget() != m_pPlayer)
+    {
+        m_pPlayer->CancelTrade(true);
+        tradeTarget->CancelTrade(true);
+        return;
+    }
+
+    if(m_pPlayer->m_bTradeAccepted)
+        return;
+
+    m_pPlayer->ConfirmTrade();
+
+    XPacket tradePct(TS_TRADE);
+    tradePct << m_pPlayer->GetHandle();
+    tradePct << (uint8)TM_CONFIRM_TRADE;
+    tradeTarget->SendPacket(tradePct);
+    m_pPlayer->SendPacket(tradePct);
+
+    if(!tradeTarget->m_bTradeAccepted)
+        return;
+
+    if(   !m_pPlayer->CheckTradeWeight()
+       || !tradeTarget->CheckTradeWeight())
+    {
+        m_pPlayer->CancelTrade(false);
+        tradeTarget->CancelTrade(false);
+
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
+        Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
+
+        return;
+    }
+
+    if(   !m_pPlayer->CheckTradeItem()
+       || !tradeTarget->CheckTradeItem())
+    {
+        m_pPlayer->CancelTrade(false);
+        tradeTarget->CancelTrade(false);
+
+        Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
+        Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
+
+        return;
+    }
+
+    int64 tradeGold = m_pPlayer->GetGold() + tradeTarget->GetTradeGold();
+    int64 tradeTargetGold = tradeTarget->GetGold() + m_pPlayer->GetTradeGold();
+
+    bool bExceedGold = tradeGold > MAX_GOLD_FOR_INVENTORY;
+    bool bExceedGoldTradeTarget = tradeTargetGold > MAX_GOLD_FOR_INVENTORY;
+
+    if(bExceedGold || bExceedGoldTradeTarget)
+    {
+        m_pPlayer->CancelTrade(false);
+        tradeTarget->CancelTrade(false);
+
+        if(bExceedGold)
+        {
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
+            Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
+        }
+
+        if ( bExceedGoldTradeTarget )
+        {
+            Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
+            Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
+        }
+    }
+    else
+    {
+        if(   m_pPlayer->m_bTrading
+           && tradeTarget->m_bTrading
+           && m_pPlayer->m_bTradeFreezed
+           && tradeTarget->m_bTradeFreezed
+           && m_pPlayer->GetTradeTarget() == tradeTarget
+           && tradeTarget->GetTradeTarget() == m_pPlayer
+           && m_pPlayer->ProcessTrade())
+        {
+            XPacket tradePct(TS_TRADE);
+            tradePct << m_pPlayer->GetHandle();
+            tradePct << (uint8)TM_PROCESS_TRADE;
+            tradeTarget->SendPacket(tradePct);
+            m_pPlayer->SendPacket(tradePct);
+        }
+        m_pPlayer->CancelTrade(false);
+        tradeTarget->CancelTrade(false);
+    }
 }
 
 bool WorldSession::isValidTradeTarget(Player *pTradeTarget)
