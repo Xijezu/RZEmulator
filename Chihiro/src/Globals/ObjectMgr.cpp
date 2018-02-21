@@ -1126,7 +1126,9 @@ void ObjectMgr::LoadEnhanceResource()
         info.nLocalFlag    = field[idx++].GetUInt32();
         info.nNeedItemCode = field[idx++].GetInt32();
         for (auto &perc : info.fPercentage)
+        {
             perc = field[idx++].GetFloat();
+        }
         if ((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
         {
             sMixManager->RegisterEnhanceInfo(info);
@@ -1607,9 +1609,9 @@ MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
     return nullptr;
 }
 
-Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock)
+Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
 {
-    auto mob = sMemoryPool->AllocMonster(id);
+    auto mob = sMemoryPool->AllocMonster((uint)id);
     if (mob != nullptr)
     {
         mob->SetCurrentXY(x, y);
@@ -1688,13 +1690,23 @@ void ObjectMgr::UnloadAll()
     _itemTemplateStore.clear();
     _creatureBaseStore.clear();
     _jobBonusStore.clear();
-    _summonLevelStore.clear();
     _summonResourceStore.clear();
     _marketResourceStore.clear();
     _skillTreeResourceStore.clear();
+    _summonLevelStore.clear();
+    _stringResourceStore.clear();
     _levelResourceStore.clear();
     _skillBaseStore.clear();
     _monsterBaseStore.clear();
+    _dropTemplateStore.clear();
+    _questTemplateStore.clear();
+    _questLinkStore.clear();
+    _npcTemplateStore.clear();
+    _fieldPropTemplateStore.clear();
+    _summonPrefixStore.clear();
+    _summonPostfixStore.clear();
+    _summonBonusStore.clear();
+    _stateTemplateStore.clear();
 }
 
 bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
@@ -1791,7 +1803,7 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
 
 bool ObjectMgr::IsInRandomPoolMonster(int group_id, int monster_id)
 {
-    bool result;
+    bool result{false};
 //             ArMoveVector::MOVE_INFO *v3; // eax@11
 //             ArMoveVector::MOVE_INFO *v4; // eax@14
 //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
@@ -1852,10 +1864,6 @@ bool ObjectMgr::IsInRandomPoolMonster(int group_id, int monster_id)
 */
             result = false;
         }
-        else
-        {
-            result = false;
-        }
     }
     return result;
 }
@@ -1888,12 +1896,12 @@ void ObjectMgr::AddNPCToWorld()
 
 QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
 {
-    for (auto &l : _questLinkStore)
-    {
-        if (l.code == code && (l.nStartTextID == start_id || start_id == 0))
-            return &l;
-    }
-    return nullptr;
+    auto l = std::find_if(_questLinkStore.begin(),
+                       _questLinkStore.end(),
+                       [&code, start_id](const QuestLink &ql) {
+                           return ql.code == code && (ql.nStartTextID == start_id || start_id == 0);
+                       });
+    return l != _questLinkStore.end() ? &*l : nullptr;
 }
 
 StateTemplate *const ObjectMgr::GetStateInfo(int code)
