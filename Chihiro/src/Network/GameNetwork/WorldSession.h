@@ -118,7 +118,7 @@ class WorldSession
         void onRemoveItem(uint, XPacket *);
         void onAddGold(uint, XPacket *);
         void onFreezeTrade();
-        void onConfirmTrade();
+        void onConfirmTrade(uint);
 
 
 		void onPutOnItem(XPacket *);
