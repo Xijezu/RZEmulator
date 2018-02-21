@@ -46,7 +46,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
 
     auto wl = std::find_if(m_vWorldLocation.begin(),
                            m_vWorldLocation.end(),
-                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+                           [idx](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
 
     if (wl != m_vWorldLocation.end())
     {
@@ -86,7 +86,7 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
     NG_SHARED_GUARD readGuard(i_lock);
     auto            wl = std::find_if(m_vWorldLocation.begin(),
                                       m_vWorldLocation.end(),
-                                      [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+                                      [idx](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
 
     if (wl != m_vWorldLocation.end())
     {
@@ -103,7 +103,7 @@ int WorldLocationManager::GetShovelableItem(uint idx)
 
     auto wl = std::find_if(m_vWorldLocation.begin(),
                            m_vWorldLocation.end(),
-                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+                           [idx](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
 
     if (wl != m_vWorldLocation.end())
         return wl->shovelable_item;
@@ -120,7 +120,7 @@ void WorldLocationManager::RegisterWorldLocation(uint idx, uint8_t location_type
 
     auto wl = std::find_if(m_vWorldLocation.begin(),
                            m_vWorldLocation.end(),
-                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+                           [idx](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
 
     if (wl != m_vWorldLocation.end())
     {
