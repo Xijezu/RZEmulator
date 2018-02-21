@@ -19,12 +19,14 @@
 #include "Player.h"
 #include "ClientPackets.h"
 
-WorldLocation::WorldLocation(const WorldLocation& src)
+WorldLocation::WorldLocation(const WorldLocation &src)
 {
     idx           = src.idx;
     location_type = src.location_type;
-    for (int x = 0; x < 7; ++x) {
-        for (int y = 0; y < 4; ++y) {
+    for (int x = 0; x < 7; ++x)
+    {
+        for (int y = 0; y < 4; ++y)
+        {
             weather_ratio[x][y] = src.weather_ratio[x][y];
         }
     }
@@ -41,16 +43,19 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
         RemoveFromLocation(player);
 
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    for(int i = 0; i < m_vWorldLocation.size(); i++)
+
+    auto wl = std::find_if(m_vWorldLocation.begin(),
+                           m_vWorldLocation.end(),
+                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+
+    if (wl != m_vWorldLocation.end())
     {
-        if (m_vWorldLocation[i].idx == idx) {
-            m_vWorldLocation[i].m_vIncludeClient.emplace_back(player);
-            XPacket worldLocationPct(TS_SC_WEATHER_INFO);
-            worldLocationPct << (uint32_t)idx;
-            worldLocationPct << (uint16_t)m_vWorldLocation[i].current_weather;
-            player->SendPacket(worldLocationPct);
-            return &m_vWorldLocation[i];
-        }
+        wl->m_vIncludeClient.emplace_back(player);
+        XPacket worldLocationPct(TS_SC_WEATHER_INFO);
+        worldLocationPct << (uint32_t)idx;
+        worldLocationPct << (uint16_t)wl->current_weather;
+        player->SendPacket(worldLocationPct);
+        return &*wl;
     }
     return nullptr;
 }
@@ -59,47 +64,50 @@ bool WorldLocationManager::RemoveFromLocation(Player *player)
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
 
-    for (auto &wl : m_vWorldLocation)
+    auto wl = std::find_if(m_vWorldLocation.begin(),
+                           m_vWorldLocation.end(),
+                           [&player](const WorldLocation &worldLocation) { return player->m_WorldLocation->idx == worldLocation.idx; });
+
+    if (wl != m_vWorldLocation.end())
     {
-        if (player->m_WorldLocation->idx == wl.idx)
-        {
-            wl.m_vIncludeClient.erase(std::remove(wl.m_vIncludeClient.begin(),
-                                                  wl.m_vIncludeClient.end(), player),
-                                      wl.m_vIncludeClient.end());
-            return true;
-        }
+        wl->m_vIncludeClient.erase(std::remove(wl->m_vIncludeClient.begin(),
+                                               wl->m_vIncludeClient.end(), player),
+                                   wl->m_vIncludeClient.end());
+        return true;
     }
     return false;
 }
 
 void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
 {
-    if(player == nullptr)
+    if (player == nullptr)
         return;
 
     NG_SHARED_GUARD readGuard(i_lock);
-    for(auto& wl : m_vWorldLocation)
+    auto            wl = std::find_if(m_vWorldLocation.begin(),
+                                      m_vWorldLocation.end(),
+                                      [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+
+    if (wl != m_vWorldLocation.end())
     {
-        if(wl.idx == idx)
-        {
-            XPacket weatherPct(TS_SC_WEATHER_INFO);
-            weatherPct << (uint32_t)idx;
-            weatherPct << (uint16_t)wl.current_weather;
-            player->SendPacket(weatherPct);
-            return;
-        }
+        XPacket weatherPct(TS_SC_WEATHER_INFO);
+        weatherPct << (uint32_t)idx;
+        weatherPct << (uint16_t)wl->current_weather;
+        player->SendPacket(weatherPct);
     }
 }
 
 int WorldLocationManager::GetShovelableItem(uint idx)
 {
-    for(auto& wl : m_vWorldLocation)
-    {
-        if(wl.idx == idx)
-        {
-            return wl.shovelable_item;
-        }
-    }
+    NG_SHARED_GUARD readGuard(i_lock);
+
+    auto wl = std::find_if(m_vWorldLocation.begin(),
+                           m_vWorldLocation.end(),
+                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+
+    if (wl != m_vWorldLocation.end())
+        return wl->shovelable_item;
+    return 0;
 }
 
 uint WorldLocationManager::GetShovelableMonster(uint idx)
@@ -109,20 +117,24 @@ uint WorldLocationManager::GetShovelableMonster(uint idx)
 
 void WorldLocationManager::RegisterWorldLocation(uint idx, uint8_t location_type, uint time_id, uint weather_id, uint8_t ratio, uint weather_change_time, int shovelable_item)
 {
-    for(auto& wl : m_vWorldLocation) {
-        if (wl.idx == idx) {
-            wl.weather_ratio[weather_id][time_id] = ratio;
-            wl.shovelable_item = shovelable_item;
-            return;
-        }
+
+    auto wl = std::find_if(m_vWorldLocation.begin(),
+                           m_vWorldLocation.end(),
+                           [](const WorldLocation &worldLocation) { return worldLocation.idx == idx; });
+
+    if (wl != m_vWorldLocation.end())
+    {
+        wl->weather_ratio[weather_id][time_id] = ratio;
+        wl->shovelable_item = shovelable_item;
+        return;
     }
 
-    WorldLocation nwl { };
-    nwl.idx = idx;
+    WorldLocation nwl{ };
+    nwl.idx           = idx;
     nwl.location_type = location_type;
     nwl.weather_ratio[weather_id][time_id] = ratio;
     nwl.weather_change_time = weather_change_time;
-    nwl.shovelable_item = shovelable_item;
+    nwl.shovelable_item     = shovelable_item;
 
     m_vWorldLocation.emplace_back(nwl);
 }
@@ -131,13 +143,17 @@ void WorldLocationManager::RegisterMonsterLocation(uint idx, uint monster_id)
 {
     std::vector<uint> ml{ };
 
-    if (m_hsMonsterID.count(idx) >= 1) {
+    if (m_hsMonsterID.count(idx) >= 1)
+    {
         ml = m_hsMonsterID[idx];
-    } else {
+    }
+    else
+    {
         m_hsMonsterID[idx] = ml;
     }
 
-    for (auto &id :  ml) {
+    for (auto &id :  ml)
+    {
         if (id == monster_id)
             return;
     }

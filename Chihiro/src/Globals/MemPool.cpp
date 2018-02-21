@@ -99,8 +99,6 @@ Monster *MemoryPoolMgr::AllocMonster(uint idx)
     auto p = new Monster{m_nMonsterTop, mb};
     p->SetInt32Value(UNIT_FIELD_HANDLE, m_nMonsterTop);
     m_nMonsterTop++;
-    //m_hsMonster.insert(std::make_pair<uint,Monster*>(p->GetHandle(), (Monster*)p));
-    //HashMapHolder<Monster>::Insert(p);
     AddObject(p);
     return p;
 }
