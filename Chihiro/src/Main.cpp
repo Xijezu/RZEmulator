@@ -126,14 +126,14 @@ int main(int argc, char **argv)
 	sWorld->InitWorld();
 
 	ACE_Singleton<WorldSocketMgr<GameAuthSession>, ACE_Thread_Mutex>::instance()->StartNetwork(0, "0.0.0.0");
-	ACE_INET_Addr auth_addr(sConfigMgr->GetIntDefault("AuthServer.Port", 4502), sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1").c_str());
+	ACE_INET_Addr auth_addr((uint16_t)sConfigMgr->GetIntDefault("AuthServer.Port", 4502), sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1").c_str());
 	if (sAuthNetwork->InitializeNetwork(auth_addr) != 0)
 	{
 		NG_LOG_ERROR("server.worldserver","Cannot connect to the auth server!");
 		return 1;
 	}
 
-	uint16 worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+	auto worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 	std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
 	//WorldSockAcceptor acceptor;
 	if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)
@@ -147,37 +147,14 @@ int main(int argc, char **argv)
     ACE_Based::Thread worldThread(new WorldRunnable);
     worldThread.setPriority(ACE_Based::Highest);
 
-	// maximum counter for next ping
-	uint32 numLoops = 30 * (MINUTE * 1000000 / 100000);
-	uint32 loopCounter = 0;
 
-	// Wait for termination signal
-	while (!World::IsStopped())
-	{
-		// dont move this outside the loop, the reactor will modify it
-		ACE_Time_Value interval(0, 100000);
-
-		if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
-			break;
-
-		if ((++loopCounter) == numLoops)
-		{
-			loopCounter = 0;
-
-			NG_LOG_INFO("misc", "Ping MySQL to keep connection alive");
-			CharacterDatabase.KeepAlive();
-		}
-	}
-
-    // when the main thread closes the singletons get unloaded
-    // since worldrunnable uses them, it will crash if unloaded after master
     worldThread.wait();
-
     StopDB();
 
-	NG_LOG_INFO("server.worldserver", "Exiting with code %d", World::GetExitCode());
+	int exitCode = World::GetExitCode();
+	NG_LOG_INFO("server.worldserver", "Exiting with code %d", exitCode);
 
-	return World::GetExitCode();
+	return exitCode;
 }
 
 ///- Initialize connection to the databases
