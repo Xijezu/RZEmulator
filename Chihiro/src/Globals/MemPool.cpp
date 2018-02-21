@@ -32,7 +32,6 @@ Item *MemoryPoolMgr::AllocItem()
     auto *p = new Item{ };
     p->m_nHandle = m_nItemTop++;
     p->SetUInt32Value(UNIT_FIELD_HANDLE, p->m_nHandle);
-    //m_hsItem.insert(std::pair<uint, Item *>(p->m_nHandle, p));
     AddObject(p);
     return p;
 }
@@ -68,8 +67,6 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
         item->m_Instance.UID = sWorld->GetItemIndex();
     }
     m_nMiscTop++;
-    //m_hsItem.insert(std::make_pair<uint, Item *>((uint)(item->m_nHandle), (Item*)item));
-    //HashMapHolder<Item>::Insert(item);
     AddObject(item);
 }
 
@@ -140,8 +137,8 @@ void MemoryPoolMgr::Update(uint diff)
     // First deleting all things in the remove list
     while (!i_objectsToRemove.empty())
     {
-        std::set<WorldObject *>::iterator itr  = i_objectsToRemove.begin();
-        WorldObject                       *obj = *itr;
+        auto        itr  = i_objectsToRemove.begin();
+        WorldObject *obj = *itr;
 
         if (obj->IsInWorld())
             sWorld->RemoveObjectFromWorld(obj);
@@ -149,16 +146,16 @@ void MemoryPoolMgr::Update(uint diff)
         switch (obj->GetSubType())
         {
             case ST_Player:
-                RemoveObject((Player *)obj);
+                RemoveObject(obj->As<Player>());
                 break;
             case ST_Mob:
-                RemoveObject((Monster *)obj);
+                RemoveObject(obj->As<Monster>());
                 break;
             case ST_Summon:
-                RemoveObject((Summon *)obj);
+                RemoveObject(obj->As<Summon>());
                 break;
             case ST_Object: // In this case item
-                RemoveObject((Item *)obj);
+                RemoveObject(obj->As<Item>());
                 break;
             default:
                 RemoveObject(obj);
@@ -182,7 +179,7 @@ void MemoryPoolMgr::_unload()
 {
     NG_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());
     auto            container = HashMapHolder<T>::GetContainer();
-    for (auto &obj : container)
+    for (auto       &obj : container)
     {
         container.erase(obj.second->GetHandle());
         delete obj.second;

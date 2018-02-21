@@ -30,6 +30,10 @@
 #include "Skill.h"
 #include "WorldLocation.h"
 
+ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
+{
+}
+
 void ObjectMgr::InitGameContent()
 {
     LoadStatResource();
@@ -58,6 +62,34 @@ void ObjectMgr::InitGameContent()
     LoadWorldLocation();
     LoadStringResource();
     LoadSummonNameResource();
+}
+
+
+void ObjectMgr::UnloadAll()
+{
+    g_vWayPoint.clear();
+    g_vRespawnInfo.clear();
+    _jobTemplateStore.clear();
+    _itemTemplateStore.clear();
+    _creatureBaseStore.clear();
+    _jobBonusStore.clear();
+    _summonResourceStore.clear();
+    _marketResourceStore.clear();
+    _skillTreeResourceStore.clear();
+    _summonLevelStore.clear();
+    _stringResourceStore.clear();
+    _levelResourceStore.clear();
+    _skillBaseStore.clear();
+    _monsterBaseStore.clear();
+    _dropTemplateStore.clear();
+    _questTemplateStore.clear();
+    _questLinkStore.clear();
+    _npcTemplateStore.clear();
+    _fieldPropTemplateStore.clear();
+    _summonPrefixStore.clear();
+    _summonPostfixStore.clear();
+    _summonBonusStore.clear();
+    _stateTemplateStore.clear();
 }
 
 void ObjectMgr::LoadItemResource()
@@ -1290,9 +1322,7 @@ CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
 ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1)
-    {
         return &_itemTemplateStore[item_id];
-    }
     return nullptr;
 }
 
@@ -1340,9 +1370,7 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
 JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
 {
     if (_jobTemplateStore.count(job_id) == 1)
-    {
         return &_jobTemplateStore[job_id];
-    }
     return nullptr;
 }
 
@@ -1356,9 +1384,7 @@ SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
 std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
     if (_marketResourceStore.count(szKey) == 1)
-    {
         return &_marketResourceStore[szKey];
-    }
     return nullptr;
 }
 
@@ -1423,9 +1449,9 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
 
     auto st = getSkillTree(nJobID);
     if (st.empty())
-    {
         return TS_RESULT_ACCESS_DENIED;
-    }
+
+
     for (auto stree : st)
     {
         if (stree.skill_id == skill_id)
@@ -1466,13 +1492,11 @@ ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, i
         }
     }
     if (bFound)
-    {
         return TS_RESULT_NOT_ENOUGH_JOB_LEVEL;
-    }
+
     if (bMaxLimit)
-    {
         return TS_RESULT_LIMIT_MAX;
-    }
+
     return TS_RESULT_ACCESS_DENIED;
 }
 
@@ -1680,33 +1704,6 @@ int64 ObjectMgr::GetItemSellPrice(int64 price, int rank, int lv, bool same_price
             return k / 2;
     }
     return 0;
-}
-
-void ObjectMgr::UnloadAll()
-{
-    g_vWayPoint.clear();
-    g_vRespawnInfo.clear();
-    _jobTemplateStore.clear();
-    _itemTemplateStore.clear();
-    _creatureBaseStore.clear();
-    _jobBonusStore.clear();
-    _summonResourceStore.clear();
-    _marketResourceStore.clear();
-    _skillTreeResourceStore.clear();
-    _summonLevelStore.clear();
-    _stringResourceStore.clear();
-    _levelResourceStore.clear();
-    _skillBaseStore.clear();
-    _monsterBaseStore.clear();
-    _dropTemplateStore.clear();
-    _questTemplateStore.clear();
-    _questLinkStore.clear();
-    _npcTemplateStore.clear();
-    _fieldPropTemplateStore.clear();
-    _summonPrefixStore.clear();
-    _summonPostfixStore.clear();
-    _summonBonusStore.clear();
-    _stateTemplateStore.clear();
 }
 
 bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
@@ -1918,10 +1915,6 @@ bool ObjectMgr::IsBlocked(float x, float y)
     if (sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;
     return g_qtBlockInfo.Collision({x, y});
-}
-
-ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
-{
 }
 
 FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
