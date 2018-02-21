@@ -3445,9 +3445,12 @@ void Player::FreezeTrade()
 
 void Player::ClearTradeInfo()
 {
-    m_bTradeFreezed      = false;
-    m_bTrading           = false;
-    // Todo: Implement clearing trade params as functions are implemented
+    m_bTradeAccepted = false;
+    m_bTradeFreezed  = false;
+    m_bTrading       = false;
+    SetUInt32Value(PLAYER_FIELD_TRADE_TARGET, 0);
+    SetUInt64Value(PLAYER_FIELD_TRADE_GOLD, 0);
+    m_vTradeItemList.clear();
 }
 
 Player* Player::GetTradeTarget()
@@ -3528,7 +3531,7 @@ LABEL_10:
 void Player::AddGoldToTradeWindow(int64 nGold)
 {
     if (!m_bTradeFreezed)
-        m_nTradeGold = nGold;
+        SetUInt64Value(PLAYER_FIELD_TRADE_GOLD, (uint64)nGold);
 }
 
 bool Player::IsTradable(Item *pItem)
@@ -3560,4 +3563,162 @@ bool Player::RemoveItemFromTradeWindow(Item *item, int32 count)
     }
 
     return false;
+}
+
+void Player::ConfirmTrade()
+{
+    m_bTradeAccepted = true;
+}
+
+bool Player::ProcessTrade()
+{
+    if(m_bTrading && m_bTradeFreezed)
+    {
+        auto tradeTarget = GetTradeTarget();
+        if(tradeTarget == nullptr)
+            return false;
+
+        int64 nTradeTargetResult = GetGold();
+        int64 nPrevTradeTargetGold = tradeTarget->GetGold();
+
+        uint16 resultGold = processTradeGold();
+        if(resultGold != TS_RESULT_SUCCESS)
+        {
+            if(resultGold == TS_RESULT_TOO_MUCH_MONEY)
+            {
+                Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+            }
+
+            if(   ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
+               || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            {
+                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
+            }
+
+            return false;
+        }
+
+        resultGold = tradeTarget->processTradeGold();
+        if(resultGold != TS_RESULT_SUCCESS)
+        {
+            if(resultGold == TS_RESULT_TOO_MUCH_MONEY)
+            {
+                Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+            }
+
+            if(   ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
+                  || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            {
+                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
+            }
+
+            return false;
+        }
+
+        if(   processTradeItem() != TS_RESULT_SUCCESS
+           || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
+        {
+            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount, tradeTarget->m_szAccount);
+           return false;
+        }
+
+        Save(false);
+        tradeTarget->Save(false);
+        ClearTradeInfo();
+        tradeTarget->ClearTradeInfo();
+        return true;
+    }
+    return false;
+}
+
+uint16 Player::processTradeGold()
+{
+    if(!m_bTrading || !m_bTradeFreezed)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto tradeTarget = GetTradeTarget();
+    if(tradeTarget == nullptr)
+        return TS_RESULT_NOT_EXIST;
+
+    if(IsInWorld())
+    {
+        int64 tradeGold = GetTradeGold();
+        int64 prevGold = GetGold();
+
+        if(tradeGold == 0)
+            return TS_RESULT_SUCCESS;
+
+        if(tradeGold < 0)
+        {
+            NG_LOG_ERROR("trade", "Player::processTradeGold(): Gold cannot be negative value");
+            //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
+            return TS_RESULT_ACCESS_DENIED;
+        }
+
+        if(   ChangeGold(prevGold - tradeGold) == TS_RESULT_SUCCESS
+           && tradeTarget->ChangeGold(tradeTarget->GetGold() + tradeGold) == TS_RESULT_SUCCESS)
+        {
+            return TS_RESULT_SUCCESS;
+        }
+
+        if(ChangeGold(prevGold) != TS_RESULT_SUCCESS)
+        {
+            NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), prevGold);
+        }
+
+        return TS_RESULT_TOO_MUCH_MONEY;
+    }
+    else
+    {
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
+        return TS_RESULT_NOT_EXIST;
+    }
+
+    return TS_RESULT_SUCCESS;
+}
+
+uint16 Player::processTradeItem()
+{
+    return TS_RESULT_SUCCESS;
+}
+
+bool Player::CheckTradeWeight()
+{
+    if(!m_bTrading)
+        return false;
+
+    auto tplayer = GetTradeTarget();
+    if(tplayer == nullptr)
+        return false;
+
+    float weight = 0;
+    float targetWeight = tplayer->GetFloatValue(PLAYER_FIELD_WEIGHT);
+
+    for(auto& it : m_vTradeItemList)
+    {
+        auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
+        if(pItem == nullptr)
+            return false;
+
+        weight += pItem->m_pItemBase->weight * it.second;
+    }
+
+    return (weight <= tplayer->m_Attribute.nMaxWeight - targetWeight );
+}
+
+bool Player::CheckTradeItem()
+{
+    for(auto& it : m_vTradeItemList)
+    {
+        auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
+        if(pItem == nullptr)
+            return false;
+
+        if(it.second > pItem->m_Instance.nCount)
+            return false;
+    }
+    return true;
 }
