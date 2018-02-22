@@ -135,7 +135,6 @@ int main(int argc, char **argv)
 
 	auto worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 	std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
-	//WorldSockAcceptor acceptor;
 	if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)
 	{
 		NG_LOG_ERROR("server.worldserver", "Failed to start network");
