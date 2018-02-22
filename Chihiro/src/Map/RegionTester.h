@@ -19,53 +19,82 @@
 #define NGEMITY_REGIONTESTER_H
 
 #include "Object.h"
+#include <memory>
 
-class RegionTester
+struct RegionTester
 {
-    public:
-        virtual void Init(Position OriginalPos, Position TargetPos, float RegionProperty) = 0;
-        virtual bool IsInRegion(Position pos) = 0;
+    virtual void Init(Position OriginalPos, Position TargetPos, float RegionProperty) = 0;
+    virtual bool IsInRegion(Position pos) = 0;
 };
 
-class DirectionRegionTester : public RegionTester
+struct DirectionRegionTester : public RegionTester
 {
-    public:
-        DirectionRegionTester() : V1x(), V1y(), ori_x(), ori_y(), dx(), dy(), c(), thickness(), denominator() { };
-        ~DirectionRegionTester() = default;
-        void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
-        bool IsInRegion(Position pos) override;
-    private:
-        float V1x;
-        float V1y;
-        float ori_x;
-        float ori_y;
-        float dx;
-        float dy;
-        float c;
-        float thickness;
-        float denominator;
+    DirectionRegionTester() : V1x(), V1y(), ori_x(), ori_y(), dx(), dy(), c(), thickness(), denominator()
+    {
+
+    };
+    ~DirectionRegionTester() = default;
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    bool IsInRegion(Position pos) override;
+
+    float V1x;
+    float V1y;
+    float ori_x;
+    float ori_y;
+    float dx;
+    float dy;
+    float c;
+    float thickness;
+    float denominator;
 };
 
-class CrossRegionTester : public RegionTester
+struct CrossRegionTester : public RegionTester
 {
-    public:
-        void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
-        bool IsInRegion(Position pos) override;
-    private:
+    CrossRegionTester() : x1(), y1(), c1(), x2(), y2(), c2(), thickness(), denominator()
+    {
+    };
+
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    bool IsInRegion(Position pos) override;
+
+    float x1;
+    float y1;
+    float c1;
+    float x2;
+    float y2;
+    float c2;
+    float thickness;
+    float denominator;
 };
 
-class ArcCircleRegionTester : public RegionTester
+struct ArcCircleRegionTester : public RegionTester
 {
-    public:
-        void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
-        bool IsInRegion(Position pos) override;
+    ArcCircleRegionTester() : V1x(), V1y(), x(), y(), fCos()
+    {
+
+    };
+    ~ArcCircleRegionTester() = default;
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    bool IsInRegion(Position pos) override;
+
+    float V1x;
+    float V1y;
+    float x;
+    float y;
+    float fCos;
 };
 
-class CircleRegionTester : public RegionTester
+struct CircleRegionTester : public RegionTester
 {
-    public:
-        void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
-        bool IsInRegion(Position pos) override;
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override
+    {
+
+    }
+
+    bool IsInRegion(Position pos) override
+    {
+        return true;
+    }
 };
 
 

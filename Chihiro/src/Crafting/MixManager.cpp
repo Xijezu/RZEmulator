@@ -459,12 +459,11 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
 
 EnhanceInfo *MixManager::getenhanceInfo(int sid)
 {
-    for(int i = 0; i < m_vEnhanceInfo.size(); i++)
-    {
-        if(m_vEnhanceInfo[i].nSID == sid)
-            return &m_vEnhanceInfo[i];
-    }
-    return nullptr;
+    auto info = std::find_if(m_vEnhanceInfo.begin(),
+                             m_vEnhanceInfo.end(),
+                             [sid](const EnhanceInfo& res) { return sid == res.nSID; });
+
+    return info != m_vEnhanceInfo.end() ? &*info : nullptr;
 }
 
 void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)

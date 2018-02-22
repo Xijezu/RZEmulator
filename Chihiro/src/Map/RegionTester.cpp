@@ -50,3 +50,71 @@ bool DirectionRegionTester::IsInRegion(Position pos)
     }
     ACE_NOTREACHED(return false);
 }
+
+void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+{
+    /*
+     * I dont know either
+       this->x1 = TargetPos->y - OriginalPos->y;
+       *(float *)&OriginalPosa = OriginalPos->x - TargetPos->x;
+       this->y1 = *(float *)&OriginalPosa;
+     */
+    y1 = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    x1 = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+
+
+    c1 = 0.0f - x1 * OriginalPos.GetPositionX() - y1 - OriginalPos.GetPositionY();
+    x2 = y1;
+    y2 = x1;
+
+    c1 = 0.0f - OriginalPos.GetPositionX() * x2 - x1 * OriginalPos.GetPositionY();
+    denominator = std::sqrt(y1 * y1 + x1 * x1);
+    thickness = RegionProperty * 12.0f * 0.5f;
+}
+
+bool CrossRegionTester::IsInRegion(Position pos)
+{
+    auto posa = std::abs(x1 * pos.GetPositionX() + y1 * pos.GetPositionY() + c1);
+
+    if(posa / denominator >= thickness)
+    {
+        auto posb = std::abs(x2 * pos.GetPositionX() + y2 * pos.GetPositionY() + c2);
+        if(posb / denominator >= thickness)
+            return false;
+    }
+    return true;
+}
+
+void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+{
+    auto _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    auto _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+    float m = std::sqrt(_V1y * _V1y + _V1x * _V1x);
+    if(m == 0.0f)
+    {
+        V1x = 1.0f;
+        V1y = 0.0f;
+    }
+    else
+    {
+        V1x = _V1x / m;
+        V1y = _V1y / m;
+    }
+    x = OriginalPos.GetPositionX();
+    y = OriginalPos.GetPositionY();
+    fCos = std::cos(RegionProperty);
+}
+
+bool ArcCircleRegionTester::IsInRegion(Position pos)
+{
+    auto  _V2x = pos.GetPositionX() - x;
+    auto  _V2y = pos.GetPositionY() - y;
+    float m    = std::sqrt(_V2y * _V2y + _V2x * _V2x);
+    if (m == 0.0f)
+    {
+        return true;
+    }
+    auto  v4 = _V2y / m;
+    float mb = _V2x / m;
+    return v4 * V1y + mb * V1x >= fCos;
+}
