@@ -782,7 +782,7 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
             XPacket statusMsg(TS_SC_STATUS_CHANGE);
             statusMsg << obj->GetHandle();
             statusMsg << Messages::GetStatusCode(obj, pObject->As<Player>());
-            obj->As<Player>()->SendPacket(statusMsg);
+            pObject->As<Player>()->SendPacket(statusMsg);
         }
     };
 
