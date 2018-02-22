@@ -69,6 +69,11 @@ struct CrossRegionTester : public RegionTester
 
 struct ArcCircleRegionTester : public RegionTester
 {
+    ArcCircleRegionTester() : V1x(), V1y(), x(), y(), fCos()
+    {
+
+    };
+    ~ArcCircleRegionTester() = default;
     void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
     bool IsInRegion(Position pos) override;
 
@@ -81,8 +86,15 @@ struct ArcCircleRegionTester : public RegionTester
 
 struct CircleRegionTester : public RegionTester
 {
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
-    bool IsInRegion(Position pos) override;
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override
+    {
+
+    }
+
+    bool IsInRegion(Position pos) override
+    {
+        return true;
+    }
 };
 
 
