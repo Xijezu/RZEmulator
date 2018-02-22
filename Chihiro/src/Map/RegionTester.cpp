@@ -84,3 +84,37 @@ bool CrossRegionTester::IsInRegion(Position pos)
     }
     return true;
 }
+
+void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+{
+    auto _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    auto _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+    float m = std::sqrt(_V1y * _V1y + _V1x * _V1x);
+    if(m == 0.0f)
+    {
+        V1x = 1.0f;
+        V1y = 0.0f;
+    }
+    else
+    {
+        V1x = _V1x / m;
+        V1y = _V1y / m;
+    }
+    x = OriginalPos.GetPositionX();
+    y = OriginalPos.GetPositionY();
+    fCos = std::cos(RegionProperty);
+}
+
+bool ArcCircleRegionTester::IsInRegion(Position pos)
+{
+    auto  _V2x = pos.GetPositionX() - x;
+    auto  _V2y = pos.GetPositionY() - y;
+    float m    = std::sqrt(_V2y * _V2y + _V2x * _V2x);
+    if (m == 0.0f)
+    {
+        return true;
+    }
+    auto  v4 = _V2y / m;
+    float mb = _V2x / m;
+    return v4 * V1y + mb * V1x >= fCos;
+}
