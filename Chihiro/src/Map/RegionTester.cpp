@@ -50,3 +50,37 @@ bool DirectionRegionTester::IsInRegion(Position pos)
     }
     ACE_NOTREACHED(return false);
 }
+
+void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+{
+    /*
+     * I dont know either
+       this->x1 = TargetPos->y - OriginalPos->y;
+       *(float *)&OriginalPosa = OriginalPos->x - TargetPos->x;
+       this->y1 = *(float *)&OriginalPosa;
+     */
+    y1 = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    x1 = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+
+
+    c1 = 0.0f - x1 * OriginalPos.GetPositionX() - y1 - OriginalPos.GetPositionY();
+    x2 = y1;
+    y2 = x1;
+
+    c1 = 0.0f - OriginalPos.GetPositionX() * x2 - x1 * OriginalPos.GetPositionY();
+    denominator = std::sqrt(y1 * y1 + x1 * x1);
+    thickness = RegionProperty * 12.0f * 0.5f;
+}
+
+bool CrossRegionTester::IsInRegion(Position pos)
+{
+    auto posa = std::abs(x1 * pos.GetPositionX() + y1 * pos.GetPositionY() + c1);
+
+    if(posa / denominator >= thickness)
+    {
+        auto posb = std::abs(x2 * pos.GetPositionX() + y2 * pos.GetPositionY() + c2);
+        if(posb / denominator >= thickness)
+            return false;
+    }
+    return true;
+}
