@@ -2208,7 +2208,7 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
         if (count <= 0 || count > item->m_Instance.nCount)
         {
-            // Print debug message?
+            NG_LOG_ERROR("trade", "Add Trade Bug [%s:%s]", m_pPlayer->m_szAccount, m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
@@ -2274,7 +2274,7 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
         int64 gold = pRecvPct->read<int32>();
         if (gold <= 0)
         {
-            // Print debug message?
+            NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%s]", m_pPlayer->m_szAccount, m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
