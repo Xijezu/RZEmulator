@@ -72,6 +72,7 @@ class Skill
         uint8 m_nRequestedSkillLevel;
     private:
         Position m_targetPosition{ };
+        float    m_fRange;
         uint     m_nCastingDelay;
         uint     m_nEnhance{ };
         uint16   m_nErrorCode{ };
@@ -103,6 +104,7 @@ class Skill
 
         void SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget);
 
+        void MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void TOGGLE_AURA(Unit *pTarget);
 
