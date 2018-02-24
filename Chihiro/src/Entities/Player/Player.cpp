@@ -3741,7 +3741,7 @@ bool Player::CheckTradeItem()
     return true;
 }
 
-bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count, uint32 *ResultItemHandle)
+bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 {
     Item *origItem = FindItemByHandle(ItemHandle);
 
@@ -3758,14 +3758,8 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count, uint32 *R
 
     Item *target_item = pTarget->PushItem(item, count, false);
 
-    if(target_item != nullptr)
-    {
-        if(ResultItemHandle != nullptr)
-            *ResultItemHandle = target_item->GetHandle();
-
-        if(target_item != item)
-            Item::PendFreeItem(item);
-    }
+    if(target_item != nullptr && target_item != item)
+        Item::PendFreeItem(item);
 
     return true;
 }
