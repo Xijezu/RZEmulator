@@ -411,11 +411,6 @@ void Player::DB_ReadStorage()
         DB_UpdateStorageGold();
     }
 
-    for (const auto &summon : m_vStorageSummonList)
-    {
-        NG_LOG_DEBUG("misc", "%d : %d", summon->GetHandle(), summon->GetUInt32Value(UNIT_FIELD_UID));
-    }
-
     m_bIsStorageLoaded = true;
     OpenStorage();
     m_bIsStorageRequested = false;
