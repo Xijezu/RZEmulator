@@ -192,7 +192,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Item *GetStorageItem(uint idx);
         uint GetItemCount() const;
         uint GetStorageItemCount() const;
-        bool GiveItem(Player *pTarget, uint32 ItemHandle, int64 count, uint32 *ResultItemHandle);
+        bool GiveItem(Player *pTarget, uint32 ItemHandle, int64 count);
         void MoveStorageToInventory(Item *pItem, int64 count);
         void MoveInventoryToStorage(Item *pItem, int64 count);
         bool EraseItem(Item *pItem, int64 count);
