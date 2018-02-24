@@ -76,7 +76,7 @@ void Player::CleanupsBeforeDelete()
         sWorld->RemoveObjectFromWorld(this);
     }
 
-    if(GetPartyID() != 0)
+    if (GetPartyID() != 0)
         sGroupManager->onLogout(GetPartyID(), this);
 
     for (auto &t : m_vStorageSummonList)
@@ -140,7 +140,7 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
 }
 
-bool Player::ReadCharacter(const std::string& _name, int _race)
+bool Player::ReadCharacter(const std::string &_name, int _race)
 {
     int mainSummon = 0;
     int subSummon  = 0;
@@ -154,7 +154,7 @@ bool Player::ReadCharacter(const std::string& _name, int _race)
         SetUInt32Value(UNIT_FIELD_UID, (*result)[0].GetUInt32());
         m_szAccount = (*result)[1].GetString();
         int permission = (*result)[2].GetInt32();
-        if(m_session->m_nPermission > permission)
+        if (m_session->m_nPermission > permission)
             permission = m_session->m_nPermission;
         SetInt32Value(PLAYER_FIELD_PERMISSION, permission);
         SetInt32Value(PLAYER_FIELD_PARTY_ID, (*result)[3].GetInt32());
@@ -285,8 +285,8 @@ void Player::DB_ReadStorage()
     {
         do
         {
-            int fidx = 0;
-            Field *field = result->Fetch();
+            int   fidx        = 0;
+            Field *field      = result->Fetch();
             int64 sid         = field[fidx++].GetInt64();
             int   idx         = field[fidx++].GetInt32();
             int   code        = field[fidx++].GetInt32();
@@ -309,7 +309,7 @@ void Player::DB_ReadStorage()
             if (!m_bIsStorageLoaded || code == 0 || curItem == nullptr)
             {
                 Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
-                if(newItem == nullptr)
+                if (newItem == nullptr)
                 {
                     NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                     continue;
@@ -458,7 +458,7 @@ bool Player::ReadItemList(int sid)
 
             auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag,
                                         socket_0, socket_1, socket_2, socket_3, remain_time);
-            if(item == nullptr)
+            if (item == nullptr)
             {
                 NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                 continue;
@@ -1141,31 +1141,31 @@ Summon *Player::GetSummon(int summon_sid)
     return nullptr;
 }
 
-void Player::SetLastContact(const std::string& szKey, const std::string& szValue)
+void Player::SetLastContact(const std::string &szKey, const std::string &szValue)
 {
     m_hsContact[szKey] = szValue;
 }
 
-void Player::SetLastContact(const std::string& szKey, uint32_t nValue)
+void Player::SetLastContact(const std::string &szKey, uint32_t nValue)
 {
     SetLastContact(szKey, std::to_string(nValue));
 }
 
-std::string Player::GetLastContactStr(const std::string& szKey)
+std::string Player::GetLastContactStr(const std::string &szKey)
 {
-    std::string res{};
+    std::string res{ };
     if (m_hsContact.count(szKey) == 1)
         return m_hsContact[szKey];
     return res;
 }
 
-uint32_t Player::GetLastContactLong(const std::string& szKey)
+uint32_t Player::GetLastContactLong(const std::string &szKey)
 {
     auto szValue = GetLastContactStr(szKey);
     return (uint32_t)std::stoul(szValue);
 }
 
-void Player::SetDialogTitle(const std::string& szTitle, int type)
+void Player::SetDialogTitle(const std::string &szTitle, int type)
 {
     if (!szTitle.empty())
     {
@@ -1180,7 +1180,7 @@ void Player::SetDialogTitle(const std::string& szTitle, int type)
     }
 }
 
-void Player::SetDialogText(const std::string& szText)
+void Player::SetDialogText(const std::string &szText)
 {
     if (!szText.empty())
     {
@@ -1190,7 +1190,7 @@ void Player::SetDialogText(const std::string& szText)
     }
 }
 
-void Player::AddDialogMenu(const std::string& szKey, const std::string& szValue)
+void Player::AddDialogMenu(const std::string &szKey, const std::string &szValue)
 {
     if (!szKey.empty())
     {
@@ -1219,8 +1219,8 @@ void Player::ShowDialog()
 
 bool Player::IsValidTrigger(const std::string &szTrigger)
 {
-    Tokenizer tokenizer(m_szDialogMenu, '\t');
-    for (const auto& s : tokenizer)
+    Tokenizer       tokenizer(m_szDialogMenu, '\t');
+    for (const auto &s : tokenizer)
     {
         if (s == szTrigger)
             return true;
@@ -1550,8 +1550,8 @@ void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int s
 
 void Player::onExpChange()
 {
-    int  level   = 1;
-    auto exp     = GetEXP();
+    int  level = 1;
+    auto exp   = GetEXP();
     if (sObjectMgr->GetNeedExp(1) <= exp)
     {
         do
@@ -1655,7 +1655,6 @@ bool Player::RemoveSummon(Summon *pSummon)
     Summon::DB_UpdateSummon(this, pSummon);
     return true;
 }
-
 
 Summon *Player::GetSummonByHandle(uint handle)
 {
@@ -2359,26 +2358,25 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
-    NG_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
-    HashMapHolder<Player>::MapType const &m  = sMemoryPool->GetPlayers();
-
-    for (auto itr = m.begin(); itr != m.end(); ++itr)
+    NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
+    auto const      &m = sMemoryPool->GetPlayers();
+    for (auto &itr : m)
     {
-        if (itr->second != nullptr)
-            fn(itr->second);
+        if (itr.second != nullptr)
+            fn(itr.second);
     }
 }
 
 Player *Player::FindPlayer(const std::string &szName)
 {
-    NG_SHARED_GUARD                      readGuard(*HashMapHolder<Player>::GetLock());
-    HashMapHolder<Player>::MapType const &m = sMemoryPool->GetPlayers();
-    for (auto                            itr : m)
-    {
-        if (iequals(szName, itr.second->GetNameAsString()))
-            return itr.second;
-    }
-    return nullptr;
+    NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
+    auto const      &m = sMemoryPool->GetPlayers();
+
+    auto pos = std::find_if(m.begin(),
+                            m.end(),
+                            [&szName](const auto &player) { return iequals(szName, player.second->GetNameAsString()); });
+
+    return pos == m.end() ? nullptr : pos->second;
 }
 
 void Player::StartQuest(int code, int nStartQuestID, bool bForce)
@@ -2819,7 +2817,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
         if (bApplyStanima)
         {
             gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
-            auto s = GetStamina();
+            auto s   = GetStamina();
             if (s >= gain_exp || m_bStaminaActive)
             {
                 bonus_exp = (int64)((float)exp * GameRule::GetStaminaBonus());
@@ -2931,7 +2929,7 @@ int Player::AddStamina(int nStamina)
         if (GetStamina() != oldStamina)
             Messages::SendPropertyMessage(this, this, "stamina", GetStamina());
     }
-	return GetStamina();
+    return GetStamina();
 }
 
 int Player::GetStaminaRegenRate()
@@ -3209,7 +3207,7 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
     {
         if (pItem->IsJoinable())
         {
-            Item  *pNewItem  = m_Storage.Pop(pItem, count, false);
+            Item *pNewItem = m_Storage.Pop(pItem, count, false);
             pNewItem->m_Instance.nIdx     = ++m_Inventory.m_nIndex;
             pNewItem->m_bIsNeedUpdateToDB = true;
             auto pDividedItem = m_Inventory.Push(pNewItem, count, false);
@@ -3236,10 +3234,10 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
 
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
     {
-        if(pItem->m_Instance.OwnSummonHandle != 0)
+        if (pItem->m_Instance.OwnSummonHandle != 0)
         {
             auto summon = sMemoryPool->GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
-            if(summon != nullptr)
+            if (summon != nullptr)
                 summon->Putoff(pItem->m_Instance.nWearInfo);
             else
                 return;
@@ -3252,10 +3250,10 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     }
 
     if (IsErasable(pItem) &&
-            (pItem->m_Instance.Flag & 0x20000000) == 0
-            && m_bIsUsingStorage
-            && pItem->m_Instance.nCount >= count
-            && (pItem->IsJoinable() || pItem->m_Instance.nCount == count))
+        (pItem->m_Instance.Flag & 0x20000000) == 0
+        && m_bIsUsingStorage
+        && pItem->m_Instance.nCount >= count
+        && (pItem->IsJoinable() || pItem->m_Instance.nCount == count))
     {
         if (pItem->IsJoinable())
         {
@@ -3361,21 +3359,21 @@ bool Player::IsSitdownable() const
 
 bool Player::IsErasable(Item *pItem) const
 {
-    if(!pItem->IsInInventory())
+    if (!pItem->IsInInventory())
         return false;
-    if(pItem->m_Instance.OwnerHandle != GetHandle())
+    if (pItem->m_Instance.OwnerHandle != GetHandle())
         return false;
-    if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+    if (pItem->m_Instance.nWearInfo != WEAR_NONE)
         return false;
-    if(pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+    if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
         return false;
 
-    if(pItem->m_pItemBase->group == GROUP_SUMMONCARD)
+    if (pItem->m_pItemBase->group == GROUP_SUMMONCARD)
     {
         for (int i = 0; i < 6; i++)
         {
             // TODO: Beltslots
-            if(m_aBindSummonCard[i] != nullptr && pItem->GetHandle() == m_aBindSummonCard[i]->GetHandle())
+            if (m_aBindSummonCard[i] != nullptr && pItem->GetHandle() == m_aBindSummonCard[i]->GetHandle())
                 return false;
         }
     }
@@ -3391,7 +3389,7 @@ bool Player::IsMixable(Item *pItem) const
 bool Player::DropQuest(int code)
 {
     auto q = m_QuestManager.FindQuest(code);
-    if(q == nullptr)
+    if (q == nullptr)
         return false;
 
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_QUEST);
@@ -3408,9 +3406,9 @@ void Player::onDropQuest(Quest *pQuest)
 {
     if (pQuest->m_QuestBase->nType == QuestType::QUEST_PARAMETER)
     {
-        for(int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
+        for (int i = 0; i < MAX_RANDOM_QUEST_VALUE; ++i)
         {
-            if(pQuest->GetValue(i) == 99 && GetChaos() != 0 && pQuest->GetValue(i + 1) == 1)
+            if (pQuest->GetValue(i) == 99 && GetChaos() != 0 && pQuest->GetValue(i + 1) == 1)
             {
                 AddChaos(-pQuest->GetValue(i + 2));
             }
@@ -3453,9 +3451,9 @@ void Player::ClearTradeInfo()
     m_vTradeItemList.clear();
 }
 
-Player* Player::GetTradeTarget()
+Player *Player::GetTradeTarget()
 {
-    if(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
+    if (GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
         return nullptr;
     return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
 }
@@ -3572,26 +3570,26 @@ void Player::ConfirmTrade()
 
 bool Player::ProcessTrade()
 {
-    if(m_bTrading && m_bTradeFreezed)
+    if (m_bTrading && m_bTradeFreezed)
     {
         auto tradeTarget = GetTradeTarget();
-        if(tradeTarget == nullptr)
+        if (tradeTarget == nullptr)
             return false;
 
-        int64 nTradeTargetResult = GetGold();
+        int64 nTradeTargetResult   = GetGold();
         int64 nPrevTradeTargetGold = tradeTarget->GetGold();
 
         uint16 resultGold = processTradeGold();
-        if(resultGold != TS_RESULT_SUCCESS)
+        if (resultGold != TS_RESULT_SUCCESS)
         {
-            if(resultGold == TS_RESULT_TOO_MUCH_MONEY)
+            if (resultGold == TS_RESULT_TOO_MUCH_MONEY)
             {
                 Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
                 Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
-            if(   ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
-               || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
+                || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
                 NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
             }
@@ -3600,16 +3598,16 @@ bool Player::ProcessTrade()
         }
 
         resultGold = tradeTarget->processTradeGold();
-        if(resultGold != TS_RESULT_SUCCESS)
+        if (resultGold != TS_RESULT_SUCCESS)
         {
-            if(resultGold == TS_RESULT_TOO_MUCH_MONEY)
+            if (resultGold == TS_RESULT_TOO_MUCH_MONEY)
             {
                 Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
                 Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
-            if(   ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
-                  || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
+                || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
                 NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
             }
@@ -3617,11 +3615,11 @@ bool Player::ProcessTrade()
             return false;
         }
 
-        if(   processTradeItem() != TS_RESULT_SUCCESS
-           || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
+        if (processTradeItem() != TS_RESULT_SUCCESS
+            || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount, tradeTarget->m_szAccount);
-           return false;
+            return false;
         }
 
         Save(false);
@@ -3635,35 +3633,35 @@ bool Player::ProcessTrade()
 
 uint16 Player::processTradeGold()
 {
-    if(!m_bTrading || !m_bTradeFreezed)
+    if (!m_bTrading || !m_bTradeFreezed)
         return TS_RESULT_NOT_ACTABLE;
 
     auto tradeTarget = GetTradeTarget();
-    if(tradeTarget == nullptr)
+    if (tradeTarget == nullptr)
         return TS_RESULT_NOT_EXIST;
 
-    if(IsInWorld())
+    if (IsInWorld())
     {
         int64 tradeGold = GetTradeGold();
-        int64 prevGold = GetGold();
+        int64 prevGold  = GetGold();
 
-        if(tradeGold == 0)
+        if (tradeGold == 0)
             return TS_RESULT_SUCCESS;
 
-        if(tradeGold < 0)
+        if (tradeGold < 0)
         {
             NG_LOG_ERROR("trade", "Player::processTradeGold(): Gold cannot be negative value");
             //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
             return TS_RESULT_ACCESS_DENIED;
         }
 
-        if(   ChangeGold(prevGold - tradeGold) == TS_RESULT_SUCCESS
-           && tradeTarget->ChangeGold(tradeTarget->GetGold() + tradeGold) == TS_RESULT_SUCCESS)
+        if (ChangeGold(prevGold - tradeGold) == TS_RESULT_SUCCESS
+            && tradeTarget->ChangeGold(tradeTarget->GetGold() + tradeGold) == TS_RESULT_SUCCESS)
         {
             return TS_RESULT_SUCCESS;
         }
 
-        if(ChangeGold(prevGold) != TS_RESULT_SUCCESS)
+        if (ChangeGold(prevGold) != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), prevGold);
         }
@@ -3694,7 +3692,7 @@ uint16 Player::processTradeItem()
 
     for (auto &it : m_vTradeItemList)
     {
-        if (!GiveItem(tradeTarget, it.first, it.second, nullptr))
+        if (!GiveItem(tradeTarget, it.first, it.second))
         {
             return TS_RESULT_ACCESS_DENIED;
         }
@@ -3705,7 +3703,7 @@ uint16 Player::processTradeItem()
 
 bool Player::CheckTradeWeight()
 {
-    if(!m_bTrading)
+    if (!m_bTrading)
         return false;
 
     auto tradeTarget = GetTradeTarget();
@@ -3715,10 +3713,10 @@ bool Player::CheckTradeWeight()
     float weight = 0;
     float targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
 
-    for(auto& it : m_vTradeItemList)
+    for (auto &it : m_vTradeItemList)
     {
         auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
-        if(pItem == nullptr)
+        if (pItem == nullptr)
             return false;
 
         weight += pItem->m_pItemBase->weight * it.second;
@@ -3729,13 +3727,13 @@ bool Player::CheckTradeWeight()
 
 bool Player::CheckTradeItem()
 {
-    for(auto& it : m_vTradeItemList)
+    for (auto &it : m_vTradeItemList)
     {
         auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
-        if(pItem == nullptr)
+        if (pItem == nullptr)
             return false;
 
-        if(it.second > pItem->m_Instance.nCount)
+        if (it.second > pItem->m_Instance.nCount)
             return false;
     }
     return true;
