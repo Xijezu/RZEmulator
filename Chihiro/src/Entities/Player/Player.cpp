@@ -3665,6 +3665,24 @@ uint16 Player::processTradeGold()
 
 uint16 Player::processTradeItem()
 {
+    auto tradeTarget = GetTradeTarget();
+    if (tradeTarget == nullptr)
+        return TS_RESULT_NOT_EXIST;
+
+    if (!IsInWorld())
+    {
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        return TS_RESULT_NOT_EXIST;
+    }
+
+    for (auto &it : m_vTradeItemList)
+    {
+        if (!GiveItem(tradeTarget, it.first, it.second))
+        {
+            return TS_RESULT_ACCESS_DENIED;
+        }
+    }
+
     return TS_RESULT_SUCCESS;
 }
 
@@ -3673,12 +3691,12 @@ bool Player::CheckTradeWeight()
     if (!m_bTrading)
         return false;
 
-    auto tplayer = GetTradeTarget();
-    if (tplayer == nullptr)
+    auto tradeTarget = GetTradeTarget();
+    if(tradeTarget == nullptr)
         return false;
 
-    float weight       = 0;
-    float targetWeight = tplayer->GetFloatValue(PLAYER_FIELD_WEIGHT);
+    float weight = 0;
+    float targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
 
     for (auto &it : m_vTradeItemList)
     {
@@ -3689,7 +3707,7 @@ bool Player::CheckTradeWeight()
         weight += pItem->m_pItemBase->weight * it.second;
     }
 
-    return (weight <= tplayer->m_Attribute.nMaxWeight - targetWeight);
+    return (weight <= tradeTarget->m_Attribute.nMaxWeight - targetWeight );
 }
 
 bool Player::CheckTradeItem()
@@ -3703,5 +3721,28 @@ bool Player::CheckTradeItem()
         if (it.second > pItem->m_Instance.nCount)
             return false;
     }
+    return true;
+}
+
+bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
+{
+    Item *origItem = FindItemByHandle(ItemHandle);
+
+    if(origItem == nullptr || !IsTradable(origItem))
+        return false;
+
+    if(count > origItem->m_Instance.nCount)
+        return false;
+
+    Item *item = popItem(origItem, count, false);
+
+    item->m_Instance.nIdx = 0;
+    item->m_bIsNeedUpdateToDB = true;
+
+    Item *target_item = pTarget->PushItem(item, count, false);
+
+    if(target_item != nullptr && target_item != item)
+        Item::PendFreeItem(item);
+
     return true;
 }
