@@ -1281,7 +1281,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
     }
     if (pItem->m_Instance.UID != 0)
     {
-        if (bSkipUpdateItemToDB || oldOwner == pItem->m_Instance.nOwnerUID && oldAccount == pItem->m_nAccountID || !HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
+        if (bSkipUpdateItemToDB || (oldOwner == pItem->m_Instance.nOwnerUID && oldAccount == pItem->m_nAccountID) || !HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         {
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
                 Messages::SendItemMessage(this, pItem);
@@ -3595,7 +3595,7 @@ bool Player::ProcessTrade()
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
                 || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
-                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
+                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%dll), Target(%dll)]", GetName(), GetGold(), nTradeTargetResult);
             }
 
             return false;
@@ -3604,7 +3604,7 @@ bool Player::ProcessTrade()
         if (processTradeItem() != TS_RESULT_SUCCESS
             || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
         {
-            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount, tradeTarget->m_szAccount);
+            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount.c_str(), tradeTarget->m_szAccount.c_str());
             return false;
         }
 
@@ -3656,7 +3656,7 @@ uint16 Player::processTradeGold()
     }
     else
     {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
         return TS_RESULT_NOT_EXIST;
     }
@@ -3672,7 +3672,7 @@ uint16 Player::processTradeItem()
 
     if (!IsInWorld())
     {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         return TS_RESULT_NOT_EXIST;
     }
 
