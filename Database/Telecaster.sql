@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `AutoAuctionRegistrationInfo` (
 DROP TABLE IF EXISTS `Character`;
 CREATE TABLE IF NOT EXISTS `Character` (
   `sid` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(61) NOT NULL DEFAULT 'name',
+  `name` varchar(61) NOT NULL,
   `account` varchar(60) NOT NULL,
   `account_id` int(11) NOT NULL DEFAULT '0',
   `slot` int(11) NOT NULL DEFAULT '0',
