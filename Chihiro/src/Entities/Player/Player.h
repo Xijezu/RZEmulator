@@ -80,6 +80,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         explicit Player(uint32);
         ~Player() override;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Player (const Player&) = delete;
+        Player& operator= (const Player&) = delete;
+
         void CleanupsBeforeDelete();
 
         /* ****************** STATIC FUNCTIONS ****************** */

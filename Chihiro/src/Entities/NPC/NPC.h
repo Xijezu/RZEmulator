@@ -22,34 +22,42 @@
 #include "NPCBase.h"
 #include "Quest.h"
 
-class NPC : public Unit {
-public:
-    explicit NPC(NPCTemplate* base);
-    static void EnterPacket(XPacket& pEnterPct, NPC* pNPC, Player* pPlayer);
+class NPC : public Unit
+{
+    public:
+        explicit NPC(NPCTemplate *base);
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        NPC (const NPC&) = delete;
+        NPC& operator= (const NPC&) = delete;
 
-    void LinkQuest(QuestLink* quest_link_info);
-    NPC_STATUS GetStatus() const;
-    void SetStatus(NPC_STATUS status);
-    int GetNPCID() const;
-    bool IsNPC() const override { return true; }
-    bool HasStartableQuest(Player* player);
-    bool HasFinishableQuest(Player* player);
-    bool HasInProgressQuest(Player* player);
+        static void EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer);
 
-    void DoEachStartableQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
-    void DoEachInProgressQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
-    void DoEachFinishableQuest(Player* pPlayer, const std::function<void (Player*,QuestLink*)>& fn);
+        void LinkQuest(QuestLink *quest_link_info);
+        NPC_STATUS GetStatus() const;
+        void SetStatus(NPC_STATUS status);
+        int GetNPCID() const;
 
-    int GetQuestTextID(int code, int progress) const;
-    int GetProgressFromTextID(int code, int textId) const;
+        bool IsNPC() const override { return true; }
 
-    NPCTemplate* m_pBase;
-private:
-    int m_nStatus;
-    std::vector<QuestLink*> m_vQuestLink_Start{};
-    std::vector<QuestLink*> m_vQuestLink_Progress{};
-    std::vector<QuestLink*> m_vQuestLink_End{};
-    std::vector<int> m_vQuest{};
+        bool HasStartableQuest(Player *player);
+        bool HasFinishableQuest(Player *player);
+        bool HasInProgressQuest(Player *player);
+
+        void DoEachStartableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+        void DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+        void DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+
+        int GetQuestTextID(int code, int progress) const;
+        int GetProgressFromTextID(int code, int textId) const;
+
+        NPCTemplate *m_pBase;
+    private:
+        int                      m_nStatus;
+        std::vector<QuestLink *> m_vQuestLink_Start{ };
+        std::vector<QuestLink *> m_vQuestLink_Progress{ };
+        std::vector<QuestLink *> m_vQuestLink_End{ };
+        std::vector<int>         m_vQuest{ };
 };
 
 #endif // NGEMITY_NPC_H_

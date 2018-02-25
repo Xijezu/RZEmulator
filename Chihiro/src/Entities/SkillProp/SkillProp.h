@@ -35,6 +35,11 @@ class SkillProp : public WorldObject
         static SkillProp* Create(uint caster, Skill* pSkill, int nMagicPoint, float fHateRatio);
         SkillProp() = delete;
         ~SkillProp() override = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        SkillProp (const SkillProp&) = delete;
+        SkillProp& operator= (const SkillProp&) = delete;
+
         void Update(uint diff) override;
         bool IsSkillProp() const override;
         void PendRemove();
