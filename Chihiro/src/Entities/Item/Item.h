@@ -64,6 +64,10 @@ class Item : public WorldObject
         static void PendFreeItem(Item *pItem);
 
         Item();
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Item (const Item&) = delete;
+        Item& operator= (const Item&) = delete;
 
         void SetCount(int64 count);
         bool IsWearable();

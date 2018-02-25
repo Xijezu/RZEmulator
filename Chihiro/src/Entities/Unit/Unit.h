@@ -90,7 +90,13 @@ class Unit : public WorldObject
         friend class XLua;
         friend class WorldSession;
 
+        explicit Unit(bool isWorldObject);
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Unit (const Unit&) = delete;
+        Unit& operator= (const Unit&) = delete;
         virtual ~Unit();
+
         static void EnterPacket(XPacket &, Unit *, Player *);
         void AddToWorld() override;
         void RemoveFromWorld() override;
@@ -266,7 +272,6 @@ class Unit : public WorldObject
         bool IsActiveAura(Skill *pSkill) const;
 
         uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue);
-        explicit Unit(bool isWorldObject);
     protected:
         uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
         void applyStatByItem();

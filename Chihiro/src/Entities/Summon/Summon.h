@@ -29,6 +29,10 @@ class Summon : public Unit
         friend class Player;
         static Summon *AllocSummon(Player *, uint);
         explicit Summon(uint, uint);
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Summon (const Summon&) = delete;
+        Summon& operator= (const Summon&) = delete;
         ~Summon();
 
         static void DB_InsertSummon(Player *, Summon *);

@@ -37,6 +37,10 @@ class FieldProp : public WorldObject
 		friend class FieldPropManager;
 	public:
 		FieldProp() = delete;
+		// Deleting the copy & assignment operators
+		// Better safe than sorry
+		FieldProp (const FieldProp&) = delete;
+		FieldProp& operator= (const FieldProp&) = delete;
 		/// \brief Used to generate the TS_SC_ENTER packet for a FieldProp
 		/// \param pEnterPct Writable object
 		/// \param pFieldProp The object we're generating for

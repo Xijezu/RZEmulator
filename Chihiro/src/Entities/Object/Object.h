@@ -137,6 +137,10 @@ class ArRegion;
 class Object
 {
     public:
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Object (const Object&) = delete;
+        Object& operator= (const Object&) = delete;
         virtual ~Object();
 
         bool IsInWorld() const { return m_inWorld; }
@@ -338,9 +342,6 @@ class Object
 
         // for output helpful error messages from asserts
         bool PrintIndexError(uint32 index, bool set) const;
-
-        Object(const Object &);                              // prevent generation copy constructor
-        Object &operator=(Object const &);                   // prevent generation assignment operator
 };
 
 struct Position {
@@ -573,7 +574,12 @@ class Region;
 class WorldObject : public Object, public ArMoveVector
 {
     public:
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        WorldObject (const WorldObject&) = delete;
+        WorldObject& operator= (const WorldObject&) = delete;
         ~WorldObject() override;
+
         template<class T> T* As() { return dynamic_cast<T*>(this); }
 
         virtual void Update(uint32 /*time_diff*/) {}

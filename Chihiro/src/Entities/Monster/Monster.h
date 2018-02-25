@@ -86,6 +86,10 @@ class Monster : public Unit
         static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
         explicit Monster(uint handle, MonsterBase *mb);
         ~Monster() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Monster (const Monster&) = delete;
+        Monster& operator= (const Monster&) = delete;
 
         void Update(uint) override;
         void OnUpdate() override;
