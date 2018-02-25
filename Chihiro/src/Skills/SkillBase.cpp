@@ -16,6 +16,7 @@
  */
 
 #include "SkillBase.h"
+#include "World.h"
 
 bool SkillBase::IsUseableWeapon(ItemClass cl)
 {
@@ -91,7 +92,7 @@ uint SkillBase::GetCastDelay(int skill_lv, int enhance)
 
 uint SkillBase::GetCoolTime(int enhance) const
 {
-    return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
+    return sWorld->getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
 }
 
 int SkillBase::GetNeedJobPoint(int skill_lv)
