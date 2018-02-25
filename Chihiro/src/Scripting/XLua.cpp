@@ -516,8 +516,8 @@ std::string XLua::SCRIPT_Conv(sol::variadic_args args)
             result += args[count].get<std::string>();
             ++count;
         } while (count < args.size());
-        return result;
     }
+    return result;
 }
 
 void XLua::SCRIPT_Message(std::string szMsg)
