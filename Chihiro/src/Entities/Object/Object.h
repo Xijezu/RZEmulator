@@ -19,7 +19,6 @@
 #define NGEMITY_OBJECT_H_
 
 #include "Common.h"
-#include "UnorderedMap.h"
 #include "ByteBuffer.h"
 #include "Util.h"
 

@@ -100,7 +100,7 @@ class WorldLocationManager
     private:
         NG_SHARED_MUTEX                        i_lock;
         std::vector<WorldLocation>             m_vWorldLocation{ };
-        UNORDERED_MAP<uint, std::vector<uint>> m_hsMonsterID{ };
+        std::unordered_map<uint, std::vector<uint>> m_hsMonsterID{ };
 };
 #define sWorldLocationMgr ACE_Singleton<WorldLocationManager, ACE_Thread_Mutex>::instance()
 #endif // NGEMITY_WORLDLOCATION_H

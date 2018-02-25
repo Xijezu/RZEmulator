@@ -374,7 +374,7 @@ void Monster::Update(uint diff)
     if (bForceKill)
         ForceKill(pFCClient);
 
-    if(!m_bNearClient)
+    if (!m_bNearClient)
         return;
 
     uint           ct = sWorld->GetArTime();
@@ -511,7 +511,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 {
     if (count == 0)
     {
-        NG_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %u, y: %u, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
+        NG_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %f, y: %f, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
         return;
     }
 
@@ -598,9 +598,9 @@ void Monster::ForceKill(Player *byPlayer)
 
 void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
 {
-    int64 gold;
-    int   tax;
-    int   nGuildID;
+    int64  gold;
+    int    tax;
+    int    nGuildID;
     Player *player{nullptr};
     fDropRatePenalty = GameRule::GetGoldDropRate() * fDropRatePenalty;
     if ((uint)rand32() % 100 >= m_Base->gold_drop_percentage * fDropRatePenalty)
@@ -769,10 +769,12 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if (!IsInWorld() || pEnemy == nullptr)
         return;
 
-    if (IsNonAttacker() || IsAutoTrap() || (IsAgent() && !pEnemy->IsPlayer())
-        || sRegion->IsVisibleRegion(pEnemy, this) == 0
-        || pEnemy->GetLayer() != GetLayer()
-           && pEnemy->GetTargetHandle() != GetHandle())
+    if ((IsNonAttacker()
+         || IsAutoTrap()
+         || (IsAgent() && !pEnemy->IsPlayer())
+         || sRegion->IsVisibleRegion(pEnemy, this) == 0
+         || pEnemy->GetLayer() != GetLayer())
+        && pEnemy->GetTargetHandle() != GetHandle())
     {
         comeBackHome(false);
         return;
@@ -790,8 +792,13 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     }
 
     auto ht = getHateTag(pEnemy->GetHandle(), 0);
-    if (/*!m_bIsDungeonRaidMonster*/ ((ht != nullptr && ht->nTime + 2500 < t) && pEnemy->bIsMoving && pEnemy->IsInWorld()
-                                      && ry1 > 360.0f || m_nLastEnemyDistance != 0.0f && ry1 > 600.0f && m_nLastEnemyDistance < ry1))
+    if (/*!m_bIsDungeonRaidMonster*/ ((ht != nullptr && ht->nTime + 2500 < t)
+                                      && pEnemy->bIsMoving
+                                      && pEnemy->IsInWorld()
+                                      && (ry1 > 360.0f
+                                          || (m_nLastEnemyDistance != 0.0f
+                                              && ry1 > 600.0f
+                                              && m_nLastEnemyDistance < ry1))))
     {
         auto ht2 = getHateTag(pEnemy->GetHandle(), t);
 
@@ -816,11 +823,13 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             && GetRealAttackRange() * 1.2f < ry1 - rx1))
     {
 
-        if (bIsMoving && IsInWorld() && !pEnemy->IsMoving(t)
-            && (GetRealAttackRange() * 1.2f >= GetTargetPos().GetExactDist2d(&enemyPosition) - rx1)
-            // || !IsActable()
+        if (bIsMoving
+            && IsInWorld()
+            && !pEnemy->IsMoving(t)
+            && ((GetRealAttackRange() * 1.2f >= GetTargetPos().GetExactDist2d(&enemyPosition) - rx1)
+            || !IsActable()
             || !IsMovable()
-            || m_nMovableTime > t)
+            || m_nMovableTime > t))
         {
             return;
         }
@@ -1145,7 +1154,7 @@ bool Monster::removeFromHateList(uint handle)
 
 void Monster::processWalk(uint t)
 {
-    ArMoveVector tmp_mv{};
+    ArMoveVector tmp_mv{ };
     tmp_mv.Copy(*this);
     tmp_mv.Step(t);
     int wpi{0};
@@ -1294,7 +1303,7 @@ void Monster::processFirstAttack(uint t)
                 if (IsFirstAttacker() && IsEnemy(unit, false))
                 {
                     auto _distance = unit->GetCurrentPosition(t).GetExactDist2d(this);
-                    if (!unit->IsSummon() || GetFirstAttackRange() * 0.5f >= _distance && distance > _distance)
+                    if (!unit->IsSummon() || (GetFirstAttackRange() * 0.5f >= _distance && distance > _distance))
                     {
                         distance = _distance;
                         target   = handle;

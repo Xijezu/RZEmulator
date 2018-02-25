@@ -359,8 +359,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 
-        UNORDERED_MAP<std::string, std::string> m_lFlagList{ };
-        UNORDERED_MAP<std::string, std::string> m_hsContact{ };
+        std::unordered_map<std::string, std::string> m_lFlagList{ };
+        std::unordered_map<std::string, std::string> m_hsContact{ };
 
         std::vector<Skill *> m_vApplySummonPassive;
         std::vector<Skill *> m_vApmlifySummonPassive;
@@ -369,7 +369,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::vector<Summon *> m_vStorageSummonList{ };
         std::vector<Item *>   m_vCharmList{ };
 
-        UNORDERED_MAP<uint32, int32> m_vTradeItemList{ };
+        std::unordered_map<uint32, int32> m_vTradeItemList{ };
 
         BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{ };
 

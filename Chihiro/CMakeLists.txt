@@ -37,6 +37,7 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${MYSQL_INCLUDE_DIR})
 
+
 add_executable(Chihiro ${SOURCE_FILES})
 target_link_libraries(Chihiro shared ${MYSQL_LIBRARY} lualib)
 

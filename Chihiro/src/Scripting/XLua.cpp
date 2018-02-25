@@ -109,7 +109,7 @@ bool XLua::InitializeLua()
             if (!t.valid())
             {
                 sol::error err = t;
-                NG_LOG_ERROR("scripting", err.what());
+                NG_LOG_ERROR("scripting", "%s", err.what());
             }
         }
     }
@@ -118,7 +118,7 @@ bool XLua::InitializeLua()
         m_pState.script("on_server_init()");
     } catch (sol::error &ex)
     {
-        NG_LOG_ERROR("scripting", ex.what());
+        NG_LOG_ERROR("scripting", "%s", ex.what());
         return false;
     }
     return true;
@@ -138,7 +138,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     catch (std::exception &ex)
     {
         Messages::SendChatMessage(50, "@SCRIPT", dynamic_cast<Player *>(m_pUnit), ex.what());
-        NG_LOG_ERROR("scripting", ex.what());
+        NG_LOG_ERROR("scripting", "%s", ex.what());
     }
     return true;
 }
@@ -505,7 +505,7 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
 
 std::string XLua::SCRIPT_Conv(sol::variadic_args args)
 {
-    std::string result {};
+    std::string result{ };
     if (args.size() >= 1 && args.size() % 2 == 1)
     {
         int count = 0;
@@ -850,6 +850,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     {
         return return_object(summon->IsInWorld() ? 1 : 0);
     }
+    return return_object((int)0);
 }
 
 void XLua::SCRIPT_CreatureEvolution(int slot)

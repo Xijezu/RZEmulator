@@ -29,7 +29,7 @@ class GameAuthSession
 {
 public:
 	typedef WorldSocket<GameAuthSession> AuthSocket;
-	typedef UNORDERED_MAP<std::string, WorldSession*> AuthQueue;
+	typedef std::unordered_map<std::string, WorldSession*> AuthQueue;
 	explicit GameAuthSession(AuthSocket *pSocket);
 	~GameAuthSession();
 

@@ -32,7 +32,7 @@ class ItemCollector
         void Update();
 
     private:
-        typedef UNORDERED_MAP<uint, Item *> ItemMap;
+        typedef std::unordered_map<uint, Item *> ItemMap;
 
         ItemMap m_vItemList;
         NG_SHARED_MUTEX i_lock;

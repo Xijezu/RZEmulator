@@ -104,7 +104,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 {
     m_vResultList.clear();
     auto current_time = sWorld->GetArTime();
-    uint delay        = 0xffffffff;
+    int delay        = 0xffffffff;
 
     if (m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
         nSkillLevel = m_nSkillLevel + m_nSkillLevelAdd;
@@ -318,14 +318,12 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     if (nType != SKILL_STATUS::ST_FIRE)
     {
         constexpr int preSkillFillSize = 9;
-        auto pos = pct.wpos();
+        auto          pos              = pct.wpos();
         pct.fill("", preSkillFillSize);
         pct.wpos(pos);
 
-        switch(nType)
+        switch (nType)
         {
-            case 0:
-                break;
             case 1:
             case 2:
             case 5:
@@ -338,12 +336,12 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     }
 
     pct << (uint8)(m_bMultiple ? 1 : 0);
-    pct << m_fRange*10;
+    pct << m_fRange * 10;
     pct << (uint8)m_nTargetCount;
     pct << (uint8)m_nFireCount;
     pct << (uint16)m_vResultList.size();
 
-    constexpr int fillSize = 37;
+    constexpr int fillSize = 45;
 
     if (!m_vResultList.empty())
     {
@@ -385,7 +383,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
             pct.wpos(pct.size());
         }
     }
-    int i = pct.size();
+    int           i        = pct.size();
 }
 
 void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, int nType)
@@ -529,7 +527,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
                 break;
             default:
                 auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
-                NG_LOG_INFO("skill", result.c_str());
+                NG_LOG_INFO("skill", "%s", result.c_str());
                 if (m_pOwner->IsPlayer())
                     Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
                 else if (m_pOwner->IsSummon())
@@ -559,7 +557,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
 void Skill::PostFireSkill(Unit *pTarget)
 {
     std::vector<Unit *> vNeedStateList{ };
-    for (const auto &sr : m_vResultList)
+    for (const auto     &sr : m_vResultList)
     {
         auto pDealTarget = sMemoryPool->GetObjectInWorld<Unit>(sr.hTarget);
         if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
@@ -1071,11 +1069,11 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
             vTargetList,
             true);
 
-    for(auto& target : vTargetList)
+    for (auto &target : vTargetList)
     {
         auto hitBonus = m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - target->GetLevel());
-        int nFlag = m_SkillBase->critical_bonus + m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl;
-        auto damage = target->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental, hitBonus, nFlag, 0);
+        int  nFlag    = m_SkillBase->critical_bonus + m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl;
+        auto damage   = target->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental, hitBonus, nFlag, 0);
         sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, target->GetHandle());
     }
     m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);

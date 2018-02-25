@@ -60,7 +60,7 @@ public:
 				 * was a segmentation fault
 				 */
 				ACE_Stack_Trace st;
-				NG_LOG_FATAL("server.worldserver", st.c_str());
+				NG_LOG_FATAL("server.worldserver", "%s", st.c_str());
 				exit(sigNum);
 			}
 				break;
@@ -183,7 +183,7 @@ bool StartDB()
 	///- Initialize the world database
 	if (!CharacterDatabase.Open(dbstring, 1, synch_threads))
 	{
-		sLog->outError("Cannot connect to character database %s", dbstring.c_str());
+		NG_LOG_ERROR("server.worldserver", "Cannot connect to character database %s", dbstring.c_str());
 		return false;
 	}
 
@@ -198,7 +198,7 @@ bool StartDB()
 	///- Initialize the game database, no need to set async/sync threads
 	if (!GameDatabase.Open(dbstring, 1, 1))
 	{
-		sLog->outError("Cannot connect to Arcadia database %s", dbstring.c_str());
+		NG_LOG_ERROR("server.worldserver", "Cannot connect to Arcadia database %s", dbstring.c_str());
 		return false;
 	}
 	return true;

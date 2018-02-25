@@ -1281,7 +1281,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
     }
     if (pItem->m_Instance.UID != 0)
     {
-        if (bSkipUpdateItemToDB || oldOwner == pItem->m_Instance.nOwnerUID && oldAccount == pItem->m_nAccountID || !HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
+        if (bSkipUpdateItemToDB || (oldOwner == pItem->m_Instance.nOwnerUID && oldAccount == pItem->m_nAccountID) || !HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         {
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
                 Messages::SendItemMessage(this, pItem);
@@ -1856,9 +1856,9 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                     || item2->m_pItemBase->iclass != CLASS_DAGGER
                     || item2->m_pItemBase->iclass != CLASS_ONEHAND_AXE)
                 || m_anWear[14] == nullptr
-                || GetCurrentSkillLevel(1181) < 1
+                || (GetCurrentSkillLevel(1181) < 1
                    && GetCurrentSkillLevel(61010) < 1
-                   && GetCurrentSkillLevel(61015) < 1)
+                   && GetCurrentSkillLevel(61015) < 1))
             {
                 pos = WEAR_DECO_WEAPON;
             }
@@ -1867,8 +1867,8 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
-            if (item1 != nullptr && item1->m_pItemBase->iclass != CLASS_SHIELD
-                || item2 != nullptr && item2->m_pItemBase->wear_type == WEAR_TWOHAND)
+            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_SHIELD)
+                || (item2 != nullptr && item2->m_pItemBase->wear_type == WEAR_TWOHAND))
             {
                 return false;
             }
@@ -1921,9 +1921,9 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 auto new_capacity  = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
                 if (curr_capacity != new_capacity
                     && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight
-                    && GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
-                    || GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
-                       && curr_capacity > new_capacity)
+                    && (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
+                    || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
+                       && curr_capacity > new_capacity)))
                 {
                     return false;
                 }
@@ -2038,8 +2038,11 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         {
             if (pos == WEAR_SHIELD)
             {
-                if (!item1->IsBow() && !item1->IsCrossBow() || pItem->m_pItemBase->group != GROUP_BULLET)
+                if ((!item1->IsBow() && !item1->IsCrossBow())
+                    || pItem->m_pItemBase->group != GROUP_BULLET)
+                {
                     vpOverlappItemList.emplace_back(0);
+                }
             }
         }
     }
@@ -2278,8 +2281,10 @@ void Player::onModifyStatAndAttribute()
 uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint ct = sWorld->GetArTime();
-    if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || pItem->m_pItemBase->cool_time_group != 0
-                                                                                               && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct)
+    if (pItem->m_pItemBase->cool_time_group < 0
+        || pItem->m_pItemBase->cool_time_group > 40
+        || (pItem->m_pItemBase->cool_time_group != 0
+           && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
         return TS_RESULT_COOL_TIME;
     // Ride IDX
     if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
@@ -2612,7 +2617,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         if (ChangeGold(nPrevGold) != TS_RESULT_SUCCESS)
         {
-            NG_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nPrevGold);
+            NG_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nPrevGold);
         }
         Messages::SendQuestMessage(120, this, "END|FAIL|0");
     }
@@ -3588,7 +3593,7 @@ bool Player::ProcessTrade()
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
                 || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
-                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
+                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
 
             return false;
@@ -3606,7 +3611,7 @@ bool Player::ProcessTrade()
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
                 || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
-                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), nTradeTargetResult);
+                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s], Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
 
             return false;
@@ -3615,7 +3620,7 @@ bool Player::ProcessTrade()
         if (processTradeItem() != TS_RESULT_SUCCESS
             || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
         {
-            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount, tradeTarget->m_szAccount);
+            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount.c_str(), tradeTarget->m_szAccount.c_str());
             return false;
         }
 
@@ -3660,14 +3665,14 @@ uint16 Player::processTradeGold()
 
         if (ChangeGold(prevGold) != TS_RESULT_SUCCESS)
         {
-            NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%d), Target(%d)]", GetName(), GetGold(), prevGold);
+            NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), prevGold);
         }
 
         return TS_RESULT_TOO_MUCH_MONEY;
     }
     else
     {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
         return TS_RESULT_NOT_EXIST;
     }
@@ -3683,7 +3688,7 @@ uint16 Player::processTradeItem()
 
     if (!IsInWorld())
     {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount);
+        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         return TS_RESULT_NOT_EXIST;
     }
 
