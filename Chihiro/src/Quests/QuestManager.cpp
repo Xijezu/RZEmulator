@@ -264,10 +264,10 @@ bool QuestManager::IsTakeableQuestItem(int code)
 {
     for(auto& q : m_vActiveQuest) {
         if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE
-            || q->m_QuestBase->nType != QuestType::QUEST_COLLECT
+            || (q->m_QuestBase->nType != QuestType::QUEST_COLLECT
                && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM
                && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS
-               && q->m_QuestBase->nType != QuestType::QUEST_RANDOM_COLLECT
+               && q->m_QuestBase->nType != QuestType::QUEST_RANDOM_COLLECT)
             || q->IsFinishable())
             continue;
 
@@ -427,8 +427,8 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
                 case QuestType::QUEST_KILL_TOTAL:
                     if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
                         || sObjectMgr->IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID)
-                           && (q->GetStatus(0) < q->GetValue(1))) {
+                        || (sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID)
+                           && q->GetStatus(0) < q->GetValue(1))) {
                         q->IncStatus(0, 1);
                     }
                     break;

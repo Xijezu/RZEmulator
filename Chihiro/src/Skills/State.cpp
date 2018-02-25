@@ -93,9 +93,9 @@ bool State::IsDuplicatedGroup(int nGroupID)
 {
     if (m_pTemplate == nullptr)
         return false;
-    return m_pTemplate->duplicate_group[0] != 0 && m_pTemplate->duplicate_group[0] == nGroupID
-           || m_pTemplate->duplicate_group[1] != 0 && m_pTemplate->duplicate_group[1] == nGroupID
-           || m_pTemplate->duplicate_group[2] != 0 && m_pTemplate->duplicate_group[2] == nGroupID;
+    return (m_pTemplate->duplicate_group[0] != 0 && m_pTemplate->duplicate_group[0] == nGroupID)
+           || (m_pTemplate->duplicate_group[1] != 0 && m_pTemplate->duplicate_group[1] == nGroupID)
+           || (m_pTemplate->duplicate_group[2] != 0 && m_pTemplate->duplicate_group[2] == nGroupID);
 }
 
 void State::SetState(int code, int uid, uint caster, const uint16 *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)

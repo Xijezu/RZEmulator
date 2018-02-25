@@ -70,7 +70,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
                 rtype = 0;
             else if(lines[1] == "building"s)
                 rtype = 1;
-        } else if(lines[0] == "PROPNAME") {
+        } else if(lines[0] == "PROPNAME"s) {
             Tokenizer vars(lines[1], ',');
             if(vars.size() < 2)
                 continue;
