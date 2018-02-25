@@ -473,8 +473,10 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                     npos.m_positionZ  = 0.0f;
                     npos._orientation = 0.0f;
                 }
-                if (mover->GetHandle() != m_pPlayer->GetHandle() || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) / 5.0 >= tpos2.GetExactDist2d(&cp)
-                    /*|| !m_pPlayer.m_bAutoUsed*/ || !m_pPlayer->m_nWorldLocationId != 110900)
+                if (mover->GetHandle() != m_pPlayer->GetHandle()
+                    || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) / 5.0 >= tpos2.GetExactDist2d(&cp)
+                    /*|| !m_pPlayer.m_bAutoUsed*/
+                    || m_pPlayer->m_nWorldLocationId != 110900)
                 {
                     if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
                     {
@@ -2196,10 +2198,10 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
     if (!m_pPlayer->m_bTradeFreezed)
     {
-        uint32 handle = pRecvPct->read<uint32>();
+        auto handle = pRecvPct->read<uint32>();
         pRecvPct->read<int32>(); // Code
         pRecvPct->read<int64>(); // ID
-        int32 count = pRecvPct->read<int32>();
+        auto count = pRecvPct->read<int32>();
 
         auto item = m_pPlayer->FindItemByHandle(handle);
 
@@ -2208,7 +2210,7 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
         if (count <= 0 || count > item->m_Instance.nCount)
         {
-            NG_LOG_ERROR("trade", "Add Trade Bug [%s:%s]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
+            NG_LOG_ERROR("trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
@@ -2274,7 +2276,7 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
         int64 gold = pRecvPct->read<int32>();
         if (gold <= 0)
         {
-            NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%s]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
+            NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;

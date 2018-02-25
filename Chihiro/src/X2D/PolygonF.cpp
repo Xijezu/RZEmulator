@@ -176,10 +176,10 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
             if (r2 == X2D::Linef::IntersectResult::Intersect)
                 return true;
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_d.begin, line_d.end) == X2D::Linef::IntersectResult::Intersect
-                || line.end.x != line.begin.x
+                || (line.end.x != line.begin.x
                    && line.end.y != line.begin.y
                    && r1 == X2D::Linef::IntersectResult::Touch
-                   && r2 == X2D::Linef::IntersectResult::Touch)
+                   && r2 == X2D::Linef::IntersectResult::Touch))
                 return true;
         }
     }
@@ -290,10 +290,10 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
             if (r2 == X2D::Linef::IntersectResult::Intersect)
                 return true;
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_d.begin, line_d.end) == X2D::Linef::IntersectResult::Intersect
-                || line.end.x != line.begin.x
+                || (line.end.x != line.begin.x
                    && line.end.y != line.begin.y
                    && r1 == X2D::Linef::IntersectResult::Touch
-                   && r2 == X2D::Linef::IntersectResult::Touch)
+                   && r2 == X2D::Linef::IntersectResult::Touch))
                 return true;
         }
     }

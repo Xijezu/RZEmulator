@@ -104,7 +104,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 {
     m_vResultList.clear();
     auto current_time = sWorld->GetArTime();
-    uint delay        = 0xffffffff;
+    int delay        = 0xffffffff;
 
     if (m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
         nSkillLevel = m_nSkillLevel + m_nSkillLevelAdd;
@@ -527,7 +527,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
                 break;
             default:
                 auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
-                NG_LOG_INFO("skill", result.c_str());
+                NG_LOG_INFO("skill", "%s", result.c_str());
                 if (m_pOwner->IsPlayer())
                     Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
                 else if (m_pOwner->IsSummon())

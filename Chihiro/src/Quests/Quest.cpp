@@ -169,9 +169,11 @@ bool Quest::IsFinishable() const
         case QuestType::QUEST_COLLECT:
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
                 && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5]
-                && m_Instance.nStatus[3] >= m_QuestBase->nValue[7]
+                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+                /*&& m_Instance.nStatus[3] >= m_QuestBase->nValue[7]
                 && m_Instance.nStatus[4] >= m_QuestBase->nValue[9])
+                 * For later usage
+                 */
                 return true;
             return false;
 
@@ -207,23 +209,23 @@ bool Quest::IsFinishable() const
 
         case QuestType::QUEST_PARAMETER:
             if (m_QuestBase->nValue[0] == 0
-                || m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2]
-                || m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2]
-                || m_QuestBase->nValue[1] == 0 && m_Instance.nStatus[0] == m_QuestBase->nValue[2]
-                || m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2]
-                || m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2]) {
+                || (m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2])
+                || (m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2])
+                || (m_QuestBase->nValue[1] == 0 && m_Instance.nStatus[0] == m_QuestBase->nValue[2])
+                || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2])
+                || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2])) {
                 if (m_QuestBase->nValue[3] == 0
-                    || m_QuestBase->nValue[4] == 2 && m_Instance.nStatus[1] > m_QuestBase->nValue[5]
-                    || m_QuestBase->nValue[4] == 1 && m_Instance.nStatus[1] >= m_QuestBase->nValue[5]
-                    || m_QuestBase->nValue[4] == 0 && m_Instance.nStatus[1] == m_QuestBase->nValue[5]
-                    || m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5]
-                    || m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5]) {
+                    || (m_QuestBase->nValue[4] == 2 && m_Instance.nStatus[1] > m_QuestBase->nValue[5])
+                    || (m_QuestBase->nValue[4] == 1 && m_Instance.nStatus[1] >= m_QuestBase->nValue[5])
+                    || (m_QuestBase->nValue[4] == 0 && m_Instance.nStatus[1] == m_QuestBase->nValue[5])
+                    || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5])
+                    || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5])) {
                     if (m_QuestBase->nValue[6] == 0
-                        || m_QuestBase->nValue[7] == 2 && m_Instance.nStatus[2] > m_QuestBase->nValue[8]
-                        || m_QuestBase->nValue[7] == 1 && m_Instance.nStatus[2] >= m_QuestBase->nValue[8]
-                        || m_QuestBase->nValue[7] == 0 && m_Instance.nStatus[2] == m_QuestBase->nValue[8]
-                        || m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8]
-                        || m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8]) {
+                        || (m_QuestBase->nValue[7] == 2 && m_Instance.nStatus[2] > m_QuestBase->nValue[8])
+                        || (m_QuestBase->nValue[7] == 1 && m_Instance.nStatus[2] >= m_QuestBase->nValue[8])
+                        || (m_QuestBase->nValue[7] == 0 && m_Instance.nStatus[2] == m_QuestBase->nValue[8])
+                        || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8])
+                        || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8])) {
                         return true;
                     }
                 }
