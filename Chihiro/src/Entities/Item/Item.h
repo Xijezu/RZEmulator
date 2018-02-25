@@ -92,8 +92,10 @@ class Item : public WorldObject
         int GetItemRank() const;
         bool IsBow();
         bool IsCrossBow();
+        bool IsCashItem();
 
         bool IsItem() const override { return true; }
+
 
         void SetOwnerInfo(uint, int, int);
         void SetPickupOrder(const ItemPickupOrder &order);
