@@ -361,7 +361,7 @@ class Unit : public WorldObject
         Skill *m_castingSkill{nullptr};
         float m_nRegenHP{ }, m_fRegenMP{ };
     private:
-        UNORDERED_MAP<int, Skill *> m_vAura;
+        std::unordered_map<int, Skill *> m_vAura;
 
         float m_fBowInterval{0};
         bool ClearExpiredState(uint t);

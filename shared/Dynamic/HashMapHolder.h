@@ -8,7 +8,7 @@ template <class T>
 class HashMapHolder
 {
 public:
-    typedef UNORDERED_MAP<uint32, T*> MapType;
+    typedef std::unordered_map<uint32, T*> MapType;
 
     static void Insert(T* o)
     {

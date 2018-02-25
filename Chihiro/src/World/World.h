@@ -19,7 +19,6 @@
 #define NGEMITY_WORLD_H
 
 #include "Common.h"
-#include "Dynamic/UnorderedMap.h"
 #include "RespawnObject.h"
 #include "Timer.h"
 
@@ -81,7 +80,7 @@ class Player;
 class Summon;
 class XPacket;
 
-typedef UNORDERED_MAP<uint32, WorldSession *> SessionMap;
+typedef std::unordered_map<uint32, WorldSession *> SessionMap;
 constexpr int                                 g_nRegionSize = 180;
 constexpr int                                 g_nMapWidth   = 700000;
 constexpr int                                 g_nMapHeight  = 1000000;

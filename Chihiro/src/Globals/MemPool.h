@@ -19,7 +19,6 @@
 #define MEMORYPOOL_H
 
 #include "Common.h"
-#include "Dynamic/UnorderedMap.h"
 #include "SharedMutex.h"
 #include "HashMapHolder.h"
 #include "ItemFields.h"
@@ -27,8 +26,9 @@
 #include "Player.h"
 #include "Summon.h"
 #include "Monster.h"
+#include <unordered_map>
 
-typedef UNORDERED_MAP<uint32, WorldObject*> UpdateMap;
+typedef std::unordered_map<uint32, WorldObject*> UpdateMap;
 class MemoryPoolMgr
 {
     public:

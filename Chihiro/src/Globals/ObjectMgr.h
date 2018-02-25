@@ -22,7 +22,6 @@
 #include "DatabaseTemplates.h"
 #include <unordered_map>
 #include "QuadTreeMapInfo.h"
-#include "Dynamic/UnorderedMap.h"
 #include "SkillBase.h"
 #include "NPCBase.h"
 #include "StateBase.h"
@@ -53,25 +52,25 @@ class ObjectMgr
         ObjectMgr();
         ~ObjectMgr() = default;
 
-        typedef UNORDERED_MAP<int32, ItemTemplate>                  ItemTemplateContainer;
-        typedef UNORDERED_MAP<int32, uint64>                        SummonLevelBaseContainer;
-        typedef UNORDERED_MAP<int32, CreatureStat>                  CreatureBaseStat;
-        typedef UNORDERED_MAP<int32, JobLevelBonusTemplate>         JobLevelBonusTemplateContainer;
-        typedef UNORDERED_MAP<int32, SummonLevelBonus>              SummonBonusTemplateContainer;
-        typedef UNORDERED_MAP<int32, JobResourceTemplate>           JobResourceTemplateContainer;
-        typedef UNORDERED_MAP<int32, SummonResourceTemplate>        SummonResourceTemplateContainer;
+        typedef std::unordered_map<int32, ItemTemplate>                  ItemTemplateContainer;
+        typedef std::unordered_map<int32, uint64>                        SummonLevelBaseContainer;
+        typedef std::unordered_map<int32, CreatureStat>                  CreatureBaseStat;
+        typedef std::unordered_map<int32, JobLevelBonusTemplate>         JobLevelBonusTemplateContainer;
+        typedef std::unordered_map<int32, SummonLevelBonus>              SummonBonusTemplateContainer;
+        typedef std::unordered_map<int32, JobResourceTemplate>           JobResourceTemplateContainer;
+        typedef std::unordered_map<int32, SummonResourceTemplate>        SummonResourceTemplateContainer;
         typedef std::vector<SkillTreeGroup>                         SkillTreeTemplateContainer;
-        typedef UNORDERED_MAP<int32, SkillBase>                     SkillBaseContainer;
-        typedef UNORDERED_MAP<int32, MonsterBase>                   MonsterBaseContainer;
-        typedef UNORDERED_MAP<int32, LevelResourceTemplate>         LevelTemplateContainer;
-        typedef UNORDERED_MAP<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
-        typedef UNORDERED_MAP<int, DropGroup>                       DropGroupTemplateContainer;
-        typedef UNORDERED_MAP<int, std::string>                     StringContainer;
-        typedef UNORDERED_MAP<int, QuestBaseServer>                 QuestResourceTemplateContainer;
-        typedef UNORDERED_MAP<int, FieldPropTemplate>               FieldPropTemplateContainer;
+        typedef std::unordered_map<int32, SkillBase>                     SkillBaseContainer;
+        typedef std::unordered_map<int32, MonsterBase>                   MonsterBaseContainer;
+        typedef std::unordered_map<int32, LevelResourceTemplate>         LevelTemplateContainer;
+        typedef std::unordered_map<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
+        typedef std::unordered_map<int, DropGroup>                       DropGroupTemplateContainer;
+        typedef std::unordered_map<int, std::string>                     StringContainer;
+        typedef std::unordered_map<int, QuestBaseServer>                 QuestResourceTemplateContainer;
+        typedef std::unordered_map<int, FieldPropTemplate>               FieldPropTemplateContainer;
         typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
-        typedef UNORDERED_MAP<int, NPCTemplate>                     NPCTemplateContainer;
-        typedef UNORDERED_MAP<int, StateTemplate>                   StateTemplateContainer;
+        typedef std::unordered_map<int, NPCTemplate>                     NPCTemplateContainer;
+        typedef std::unordered_map<int, StateTemplate>                   StateTemplateContainer;
 
         void LoadStatResource();
         void LoadJobResource();
@@ -147,8 +146,7 @@ class ObjectMgr
 
         int                             g_currentLocationId{0};
 
-        UNORDERED_MAP<int, WayPointInfo> g_vWayPoint{ };
-        //UNORDERED_MAP<int,MonsterRespawnInfo> g_vRespawnInfo{};
+        std::unordered_map<int, WayPointInfo> g_vWayPoint{ };
         std::vector<MonsterRespawnInfo> g_vRespawnInfo{ };
         X2D::QuadTreeMapInfo            g_qtBlockInfo;
     private:
