@@ -1667,10 +1667,6 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             }
             if (pPlayer != nullptr)
             {
-            	NG_LOG_DEBUG("mount", "RIDING IDX: %d\nRIDING UID: %d\nIsInDungeon: %d",
-            			pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX),
-						pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID),
-						pPlayer->IsInDungeon());
                 if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
                 {
                     auto si = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
