@@ -91,7 +91,7 @@ uint SkillBase::GetCastDelay(int skill_lv, int enhance)
 
 uint SkillBase::GetCoolTime(int enhance) const
 {
-    return 0; //return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
+    return (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
 }
 
 int SkillBase::GetNeedJobPoint(int skill_lv)
