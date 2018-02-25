@@ -1624,6 +1624,7 @@ void Player::onChangeProperty(std::string key, int value)
 
 void Player::AddSummon(Summon *pSummon, bool bSendMsg)
 {
+    pSummon->m_pMaster = this;
     m_vSummonList.emplace_back(pSummon);
     if (bSendMsg)
         Messages::SendAddSummonMessage(this, pSummon);
