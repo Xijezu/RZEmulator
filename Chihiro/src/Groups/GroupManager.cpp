@@ -51,7 +51,7 @@ bool GroupManager::DestroyParty(int nPartyID)
         if(tag.bIsOnline && tag.pPlayer != nullptr)
         {
             tag.pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
-            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, string_format("DESTROY|%s|", name));
+            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, string_format("DESTROY|%s|", name.c_str()));
         }
     });
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_PARTY);

@@ -198,11 +198,8 @@ class Unit : public WorldObject
         virtual bool IsSitdown() const { return false; }
 
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
-
         void SetMaxMana(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_MANA, val); };
-
         void SetFullHealth() { SetHealth(GetMaxHealth()); }
-
         void SetEXP(int64 exp);
 
         // eh
@@ -229,7 +226,7 @@ class Unit : public WorldObject
         uint32 GetCurrentJob() const { return GetUInt32Value(UNIT_FIELD_JOB); };
         uint32 GetCurrentJLv() const { return GetUInt32Value(UNIT_FIELD_JLV); }
         int GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
-        uint32 GetJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
+        int32 GetJP() const { return GetInt32Value(UNIT_FIELD_JOBPOINT); }
         uint32 GetTotalJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
         float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
         float GetItemChance() const;
@@ -361,7 +358,7 @@ class Unit : public WorldObject
         Skill *m_castingSkill{nullptr};
         float m_nRegenHP{ }, m_fRegenMP{ };
     private:
-        UNORDERED_MAP<int, Skill *> m_vAura;
+        std::unordered_map<int, Skill *> m_vAura;
 
         float m_fBowInterval{0};
         bool ClearExpiredState(uint t);

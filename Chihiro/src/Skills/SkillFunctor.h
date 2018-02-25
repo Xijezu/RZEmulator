@@ -112,12 +112,12 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
                 default:
                     if (pSkill->m_SkillBase->effect_type != 701 && pSkill->m_SkillBase->effect_type != 702)
                     {
-                        if ((!pCaster->GetHandle() != pTarget->GetHandle()
-                             || pSkill->m_SkillBase->effect_type != 121
+                        if ((pCaster->GetHandle() != pTarget->GetHandle()
+                             || (pSkill->m_SkillBase->effect_type != 121
                                 && pSkill->m_SkillBase->effect_type != 221
                                 && pSkill->m_SkillBase->effect_type != 235
                                 && pSkill->m_SkillBase->effect_type != 266
-                                && pSkill->m_SkillBase->effect_type != 30002))
+                                && pSkill->m_SkillBase->effect_type != 30002)))
                             bResult = pTarget->AddState((StateType)pSkill->m_SkillBase->state_type, (StateCode)pSkill->m_SkillBase->state_id,
                                                         pCaster->GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, 0),
                                                         t, end_time, false, 0, "") == 0;

@@ -746,6 +746,7 @@ bool World::ProcTame(Monster *pMonster)
     Messages::SendItemMessage(player, pItem);
     Messages::BroadcastTamingMessage(player, pMonster, 2);
     ClearTamer(pMonster, false);
+    return true;
 }
 
 void World::ClearTamer(Monster *pMonster, bool bBroadcastMsg)

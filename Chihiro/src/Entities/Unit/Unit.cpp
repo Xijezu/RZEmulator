@@ -395,9 +395,9 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
                 return TS_RESULT_NOT_ACTABLE;
             break;
         case TARGET_SELF_WITH_MASTER:
-            if (!IsSummon() == ST_Summon)
+            if (!IsSummon())
                 return TS_RESULT_NOT_ACTABLE;
-            summon = dynamic_cast<Summon *>(this);
+            summon = this->As<Summon>();
             if (pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
@@ -450,8 +450,8 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
             return TS_RESULT_NOT_ACTABLE;
 
         if (pSkillTarget->GetHandle() == GetHandle()
-            || pSkillTarget->IsSummon()
-               && dynamic_cast<Summon *>(pSkillTarget)->GetMaster()->GetHandle() == GetHandle())
+            || (pSkillTarget->IsSummon()
+               && pSkillTarget->As<Summon>()->GetMaster()->GetHandle() == GetHandle()))
         {
             if (!pSkill->m_SkillBase->IsUsable(0))
                 return TS_RESULT_NOT_ACTABLE;
@@ -474,9 +474,9 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
             }
         }
 
-        if (pSkillTarget->IsPlayer() && pSkill->m_SkillBase->tf_avatar == 0
-            || pSkillTarget->IsMonster() && pSkill->m_SkillBase->tf_monster == 0
-            || pSkillTarget->IsSummon() && pSkill->m_SkillBase->tf_summon == 0)
+        if ((pSkillTarget->IsPlayer() && pSkill->m_SkillBase->tf_avatar == 0)
+            || (pSkillTarget->IsMonster() && pSkill->m_SkillBase->tf_monster == 0)
+            || (pSkillTarget->IsSummon() && pSkill->m_SkillBase->tf_summon == 0))
             return TS_RESULT_NOT_ACTABLE;
 
         tpos = pSkillTarget->GetCurrentPosition(ct);
@@ -562,8 +562,8 @@ void Unit::processAttack()
             }
             else if (IsSummon())
             {
-                auto summon = dynamic_cast<Summon *>(this);
-                if (this != nullptr)
+                auto summon = this->As<Summon>();
+                if (summon != nullptr)
                     player = summon->GetMaster();
             }
 
@@ -590,8 +590,8 @@ void Unit::processAttack()
             }
             else if (IsSummon())
             {
-                auto summon = dynamic_cast<Summon *>(this);
-                if (this != nullptr)
+                auto summon = this->As<Summon>();
+                if (summon != nullptr)
                     player = summon->GetMaster();
             }
 
@@ -1392,6 +1392,8 @@ ushort Unit::Putoff(ItemWearType pos)
         return putoffItem(abspos);
 
     // Todo: Bag
+
+    return TS_RESULT_NOT_ACTABLE;
 }
 
 ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
@@ -1745,7 +1747,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             break;
         default:
             error = string_format("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
-            NG_LOG_ERROR("entites.unit", error.c_str());
+            NG_LOG_ERROR("entites.unit", "%s", error.c_str());
             Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
             result = TS_RESULT_UNKNOWN;
             break;

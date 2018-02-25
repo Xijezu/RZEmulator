@@ -22,7 +22,7 @@
 
 #include "Define.h"
 #include <ctime>
-#include "Dynamic/UnorderedMap.h"
+#include <unordered_map>
 
 #include <string>
 
@@ -59,7 +59,7 @@ enum AppenderFlags
 
 struct LogMessage
 {
-    LogMessage(LogLevel _level, std::string const& _type, std::string const& _text)
+    LogMessage(LogLevel _level, const std::string& _type, std::string const& _text)
         : level(_level), type(_type), text(_text), mtime(time(NULL))
     { }
 
@@ -106,6 +106,6 @@ class Appender
         AppenderFlags flags;
 };
 
-typedef UNORDERED_MAP<uint8, Appender*> AppenderMap;
+typedef std::unordered_map<uint8, Appender*> AppenderMap;
 
 #endif
