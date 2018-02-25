@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <limits>
 #include "Unit.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -1665,7 +1665,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
             {
                 RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
                 pPlayer->SetUInt32Value(PLAYER_FIELD_RIDING_UID, 0);
-                break;
+                return TS_RESULT_SUCCESS;
             }
             if (pPlayer != nullptr)
             {
@@ -1690,8 +1690,10 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item* pItem, int type, float var1, f
                     if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != 0)
                         return TS_RESULT_ACCESS_DENIED;
                 }
+                uint endTime = std::numeric_limits<unsigned int>::max();
                 pPlayer->AddState((StateType)0, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
-                                  pItem->m_pItemBase->state_level, ct, 0xffffffff, true, 0, "");
+                                  pItem->m_pItemBase->state_level, ct, endTime, true, 0, "");
+                return TS_RESULT_SUCCESS;
             }
         }
             break;
