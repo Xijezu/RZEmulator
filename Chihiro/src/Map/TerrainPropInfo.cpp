@@ -138,5 +138,5 @@ void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16 wPropNum, PropType prop
     p.fVisibleRatio = fVisibleRatio;
     p.strName = std::move(rName);
     p.nShadowFlag = nShadowFlag;
-    m_pPropInfo[wPropNum] = p;
+    m_pPropInfo.emplace_back(p);
 }
