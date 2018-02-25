@@ -208,6 +208,11 @@ bool Item::IsCrossBow()
     return m_pItemBase->iclass == CLASS_CROSSBOW;
 }
 
+bool Item::IsCashItem()
+{
+	return (m_pItemBase->flaglist[FLAG_CASHITEM] == 1);
+}
+
 int Item::GetItemRank() const
 {
     return m_pItemBase->rank;
