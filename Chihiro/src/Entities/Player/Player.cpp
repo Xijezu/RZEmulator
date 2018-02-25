@@ -2302,10 +2302,10 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
     if (pTarget == nullptr)
         pTarget = this;
     if (pItem->m_Instance.nCount < 1)
-        return TS_RESULT_NOT_ENOUGH_ITEM; // NOT_ACTABLE?
+        return TS_RESULT_ACCESS_DENIED;
 
 
-    uint16   result{0};
+    uint16   result{TS_RESULT_SUCCESS};
     for (int i  = 0; i < MAX_OPTION_NUMBER; ++i)
     {
         if (pItem->m_pItemBase->base_type[i] != 0)
@@ -2327,7 +2327,18 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
     {
         m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld->GetArTime() + (pItem->m_pItemBase->cool_time * 100);
         Messages::SendItemCoolTimeInfo(this);
-        EraseItem(pItem, 1);
+
+        auto itemCode = pItem->m_Instance.Code;
+        if(itemCode != FEATHER_OF_RETURN &&
+           itemCode != FEATHER_OF_REINSTATEMENT &&
+		   itemCode != FEATHER_OF_RETURN_EVENT)
+        {
+            if(pItem->m_pItemBase->type != 6)
+            	EraseItem(pItem, 1);
+
+            if(pItem->IsCashItem())
+            	this->Save(false);
+        }
     }
     return result;
 }
