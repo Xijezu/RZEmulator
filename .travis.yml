@@ -25,9 +25,8 @@ matrix:
             - clang-5.0
             - cmake-data
             - cmake
-          env:
-            - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
-      sudo: required
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
 branches:
   only:
