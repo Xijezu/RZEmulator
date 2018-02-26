@@ -22,7 +22,7 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-option(ACE_USE_EXTERNAL "Use external ACE"                                            1)
+option(ACE_USE_EXTERNAL "Use external ACE"                                            0)
 option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 
 if(ACE_USE_EXTERNAL)
