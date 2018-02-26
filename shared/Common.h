@@ -111,7 +111,8 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 #define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a
-using namespace std::string_literals;
+
+using namespace std::literals::string_literals;
 
 enum TimeConstants
 {
