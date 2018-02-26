@@ -21,6 +21,7 @@ add_definitions(-D_BUILD_DIRECTIVE="'${CMAKE_BUILD_TYPE}'")
 
 #Set config install path correctly from given path
 string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 if(${CONF_DIR_ABSOLUTE} EQUAL -1)
     #Path was not absolute
     set(CONF_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${CONF_DIR}")
