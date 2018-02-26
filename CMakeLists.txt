@@ -22,28 +22,18 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-option(ACE_USE_EXTERNAL "Use external ACE"                                            0)
-option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
-
-if(ACE_USE_EXTERNAL)
-    find_package(ACE)
-    if(NOT ACE_FOUND)
-        message(FATAL_ERROR
-                "This project requires ACE installed when ACE_USE_EXTERNAL is set. Please download the ACE Micro Release Kit from http://download.dre.vanderbilt.edu/ and install it. If this script didn't find ACE and it was correctly installed please set ACE_ROOT to the correct path."
-                )
-    endif()
-    if(EXISTS ${ACE_INCLUDE_DIR}/ace/Stack_Trace.h)
-        add_definitions(-DHAVE_ACE_STACK_TRACE_H)
-    endif()
-else()
-    include(cmake/ImportACE.cmake)
-    if(NOT(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD"))
-        add_definitions(-DHAVE_ACE_STACK_TRACE_H)
-    endif()
-endif()
+# Note: Even is ACE_FORCE_INTERNAL is disabled,
+# if it doesn't find ACE it uses the distributed
+# version of ACE.
+option(ACE_FORCE_INTERNAL "Force the usage of internal ACE"              0)
+option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
+
+# Find the correct ACE package
+include(cmake/ImportACE.cmake)
+
 find_package(Platform REQUIRED)
 find_package(MYSQL REQUIRED)
 
@@ -55,27 +45,7 @@ ENDIF()
 include(cmake/genrev.cmake)
 add_custom_target(revision.h ALL
         COMMAND ${CMAKE_COMMAND} -DNO_GIT=${WITHOUT_GIT} -DGIT_EXEC=${GIT_EXECUTABLE} -DBUILDDIR=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/genrev.cmake
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        )
-
-include_directories(${CMAKE_BINARY_DIR}
-                    ${CMAKE_SOURCE_DIR}/shared
-                    ${CMAKE_SOURCE_DIR}/shared/Configuration
-                    ${CMAKE_SOURCE_DIR}/shared/Database
-                    ${CMAKE_SOURCE_DIR}/shared/Dynamic
-                    ${CMAKE_SOURCE_DIR}/shared/Dynamic/LinkedReference
-                    ${CMAKE_SOURCE_DIR}/shared/Threading
-                    ${CMAKE_SOURCE_DIR}/shared/Debugging
-                    ${CMAKE_SOURCE_DIR}/shared/Encryption
-                    ${CMAKE_SOURCE_DIR}/shared/Lists
-                    ${CMAKE_SOURCE_DIR}/shared/Logging
-                    ${CMAKE_SOURCE_DIR}/shared/utf8
-                    ${CMAKE_SOURCE_DIR}/shared/Server
-                    ${CMAKE_SOURCE_DIR}/shared/Utilities)
-
-if(NOT ACE_USE_EXTERNAL)
-    add_subdirectory(dep/acelite)
-endif()
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(dep/liblua)
 add_subdirectory(shared)
