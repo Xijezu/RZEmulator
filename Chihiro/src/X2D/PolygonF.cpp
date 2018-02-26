@@ -29,12 +29,15 @@ bool X2D::Polygonf::Set(X2D::Pointf _begin, X2D::Pointf _end)
     this->RemoveDuplicatedPoint();
     this->m_bIsValid = this->isValid(this->m_vList);
 
-    if (this->m_bIsValid) {
+    if (this->m_bIsValid)
+    {
         this->m_bIsClockWise = this->isClockWise();
         this->calculateArea(this->m_vList, this->m_bxArea);
         this->calculateRect();
 
-    } else {
+    }
+    else
+    {
         this->Clear();
     }
     return this->m_bIsValid;
@@ -45,11 +48,14 @@ bool X2D::Polygonf::Set()
     this->RemoveDuplicatedPoint();
     this->m_bIsValid = this->isValid(this->m_vList);
 
-    if (this->m_bIsValid) {
+    if (this->m_bIsValid)
+    {
         this->m_bIsClockWise = this->isClockWise();
         this->calculateArea(this->m_vList, this->m_bxArea);
         this->calculateRect();
-    } else {
+    }
+    else
+    {
         this->Clear();
     }
     return this->m_bIsValid;
@@ -57,7 +63,8 @@ bool X2D::Polygonf::Set()
 
 bool X2D::Polygonf::IsIn(X2D::Rectf t)
 {
-    for (auto &p : this->m_vList) {
+    for (auto &p : this->m_vList)
+    {
         if (!t.IsInclude(p.x, p.y))
             return false;
     }
@@ -79,27 +86,33 @@ bool X2D::Polygonf::IsInclude(X2D::Pointf pt)
     Pointf tp2{ };
 
     bool result = this->m_bxArea.IsInclude(pt.x, pt.y);
-    if (result) {
+    if (result)
+    {
         nTouchCnt     = 0;
         nIntersectCnt = 0;
 
         //v5 = this.m_vList;
-        farAway.x = this->m_bxArea.end.x + 1.0f;
+        farAway.x = m_bxArea.end.x + 1.0f;
         farAway.y = pt.y;
 
-        if (!this->m_vList.empty()) {
-            for (int i = 0; i < m_vList.size(); ++i) {
+        if (m_vList.empty())
+        {
+            auto     size = static_cast<int>(m_vList.size());
+            for (int i    = 0; i < size; ++i)
+            {
                 tp1 = m_vList[i];
                 if (tp1.x == pt.x && tp1.y == pt.y)
                     return true;
 
-                int i2 = i != this->m_vList.size() - 1 ? i + 1 : 0;
+                int i2 = i != size - 1 ? i + 1 : 0;
                 tp2 = m_vList[i2];
                 Linef::IntersectResult ir = X2D::Linef::IntersectCCW(tp1, tp2, farAway, pt);
                 if (ir == Linef::IntersectResult::Intersect)
                     ++nIntersectCnt;
-                if (ir == Linef::IntersectResult::Touch) {
-                    if (std::min(tp1.y, tp2.y) == pt.y) {
+                if (ir == Linef::IntersectResult::Touch)
+                {
+                    if (std::min(tp1.y, tp2.y) == pt.y)
+                    {
                         if (tp2.y != tp1.y)
                             ++nTouchCnt;
                     }
@@ -114,8 +127,8 @@ bool X2D::Polygonf::IsInclude(X2D::Pointf pt)
 X2D::Linef X2D::Polygonf::GetSegment(uint idx)
 {
     uint   idx2 = idx != this->m_vList.size() - 1 ? idx + 1 : 0;
-    Pointf p1   = this->m_vList[(int) idx];
-    Pointf p2   = this->m_vList[(int) idx2];
+    Pointf p1   = this->m_vList[(int)idx];
+    Pointf p2   = this->m_vList[(int)idx2];
     return Linef(p1, p2);
 }
 
@@ -138,15 +151,19 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
     line.end.x = rc.pos.x;
     line.end.y = rc.pos.y;
 
-    if (this->IsInclude(line.end)) {
+    if (IsInclude(line.end))
+    {
         return true;
-    } else {
-        for (auto p1 :  this->m_vList) {
+    }
+    else
+    {
+        for (auto &p1 :  m_vList)
+        {
             if (rc.IsInclude(p1))
                 return true;
         }
-        float     rsx = rc.size.x + rc.pos.x;
-        float     rsy = rc.size.y + rc.pos.y;
+        float rsx = rc.size.x + rc.pos.x;
+        float rsy = rc.size.y + rc.pos.y;
 
         line_a.begin.x = rc.pos.x;
         line_a.begin.y = rc.pos.y;
@@ -165,8 +182,9 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
         line_d.end.x   = rc.pos.x;
         line_d.end.y   = rc.pos.y;
 
-        for (int i = 0; i < this->m_vList.size(); ++i) {
-            line = this->GetSegment((uint) i);
+        for (int i = 0; i < static_cast<int>(m_vList.size()); ++i)
+        {
+            line = GetSegment((uint)i);
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_a.begin, line_a.end) == X2D::Linef::IntersectResult::Intersect)
                 return true;
             X2D::Linef::IntersectResult r1 = X2D::Linef::IntersectCCW(line.begin, line.end, line_b.begin, line_b.end);
@@ -177,9 +195,9 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
                 return true;
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_d.begin, line_d.end) == X2D::Linef::IntersectResult::Intersect
                 || (line.end.x != line.begin.x
-                   && line.end.y != line.begin.y
-                   && r1 == X2D::Linef::IntersectResult::Touch
-                   && r2 == X2D::Linef::IntersectResult::Touch))
+                    && line.end.y != line.begin.y
+                    && r1 == X2D::Linef::IntersectResult::Touch
+                    && r2 == X2D::Linef::IntersectResult::Touch))
                 return true;
         }
     }
@@ -208,17 +226,22 @@ void X2D::Polygonf::calculateArea(std::vector<X2D::Pointf> vList, X2D::Boxf area
 {
     area.Set(*vList.begin(), *vList.end());
 
-    for (auto &pt : vList) {
-        if (area.begin.x > pt.x) {
+    for (auto &pt : vList)
+    {
+        if (area.begin.x > pt.x)
+        {
             area.SetLeft(pt.x);
         }
-        if (area.begin.y > pt.y) {
+        if (area.begin.y > pt.y)
+        {
             area.SetTop(pt.y);
         }
-        if (area.end.x < pt.x) {
+        if (area.end.x < pt.x)
+        {
             area.SetRight(pt.x);
         }
-        if (area.end.y < pt.y) {
+        if (area.end.y < pt.y)
+        {
             area.SetBottom(pt.y);
         }
     }
@@ -236,7 +259,8 @@ X2D::PolygonF::PolygonF(X2D::Pointf p1, X2D::Pointf p2)
 X2D::PolygonF::PolygonF(std::vector<X2D::Pointf> points)
 {
     this->m_Area = RectangleF(points);
-    for (auto &p : points) {
+    for (auto &p : points)
+    {
         this->m_Points.emplace_back(Pointf(p.x, p.y));
     }
 }
@@ -252,10 +276,14 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
     line.end.x = rc.m_TopLeft.x;
     line.end.y = rc.m_TopLeft.y;
 
-    if (this->IsInclude(line.end)) {
+    if (this->IsInclude(line.end))
+    {
         return true;
-    } else {
-        for (auto &p1 : this->m_Points) {
+    }
+    else
+    {
+        for (auto &p1 : this->m_Points)
+        {
             if (rc.IsInclude(p1))
                 return true;
         }
@@ -279,8 +307,9 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
         line_d.end.x   = rc.m_TopLeft.x;
         line_d.end.y   = rc.m_TopLeft.y;
 
-        for (int i = 0; i < this->m_Points.size(); ++i) {
-            line = this->GetSegment((uint) i);
+        for (int i = 0; i < static_cast<int>(m_Points.size()); ++i)
+        {
+            line = GetSegment((uint)i);
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_a.begin, line_a.end) == X2D::Linef::IntersectResult::Intersect)
                 return true;
             X2D::Linef::IntersectResult r1 = X2D::Linef::IntersectCCW(line.begin, line.end, line_b.begin, line_b.end);
@@ -291,9 +320,9 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
                 return true;
             if (X2D::Linef::IntersectCCW(line.begin, line.end, line_d.begin, line_d.end) == X2D::Linef::IntersectResult::Intersect
                 || (line.end.x != line.begin.x
-                   && line.end.y != line.begin.y
-                   && r1 == X2D::Linef::IntersectResult::Touch
-                   && r2 == X2D::Linef::IntersectResult::Touch))
+                    && line.end.y != line.begin.y
+                    && r1 == X2D::Linef::IntersectResult::Touch
+                    && r2 == X2D::Linef::IntersectResult::Touch))
                 return true;
         }
     }
@@ -302,9 +331,11 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
 
 bool X2D::PolygonF::IsLooseCollision(X2D::Linef line)
 {
-    if (!this->IsLooseInclude(line.begin) && !this->IsLooseInclude(line.end)) {
-        for (int i = 0; i < this->m_Points.size(); ++i) {
-            Linef                  l   = this->GetSegment((uint) i);
+    if (!IsLooseInclude(line.begin) && !IsLooseInclude(line.end))
+    {
+        for (uint i = 0; i < static_cast<uint>(m_Points.size()); ++i)
+        {
+            Linef                  l   = GetSegment(i);
             Linef::IntersectResult res = Linef::IntersectCCW(l.begin, l.end, line.begin, line.end);
             if (res != Linef::IntersectResult::Seperate && res != Linef::IntersectResult::Touch)
                 return true;
@@ -327,23 +358,28 @@ bool X2D::PolygonF::IsLooseInclude(X2D::Pointf pt)
 
     Pointf np{ };
 
-    if (!this->m_Points.empty()) {
-        for (int i = 0; i < this->m_Points.size(); ++i) {
+    if (!m_Points.empty())
+    {
+        auto size = static_cast<int>(m_Points.size());
+        for (int i = 0; i < size; ++i)
+        {
             Pointf p = this->m_Points[i];
 
             if (p.x == pt.x && p.y == pt.y)
                 return false;
 
-            np = this->m_Points[i >= this->m_Points.size() - 1 ? 0 : i + 1];
+            np = m_Points[i >= size - 1 ? 0 : i + 1];
 
             Linef::IntersectResult res = Linef::IntersectCCW(p, np, farAway, pt);
             if (res == Linef::IntersectResult::Intersect)
                 nIntersectCnt++;
-            if (res == Linef::IntersectResult::Touch) {
+            if (res == Linef::IntersectResult::Touch)
+            {
                 float y = np.y;
                 if (np.y >= p.y)
                     y = p.y;
-                if (pt.y == y) {
+                if (pt.y == y)
+                {
                     if (p.y != np.y)
                         nTouchCnt++;
                 }
@@ -357,8 +393,8 @@ bool X2D::PolygonF::IsLooseInclude(X2D::Pointf pt)
 bool X2D::PolygonF::IsInclude(X2D::Pointf pt)
 {
     X2D::Pointf farAway{ };
-    int nTouchCnt;
-    int nIntersectCnt;
+    int         nTouchCnt;
+    int         nIntersectCnt;
 
     Pointf tp1;
     Pointf tp2;
@@ -367,22 +403,23 @@ bool X2D::PolygonF::IsInclude(X2D::Pointf pt)
 //            return result;
     if (result)
     {
-        nTouchCnt = 0;
+        nTouchCnt     = 0;
         nIntersectCnt = 0;
 
         //v5 = this.m_vList;
         farAway.x = this->m_Area.m_BottomRight.x + 1.0f;
         farAway.y = pt.y;
 
-        if (!this->m_Points.empty())
+        if (!m_Points.empty())
         {
-            for (int i = 0; i < m_Points.size(); ++i)
+            auto size = static_cast<int>(m_Points.size());
+            for (int i = 0; i < size; ++i)
             {
                 tp1 = m_Points[i];
                 if (tp1.x == pt.x && tp1.y == pt.y)
                     return true;
 
-                int i2 = i != this->m_Points.size() - 1 ? i + 1 : 0;
+                int i2 = i != size - 1 ? i + 1 : 0;
                 tp2 = m_Points[i2];
                 Linef::IntersectResult ir = X2D::Linef::IntersectCCW(tp1, tp2, farAway, pt);
                 if (ir == Linef::IntersectResult::Intersect)
@@ -397,14 +434,14 @@ bool X2D::PolygonF::IsInclude(X2D::Pointf pt)
                 }
             }
         }
-        result = ((nTouchCnt + nIntersectCnt) & 1) == 1;
+        result    = ((nTouchCnt + nIntersectCnt) & 1) == 1;
     }
     return result;
 }
 
 bool X2D::PolygonF::IsIn(X2D::RectangleF t)
 {
-    for(auto& p : this->m_Points)
+    for (auto &p : this->m_Points)
     {
         if (!t.IsInclude(p.x, p.y))
             return false;
@@ -414,8 +451,8 @@ bool X2D::PolygonF::IsIn(X2D::RectangleF t)
 
 X2D::Linef X2D::PolygonF::GetSegment(uint idx)
 {
-    uint idx2 = idx != this->m_Points.size() - 1 ? idx + 1 : 0;
-    Pointf p1 = this->m_Points[(int)idx];
-    Pointf p2 = this->m_Points[(int)idx2];
+    uint   idx2 = idx != this->m_Points.size() - 1 ? idx + 1 : 0;
+    Pointf p1   = this->m_Points[(int)idx];
+    Pointf p2   = this->m_Points[(int)idx2];
     return Linef(p1, p2);
 }

@@ -20,14 +20,15 @@
 
 #include "Common.h"
 
-struct NPCTemplate {
-    uint32      id;
-    uint32      x;
-    uint32      y;
-    uint32      z;
+struct NPCTemplate
+{
+    int         id;
+    float       x;
+    float       y;
+    float       z;
     int         spawn_type;
-    uint32      face;
-    uint32      local_flag;
+    int         face;
+    int         local_flag;
     std::string contact_script;
 };
 
@@ -40,7 +41,7 @@ enum NPC_STATUS
     NPC_STATUS_DEAD            = 0x4
 };
 
-enum  NPC_SpawnType : int
+enum NPC_SpawnType : int
 {
     SPAWN_NORMAL         = 0,
     SPAWN_SIEGE_DUNGEON  = 1,

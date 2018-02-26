@@ -55,8 +55,8 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
 
     regionTest->Init(rOriginalPos, rTargetPos, fRegionProperty);
 
-    uint nTargetCount = 0;
-    uint nAllyCount   = 0;
+    int nTargetCount = 0;
+    int nAllyCount   = 0;
     bool bIsAlly{false};
 
     for (const uint &uid : vList)

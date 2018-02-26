@@ -63,13 +63,13 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 {
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        for (int        i = 0; i < m_vExpireObject.size(); i++)
+
+        auto pos = std::find_if(m_vExpireObject.begin(),
+                                m_vExpireObject.end(),
+                                [&prop] (const FieldProp* fp) { return fp->GetHandle() == prop->GetHandle(); });
+        if(pos != m_vExpireObject.end())
         {
-            auto fp = m_vExpireObject[i];
-            if (fp->GetHandle() == prop->GetHandle())
-            {
-                m_vExpireObject.erase(m_vExpireObject.begin() + i);
-            }
+            m_vExpireObject.erase(pos);
         }
 
         if (!prop->m_PropInfo.bOnce)
@@ -90,13 +90,16 @@ void FieldPropManager::Update(uint/* diff*/)
     // "Critical section" for lock (yeah, I prefer those)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        for (int i = 0; i < m_vRespawnList.size(); ++i)
+        for (auto it = m_vRespawnList.begin(); it != m_vRespawnList.end(); )
         {
-            FieldPropRegenInfo regen = m_vRespawnList[i];
-            if (regen.tNextRegen < ct)
+            if (it->tNextRegen < ct)
             {
-                vRegenInfo.emplace_back(regen);
-                m_vRespawnList.erase(m_vRespawnList.begin() + i);
+                vRegenInfo.emplace_back(*it);
+                it = m_vRespawnList.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
 

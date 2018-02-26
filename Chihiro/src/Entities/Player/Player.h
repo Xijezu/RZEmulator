@@ -139,7 +139,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         bool IsSitdown() const override { return m_bSitdown; }
 
-        uint GetJobDepth();
+        int GetJobDepth();
 
         std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 

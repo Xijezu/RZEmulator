@@ -23,13 +23,14 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
 {
     this->Release();
 
-    std::vector<std::string> TextLines{};
-    std::string strPropNum{};
-    std::string strPropName{};
+    std::vector<std::string> TextLines{ };
+    std::string              strPropNum{ };
+    std::string              strPropName{ };
 
     std::ifstream ifstream(("Resource/NewMap/"s + szFileName).c_str(), std::ios::in);
     std::string   row;
-    while (std::getline(ifstream, row)) {
+    while (std::getline(ifstream, row))
+    {
         if (!row.empty() || row[0] == ';')
             TextLines.push_back(row);
     }
@@ -39,59 +40,71 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
         return false;
 
     float fCurrentVisibleRatio = 1.0f;
-    int ptype = 0;
-    int rtype = 0;
-    int sflag = 0;
-    int line_num = 0;
-    int nCurrentCategory = 0;
+    int   ptype                = 0;
+    int   rtype                = 0;
+    int   sflag                = 0;
+    int   line_num             = 0;
+    int   nCurrentCategory     = 0;
 
-    for(const auto& s : TextLines) {
+    for (const auto &s : TextLines)
+    {
         Tokenizer lines(s, '=');
-        if(lines.size() < 2)
+        if (lines.size() < 2)
             continue;
-        if(lines[0] == "CATEGORY"s) {
+        if (lines[0] == "CATEGORY"s)
+        {
             nCurrentCategory = -1;
-            for(int i = 0; i < m_CategoryNames.size(); ++i) {
-                if(m_CategoryNames[i] == lines[1]) {
-                    nCurrentCategory = i;
+            for (std::size_t i = 0; i < m_CategoryNames.size(); ++i)
+            {
+                if (m_CategoryNames[i] == lines[1])
+                {
+                    nCurrentCategory = static_cast<int>(i);
                     break;
                 }
             }
-            if(nCurrentCategory == -1) {
-                nCurrentCategory  = (int)m_CategoryNames.size();
+            if (nCurrentCategory == -1)
+            {
+                nCurrentCategory = (int)m_CategoryNames.size();
                 m_CategoryNames.emplace_back(lines[1]);
             }
-        } else if(lines[0]  == "VISIBLE_RATIO"s) {
-            fCurrentVisibleRatio = std::stof(lines[1]);
-            if(fCurrentVisibleRatio == 0.0f)
+        }
+        else if (lines[0] == "VISIBLE_RATIO"s)
+        {
+            fCurrentVisibleRatio     = std::stof(lines[1]);
+            if (fCurrentVisibleRatio == 0.0f)
                 fCurrentVisibleRatio = 1.0f;
-        } else if(lines[0] == "RENDERTYPE"s) {
-            if(lines[1] == "general"s)
+        }
+        else if (lines[0] == "RENDERTYPE"s)
+        {
+            if (lines[1] == "general"s)
                 rtype = 0;
-            else if(lines[1] == "building"s)
+            else if (lines[1] == "building"s)
                 rtype = 1;
-        } else if(lines[0] == "PROPNAME"s) {
+        }
+        else if (lines[0] == "PROPNAME"s)
+        {
             Tokenizer vars(lines[1], ',');
-            if(vars.size() < 2)
+            if (vars.size() < 2)
                 continue;
 
-            strPropNum = vars[0];
+            strPropNum  = vars[0];
             strPropName = vars[1];
 
-            if(vars.size() == 4)
+            if (vars.size() == 4)
                 sflag = GetShadowFlag(vars[3]) | GetShadowFlag(vars[4]);
-            if(strPropName.empty())
+            if (strPropName.empty())
                 continue;
 
             int prop_num = std::stoi(strPropNum);
-            if(CheckPropFileType(strPropName, ".nx3"s))
+            if (CheckPropFileType(strPropName, ".nx3"s))
                 ptype = 2;
-            else if(CheckPropFileType(strPropName, "_default.naf"))
+            else if (CheckPropFileType(strPropName, "_default.naf"))
                 ptype = 1;
-            else if(CheckPropFileType(strPropName, ".spt"))
+            else if (CheckPropFileType(strPropName, ".spt"))
                 ptype = 3;
-            else {
-                if(!CheckPropFileType(strPropName, ".cob"))
+            else
+            {
+                if (!CheckPropFileType(strPropName, ".cob"))
                     continue;
                 ptype = 4;
             }
@@ -109,15 +122,15 @@ void TerrainPropInfo::Release()
 
 int TerrainPropInfo::GetShadowFlag(std::string str)
 {
-    if(str == "no_ca"s)
+    if (str == "no_ca"s)
         return 1;
-    else if(str == "dy_ca"s)
+    else if (str == "dy_ca"s)
         return 2;
-    else if(str == "st_ca"s)
+    else if (str == "st_ca"s)
         return 4;
-    else if(str == "no_re"s)
+    else if (str == "no_re"s)
         return 8;
-    else if(str == "re"s)
+    else if (str == "re"s)
         return 16;
     else
         return 9;
@@ -130,13 +143,13 @@ bool TerrainPropInfo::CheckPropFileType(std::string rname, std::string szTail)
 
 void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16 wPropNum, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
 {
-    PropInfo p{};
-    p.nLineIndex = nLineIndex;
-    p.Type = propType;
-    p.mRenderType = renderType;
-    p.nCategory = nCategory;
+    PropInfo p{ };
+    p.nLineIndex    = nLineIndex;
+    p.Type          = propType;
+    p.mRenderType   = renderType;
+    p.nCategory     = nCategory;
     p.fVisibleRatio = fVisibleRatio;
-    p.strName = std::move(rName);
-    p.nShadowFlag = nShadowFlag;
+    p.strName       = std::move(rName);
+    p.nShadowFlag   = nShadowFlag;
     m_pPropInfo.emplace_back(p);
 }

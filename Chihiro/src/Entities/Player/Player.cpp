@@ -341,10 +341,10 @@ void Player::DB_ReadStorage()
                     {
                         if (newItem->m_pItemBase->group == GROUP_SUMMONCARD)
                         {
-                            for (int i = 0; i < vList.size(); i++)
+                            for (int i = 0; i < static_cast<int>(vList.size()); i++)
                             {
                                 Summon *sm = vList[i];
-                                if (sm->GetUInt32Value(UNIT_FIELD_UID) == newItem->m_Instance.Socket[0])
+                                if (sm->GetUInt32Value(UNIT_FIELD_UID) == (uint)newItem->m_Instance.Socket[0])
                                 {
                                     vList.erase(vList.begin() + i);
                                     sm->m_pItem        = newItem;
@@ -850,7 +850,7 @@ void Player::SendLoginProperties()
     {
         if (item->m_pItemBase->group == GROUP_SKILLCARD)
         {
-            if (item->m_Instance.Socket[0] == GetUInt32Value(UNIT_FIELD_UID))
+            if ((uint)item->m_Instance.Socket[0] == GetUInt32Value(UNIT_FIELD_UID))
             {
                 BindSkillCard(item);
             }
@@ -1001,7 +1001,7 @@ void Player::Save(bool bOnlyPlayer)
     }
 }
 
-uint Player::GetJobDepth()
+int Player::GetJobDepth()
 {
     auto res = sObjectMgr->GetJobInfo(GetCurrentJob());
     if (res != nullptr)
@@ -1013,12 +1013,12 @@ void Player::applyJobLevelBonus()
 {
     int          levels[4]{ };
     int          jobs[4]{ };
-    uint         i = 0;
+    int          i = 0;
     CreatureStat stat{ };
 
     if (GetCurrentJob() != 0)
     {
-        uint jobDepth = GetJobDepth();
+        int jobDepth = GetJobDepth();
         for (i = 0; i < jobDepth; i++)
         {
             jobs[i]   = GetPrevJobId(i);
@@ -1359,7 +1359,7 @@ void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpd
 
 Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
 {
-    if (pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID))
+    if ((uint)pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID))
     {
         NG_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
         return nullptr;
@@ -2530,7 +2530,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     }
     if (m_QuestManager.EndQuest(q))
     {
-        auto str = string_format("END|EXP|%d|%d|%d|%d", q->m_Instance.Code, q->m_QuestBase->nEXP, q->m_QuestBase->nJP, q->m_QuestBase->nGold);
+        auto str = string_format("END|EXP|%d|%ld|%d|%d", q->m_Instance.Code, q->m_QuestBase->nEXP, q->m_QuestBase->nJP, q->m_QuestBase->nGold);
         Messages::SendQuestMessage(120, this, str);
 
         auto nRewardEXP = q->m_QuestBase->nEXP;
@@ -2540,7 +2540,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
             {
                 if (GetEXP() < sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1))
                 {
-                    nRewardEXP = (uint64)sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1) - GetEXP();
+                    nRewardEXP = sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1) - GetEXP();
                 }
                 else
                 {
@@ -2555,7 +2555,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
             // @todo: max JP
         }
 
-        Unit::AddEXP((uint64)((double)nRewardEXP * (double)fMod), nRewardJP, false);
+        Unit::AddEXP(static_cast<int64>(nRewardEXP * fMod), nRewardJP, false);
         // @todo: favor
 
         if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)

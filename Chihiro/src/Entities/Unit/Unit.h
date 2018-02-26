@@ -113,20 +113,20 @@ class Unit : public WorldObject
 
         virtual bool StartAttack(uint target, bool bNeedFastReaction);
 
-        uint32 GetPrevJobId(int nDepth) const
+        int32 GetPrevJobId(int nDepth) const
         {
             if (nDepth > 3)
                 return 0;
             else
-                return GetUInt32Value(UNIT_FIELD_PREV_JOB + nDepth);
+                return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth);
         }
 
-        uint32 GetPrevJobLv(int nDepth) const
+        int32 GetPrevJobLv(int nDepth) const
         {
             if (nDepth > 3)
                 return 0;
             else
-                return GetUInt32Value(UNIT_FIELD_PREV_JLV + nDepth);
+                return GetInt32Value(UNIT_FIELD_PREV_JLV + nDepth);
         }
 
         void regenHPMP(uint t);
@@ -176,12 +176,9 @@ class Unit : public WorldObject
         void RemoveState(StateCode code, int state_level);
         void RemoveState(int uid);
 
-        void AddUnitTypeMask(uint32 mask) { m_unitTypeMask |= mask; }
-
         // Setters
-        void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, lvl); }
-
-        void SetCurrentJob(uint job) { SetUInt32Value(UNIT_FIELD_JOB, job); }
+        void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int>(lvl)); }
+        void SetCurrentJob(uint job) { SetInt32Value(UNIT_FIELD_JOB, job); }
 
         void SetJP(int jp);
         void SetCurrentJLv(int jlv);
@@ -217,20 +214,20 @@ class Unit : public WorldObject
         uint GetBowInterval() { return (uint)((float)GetAttackInterval() * m_fBowInterval); }
 
         // Getters
-        uint32_t GetLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
+        int GetLevel() const { return GetInt32Value(UNIT_FIELD_LEVEL); }
         virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
-        uint32 GetHealth() const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
-        uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAX_HEALTH); }
-        uint32 GetMana() const { return GetUInt32Value(UNIT_FIELD_MANA); }
-        uint32 GetMaxMana() const { return GetUInt32Value(UNIT_FIELD_MAX_MANA); }
-        uint32 GetCurrentJob() const { return GetUInt32Value(UNIT_FIELD_JOB); };
-        uint32 GetCurrentJLv() const { return GetUInt32Value(UNIT_FIELD_JLV); }
+        int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
+        int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }
+        int GetMana() const { return GetInt32Value(UNIT_FIELD_MANA); }
+        int GetMaxMana() const { return GetInt32Value(UNIT_FIELD_MAX_MANA); }
+        int GetCurrentJob() const { return GetInt32Value(UNIT_FIELD_JOB); };
+        int GetCurrentJLv() const { return GetInt32Value(UNIT_FIELD_JLV); }
         int GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
-        int32 GetJP() const { return GetInt32Value(UNIT_FIELD_JOBPOINT); }
+        int GetJP() const { return GetInt32Value(UNIT_FIELD_JOBPOINT); }
         uint32 GetTotalJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
         float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
         float GetItemChance() const;
-        uint64 GetEXP() const { return GetUInt64Value(UNIT_FIELD_EXP); }
+        int64 GetEXP() const { return static_cast<int64>(GetUInt64Value(UNIT_FIELD_EXP)); }
         virtual uint GetCreatureGroup() const;
 
         void AddHealth(int hp) { SetHealth(GetHealth() + hp); }
