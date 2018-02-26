@@ -1,26 +1,28 @@
+language: cpp
+
 matrix:
   include:
     - os: linux
-      env: BUILD_SYSTEM=cmake C_COMPILER=gcc-7 CXX_COMPILER=g++-7
       addons:
         apt:
           sources:
-          - ubuntu-toolchain-r-test
+            - ubuntu-toolchain-r-test
           packages:
-          - gcc-7
-          - g++-7
-      sudo: required
+            - gcc-7
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
-      env: BUILD_SYSTEM=cmake C_COMPILER=clang-5.0 CXX_COMPILER=clang++-5.0
       addons:
         apt:
           sources:
-          - llvm-toolchain-trusty-5.0
+            - llvm-toolchain-trusty-5.0
           packages:
-          - clang-5.0
+            - clang-5.0
+            - clang++-5.0
+          env:
+            - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       sudo: required
-
-language: cpp
 
 branches:
   only:
@@ -29,10 +31,8 @@ branches:
 before_install:
   - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   - sudo apt-get update -qq
-#  - sudo apt-get install build-essential autoconf libtool make cmake git-core patch wget
   - sudo apt-get install libmysqlclient15-dev libmysql++-dev
-  - if [ -n "${C_COMPILER}" ]; then export CC="${C_COMPILER}"; fi
-  - if [ -n "${CXX_COMPILER}" ]; then export CXX="${CXX_COMPILER}"; fi
+  - eval "${MATRIX_EVAL}"
 
 script:
   - mkdir build
