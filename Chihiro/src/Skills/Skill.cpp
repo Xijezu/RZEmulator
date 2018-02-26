@@ -104,7 +104,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 {
     m_vResultList.clear();
     auto current_time = sWorld->GetArTime();
-    int delay        = 0xffffffff;
+    uint delay        = 0xffffffff;
 
     if (m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
         nSkillLevel = m_nSkillLevel + m_nSkillLevelAdd;
@@ -180,7 +180,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         Init();
         return TS_RESULT_NOT_ENOUGH_LEVEL;
     }
-    if (m_pOwner->GetJP() < m_SkillBase->cost_jp + m_nEnhance * m_SkillBase->cost_jp_per_enhance)
+    if (m_pOwner->GetJP() < m_SkillBase->cost_jp + static_cast<int>(m_nEnhance) * m_SkillBase->cost_jp_per_enhance)
     {
         Init();
         return TS_RESULT_NOT_ENOUGH_JP;
@@ -235,8 +235,6 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         delay = m_SkillBase->GetCastDelay(nSkillLevel, 0);
         if (m_nSkillID > 0 || m_nSkillID < -5)
         {
-            if (delay < 0)
-                delay = (uint)(delay + 4294967296);
             delay     = (uint)(delay / (m_pOwner->m_Attribute.nCastingSpeed / 100.0f));
             delay     = (uint)((float)delay * (m_pOwner->GetCastingMod((ElementalType)m_SkillBase->elemental,
                                                                        m_SkillBase->is_physical_act == 1, m_SkillBase->is_harmful != 0,

@@ -508,7 +508,7 @@ std::string XLua::SCRIPT_Conv(sol::variadic_args args)
     std::string result{ };
     if (args.size() >= 1 && args.size() % 2 == 1)
     {
-        int count = 0;
+        std::size_t count = 0;
         do
         {
             if (count != 0)

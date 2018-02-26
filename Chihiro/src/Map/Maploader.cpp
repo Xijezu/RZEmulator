@@ -113,7 +113,7 @@ void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, fl
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-    size_t size = infile.tellg();
+    int64 size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
@@ -167,7 +167,7 @@ void Maploader::LoadAttributeFile(const std::string&  szFilename, int x, int y, 
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-	size_t size = infile.tellg();
+    int64 size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
@@ -205,7 +205,7 @@ void Maploader::LoadScriptFile(const std::string&  szFilename, int x, int y, flo
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0,std::ios::end);
-	size_t size = infile.tellg();
+    int64 size = infile.tellg();
     infile.seekg(0,std::ios::beg);
     if(size == -1)
         return;
@@ -314,7 +314,7 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
-	size_t size = infile.tellg();
+    int64 size = infile.tellg();
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
@@ -324,7 +324,7 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
     infile.close();
 
     buffer.read_skip(18); // Sign
-    int version = buffer.read<int>();  // Version
+    auto version = buffer.read<int>();  // Version
 
     auto  total_entries = buffer.read<int>();
     float rx            = x * fMapLength;

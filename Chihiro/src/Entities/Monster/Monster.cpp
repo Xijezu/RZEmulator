@@ -436,7 +436,7 @@ void Monster::Update(uint diff)
             m_nLastHateUpdateTime = ct;
             //updateHate();
         }
-        if (m_nTamedTime + 30000 < ct)
+        if (m_nTamedTime + 30000 < static_cast<int>(ct))
         {
             m_hTamer     = 0;
             m_nTamedTime = -1;
@@ -1063,13 +1063,14 @@ int Monster::AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMons
 
 HateTag *Monster::getHateTag(uint handle, uint t)
 {
-    for (auto i = 0; i < m_vHateList.size(); i++)
+    auto pos = std::find_if(m_vHateList.begin(),
+                            m_vHateList.end(),
+                            [handle] (const HateTag& ht) { return ht.uid == handle; });
+
+    if(pos != m_vHateList.end())
     {
-        if (m_vHateList[i].uid == handle)
-        {
-            m_vHateList[i].nTime = t;
-            return &m_vHateList[i];
-        }
+        pos->nTime = t;
+        return &*pos;
     }
     return nullptr;
 }

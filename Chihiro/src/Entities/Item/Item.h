@@ -34,7 +34,7 @@ class ItemInstance
 
         uint         OwnerHandle{0};                            // 0x0
         uint         OwnSummonHandle{0};                        // 0x4
-        uint64       UID{0};                                    // 0x8
+        int64       UID{0};                                    // 0x8
         int          Code{0};                                    // 0x10
         int          nIdx{0};                                    // 0x14
         int          nLevel{0};                                  // 0x18

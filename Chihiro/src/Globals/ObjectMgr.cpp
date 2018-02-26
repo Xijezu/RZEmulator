@@ -1568,7 +1568,7 @@ int64 ObjectMgr::GetNeedExp(int level)
         l = 1;
     if (l > 300)
         l = 300;
-    if (_levelResourceStore.size() < l)
+    if ((int)_levelResourceStore.size() < l)
         l = (int)(_levelResourceStore.size() - 1);
     return _levelResourceStore[l - 1].normal_exp;
 }
@@ -1651,7 +1651,7 @@ Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool
     return mob;
 }
 
-uint64 ObjectMgr::GetNeedSummonExp(int level)
+int64 ObjectMgr::GetNeedSummonExp(int level)
 {
     if (level <= 300 && level > 0)
         return _summonLevelStore[level];

@@ -22,7 +22,7 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-option(ACE_USE_EXTERNAL "Use external ACE"                                            0)
+option(ACE_USE_EXTERNAL "Use external ACE"                                            1)
 option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 
 if(ACE_USE_EXTERNAL)
@@ -58,6 +58,7 @@ add_custom_target(revision.h ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsign-compare")
 
 include_directories(${CMAKE_BINARY_DIR}
                     ${CMAKE_SOURCE_DIR}/shared

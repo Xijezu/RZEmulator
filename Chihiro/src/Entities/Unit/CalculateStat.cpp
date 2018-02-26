@@ -29,10 +29,10 @@ void Unit::CalculateStat()
     CreatureAtributeServer stateAttr{ };
     CreatureStat           stateStat{ };
 
-    int prev_max_hp = GetMaxHealth();
-    int prev_max_mp = GetMaxMana();
-    int prev_hp     = GetHealth();
-    int prev_mp     = GetMana();
+    auto prev_max_hp = GetMaxHealth();
+    auto prev_max_mp = GetMaxMana();
+    auto prev_hp     = GetHealth();
+    auto prev_mp     = GetMana();
 
     SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, 1.0f);
@@ -145,8 +145,6 @@ void Unit::CalculateStat()
     SetMaxHealth((uint32_t)GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) * GetMaxHealth());
     SetMaxMana((uint32_t)GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) * GetMaxMana());
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
-    auto hp = GetMaxHealth();
-    auto mp = GetMaxMana();
     onCompleteCalculateStat();
     SetHealth(GetHealth());
     SetMana(GetMana());

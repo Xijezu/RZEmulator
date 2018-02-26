@@ -83,7 +83,7 @@ struct QuestBase
     int       nDropGroupID;
     int       nQuestDifficulty;
     int       nFavor;
-    uint64    nEXP;
+    int64     nEXP;
     int       nJP;
     int64     nGold;
     Reward    DefaultReward;

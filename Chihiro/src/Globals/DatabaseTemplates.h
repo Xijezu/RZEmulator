@@ -102,9 +102,9 @@ struct JobLevelBonusTemplate
 struct JobResourceTemplate
 {
     int  id;
-    uint stat_id;
+    int stat_id;
     int  job_class;
-    uint job_depth;
+    int job_depth;
     int  up_lv;
     int  up_jlv;
     int  available_job[4];

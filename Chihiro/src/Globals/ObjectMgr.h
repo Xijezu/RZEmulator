@@ -131,7 +131,7 @@ class ObjectMgr
         int GetNeedJpForJobLevelUp(int, int);
         int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
         int64 GetNeedExp(int level);
-        uint64 GetNeedSummonExp(int level);
+        int64 GetNeedSummonExp(int level);
         Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
         bool IsInRandomPoolMonster(int group_id, int monster_id);
         bool LearnAllSkill(Player *pPlayer);

@@ -38,7 +38,7 @@ void RespawnObject::Update(uint diff)
     if(lastDeadTime != 0 && lastDeadTime + info.interval > ct)
         return;
 
-    int respawn_count = m_nMaxRespawnNum - info.count;
+    auto respawn_count = m_nMaxRespawnNum - info.count;
 
     if(lastDeadTime == 0) {
         lastDeadTime = ct;

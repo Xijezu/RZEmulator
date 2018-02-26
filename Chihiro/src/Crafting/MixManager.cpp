@@ -101,7 +101,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     auto nRandom = (uint)(pInfo->fPercentage[nCurrentEnhance] * 100000.0f);
 
     bool bResult = false;
-    if(irand(0, 100000) > nRandom)
+    if((uint)irand(0, 100000) > nRandom)
     {
         // failed
         if(pMixInfo->type != 103)
@@ -176,7 +176,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMa
 	pPlayer->EraseItem(skillCube, 1);
 
     auto nRandom = (uint)(pInfo->fPercentage[skillCardMain->m_Instance.nEnhance] * 100000.0f);
-    if(irand(0, 100000) > nRandom)
+    if((uint)irand(0, 100000) > nRandom)
     {
     	pPlayer->EraseItem(skillCardMain, 1);
     	pPlayer->EraseItem(skillCardSec, 1);
@@ -276,7 +276,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
 
 MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item*> &pSubItem, std::vector<uint16> &pCountList)
 {
-    for(int i = 0; i < m_vMixInfo.size(); i++)
+    for(int i = 0; i < static_cast<int>(m_vMixInfo.size()); i++)
     {
         if(m_vMixInfo[i].sub_material_cnt == nSubMaterialCount)
         {

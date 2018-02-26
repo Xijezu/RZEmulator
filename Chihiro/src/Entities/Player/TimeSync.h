@@ -23,12 +23,12 @@
 class TimeSynch
 {
     public:
-        TimeSynch(int L, int DC, int pMAX) : m_L(L), m_DC(DC), m_MAX(pMAX) {};
+        TimeSynch(uint L, uint DC, uint pMAX) : m_L(L), m_DC(DC), m_MAX(pMAX) {};
         ~TimeSynch() = default;
 
         void onEcho(uint t)
         {
-            if (m_vT.size() == m_MAX)
+            if (static_cast<uint>(m_vT.size()) == m_MAX)
             {
                 //                 m_vT.
 //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
@@ -47,8 +47,8 @@ class TimeSynch
         uint GetInterval()
         {
             uint tc   = 0;
-            int  CDC  = 0;
-            auto size = (uint)m_vT.size();
+            uint  CDC  = 0;
+            auto size = static_cast<uint>(m_vT.size());
 
             for (auto &i : m_vT)
             {
@@ -69,9 +69,9 @@ class TimeSynch
 
         std::vector<uint> m_vT{ };
     private:
-        int m_L{ };
-        int m_DC{ };
-        int m_MAX{ };
+        uint m_L{ };
+        uint m_DC{ };
+        uint m_MAX{ };
 };
 
 #endif // NGEMITY_TIMESYNCHER_H

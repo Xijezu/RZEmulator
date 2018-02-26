@@ -186,7 +186,7 @@ class Monster : public Unit
         MonsterBase *m_Base{nullptr};
 
         float m_nLastEnemyDistance;
-        int   m_nLastTrackTime;
+        uint   m_nLastTrackTime;
 
         bool m_bComeBackHome;
         uint m_nLastHateUpdateTime;
