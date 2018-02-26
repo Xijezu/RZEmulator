@@ -1,84 +1,113 @@
+#--------------------------------------------------------
+# Copyright (C) 1995-2007 MySQL AB
 #
-# Find the MySQL client includes and library
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
 #
+# There are special exceptions to the terms and conditions of the GPL
+# as it is applied to this software. View the full text of the exception
+# in file LICENSE.exceptions in the top-level directory of this software
+# distribution.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+#
+# The MySQL Connector/ODBC is licensed under the terms of the
+# GPL, like most MySQL Connectors. There are special exceptions
+# to the terms and conditions of the GPL as it is applied to
+# this software, see the FLOSS License Exception available on
+# mysql.com.
 
-# This module defines
-# MYSQL_INCLUDE_DIR, where to find mysql.h
-# MYSQL_LIBRARY, the libraries needed to use MySQL.
-# MYSQL_FOUND, If false, do not try to use MySQL.
+##########################################################################
 
-if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-    set(MYSQL_FOUND TRUE)
-else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
 
-    SET(PROGRAM_FILES_ARCH_PATH)
-    if(PLATFORM EQUAL 32)
-        SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramFiles})
-    elseif(PLATFORM EQUAL 64)
-        SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramW6432})
-    endif()
+#-------------- FIND MYSQL_INCLUDE_DIR ------------------
+FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
+        /usr/include/mysql
+        /usr/local/include/mysql
+        /opt/mysql/mysql/include
+        /opt/mysql/mysql/include/mysql
+        /opt/mysql/include
+        /opt/local/include/mysql5
+        /usr/local/mysql/include
+        /usr/local/mysql/include/mysql
+        $ENV{ProgramFiles}/MySQL/*/include
+        $ENV{SystemDrive}/MySQL/*/include)
 
-    if (${PROGRAM_FILES_ARCH_PATH})
-        STRING(REPLACE "\\\\" "/" PROGRAM_FILES_ARCH_PATH ${PROGRAM_FILES_ARCH_PATH})
-    endif(${PROGRAM_FILES_ARCH_PATH})
+#----------------- FIND MYSQL_LIB_DIR -------------------
+IF (WIN32)
+    # Set lib path suffixes
+    # dist = for mysql binary distributions
+    # build = for custom built tree
+    IF (CMAKE_BUILD_TYPE STREQUAL Debug)
+        SET(libsuffixDist debug)
+        SET(libsuffixBuild Debug)
+    ELSE (CMAKE_BUILD_TYPE STREQUAL Debug)
+        SET(libsuffixDist opt)
+        SET(libsuffixBuild Release)
+        ADD_DEFINITIONS(-DDBUG_OFF)
+    ENDIF (CMAKE_BUILD_TYPE STREQUAL Debug)
 
-    find_path(MYSQL_INCLUDE_DIR mysql.h
-            /usr/include
-            /usr/include/mysql
-            /usr/local/include
-            /usr/local/include/mysql
-            /usr/local/mysql/include
-            /opt/local/include/mysql*/mysql
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.0/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.1/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.2/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.3/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.4/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.5/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.6/include"
-            "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.7/include"
-			"${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Connector C 6.1/include"
-            )
+    FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient
+            PATHS
+            $ENV{MYSQL_DIR}/lib/${libsuffixDist}
+            $ENV{MYSQL_DIR}/libmysql
+            $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
+            $ENV{MYSQL_DIR}/client/${libsuffixBuild}
+            $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
+            $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
+            $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
+ELSE (WIN32)
+    FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient
+            PATHS
+            /usr/lib/mysql
+            /usr/local/lib/mysql
+            /usr/local/mysql/lib
+            /usr/local/mysql/lib/mysql
+            /opt/local/mysql5/lib
+            /opt/local/lib/mysql5/mysql
+            /opt/mysql/mysql/lib/mysql
+            /opt/mysql/lib/mysql)
+ENDIF (WIN32)
 
-    if(WIN32 AND MSVC)
-        find_library(MYSQL_LIBRARY
-                NAMES
-                libmysql
-                PATHS
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.0/lib/opt"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.1/lib/opt"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.2/lib"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.3/lib"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.4/lib"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.5/lib"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.6/lib"
-                "${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Server 5.7/lib"
-				"${PROGRAM_FILES_ARCH_PATH}/MySQL/MySQL Connector C 6.1/lib"
-                )
-    else(WIN32 AND MSVC)
-        find_library(MYSQL_LIBRARY
-                NAMES
-                mysqlclient
-                mysqlclient_r
-                mysql
-                libmysql
-                PATHS
-                /usr/lib/mysql
-                /usr/local/lib/mysql
-                /usr/local/mysql/lib
-                /opt/local/lib/mysql*/mysql
-                )
-    endif(WIN32 AND MSVC)
+IF(MYSQL_LIB)
+    GET_FILENAME_COMPONENT(MYSQL_LIB_DIR ${MYSQL_LIB} PATH)
+ENDIF(MYSQL_LIB)
 
-    if(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-        set(MYSQL_FOUND TRUE)
-        message(STATUS "Found MySQL library: ${MYSQL_LIBRARY}")
-        message(STATUS "Found MySQL headers: ${MYSQL_INCLUDE_DIR}")
-    else(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
-        set(MYSQL_FOUND FALSE)
-        message(FATAL_ERROR "Could not find ${PLATFORM}-bit MySQL headers or libraries! Please install the development libraries and headers.")
-    endif(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
+IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
+    SET(MYSQL_FOUND TRUE)
 
-    mark_as_advanced(MYSQL_INCLUDE_DIR MYSQL_LIBRARY)
+    INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
+    LINK_DIRECTORIES(${MYSQL_LIB_DIR})
 
-endif(MYSQL_INCLUDE_DIR AND MYSQL_LIBRARY)
+    FIND_LIBRARY(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
+    FIND_LIBRARY(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
+    IF (MYSQL_LIB)
+        SET(MYSQL_CLIENT_LIBS ${MYSQL_LIB})
+    ELSE()
+        SET(MYSQL_CLIENT_LIBS mysqlclient_r)
+    ENDIF()
+    IF (MYSQL_ZLIB)
+        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
+    ENDIF (MYSQL_ZLIB)
+    IF (MYSQL_TAOCRYPT)
+        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} taocrypt)
+    ENDIF (MYSQL_TAOCRYPT)
+    # Added needed mysqlclient dependencies on Windows
+    IF (WIN32)
+        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} ws2_32)
+    ENDIF (WIN32)
+
+    MESSAGE(STATUS "MySQL Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
+    MESSAGE(STATUS "MySQL client libraries: ${MYSQL_CLIENT_LIBS}")
+ELSEIF (MySQL_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Cannot find MySQL. Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
+ENDIF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
