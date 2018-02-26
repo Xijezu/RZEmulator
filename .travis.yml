@@ -22,6 +22,7 @@ matrix:
             - llvm-toolchain-trusty-5.0
             - george-edison55-precise-backports
           packages:
+            - g++-7 # Maybe outdated libc++? no idea whats going on
             - clang-5.0
             - cmake-data
             - cmake
