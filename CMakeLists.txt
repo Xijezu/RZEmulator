@@ -58,8 +58,6 @@ add_custom_target(revision.h ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsign-compare")
-
 include_directories(${CMAKE_BINARY_DIR}
                     ${CMAKE_SOURCE_DIR}/shared
                     ${CMAKE_SOURCE_DIR}/shared/Configuration
