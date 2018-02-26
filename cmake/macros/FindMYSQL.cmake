@@ -28,6 +28,17 @@
 
 ##########################################################################
 
+SET(PROGRAM_FILES_ARCH_PATH)
+if(PLATFORM EQUAL 32)
+    SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramFiles})
+elseif(PLATFORM EQUAL 64)
+    SET(PROGRAM_FILES_ARCH_PATH $ENV{ProgramW6432})
+endif()
+
+if (${PROGRAM_FILES_ARCH_PATH})
+    STRING(REPLACE "\\\\" "/" PROGRAM_FILES_ARCH_PATH ${PROGRAM_FILES_ARCH_PATH})
+endif(${PROGRAM_FILES_ARCH_PATH})
+
 
 #-------------- FIND MYSQL_INCLUDE_DIR ------------------
 FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
@@ -39,34 +50,24 @@ FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
         /opt/local/include/mysql5
         /usr/local/mysql/include
         /usr/local/mysql/include/mysql
+        ${PROGRAM_FILES_ARCH_PATH}/MySQL/*/include
         $ENV{ProgramFiles}/MySQL/*/include
         $ENV{SystemDrive}/MySQL/*/include)
 
 #----------------- FIND MYSQL_LIB_DIR -------------------
 IF (WIN32)
-    # Set lib path suffixes
-    # dist = for mysql binary distributions
-    # build = for custom built tree
-    IF (CMAKE_BUILD_TYPE STREQUAL Debug)
-        SET(libsuffixDist debug)
-        SET(libsuffixBuild Debug)
-    ELSE (CMAKE_BUILD_TYPE STREQUAL Debug)
-        SET(libsuffixDist opt)
-        SET(libsuffixBuild Release)
-        ADD_DEFINITIONS(-DDBUG_OFF)
-    ENDIF (CMAKE_BUILD_TYPE STREQUAL Debug)
-
-    FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient
+    FIND_LIBRARY(MYSQL_LIB NAMES libmysql
             PATHS
-            $ENV{MYSQL_DIR}/lib/${libsuffixDist}
+            $ENV{MYSQL_DIR}/lib
             $ENV{MYSQL_DIR}/libmysql
-            $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
-            $ENV{MYSQL_DIR}/client/${libsuffixBuild}
-            $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
-            $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
-            $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
+            $ENV{MYSQL_DIR}/libmysql
+            $ENV{MYSQL_DIR}/client
+            $ENV{MYSQL_DIR}/libmysql
+            ${PROGRAM_FILES_ARCH_PATH}/MySQL/*/lib
+            $ENV{ProgramFiles}/MySQL/*/lib
+            $ENV{SystemDrive}/MySQL/*/lib)
 ELSE (WIN32)
-    FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient
+    FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient mysqlclient_r mysql libmysql
             PATHS
             /usr/lib/mysql
             /usr/local/lib/mysql
@@ -84,30 +85,9 @@ ENDIF(MYSQL_LIB)
 
 IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
     SET(MYSQL_FOUND TRUE)
-
     INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
     LINK_DIRECTORIES(${MYSQL_LIB_DIR})
-
-    FIND_LIBRARY(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
-    FIND_LIBRARY(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
-    IF (MYSQL_LIB)
-        SET(MYSQL_CLIENT_LIBS ${MYSQL_LIB})
-    ELSE()
-        SET(MYSQL_CLIENT_LIBS mysqlclient_r)
-    ENDIF()
-    IF (MYSQL_ZLIB)
-        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
-    ENDIF (MYSQL_ZLIB)
-    IF (MYSQL_TAOCRYPT)
-        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} taocrypt)
-    ENDIF (MYSQL_TAOCRYPT)
-    # Added needed mysqlclient dependencies on Windows
-    IF (WIN32)
-        SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} ws2_32)
-    ENDIF (WIN32)
-
-    MESSAGE(STATUS "MySQL Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
-    MESSAGE(STATUS "MySQL client libraries: ${MYSQL_CLIENT_LIBS}")
 ELSEIF (MySQL_FIND_REQUIRED)
+    set(MYSQL_FOUND FALSE)
     MESSAGE(FATAL_ERROR "Cannot find MySQL. Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
 ENDIF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
