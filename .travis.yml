@@ -12,6 +12,8 @@ matrix:
             - g++-7
             - cmake-data
             - cmake
+            - libmysqlclient15-dev
+            - libmysql++-dev
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
@@ -22,12 +24,19 @@ matrix:
             - llvm-toolchain-trusty-5.0
             - george-edison55-precise-backports
           packages:
-            - g++-7 # Maybe outdated libc++? no idea whats going on
+            - libc++
             - clang-5.0
             - cmake-data
             - cmake
+            - libmysqlclient15-dev
+            - libmysql++-dev
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+
+    - os: osx
+      osx_image: xcode8
+      env:
+        - MATRIX_EVAL="brew install gcc && brew install mysql && CC=gcc-7 && CXX=g++-7"
 
 branches:
   only:
