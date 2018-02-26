@@ -87,13 +87,12 @@ elseif(UNIX)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 
    if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
         if(NOT DEBUG)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --no-warnings")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -std=c++11 -Wno-narrowing -Wno-deprecated-register")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -Wno-narrowing -Wno-deprecated-register")
         else()
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -g3")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -g3 -std=c++11 -Wno-narrowing -Wno-deprecated-register")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -g3 -Wno-narrowing -Wno-deprecated-register")
         endif()
 
     elseif(CMAKE_C_COMPILER MATCHES "icc")
@@ -112,6 +111,6 @@ elseif(UNIX)
 
         # -Wno-narrowing needed to suppress a warning in g3d
         # -Wno-deprecated-register is needed to suppress 185 gsoap warnings on Unix systems.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wno-narrowing -Wno-deprecated-register -Wno-ignored-attributes -Wno-deprecated-declarations")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wno-deprecated-register -Wno-ignored-attributes -Wno-deprecated-declarations")
     endif()
 endif()
