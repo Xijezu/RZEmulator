@@ -15,6 +15,9 @@ We used it to get a proper base for networking & database, see /shared/README.md
 * MySQL >= 5.6.36 (Windows / Linux)
 * A C++14 Compiler
 
+## Installation Guide
+You can find detailed guides about compiling, installation and configuring in our [forum](https://www.ngemity.org/viewforum.php?f=12), make sure to check it out!
+
 ## Current Status
 This project is far from finished, but it's a huge base so far. The Emulator is pretty stable so far.
 * Most of the non-default skills don't work yet (since they require special interactions)
