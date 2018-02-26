@@ -39,7 +39,7 @@ include_directories(
         ${MYSQL_INCLUDE_DIR})
 
 add_executable(Chihiro ${SOURCE_FILES})
-target_link_libraries(Chihiro shared ${MYSQL_CLIENT_LIBS} lualib)
+target_link_libraries(Chihiro shared ${MYSQL_LIB} lualib)
 
 
 if(NOT ACE_USE_EXTERNAL)
