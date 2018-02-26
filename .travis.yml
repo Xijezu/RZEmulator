@@ -43,7 +43,6 @@ branches:
     - master
 
 before_install:
-  - sudo apt-get install libmysqlclient15-dev libmysql++-dev
   - eval "${MATRIX_EVAL}"
 
 script:
