@@ -892,7 +892,7 @@ void Skill::ACTIVATE_FIELD_PROP()
     auto fp = sMemoryPool->GetObjectInWorld<FieldProp>(m_hTarget);
     if (fp != nullptr)
     {
-        sWorld->AddSkillDamageResult(m_vResultList, fp->UseProp(m_pOwner->As<Player>()), 0, 0);
+        sWorld->AddSkillResult(m_vResultList, fp->UseProp(m_pOwner->As<Player>()), 0, 0);
     }
 }
 
@@ -977,7 +977,7 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
     {
         // TODO: Party functor
     }
-    sWorld->AddSkillDamageResult(m_vResultList, true, 0, m_pOwner->GetHandle());
+    sWorld->AddSkillResult(m_vResultList, true, 0, m_pOwner->GetHandle());
 }
 
 void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
