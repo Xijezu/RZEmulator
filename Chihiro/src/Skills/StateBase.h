@@ -34,12 +34,12 @@ enum AttributeFlag {
 enum StateCode {
     SC_NONE                                = 0x000,
     SC_INC_ITEM_CHANCE                     = 0x3FC,
-    SC_HUNTING_CREATURE_CARD               = 0x803,
     SC_INC_BLOCK_CHANCE                    = 0x3FD,
-    SC_ADD_ENERGY                          = 0x1198,
-    SC_STAMINA_SAVE                        = 0xFA3,
+    SC_HUNTING_CREATURE_CARD               = 0x803,
+	SC_STAMINA_SAVE                        = 0xFA3,
     SC_HAVOC_BURST                         = 0x1195,
     SC_FRENZY                              = 0x1197,
+    SC_ADD_ENERGY                          = 0x1198,
     SC_BLESS_OF_GODDESS                    = 0x119E,
     SC_STIGMA_OF_CRIME                     = 0x11A0,
     SC_NEMESIS_FOR_AUTO                    = 0x176D,
@@ -49,8 +49,6 @@ enum StateCode {
     SC_HOLD                                = 0x1777,
     SC_FEAR                                = 0x1778,
     SC_FROZEN                              = 0x1779,
-    SC_SEAL                                = 0xF4236,
-    SC_SHINE_WALL                          = 0xF4237,
     SC_STONECURSED                         = 0x177C,
     SC_MUTE                                = 0x177D,
     SC_HIDE                                = 0x1780,
@@ -77,6 +75,8 @@ enum StateCode {
     SC_LIGHTNING_FORCE_CONGESTION          = 0x27E5C,
     SC_FUSION_WITH_SUMMON                  = 0x280A1,
     SC_SUMMON_FORM                         = 0x280A2,
+    SC_SEAL                                = 0xF4236,
+    SC_SHINE_WALL                          = 0xF4237,
 };
 
 enum StateType {
