@@ -1474,8 +1474,8 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     {
         return TS_RESULT_LIMIT_TARGET;
     } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL
-               && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != 104) {
-        if (stateInfo->effect_type != 82 || stateInfo->value[0] == 0.0f && stateInfo->value[1] == 0.0f
+               && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != SEF_TRANSFORMATION) {
+        if (stateInfo->effect_type != SEF_MEZZ || stateInfo->value[0] == 0.0f && stateInfo->value[1] == 0.0f
                                             && stateInfo->value[2] == 0.0f && stateInfo->value[3] == 0.0f)
 
     }*/
@@ -1659,7 +1659,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
             auto state = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
             if (state == nullptr)
                 return TS_RESULT_NOT_ACTABLE;
-            if (state->effect_type != 200)
+            if (state->effect_type != StateBaseEffect::SEF_RIDING)
             {
                 if (pItem->m_pItemBase->state_id == 4003)
                 {
@@ -1689,7 +1689,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
                 if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
                 {
                     auto si = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
-                    if (si != nullptr && si->effect_type == 200)
+                    if (si != nullptr && si->effect_type == StateBaseEffect::SEF_RIDING)
                         return TS_RESULT_ACCESS_DENIED;
                 }
                 if (pWornItem != nullptr)
