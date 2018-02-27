@@ -395,6 +395,14 @@ void World::Update(uint diff)
         //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
 
+    for(auto& timer : m_timers)
+    {
+        if(timer.GetCurrent() >= 0)
+            timer.Update(diff);
+        else
+            timer.SetCurrent(0);
+    }
+
     ///- Ping to keep MySQL connections alive
     if (m_timers[WUPDATE_PINGDB].Passed())
     {
