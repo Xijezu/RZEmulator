@@ -802,7 +802,6 @@ void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, in
     SkillResult sr{ };
     sr.rebirth.nIncHP = 0;
     //sr.add_hp_mp_sp.nIncSp = 0;
-    sr.damage.elemental_damage[1] = 0;
     sr.type                = (int)SRT_RESULT;
     sr.hTarget             = handle;
     sr.result.bResult      = bIsSuccess;
