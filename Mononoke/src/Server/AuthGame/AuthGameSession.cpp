@@ -152,6 +152,7 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
     }
     else
     {
+        m_bIsAuthed = false;
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
         XPacket resultPct(TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_ACCESS_DENIED;

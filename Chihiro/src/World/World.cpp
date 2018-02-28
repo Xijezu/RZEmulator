@@ -504,7 +504,7 @@ void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
 
     Messages::SendWarpMessage(pPlayer);
     if (pPlayer->m_pMainSummon != nullptr)
-        WarpEndSummon(pPlayer, pPosition, layer, pPlayer->m_pMainSummon, 0);
+        WarpEndSummon(pPlayer, pPosition, layer, pPlayer->m_pMainSummon, false);
 
     ((Unit *)pPlayer)->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
     AddObjectToWorld(pPlayer);
@@ -528,8 +528,7 @@ void World::WarpEndSummon(Player *pPlayer, Position pos, uint8_t layer, Summon *
     pSummon->AddNoise(rand32(), rand32(), 35);
     AddObjectToWorld(pSummon);
     pSummon->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
-    auto position = pSummon->GetCurrentPosition(ct);
-    // Set move
+    SetMove(pSummon, pos, pos, 0, true, ct, true);
 }
 
 void World::AddMonsterToWorld(Monster *pMonster)
@@ -662,7 +661,6 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
 
 int World::ShowQuestMenu(Player *pPlayer)
 {
-    //auto obj = sMemoryPool->getPtrFromId(pPlayer->GetLastContactLong("npc"));
     auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr)
     {
