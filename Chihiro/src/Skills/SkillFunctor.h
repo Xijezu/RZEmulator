@@ -132,8 +132,24 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
                 }
             }
         }
-        sWorld->AddSkillDamageResult(pvList, bResult, 10, pTarget->GetHandle());
+        sWorld->AddSkillResult(pvList, bResult, 10, pTarget->GetHandle());
     }
+};
+
+struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
+{
+	void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+	{
+
+	}
+};
+
+struct HealingSkillFunctor : public SkillTargetFunctor
+{
+	void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+	{
+
+	}
 };
 
 #endif // NGEMITY_SKILLFUNCTOR_H
