@@ -797,9 +797,11 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
     return false;
 }
 
-void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
+void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
 {
     SkillResult sr{ };
+    sr.rebirth.nIncHP = 0;
+    //sr.add_hp_mp_sp.nIncSp = 0;
     sr.type                = (int)SRT_RESULT;
     sr.hTarget             = handle;
     sr.result.bResult      = bIsSuccess;
