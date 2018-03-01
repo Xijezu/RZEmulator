@@ -2221,6 +2221,15 @@ void Unit::RemoveState(int uid)
     }
 }
 
+void Unit::RemoveGoodState(int state_level)
+{
+	for(auto &s : m_vStateList)
+	{
+		if( !s.IsHarmful() && s.GetTimeType() != 0)
+			RemoveState(s.m_nCode, state_level);
+	}
+}
+
 int Unit::MPHeal(int mp)
 {
     return MPHealByItem(mp);
