@@ -175,6 +175,7 @@ class Unit : public WorldObject
         /// BATTLE END
         void RemoveState(StateCode code, int state_level);
         void RemoveState(int uid);
+        void RemoveGoodState(int state_level);
 
         // Setters
         void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int>(lvl)); }
