@@ -27,13 +27,13 @@ SkillProp *SkillProp::Create(uint caster, Skill *pSkill, int nMagicPoint, float 
 
 void SkillProp::Update(uint/* diff*/)
 {
-    if(m_bProcessEnded)
+    if (m_bProcessEnded)
         return;
 
-    Unit* pCaster{nullptr};
+    Unit *pCaster{nullptr};
 
     uint ct = sWorld->GetArTime();
-    if(ct > m_Info.m_nEndTime  || m_bIsRemovePended)
+    if (ct > m_Info.m_nEndTime || m_bIsRemovePended)
     {
         m_bProcessEnded = true;
 
@@ -42,12 +42,12 @@ void SkillProp::Update(uint/* diff*/)
     }
     else
     {
-        if(ct < m_Info.m_nLastFireTime + m_Info.m_nInterval)
+        if (ct < m_Info.m_nLastFireTime + m_Info.m_nInterval)
             return;
 
         m_Info.m_nLastFireTime = ct;
         pCaster = sMemoryPool->GetObjectInWorld<Unit>(m_hCaster);
-        if(pCaster != nullptr)
+        if (pCaster != nullptr)
         {
             m_pSkill->m_targetPosition.Relocate(this);
             m_pSkill->m_vResultList.clear();
@@ -93,7 +93,7 @@ void SkillProp::Update(uint/* diff*/)
                     break;
             }
 
-            if(m_pSkill->m_nTargetCount != 0)
+            if (m_pSkill->m_nTargetCount != 0)
             {
                 m_pSkill->broadcastSkillMessage(this, 0, 0, 4);
             }
@@ -132,25 +132,25 @@ void SkillProp::INIT_AREA_EFFECT_HEAL()
 {
     uint ct = sWorld->GetArTime();
     m_Info.m_nStartTime = ct;
-    m_Info.m_nEndTime = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
-    m_Info.m_nInterval = (uint)(m_pSkill->m_SkillBase->var[10] * 100);
+    m_Info.m_nEndTime   = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
+    m_Info.m_nInterval  = (uint)(m_pSkill->m_SkillBase->var[10] * 100);
 }
 
 void SkillProp::INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP()
 {
     uint ct = sWorld->GetArTime();
     m_Info.m_nStartTime = ct;
-    m_Info.m_nEndTime = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
-    m_Info.m_nInterval = (uint)(m_pSkill->m_SkillBase->var[5] * 100);
+    m_Info.m_nEndTime   = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
+    m_Info.m_nInterval  = (uint)(m_pSkill->m_SkillBase->var[5] * 100);
 }
 
 void SkillProp::INIT_SKILL_PROP_PARAMETER(uint nDuration, uint nInterval)
 {
     uint ct = sWorld->GetArTime();
     m_Info.m_nLastFireTime = 0;
-    m_Info.m_nStartTime = ct;
-    m_Info.m_nEndTime = nDuration + ct;
-    m_Info.m_nInterval = nInterval;
+    m_Info.m_nStartTime    = ct;
+    m_Info.m_nEndTime      = nDuration + ct;
+    m_Info.m_nInterval     = nInterval;
 }
 
 void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
@@ -159,9 +159,9 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
 
     float fRange  = m_pSkill->m_SkillBase->var[9] * 12.0f;
     auto  nDamage = (int)((m_pSkill->m_SkillBase->var[10] + (m_pSkill->m_SkillBase->var[11] * m_pSkill->m_nEnhance))
-                          * ((m_pSkill->m_SkillBase->var[5] * m_pSkill->m_nEnhance) + m_nOwnerMagicPoint
-                                                                                      * ((m_pSkill->m_SkillBase->var[0] + (m_pSkill->m_SkillBase->var[1] * m_pSkill->m_nRequestedSkillLevel))
-                                                                                         + (m_pSkill->m_SkillBase->var[2] * m_pSkill->m_nEnhance))
+                          * ((m_pSkill->m_SkillBase->var[5] * m_pSkill->m_nEnhance)
+                             + m_nOwnerMagicPoint * ((m_pSkill->m_SkillBase->var[0] + (m_pSkill->m_SkillBase->var[1] * m_pSkill->m_nRequestedSkillLevel))
+                                                     + (m_pSkill->m_SkillBase->var[2] * m_pSkill->m_nEnhance))
                              + (m_pSkill->m_SkillBase->var[3] + (m_pSkill->m_SkillBase->var[4] * m_pSkill->m_nRequestedSkillLevel))));
 
     // sWorld->EnumMovableObject()
@@ -195,7 +195,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
             flag |= 8;
 
         SkillResult skill_result{ };
-        skill_result.type        = 1;
+        skill_result.type               = 1;
         skill_result.hTarget            = pUnit->GetHandle();
         skill_result.damage.target_hp   = pUnit->GetHealth();
         skill_result.damage.damage_type = elemental_type;

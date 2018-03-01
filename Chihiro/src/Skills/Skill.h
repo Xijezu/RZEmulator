@@ -104,6 +104,7 @@ class Skill
 
         void SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget);
 
+        void MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget);
         void MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void TOGGLE_AURA(Unit *pTarget);
