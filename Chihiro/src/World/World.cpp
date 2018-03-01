@@ -799,11 +799,8 @@ void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, in
 {
     SkillResult sr{ };
     sr.rebirth.nIncHP = 0;
-    //sr.add_hp_mp_sp.nIncSp = 0;
     sr.type                = (int)SRT_RESULT;
     sr.hTarget             = handle;
-    sr.result.bResult      = bIsSuccess;
-    sr.result.success_type = nSuccessType;
     pvList.emplace_back(sr);
 }
 
@@ -827,7 +824,6 @@ void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, u
 
     sr.damage.damage    = damageInfo.nDamage;
     sr.damage.target_hp = damageInfo.target_hp;
-    sr.damage.hTarget   = handle;
     for (int i = 0; i < 7; i++)
         sr.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
 

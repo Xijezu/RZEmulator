@@ -310,7 +310,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     pct << (uint8)nType;
     pct << (int16)cost_hp;
     pct << (int16)cost_mp;
-    pct << (int)m_pOwner->GetHealth();
+    pct << m_pOwner->GetHealth();
     pct << (int16)m_pOwner->GetMana();
 
     if (nType != SKILL_STATUS::ST_FIRE)
@@ -351,7 +351,7 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
             pct.wpos(pos);
 
             pct << (uint8)sr.type;
-            pct << (uint)sr.damage.hTarget;
+            pct << (uint)sr.hTarget;
 
             switch (sr.type)
             {
@@ -361,13 +361,37 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
                     pct << sr.damage.damage_type;
                     pct << sr.damage.damage;
                     pct << sr.damage.flag;
-                    for (uint16 i : sr.damage.elemental_damage)
+                    for (const uint16& i : sr.damage.elemental_damage)
                         pct << i;
+                    break;
+                case SRT_DAMAGE_WITH_KNOCK_BACK:
+                    pct << sr.damage_kb.target_hp;
+                    pct << sr.damage_kb.damage_type;
+                    pct << sr.damage_kb.damage;
+                    pct << sr.damage_kb.flag;
+                    for (const uint16& i : sr.damage_kb.elemental_damage)
+                        pct << i;
+                    pct << sr.damage_kb.x;
+                    pct << sr.damage_kb.y;
+                    pct << sr.damage_kb.speed;
+                    pct << sr.damage_kb.knock_back_time;
+                    break;
+                case SRT_RESULT:
+                    pct << (uint8)(sr.result.bResult ? 1 : 0);
+                    pct << sr.result.success_type;
                     break;
                 case SRT_ADD_HP:
                 case SRT_ADD_MP:
-                    pct << sr.addHPType.target_hp;
-                    pct << sr.addHPType.nIncHP;
+                    pct << sr.add_hp.target_hp;
+                    pct << sr.add_hp.nIncHP;
+                    break;
+                case SRT_ADD_HP_MP_SP:
+                    pct << sr.add_hp_mp_sp.target_hp;
+                    pct << sr.add_hp_mp_sp.nIncHP;
+                    pct << sr.add_hp_mp_sp.nIncMP;
+                    pct << sr.add_hp_mp_sp.nIncSP;
+                    pct << sr.add_hp_mp_sp.target_mp;
+                    break;
                 case SRT_REBIRTH:
                     pct << sr.rebirth.target_hp;
                     pct << sr.rebirth.nIncHP;
@@ -375,13 +399,24 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
                     pct << sr.rebirth.nRecoveryEXP;
                     pct << sr.rebirth.target_mp;
                     break;
+                case SRT_RUSH:
+                    pct << (uint8)(sr.rush.bResult ? 1 : 0);
+                    pct << sr.rush.x;
+                    pct << sr.rush.y;
+                    pct << sr.rush.face;
+                    pct << sr.rush.speed;
+                    break;
+//              @todo: The following are still missing
+//              SRT_CHAIN_DAMAGE
+//              SRT_CHAIN_MAGIC_DAMAGE
+//              SRT_CHAIN_HEAL
+//              SRT_NOT_USE
                 default:
                     break;
             }
             pct.wpos(pct.size());
         }
     }
-    int           i        = pct.size();
 }
 
 void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, int nType)
@@ -870,20 +905,16 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
     SkillResult skill_result{ };
     skill_result.type                = (int)SRT_ADD_HP;
     skill_result.hTarget             = m_pOwner->GetHandle();
-    skill_result.addHPType.type      = (int)SRT_ADD_HP;
-    skill_result.addHPType.hTarget   = m_pOwner->GetHandle();
-    skill_result.addHPType.target_hp = m_pOwner->GetHealth();
-    skill_result.addHPType.nIncHP    = nAddHP;
+    skill_result.add_hp.target_hp = m_pOwner->GetHealth();
+    skill_result.add_hp.nIncHP    = nAddHP;
 
     m_vResultList.emplace_back(skill_result);
 
     SkillResult skillResult{ };
     skillResult.type                = (int)SRT_ADD_MP;
     skillResult.hTarget             = m_pOwner->GetHandle();
-    skillResult.addHPType.type      = (int)SRT_ADD_MP;
-    skillResult.addHPType.hTarget   = m_pOwner->GetHandle();
-    skillResult.addHPType.target_hp = (int)m_pOwner->GetMana();
-    skillResult.addHPType.nIncHP    = nAddHP;
+    skillResult.add_hp.target_hp = (int)m_pOwner->GetMana();
+    skillResult.add_hp.nIncHP    = nAddHP;
     m_vResultList.emplace_back(skillResult);
 }
 
@@ -915,9 +946,9 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
 
     SkillResult skillResult{ };
     skillResult.type                = SRT_ADD_HP;
-    skillResult.damage.hTarget      = pTarget->GetHandle();
-    skillResult.addHPType.target_hp = pTarget->GetHealth();
-    skillResult.addHPType.nIncHP    = (int)heal;
+    skillResult.hTarget      = pTarget->GetHandle();
+    skillResult.add_hp.target_hp = pTarget->GetHealth();
+    skillResult.add_hp.nIncHP    = (int)heal;
     m_vResultList.emplace_back(skillResult);
     /* @todo: This implementation is wrong. skillResult.type should be 1, not SRT_ADD_HP.
      * Not sure about why I went this way "as some kind of workaround", but it was the wrong
@@ -999,9 +1030,9 @@ void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
 
     SkillResult skillResult{ };
     skillResult.type                = SRT_ADD_MP;
-    skillResult.damage.hTarget      = pTarget->GetHandle();
-    skillResult.addHPType.target_hp = pTarget->GetHealth();
-    skillResult.addHPType.nIncHP    = (int)heal;
+    skillResult.hTarget      = pTarget->GetHandle();
+    skillResult.add_hp.target_hp = pTarget->GetHealth();
+    skillResult.add_hp.nIncHP    = (int)heal;
     m_vResultList.emplace_back(skillResult);
 }
 
@@ -1018,7 +1049,7 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
 
     SkillResult skillResult{ };
     skillResult.type                 = SRT_REBIRTH;
-    skillResult.damage.hTarget       = pTarget->GetHandle();
+    skillResult.hTarget       = pTarget->GetHandle();
     skillResult.rebirth.target_hp    = pTarget->GetHealth();
     skillResult.rebirth.nIncHP       = std::max((int)(pTarget->GetHealth() - prev_hp), 0);
     skillResult.rebirth.nIncMP       = std::max((int)(pTarget->GetMana() - prev_mp), 0);
