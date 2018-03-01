@@ -186,8 +186,8 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 		}
 		else
 		{
-			//if(bResult)
-				//pTarget->RemoveGoodState(SHIDWORD(skbValOne));
+			if(bResult)
+				pTarget->RemoveGoodState(/*SHIDWORD*/(skbValOne));
 
 			sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
 		}
