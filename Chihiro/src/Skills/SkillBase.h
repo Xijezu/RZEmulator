@@ -38,10 +38,8 @@ enum SKILL_RESULT_TYPE : int
     SRT_NOT_USE                = 100,
 };
 
-struct SkillDamage
+struct SR_DamageType
 {
-    uint8  type;
-    uint   hTarget;
     int    target_hp;
     uint8  damage_type;
     int    damage;
@@ -49,21 +47,50 @@ struct SkillDamage
     uint16 elemental_damage[7];
 };
 
-struct AddHPType
+struct SR_DamageWithKnockBackType
 {
-    uint8 type;
-    uint  hTarget;
-    int   target_hp;
-    int   nIncHP;
+    int    target_hp;
+    uint8  damage_type;
+    int    damage;
+    int    flag;
+    uint16 elemental_damage[7];
+    float  x;
+    float  y;
+    uint8  speed;
+    uint   knock_back_time;
 };
 
-struct SR_Result
+struct SR_ResultType
 {
     bool bResult;
     int  success_type;
 };
 
-struct SkillRebirth
+struct SR_AddHPType
+{
+    int target_hp;
+    int nIncHP;
+};
+
+struct SR_AddHPMPSPType
+{
+    int   target_hp;
+    int   nIncHP;
+    int   nIncMP;
+    int   nIncSP;
+    int16 target_mp;
+};
+
+struct SR_RushType
+{
+    bool  bResult;
+    float x;
+    float y;
+    float face;
+    uint8 speed;
+};
+
+struct SR_RebirthType
 {
     int   target_hp;
     int   nIncHP;
@@ -72,18 +99,19 @@ struct SkillRebirth
     int16 target_mp;
 };
 
+
 struct SkillResult
 {
     uint8 type;
     uint  hTarget;
 
-    // Damage
-    int          target_hp;
-    uint8        damage_type;
-    SR_Result    result;
-    SkillDamage  damage;
-    AddHPType    addHPType;
-    SkillRebirth rebirth;
+    SR_DamageType              damage;
+    SR_DamageWithKnockBackType damage_kb;
+    SR_ResultType              result;
+    SR_AddHPType               add_hp;
+    SR_AddHPMPSPType           add_hp_mp_sp;
+    SR_RushType                rush;
+    SR_RebirthType             rebirth;
 };
 
 enum SKILL_STATUS : short
