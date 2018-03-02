@@ -1326,6 +1326,73 @@ ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
     return nullptr;
 }
 
+FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
+{
+    if (_fieldPropTemplateStore.count(idx) == 1)
+        return &_fieldPropTemplateStore[idx];
+    return nullptr;
+}
+
+void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
+{
+    Position pos{ };
+    pos.Relocate(x, y, 0);
+
+    for (auto &wpi : g_vWayPoint)
+    {
+        if (wpi.first == waypoint_id)
+        {
+            wpi.second.vWayPoint.emplace_back(pos);
+            return;
+        }
+    }
+
+    WayPointInfo wp{ };
+    wp.way_point_id    = waypoint_id;
+    wp.way_point_speed = 0;
+    wp.way_point_type  = 1;
+    wp.vWayPoint.emplace_back(pos);
+    g_vWayPoint[waypoint_id] = wp;
+}
+
+void ObjectMgr::SetWayPointType(int waypoint_id, int type)
+{
+    for (const auto &wpi : g_vWayPoint)
+    {
+        if (wpi.first == waypoint_id)
+            return;
+    }
+
+    WayPointInfo info{ };
+    info.way_point_speed = 0;
+    info.way_point_type  = type;
+    info.way_point_id    = waypoint_id;
+    g_vWayPoint[waypoint_id] = info;
+
+}
+
+WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
+{
+    if (g_vWayPoint.count(waypoint_id) != 0)
+        return &g_vWayPoint[waypoint_id];
+    return nullptr;
+}
+
+DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
+{
+    if (_dropTemplateStore.count(drop_group_id) == 1)
+        return &_dropTemplateStore[drop_group_id];
+    return nullptr;
+}
+
+void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
+{
+    if (_monsterBaseStore.count(info.monster_id))
+        g_vRespawnInfo.emplace_back(info);
+    else
+        NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
+}
+
 CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels[])
 {
     CreatureStat stat{ };
@@ -1388,116 +1455,11 @@ std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey
     return nullptr;
 }
 
-int ObjectMgr::GetLocationID(const float x, const float y) const
-{
-    int         loc_id   = 0;
-    int         priority = 0x7fffffff;
-    X2D::Pointf pt{ };
-    pt.x = x;
-    pt.y = y;
-    X2D::QuadTreeMapInfo::FunctorAdaptor fn{ };
-    sMapContent->g_qtLocationInfo->Enum(pt, fn);
-
-    for (auto &info : fn.pResult)
-    {
-        if (info.priority < priority)
-        {
-            loc_id   = info.location_id;
-            priority = info.priority;
-        }
-    }
-    return loc_id;
-}
-
 int ObjectMgr::GetNeedJpForJobLevelUp(const int jlv, const int depth)
 {
     if (depth > 3 || jlv > 49)
         return 0;
     return _levelResourceStore[jlv].jlv[depth];
-}
-
-ushort ObjectMgr::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
-{
-    ushort   ilsResult = TS_RESULT_ACCESS_DENIED;
-    for (int i         = 0; i < 4; ++i)
-    {
-        if (pUnit->GetPrevJobLv(i) != 0)
-        {
-            ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetPrevJobId(i), pUnit->GetPrevJobLv(i));
-            if (ilsResult == TS_RESULT_SUCCESS)
-            {
-                job_id = pUnit->GetPrevJobId(i);
-                break;
-            }
-            if (ilsResult != TS_RESULT_ACCESS_DENIED && ilsResult != TS_RESULT_LIMIT_MAX && ilsResult != TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
-                break;
-        }
-    }
-    if (ilsResult == TS_RESULT_ACCESS_DENIED || ilsResult == TS_RESULT_LIMIT_MAX || ilsResult == TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
-    {
-        ilsResult  = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
-        if (ilsResult == TS_RESULT_SUCCESS)
-            job_id = pUnit->GetCurrentJob();
-    }
-    return ilsResult;
-}
-
-ushort ObjectMgr::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
-{
-    bool bMaxLimit = false;
-    bool bFound    = false;
-
-    auto st = getSkillTree(nJobID);
-    if (st.empty())
-        return TS_RESULT_ACCESS_DENIED;
-
-
-    for (auto stree : st)
-    {
-        if (stree.skill_id == skill_id)
-        {
-            if (stree.max_skill_lv >= skill_level)
-            {
-                if (stree.lv > pUnit->GetLevel())
-                {
-                    return TS_RESULT_NOT_ENOUGH_LEVEL;
-                }
-                if (stree.job_lv <= unit_job_level)
-                {
-                    for (int nsi = 0; nsi < 3; nsi++)
-                    {
-                        if (stree.need_skill_id[nsi] == 0)
-                            break;
-                        if (pUnit->GetCurrentSkillLevel(stree.need_skill_id[nsi]) < stree.need_skill_lv[nsi])
-                        {
-                            return TS_RESULT_NOT_ENOUGH_SKILL;
-                        }
-                    }
-                    auto     sb  = GetSkillBase(skill_id);
-                    if (sb->id == 0)
-                        return TS_RESULT_ACCESS_DENIED;
-
-                    if (pUnit->GetJP() < (int)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio))
-                    {
-                        return TS_RESULT_NOT_ENOUGH_JP;
-                    }
-                    return TS_RESULT_SUCCESS;
-                }
-                bFound = true;
-            }
-            else
-            {
-                bMaxLimit = true;
-            }
-        }
-    }
-    if (bFound)
-        return TS_RESULT_NOT_ENOUGH_JOB_LEVEL;
-
-    if (bMaxLimit)
-        return TS_RESULT_LIMIT_MAX;
-
-    return TS_RESULT_ACCESS_DENIED;
 }
 
 void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
@@ -1573,59 +1535,6 @@ int64 ObjectMgr::GetNeedExp(int level)
     return _levelResourceStore[l - 1].normal_exp;
 }
 
-void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
-{
-    Position pos{ };
-    pos.Relocate(x, y, 0);
-
-    for (auto &wpi : g_vWayPoint)
-    {
-        if (wpi.first == waypoint_id)
-        {
-            wpi.second.vWayPoint.emplace_back(pos);
-            return;
-        }
-    }
-
-    WayPointInfo wp{ };
-    wp.way_point_id    = waypoint_id;
-    wp.way_point_speed = 0;
-    wp.way_point_type  = 1;
-    wp.vWayPoint.emplace_back(pos);
-    g_vWayPoint[waypoint_id] = wp;
-}
-
-void ObjectMgr::SetWayPointType(int waypoint_id, int type)
-{
-    for (const auto &wpi : g_vWayPoint)
-    {
-        if (wpi.first == waypoint_id)
-            return;
-    }
-
-    WayPointInfo info{ };
-    info.way_point_speed = 0;
-    info.way_point_type  = type;
-    info.way_point_id    = waypoint_id;
-    g_vWayPoint[waypoint_id] = info;
-
-}
-
-WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
-{
-    if (g_vWayPoint.count(waypoint_id) != 0)
-        return &g_vWayPoint[waypoint_id];
-    return nullptr;
-}
-
-void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
-{
-    if (_monsterBaseStore.count(info.monster_id))
-        g_vRespawnInfo.emplace_back(info);
-    else
-        NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
-}
-
 MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
 {
     if (_monsterBaseStore.count(idx) == 1)
@@ -1633,113 +1542,11 @@ MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
     return nullptr;
 }
 
-Monster *ObjectMgr::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
-{
-    auto mob = sMemoryPool->AllocMonster((uint)id);
-    if (mob != nullptr)
-    {
-        mob->SetCurrentXY(x, y);
-        mob->SetLayer(layer);
-        mob->m_pDeleteHandler    = pDeleteHandler;
-        mob->m_bIsWandering      = is_wandering;
-        if (way_point_id != 0)
-            mob->m_pWayPointInfo = GetWayPoint(way_point_id);
-        mob->SetRespawnPosition({x, y, 0});
-        sWorld->AddMonsterToWorld(mob);
-        sWorld->SetMove(mob, mob->GetPosition(), mob->GetPosition(), 0, true, sWorld->GetArTime(), false);
-    }
-    return mob;
-}
-
 int64 ObjectMgr::GetNeedSummonExp(int level)
 {
     if (level <= 300 && level > 0)
         return _summonLevelStore[level];
     return 0;
-}
-
-int64 ObjectMgr::GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying)
-{
-    int64 k;
-    float f[8]{0};
-    int   i;
-
-    k = price;
-    if (rank <= 8)
-    {
-        f[0] = 1.35f;
-        f[1] = 0.4f;
-        f[2] = 0.2f;
-        f[3] = 0.13f;
-        f[4] = 0.1f;
-        f[5] = 0.1f;
-        f[6] = 0.1f;
-        f[7] = 0.1f;
-        if (lv >= 2)
-        {
-            i = lv - 1;
-            do
-            {
-                if (rank != 0 && rank != 1)
-                {
-                    if (rank == 2)
-                    {
-                        k += (int64)((k * 0.4f * 0.01f) * 100);
-                    }
-                    else
-                    {
-                        k += (int64)((f[rank] * k * 0.001f) * 1000);
-                    }
-                }
-                else
-                {
-                    k += (int64)((k * 1.35f * 0.1f) * 10);
-                }
-                --i;
-            } while (i > 0);
-        }
-        if (same_price_for_buying)
-            return k;
-        else
-            return k / 2;
-    }
-    return 0;
-}
-
-bool ObjectMgr::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
-{
-    nItemID    = 0;
-    nItemCount = 1;
-
-    auto dg    = GetDropGroupInfo(nDropGroupID);
-    if (dg != nullptr)
-    {
-        int      cp = 0;
-        int      p  = irand(1, 100000000);
-        for (int i  = 0; i < MAX_DROP_GROUP; ++i)
-        {
-            cp += dg->drop_percentage[i];
-            if (p <= cp)
-            {
-                // temporary workaround for dropgroup
-                if (dg->drop_item_id[i] > 0 && GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
-                    continue;
-                nItemID    = dg->drop_item_id[i];
-                nItemCount = 1;
-                return true;
-            }
-        }
-    }
-    nItemID    = 0;
-    nItemCount = 1;
-    return false;
-}
-
-DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
-{
-    if (_dropTemplateStore.count(drop_group_id) == 1)
-        return &_dropTemplateStore[drop_group_id];
-    return nullptr;
 }
 
 QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
@@ -1798,99 +1605,6 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
 
 }
 
-bool ObjectMgr::IsInRandomPoolMonster(int group_id, int monster_id)
-{
-    bool result{false};
-//             ArMoveVector::MOVE_INFO *v3; // eax@11
-//             ArMoveVector::MOVE_INFO *v4; // eax@14
-//             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
-//             std::_Vector_iterator<GameContent::RANDOM_POOL_INFO,std::allocator<GameContent::RANDOM_POOL_INFO> > itRandom; // [sp+10h] [bp-10h]@8
-//             std::_Vector_iterator<RANDOM_POOL,std::allocator<RANDOM_POOL> > it; // [sp+18h] [bp-8h]@5
-
-    if (group_id == monster_id)
-    {
-        result = true;
-    }
-    else
-    {
-        if (group_id < 0)
-        {
-/*
-                    std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-                        &this,
-                        dword_64F594,
-                        &g_vRandomPool);
-                    it.baseclass_0.baseclass_0.baseclass_0._Mycont = this.baseclass_0.baseclass_0._Mycont;
-                    it.baseclass_0._Myptr = this._Myptr;
-                    while ( 1 )
-                    {
-                        std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-                            &itRandom,
-                            dword_64F598,
-                            &g_vRandomPool);
-                        if ( std::_Vector_const_iterator<X2D::Point<float>_std::allocator<X2D::Point<float>>>::operator__(
-                                 &it,
-                                 &itRandom) )
-                            break;
-                        if ( group_id == LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it)->end.x) )
-                        {
-                            v3 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it);
-                            std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-                                &itRandom,
-                                LODWORD(v3->end.z),
-                                &v3->end.y);
-                            while ( 1 )
-                            {
-                                v4 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&it);
-                                std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-                                    &this,
-                                    LODWORD(v4->end.face),
-                                    &v4->end.y);
-                                if ( std::_Vector_const_iterator<X2D::Point<float>_std::allocator<X2D::Point<float>>>::operator__(
-                                         &itRandom,
-                                         &this) )
-                                    break;
-                                if ( LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&itRandom)->end.x) == monster_id )
-                                    return 1;
-                                std::_Vector_const_iterator<std::pair<GameContent::HUNTAHOLIC_MONSTER_RESPAWN_INFO_const___unsigned_long>_std::allocator<std::pair<GameContent::HUNTAHOLIC_MONSTER_RESPAWN_INFO_const___unsigned_long>>>::operator__(&itRandom);
-                            }
-                            break;
-                        }
-                        std::_Vector_const_iterator<StructCreature::AdditionalDamageInfo_std::allocator<StructCreature::AdditionalDamageInfo>>::operator__(&it);
-                    }
-*/
-            result = false;
-        }
-    }
-    return result;
-}
-
-NPC *ObjectMgr::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
-{
-    auto npc = new NPC{npc_info};
-    npc->SetLayer(layer);
-    for (auto &ql : _questLinkStore)
-    {
-        if (ql.nNPCID == npc->m_pBase->id)
-        {
-            npc->LinkQuest(&ql);
-        }
-    }
-    return npc;
-}
-
-void ObjectMgr::AddNPCToWorld()
-{
-    for (auto &npc : _npcTemplateStore)
-    {
-        if (/*npc.second.spawn_type == SPAWN_NORMAL &&*/ npc.second.local_flag == 0)
-        {
-            auto nn = GetNewNPC(&npc.second, 0);
-            sWorld->AddObjectToWorld(nn);
-        }
-    }
-}
-
 QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
 {
     auto l = std::find_if(_questLinkStore.begin(),
@@ -1906,63 +1620,6 @@ StateTemplate *const ObjectMgr::GetStateInfo(int code)
     if (_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];
     return nullptr;
-}
-
-bool ObjectMgr::IsBlocked(float x, float y)
-{
-    if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
-        return true;
-    if (sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
-        return false;
-    return g_qtBlockInfo.Collision({x, y});
-}
-
-FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
-{
-    if (_fieldPropTemplateStore.count(idx) == 1)
-        return &_fieldPropTemplateStore[idx];
-    return nullptr;
-}
-
-bool ObjectMgr::CollisionToLine(float x1, float y1, float x2, float y2)
-{
-    return g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
-                                                      {x2, y2}});
-}
-
-bool ObjectMgr::LearnAllSkill(Player *pPlayer)
-{
-    auto     depth = pPlayer->GetJobDepth();
-    for (int i     = 0; i <= depth; ++i)
-    {
-        int  nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
-        auto tree     = getSkillTree(nCurrJob);
-        if (tree.empty())
-            continue;
-
-        if (i == depth)
-            pPlayer->SetCurrentJLv(depth == 0 ? 10 : 50);
-        else
-            pPlayer->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
-        for (auto &s : tree)
-        {
-            auto currSkill      = pPlayer->GetSkill(s.skill_id);
-            int  currSkillLevel = 0;
-            if (currSkill != nullptr)
-                currSkillLevel = currSkill->m_nSkillLevel;
-
-            if (currSkillLevel >= s.max_skill_lv)
-                continue;
-
-            for (currSkillLevel += 1; currSkillLevel <= s.max_skill_lv; ++currSkillLevel)
-            {
-                int nNeedJP = sObjectMgr->GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
-                pPlayer->SetJP(nNeedJP);
-                pPlayer->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
-            }
-        }
-    }
-    return true;
 }
 
 CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type */, int level)

@@ -22,6 +22,7 @@
 #include "MemPool.h"
 #include "World.h"
 #include "DungeonManager.h"
+#include "GameContent.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -723,7 +724,7 @@ void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
 {
     for (int i = 0; i < amount; i++)
     {
-        auto mob = sObjectMgr->RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
+        auto mob = GameContent::RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
         mob->m_bNearClient = true;
     }
 }
@@ -939,7 +940,7 @@ int XLua::SCRIPT_LearnAllSkill()
     if (m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return 0;
 
-    if (sObjectMgr->LearnAllSkill((Player *)m_pUnit))
+    if (GameContent::LearnAllSkill((Player *)m_pUnit))
         return 1;
     return 0;
 }

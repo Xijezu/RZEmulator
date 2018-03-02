@@ -49,6 +49,7 @@ struct WayPointInfo
 class ObjectMgr
 {
     public:
+        friend class GameContent;
         ObjectMgr();
         ~ObjectMgr() = default;
 
@@ -59,7 +60,7 @@ class ObjectMgr
         typedef std::unordered_map<int32, SummonLevelBonus>              SummonBonusTemplateContainer;
         typedef std::unordered_map<int32, JobResourceTemplate>           JobResourceTemplateContainer;
         typedef std::unordered_map<int32, SummonResourceTemplate>        SummonResourceTemplateContainer;
-        typedef std::vector<SkillTreeGroup>                         SkillTreeTemplateContainer;
+        typedef std::vector<SkillTreeGroup>                              SkillTreeTemplateContainer;
         typedef std::unordered_map<int32, SkillBase>                     SkillBaseContainer;
         typedef std::unordered_map<int32, MonsterBase>                   MonsterBaseContainer;
         typedef std::unordered_map<int32, LevelResourceTemplate>         LevelTemplateContainer;
@@ -68,7 +69,7 @@ class ObjectMgr
         typedef std::unordered_map<int, std::string>                     StringContainer;
         typedef std::unordered_map<int, QuestBaseServer>                 QuestResourceTemplateContainer;
         typedef std::unordered_map<int, FieldPropTemplate>               FieldPropTemplateContainer;
-        typedef std::vector<QuestLink>                              QuestLinkTemplateContainer;
+        typedef std::vector<QuestLink>                                   QuestLinkTemplateContainer;
         typedef std::unordered_map<int, NPCTemplate>                     NPCTemplateContainer;
         typedef std::unordered_map<int, StateTemplate>                   StateTemplateContainer;
 
@@ -101,19 +102,9 @@ class ObjectMgr
 
         void UnloadAll();
 
-        void AddWayPoint(int waypoint_id, float x, float y);
-        void SetWayPointType(int waypoint_id, int type);
-        WayPointInfo *GetWayPoint(int waypoint_id);
-        void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
-
-        NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
-        void AddNPCToWorld();
-
         const std::string &GetValueFromNameID(int name_id);
-
         CreatureStat *const GetStatInfo(int stat_id);
         ItemTemplate *const GetItemBase(int item_id);
-        int64 GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying);
         SkillBase *const GetSkillBase(int);
         CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
         CreatureStat GetSummonLevelBonus(int summon_code, int growth_depth, int level);
@@ -127,28 +118,22 @@ class ObjectMgr
         StateTemplate *const GetStateInfo(int code);
         bool checkQuestTypeFlag(QuestType type, int flag);
         std::string GetSummonName();
-
         int GetNeedJpForJobLevelUp(int, int);
         int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
         int64 GetNeedExp(int level);
         int64 GetNeedSummonExp(int level);
-        Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
-        bool IsInRandomPoolMonster(int group_id, int monster_id);
-        bool LearnAllSkill(Player *pPlayer);
-
+        WayPointInfo *GetWayPoint(int waypoint_id);
         DropGroup *GetDropGroupInfo(int drop_group_id);
-        bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);
 
-        ushort IsLearnableSkill(Unit *, int, int, int &);
-        int GetLocationID(float x, float y) const;
-        bool IsBlocked(float x, float y);
-        bool CollisionToLine(float x1, float y1, float x2, float y2);
+        void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
+        void AddWayPoint(int waypoint_id, float x, float y);
+        void SetWayPointType(int waypoint_id, int type);
 
-        int                             g_currentLocationId{0};
+        int g_currentLocationId{0};
 
         std::unordered_map<int, WayPointInfo> g_vWayPoint{ };
-        std::vector<MonsterRespawnInfo> g_vRespawnInfo{ };
-        X2D::QuadTreeMapInfo            g_qtBlockInfo;
+        std::vector<MonsterRespawnInfo>       g_vRespawnInfo{ };
+        X2D::QuadTreeMapInfo                  g_qtBlockInfo;
     private:
         JobResourceTemplateContainer    _jobTemplateStore;
         ItemTemplateContainer           _itemTemplateStore;
@@ -172,9 +157,7 @@ class ObjectMgr
         SummonBonusTemplateContainer    _summonBonusStore;
         StateTemplateContainer          _stateTemplateStore;
 
-        ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
         void RegisterSkillTree(SkillTreeBase base);
-
         std::vector<SkillTreeBase> getSkillTree(int job_id);
 };
 

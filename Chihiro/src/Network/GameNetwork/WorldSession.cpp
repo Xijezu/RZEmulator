@@ -33,6 +33,7 @@
 #include "AllowedCommandInfo.h"
 #include "MixManager.h"
 #include "GroupManager.h"
+#include "GameContent.h"
 
 // Constructo - give it a socket
 WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
@@ -418,7 +419,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
 
     for (auto &mi : vPctInfo)
     {
-        if (mover->IsPlayer() && sObjectMgr->CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
+        if (mover->IsPlayer() && GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
         {
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -443,7 +444,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         return;
 
     Position cp = vMoveInfo.back();
-    if (mover->IsPlayer() && sObjectMgr->IsBlocked(cp.GetPositionX(), cp.GetPositionY()))
+    if (mover->IsPlayer() && GameContent::IsBlocked(cp.GetPositionX(), cp.GetPositionY()))
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
         return;
@@ -1122,7 +1123,7 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
     int    currentLevel = target->GetBaseSkillLevel(skill_id) + 1;
     //if(skill_level == currentLevel)
     //{
-    result = sObjectMgr->IsLearnableSkill(target, skill_id, currentLevel, jobID);
+    result = GameContent::IsLearnableSkill(target, skill_id, currentLevel, jobID);
     if (result == TS_RESULT_SUCCESS)
     {
         target->RegisterSkill(skill_id, currentLevel, 0, jobID);
@@ -1263,7 +1264,7 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     }
     //if(!m_pPlayer.IsSelllable) @todo
 
-    auto nPrice        = sObjectMgr->GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
+    auto nPrice        = GameContent::GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
     auto nResultCount  = item->m_Instance.nCount - sell_count;
     auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
     if (nResultCount < 0)

@@ -27,6 +27,7 @@
 #include "RegionContainer.h"
 #include "Skill.h"
 #include "GroupManager.h"
+#include "GameContent.h"
 
 Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
 {
@@ -580,7 +581,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
         nItemCount = 1;
 
         do
-            sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+            GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
         while (nItemID < 0);
         if (nItemID > 0)
         {
@@ -849,7 +850,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             {
                 m_nLastTrackTime = t;
                 track_distance   = (((float)irand(0, 9) / 100.0f) + 1.0f);
-                if (!sObjectMgr->IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()) && IsMovable())
+                if (!GameContent::IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()) && IsMovable())
                 {
                     sWorld->SetMove(this, GetCurrentPosition(t), targetPosition, (uint8)((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld->GetArTime(), true);
                 }
@@ -868,7 +869,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     {
         auto attack_pos = getNonDuplicateAttackPos(pEnemy);
         SetStatus(STATUS_FIND_ATTACK_POS);
-        if (!sObjectMgr->IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
+        if (!GameContent::IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
         {
             sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
         }
@@ -1215,7 +1216,7 @@ void Monster::processMove(uint t)
                     && (rnd % 3) != 0)
                 {
                     getMovePosition(targetPos);
-                    if (!sObjectMgr->IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
+                    if (!GameContent::IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
                     {
                         auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
                         sWorld->SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld->GetArTime(), true);
@@ -1345,7 +1346,7 @@ void Monster::FindAttackablePosition(Position &myPosition, Position &enemyPositi
         enemyPosition.m_positionY = ((enemyPosition.GetPositionY() - myPosition.GetPositionY()) * v) + myPosition.GetPositionY();
         enemyPosition.m_positionZ = ((enemyPosition.GetPositionZ() - myPosition.GetPositionZ()) * v) + myPosition.GetPositionZ();
 
-        if (!sObjectMgr->IsBlocked(enemyPosition.GetPositionX(), enemyPosition.GetPositionY()))
+        if (!GameContent::IsBlocked(enemyPosition.GetPositionX(), enemyPosition.GetPositionY()))
             return;
 
         enemyPosition = duplicateEnemyPosition;
