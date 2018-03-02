@@ -138,60 +138,46 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
 
 struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 {
-	std::vector<SkillResult> pvList;
+	std::vector<SkillResult> &pvList;
 	void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
 	{
 		auto nEnhance  = pSkill->GetSkillEnhance();
-		auto sklvl     = pSkill->m_nRequestedSkillLevel;
-		auto skbValOne = pSkill->m_SkillBase->var[1];
-		auto skbValTwo = pSkill->m_SkillBase->var[2];
+        auto v13 = pSkill->m_SkillBase->var[9] + (pSkill->m_SkillBase->var[10] * pSkill->m_nRequestedSkillLevel);
+        int nSkillLevel = ((int)pSkill->m_SkillBase->var[1] * pSkill->m_nRequestedSkillLevel) + ((int)pSkill->m_SkillBase->var[2] * nEnhance);
 
-		pSkill->m_SkillBase->var[2] = (skbValOne * sklvl) + (skbValTwo * nEnhance);
-		skbValOne = pSkill->m_SkillBase->var[2] / 10000.0;
-		auto skb = pSkill->m_SkillBase;
-		auto skbValNine = skb->var[9];
 
-		pSkill->m_SkillBase->var[2] = skb->var[10];
-		auto bResult = true;
+        bool bResult = (v13 <= (uint)rand32() % 100);
 
-		pSkill->m_SkillBase->var[2] = skbValNine + (skbValTwo * pSkill->m_nRequestedSkillLevel);
-
-		if(pSkill->m_SkillBase->var[2] / 10000.0 <= rand32() % 100)
+        if(pSkill->m_SkillBase->var[2] / 10000.0 > rand32() % 100)
 			bResult = false;
 
-		auto targetHandle = pTarget->GetHandle();
-
-		if(skb->var[8] == 0)
+        auto targetHandle = pTarget->GetHandle();
+		if(pSkill->m_SkillBase->var[8] == 0.0f)
 		{
 			if(bResult)
-				pTarget->RemoveState((StateCode)skb->state_id, /*SHIDWORD*/skbValOne); //pTarget->RemoveState(static_cast<StateCode>(skb->var[0]/10000.0), /*SHIDWORD*/skbValOne);
+				pTarget->RemoveState((StateCode)static_cast<int>(pSkill->m_SkillBase->var[0]), nSkillLevel);
 
 			sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
 			auto counter = 304;
 
-			do
-			{
-				auto res = skb->state_id + counter; //(double)*(int*)((char *)&counter + (unsigned int)skb / 10000.0);
 
-				if(res == 0)
-					break;
+            for(int i = 0; i < 5; ++i)
+            {
+                auto val = pSkill->m_SkillBase->var[9 + i];
+                if(val == 0.0f)
+                    break;
 
-				if(bResult)
-					pTarget->RemoveState((StateCode)skb->state_id, /*SHIDWORD*/skbValOne); //pTarget->RemoveState(static_cast<StateCode>(res), /*SHIDWORD*/skbValOne);
-
-				sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
-				counter += 8;
-			}
-			while( counter < 344);
+                if(bResult)
+                    pTarget->RemoveState((StateCode)static_cast<int>(val), nSkillLevel);
+                sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
+            }
 		}
 		else
 		{
 			if(bResult)
-				pTarget->RemoveGoodState(/*SHIDWORD*/(skbValOne));
-
+				pTarget->RemoveGoodState(nSkillLevel);
 			sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
 		}
-		//return 1;
 	}
 };
 
