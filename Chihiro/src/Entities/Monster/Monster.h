@@ -80,7 +80,7 @@ struct WayPointInfo;
 class Monster : public Unit
 {
         friend class World;
-        friend class ObjectMgr;
+        friend class GameContent;
     public:
 
         static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);

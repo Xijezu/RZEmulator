@@ -23,6 +23,7 @@
 #include "GameRule.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
+#include "GameContent.h"
 
 void MixManager::RegisterEnhanceInfo(const EnhanceInfo &info)
 {
@@ -251,7 +252,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
             nItemCount = nRandom;
             while(nItemID < 0)
             {
-                sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+                GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
             }
             pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0,0,0,0,0);
             if(!pItem->m_pItemBase->flaglist[FLAG_DUPLICATE])

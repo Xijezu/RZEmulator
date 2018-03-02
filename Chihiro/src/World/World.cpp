@@ -32,6 +32,7 @@
 #include "FieldPropManager.h"
 #include "GroupManager.h"
 #include "ItemCollector.h"
+#include "GameContent.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool>   World::m_stopEvent        = false;
 uint8                                   World::m_ExitCode         = SHUTDOWN_EXIT_CODE;
@@ -90,7 +91,7 @@ void World::InitWorld()
         auto               ro = new RespawnObject{nri};
         m_vRespawnList.emplace_back(ro);
     }
-    sObjectMgr->AddNPCToWorld();
+    GameContent::AddNPCToWorld();
 
     // Set timers:
     m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_PINGDB) * MINUTE * IN_MILLISECONDS);    // Mysql ping time in minutes

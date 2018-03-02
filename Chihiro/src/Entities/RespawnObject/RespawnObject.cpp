@@ -19,6 +19,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "MemPool.h"
+#include "GameContent.h"
 
 RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo(rh))
 {
@@ -54,8 +55,8 @@ void RespawnObject::Update(uint diff)
 
             /// Generate monster if not blocked
             Monster* monster{nullptr};
-            if (!sObjectMgr->IsBlocked(x, y)) {
-                monster = sObjectMgr->RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
+            if (!GameContent::IsBlocked(x, y)) {
+                monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
             }
             /// Put it to the list when it's not blocked
             if (monster != nullptr) {

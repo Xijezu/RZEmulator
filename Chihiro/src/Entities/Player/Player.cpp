@@ -31,6 +31,7 @@
 #include "DungeonManager.h"
 #include "GroupManager.h"
 #include "WorldLocation.h"
+#include "GameContent.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1459,7 +1460,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
         pos.m_positionZ  = client_pos.m_positionZ;
         pos._orientation = client_pos._orientation;
     }
-    int     nl = sObjectMgr->GetLocationID(x, y);
+    int     nl = GameContent::GetLocationID(x, y);
     XPacket locPct(TS_SC_CHANGE_LOCATION);
     locPct << m_nWorldLocationId;
     locPct << nl;

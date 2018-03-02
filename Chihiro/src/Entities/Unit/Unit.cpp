@@ -23,6 +23,7 @@
 #include "Skill.h"
 #include "MemPool.h"
 #include "RegionContainer.h"
+#include "GameContent.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
@@ -1736,7 +1737,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
                     auto nItemID    = (int)var1;
                     auto nItemCount = (int64)var2;
                     while (nItemID < 0)
-                        sObjectMgr->SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+                        GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
                     if (nItemID != 0)
                     {
                         auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);

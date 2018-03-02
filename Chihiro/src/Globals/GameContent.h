@@ -20,6 +20,14 @@
 
 #include "Common.h"
 #include "Unit.h"
+#include "MonsterBase.h"
+
+class Monster;
+struct MonsterDeleteHandler;
+class DropGroup;
+struct WayPointInfo;
+class NPC;
+struct NPCTemplate;
 
 class GameContent
 {
@@ -29,7 +37,20 @@ class GameContent
                 float fEffectLength, int nRegionType, float fRegionProperty, int nOriginalDamage,
                 bool bIncludeOriginalPos, Unit *pCaster, int nDistributeType, int nTargetMax,
                 std::vector<Unit *> &vTargetList, bool bEnemyOnly);
+
+        static Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
+        static bool IsInRandomPoolMonster(int group_id, int monster_id);
+        static bool LearnAllSkill(Player *pPlayer);
+        static bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);
+        static ushort IsLearnableSkill(Unit *, int, int, int &);
+        static int GetLocationID(float x, float y);
+        static bool IsBlocked(float x, float y);
+        static bool CollisionToLine(float x1, float y1, float x2, float y2);
+        static NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
+        static void AddNPCToWorld();
+        static int64 GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying);
     private:
+        static ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
         GameContent() = default;
         ~GameContent() = default;
 };

@@ -17,6 +17,7 @@
 
 #include "QuestManager.h"
 #include "ObjectMgr.h"
+#include "GameContent.h"
 
 bool QuestManager::DoEachActiveQuest(const std::function<void(Quest *)> &fn)
 {
@@ -353,9 +354,9 @@ void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> 
         {
             if (q->m_QuestBase->nType == QuestType::QUEST_KILL_TOTAL || q->m_QuestBase->nType == QuestType::QUEST_KILL_INDIVIDUAL)
             {
-                if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
-                    || sObjectMgr->IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
-                    || sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID))
+                if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
+                    || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
+                    || GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID))
                     vQuest.emplace_back(q);
             } else {
                 if (q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM)
@@ -363,12 +364,12 @@ void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> 
                     if (q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
                         vQuest.emplace_back(q);
                 } else {
-                    if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(6), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(7), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(8), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(9), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(10), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(11), nMonsterID))
+                    if (GameContent::IsInRandomPoolMonster(q->GetValue(6), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(7), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(8), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(9), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(10), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(11), nMonsterID))
                         vQuest.emplace_back(q);
                 }
             }
@@ -425,20 +426,20 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
         {
             switch(q->m_QuestBase->nType) {
                 case QuestType::QUEST_KILL_TOTAL:
-                    if (sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
-                        || sObjectMgr->IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
-                        || (sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID)
+                    if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID)
+                        || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID)
+                        || (GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID)
                            && q->GetStatus(0) < q->GetValue(1))) {
                         q->IncStatus(0, 1);
                     }
                     break;
 
                 case QuestType::QUEST_KILL_INDIVIDUAL:
-                    if(sObjectMgr->IsInRandomPoolMonster(q->GetValue(0), nMonsterID) && q->GetStatus(0) < q->GetValue(1))
+                    if(GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID) && q->GetStatus(0) < q->GetValue(1))
                         q->IncStatus(0, 1);
-                    else if(sObjectMgr->IsInRandomPoolMonster(q->GetValue(2), nMonsterID) && q->GetStatus(1) < q->GetValue(3))
+                    else if(GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID) && q->GetStatus(1) < q->GetValue(3))
                         q->IncStatus(1, 1);
-                    else if(sObjectMgr->IsInRandomPoolMonster(q->GetValue(4), nMonsterID) && q->GetStatus(2) < q->GetValue(5))
+                    else if(GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID) && q->GetStatus(2) < q->GetValue(5))
                         q->IncStatus(2, 1);
                     break;
 
