@@ -148,9 +148,6 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 
         bool bResult = (v13 <= (uint)rand32() % 100);
 
-        if(pSkill->m_SkillBase->var[2] / 10000.0 > rand32() % 100)
-			bResult = false;
-
         auto targetHandle = pTarget->GetHandle();
 		if(pSkill->m_SkillBase->var[8] == 0.0f)
 		{
