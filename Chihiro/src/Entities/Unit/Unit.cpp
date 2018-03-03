@@ -315,7 +315,7 @@ int Unit::GetBaseSkillLevel(int skill_id) const
 
 Skill *Unit::GetSkill(int skill_id) const
 {
-    for (auto s : m_vSkillList)
+    for (auto& s : m_vSkillList)
     {
         if (s->m_nSkillID == skill_id)
             return s;
