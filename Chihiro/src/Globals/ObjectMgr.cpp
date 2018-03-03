@@ -1486,7 +1486,7 @@ std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
     {
         if (stg.job_id == job_id)
         {
-            for (auto st : stg.skillTrees)
+            for (auto &st : stg.skillTrees)
             {
                 skills.emplace_back(st);
             }
@@ -1502,7 +1502,7 @@ int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobI
     float                      jp_ratio   = -1.0f;
     if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty())
     {
-        for (auto st : trees)
+        for (auto &st : trees)
         {
             if (st.skill_id == skill_id && st.max_skill_lv >= skill_level)
             {
