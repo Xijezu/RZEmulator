@@ -283,7 +283,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList) override;
 
-        CreatureStat *GetBaseStat() const override;
+        const CreatureStat *GetBaseStat() const override;
 
         uint GetCreatureGroup() const override { return 9; }
 

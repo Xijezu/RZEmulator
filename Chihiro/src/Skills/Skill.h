@@ -63,7 +63,7 @@ class Skill
         int m_nSkillLevelAdd{0};
         int cool_time;
 
-        SkillBase *m_SkillBase{nullptr};
+        const SkillBase *m_SkillBase{nullptr};
 
         void broadcastSkillMessage(WorldObject *pObject, int cost_hp, int cost_mp, int nType);
         void broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int cost_mp, int nType);

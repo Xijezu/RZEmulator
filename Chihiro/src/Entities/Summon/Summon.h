@@ -39,7 +39,7 @@ class Summon : public Unit
         static void DB_UpdateSummon(Player *, Summon *);
         static void EnterPacket(XPacket &, Summon *, Player *pPlayer);
 
-        CreatureStat *GetBaseStat() const override;
+        const CreatureStat *GetBaseStat() const override;
 
         uint GetCreatureGroup() const override { return 9; }
 
@@ -86,7 +86,7 @@ class Summon : public Unit
         //void onApplyStat
         void onCompleteCalculateStat() override;
     private:
-        SummonResourceTemplate *m_tSummonBase{nullptr};
+        const SummonResourceTemplate *m_tSummonBase{nullptr};
         Player *m_pMaster{nullptr};
 
         int m_nAccountID{};

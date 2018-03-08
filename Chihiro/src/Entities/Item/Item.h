@@ -101,7 +101,7 @@ class Item : public WorldObject
 
 // private:
         ItemInstance    m_Instance{ };
-        ItemTemplate    *m_pItemBase{ };
+        const ItemTemplate    *m_pItemBase{ };
         Summon          *m_pSummon{nullptr};
         uint            m_nHandle{0};
         int             m_nAccountID{0};

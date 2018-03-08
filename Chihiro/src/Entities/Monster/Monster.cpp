@@ -29,7 +29,7 @@
 #include "GroupManager.h"
 #include "GameContent.h"
 
-Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
+Monster::Monster(uint handle, const MonsterBase *mb) : Unit(true)
 {
     _mainType    = MT_NPC;
     _subType     = ST_Mob;
@@ -1019,7 +1019,7 @@ int Monster::GetMonsterID() const
     return m_Base->id;
 }
 
-CreatureStat *Monster::GetBaseStat() const
+const CreatureStat *Monster::GetBaseStat() const
 {
     return sObjectMgr->GetStatInfo(m_Base->stat_id);
 }

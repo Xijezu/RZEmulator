@@ -77,7 +77,7 @@ class State
         uint      m_nEndTime[3]{ };
         uint      m_nRemainDuration[3]{ };
         uint      m_nLastProcessedTime;
-        StateTemplate *m_pTemplate{nullptr};
+        const StateTemplate *m_pTemplate{nullptr};
         int         m_nTotalDamage;
         bool        m_bAura;
         int         m_nStateValue;

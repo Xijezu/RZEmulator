@@ -255,7 +255,7 @@ class Unit : public WorldObject
         bool IsWearShield();
         std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
 
-        virtual CreatureStat *GetBaseStat() const { return nullptr; }
+        virtual const CreatureStat *GetBaseStat() const { return nullptr; }
 
         virtual bool IsUsingBow() const { return false; }
 
