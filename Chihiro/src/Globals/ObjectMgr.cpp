@@ -1436,7 +1436,7 @@ const JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
 
 const SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
 {
-    _summonResourceStore.GetRegistryItem(idx);
+    return _summonResourceStore.GetRegistryItem(idx);
 }
 
 const std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
