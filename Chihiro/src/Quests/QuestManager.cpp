@@ -551,7 +551,7 @@ bool QuestManager::IsStartableQuest(int code)
     }
     else
     {
-        for (int &id : qbs->nForeQuest)
+        for (auto &id : qbs->nForeQuest)
         {
             if (id != 0 && IsFinishedQuest(id))
             {

@@ -18,7 +18,7 @@
 #include "SkillBase.h"
 #include "World.h"
 
-bool SkillBase::IsUseableWeapon(ItemClass cl)
+bool SkillBase::IsUseableWeapon(ItemClass cl) const
 {
     auto c = (int)cl;
 
@@ -68,7 +68,7 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
     return false;
 }
 
-int SkillBase::GetStateSecond(int skill_lv, int enhance_lv)
+int SkillBase::GetStateSecond(int skill_lv, int enhance_lv) const
 {
     return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
 }
@@ -78,14 +78,14 @@ int SkillBase::GetHitBonus(int enhance, int level_diff) const
     return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
 }
 
-int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
+int SkillBase::GetStateLevel(int skill_lv, int enhance_lv) const
 {
     return (int) (state_level_base
                   + (state_level_per_enhance * enhance_lv)
                   + (state_level_per_skl * skill_lv));
 }
 
-uint SkillBase::GetCastDelay(int skill_lv, int enhance)
+uint SkillBase::GetCastDelay(int skill_lv, int enhance) const
 {
     return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
 }
@@ -95,7 +95,7 @@ uint SkillBase::GetCoolTime(int enhance) const
     return sWorld->getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
 }
 
-int SkillBase::GetNeedJobPoint(int skill_lv)
+int SkillBase::GetNeedJobPoint (int skill_lv) const
 {
     int result;
 

@@ -84,7 +84,7 @@ class Monster : public Unit
     public:
 
         static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
-        explicit Monster(uint handle, MonsterBase *mb);
+        explicit Monster(uint handle, const MonsterBase *mb);
         ~Monster() = default;
         // Deleting the copy & assignment operators
         // Better safe than sorry
@@ -97,7 +97,7 @@ class Monster : public Unit
 
         void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
 
-        MonsterBase *GetBase() const { return m_Base; }
+        const MonsterBase *GetBase() const { return m_Base; }
 
         void applyJobLevelBonus() override {};
 
@@ -134,7 +134,7 @@ class Monster : public Unit
         int GetTameCode() const;
         float GetTamePercentage() const;
         int GetMonsterID() const;
-        CreatureStat *GetBaseStat() const override;
+        const CreatureStat *GetBaseStat() const override;
         int GetRace() const override;
 
         int AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMonster);
@@ -183,7 +183,7 @@ class Monster : public Unit
         std::vector<HateModifierTag> m_vHateModifierByState{ };
 
         Position m_pRespawn{ };
-        MonsterBase *m_Base{nullptr};
+        const MonsterBase *m_Base{nullptr};
 
         float m_nLastEnemyDistance;
         uint   m_nLastTrackTime;

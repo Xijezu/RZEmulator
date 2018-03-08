@@ -148,9 +148,9 @@ NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
     npc->SetLayer(layer);
     for (auto &ql : sObjectMgr->_questLinkStore)
     {
-        if (ql.nNPCID == npc->m_pBase->id)
+        if (ql->nNPCID == npc->m_pBase->id)
         {
-            npc->LinkQuest(&ql);
+            npc->LinkQuest(ql);
         }
     }
     return npc;
@@ -158,11 +158,12 @@ NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
 
 void GameContent::AddNPCToWorld()
 {
-    for (auto &npc : sObjectMgr->_npcTemplateStore)
+    auto list = sObjectMgr->_npcTemplateStore.GetRegisteredItems();
+    for (auto &npc : list)
     {
-        if (/*npc.second.spawn_type == SPAWN_NORMAL &&*/ npc.second.local_flag == 0)
+        if (/*npc.second.spawn_type == SPAWN_NORMAL &&*/ npc.second->local_flag == 0)
         {
-            auto nn = GetNewNPC(&npc.second, 0);
+            auto nn = GetNewNPC(npc.second, 0);
             sWorld->AddObjectToWorld(nn);
         }
     }

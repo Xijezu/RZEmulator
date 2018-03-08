@@ -64,7 +64,7 @@ class FieldProp : public WorldObject
 
 		uint m_nRegenTime;
 		FieldPropDeleteHandler *m_pDeleteHandler;
-		FieldPropTemplate      *m_pFieldPropBase;
+		const FieldPropTemplate      *m_pFieldPropBase;
 		FieldPropRespawnInfo m_PropInfo;
 		int                  m_nUseCount;
 		bool                 m_bIsCasting;

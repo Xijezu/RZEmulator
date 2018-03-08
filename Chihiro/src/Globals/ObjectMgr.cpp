@@ -69,27 +69,27 @@ void ObjectMgr::UnloadAll()
 {
     g_vWayPoint.clear();
     g_vRespawnInfo.clear();
-    _jobTemplateStore.clear();
-    _itemTemplateStore.clear();
-    _creatureBaseStore.clear();
-    _jobBonusStore.clear();
-    _summonResourceStore.clear();
+    _jobTemplateStore.Clear();
+    _itemTemplateStore.Clear();
+    _creatureBaseStore.Clear();
+    _jobBonusStore.Clear();
+    _summonResourceStore.Clear();
     _marketResourceStore.clear();
     _skillTreeResourceStore.clear();
     _summonLevelStore.clear();
     _stringResourceStore.clear();
-    _levelResourceStore.clear();
-    _skillBaseStore.clear();
-    _monsterBaseStore.clear();
-    _dropTemplateStore.clear();
-    _questTemplateStore.clear();
+    _levelResourceStore.Clear();
+    _skillBaseStore.Clear();
+    _monsterBaseStore.Clear();
+    _dropTemplateStore.Clear();
+    _questTemplateStore.Clear();
     _questLinkStore.clear();
-    _npcTemplateStore.clear();
-    _fieldPropTemplateStore.clear();
+    _npcTemplateStore.Clear();
+    _fieldPropTemplateStore.Clear();
     _summonPrefixStore.clear();
     _summonPostfixStore.clear();
-    _summonBonusStore.clear();
-    _stateTemplateStore.clear();
+    _summonBonusStore.Clear();
+    _stateTemplateStore.Clear();
 }
 
 void ObjectMgr::LoadItemResource()
@@ -121,80 +121,80 @@ void ObjectMgr::LoadItemResource()
     do
     {
         Field        *fields = result->Fetch();
-        ItemTemplate itemTemplate{ };
+        auto itemTemplate = new ItemTemplate{ };
 
-        itemTemplate.id               = fields[0].GetInt32();
-        itemTemplate.type             = fields[1].GetInt32();
-        itemTemplate.group            = fields[2].GetInt32();
-        itemTemplate.iclass           = fields[3].GetInt32();
-        itemTemplate.wear_type        = fields[4].GetInt32();
-        itemTemplate.set_id           = fields[5].GetInt32();
-        itemTemplate.set_part_flag    = fields[6].GetInt32();
-        itemTemplate.rank             = fields[7].GetInt32();
-        itemTemplate.level            = fields[8].GetInt32();
-        itemTemplate.enhance          = fields[9].GetInt32();
-        itemTemplate.socket           = fields[10].GetInt32();
-        itemTemplate.status_flag      = fields[11].GetInt32();
-        itemTemplate.limit_deva       = fields[12].GetInt32();
-        itemTemplate.limit_asura      = fields[13].GetInt32();
-        itemTemplate.limit_gaia       = fields[14].GetInt32();
-        itemTemplate.limit_fighter    = fields[15].GetInt32();
-        itemTemplate.limit_hunter     = fields[16].GetInt32();
-        itemTemplate.limit_magician   = fields[17].GetInt32();
-        itemTemplate.limit_summoner   = fields[18].GetInt32();
-        itemTemplate.use_min_level    = fields[19].GetInt32();
-        itemTemplate.use_max_level    = fields[20].GetInt32();
-        itemTemplate.target_min_level = fields[21].GetInt32();
-        itemTemplate.target_max_level = fields[22].GetInt32();
-        itemTemplate.range            = fields[23].GetFloat() * 100;
-        itemTemplate.weight           = fields[24].GetFloat();
-        itemTemplate.price            = fields[25].GetUInt32();
-        itemTemplate.endurance        = fields[26].GetInt32();
-        itemTemplate.material         = fields[27].GetInt32();
-        itemTemplate.summon_id        = fields[28].GetInt32();
+        itemTemplate->id               = fields[0].GetInt32();
+        itemTemplate->type             = fields[1].GetInt32();
+        itemTemplate->group            = fields[2].GetInt32();
+        itemTemplate->iclass           = fields[3].GetInt32();
+        itemTemplate->wear_type        = fields[4].GetInt32();
+        itemTemplate->set_id           = fields[5].GetInt32();
+        itemTemplate->set_part_flag    = fields[6].GetInt32();
+        itemTemplate->rank             = fields[7].GetInt32();
+        itemTemplate->level            = fields[8].GetInt32();
+        itemTemplate->enhance          = fields[9].GetInt32();
+        itemTemplate->socket           = fields[10].GetInt32();
+        itemTemplate->status_flag      = fields[11].GetInt32();
+        itemTemplate->limit_deva       = fields[12].GetInt32();
+        itemTemplate->limit_asura      = fields[13].GetInt32();
+        itemTemplate->limit_gaia       = fields[14].GetInt32();
+        itemTemplate->limit_fighter    = fields[15].GetInt32();
+        itemTemplate->limit_hunter     = fields[16].GetInt32();
+        itemTemplate->limit_magician   = fields[17].GetInt32();
+        itemTemplate->limit_summoner   = fields[18].GetInt32();
+        itemTemplate->use_min_level    = fields[19].GetInt32();
+        itemTemplate->use_max_level    = fields[20].GetInt32();
+        itemTemplate->target_min_level = fields[21].GetInt32();
+        itemTemplate->target_max_level = fields[22].GetInt32();
+        itemTemplate->range            = fields[23].GetFloat() * 100;
+        itemTemplate->weight           = fields[24].GetFloat();
+        itemTemplate->price            = fields[25].GetUInt32();
+        itemTemplate->endurance        = fields[26].GetInt32();
+        itemTemplate->material         = fields[27].GetInt32();
+        itemTemplate->summon_id        = fields[28].GetInt32();
         for (int i = 0; i < 19; i++)
         {
-            itemTemplate.flaglist[i] = fields[29 + i].GetUInt8();
+            itemTemplate->flaglist[i] = fields[29 + i].GetUInt8();
         }
-        itemTemplate.available_period = fields[48].GetInt32();
-        itemTemplate.decrease_type    = fields[49].GetInt16();
-        itemTemplate.throw_range      = fields[50].GetFloat();
-        itemTemplate.distribute_type  = fields[51].GetUInt8();
+        itemTemplate->available_period = fields[48].GetInt32();
+        itemTemplate->decrease_type    = fields[49].GetInt16();
+        itemTemplate->throw_range      = fields[50].GetFloat();
+        itemTemplate->distribute_type  = fields[51].GetUInt8();
         int      y = 52;
         for (int i = 0; i < 4; i++)
         {
-            itemTemplate.base_type[i]   = fields[y++].GetInt16();
-            itemTemplate.base_var[i][0] = fields[y++].GetFloat();
-            itemTemplate.base_var[i][1] = fields[y++].GetFloat();
+            itemTemplate->base_type[i]   = fields[y++].GetInt16();
+            itemTemplate->base_var[i][0] = fields[y++].GetFloat();
+            itemTemplate->base_var[i][1] = fields[y++].GetFloat();
         }
         y = 64;
         for (int i = 0; i < 4; i++)
         {
-            itemTemplate.opt_type[i]   = fields[y++].GetInt16();
-            itemTemplate.opt_var[i][0] = fields[y++].GetFloat();
-            itemTemplate.opt_var[i][1] = fields[y++].GetFloat();
+            itemTemplate->opt_type[i]   = fields[y++].GetInt16();
+            itemTemplate->opt_var[i][0] = fields[y++].GetFloat();
+            itemTemplate->opt_var[i][1] = fields[y++].GetFloat();
         }
         y = 76;
         for (int i = 0; i < 2; i++)
         {
-            itemTemplate.enhance_id[i]  = fields[y++].GetInt16();
-            itemTemplate._enhance[i][0] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][1] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][2] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][3] = fields[y++].GetFloat();
+            itemTemplate->enhance_id[i]  = fields[y++].GetInt16();
+            itemTemplate->_enhance[i][0] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][1] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][2] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][3] = fields[y++].GetFloat();
         }
 
-        itemTemplate.skill_id        = fields[86].GetInt32();
-        itemTemplate.state_id        = fields[87].GetInt32();
-        itemTemplate.state_level     = fields[88].GetInt32();
-        itemTemplate.state_time      = fields[89].GetInt32();
-        itemTemplate.state_type      = fields[90].GetInt32();
-        itemTemplate.cool_time       = fields[91].GetInt32();
-        itemTemplate.cool_time_group = fields[92].GetInt16();
-        itemTemplate.script_text     = fields[93].GetString();
-        itemTemplate.name_id         = fields[94].GetInt32();
+        itemTemplate->skill_id        = fields[86].GetInt32();
+        itemTemplate->state_id        = fields[87].GetInt32();
+        itemTemplate->state_level     = fields[88].GetInt32();
+        itemTemplate->state_time      = fields[89].GetInt32();
+        itemTemplate->state_type      = fields[90].GetInt32();
+        itemTemplate->cool_time       = fields[91].GetInt32();
+        itemTemplate->cool_time_group = fields[92].GetInt16();
+        itemTemplate->script_text     = fields[93].GetString();
+        itemTemplate->name_id         = fields[94].GetInt32();
 
-        _itemTemplateStore[itemTemplate.id] = itemTemplate;
+        _itemTemplateStore.InsertItem(itemTemplate, itemTemplate->id);
 
         ++count;
     } while (result->NextRow());
@@ -217,82 +217,82 @@ void ObjectMgr::LoadMonsterResource()
     {
         Field       *field = result->Fetch();
         int         idx    = 0;
-        MonsterBase base{ };
-        base.id            = field[idx++].GetInt32();
-        base.monster_group = field[idx++].GetInt32();
-        base.name_id       = field[idx++].GetInt32();
-        base.location_id   = field[idx++].GetInt32();
+        auto base = new MonsterBase{ };
+        base->id            = field[idx++].GetInt32();
+        base->monster_group = field[idx++].GetInt32();
+        base->name_id       = field[idx++].GetInt32();
+        base->location_id   = field[idx++].GetInt32();
         idx += 5; // 14 unused columns, mostly for rendering clientside
-        base.size  = field[idx++].GetFloat();
-        base.scale = field[idx++].GetFloat();
+        base->size  = field[idx++].GetFloat();
+        base->scale = field[idx++].GetFloat();
         idx += 7;
-        base.level         = field[idx++].GetInt32();
-        base.grp           = field[idx++].GetInt32();
-        base.magic_type    = field[idx++].GetInt32();
-        base.race          = field[idx++].GetInt32();
-        base.visible_range = field[idx++].GetInt32() * 12;
-        base.chase_range   = field[idx++].GetInt32();
-        for (auto &curr : base.flag)
+        base->level         = field[idx++].GetInt32();
+        base->grp           = field[idx++].GetInt32();
+        base->magic_type    = field[idx++].GetInt32();
+        base->race          = field[idx++].GetInt32();
+        base->visible_range = field[idx++].GetInt32() * 12;
+        base->chase_range   = field[idx++].GetInt32();
+        for (auto &curr : base->flag)
         {
             curr = field[idx++].GetInt32();
         }
-        base.monster_type = field[idx++].GetInt32();
-        base.stat_id      = field[idx++].GetInt32();
-        base.fight_type   = field[idx++].GetInt32();
+        base->monster_type = field[idx++].GetInt32();
+        base->stat_id      = field[idx++].GetInt32();
+        base->fight_type   = field[idx++].GetInt32();
         idx += 9;
-        base.weapon_type         = field[idx++].GetInt32();
-        base.attack_motion_speed = field[idx++].GetInt32();
-        base.ability             = field[idx++].GetInt32();
-        base.standard_walk_speed = field[idx++].GetInt32();
-        base.standard_run_speed  = field[idx++].GetInt32();
-        base.walk_speed          = field[idx++].GetInt32();
-        base.run_speed           = field[idx++].GetInt32();
-        base.attack_range        = field[idx++].GetFloat() * 100;
-        base.hp                  = field[idx++].GetInt32();
-        base.mp                  = field[idx++].GetInt32();
-        base.attacK_point        = field[idx++].GetInt32();
-        base.magic_point         = field[idx++].GetInt32();
-        base.defence             = field[idx++].GetInt32();
-        base.magic_defence       = field[idx++].GetInt32();
-        base.attack_speed        = field[idx++].GetInt32();
-        base.magic_speed         = field[idx++].GetInt32();
-        base.accuracy            = field[idx++].GetInt32();
-        base.magic_accuracy      = field[idx++].GetInt32();
-        base.avoid               = field[idx++].GetInt32();
-        base.magic_avoid         = field[idx++].GetInt32();
-        base.taming_id           = field[idx++].GetInt32();
-        base.taming_percentage   = field[idx++].GetFloat();
-        base.taming_exp_mod      = field[idx++].GetFloat();
+        base->weapon_type         = field[idx++].GetInt32();
+        base->attack_motion_speed = field[idx++].GetInt32();
+        base->ability             = field[idx++].GetInt32();
+        base->standard_walk_speed = field[idx++].GetInt32();
+        base->standard_run_speed  = field[idx++].GetInt32();
+        base->walk_speed          = field[idx++].GetInt32();
+        base->run_speed           = field[idx++].GetInt32();
+        base->attack_range        = field[idx++].GetFloat() * 100;
+        base->hp                  = field[idx++].GetInt32();
+        base->mp                  = field[idx++].GetInt32();
+        base->attacK_point        = field[idx++].GetInt32();
+        base->magic_point         = field[idx++].GetInt32();
+        base->defence             = field[idx++].GetInt32();
+        base->magic_defence       = field[idx++].GetInt32();
+        base->attack_speed        = field[idx++].GetInt32();
+        base->magic_speed         = field[idx++].GetInt32();
+        base->accuracy            = field[idx++].GetInt32();
+        base->magic_accuracy      = field[idx++].GetInt32();
+        base->avoid               = field[idx++].GetInt32();
+        base->magic_avoid         = field[idx++].GetInt32();
+        base->taming_id           = field[idx++].GetInt32();
+        base->taming_percentage   = field[idx++].GetFloat();
+        base->taming_exp_mod      = field[idx++].GetFloat();
         for (y = 0; y < 2; y++)
         {
-            base.exp[y] = field[idx++].GetInt32();
-            base.jp[y]  = field[idx++].GetInt32();
+            base->exp[y] = field[idx++].GetInt32();
+            base->jp[y]  = field[idx++].GetInt32();
             if (y == 0)
-                base.gold_drop_percentage = field[idx++].GetInt32();
-            base.gold_min[y] = field[idx++].GetInt32();
-            base.gold_max[y] = field[idx++].GetInt32();
+                base->gold_drop_percentage = field[idx++].GetInt32();
+            base->gold_min[y] = field[idx++].GetInt32();
+            base->gold_max[y] = field[idx++].GetInt32();
             if (y == 0)
-                base.chaos_drop_percentage = field[idx++].GetInt32();
-            base.chaos_min[y] = field[idx++].GetInt32();
-            base.chaos_max[y] = field[idx++].GetInt32();
+                base->chaos_drop_percentage = field[idx++].GetInt32();
+            base->chaos_min[y] = field[idx++].GetInt32();
+            base->chaos_max[y] = field[idx++].GetInt32();
         }
         for (y = 0; y < 10; y++)
         {
-            base.drop_item_id[y]    = field[idx++].GetInt32();
-            base.drop_percentage[y] = (int)(field[idx++].GetFloat() * 100000000);
-            base.drop_min_count[y]  = field[idx++].GetInt32();
-            base.drop_max_count[y]  = field[idx++].GetInt32();
-            base.drop_min_level[y]  = field[idx++].GetInt32();
-            base.drop_max_level[y]  = field[idx++].GetInt32();
+            base->drop_item_id[y]    = field[idx++].GetInt32();
+            base->drop_percentage[y] = (int)(field[idx++].GetFloat() * 100000000);
+            base->drop_min_count[y]  = field[idx++].GetInt32();
+            base->drop_max_count[y]  = field[idx++].GetInt32();
+            base->drop_min_level[y]  = field[idx++].GetInt32();
+            base->drop_max_level[y]  = field[idx++].GetInt32();
         }
         for (y = 0; y < 4; y++)
         {
-            base.skill_id[y]          = field[idx++].GetInt32();
-            base.skill_lv[y]          = field[idx++].GetInt32();
-            base.skill_probability[y] = field[idx++].GetFloat();
+            base->skill_id[y]          = field[idx++].GetInt32();
+            base->skill_lv[y]          = field[idx++].GetInt32();
+            base->skill_probability[y] = field[idx++].GetFloat();
         }
-        base.local_flag = field[idx].GetInt32();
-        _monsterBaseStore[base.id] = base;
+        base->local_flag = field[idx].GetInt32();
+        _monsterBaseStore.InsertItem(base, base->id);
         ++count;
     } while (result->NextRow());
 
@@ -315,14 +315,14 @@ void ObjectMgr::LoadQuestResource()
         Field *field = result->Fetch();
         int   idx    = 0;
 
-        QuestBaseServer q{ };
-        q.nCode            = field[idx++].GetInt32();
-        q.nQuestTextID     = field[idx++].GetInt32();
-        q.nSummaryTextID   = field[idx++].GetInt32();
-        q.nStatusTextID    = field[idx++].GetInt32();
-        q.nLimitLevel      = field[idx++].GetInt32();
-        q.nLimitJobLevel   = field[idx++].GetInt32();
-        q.nLimitIndication = field[idx++].GetUInt8();
+        auto q = new QuestBaseServer{ };
+        q->nCode            = field[idx++].GetInt32();
+        q->nQuestTextID     = field[idx++].GetInt32();
+        q->nSummaryTextID   = field[idx++].GetInt32();
+        q->nStatusTextID    = field[idx++].GetInt32();
+        q->nLimitLevel      = field[idx++].GetInt32();
+        q->nLimitJobLevel   = field[idx++].GetInt32();
+        q->nLimitIndication = field[idx++].GetUInt8();
 
         int limit_deva  = field[idx++].GetInt32();
         int limit_asura = field[idx++].GetInt32();
@@ -333,60 +333,59 @@ void ObjectMgr::LoadQuestResource()
         int limit_magician = field[idx++].GetInt32();
         int limit_summoner = field[idx++].GetInt32();
 
-        q.nLimitJob          = field[idx++].GetInt32();
-        q.nLimitFavorGroupID = field[idx++].GetInt32();
-        q.nLimitFavor        = field[idx++].GetInt32();
-        q.bIsRepeatable      = field[idx++].GetUInt8() == 1;
-        q.nInvokeCondition   = field[idx++].GetInt32();
-        q.nInvokeValue       = field[idx++].GetInt32();
-        q.nType              = (QuestType)field[idx++].GetInt32();
-        for (int &i : q.nValue)
+        q->nLimitJob          = field[idx++].GetInt32();
+        q->nLimitFavorGroupID = field[idx++].GetInt32();
+        q->nLimitFavor        = field[idx++].GetInt32();
+        q->bIsRepeatable      = field[idx++].GetUInt8() == 1;
+        q->nInvokeCondition   = field[idx++].GetInt32();
+        q->nInvokeValue       = field[idx++].GetInt32();
+        q->nType              = (QuestType)field[idx++].GetInt32();
+        for (int &i : q->nValue)
         {
             i = field[idx++].GetInt32();
         }
-        q.nDropGroupID            = field[idx++].GetInt32();
-        q.nQuestDifficulty        = field[idx++].GetInt32();
-        q.nFavorGroupID           = field[idx++].GetInt32();
-        q.nHateGroupID            = field[idx++].GetInt32();
-        q.nFavor                  = field[idx++].GetInt32();
-        q.nEXP                    = field[idx++].GetUInt64();
-        q.nJP                     = field[idx++].GetInt32();
-        q.nGold                   = field[idx++].GetInt64();
-        q.DefaultReward.nItemCode = field[idx++].GetInt32();
-        q.DefaultReward.nLevel    = field[idx++].GetInt32();
-        q.DefaultReward.nQuantity = field[idx++].GetInt32();
-        for (auto &i : q.OptionalReward)
+        q->nDropGroupID            = field[idx++].GetInt32();
+        q->nQuestDifficulty        = field[idx++].GetInt32();
+        q->nFavorGroupID           = field[idx++].GetInt32();
+        q->nHateGroupID            = field[idx++].GetInt32();
+        q->nFavor                  = field[idx++].GetInt32();
+        q->nEXP                    = field[idx++].GetUInt64();
+        q->nJP                     = field[idx++].GetInt32();
+        q->nGold                   = field[idx++].GetInt64();
+        q->DefaultReward.nItemCode = field[idx++].GetInt32();
+        q->DefaultReward.nLevel    = field[idx++].GetInt32();
+        q->DefaultReward.nQuantity = field[idx++].GetInt32();
+        for (auto &i : q->OptionalReward)
         {
             i.nItemCode = field[idx++].GetInt32();
             i.nLevel    = field[idx++].GetInt32();
             i.nQuantity = field[idx++].GetInt32();
         }
-        for (int  &i : q.nForeQuest)
+        for (int  &i : q->nForeQuest)
         {
             i = field[idx++].GetInt32();
         }
-        q.bForceCheckType = field[idx++].GetUInt8() != 0;
-        q.strAcceptScript = field[idx++].GetString();
-        q.strClearScript  = field[idx++].GetString();
-        q.strScript       = field[idx].GetString();
+        q->bForceCheckType = field[idx++].GetUInt8() != 0;
+        q->strAcceptScript = field[idx++].GetString();
+        q->strClearScript  = field[idx++].GetString();
+        q->strScript       = field[idx].GetString();
 
         if (limit_asura != 0)
-            q.LimitFlag |= 4;
+            q->LimitFlag |= 4;
         if (limit_gaia != 0)
-            q.LimitFlag |= 8u;
+            q->LimitFlag |= 8u;
         if (limit_deva != 0)
-            q.LimitFlag |= 2u;
+            q->LimitFlag |= 2u;
         if (limit_hunter != 0)
-            q.LimitFlag |= 0x20u;
+            q->LimitFlag |= 0x20u;
         if (limit_fighter != 0)
-            q.LimitFlag |= 0x10u;
+            q->LimitFlag |= 0x10u;
         if (limit_magician != 0)
-            q.LimitFlag |= 0x40u;
+            q->LimitFlag |= 0x40u;
         if (limit_summoner != 0)
-            q.LimitFlag |= 0x80u;
+            q->LimitFlag |= 0x80u;
 
-        _questTemplateStore[q.nCode] = q;
-
+        _questTemplateStore.InsertItem(q, q->nCode);
         ++count;
     } while (result->NextRow());
 
@@ -409,19 +408,19 @@ void ObjectMgr::LoadFieldPropResource()
         Field *field = result->Fetch();
         int   idx    = 0;
 
-        FieldPropTemplate propTemplate{ };
-        propTemplate.nPropID     = field[idx++].GetUInt32();
-        propTemplate.nPropTextID = field[idx++].GetInt32();
+        auto propTemplate = new FieldPropTemplate{ };
+        propTemplate->nPropID     = field[idx++].GetUInt32();
+        propTemplate->nPropTextID = field[idx++].GetInt32();
         idx++; // tooltip_id
-        propTemplate.nType        = field[idx++].GetInt32();
-        propTemplate.nLocalFlag   = field[idx++].GetInt32();
-        propTemplate.nCastingTime = field[idx++].GetUInt32() * 100;
-        propTemplate.nUseCount    = field[idx++].GetInt32();
-        propTemplate.nRegenTime   = field[idx++].GetUInt32() * 100;
-        propTemplate.nLifeTime    = field[idx++].GetUInt32() * 100;
+        propTemplate->nType        = field[idx++].GetInt32();
+        propTemplate->nLocalFlag   = field[idx++].GetInt32();
+        propTemplate->nCastingTime = field[idx++].GetUInt32() * 100;
+        propTemplate->nUseCount    = field[idx++].GetInt32();
+        propTemplate->nRegenTime   = field[idx++].GetUInt32() * 100;
+        propTemplate->nLifeTime    = field[idx++].GetUInt32() * 100;
         idx += 2; // casting range & target_fx_size
-        propTemplate.nMinLevel = field[idx++].GetInt32();
-        propTemplate.nMaxLevel = field[idx++].GetInt32();
+        propTemplate->nMinLevel = field[idx++].GetInt32();
+        propTemplate->nMaxLevel = field[idx++].GetInt32();
         int limit_deva     = field[idx++].GetUInt8();
         int limit_asura    = field[idx++].GetUInt8();
         int limit_gaia     = field[idx++].GetUInt8();
@@ -429,15 +428,15 @@ void ObjectMgr::LoadFieldPropResource()
         int limit_hunter   = field[idx++].GetUInt8();
         int limit_magician = field[idx++].GetUInt8();
         int limit_summoner = field[idx++].GetUInt8();
-        propTemplate.nLimitJobID = field[idx++].GetInt32();
+        propTemplate->nLimitJobID = field[idx++].GetInt32();
         for (int i = 0; i < 2; i++)
         {
-            propTemplate.nActivateID[i]       = field[idx++].GetInt32();
-            propTemplate.nActivateValue[i][0] = field[idx++].GetInt32();
-            propTemplate.nActivateValue[i][1] = field[idx++].GetInt32();
+            propTemplate->nActivateID[i]       = field[idx++].GetInt32();
+            propTemplate->nActivateValue[i][0] = field[idx++].GetInt32();
+            propTemplate->nActivateValue[i][1] = field[idx++].GetInt32();
         }
-        propTemplate.nActivateSkillID = field[idx++].GetInt32();
-        for (auto &i : propTemplate.drop_info)
+        propTemplate->nActivateSkillID = field[idx++].GetInt32();
+        for (auto &i : propTemplate->drop_info)
         {
             i.code      = field[idx++].GetInt32();
             i.ratio     = (int)(field[idx++].GetFloat() * 100000000);
@@ -447,25 +446,25 @@ void ObjectMgr::LoadFieldPropResource()
             i.max_level = field[idx++].GetInt32();
         }
 
-        propTemplate.strScript = field[idx].GetString();
+        propTemplate->strScript = field[idx].GetString();
 
-        propTemplate.nLimit = 0;
+        propTemplate->nLimit = 0;
         if (limit_asura != 0)
-            propTemplate.nLimit |= 8;
+            propTemplate->nLimit |= 8;
         if (limit_gaia != 0)
-            propTemplate.nLimit |= 0x10;
+            propTemplate->nLimit |= 0x10;
         if (limit_deva != 0)
-            propTemplate.nLimit |= 4;
+            propTemplate->nLimit |= 4;
         if (limit_hunter != 0)
-            propTemplate.nLimit |= 0x800;
+            propTemplate->nLimit |= 0x800;
         if (limit_fighter != 0)
-            propTemplate.nLimit |= 0x400;
+            propTemplate->nLimit |= 0x400;
         if (limit_magician != 0)
-            propTemplate.nLimit |= 0x1000;
+            propTemplate->nLimit |= 0x1000;
         if (limit_summoner != 0)
-            propTemplate.nLimit |= 0x2000;
+            propTemplate->nLimit |= 0x2000;
 
-        _fieldPropTemplateStore[propTemplate.nPropID] = propTemplate;
+        _fieldPropTemplateStore.InsertItem(propTemplate, propTemplate->nPropID);
 
         ++count;
     } while (result->NextRow());
@@ -489,15 +488,15 @@ void ObjectMgr::LoadQuestLinkResource()
         Field *field = result->Fetch();
         int   idx    = 0;
 
-        QuestLink ql{ };
-        ql.nNPCID            = field[idx++].GetInt32();
-        ql.code              = field[idx++].GetInt32();
-        ql.bLF_Start         = field[idx++].GetUInt8() == 1;
-        ql.bLF_Progress      = field[idx++].GetUInt8() == 1;
-        ql.bLF_End           = field[idx++].GetUInt8() == 1;
-        ql.nStartTextID      = field[idx++].GetInt32();
-        ql.nInProgressTextID = field[idx++].GetInt32();
-        ql.nEndTextID        = field[idx].GetInt32();
+        auto ql = new QuestLink{ };
+        ql->nNPCID            = field[idx++].GetInt32();
+        ql->code              = field[idx++].GetInt32();
+        ql->bLF_Start         = field[idx++].GetUInt8() == 1;
+        ql->bLF_Progress      = field[idx++].GetUInt8() == 1;
+        ql->bLF_End           = field[idx++].GetUInt8() == 1;
+        ql->nStartTextID      = field[idx++].GetInt32();
+        ql->nInProgressTextID = field[idx++].GetInt32();
+        ql->nEndTextID        = field[idx].GetInt32();
 
         _questLinkStore.emplace_back(ql);
 
@@ -522,14 +521,14 @@ void ObjectMgr::LoadDropGroupResource()
     {
         Field     *field = result->Fetch();
         int       idx    = 0;
-        DropGroup dg{ };
-        dg.uid = field[idx++].GetInt32();
+        auto dg = new DropGroup{};
+        dg->uid = field[idx++].GetInt32();
         for (int i                 = 0; i < MAX_DROP_GROUP; i++)
         {
-            dg.drop_item_id[i]    = field[idx++].GetInt32();
-            dg.drop_percentage[i] = (int)(field[idx++].GetFloat() * 100000000);
+            dg->drop_item_id[i]    = field[idx++].GetInt32();
+            dg->drop_percentage[i] = (int)(field[idx++].GetFloat() * 100000000);
         }
-        _dropTemplateStore[dg.uid] = dg;
+        _dropTemplateStore.InsertItem(dg, dg->uid);
         ++count;
     } while (result->NextRow());
 
@@ -586,115 +585,115 @@ void ObjectMgr::LoadSkillResource()
     {
         int       idx    = 0;
         Field     *field = result->Fetch();
-        SkillBase base{ };
-        base.id      = field[idx++].GetInt32();
-        base.text_id = field[idx++].GetInt32();
+        auto base = new SkillBase{};
+        base->id      = field[idx++].GetInt32();
+        base->text_id = field[idx++].GetInt32();
         idx += 2;
-        base.is_valid                 = field[idx++].GetInt16();
-        base.elemental                = field[idx++].GetUInt8();
-        base.is_passive               = field[idx++].GetUInt8();
-        base.is_physical_act          = field[idx++].GetUInt8();
-        base.is_harmful               = field[idx++].GetUInt8();
-        base.is_need_target           = field[idx++].GetUInt8();
-        base.is_corpse                = field[idx++].GetUInt8();
-        base.is_toggle                = field[idx++].GetUInt8();
-        base.toggle_group             = field[idx++].GetInt32();
-        base.casting_type             = field[idx++].GetUInt8();
-        base.casting_level            = field[idx++].GetUInt8();
-        base.cast_range               = field[idx++].GetInt32();
-        base.valid_range              = field[idx++].GetInt32();
-        base.cost_hp                  = field[idx++].GetInt32();
-        base.cost_hp_per_skl          = field[idx++].GetInt32();
-        base.cost_mp                  = field[idx++].GetInt32();
-        base.cost_mp_per_skl          = field[idx++].GetInt32();
-        base.cost_mp_per_enhance      = field[idx++].GetInt32();
-        base.cost_hp_per              = field[idx++].GetFloat();
-        base.cost_hp_per_skl_per      = field[idx++].GetFloat();
-        base.cost_mp_per              = field[idx++].GetFloat();
-        base.cost_mp_per_skl_per      = field[idx++].GetFloat();
-        base.cost_havoc               = field[idx++].GetInt32();
-        base.cost_havoc_per_skl       = field[idx++].GetInt32();
-        base.cost_energy              = field[idx++].GetFloat();
-        base.cost_energy_per_skl      = field[idx++].GetFloat();
-        base.cost_exp                 = field[idx++].GetInt32();
-        base.cost_exp_per_enhance     = field[idx++].GetInt32();
-        base.cost_jp                  = field[idx++].GetInt32();
-        base.cost_jp_per_enhance      = field[idx++].GetInt32();
-        base.cost_item                = field[idx++].GetInt32();
-        base.cost_item_count          = field[idx++].GetInt32();
-        base.cost_item_count_per      = field[idx++].GetInt32();
-        base.need_level               = field[idx++].GetInt32();
-        base.need_hp                  = field[idx++].GetInt32();
-        base.need_mp                  = field[idx++].GetInt32();
-        base.need_havoc               = field[idx++].GetInt32();
-        base.need_havoc_burst         = field[idx++].GetInt32();
-        base.need_state_id            = field[idx++].GetInt16();
-        base.need_state_level         = field[idx++].GetInt16();
-        base.need_state_exhaust       = field[idx++].GetInt16();
-        base.vf_one_hand_sword        = field[idx++].GetUInt8();
-        base.vf_two_hand_sword        = field[idx++].GetUInt8();
-        base.vf_double_sword          = field[idx++].GetUInt8();
-        base.vf_dagger                = field[idx++].GetUInt8();
-        base.vf_double_dagger         = field[idx++].GetUInt8();
-        base.vf_spear                 = field[idx++].GetUInt8();
-        base.vf_axe                   = field[idx++].GetUInt8();
-        base.vf_one_hand_axe          = field[idx++].GetUInt8();
-        base.vf_double_axe            = field[idx++].GetUInt8();
-        base.vf_one_hand_mace         = field[idx++].GetUInt8();
-        base.vf_two_hand_mace         = field[idx++].GetUInt8();
-        base.vf_lightbow              = field[idx++].GetUInt8();
-        base.vf_heavybow              = field[idx++].GetUInt8();
-        base.vf_crossbow              = field[idx++].GetUInt8();
-        base.vf_one_hand_staff        = field[idx++].GetUInt8();
-        base.vf_two_hand_staff        = field[idx++].GetUInt8();
-        base.vf_shield_only           = field[idx++].GetUInt8();
-        base.vf_is_not_need_weapon    = field[idx++].GetUInt8();
-        base.delay_cast               = field[idx++].GetFloat() * 100;
-        base.delay_cast_per_skl       = field[idx++].GetFloat() * 100;
-        base.delay_cast_mode_per      = field[idx++].GetFloat() * 100;
-        base.delay_common             = field[idx++].GetFloat() * 100;
-        base.delay_cooltime           = field[idx++].GetFloat() * 100;
-        base.delay_cooltime_mode      = field[idx++].GetFloat() * 100;
-        base.cool_time_group_id       = field[idx++].GetInt32();
-        base.uf_self                  = field[idx++].GetUInt8();
-        base.uf_party                 = field[idx++].GetUInt8();
-        base.uf_guild                 = field[idx++].GetUInt8();
-        base.uf_neutral               = field[idx++].GetUInt8();
-        base.uf_purple                = field[idx++].GetUInt8();
-        base.uf_enemy                 = field[idx++].GetUInt8();
-        base.tf_avatar                = field[idx++].GetUInt8();
-        base.tf_summon                = field[idx++].GetUInt8();
-        base.tf_monster               = field[idx++].GetUInt8();
-        base.target                   = field[idx++].GetInt16();
-        base.effect_type              = field[idx++].GetInt16();
-        base.state_id                 = field[idx++].GetInt32();
-        base.state_level_base         = field[idx++].GetInt32();
-        base.state_level_per_skl      = field[idx++].GetFloat();
-        base.state_level_per_enhance  = field[idx++].GetFloat();
-        base.state_second             = field[idx++].GetFloat();
-        base.state_second_per_level   = field[idx++].GetFloat();
-        base.state_second_per_enhance = field[idx++].GetFloat();
-        base.state_type               = field[idx++].GetUInt8();
-        base.probability_on_hit       = field[idx++].GetInt32();
-        base.probability_inc_by_slv   = field[idx++].GetInt32();
-        base.hit_bonus                = field[idx++].GetInt16();
-        base.hit_bonus_per_enhance    = field[idx++].GetInt16();
-        base.percentage               = field[idx++].GetInt16();
-        base.hate_mod                 = field[idx++].GetFloat();
-        base.hate_basic               = field[idx++].GetInt16();
-        base.hate_per_skl             = field[idx++].GetFloat();
-        base.hate_per_enhance         = field[idx++].GetFloat();
-        base.critical_bonus           = field[idx++].GetInt32();
-        base.critical_bonus_per_skl   = field[idx++].GetInt32();
-        for (float &i : base.var)
+        base->is_valid                 = field[idx++].GetInt16();
+        base->elemental                = field[idx++].GetUInt8();
+        base->is_passive               = field[idx++].GetUInt8();
+        base->is_physical_act          = field[idx++].GetUInt8();
+        base->is_harmful               = field[idx++].GetUInt8();
+        base->is_need_target           = field[idx++].GetUInt8();
+        base->is_corpse                = field[idx++].GetUInt8();
+        base->is_toggle                = field[idx++].GetUInt8();
+        base->toggle_group             = field[idx++].GetInt32();
+        base->casting_type             = field[idx++].GetUInt8();
+        base->casting_level            = field[idx++].GetUInt8();
+        base->cast_range               = field[idx++].GetInt32();
+        base->valid_range              = field[idx++].GetInt32();
+        base->cost_hp                  = field[idx++].GetInt32();
+        base->cost_hp_per_skl          = field[idx++].GetInt32();
+        base->cost_mp                  = field[idx++].GetInt32();
+        base->cost_mp_per_skl          = field[idx++].GetInt32();
+        base->cost_mp_per_enhance      = field[idx++].GetInt32();
+        base->cost_hp_per              = field[idx++].GetFloat();
+        base->cost_hp_per_skl_per      = field[idx++].GetFloat();
+        base->cost_mp_per              = field[idx++].GetFloat();
+        base->cost_mp_per_skl_per      = field[idx++].GetFloat();
+        base->cost_havoc               = field[idx++].GetInt32();
+        base->cost_havoc_per_skl       = field[idx++].GetInt32();
+        base->cost_energy              = field[idx++].GetFloat();
+        base->cost_energy_per_skl      = field[idx++].GetFloat();
+        base->cost_exp                 = field[idx++].GetInt32();
+        base->cost_exp_per_enhance     = field[idx++].GetInt32();
+        base->cost_jp                  = field[idx++].GetInt32();
+        base->cost_jp_per_enhance      = field[idx++].GetInt32();
+        base->cost_item                = field[idx++].GetInt32();
+        base->cost_item_count          = field[idx++].GetInt32();
+        base->cost_item_count_per      = field[idx++].GetInt32();
+        base->need_level               = field[idx++].GetInt32();
+        base->need_hp                  = field[idx++].GetInt32();
+        base->need_mp                  = field[idx++].GetInt32();
+        base->need_havoc               = field[idx++].GetInt32();
+        base->need_havoc_burst         = field[idx++].GetInt32();
+        base->need_state_id            = field[idx++].GetInt16();
+        base->need_state_level         = field[idx++].GetInt16();
+        base->need_state_exhaust       = field[idx++].GetInt16();
+        base->vf_one_hand_sword        = field[idx++].GetUInt8();
+        base->vf_two_hand_sword        = field[idx++].GetUInt8();
+        base->vf_double_sword          = field[idx++].GetUInt8();
+        base->vf_dagger                = field[idx++].GetUInt8();
+        base->vf_double_dagger         = field[idx++].GetUInt8();
+        base->vf_spear                 = field[idx++].GetUInt8();
+        base->vf_axe                   = field[idx++].GetUInt8();
+        base->vf_one_hand_axe          = field[idx++].GetUInt8();
+        base->vf_double_axe            = field[idx++].GetUInt8();
+        base->vf_one_hand_mace         = field[idx++].GetUInt8();
+        base->vf_two_hand_mace         = field[idx++].GetUInt8();
+        base->vf_lightbow              = field[idx++].GetUInt8();
+        base->vf_heavybow              = field[idx++].GetUInt8();
+        base->vf_crossbow              = field[idx++].GetUInt8();
+        base->vf_one_hand_staff        = field[idx++].GetUInt8();
+        base->vf_two_hand_staff        = field[idx++].GetUInt8();
+        base->vf_shield_only           = field[idx++].GetUInt8();
+        base->vf_is_not_need_weapon    = field[idx++].GetUInt8();
+        base->delay_cast               = field[idx++].GetFloat() * 100;
+        base->delay_cast_per_skl       = field[idx++].GetFloat() * 100;
+        base->delay_cast_mode_per      = field[idx++].GetFloat() * 100;
+        base->delay_common             = field[idx++].GetFloat() * 100;
+        base->delay_cooltime           = field[idx++].GetFloat() * 100;
+        base->delay_cooltime_mode      = field[idx++].GetFloat() * 100;
+        base->cool_time_group_id       = field[idx++].GetInt32();
+        base->uf_self                  = field[idx++].GetUInt8();
+        base->uf_party                 = field[idx++].GetUInt8();
+        base->uf_guild                 = field[idx++].GetUInt8();
+        base->uf_neutral               = field[idx++].GetUInt8();
+        base->uf_purple                = field[idx++].GetUInt8();
+        base->uf_enemy                 = field[idx++].GetUInt8();
+        base->tf_avatar                = field[idx++].GetUInt8();
+        base->tf_summon                = field[idx++].GetUInt8();
+        base->tf_monster               = field[idx++].GetUInt8();
+        base->target                   = field[idx++].GetInt16();
+        base->effect_type              = field[idx++].GetInt16();
+        base->state_id                 = field[idx++].GetInt32();
+        base->state_level_base         = field[idx++].GetInt32();
+        base->state_level_per_skl      = field[idx++].GetFloat();
+        base->state_level_per_enhance  = field[idx++].GetFloat();
+        base->state_second             = field[idx++].GetFloat();
+        base->state_second_per_level   = field[idx++].GetFloat();
+        base->state_second_per_enhance = field[idx++].GetFloat();
+        base->state_type               = field[idx++].GetUInt8();
+        base->probability_on_hit       = field[idx++].GetInt32();
+        base->probability_inc_by_slv   = field[idx++].GetInt32();
+        base->hit_bonus                = field[idx++].GetInt16();
+        base->hit_bonus_per_enhance    = field[idx++].GetInt16();
+        base->percentage               = field[idx++].GetInt16();
+        base->hate_mod                 = field[idx++].GetFloat();
+        base->hate_basic               = field[idx++].GetInt16();
+        base->hate_per_skl             = field[idx++].GetFloat();
+        base->hate_per_enhance         = field[idx++].GetFloat();
+        base->critical_bonus           = field[idx++].GetInt32();
+        base->critical_bonus_per_skl   = field[idx++].GetInt32();
+        for (float &i : base->var)
         {
             i = field[idx++].GetFloat();
         }
         idx += 2;
-        base.is_projectile           = field[idx++].GetInt16();
-        base.projectile_speed        = field[idx++].GetFloat();
-        base.projectile_acceleration = field[idx].GetFloat();
-        _skillBaseStore[base.id] = base;
+        base->is_projectile           = field[idx++].GetInt16();
+        base->projectile_speed        = field[idx++].GetFloat();
+        base->projectile_acceleration = field[idx].GetFloat();
+        _skillBaseStore.InsertItem(base, base->id);
         ++count;
     } while (result->NextRow());
 
@@ -779,12 +778,12 @@ void ObjectMgr::LoadLevelResource()
     do
     {
         Field                 *field = result->Fetch();
-        LevelResourceTemplate base{ };
-        base.level      = field[0].GetInt32();
-        base.normal_exp = field[1].GetInt64();
+        auto base = new LevelResourceTemplate{};
+        base->level      = field[0].GetInt32();
+        base->normal_exp = field[1].GetInt64();
         for (int i = 0; i < 4; i++)
-            base.jlv[i]                 = field[2 + i].GetInt32();
-        _levelResourceStore[base.level] = base;
+            base->jlv[i]                 = field[2 + i].GetInt32();
+        _levelResourceStore.InsertItem(base, base->level);
         ++count;
     } while (result->NextRow());
 
@@ -806,30 +805,30 @@ void ObjectMgr::LoadStateResource()
     {
         Field         *field = result->Fetch();
         int           idx    = 0;
-        StateTemplate state{ };
-        state.state_id        = field[idx++].GetInt32();
-        state.text_id         = field[idx++].GetInt32();
-        state.tooltip_id      = field[idx++].GetInt32();
-        state.is_harmful      = field[idx++].GetUInt8();
-        state.state_time_type = field[idx++].GetInt32();
-        state.state_group     = field[idx++].GetInt32();
-        for (auto &dg : state.duplicate_group)
+        auto state = new StateTemplate { };
+        state->state_id        = field[idx++].GetInt32();
+        state->text_id         = field[idx++].GetInt32();
+        state->tooltip_id      = field[idx++].GetInt32();
+        state->is_harmful      = field[idx++].GetUInt8();
+        state->state_time_type = field[idx++].GetInt32();
+        state->state_group     = field[idx++].GetInt32();
+        for (auto &dg : state->duplicate_group)
             dg = field[idx++].GetInt32();
-        state.uf_avatar          = field[idx++].GetUInt8();
-        state.uf_summon          = field[idx++].GetUInt8();
-        state.uf_monster         = field[idx++].GetUInt8();
-        state.base_effect_id     = field[idx++].GetInt32();
-        state.fire_interval      = field[idx++].GetInt32();
-        state.elemental_type     = field[idx++].GetInt32();
-        state.amplify_base       = field[idx++].GetFloat();
-        state.amplify_per_skl    = field[idx++].GetFloat();
-        state.add_damage_base    = field[idx++].GetInt32();
-        state.add_damage_per_skl = field[idx++].GetInt32();
-        state.effect_type        = field[idx++].GetInt32();
-        for (auto &val : state.value)
+        state->uf_avatar          = field[idx++].GetUInt8();
+        state->uf_summon          = field[idx++].GetUInt8();
+        state->uf_monster         = field[idx++].GetUInt8();
+        state->base_effect_id     = field[idx++].GetInt32();
+        state->fire_interval      = field[idx++].GetInt32();
+        state->elemental_type     = field[idx++].GetInt32();
+        state->amplify_base       = field[idx++].GetFloat();
+        state->amplify_per_skl    = field[idx++].GetFloat();
+        state->add_damage_base    = field[idx++].GetInt32();
+        state->add_damage_per_skl = field[idx++].GetInt32();
+        state->effect_type        = field[idx++].GetInt32();
+        for (auto &val : state->value)
             val = field[idx++].GetFloat();
 
-        _stateTemplateStore[state.state_id] = state;
+        _stateTemplateStore.InsertItem(state, state->state_id);
         ++count;
     } while (result->NextRow());
 
@@ -850,16 +849,16 @@ void ObjectMgr::LoadStatResource()
     do
     {
         Field        *field = result->Fetch();
-        CreatureStat stat{ };
-        stat.stat_id      = field[0].GetInt16();
-        stat.strength     = field[1].GetInt32();
-        stat.vital        = field[2].GetInt32();
-        stat.dexterity    = field[3].GetInt32();
-        stat.agility      = field[4].GetInt32();
-        stat.intelligence = field[5].GetInt32();
-        stat.mentality    = field[6].GetInt32();
-        stat.luck         = field[7].GetInt32();
-        _creatureBaseStore[stat.stat_id] = stat;
+        auto stat = new CreatureStat{ };
+        stat->stat_id      = field[0].GetInt16();
+        stat->strength     = field[1].GetInt32();
+        stat->vital        = field[2].GetInt32();
+        stat->dexterity    = field[3].GetInt32();
+        stat->agility      = field[4].GetInt32();
+        stat->intelligence = field[5].GetInt32();
+        stat->mentality    = field[6].GetInt32();
+        stat->luck         = field[7].GetInt32();
+        _creatureBaseStore.InsertItem(stat, stat->stat_id);
         ++count;
     } while (result->NextRow());
 
@@ -930,18 +929,18 @@ void ObjectMgr::LoadJobResource()
     {
         int                 i      = 0;
         Field               *field = result->Fetch();
-        JobResourceTemplate job{ };
-        job.id        = field[i++].GetInt32();
-        job.stat_id   = field[i++].GetUInt32();
-        job.job_class = field[i++].GetInt32();
-        job.job_depth = field[i++].GetUInt32();
-        job.up_lv     = field[i++].GetInt32();
-        job.up_jlv    = field[i++].GetInt32();
-        for (int &j : job.available_job)
+        auto job = new JobResourceTemplate{ };
+        job->id        = field[i++].GetInt32();
+        job->stat_id   = field[i++].GetUInt32();
+        job->job_class = field[i++].GetInt32();
+        job->job_depth = field[i++].GetUInt32();
+        job->up_lv     = field[i++].GetInt32();
+        job->up_jlv    = field[i++].GetInt32();
+        for (int &j : job->available_job)
         {
             j = field[i++].GetInt32();
         }
-        _jobTemplateStore[job.id] = job;
+        _jobTemplateStore.InsertItem(job, job->id);
         ++count;
     } while (result->NextRow());
 
@@ -985,18 +984,18 @@ void ObjectMgr::LoadSummonLevelBonus()
     do
     {
         Field            *field = result->Fetch();
-        SummonLevelBonus bonus{ };
+        auto bonus = new SummonLevelBonus{ };
 
         int i = 0;
-        bonus.summon_id    = field[i++].GetInt32();
-        bonus.strength     = field[i++].GetFloat();
-        bonus.vital        = field[i++].GetFloat();
-        bonus.dexterity    = field[i++].GetFloat();
-        bonus.agility      = field[i++].GetFloat();
-        bonus.intelligence = field[i++].GetFloat();
-        bonus.mentality    = field[i++].GetFloat();
-        bonus.luck         = field[i].GetFloat();
-        _summonBonusStore[bonus.summon_id] = bonus;
+        bonus->summon_id    = field[i++].GetInt32();
+        bonus->strength     = field[i++].GetFloat();
+        bonus->vital        = field[i++].GetFloat();
+        bonus->dexterity    = field[i++].GetFloat();
+        bonus->agility      = field[i++].GetFloat();
+        bonus->intelligence = field[i++].GetFloat();
+        bonus->mentality    = field[i++].GetFloat();
+        bonus->luck         = field[i].GetFloat();
+        _summonBonusStore.InsertItem(bonus, bonus->summon_id);
         ++count;
     } while (result->NextRow());
 
@@ -1022,21 +1021,21 @@ void ObjectMgr::LoadJobLevelBonus()
     do
     {
         Field                 *field = result->Fetch();
-        JobLevelBonusTemplate bonus{ };
+        auto bonus = new JobLevelBonusTemplate{ };
 
         int i = 0, j = 0;
-        bonus.job_id = field[i++].GetInt32();
+        bonus->job_id = field[i++].GetInt32();
         for (j                       = 0; j < 4; j++)
         {
-            bonus.strength[j]     = field[i++].GetFloat();
-            bonus.vital[j]        = field[i++].GetFloat();
-            bonus.dexterity[j]    = field[i++].GetFloat();
-            bonus.agility[j]      = field[i++].GetFloat();
-            bonus.intelligence[j] = field[i++].GetFloat();
-            bonus.mentality[j]    = field[i++].GetFloat();
-            bonus.luck[j]         = field[i++].GetFloat();
+            bonus->strength[j]     = field[i++].GetFloat();
+            bonus->vital[j]        = field[i++].GetFloat();
+            bonus->dexterity[j]    = field[i++].GetFloat();
+            bonus->agility[j]      = field[i++].GetFloat();
+            bonus->intelligence[j] = field[i++].GetFloat();
+            bonus->mentality[j]    = field[i++].GetFloat();
+            bonus->luck[j]         = field[i++].GetFloat();
         }
-        _jobBonusStore[bonus.job_id] = bonus;
+        _jobBonusStore.InsertItem(bonus, bonus->job_id);
         ++count;
     } while (result->NextRow());
 
@@ -1058,18 +1057,18 @@ void ObjectMgr::LoadNPCResource()
     do
     {
         Field       *field = result->Fetch();
-        NPCTemplate npc{ };
+        auto npc = new NPCTemplate{ };
         // SELECT id, x, y, z, face, local_flag, contact_script FROM npcresource;
-        npc.id             = field[0].GetUInt32();
-        npc.x              = field[1].GetUInt32();
-        npc.y              = field[2].GetUInt32();
-        npc.z              = field[3].GetUInt32();
-        npc.face           = field[4].GetUInt32();
-        npc.local_flag     = field[5].GetUInt32();
-        npc.contact_script = field[6].GetString();
-        npc.spawn_type     = field[7].GetInt32();
+        npc->id             = field[0].GetUInt32();
+        npc->x              = field[1].GetUInt32();
+        npc->y              = field[2].GetUInt32();
+        npc->z              = field[3].GetUInt32();
+        npc->face           = field[4].GetUInt32();
+        npc->local_flag     = field[5].GetUInt32();
+        npc->contact_script = field[6].GetString();
+        npc->spawn_type     = field[7].GetInt32();
 
-        _npcTemplateStore[npc.id] = npc;
+        _npcTemplateStore.InsertItem(npc, npc->id);
         ++count;
 
     } while (result->NextRow());
@@ -1093,7 +1092,7 @@ void ObjectMgr::LoadSkillJP()
         Field     *field   = result->Fetch();
         int       off      = 0;
         int       skill_id = field[off++].GetInt32();
-        SkillBase *sb      = &_skillBaseStore[skill_id];
+        SkillBase *sb      = const_cast<SkillBase*>(_skillBaseStore.GetRegistryItem(skill_id));
         if (sb->id != 0)
         {
             for (int &v : sb->m_need_jp)
@@ -1233,27 +1232,27 @@ void ObjectMgr::LoadSummonResource()
     do
     {
         Field                  *field = result->Fetch();
-        SummonResourceTemplate summon{ };
+        auto summon = new SummonResourceTemplate{};
         int                    i      = 0;
-        summon.id                  = field[i++].GetInt32();
-        summon.type                = field[i++].GetInt32();
-        summon.magic_type          = field[i++].GetInt32();
-        summon.rate                = field[i++].GetInt32();
-        summon.stat_id             = field[i++].GetInt32();
-        summon.size                = field[i++].GetFloat();
-        summon.scale               = field[i++].GetFloat();
-        summon.standard_walk_speed = field[i++].GetInt32();
-        summon.standard_run_speed  = field[i++].GetInt32();
-        summon.walk_speed          = field[i++].GetInt32();
-        summon.run_speed           = field[i++].GetInt32();
-        summon.is_riding_only      = field[i++].GetBool();
-        summon.attack_range        = field[i++].GetFloat();
-        summon.material            = field[i++].GetInt32();
-        summon.weapon_type         = field[i++].GetInt32();
-        summon.form                = field[i++].GetInt32();
-        summon.evolve_target       = field[i++].GetInt32();
-        summon.card_id             = field[i].GetInt32();
-        _summonResourceStore[summon.id] = summon;
+        summon->id                  = field[i++].GetInt32();
+        summon->type                = field[i++].GetInt32();
+        summon->magic_type          = field[i++].GetInt32();
+        summon->rate                = field[i++].GetInt32();
+        summon->stat_id             = field[i++].GetInt32();
+        summon->size                = field[i++].GetFloat();
+        summon->scale               = field[i++].GetFloat();
+        summon->standard_walk_speed = field[i++].GetInt32();
+        summon->standard_run_speed  = field[i++].GetInt32();
+        summon->walk_speed          = field[i++].GetInt32();
+        summon->run_speed           = field[i++].GetInt32();
+        summon->is_riding_only      = field[i++].GetBool();
+        summon->attack_range        = field[i++].GetFloat();
+        summon->material            = field[i++].GetInt32();
+        summon->weapon_type         = field[i++].GetInt32();
+        summon->form                = field[i++].GetInt32();
+        summon->evolve_target       = field[i++].GetInt32();
+        summon->card_id             = field[i].GetInt32();
+        _summonResourceStore.InsertItem(summon, summon->id);
         ++count;
     } while (result->NextRow());
     NG_LOG_INFO("server.worldserver", ">> Loaded %u Summons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
@@ -1312,25 +1311,19 @@ void ObjectMgr::LoadSummonNameResource()
     NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
+const CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
 {
-    if (_creatureBaseStore.count(stat_id) == 1)
-        return &_creatureBaseStore[stat_id];
-    return nullptr;
+    return _creatureBaseStore.GetRegistryItem(stat_id);
 }
 
-ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
+const ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
 {
-    if (_itemTemplateStore.count(item_id) == 1)
-        return &_itemTemplateStore[item_id];
-    return nullptr;
+    return _itemTemplateStore.GetRegistryItem(item_id);
 }
 
-FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
+const FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
 {
-    if (_fieldPropTemplateStore.count(idx) == 1)
-        return &_fieldPropTemplateStore[idx];
-    return nullptr;
+    return _fieldPropTemplateStore.GetRegistryItem(idx);
 }
 
 void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
@@ -1378,16 +1371,14 @@ WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
     return nullptr;
 }
 
-DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
+const DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
 {
-    if (_dropTemplateStore.count(drop_group_id) == 1)
-        return &_dropTemplateStore[drop_group_id];
-    return nullptr;
+    return _dropTemplateStore.GetRegistryItem(drop_group_id);
 }
 
 void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
 {
-    if (_monsterBaseStore.count(info.monster_id))
+    if (_monsterBaseStore.HasItem(info.monster_id))
         g_vRespawnInfo.emplace_back(info);
     else
         NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
@@ -1400,9 +1391,9 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
     {
         for (int i = 0; i < 4; i++)
         {
-            if (_jobBonusStore.count((uint)jobs[i]))
+            if (_jobBonusStore.HasItem((uint)jobs[i]))
             {
-                auto jlb = _jobBonusStore[jobs[i]];
+                auto jlb = _jobBonusStore.GetRegistryItem(jobs[i]);
 
                 float v1 = (levels[i] - 20);
                 if (levels[i] > 40)
@@ -1421,45 +1412,40 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
 
                 if (v2 <= 0)
                     v2 = 0;
-                stat.strength += (int)((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
-                stat.vital += (int)((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
-                stat.dexterity += (int)((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
-                stat.agility += (int)((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
-                stat.intelligence += (int)((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
-                stat.mentality += (int)((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
-                stat.luck += (int)((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
+                stat.strength += (int)((v1 * jlb->strength[1]) + (v2 * jlb->strength[2]) + (jlb->strength[3]) + (v0 * jlb->strength[0]));
+                stat.vital += (int)((v1 * jlb->vital[1]) + (v2 * jlb->vital[2]) + (jlb->vital[3]) + (v0 * jlb->vital[0]));
+                stat.dexterity += (int)((v1 * jlb->dexterity[1]) + (v2 * jlb->dexterity[2]) + (jlb->dexterity[3]) + (v0 * jlb->dexterity[0]));
+                stat.agility += (int)((v1 * jlb->agility[1]) + (v2 * jlb->agility[2]) + (jlb->agility[3]) + (v0 * jlb->agility[0]));
+                stat.intelligence += (int)((v1 * jlb->intelligence[1]) + (v2 * jlb->intelligence[2]) + (jlb->intelligence[3]) + (v0 * jlb->intelligence[0]));
+                stat.mentality += (int)((v1 * jlb->mentality[1]) + (v2 * jlb->mentality[2]) + (jlb->mentality[3]) + (v0 * jlb->mentality[0]));
+                stat.luck += (int)((v1 * jlb->luck[1]) + (v2 * jlb->luck[2]) + (jlb->luck[3]) + (v0 * jlb->luck[0]));
             }
         }
     }
     return stat;
 }
 
-JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
+const JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
 {
-    if (_jobTemplateStore.count(job_id) == 1)
-        return &_jobTemplateStore[job_id];
-    return nullptr;
+    return _jobTemplateStore.GetRegistryItem(job_id);
 }
 
-SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
+const SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
 {
-    if (_summonResourceStore.count(idx) == 1)
-        return &_summonResourceStore[idx];
-    return nullptr;
+    _summonResourceStore.GetRegistryItem(idx);
 }
 
-std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
+const std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
-    if (_marketResourceStore.count(szKey) == 1)
-        return &_marketResourceStore[szKey];
-    return nullptr;
+    return _marketResourceStore.count(szKey) == 1 ? &_marketResourceStore[szKey] : nullptr;
 }
 
 int ObjectMgr::GetNeedJpForJobLevelUp(const int jlv, const int depth)
 {
     if (depth > 3 || jlv > 49)
         return 0;
-    return _levelResourceStore[jlv].jlv[depth];
+    auto lr = _levelResourceStore.GetRegistryItem(jlv);
+    return lr != nullptr ? lr->jlv[depth] : 0;
 }
 
 void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
@@ -1516,11 +1502,9 @@ int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobI
     return -1;
 }
 
-SkillBase *const ObjectMgr::GetSkillBase(const int skill_id)
+const SkillBase *const ObjectMgr::GetSkillBase(const int skill_id)
 {
-    if (_skillBaseStore.count(skill_id) == 1)
-        return &_skillBaseStore[skill_id];
-    return nullptr;
+    return _skillBaseStore.GetRegistryItem(skill_id);
 }
 
 int64 ObjectMgr::GetNeedExp(int level)
@@ -1530,16 +1514,14 @@ int64 ObjectMgr::GetNeedExp(int level)
         l = 1;
     if (l > 300)
         l = 300;
-    if ((int)_levelResourceStore.size() < l)
-        l = (int)(_levelResourceStore.size() - 1);
-    return _levelResourceStore[l - 1].normal_exp;
+    if ((int)_levelResourceStore.GetSize() < l)
+        l = (int)(_levelResourceStore.GetSize() - 1);
+    return _levelResourceStore.GetRegistryItem(l - 1)->normal_exp;
 }
 
-MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
+const MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
 {
-    if (_monsterBaseStore.count(idx) == 1)
-        return &_monsterBaseStore[idx];
-    return nullptr;
+    return _monsterBaseStore.GetRegistryItem(idx);
 }
 
 int64 ObjectMgr::GetNeedSummonExp(int level)
@@ -1549,11 +1531,9 @@ int64 ObjectMgr::GetNeedSummonExp(int level)
     return 0;
 }
 
-QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
+const QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
 {
-    if (_questTemplateStore.count(code) == 1)
-        return &_questTemplateStore[code];
-    return nullptr;
+    return _questTemplateStore.GetRegistryItem(code);
 }
 
 bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
@@ -1605,43 +1585,41 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
 
 }
 
-QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
+const QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
 {
     auto l = std::find_if(_questLinkStore.begin(),
                        _questLinkStore.end(),
-                       [&code, start_id](const QuestLink &ql) {
-                           return ql.code == code && (ql.nStartTextID == start_id || start_id == 0);
+                       [&code, start_id](const QuestLink *ql) {
+                           return ql->code == code && (ql->nStartTextID == start_id || start_id == 0);
                        });
-    return l != _questLinkStore.end() ? &*l : nullptr;
+    return l != _questLinkStore.end() ? *l : nullptr;
 }
 
-StateTemplate *const ObjectMgr::GetStateInfo(int code)
+const StateTemplate *const ObjectMgr::GetStateInfo(int code)
 {
-    if (_stateTemplateStore.count(code) == 1)
-        return &_stateTemplateStore[code];
-    return nullptr;
+    return _stateTemplateStore.GetRegistryItem(code);
 }
 
 CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type */, int level)
 {
-    if (_summonBonusStore.count(summon_code) == 0)
+    if (_summonBonusStore.HasItem(summon_code) == 0)
         return CreatureStat{ };
 
     CreatureStat stat{ };
-    auto         bonus = _summonBonusStore[summon_code];
+    auto         bonus = _summonBonusStore.GetRegistryItem(summon_code);
     if (growth_depth != 1)
     {
         level = level - 50 * growth_depth + 51;
     }
 
     stat.stat_id      = (short)summon_code;
-    stat.strength     = bonus.strength * level;
-    stat.vital        = bonus.vital * level;
-    stat.dexterity    = bonus.dexterity * level;
-    stat.agility      = bonus.agility * level;
-    stat.intelligence = bonus.intelligence * level;
-    stat.mentality    = bonus.mentality * level;
-    stat.luck         = bonus.luck * level;
+    stat.strength     = bonus->strength * level;
+    stat.vital        = bonus->vital * level;
+    stat.dexterity    = bonus->dexterity * level;
+    stat.agility      = bonus->agility * level;
+    stat.intelligence = bonus->intelligence * level;
+    stat.mentality    = bonus->mentality * level;
+    stat.luck         = bonus->luck * level;
 
     return stat;
 }
@@ -1649,7 +1627,7 @@ CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /*
 const std::string &ObjectMgr::GetValueFromNameID(const int name_id)
 {
     static const std::string empty = { };
-    if (_stringResourceStore.count(name_id) != 0)
+    if (_stringResourceStore.count(name_id) == 1)
         return _stringResourceStore[name_id];
     return empty;
 }

@@ -666,7 +666,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
             }
             else
             {
-                QuestLink *l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
+                auto *l = sObjectMgr->GetQuestLink(code, q->m_Instance.nStartID);
                 if (l != nullptr && l->nEndTextID != 0)
                     textID = l->nEndTextID;
                 type       = 8;

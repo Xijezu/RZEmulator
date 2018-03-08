@@ -579,7 +579,8 @@ class WorldObject : public Object, public ArMoveVector
         WorldObject& operator= (const WorldObject&) = delete;
         ~WorldObject() override;
 
-        template<class T> T* As() { return dynamic_cast<T*>(this); }
+        template<class T>
+        inline T* As() { return dynamic_cast<T*>(this); }
 
         virtual void Update(uint32 /*time_diff*/) {}
 

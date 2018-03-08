@@ -20,7 +20,6 @@
 #define SKYFIRE_OBJECTREGISTRY_H
 
 #include "Define.h"
-#include "Dynamic/UnorderedMap.h"
 #include <ace/Singleton.h>
 
 #include <string>
@@ -29,7 +28,7 @@
 
 /** ObjectRegistry holds all registry item of the same type
  */
-template<class T, class Key = int32_t>
+template<class Key, class T>
 class ObjectRegistry
 {
     public:
@@ -74,6 +73,21 @@ class ObjectRegistry
         bool HasItem(Key key) const
         {
             return (i_registeredObjects.find(key) != i_registeredObjects.end());
+        }
+
+        // Returns the size
+        size_t GetSize() const
+        {
+            return i_registeredObjects.size();
+        }
+
+        void Clear()
+        {
+            for(auto& item : i_registeredObjects)
+            {
+                delete item.second;
+            }
+            i_registeredObjects.clear();
         }
 
         /// Inefficiently return a vector of registered items

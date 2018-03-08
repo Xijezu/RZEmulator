@@ -2348,9 +2348,9 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
     return result;
 }
 
-CreatureStat *Player::GetBaseStat() const
+const CreatureStat *Player::GetBaseStat() const
 {
-    uint stat_id = 0;
+    int stat_id = 0;
     auto job     = sObjectMgr->GetJobInfo(GetCurrentJob());
     if (job != nullptr)
         stat_id = job->stat_id;

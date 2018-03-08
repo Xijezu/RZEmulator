@@ -542,12 +542,12 @@ struct SkillTreeGroup
 struct SkillBase
 {
 
-    int GetNeedJobPoint(int skill_lv);
-    bool IsUseableWeapon(ItemClass cl);
-    int GetStateSecond(int skill_lv, int enhance_lv);
+    int GetNeedJobPoint(int skill_lv) const;
+    bool IsUseableWeapon(ItemClass cl) const;
+    int GetStateSecond(int skill_lv, int enhance_lv) const;
     int GetHitBonus(int enhance, int level_diff) const;
-    int GetStateLevel(int skill_lv, int enhance_lv);
-    uint GetCastDelay(int skill_lv, int enhance);
+    int GetStateLevel(int skill_lv, int enhance_lv) const;
+    uint GetCastDelay(int skill_lv, int enhance) const;
     uint GetCoolTime(int enhance) const;
     bool IsUsable(uint8 nUseIndex) const;
 
