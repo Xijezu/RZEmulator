@@ -83,6 +83,10 @@ void ObjectMgr::UnloadAll()
     _monsterBaseStore.Clear();
     _dropTemplateStore.Clear();
     _questTemplateStore.Clear();
+    for(auto& ql : _questLinkStore)
+    {
+        delete ql;
+    }
     _questLinkStore.clear();
     _npcTemplateStore.Clear();
     _fieldPropTemplateStore.Clear();

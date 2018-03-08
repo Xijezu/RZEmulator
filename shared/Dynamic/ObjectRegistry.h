@@ -83,10 +83,8 @@ class ObjectRegistry
 
         void Clear()
         {
-            for(auto& item : i_registeredObjects)
-            {
-                delete item.second;
-            }
+            for (typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+                delete iter->second;
             i_registeredObjects.clear();
         }
 
@@ -109,9 +107,7 @@ class ObjectRegistry
         ObjectRegistry() = default;
         ~ObjectRegistry()
         {
-            for (typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-                delete iter->second;
-            i_registeredObjects.clear();
+            Clear();
         }
     private:
         RegistryMapType i_registeredObjects;
