@@ -188,7 +188,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (uint16_t)pUnit->m_vSkillList.size();
         skillPct << (uint8_t)0; // reset | modification_type ?
 
-        for (auto &t : pUnit->m_vSkillList)
+        for (auto t : pUnit->m_vSkillList)
         {
             if (t->m_nSkillUID < 0)
                 continue;
@@ -251,7 +251,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
 
     marketPct << npc_handle;
     marketPct << (uint16_t)pMarket.size();
-    for (auto &info : pMarket)
+    for (auto info : pMarket)
     {
         marketPct << (int32_t)info.code;
 #if EPIC >= 5
