@@ -1553,6 +1553,7 @@ QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
 {
     if (_questTemplateStore.count(code) == 1)
         return &_questTemplateStore[code];
+
     return nullptr;
 }
 
