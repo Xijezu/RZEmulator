@@ -39,7 +39,7 @@
 #include <vector>
 #include <cstring>
 #include <time.h>
-
+#include "MessageBuffer.h"
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
 {
@@ -92,6 +92,8 @@ class ByteBuffer
                                                      _bitpos(buf._bitpos), _curbitval(buf._curbitval), _storage(buf._storage)
         {
         }
+
+        explicit ByteBuffer(MessageBuffer&& buffer);
 
         void clear()
         {

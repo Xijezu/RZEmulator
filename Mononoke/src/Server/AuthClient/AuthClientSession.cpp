@@ -25,20 +25,14 @@
 #include "AuthGameSession.h"
 
 // Constructo - give it a socket
-AuthClientSession::AuthClientSession(AuthSocket *socket) : _socket(socket), m_pPlayer(nullptr)
+AuthClientSession::AuthClientSession(XSocket *socket) : _socket(socket), m_pPlayer(nullptr)
 {
     _desCipther.Init("MERONG");
-    if (_socket)
-    {
-        _socket->AddReference();
-    }
 }
 
 // Close patch file descriptor before leaving
 AuthClientSession::~AuthClientSession()
 {
-    if (_socket)
-        _socket->RemoveReference();
 }
 
 void AuthClientSession::OnClose()
@@ -78,7 +72,7 @@ constexpr AuthHandler packetHandler[] =
 constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
 
 /// Handler for incoming packets
-void AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
+ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 {
             ASSERT(pRecvPct);
 
@@ -89,7 +83,7 @@ void AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            pRecvPct->read_skip(7);
+            //pRecvPct->read_skip(7);
             (*this.*packetHandler[i].handler)(pRecvPct);
             break;
         }
@@ -97,9 +91,10 @@ void AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteAddress().c_str());
-        return;
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_v4().to_string().c_str());
+        return ReadDataHandlerResult::Error;
     }
+    return ReadDataHandlerResult::Ok;
 }
 
 void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)

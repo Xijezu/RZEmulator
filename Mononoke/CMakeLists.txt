@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(Mononoke)
 
+FIND_PACKAGE(Boost REQUIRED system)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Lists
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthClient
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthGame
+                    ${Boost_INCLUDE_DIRS}
                     ${CMAKE_BINARY_DIR}
                     ${SHARED_INCLUDE_DIR}
                     ${ACE_INCLUDE_DIR}
@@ -13,8 +16,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
 
 file(GLOB_RECURSE SOURCE_FILES src/*.*)
 
-add_executable(Mononoke ${SOURCE_FILES} )
-target_link_libraries(Mononoke shared ${MYSQL_LIB})
+add_executable(Mononoke ${SOURCE_FILES})
+target_link_libraries(Mononoke shared ${MYSQL_LIB} ${Boost_LIBRARIES})
 if(ACE_USE_EXTERNAL)
     target_link_libraries(Mononoke ${ACE_LIBRARIES})
 else()
