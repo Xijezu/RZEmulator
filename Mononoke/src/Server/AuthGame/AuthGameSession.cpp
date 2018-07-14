@@ -23,12 +23,8 @@
 #include "AuthGame/AuthGameSession.h"
 
 // Constructor - set the default server name to <null>, also give it a socket
-AuthGameSession::AuthGameSession(GameSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
+AuthGameSession::AuthGameSession(XSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
 {
-    if (pSocket)
-    {
-        pSocket->AddReference();
-    }
     m_pGame->nIDX   = 255;
     m_pGame->szName = "<null>";
 }
@@ -48,10 +44,6 @@ AuthGameSession::~AuthGameSession()
         }
         delete m_pGame;
         m_pGame = nullptr;
-    }
-    if (m_pSocket)
-    {
-        m_pSocket->RemoveReference();
     }
 }
 
@@ -104,7 +96,7 @@ constexpr AuthHandler packetHandler[] =
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
 // Handler for incoming packets
-void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
+ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
 {
             ASSERT(pGamePct);
 
@@ -115,7 +107,7 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            pGamePct->read_skip(7); // ignoring header
+            //pGamePct->read_skip(7); // ignoring header
             (*this.*packetHandler[i].handler)(pGamePct);
             break;
         }
@@ -124,9 +116,10 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
-        return;
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        return ReadDataHandlerResult::Error;
     }
+    return ReadDataHandlerResult::Ok;
 }
 
 void AuthGameSession::HandleGameLogin(XPacket *pGamePct)

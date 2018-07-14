@@ -19,8 +19,8 @@
 #include "Database/DatabaseEnv.h"
 #include "WorldSocketMgr.h"
 #include "SignalHandler.h"
-#include "AuthGameSession.h"
-#include "AuthClientSession.h"
+#include "AuthClientSocketMgr.h"
+#include "AuthGameSocketMgr.h"
 #include "SystemConfigs.h"
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
@@ -29,7 +29,6 @@
 
 #include <ace/TP_Reactor.h>
 #include <boost/asio/signal_set.hpp>
-#include "AuthClientSocketMgr.h"
 
 bool StartDB();
 void StopDB();
@@ -59,7 +58,7 @@ class AuthServerSignalHandler : public Skyfire::SignalHandler
         }
 };
 
-void SignalHandler(boost::system::error_code const& error, int signalNumber);
+void SignalHandler(boost::system::error_code const &error, int signalNumber);
 
 extern int main(int argc, char **argv)
 {
@@ -100,14 +99,6 @@ extern int main(int argc, char **argv)
     Handler.register_handler(SIGINT, &SignalINT);
     Handler.register_handler(SIGTERM, &SignalTERM);
 
-    auto        authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
-    std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
-    /*if (ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()->StartNetwork(authPort, authBindIp.c_str()) == -1)
-    {
-        printf("Error creating acceptor at %s:%d\n", authBindIp.c_str(), authPort);
-        return 1;
-    }*/
-
     std::shared_ptr<Trinity::Asio::IoContext> ioContext = std::make_shared<Trinity::Asio::IoContext>();
 
 
@@ -118,14 +109,18 @@ extern int main(int argc, char **argv)
 #endif
     signals.async_wait(SignalHandler);
 
-    sACSocketMgr.StartWorldNetwork(*ioContext, authBindIp, authPort, 1);
+    auto        authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
+    std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
+    if (!sACSocketMgr.StartWorldNetwork(*ioContext, authBindIp, authPort, 1))
+    {
+        NG_LOG_ERROR("server.authserver", "Authnetwork startup failed: %s:%d", authBindIp.c_str(), authPort);
+    }
 
     auto        gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
     std::string bindIp   = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
-    if (ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()->StartNetwork(gamePort, bindIp.c_str()) == -1)
+    if (!sAGSocketMgr.StartWorldNetwork(*ioContext, bindIp, gamePort, 1))
     {
-        printf("Error creating acceptor at %s:%d\n", bindIp.c_str(), gamePort);
-        return 1;
+        NG_LOG_ERROR("server.authserver", "Gamenetwork startup failed: %s:%d", bindIp.c_str(), gamePort);
     }
 
     // Initialize the database connection
@@ -137,11 +132,10 @@ extern int main(int argc, char **argv)
     uint32 loopCounter = 0;
 
     // Start the Boost based thread pool
-    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
-    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread>* del)
-    {
+    int                                       numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
         ioContext->stop();
-        for (std::thread& thr : *del)
+        for (std::thread &thr : *del)
             thr.join();
 
         delete del;
@@ -176,7 +170,7 @@ extern int main(int argc, char **argv)
     return 0;
 }
 
-void SignalHandler(boost::system::error_code const& error, int /*signalNumber*/)
+void SignalHandler(boost::system::error_code const &error, int /*signalNumber*/)
 {
 }
 
