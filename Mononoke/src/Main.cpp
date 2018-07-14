@@ -26,12 +26,15 @@
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
 #include <ace/Dev_Poll_Reactor.h>
 #endif
+
 #include <ace/TP_Reactor.h>
+#include <boost/asio/signal_set.hpp>
+#include "AuthClientSocketMgr.h"
 
 bool StartDB();
 void StopDB();
 
-bool stopEvent{false};                                     // Setting it to true stops the server
+bool                    stopEvent{false};                                     // Setting it to true stops the server
 LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the auth server database
 
 
@@ -41,148 +44,180 @@ LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the a
 
 class AuthServerSignalHandler : public Skyfire::SignalHandler
 {
-public:
-	void HandleSignal(int SigNum) override
-	{
-		switch (SigNum)
-		{
-			case SIGINT:
-            case SIGTERM:
-                stopEvent = true;
-				break;
-            default:
-                break;
-		}
-	}
+    public:
+        void HandleSignal(int SigNum) override
+        {
+            switch (SigNum)
+            {
+                case SIGINT:
+                case SIGTERM:
+                    stopEvent = true;
+                    break;
+                default:
+                    break;
+            }
+        }
 };
 
-
+void SignalHandler(boost::system::error_code const& error, int signalNumber);
 
 extern int main(int argc, char **argv)
 {
-	//sLog->Initialize();
+    //sLog->Initialize();
 
-	if (!sConfigMgr->LoadInitial(_MONONOKE_CORE_CONFIG))
+    if (!sConfigMgr->LoadInitial(_MONONOKE_CORE_CONFIG))
     {
         NG_LOG_ERROR("server.authserver", "Invalid or missing configuration file : %s", _MONONOKE_CORE_CONFIG);
         NG_LOG_ERROR("server.authserver", "Verify that the file exists and has \'[authserver]' written in the top of the file!");
         return 1;
     }
-	NG_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
-	NG_LOG_INFO("server.authserver", "       _   _  _____                _ _");
-	NG_LOG_INFO("server.authserver", "      | \\ | |/ ____|              (_) |");
-	NG_LOG_INFO("server.authserver", "      |  \\| | |  __  ___ _ __ ___  _| |_ _   _");
-	NG_LOG_INFO("server.authserver", "      | . ` | | |_ |/ _ \\ '_ ` _ \\| | __| | | |");
-	NG_LOG_INFO("server.authserver", "      | |\\  | |__| |  __/ | | | | | | |_| |_| |");
-	NG_LOG_INFO("server.authserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
-	NG_LOG_INFO("server.authserver", "                                          __/ |");
-	NG_LOG_INFO("server.authserver", "                                         |___/");
-	NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
-	NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
+    NG_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+    NG_LOG_INFO("server.authserver", "       _   _  _____                _ _");
+    NG_LOG_INFO("server.authserver", "      | \\ | |/ ____|              (_) |");
+    NG_LOG_INFO("server.authserver", "      |  \\| | |  __  ___ _ __ ___  _| |_ _   _");
+    NG_LOG_INFO("server.authserver", "      | . ` | | |_ |/ _ \\ '_ ` _ \\| | __| | | |");
+    NG_LOG_INFO("server.authserver", "      | |\\  | |__| |  __/ | | | | | | |_| |_| |");
+    NG_LOG_INFO("server.authserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
+    NG_LOG_INFO("server.authserver", "                                          __/ |");
+    NG_LOG_INFO("server.authserver", "                                         |___/");
+    NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
+    NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-	ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), true), true), true);
+    ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), true), true), true);
 #else
-	ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
+    ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
 #endif
 
-	///- Initialize the signal handlers
-	AuthServerSignalHandler SignalINT, SignalTERM;
+    ///- Initialize the signal handlers
+    AuthServerSignalHandler SignalINT, SignalTERM;
 #ifdef _WIN32
-	AuthServerSignalHandler SignalBREAK;
+    AuthServerSignalHandler SignalBREAK;
 #endif /* _WIN32 */
 
-	///- Register worldserver's signal handlers
-	ACE_Sig_Handler Handler;
-	Handler.register_handler(SIGINT, &SignalINT);
-	Handler.register_handler(SIGTERM, &SignalTERM);
+    ///- Register worldserver's signal handlers
+    ACE_Sig_Handler Handler;
+    Handler.register_handler(SIGINT, &SignalINT);
+    Handler.register_handler(SIGTERM, &SignalTERM);
+
+    auto        authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
+    std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
+    /*if (ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()->StartNetwork(authPort, authBindIp.c_str()) == -1)
+    {
+        printf("Error creating acceptor at %s:%d\n", authBindIp.c_str(), authPort);
+        return 1;
+    }*/
+
+    std::shared_ptr<Trinity::Asio::IoContext> ioContext = std::make_shared<Trinity::Asio::IoContext>();
 
 
-	auto authPort = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
-	std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
-	if (ACE_Singleton<WorldSocketMgr<AuthClientSession>, ACE_Thread_Mutex>::instance()->StartNetwork(authPort, authBindIp.c_str()) == -1)
-	{
-		printf("Error creating acceptor at %s:%d\n", authBindIp.c_str(), authPort);
-		return 1;
-	}
+    // Set signal handlers (this must be done before starting IoContext threads, because otherwise they would unblock and exit)
+    boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
+#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
 
-    auto gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
-    std::string bindIp = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
+#endif
+    signals.async_wait(SignalHandler);
+
+    sACSocketMgr.StartWorldNetwork(*ioContext, authBindIp, authPort, 1);
+
+    auto        gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
+    std::string bindIp   = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
     if (ACE_Singleton<WorldSocketMgr<AuthGameSession>, ACE_Thread_Mutex>::instance()->StartNetwork(gamePort, bindIp.c_str()) == -1)
     {
         printf("Error creating acceptor at %s:%d\n", bindIp.c_str(), gamePort);
         return 1;
     }
 
-	// Initialize the database connection
-	if (!StartDB())
-		return 1;
+    // Initialize the database connection
+    if (!StartDB())
+        return 1;
 
-	// maximum counter for next ping
-	uint32 numLoops = 30 * (MINUTE * 1000000 / 100000);
-	uint32 loopCounter = 0;
+    // maximum counter for next ping
+    uint32 numLoops    = 30 * (MINUTE * 1000000 / 100000);
+    uint32 loopCounter = 0;
 
-	// Wait for termination signal
-	while (!stopEvent)
-	{
-		// dont move this outside the loop, the reactor will modify it
-		ACE_Time_Value interval(0, 100000);
+    // Start the Boost based thread pool
+    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread>* del)
+    {
+        ioContext->stop();
+        for (std::thread& thr : *del)
+            thr.join();
 
-		if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
-			break;
+        delete del;
+    });
 
-		if ((++loopCounter) == numLoops)
-		{
-			loopCounter = 0;
-			NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
-			LoginDatabase.KeepAlive();
-		}
-	}
+    if (numThreads < 1)
+        numThreads = 1;
 
-	// Close the Database Pool and library
-	StopDB();
+    for (int i = 0; i < numThreads; ++i)
+        threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
-	return 0;
+    // Wait for termination signal
+    while (!stopEvent)
+    {
+        // dont move this outside the loop, the reactor will modify it
+        ACE_Time_Value interval(0, 100000);
+
+        if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
+            break;
+
+        if ((++loopCounter) == numLoops)
+        {
+            loopCounter = 0;
+            NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
+            LoginDatabase.KeepAlive();
+        }
+    }
+
+    // Close the Database Pool and library
+    StopDB();
+
+    return 0;
+}
+
+void SignalHandler(boost::system::error_code const& error, int /*signalNumber*/)
+{
 }
 
 // Initialize connection to the database
 bool StartDB()
 {
-	MySQL::Library_Init();
+    MySQL::Library_Init();
 
-	std::string dbstring = sConfigMgr->GetStringDefault("AuthDatabase.CString", "");
-	if (dbstring.empty())
-	{
-		NG_LOG_ERROR("server.authserver","Database not specified");
-		return false;
-	}
+    std::string dbstring = sConfigMgr->GetStringDefault("AuthDatabase.CString", "");
+    if (dbstring.empty())
+    {
+        NG_LOG_ERROR("server.authserver", "Database not specified");
+        return false;
+    }
 
-	auto worker_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.WorkerThreads", 1);
-	if (worker_threads < 1 || worker_threads > 32)
-	{
-		NG_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
-		worker_threads = 1;
-	}
+    auto worker_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.WorkerThreads", 1);
+    if (worker_threads < 1 || worker_threads > 32)
+    {
+        NG_LOG_ERROR("server.authserver", "Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
+        worker_threads = 1;
+    }
 
-	auto synch_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.SynchThreads", 1);;
-	if (synch_threads < 1 || synch_threads > 32)
-	{
-		NG_LOG_ERROR("server.authserver","Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
-		synch_threads = 1;
-	}
+    auto synch_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.SynchThreads", 1);;
+    if (synch_threads < 1 || synch_threads > 32)
+    {
+        NG_LOG_ERROR("server.authserver", "Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
+        synch_threads = 1;
+    }
 
-	// NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
-	if (!LoginDatabase.Open(dbstring, worker_threads, synch_threads))
-	{
-		NG_LOG_ERROR("server.authserver","Cannot connect to database");
-		return false;
-	}
+    // NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
+    if (!LoginDatabase.Open(dbstring, worker_threads, synch_threads))
+    {
+        NG_LOG_ERROR("server.authserver", "Cannot connect to database");
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 void StopDB()
 {
-	LoginDatabase.Close();
-	MySQL::Library_End();
+    LoginDatabase.Close();
+    MySQL::Library_End();
 }

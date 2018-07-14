@@ -36,10 +36,12 @@ namespace Skyfire
 } // namespace Skyfire
 
 #define WPAssert(cond) do { if (!(cond)) Skyfire::Assert(__FILE__, __LINE__, __FUNCTION__, #cond); } while (false)
+#define WMAssert(cond, msg) do {if (!(cond)) Skyfire::Assert(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (false)
 #define WPFatal(cond, msg) do { if (!(cond)) Skyfire::Fatal(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (false)
 #define WPError(cond, msg) do { if (!(cond)) Skyfire::Error(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (false)
 #define WPWarning(cond, msg) do { if (!(cond)) Skyfire::Warning(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (false)
 
 #define ASSERT WPAssert
+#define NGASSERT WMAssert
 
 #endif
