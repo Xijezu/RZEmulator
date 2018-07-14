@@ -23,6 +23,7 @@
 #include "XPacket.h"
 #include "Encryption/MD5.h"
 #include "AuthGameSession.h"
+#include "Util.h"
 
 // Constructo - give it a socket
 AuthClientSession::AuthClientSession(XSocket *socket) : _socket(socket), m_pPlayer(nullptr)
@@ -39,10 +40,10 @@ void AuthClientSession::OnClose()
 {
     if (m_pPlayer == nullptr)
         return;
-    auto g = sPlayerMapList->GetPlayer(m_pPlayer->szLoginName);
+    auto g = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
     if (g != nullptr && g->nAccountID == m_pPlayer->nAccountID && !g->bIsInGame)
     {
-        sPlayerMapList->RemovePlayer(g->szLoginName);
+        sPlayerMapList.RemovePlayer(g->szLoginName);
         delete m_pPlayer;
     }
 }
@@ -130,22 +131,22 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
             return;
         }
 
-        auto pOldPlayer = sPlayerMapList->GetPlayer(m_pPlayer->szLoginName);
+        auto pOldPlayer = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
         if (pOldPlayer != nullptr)
         {
             if (pOldPlayer->bIsInGame)
             {
-                auto game = sGameMapList->GetGame((uint)pOldPlayer->nGameIDX);
+                auto game = sGameMapList.GetGame((uint)pOldPlayer->nGameIDX);
                 if (game != nullptr && game->m_pSession != nullptr)
                     game->m_pSession->KickPlayer(pOldPlayer);
             }
             SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
-            sPlayerMapList->RemovePlayer(pOldPlayer->szLoginName);
+            sPlayerMapList.RemovePlayer(pOldPlayer->szLoginName);
             delete pOldPlayer;
         }
 
         _isAuthed = true;
-        sPlayerMapList->AddPlayer(m_pPlayer);
+        sPlayerMapList.AddPlayer(m_pPlayer);
         SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 1);
         return;
     }
@@ -160,8 +161,8 @@ void AuthClientSession::HandleVersion(XPacket *pRecvPct)
 
 void AuthClientSession::HandleServerList(XPacket *)
 {
-    NG_SHARED_GUARD readGuard(*sGameMapList->GetGuard());
-    auto            map = sGameMapList->GetMap();
+    NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
+    auto            map = sGameMapList.GetMap();
     XPacket         packet(TS_AC_SERVER_LIST);
     packet << (uint16)0;
     packet << (uint16)map->size();
@@ -183,7 +184,7 @@ void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
     m_pPlayer->nGameIDX    = pRecvPct->read<uint16>();
     m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
     m_pPlayer->bIsInGame   = true;
-    bool    bExist = sGameMapList->GetGame((uint)m_pPlayer->nGameIDX) != 0;
+    bool    bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
     XPacket packet(TS_AC_SELECT_SERVER);
     packet << (uint16)(bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
     packet << (int64)(bExist ? m_pPlayer->nOneTimeKey : 0);

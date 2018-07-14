@@ -171,7 +171,7 @@ private:
     std::mutex _newSocketsLock;
     SocketContainer _newSockets;
 
-    Trinity::Asio::IoContext _ioContext;
+    NGemity::Asio::IoContext _ioContext;
     tcp::socket _acceptSocket;
     boost::asio::deadline_timer _updateTimer;
 };

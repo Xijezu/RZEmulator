@@ -21,7 +21,7 @@
 
 #include "fmt/printf.h"
 
-namespace Trinity
+namespace NGemity
 {
     /// Default TC string format function.
     template<typename Format, typename... Args>

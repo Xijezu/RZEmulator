@@ -25,10 +25,6 @@
 #include <string>
 #include <utility>
 
-#include <ace/Stack_Trace.h>
-#include <ace/OS_NS_unistd.h>
-#include <ace/Null_Mutex.h>
-#include <ace/Singleton.h>
 #include <cstdlib>
 #include <unordered_map>
 #include <stdio.h>
@@ -173,7 +169,7 @@ typedef std::vector<std::string> StringVector;
 
 #define MAX_QUERY_LEN 32*1024
 
-namespace Trinity
+namespace NGemity
 {
     using std::make_unique;
 }

@@ -232,46 +232,6 @@ uint32 TimeStringToSecs(const std::string& timestring)
     return secs;
 }
 
-std::string TimeToTimestampStr(time_t t)
-{
-    tm aTm;
-	ACE_OS::localtime_r(&t, &aTm);
-    //       YYYY   year
-    //       MM     month (2 digits 01-12)
-    //       DD     day (2 digits 01-31)
-    //       HH     hour (2 digits 00-23)
-    //       MM     minutes (2 digits 00-59)
-    //       SS     seconds (2 digits 00-59)
-    char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year+1900, aTm.tm_mon+1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
-    return std::string(buf);
-}
-
-/// Check if the string is a valid ip address representation
-bool IsIPAddress(char const* ipaddress)
-{
-    if (!ipaddress)
-        return false;
-
-    // Let the big boys do it.
-    // Drawback: all valid ip address formats are recognized e.g.: 12.23, 121234, 0xABCD)
-    return inet_addr(ipaddress) != INADDR_NONE;
-}
-
-std::string GetAddressString(ACE_INET_Addr const& addr)
-{
-    char buf[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16];
-    addr.addr_to_string(buf, ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16);
-    return buf;
-}
-
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask)
-{
-    uint32 mask = subnetMask.get_ip_address();
-    if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
-        return true;
-    return false;
-}
 
 /// create PID file
 uint32 CreatePIDFile(const std::string& filename)
@@ -573,4 +533,11 @@ std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse 
     }
 
     return ss.str();
+}
+
+bool StringToBool(std::string const& str)
+{
+    std::string lowerStr = str;
+    std::transform(str.begin(), str.end(), lowerStr.begin(), [](char c) { return char(::tolower(c)); });
+    return lowerStr == "1" || lowerStr == "true" || lowerStr == "yes";
 }

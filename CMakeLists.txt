@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.2)
 
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set RPATH-handing (CMake parameters)
@@ -48,6 +48,7 @@ add_custom_target(revision.h ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(dep/liblua)
+add_subdirectory(dep/fmt)
 add_subdirectory(shared)
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)

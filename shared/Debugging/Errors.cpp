@@ -103,4 +103,4 @@ namespace NGemity {
         exit(1);
     }
 
-} // namespace Trinity
+} // namespace NGemity

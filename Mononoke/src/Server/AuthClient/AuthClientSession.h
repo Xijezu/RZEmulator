@@ -20,8 +20,6 @@
 
 #include <Lists/PlayerList.h>
 #include "Common.h"
-#include "Log.h"
-#include "WorldSocket.h"
 #include "Encryption/XRc4Cipher.h"
 #include "XDes.h"
 #include "XSocket.h"

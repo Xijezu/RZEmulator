@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(Mononoke)
 
-FIND_PACKAGE(Boost REQUIRED system)
+FIND_PACKAGE(Boost REQUIRED system filesystem)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Lists
@@ -16,12 +16,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
 file(GLOB_RECURSE SOURCE_FILES src/*.*)
 
 add_executable(Mononoke ${SOURCE_FILES})
-target_link_libraries(Mononoke shared ${MYSQL_LIB} ${Boost_LIBRARIES})
-if(ACE_USE_EXTERNAL)
-    target_link_libraries(Mononoke ${ACE_LIBRARIES})
-else()
-    target_link_libraries(Mononoke ace)
-endif()
+target_link_libraries(Mononoke shared fmt ${MYSQL_LIB} ${Boost_LIBRARIES})
+
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")

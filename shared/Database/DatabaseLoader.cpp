@@ -24,8 +24,7 @@
 
 
 DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const defaultUpdateMask)
-        : _logger(logger), _autoSetup(sConfigMgr->GetBoolDefault("Updates.AutoSetup", true)),
-          _updateFlags(sConfigMgr->GetIntDefault("Updates.EnableDatabases", defaultUpdateMask))
+        : _logger(logger), _autoSetup(false), _updateFlags(false)
 {
 }
 
@@ -42,7 +41,7 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
             return false;
         }
 
-        uint8 const asyncThreads = uint8(sConfigMgr->GetIntDefault((name + "Database.WorkerThreads").c_str(), 1));
+        uint8 const asyncThreads = uint8(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
         if (asyncThreads < 1 || asyncThreads > 32)
         {
             NG_LOG_ERROR(_logger, "%s database: invalid number of worker threads specified. "

@@ -40,7 +40,7 @@ class AuthGameSocketMgr : public SocketMgr<XSocket>
         static AuthGameSocketMgr &Instance();
 
 /// Start network, listen at address:port .
-        bool StartWorldNetwork(Trinity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int networkThreads);
+        bool StartWorldNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int networkThreads);
 
 /// Stops all network threads, It will wait for all running threads .
         void StopNetwork() override;
@@ -56,7 +56,7 @@ class AuthGameSocketMgr : public SocketMgr<XSocket>
 
     private:
 // private, must not be called directly
-        bool StartNetwork(Trinity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount) override
+        bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount) override
         {
             return BaseSocketMgr::StartNetwork(ioContext, bindIp, port, threadCount);
         }
