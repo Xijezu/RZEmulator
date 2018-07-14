@@ -17,18 +17,11 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldSocketMgr.h"
-#include "SignalHandler.h"
 #include "AuthClientSocketMgr.h"
 #include "AuthGameSocketMgr.h"
 #include "SystemConfigs.h"
-
-#if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-#include <ace/Dev_Poll_Reactor.h>
-#endif
-
-#include <ace/TP_Reactor.h>
 #include <boost/asio/signal_set.hpp>
+#include <csignal>
 
 bool StartDB();
 void StopDB();
@@ -41,24 +34,8 @@ LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the a
 # define _MONONOKE_CORE_CONFIG  "authserver.conf"
 #endif //_MONONOKE_CORE_CONFIG
 
-class AuthServerSignalHandler : public Skyfire::SignalHandler
-{
-    public:
-        void HandleSignal(int SigNum) override
-        {
-            switch (SigNum)
-            {
-                case SIGINT:
-                case SIGTERM:
-                    stopEvent = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-};
-
-void SignalHandler(boost::system::error_code const &error, int signalNumber);
+void SignalHandler(std::weak_ptr<Trinity::Asio::IoContext> ioContextRef, boost::system::error_code const& error, int /*signalNumber*/);
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const& error);
 
 extern int main(int argc, char **argv)
 {
@@ -82,32 +59,7 @@ extern int main(int argc, char **argv)
     NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
     NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
-#if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-    ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), true), true), true);
-#else
-    ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
-#endif
-
-    ///- Initialize the signal handlers
-    AuthServerSignalHandler SignalINT, SignalTERM;
-#ifdef _WIN32
-    AuthServerSignalHandler SignalBREAK;
-#endif /* _WIN32 */
-
-    ///- Register worldserver's signal handlers
-    ACE_Sig_Handler Handler;
-    Handler.register_handler(SIGINT, &SignalINT);
-    Handler.register_handler(SIGTERM, &SignalTERM);
-
     std::shared_ptr<Trinity::Asio::IoContext> ioContext = std::make_shared<Trinity::Asio::IoContext>();
-
-
-    // Set signal handlers (this must be done before starting IoContext threads, because otherwise they would unblock and exit)
-    boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
-
-#endif
-    signals.async_wait(SignalHandler);
 
     auto        authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
     std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
@@ -115,6 +67,7 @@ extern int main(int argc, char **argv)
     {
         NG_LOG_ERROR("server.authserver", "Authnetwork startup failed: %s:%d", authBindIp.c_str(), authPort);
     }
+    std::shared_ptr<void> sACNetwork(nullptr, [](void*) {sACSocketMgr.StopNetwork(); });
 
     auto        gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
     std::string bindIp   = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
@@ -122,56 +75,57 @@ extern int main(int argc, char **argv)
     {
         NG_LOG_ERROR("server.authserver", "Gamenetwork startup failed: %s:%d", bindIp.c_str(), gamePort);
     }
+    std::shared_ptr<void> sAGNetwork(nullptr, [](void*) { sAGSocketMgr.StopNetwork(); });
 
     // Initialize the database connection
     if (!StartDB())
         return 1;
+    std::shared_ptr<void> sDBHandler(nullptr, [](void*) { StopDB(); });
 
-    // maximum counter for next ping
-    uint32 numLoops    = 30 * (MINUTE * 1000000 / 100000);
-    uint32 loopCounter = 0;
+    // Set signal handlers
+    boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
+#if PLATFORM == PLATFORM_WINDOWS
+    signals.add(SIGBREAK);
+#endif
+    signals.async_wait(std::bind(&SignalHandler, std::weak_ptr<Trinity::Asio::IoContext>(ioContext), std::placeholders::_1, std::placeholders::_2));
 
-    // Start the Boost based thread pool
-    int                                       numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
-    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
-        ioContext->stop();
-        for (std::thread &thr : *del)
-            thr.join();
+    // Enabled a timed callback for handling the database keep alive ping
+    int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = std::make_shared<boost::asio::deadline_timer>(*ioContext);
+    dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
+    dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
-        delete del;
-    });
+    // Start the io service worker loop
+    ioContext->run();
 
-    if (numThreads < 1)
-        numThreads = 1;
+    dbPingTimer->cancel();
+    signals.cancel();
 
-    for (int i = 0; i < numThreads; ++i)
-        threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
-
-    // Wait for termination signal
-    while (!stopEvent)
-    {
-        // dont move this outside the loop, the reactor will modify it
-        ACE_Time_Value interval(0, 100000);
-
-        if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
-            break;
-
-        if ((++loopCounter) == numLoops)
-        {
-            loopCounter = 0;
-            NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
-            LoginDatabase.KeepAlive();
-        }
-    }
-
-    // Close the Database Pool and library
-    StopDB();
+    NG_LOG_INFO("server.authserver", "Stopping Mononoke...");
 
     return 0;
 }
 
-void SignalHandler(boost::system::error_code const &error, int /*signalNumber*/)
+void SignalHandler(std::weak_ptr<Trinity::Asio::IoContext> ioContextRef, boost::system::error_code const& error, int /*signalNumber*/)
 {
+    if (!error)
+        if (std::shared_ptr<Trinity::Asio::IoContext> ioContext = ioContextRef.lock())
+            ioContext->stop();
+}
+
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const& error)
+{
+    if (!error)
+    {
+        if (std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = dbPingTimerRef.lock())
+        {
+            NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
+            LoginDatabase.KeepAlive();
+
+            dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
+            dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, dbPingTimerRef, dbPingInterval, std::placeholders::_1));
+        }
+    }
 }
 
 // Initialize connection to the database
