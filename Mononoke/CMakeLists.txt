@@ -11,7 +11,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${Boost_INCLUDE_DIRS}
                     ${CMAKE_BINARY_DIR}
                     ${SHARED_INCLUDE_DIR}
-                    ${ACE_INCLUDE_DIR}
                     ${MYSQL_INCLUDE_DIR})
 
 file(GLOB_RECURSE SOURCE_FILES src/*.*)
