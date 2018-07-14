@@ -58,7 +58,7 @@ class XSocket : public Socket<XSocket>
         typedef Socket<XSocket> BaseSocket;
 
     public:
-        XSocket(boost::asio::ip::tcp::socket &&socket) : Socket(std::move(socket)), _session(nullptr), _sendBufferSize(4096)
+        explicit XSocket(boost::asio::ip::tcp::socket &&socket) : Socket(std::move(socket)), _session(nullptr), _sendBufferSize(4096)
         {
             _headerBuffer.Resize(HEADER_SIZE);
         }
@@ -135,6 +135,7 @@ class XSocket : public Socket<XSocket>
         }
 
         void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }
+        XSession* GetSession() { return _session; }
 
     protected:
         void OnClose() override

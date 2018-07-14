@@ -90,7 +90,7 @@ int Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damag
     if (nDamage == 0)
         return Unit::onDamage(pFrom, elementalType, damageType, nDamage, bCritical);
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
     if (pFrom->IsSummon())
     {
@@ -128,16 +128,16 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     m_bTamedSuccess = false;
     if (m_hTamer != 0)
     {
-        auto player         = sMemoryPool->GetObjectInWorld<Player>(m_hTamer);
+        auto player         = sMemoryPool.GetObjectInWorld<Player>(m_hTamer);
         if (player != nullptr)
-            m_bTamedSuccess = sWorld->ProcTame(this);
+            m_bTamedSuccess = sWorld.ProcTame(this);
     }
 
     calcPartyContribute(pFrom, vPartyContribute);
     procEXP(pFrom, vPartyContribute);
     if (!m_bTamedSuccess)
     {
-        uint ct  = sWorld->GetArTime();
+        uint ct  = sWorld.GetArTime();
         auto pos = GetCurrentPosition(ct);
 
         int       i = 0;
@@ -186,7 +186,7 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
         auto player = dynamic_cast<Player *>(pFrom);
         procDropChaos(pFrom, Priority, vPartyContribute, fDropRatePenalty);
         if (pFrom->IsPlayer() && player->GetChaos() < 1 && player->GetQuestProgress(1032) == 1)
-            sWorld->addChaos(this, player, 1.0f);
+            sWorld.addChaos(this, player, 1.0f);
 
         if (m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/)
         {
@@ -205,7 +205,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     if (m_vDamageList.empty())
         return;
 
-    uint   t                   = sWorld->GetArTime();
+    uint   t                   = sWorld.GetArTime();
     uint   hKiller             = 0;
     float  fMaxDamageAdd       = 0.1f;
     uint   totalDamage         = 0;
@@ -236,7 +236,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     for (auto &dt : m_vDamageList)
     {
         totalDamage += dt.nDamage;
-        auto p = sMemoryPool->GetObjectInWorld<Player>(dt.uid);
+        auto p = sMemoryPool.GetObjectInWorld<Player>(dt.uid);
         if (p != nullptr)
         {
             if (p->GetHandle() == m_hFirstAttacker)
@@ -302,7 +302,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
 
 DamageTag *Monster::addDamage(uint handle, int nDamage)
 {
-    uint ct  = sWorld->GetArTime();
+    uint ct  = sWorld.GetArTime();
     auto tag = getDamageTag(handle, ct);
     if (tag == nullptr)
     {
@@ -359,13 +359,13 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
 
         if (vp.hPlayer != 0)
         {
-            auto player2 = sMemoryPool->GetObjectInWorld<Player>(vp.hPlayer);
+            auto player2 = sMemoryPool.GetObjectInWorld<Player>(vp.hPlayer);
             if (player2 != nullptr)
-                sWorld->addEXP(this, player2, fSharedEXP, fSharedJP);
+                sWorld.addEXP(this, player2, fSharedEXP, fSharedJP);
         }
         else
         {
-            sWorld->addEXP(this, vp.nPartyID, (int)fSharedEXP, (int)fSharedJP);
+            sWorld.addEXP(this, vp.nPartyID, (int)fSharedEXP, (int)fSharedJP);
         }
     }
 }
@@ -378,7 +378,7 @@ void Monster::Update(uint diff)
     if (!m_bNearClient)
         return;
 
-    uint           ct = sWorld->GetArTime();
+    uint           ct = sWorld.GetArTime();
     MONSTER_STATUS ms = GetStatus();
 
     if (ms != STATUS_NORMAL)
@@ -462,8 +462,8 @@ void Monster::processDead(uint t)
     if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t)
     {
         if (IsInWorld())
-            sWorld->RemoveObjectFromWorld(this);
-        //sMemoryPool->RemoveObject(this, true);
+            sWorld.RemoveObjectFromWorld(this);
+        //sMemoryPool.RemoveObject(this, true);
         DeleteThis();
     }
 }
@@ -487,7 +487,7 @@ void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, 
     int64    item_count;
     for (int i = 0; i < 10; ++i)
     {
-        if (m_Base->drop_item_id[i] != 0 && sWorld->checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1))
+        if (m_Base->drop_item_id[i] != 0 && sWorld.checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1))
         {
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
             if (item_count < m_Base->drop_min_count[i])
@@ -523,7 +523,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
     {
         if (ht.uid != 0)
         {
-            cr = sMemoryPool->GetObjectInWorld<WorldObject>(ht.uid);
+            cr = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
 
             if (cr != nullptr)
             {
@@ -565,7 +565,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
         {
             ni->m_Instance.Flag |= 0x10;
         }
-        sWorld->MonsterDropItemToWorld(this, ni);
+        sWorld.MonsterDropItemToWorld(this, ni);
     }
 }
 
@@ -613,13 +613,13 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
 
     if (gold > 1000000)
         gold = 1000000;
-    auto gi = sMemoryPool->AllocGold(gold, BY_MONSTER);
+    auto gi = sMemoryPool.AllocGold(gold, BY_MONSTER);
     gi->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
     gi->SetLayer(GetLayer());
 
     gi->AddNoise(rand32(), rand32(), 9);
     gi->SetPickupOrder(pPriority.PickupOrder);
-    sWorld->MonsterDropItemToWorld(this, gi);
+    sWorld.MonsterDropItemToWorld(this, gi);
 }
 
 void Monster::onApplyAttributeAdjustment()
@@ -676,9 +676,9 @@ void Monster::findNextEnemy()
 
             if (nHate > nMaxHate)
             {
-                auto *unit = sMemoryPool->GetObjectInWorld<WorldObject>(ht.uid);
+                auto *unit = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
                 if (unit != nullptr
-                    && sRegion->IsVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize), (uint)(unit->GetPositionY() / g_nRegionSize),
+                    && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize), (uint)(unit->GetPositionY() / g_nRegionSize),
                                                 (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) != 0
                     /*&&  IsVisible(unit) */)
                 {
@@ -707,7 +707,7 @@ void Monster::comeBackHome(bool bInvincible)
     if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED))
     {
         SetStatus(STATUS_NORMAL);
-        m_nLastHateUpdateTime = sWorld->GetArTime();
+        m_nLastHateUpdateTime = sWorld.GetArTime();
         m_hEnemy              = 0;
         m_nMaxHate            = 0;
         m_bComeBackHome       = true;
@@ -739,7 +739,7 @@ void Monster::AI_processAttack(uint t)
         return;
     }
 
-    auto target = sMemoryPool->GetObjectInWorld<Unit>(m_hEnemy);
+    auto target = sMemoryPool.GetObjectInWorld<Unit>(m_hEnemy);
     if (target == nullptr
         || target->GetHandle() != m_hEnemy
         || target->GetHealth() == 0
@@ -773,7 +773,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     if ((IsNonAttacker()
          || IsAutoTrap()
          || (IsAgent() && !pEnemy->IsPlayer())
-         || sRegion->IsVisibleRegion(pEnemy, this) == 0
+         || sRegion.IsVisibleRegion(pEnemy, this) == 0
          || pEnemy->GetLayer() != GetLayer())
         && pEnemy->GetTargetHandle() != GetHandle())
     {
@@ -852,7 +852,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
                 track_distance   = (((float)irand(0, 9) / 100.0f) + 1.0f);
                 if (!GameContent::IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()) && IsMovable())
                 {
-                    sWorld->SetMove(this, GetCurrentPosition(t), targetPosition, (uint8)((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld->GetArTime(), true);
+                    sWorld.SetMove(this, GetCurrentPosition(t), targetPosition, (uint8)((m_Attribute.nMoveSpeed / 7) * track_distance), true, sWorld.GetArTime(), true);
                 }
             }
             return;
@@ -871,7 +871,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         SetStatus(STATUS_FIND_ATTACK_POS);
         if (!GameContent::IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()) && IsMovable())
         {
-            sWorld->SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld->GetArTime(), true);
+            sWorld.SetMove(this, myPosition, attack_pos, (uint8)(m_Attribute.nMoveSpeed / 7), true, sWorld.GetArTime(), true);
         }
         return;
     }
@@ -887,7 +887,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
     // Checks for attackable
     if (bIsMoving && IsInWorld())
     {
-        sWorld->SetMove(this, myPosition, GetCurrentPosition(t + 10), 0, true, sWorld->GetArTime(), true);
+        sWorld.SetMove(this, myPosition, GetCurrentPosition(t + 10), 0, true, sWorld.GetArTime(), true);
     }
 
     AttackInfo Damages[4]{ };
@@ -997,7 +997,7 @@ int Monster::GetTameItemCode() const
     int result = m_Base->taming_id;
     if (result != 0)
     {
-        auto si = sObjectMgr->GetSummonBase(result);
+        auto si = sObjectMgr.GetSummonBase(result);
         if (si != nullptr)
             result = si->card_id;
     }
@@ -1021,7 +1021,7 @@ int Monster::GetMonsterID() const
 
 CreatureStat *Monster::GetBaseStat() const
 {
-    return sObjectMgr->GetStatInfo(m_Base->stat_id);
+    return sObjectMgr.GetStatInfo(m_Base->stat_id);
 }
 
 int Monster::GetRace() const
@@ -1035,8 +1035,8 @@ int Monster::AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMons
 
     if (GetHealth() == 0 || IsEnvironmentMonster())
         return 0;
-    uint ct   = sWorld->GetArTime();
-    auto unit = sMemoryPool->GetObjectInWorld<Unit>(handle);
+    uint ct   = sWorld.GetArTime();
+    auto unit = sMemoryPool.GetObjectInWorld<Unit>(handle);
 
     if (unit == nullptr/* || IsEnemy(unit, false)*/)
         return 0;
@@ -1078,7 +1078,7 @@ HateTag *Monster::getHateTag(uint handle, uint t)
 
 HateTag *Monster::addHate(uint handle, int nHate)
 {
-    uint ct       = sWorld->GetArTime();
+    uint ct       = sWorld.GetArTime();
     auto ht       = getHateTag(handle, ct);
     if (ht == nullptr)
     {
@@ -1128,7 +1128,7 @@ HateTag *Monster::addHate(uint handle, int nHate)
     }
 
     m_nMaxHate = ht->nHate;
-    if (sMemoryPool->GetObjectInWorld<WorldObject>(handle) != nullptr)
+    if (sMemoryPool.GetObjectInWorld<WorldObject>(handle) != nullptr)
         StartAttack(handle, false);
     return ht;
 }
@@ -1142,7 +1142,7 @@ bool Monster::removeFromHateList(uint handle)
         if (ht.uid == handle)
         {
             m_vHateList.erase(m_vHateList.begin() + i);
-            auto unit = sMemoryPool->GetObjectInWorld<Unit>(handle);
+            auto unit = sMemoryPool.GetObjectInWorld<Unit>(handle);
             if (unit != nullptr)
             {
                 found = true;
@@ -1183,14 +1183,14 @@ void Monster::processWalk(uint t)
         {
             if (tmp_mv.bIsMoving)
             {
-                sWorld->onRegionChange(this, t - lastStepTime, tmp_mv.bIsMoving == 0);
+                sWorld.onRegionChange(this, t - lastStepTime, tmp_mv.bIsMoving == 0);
                 return;
             }
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE))
                 RemoveFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE);
             m_bComeBackHome = false;
         }
-        sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
+        sWorld.onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
     }
 }
 
@@ -1219,7 +1219,7 @@ void Monster::processMove(uint t)
                     if (!GameContent::IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
                     {
                         auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
-                        sWorld->SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld->GetArTime(), true);
+                        sWorld.SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld.GetArTime(), true);
                         m_pRespawn.m_positionX = targetPos.GetPositionX();
                         m_pRespawn.m_positionY = targetPos.GetPositionY();
                     }
@@ -1228,7 +1228,7 @@ void Monster::processMove(uint t)
         }
         else
         {
-            sWorld->ClearTamer(this, true);
+            sWorld.ClearTamer(this, true);
             SetStatus(STATUS_NORMAL);
         }
     }
@@ -1258,13 +1258,13 @@ void Monster::processMove(uint t)
                 vMoveInfo.emplace_back(targetPos);
             }
 
-            t = sWorld->GetArTime();
+            t = sWorld.GetArTime();
             auto speed = (uint8)(m_pWayPointInfo->way_point_speed / 7);
 
             if (speed == 0)
                 speed = (uint8)(m_Attribute.nMoveSpeed / 7);
 
-            sWorld->SetMultipleMove(this, GetCurrentPosition(t), vMoveInfo, speed, true, t, true);
+            sWorld.SetMultipleMove(this, GetCurrentPosition(t), vMoveInfo, speed, true, t, true);
         }
     }
 }
@@ -1284,12 +1284,12 @@ void Monster::processFirstAttack(uint t)
     }
     else
     {
-        sWorld->EnumMovableObject(this->GetPosition(), GetLayer(), GetFirstAttackRange(), vResult, true, true);
+        sWorld.EnumMovableObject(this->GetPosition(), GetLayer(), GetFirstAttackRange(), vResult, true, true);
 
         auto            distance = GetFirstAttackRange() + 1.0f;
         for (const auto &handle : vResult)
         {
-            auto unit = sMemoryPool->GetObjectInWorld<Unit>(handle);
+            auto unit = sMemoryPool.GetObjectInWorld<Unit>(handle);
             if (unit != nullptr && unit->GetHealth() != 0)
             {
                 if (!IsFirstAttacker() && unit->IsMonster() && unit->GetTargetHandle() != 0)
@@ -1371,7 +1371,7 @@ void Monster::getMovePosition(Position &newPos)
 
 Position Monster::getNonDuplicateAttackPos(Unit *pEnemy)
 {
-    uint ct     = sWorld->GetArTime();
+    uint ct     = sWorld.GetArTime();
     auto result = pEnemy->GetCurrentPosition(ct);
 
     auto  range = GetRealAttackRange() + (GetUnitSize() * 0.5f) + (pEnemy->GetUnitSize() * 0.5f);
@@ -1407,7 +1407,7 @@ void Monster::onBeforeCalculateStat()
 void Monster::SetTamer(uint handle, int nTamingSkillLevel)
 {
     m_hTamer            = handle;
-    m_nTamedTime        = sWorld->GetArTime();
+    m_nTamedTime        = sWorld.GetArTime();
     m_nTamingSkillLevel = nTamingSkillLevel;
 }
 
@@ -1425,13 +1425,13 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
     {
         if (vPartyContribute.front().hPlayer != 0)
         {
-            auto player = sMemoryPool->GetObjectInWorld<Player>(vPartyContribute.front().hPlayer);
+            auto player = sMemoryPool.GetObjectInWorld<Player>(vPartyContribute.front().hPlayer);
             if (player != nullptr)
                 vPlayer.emplace_back(player);
         }
         else
         {
-            sGroupManager->DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag &tag) {
+            sGroupManager.DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag &tag) {
                 if (tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f)
                 {
                     vPlayer.emplace_back(tag.pPlayer);
@@ -1473,13 +1473,13 @@ void Monster::procDropChaos(Unit *pKiller, takePriority pPriority, std::vector<V
         float fSharedChaos = vp.fContribute * chaos;
         if (vp.hPlayer == 0)
         {
-            //sWorld->addChaos(this, vp.nPartyID, fSharedChaos);
+            //sWorld.addChaos(this, vp.nPartyID, fSharedChaos);
         }
         else
         {
-            auto p = sMemoryPool->GetObjectInWorld<Player>(vp.hPlayer);
+            auto p = sMemoryPool.GetObjectInWorld<Player>(vp.hPlayer);
             if (p != nullptr)
-                sWorld->addChaos(this, p, fSharedChaos);
+                sWorld.addChaos(this, p, fSharedChaos);
         }
     }
 }
@@ -1497,5 +1497,5 @@ void Monster::TriggerForceKill(Player *pPlayer)
 
 const std::string &Monster::GetNameAsString()
 {
-    return sObjectMgr->GetValueFromNameID(m_Base->name_id);
+    return sObjectMgr.GetValueFromNameID(m_Base->name_id);
 }

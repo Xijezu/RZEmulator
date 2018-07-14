@@ -322,7 +322,7 @@ bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vec
 }
 Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCount)
 {
-    auto retItem = sMemoryPool->GetObjectInWorld<Item>(hItem);
+    auto retItem = sMemoryPool.GetObjectInWorld<Item>(hItem);
     if(retItem == nullptr)
         return nullptr;
     if(!retItem->IsItem())

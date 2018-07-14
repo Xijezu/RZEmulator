@@ -43,7 +43,7 @@ FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPro
     fp->nLifeTime = lifeTime;
     fp->SetCurrentXY(pPropInfo.x, pPropInfo.y);
     fp->m_PropInfo.layer = pPropInfo.layer;
-    sWorld->AddObjectToWorld(fp);
+    sWorld.AddObjectToWorld(fp);
     return fp;
 }
 
@@ -156,11 +156,11 @@ bool FieldProp::UseProp(Player * pPlayer)
         }
         if(!m_pFieldPropBase->strScript.empty() && m_pFieldPropBase->strScript.length() > 2)
         {
-            sScriptingMgr->RunString(pPlayer, m_pFieldPropBase->strScript);
+            sScriptingMgr.RunString(pPlayer, m_pFieldPropBase->strScript);
         }
         if(m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0)
         {
-            sWorld->RemoveObjectFromWorld(this);
+            sWorld.RemoveObjectFromWorld(this);
             if(m_pDeleteHandler != nullptr)
                 m_pDeleteHandler->onFieldPropDelete(this);
             DeleteThis();
@@ -189,12 +189,12 @@ FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawn
     _InitValues();
 
     m_bIsCasting = false;
-    sMemoryPool->AllocMiscHandle(this);
-    m_pFieldPropBase = sObjectMgr->GetFieldPropBase(pPropInfo.nPropID);
+    sMemoryPool.AllocMiscHandle(this);
+    m_pFieldPropBase = sObjectMgr.GetFieldPropBase(pPropInfo.nPropID);
     m_PropInfo = pPropInfo;
     m_pDeleteHandler = propDeleteHandler;
     nLifeTime = m_pFieldPropBase->nLifeTime;
-    m_nRegenTime = sWorld->GetArTime();
+    m_nRegenTime = sWorld.GetArTime();
     m_nUseCount = m_pFieldPropBase->nUseCount;
     if(m_pFieldPropBase->nUseCount == 0)
         m_nUseCount = 1;

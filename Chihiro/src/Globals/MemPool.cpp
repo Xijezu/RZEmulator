@@ -64,7 +64,7 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
     item->SetUInt32Value(UNIT_FIELD_HANDLE, item->m_nHandle);
     if (item->m_Instance.UID == 0)
     {
-        item->m_Instance.UID = sWorld->GetItemIndex();
+        item->m_Instance.UID = sWorld.GetItemIndex();
     }
     m_nMiscTop++;
     AddObject(item);
@@ -75,12 +75,12 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
     if (pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
         return nullptr;
     Summon *s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
-    s->SetUInt32Value(UNIT_FIELD_UID, (uint)sWorld->GetSummonIndex());
+    s->SetUInt32Value(UNIT_FIELD_UID, (uint)sWorld.GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
     s->CalculateStat();
     s->SetJP(10);
-    s->SetName(sObjectMgr->GetSummonName());
+    s->SetName(sObjectMgr.GetSummonName());
 
     s->SetFullHealth();
     s->SetMana(s->GetMaxMana());
@@ -93,7 +93,7 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 
 Monster *MemoryPoolMgr::AllocMonster(uint idx)
 {
-    auto mb = sObjectMgr->GetMonsterInfo(idx);
+    auto mb = sObjectMgr.GetMonsterInfo(idx);
     if (mb == nullptr)
         return nullptr;
     auto p = new Monster{m_nMonsterTop, mb};
@@ -139,7 +139,7 @@ void MemoryPoolMgr::Update(uint diff)
         WorldObject *obj = *itr;
 
         if (obj->IsInWorld())
-            sWorld->RemoveObjectFromWorld(obj);
+            sWorld.RemoveObjectFromWorld(obj);
 
         switch (obj->GetSubType())
         {
@@ -163,8 +163,8 @@ void MemoryPoolMgr::Update(uint diff)
         delete obj;
         //*&obj = nullptr;
     }
-    sFieldPropManager->Update(diff);
-    sItemCollector->Update();
+    sFieldPropManager.Update(diff);
+    sItemCollector.Update();
 }
 
 Item *MemoryPoolMgr::AllocGold(int64 gold, GenerateCode gcode)

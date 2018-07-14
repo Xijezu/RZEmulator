@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(Mononoke)
 
-FIND_PACKAGE(Boost REQUIRED system filesystem)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Lists
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server

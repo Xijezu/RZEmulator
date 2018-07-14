@@ -19,3 +19,4 @@
 
 DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
 DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
+DatabaseWorkerPool<GameDatabaseConnection> GameDatabase;

@@ -21,7 +21,7 @@
 
 void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime)
 {
-    auto propTemplate = sObjectMgr->GetFieldPropBase(prop.nPropID);
+    auto propTemplate = sObjectMgr.GetFieldPropBase(prop.nPropID);
     if(propTemplate == nullptr)
         return;
 
@@ -39,7 +39,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
     FieldPropRespawnInfo info{prop};
     int nPropID = prop.nPropID;
-    FieldPropTemplate* propTemplate = sObjectMgr->GetFieldPropBase(nPropID);
+    FieldPropTemplate* propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
     if(propTemplate == nullptr)
         return;
 
@@ -48,7 +48,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
         info.nPropID = nPropID;
         info.layer   = 0; // Layer management
         m_vRespawnInfo.emplace_back(info);
-        FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld->GetArTime(), propTemplate->nLifeTime};
+        FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld.GetArTime(), propTemplate->nLifeTime};
         ri.pRespawnInfo = info;
         m_vRespawnList.emplace_back(ri);
     }
@@ -74,7 +74,7 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 
         if (!prop->m_PropInfo.bOnce)
         {
-            FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld->GetArTime(), prop->nLifeTime};
+            FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld.GetArTime(), prop->nLifeTime};
             ri.pRespawnInfo = prop->m_PropInfo;
             m_vRespawnList.emplace_back(ri);
         }
@@ -83,7 +83,7 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 
 void FieldPropManager::Update(uint/* diff*/)
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     std::vector<FieldPropRegenInfo> vRegenInfo{};
     std::vector<FieldProp*> vDeleteList{};
 
@@ -127,7 +127,7 @@ void FieldPropManager::Update(uint/* diff*/)
             {
                 if (fp->IsInWorld() && !fp->IsDeleteRequested())
                 {
-                    sWorld->RemoveObjectFromWorld(fp);
+                    sWorld.RemoveObjectFromWorld(fp);
                     fp->DeleteThis();
                 }
             }

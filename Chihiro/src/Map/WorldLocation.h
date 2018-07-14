@@ -85,8 +85,12 @@ class WorldLocation
 
 class WorldLocationManager
 {
-    public:
-        WorldLocationManager() = default;
+        public:
+        static WorldLocationManager &Instance()
+        {
+            static WorldLocationManager instance;
+            return instance;
+        }
         ~WorldLocationManager() = default;
 
         WorldLocation *AddToLocation(uint idx, Player *player);
@@ -101,6 +105,9 @@ class WorldLocationManager
         NG_SHARED_MUTEX                        i_lock;
         std::vector<WorldLocation>             m_vWorldLocation{ };
         std::unordered_map<uint, std::vector<uint>> m_hsMonsterID{ };
+
+    protected:
+        WorldLocationManager() = default;
 };
-#define sWorldLocationMgr ACE_Singleton<WorldLocationManager, ACE_Thread_Mutex>::instance()
+#define sWorldLocationMgr WorldLocationManager::Instance()
 #endif // NGEMITY_WORLDLOCATION_H

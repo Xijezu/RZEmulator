@@ -70,8 +70,12 @@ class Player;
 class GroupManager
 {
     public:
-        GroupManager() = default;
         ~GroupManager() = default;
+        static GroupManager &Instance()
+        {
+                static GroupManager instance;
+                return instance;
+        }
 
         void InitGroupSystem();
 
@@ -109,11 +113,12 @@ class GroupManager
         void LoadPartyInfo(PartyInfo &info);
         PartyInfo *getPartyInfo(int nPartyID);
         PartyInfo *getPartyInfoNC(int nPartyID);
+        GroupManager() = default;
     private:
         uint64                   m_nMaxPartyID{0};
         std::map<int, PartyInfo> m_hshPartyID{ };
         NG_SHARED_MUTEX i_lock;
 };
 
-#define sGroupManager ACE_Singleton<GroupManager, ACE_Thread_Mutex>::instance()
+#define sGroupManager GroupManager::Instance()
 #endif // NGEMITY_GROUPMANAGER_H

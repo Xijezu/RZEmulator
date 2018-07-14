@@ -21,10 +21,16 @@
 #define SKYFIRE_COMMON_H
 
 #include "Define.h"
+
+#include "DatabaseEnv.h"
+#include "DatabaseLoader.h"
+#include "MySQLThreading.h"
+
 #include <memory>
 #include <string>
 #include <utility>
 
+#include <functional>
 #include <cstdlib>
 #include <unordered_map>
 #include <stdio.h>

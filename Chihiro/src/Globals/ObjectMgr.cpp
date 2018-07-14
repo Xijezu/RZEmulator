@@ -758,7 +758,7 @@ void ObjectMgr::LoadDungeonResource()
         base.max_raid_party = field[idx].GetInt32();
         base.box.begin      = {seamless_x * g_fMapLength, seamless_y * g_fMapLength};
         base.box.end        = {(seamless_x + 1) * g_fMapLength, (seamless_y + 1) * g_fMapLength};
-        sDungeonManager->RegisterDungeonTemplate(base);
+        sDungeonManager.RegisterDungeonTemplate(base);
         ++count;
     } while (result->NextRow());
 
@@ -1127,7 +1127,7 @@ void ObjectMgr::LoadWorldLocation()
         auto  weather_id          = field[3].GetUInt32();
         auto  weather_ratio       = field[4].GetUInt8();
         auto  weather_change_time = (field[5].GetUInt32()) * 6000;
-        sWorldLocationMgr->RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time, 0);
+        sWorldLocationMgr.RegisterWorldLocation(idx, location_type, time_idx, weather_id, weather_ratio, weather_change_time, 0);
         ++count;
     } while (result->NextRow());
     NG_LOG_INFO("server.worldserver", ">> Loaded %u WorldLocation in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
@@ -1163,7 +1163,7 @@ void ObjectMgr::LoadEnhanceResource()
         }
         if ((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
         {
-            sMixManager->RegisterEnhanceInfo(info);
+            sMixManager.RegisterEnhanceInfo(info);
         }
 
         ++count;
@@ -1209,7 +1209,7 @@ void ObjectMgr::LoadMixResource()
                 i.value[j] = field[idx++].GetInt32();
             }
         }
-        sMixManager->RegisterMixInfo(info);
+        sMixManager.RegisterMixInfo(info);
 
         ++count;
     } while (result->NextRow());

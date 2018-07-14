@@ -135,13 +135,13 @@ void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, fl
             buffer.read_skip((size_t)nCharSize);
         }
         nCharSize = buffer.read<int>();
-        sObjectMgr->g_currentLocationId = 0;
+        sObjectMgr.g_currentLocationId = 0;
         if(nCharSize <= 1)
             continue;
 
         auto script = buffer.ReadString((uint)nCharSize);
-        sScriptingMgr->RunString(script);
-        if(sObjectMgr->g_currentLocationId == 0)
+        sScriptingMgr.RunString(script);
+        if(sObjectMgr.g_currentLocationId == 0)
             continue;
 
         nPolygonCount = buffer.read<int>();
@@ -156,7 +156,7 @@ void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, fl
                 pt.x = sx + ((float) buffer.read<int>() * fAttrLen);
                 pt.x = sy + ((float) buffer.read<int>() * fAttrLen);
                 points.emplace_back(pt);
-                auto location_info = MapLocationInfo(points, sObjectMgr->g_currentLocationId, 0);
+                auto location_info = MapLocationInfo(points, sObjectMgr.g_currentLocationId, 0);
                 RegisterMapLocationInfo(location_info);
             }
         }
@@ -194,7 +194,7 @@ void Maploader::LoadAttributeFile(const std::string&  szFilename, int x, int y, 
             points.emplace_back(pt);
         }
         X2D::PolygonF pg{points};
-        sObjectMgr->g_qtBlockInfo.Add({points, 0, 0});
+        sObjectMgr.g_qtBlockInfo.Add({points, 0, 0});
     }
 }
 
@@ -303,7 +303,7 @@ bool Maploader::InitMapInfo()
     for(auto& ri : m_vScriptEvent) {
         for(auto& tag : ri.vInfoList) {
             if(tag.nTrigger == 0) {
-                sScriptingMgr->RunString(tag.strFunction);
+                sScriptingMgr.RunString(tag.strFunction);
             }
         }
     }
@@ -350,6 +350,6 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
             buffer.read_skip(7);
         else
             buffer.read_skip(2);
-        sFieldPropManager->RegisterFieldProp(sr);
+        sFieldPropManager.RegisterFieldProp(sr);
     }
 }

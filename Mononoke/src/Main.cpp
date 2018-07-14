@@ -19,7 +19,6 @@
 
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
-#include "Implementation/LoginDatabase.h"
 #include "MySQLThreading.h"
 
 #include "AuthClientSocketMgr.h"

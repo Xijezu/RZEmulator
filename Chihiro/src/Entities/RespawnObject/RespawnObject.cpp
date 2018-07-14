@@ -33,7 +33,7 @@ void RespawnObject::Update(uint diff)
     if(info.count >= m_nMaxRespawnNum)
         return;
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
     /// Only update based on spawn rates (each X seconds after dead)
     if(lastDeadTime != 0 && lastDeadTime + info.interval > ct)
@@ -82,7 +82,7 @@ void RespawnObject::onMonsterDelete(Monster *mob)
     if(pos != m_vRespawnedMonster.end()) {
         m_vRespawnedMonster.erase(pos);
         mob->m_pDeleteHandler = nullptr;
-        lastDeadTime = sWorld->GetArTime();
+        lastDeadTime = sWorld.GetArTime();
         info.count--;
     }
 }
