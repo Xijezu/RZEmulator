@@ -36,7 +36,7 @@ namespace NGemity
 
     DECLSPEC_NORETURN void AbortHandler(int sigval) ATTR_NORETURN;
 
-} // namespace Trinity
+} // namespace NGemity
 
 #if COMPILER == COMPILER_MICROSOFT
 #define ASSERT_BEGIN __pragma(warning(push)) __pragma(warning(disable: 4127))

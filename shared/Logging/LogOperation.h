@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,23 +18,24 @@
 #ifndef LOGOPERATION_H
 #define LOGOPERATION_H
 
+#include "Define.h"
+#include <memory>
+
 class Logger;
 struct LogMessage;
 
 class LogOperation
 {
     public:
-        LogOperation(Logger const* _logger, LogMessage* _msg)
-            : logger(_logger), msg(_msg)
-        { }
+        LogOperation(Logger const *_logger, std::unique_ptr<LogMessage> &&_msg);
 
         ~LogOperation();
 
         int call();
 
     protected:
-        Logger const* logger;
-        LogMessage* msg;
+        Logger const *logger;
+        std::unique_ptr<LogMessage> msg;
 };
 
 #endif

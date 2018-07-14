@@ -41,7 +41,8 @@
 #endif //SKYFIRE_ENDIAN
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define SKYFIRE_PATH_MAX MAX_PATH
+
+#  define NGEMITY_PATH_MAX MAX_PATH
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif //DECLSPEC_NORETURN
@@ -49,7 +50,7 @@
 #    define DECLSPEC_DEPRECATED __declspec(deprecated)
 #  endif //DECLSPEC_DEPRECATED
 #else //PLATFORM != PLATFORM_WINDOWS
-#  define SKYFIRE_PATH_MAX PATH_MAX
+#  define NGEMITY_PATH_MAX PATH_MAX
 #  define DECLSPEC_NORETURN
 #  define DECLSPEC_DEPRECATED
 #endif //PLATFORM

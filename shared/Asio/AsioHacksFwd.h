@@ -83,7 +83,7 @@ namespace boost
     }
 }
 
-namespace Trinity
+namespace NGemity
 {
     namespace Asio
     {

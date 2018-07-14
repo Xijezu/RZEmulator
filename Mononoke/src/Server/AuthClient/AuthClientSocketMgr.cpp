@@ -19,7 +19,6 @@
 #include "AuthClientSocketMgr.h"
 #include "Config.h"
 #include "NetworkThread.h"
-#include "WorldSocket.h"
 #include <boost/system/error_code.hpp>
 
 class AuthSocketThread : public NetworkThread<XSocket>
@@ -53,7 +52,7 @@ AuthClientSocketMgr& AuthClientSocketMgr::Instance()
     return instance;
 }
 
-bool AuthClientSocketMgr::StartWorldNetwork(Trinity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port, int threadCount)
+bool AuthClientSocketMgr::StartWorldNetwork(NGemity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port, int threadCount)
 {
     _tcpNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
 

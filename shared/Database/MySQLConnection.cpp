@@ -63,7 +63,7 @@ m_Mysql(NULL),
 m_connectionInfo(connInfo),
 m_connectionFlags(CONNECTION_ASYNC)
 {
-    m_worker = Trinity::make_unique<DatabaseWorker>(m_queue, this);
+    m_worker = NGemity::make_unique<DatabaseWorker>(m_queue, this);
 }
 
 MySQLConnection::~MySQLConnection()
@@ -485,7 +485,7 @@ void MySQLConnection::PrepareStatement(uint32 index, const char* sql, Connection
         }
         else
         {
-            m_stmts[index] = Trinity::make_unique<MySQLPreparedStatement>(stmt);
+            m_stmts[index] = NGemity::make_unique<MySQLPreparedStatement>(stmt);
         }
     }
 }

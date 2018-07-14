@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,27 +18,31 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "Appender.h"
+#include "Define.h"
+#include "LogCommon.h"
+#include <unordered_map>
+#include <string>
+
+class Appender;
+struct LogMessage;
 
 class Logger
 {
     public:
-        Logger();
-        ~Logger();
+        Logger(std::string const &name, LogLevel level);
 
-        void Create(std::string const& name, LogLevel level);
-        void addAppender(uint8 type, Appender *);
+        void addAppender(uint8 type, Appender *appender);
         void delAppender(uint8 type);
 
-        std::string const& getName() const;
+        std::string const &getName() const;
         LogLevel getLogLevel() const;
         void setLogLevel(LogLevel level);
-        void write(LogMessage& message) const;
+        void write(LogMessage *message) const;
 
     private:
-        std::string name;
-        LogLevel level;
-        AppenderMap appenders;
+        std::string                           name;
+        LogLevel                              level;
+        std::unordered_map<uint8, Appender *> appenders;
 };
 
 #endif

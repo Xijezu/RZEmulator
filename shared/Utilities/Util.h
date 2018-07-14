@@ -182,6 +182,7 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
 
 size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
 void utf8truncate(std::string& utf8str, size_t len);
+bool StringToBool(std::string const& str);
 
 inline bool isBasicLatinCharacter(wchar_t wchar)
 {
