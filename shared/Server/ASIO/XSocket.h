@@ -209,12 +209,11 @@ class XSocket : public Socket<XSocket>
 
         bool ReadHeaderHandler()
         {
-            auto tmp = (char *)_headerBuffer.GetBasePointer();
             if (_session->IsEncrypted())
             {
-                _decryption.Decode(tmp, tmp, sizeof(TS_MESSAGE));
+                _decryption.Decode((char *)_headerBuffer.GetReadPointer(), (char *)_headerBuffer.GetReadPointer(), sizeof(TS_MESSAGE));
             }
-            auto header = reinterpret_cast<TS_MESSAGE *>(tmp);
+            auto header = reinterpret_cast<TS_MESSAGE *>(_headerBuffer.GetReadPointer());
 
             if (header->size > 4098)
             {
