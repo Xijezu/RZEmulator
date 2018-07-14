@@ -307,7 +307,7 @@ enum CSPACKETS
 #else
 #pragma pack(push, 1)
 #endif
-typedef struct TS_CS_ACCOUNT_WITH_AUTH : public TS_MESSAGE
+typedef struct TS_CS_ACCOUNT_WITH_AUTH
 {
 #if EPIC == 4
     char account[19];
@@ -317,13 +317,13 @@ typedef struct TS_CS_ACCOUNT_WITH_AUTH : public TS_MESSAGE
     unsigned long long one_time_key;
 } s_ClientWithAuth_CS;
 
-typedef struct TS_CS_LOGIN : public TS_MESSAGE
+typedef struct TS_CS_LOGIN
 {
     char szName[19];
     char race;
 } s_ClientLogin_CS;
 
-typedef struct TS_CS_CHATREQUET : public TS_MESSAGE
+typedef struct TS_CS_CHATREQUET
 {
     char        szTarget[21];
     uint8_t     request_id;

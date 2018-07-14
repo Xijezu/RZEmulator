@@ -128,17 +128,17 @@ float GameRule::GetPickableRange()
 
 float GameRule::GetItemDropRate()
 {
-    return sWorld->getRate(RATES_ITEM_DROP);
+    return sWorld.getRate(RATES_ITEM_DROP);
 }
 
 float GameRule::GetGoldDropRate()
 {
-    return sWorld->getRate(RATES_GOLD_DROP);
+    return sWorld.getRate(RATES_GOLD_DROP);
 }
 
 float GameRule::GetEXPRate()
 {
-    return sWorld->getRate(RATES_EXP);
+    return sWorld.getRate(RATES_EXP);
 }
 
 int GameRule::GetChipLevelLimit(int idx)
@@ -148,7 +148,7 @@ int GameRule::GetChipLevelLimit(int idx)
 
 float GameRule::GetChaosDropRate()
 {
-    return sWorld->getRate(RATES_CHAOS_DROP);
+    return sWorld.getRate(RATES_CHAOS_DROP);
 }
 
 int GameRule::GetIntValueByRandomInt(double fValue)
@@ -183,10 +183,10 @@ float GameRule::GetStaminaRatio(int level)
 
 float GameRule::GetStaminaBonus()
 {
-    return sWorld->getRate(RATES_STAMINA_BONUS);
+    return sWorld.getRate(RATES_STAMINA_BONUS);
 }
 
 int GameRule::GetLocalFlag()
 {
-    return sWorld->getIntConfig(CONFIG_LOCAL_FLAG);
+    return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }

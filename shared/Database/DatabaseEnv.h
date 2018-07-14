@@ -23,6 +23,7 @@
 #include "DatabaseWorkerPool.h"
 
 #include "Implementation/CharacterDatabase.h"
+#include "Implementation/GameDatabase.h"
 #include "Implementation/LoginDatabase.h"
 
 #include "Field.h"
@@ -35,4 +36,6 @@
 extern DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
 /// Accessor to the realm/login database
 extern DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
+
+extern DatabaseWorkerPool<GameDatabaseConnection> GameDatabase;
 #endif

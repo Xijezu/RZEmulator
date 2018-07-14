@@ -34,9 +34,9 @@
 #include "ItemCollector.h"
 #include "GameContent.h"
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool>   World::m_stopEvent        = false;
-uint8                                   World::m_ExitCode         = SHUTDOWN_EXIT_CODE;
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
+std::atomic<bool>   World::m_stopEvent        = false;
+std::atomic<uint32> World::m_worldLoopCounter = 0;
+uint8  World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 
 World::World() : startTime(getMSTime())
 {
@@ -60,7 +60,7 @@ void World::InitWorld()
 
     uint32_t oldFullTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing region system...");
-    sRegion->InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
+    sRegion.InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
 
     auto oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing game content...");
@@ -71,19 +71,19 @@ void World::InitWorld()
     s_nSkillIndex  = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
     s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
     s_nStateIndex  = CharacterDatabase.Query("SELECT MAX(sid) FROM `State`;").get()->Fetch()->GetUInt64();
-    sGroupManager->InitGroupSystem();
+    sGroupManager.InitGroupSystem();
 
-    sObjectMgr->InitGameContent();
+    sObjectMgr.InitGameContent();
     NG_LOG_INFO("server.worldserver", "Initialized game content in %u ms", GetMSTimeDiffToNow(oldTime));
 
     oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing scripting...");
-    sScriptingMgr->InitializeLua();
-    sMapContent->LoadMapContent();
-    sMapContent->InitMapInfo();
+    sScriptingMgr.InitializeLua();
+    sMapContent.LoadMapContent();
+    sMapContent.InitMapInfo();
     NG_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
 
-    for (auto &ri : sObjectMgr->g_vRespawnInfo)
+    for (auto &ri : sObjectMgr.g_vRespawnInfo)
     {
         MonsterRespawnInfo nri(ri);
         float              cx = (nri.right - nri.left) * 0.5f + nri.left;
@@ -103,7 +103,8 @@ void World::LoadConfigSettings(bool reload)
 {
     if (reload)
     {
-        if (!sConfigMgr->Reload())
+        std::string configError;
+        if (!sConfigMgr->Reload(configError))
         {
             NG_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
             return;
@@ -112,35 +113,35 @@ void World::LoadConfigSettings(bool reload)
     }
 
     // Bool configs
-    m_bool_configs[CONFIG_PK_SERVER] = sConfigMgr->GetBoolDefault("Game.PKServer", true);
-    m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
-    m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
-    m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
+    m_bool_configs[CONFIG_PK_SERVER]            = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_DISABLE_TRADE]        = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
+    m_bool_configs[CONFIG_MONSTER_WANDERING]    = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
+    m_bool_configs[CONFIG_MONSTER_COLLISION]    = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
     m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
-    m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
-    m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
+    m_bool_configs[CONFIG_NO_COLLISION_CHECK]   = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
+    m_bool_configs[CONFIG_NO_SKILL_COOLTIME]    = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
 
     // Int configs
-    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
-    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
-    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_MAP_WIDTH]      = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT]     = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE]    = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE]      = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
     m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
-    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
-    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_LOCAL_FLAG]     = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
+    m_int_configs[CONFIG_MAX_LEVEL]      = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
     // MySQL ping time interval
-    m_int_configs[CONFIG_PINGDB] = (uint)sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    m_int_configs[CONFIG_PINGDB]         = (uint)sConfigMgr->GetIntDefault("MaxPingTime", 30);
 
 
     // Rates
-    rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
-    rate_values[RATES_ITEM_DROP] = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
-    rate_values[RATES_CREATURE_DROP] = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
-    rate_values[RATES_CHAOS_DROP] = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
-    rate_values[RATES_GOLD_DROP] = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
+    rate_values[RATES_EXP]                   = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
+    rate_values[RATES_ITEM_DROP]             = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
+    rate_values[RATES_CREATURE_DROP]         = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
+    rate_values[RATES_CHAOS_DROP]            = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
+    rate_values[RATES_GOLD_DROP]             = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
     rate_values[RATES_PVP_DAMAGE_FOR_PLAYER] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForPlayer", 1.0f);
     rate_values[RATES_PVP_DAMAGE_FOR_SUMMON] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForSummon", 1.0f);
-    rate_values[RATES_STAMINA_BONUS] = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
+    rate_values[RATES_STAMINA_BONUS]         = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
 }
 
 /// Find a session by its id
@@ -230,11 +231,11 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
         {
             SetMoveFunctor fn;
             fn.obj = pUnit;
-            sRegion->DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
-                                         (uint)(pUnit->GetPositionY() / g_nRegionSize),
-                                         pUnit->GetLayer(), fn);
+            sRegion.DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
+                                        (uint)(pUnit->GetPositionY() / g_nRegionSize),
+                                        pUnit->GetLayer(), fn);
 
-            if(pUnit->IsMonster())
+            if (pUnit->IsMonster())
             {
                 pUnit->As<Monster>()->m_bNearClient = fn.nCnt != 0;
             }
@@ -268,11 +269,11 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
         {
             SetMoveFunctor fn;
             fn.obj = obj;
-            sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                         (uint)(obj->GetPositionY() / g_nRegionSize),
-                                         obj->GetLayer(), fn);
+            sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                                        (uint)(obj->GetPositionY() / g_nRegionSize),
+                                        obj->GetLayer(), fn);
 
-            if(obj->IsMonster())
+            if (obj->IsMonster())
             {
                 obj->As<Monster>()->m_bNearClient = fn.nCnt != 0;
             }
@@ -289,9 +290,9 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
     auto prev_ry = (uint)(oldPos.GetPositionY() / g_nRegionSize);
     if (prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
     {
-        auto oldRegion = sRegion->GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
+        auto oldRegion = sRegion.GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
         oldRegion->RemoveObject(pUnit);
-        auto newRegion = sRegion->GetRegion(pUnit);
+        auto newRegion = sRegion.GetRegion(pUnit);
         newRegion->AddObject(pUnit);
     }
 }
@@ -318,7 +319,7 @@ void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 
 void World::AddObjectToWorld(WorldObject *obj)
 {
-    Region *region = sRegion->GetRegion(obj);
+    Region *region = sRegion.GetRegion(obj);
     if (region == nullptr)
         return;
 
@@ -355,14 +356,14 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     broadcastFunctor.packet = leavePct;
 
     // Remove the object from the region
-    sRegion->GetRegion(obj)->RemoveObject(obj);
+    sRegion.GetRegion(obj)->RemoveObject(obj);
 
     // Send one to each player in visible region
-    sRegion->DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                 (uint)(obj->GetPositionY() / g_nRegionSize),
-                                 obj->GetLayer(),
-                                 NG_REGION_FUNCTOR(broadcastFunctor),
-                                 (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
+                                (uint)(obj->GetPositionY() / g_nRegionSize),
+                                obj->GetLayer(),
+                                NG_REGION_FUNCTOR(broadcastFunctor),
+                                (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void World::step(WorldObject *obj, uint tm)
@@ -386,7 +387,7 @@ void World::Update(uint diff)
     UpdateSessions(diff);
 
     ///- Update for WorldObjects (Player, Monster, ...)
-    sMemoryPool->Update(diff);
+    sMemoryPool.Update(diff);
 
     ///- Temporary hack for respawn list
     ///- @todo Rewrite (re)spawning
@@ -396,21 +397,12 @@ void World::Update(uint diff)
         //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
 
-    for(auto& timer : m_timers)
+    for (auto &timer : m_timers)
     {
-        if(timer.GetCurrent() >= 0)
+        if (timer.GetCurrent() >= 0)
             timer.Update(diff);
         else
             timer.SetCurrent(0);
-    }
-
-    ///- Ping to keep MySQL connections alive
-    if (m_timers[WUPDATE_PINGDB].Passed())
-    {
-        m_timers[WUPDATE_PINGDB].Reset();
-        NG_LOG_DEBUG("misc", "Ping MySQL to keep connection alive");
-        CharacterDatabase.KeepAlive();
-        GameDatabase.KeepAlive();
     }
 
     /*
@@ -451,11 +443,11 @@ void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPack
     BroadcastFunctor broadcastFunctor;
     broadcastFunctor.packet = packet;
 
-    sRegion->DoEachVisibleRegion(rx1, ry1,
-                                 rx2, ry2,
-                                 layer,
-                                 NG_REGION_FUNCTOR(broadcastFunctor),
-                                 (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion(rx1, ry1,
+                                rx2, ry2,
+                                layer,
+                                NG_REGION_FUNCTOR(broadcastFunctor),
+                                (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
@@ -463,10 +455,10 @@ void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
     BroadcastFunctor broadcastFunctor;
     broadcastFunctor.packet = packet;
 
-    sRegion->DoEachVisibleRegion(rx, ry,
-                                 layer,
-                                 NG_REGION_FUNCTOR(broadcastFunctor),
-                                 (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion(rx, ry,
+                                layer,
+                                NG_REGION_FUNCTOR(broadcastFunctor),
+                                (uint8_t)RegionVisitor::ClientVisitor);
 
 }
 
@@ -607,14 +599,14 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 
 void World::AddItemToWorld(Item *pItem)
 {
-    sItemCollector->RegisterItem(pItem);
+    sItemCollector.RegisterItem(pItem);
     AddObjectToWorld(pItem);
     pItem->m_nDropTime = GetArTime();
 }
 
 bool World::RemoveItemFromWorld(Item *pItem)
 {
-    if (sItemCollector->UnregisterItem(pItem))
+    if (sItemCollector.UnregisterItem(pItem))
     {
         RemoveObjectFromWorld(pItem);
         pItem->m_nDropTime = 0;
@@ -652,8 +644,8 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     float fMod             = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0)
     {
-        if (sObjectMgr->GetItemBase(code)->group == 13)
-            fCreatureCardMod = sWorld->getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway? */
+        if (sObjectMgr.GetItemBase(code)->group == 13)
+            fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway? */
     }
     auto perc = percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod;
     auto rand = irand(1, 0x5F5E100u);
@@ -662,14 +654,14 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
 
 int World::ShowQuestMenu(Player *pPlayer)
 {
-    auto npc = sMemoryPool->GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
+    auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr)
     {
-        int m_QuestProgress{0};
-        auto functor = [=,&m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
+        int  m_QuestProgress{0};
+        auto functor = [=, &m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
             std::string szBuf{ };
             std::string szButtonName{ };
-            auto        qbs = sObjectMgr->GetQuestBase(linkInfo->code);
+            auto        qbs = sObjectMgr.GetQuestBase(linkInfo->code);
             if ((qbs->nType != QuestType::QUEST_RANDOM_KILL_INDIVIDUAL && qbs->nType != QuestType::QUEST_RANDOM_COLLECT) || (m_QuestProgress != 0))
             {
                 int qpid = linkInfo->nStartTextID;
@@ -697,7 +689,7 @@ bool World::ProcTame(Monster *pMonster)
     if (pMonster->GetTamer() == 0)
         return false;
 
-    auto player = sMemoryPool->GetObjectInWorld<Player>(pMonster->GetTamer());
+    auto player = sMemoryPool.GetObjectInWorld<Player>(pMonster->GetTamer());
     if (player == nullptr || player->GetHealth() == 0)
     {
         Messages::BroadcastTamingMessage(nullptr, pMonster, 3);
@@ -764,7 +756,7 @@ void World::ClearTamer(Monster *pMonster, bool bBroadcastMsg)
         if (bBroadcastMsg)
             Messages::BroadcastTamingMessage(nullptr, pMonster, 1);
 
-        auto player = sMemoryPool->GetObjectInWorld<Player>(tamer);
+        auto player = sMemoryPool.GetObjectInWorld<Player>(tamer);
         if (player != nullptr)
         {
             player->m_hTamingTarget = 0;
@@ -800,8 +792,8 @@ void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, in
 {
     SkillResult sr{ };
     sr.rebirth.nIncHP = 0;
-    sr.type                = (int)SRT_RESULT;
-    sr.hTarget             = handle;
+    sr.type           = (int)SRT_RESULT;
+    sr.hTarget        = handle;
     pvList.emplace_back(sr);
 }
 
@@ -866,7 +858,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
             chaosPct << (uint8)0; // bonus type
             chaosPct << (uint8)0; // bonus percent
             chaosPct << (uint)0;  // bonus
-            sWorld->Broadcast((uint)(pCorpse->GetPositionX() / g_nRegionSize), (uint)(pCorpse->GetPositionY() / g_nRegionSize), pCorpse->GetLayer(), chaosPct);
+            Broadcast((uint)(pCorpse->GetPositionX() / g_nRegionSize), (uint)(pCorpse->GetPositionY() / g_nRegionSize), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
     }
@@ -881,8 +873,8 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
     int    nTotalCount   = 0;
     float  fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
-    sGroupManager->DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
-        if(tag.bIsOnline && tag.pPlayer != nullptr)
+    sGroupManager.DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
+        if (tag.bIsOnline && tag.pPlayer != nullptr)
         {
             nTotalCount++;
             if (tag.pPlayer->IsInWorld() && pCorpse->GetLayer() == tag.pPlayer->GetLayer() && pCorpse->GetExactDist2d(tag.pPlayer) <= 500.0f)
@@ -926,7 +918,7 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
         float lp         = fLevelPenalty * 0.01f + 1.0f;
         auto  nSharedEXP = (int)(exp * lp);
         auto  nSharedJP  = (int)(jp * lp);
-        sGroupManager->DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
+        sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
             if (tag.bIsOnline && tag.pPlayer != nullptr)
             {
                 float ratio   = (float)tag.pPlayer->GetLevel() / nTotalLevel;
@@ -952,7 +944,7 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     if (pClient->GetPartyID() == 0)
         return;
 
-    auto mode = sGroupManager->GetShareMode(pClient->GetPartyID());
+    auto mode = sGroupManager.GetShareMode(pClient->GetPartyID());
     if (mode == ITEM_SHARE_MODE::ITEM_SHARE_MONOPOLY)
     {
         procAddItem(pClient, pItem, true);
@@ -960,15 +952,14 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     else if (mode == ITEM_SHARE_MODE::ITEM_SHARE_RANDOM)
     {
         std::vector<Player *> vList{ };
-        sGroupManager->GetNearMember(pClient, 500.0f, vList);
+        sGroupManager.GetNearMember(pClient, 500.0f, vList);
         auto idx = irand(0, (int)vList.size() - 1);
         procAddItem(vList[idx], pItem, true);
     }
 }
 
-
 void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
-    sRegion->DoEachVisibleRegion((uint)(pos.GetPositionX() / g_nRegionSize), (uint)(pos.GetPositionY() / g_nRegionSize), layer, fn);
+    sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / g_nRegionSize), (uint)(pos.GetPositionY() / g_nRegionSize), layer, fn);
 }

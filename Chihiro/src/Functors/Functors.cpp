@@ -64,7 +64,7 @@ void AddObjectFunctor::Run()
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
 
-    sRegion->DoEachVisibleRegion(x, y, layer,
+    sRegion.DoEachVisibleRegion(x, y, layer,
                                  NG_REGION_FUNCTOR(fn),
                                  (uint8_t)RegionVisitor::ClientVisitor);
     if (fn.bSent)
@@ -74,7 +74,7 @@ void AddObjectFunctor::Run()
     {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
-        sRegion->DoEachVisibleRegion(x, y, layer,
+        sRegion.DoEachVisibleRegion(x, y, layer,
                                      NG_REGION_FUNCTOR(fn2),
                                      (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
@@ -85,7 +85,7 @@ void AddObjectFunctor::Run2()
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
 
-    sRegion->DoEachNewRegion(x, y,
+    sRegion.DoEachNewRegion(x, y,
                              x2, y2,
                              layer,
                              NG_REGION_FUNCTOR(fn),
@@ -97,7 +97,7 @@ void AddObjectFunctor::Run2()
     {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
-        sRegion->DoEachNewRegion(x, y,
+        sRegion.DoEachNewRegion(x, y,
                                  x2, y2,
                                  layer,
                                  NG_REGION_FUNCTOR(fn2),
@@ -137,7 +137,7 @@ EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint>
     right  = pos.GetPositionX() + range;
     top    = pos.GetPositionY() - range;
     bottom = pos.GetPositionY() + range;
-    t      = sWorld->GetArTime();
+    t      = sWorld.GetArTime();
 }
 
 void EnumMovableObjectRegionFunctor::Run(Region *region)

@@ -50,8 +50,13 @@ class ObjectMgr
 {
     public:
         friend class GameContent;
-        ObjectMgr();
         ~ObjectMgr() = default;
+
+        static ObjectMgr &Instance()
+        {
+            static ObjectMgr instance;
+            return instance;
+        }
 
         typedef std::unordered_map<int32, ItemTemplate>                  ItemTemplateContainer;
         typedef std::unordered_map<int32, uint64>                        SummonLevelBaseContainer;
@@ -159,8 +164,10 @@ class ObjectMgr
 
         void RegisterSkillTree(SkillTreeBase base);
         std::vector<SkillTreeBase> getSkillTree(int job_id);
+    protected:
+        ObjectMgr();
 };
 
-#define sObjectMgr ACE_Singleton<ObjectMgr, ACE_Null_Mutex>::instance()
+#define sObjectMgr ObjectMgr::Instance()
 
 #endif // NGEMITY_OBJECTMGR_H_

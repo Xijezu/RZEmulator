@@ -34,6 +34,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 # Find the correct ACE package
 include(cmake/ImportACE.cmake)
 
+FIND_PACKAGE(Boost REQUIRED system filesystem)
 find_package(Platform REQUIRED)
 find_package(MYSQL REQUIRED)
 

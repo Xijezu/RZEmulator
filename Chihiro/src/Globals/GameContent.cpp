@@ -29,14 +29,14 @@ bool GameContent::IsBlocked(float x, float y)
 {
     if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
         return true;
-    if (sWorld->getBoolConfig(CONFIG_NO_COLLISION_CHECK))
+    if (sWorld.getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;
-    return sObjectMgr->g_qtBlockInfo.Collision({x, y});
+    return sObjectMgr.g_qtBlockInfo.Collision({x, y});
 }
 
 bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
 {
-    return sObjectMgr->g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
+    return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
                                                       {x2, y2}});
 }
 
@@ -46,7 +46,7 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
     for (int i     = 0; i <= depth; ++i)
     {
         int  nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
-        auto tree     = sObjectMgr->getSkillTree(nCurrJob);
+        auto tree     = sObjectMgr.getSkillTree(nCurrJob);
         if (tree.empty())
             continue;
 
@@ -66,7 +66,7 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
 
             for (currSkillLevel += 1; currSkillLevel <= s.max_skill_lv; ++currSkillLevel)
             {
-                int nNeedJP = sObjectMgr->GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
+                int nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
                 pPlayer->SetJP(nNeedJP);
                 pPlayer->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
             }
@@ -146,7 +146,7 @@ NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
 {
     auto npc = new NPC{npc_info};
     npc->SetLayer(layer);
-    for (auto &ql : sObjectMgr->_questLinkStore)
+    for (auto &ql : sObjectMgr._questLinkStore)
     {
         if (ql.nNPCID == npc->m_pBase->id)
         {
@@ -158,12 +158,12 @@ NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
 
 void GameContent::AddNPCToWorld()
 {
-    for (auto &npc : sObjectMgr->_npcTemplateStore)
+    for (auto &npc : sObjectMgr._npcTemplateStore)
     {
         if (/*npc.second.spawn_type == SPAWN_NORMAL &&*/ npc.second.local_flag == 0)
         {
             auto nn = GetNewNPC(&npc.second, 0);
-            sWorld->AddObjectToWorld(nn);
+            sWorld.AddObjectToWorld(nn);
         }
     }
 }
@@ -173,7 +173,7 @@ bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int6
     nItemID    = 0;
     nItemCount = 1;
 
-    auto dg    = sObjectMgr->GetDropGroupInfo(nDropGroupID);
+    auto dg    = sObjectMgr.GetDropGroupInfo(nDropGroupID);
     if (dg != nullptr)
     {
         int      cp = 0;
@@ -184,7 +184,7 @@ bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int6
             if (p <= cp)
             {
                 // temporary workaround for dropgroup
-                if (dg->drop_item_id[i] > 0 && sObjectMgr->GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
+                if (dg->drop_item_id[i] > 0 && sObjectMgr.GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
                     continue;
                 nItemID    = dg->drop_item_id[i];
                 nItemCount = 1;
@@ -247,7 +247,7 @@ int64 GameContent::GetItemSellPrice(int64 price, int rank, int lv, bool same_pri
 
 Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
 {
-    auto mob = sMemoryPool->AllocMonster((uint)id);
+    auto mob = sMemoryPool.AllocMonster((uint)id);
     if (mob != nullptr)
     {
         mob->SetCurrentXY(x, y);
@@ -255,10 +255,10 @@ Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bo
         mob->m_pDeleteHandler    = pDeleteHandler;
         mob->m_bIsWandering      = is_wandering;
         if (way_point_id != 0)
-            mob->m_pWayPointInfo = sObjectMgr->GetWayPoint(way_point_id);
+            mob->m_pWayPointInfo = sObjectMgr.GetWayPoint(way_point_id);
         mob->SetRespawnPosition({x, y, 0});
-        sWorld->AddMonsterToWorld(mob);
-        sWorld->SetMove(mob, mob->GetPosition(), mob->GetPosition(), 0, true, sWorld->GetArTime(), false);
+        sWorld.AddMonsterToWorld(mob);
+        sWorld.SetMove(mob, mob->GetPosition(), mob->GetPosition(), 0, true, sWorld.GetArTime(), false);
     }
     return mob;
 }
@@ -294,7 +294,7 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
     bool bMaxLimit = false;
     bool bFound    = false;
 
-    auto st = sObjectMgr->getSkillTree(nJobID);
+    auto st = sObjectMgr.getSkillTree(nJobID);
     if (st.empty())
         return TS_RESULT_ACCESS_DENIED;
 
@@ -320,7 +320,7 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
                             return TS_RESULT_NOT_ENOUGH_SKILL;
                         }
                     }
-                    auto     sb  = sObjectMgr->GetSkillBase(skill_id);
+                    auto     sb  = sObjectMgr.GetSkillBase(skill_id);
                     if (sb->id == 0)
                         return TS_RESULT_ACCESS_DENIED;
 
@@ -355,7 +355,7 @@ int GameContent::GetLocationID(const float x, const float y)
     pt.x = x;
     pt.y = y;
     X2D::QuadTreeMapInfo::FunctorAdaptor fn{ };
-    sMapContent->g_qtLocationInfo->Enum(pt, fn);
+    sMapContent.g_qtLocationInfo->Enum(pt, fn);
 
     for (auto &info : fn.pResult)
     {
@@ -381,7 +381,7 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
         rTargetPos = _TargetPos;
 
     std::vector<uint> vList{ };
-    sWorld->EnumMovableObject(rOriginalPos, layer, fEffectLength, vList, true, true);
+    sWorld.EnumMovableObject(rOriginalPos, layer, fEffectLength, vList, true, true);
     vTargetList.clear();
 
     std::unique_ptr<RegionTester> regionTest{ };
@@ -409,7 +409,7 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
 
     for (const uint &uid : vList)
     {
-        auto unit = sMemoryPool->GetObjectInWorld<Unit>(uid);
+        auto unit = sMemoryPool.GetObjectInWorld<Unit>(uid);
         if (unit != nullptr && unit->GetHealth() != 0)
         {
             if (!pCaster->IsEnemy(unit, true))
@@ -419,7 +419,7 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
                 bIsAlly = true;
             }
 
-            auto current_pos = unit->GetCurrentPosition(sWorld->GetArTime());
+            auto current_pos = unit->GetCurrentPosition(sWorld.GetArTime());
             if (regionTest->IsInRegion(current_pos) && (bIncludeOriginalPos || !(rOriginalPos == current_pos)))
             {
                 if (bIsAlly)

@@ -37,7 +37,7 @@ Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0)
     m_nSummonID   = 0;
     m_fRange      = 0;
     m_nSkillLevel = 0;
-    m_SkillBase   = sObjectMgr->GetSkillBase(m_nSkillID);
+    m_SkillBase   = sObjectMgr.GetSkillBase(m_nSkillID);
     if (m_SkillBase != nullptr)
     {
         short et        = m_SkillBase->effect_type;
@@ -103,7 +103,7 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
 {
     m_vResultList.clear();
-    auto current_time = sWorld->GetArTime();
+    auto current_time = sWorld.GetArTime();
     uint delay        = 0xffffffff;
 
     if (m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
@@ -202,13 +202,13 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
             m_nErrorCode = TS_RESULT_NOT_ACTABLE;
             if (m_pOwner->IsPlayer())
             {
-                auto pProp = sMemoryPool->GetObjectInWorld<FieldProp>(handle);
+                auto pProp = sMemoryPool.GetObjectInWorld<FieldProp>(handle);
                 if (pProp != nullptr && pProp->m_pFieldPropBase->nActivateSkillID == m_SkillBase->id)
                 {
                     if (pProp->m_nUseCount >= 1 && pProp->IsUsable(m_pOwner->As<Player>()))
                     {
                         delay = pProp->GetCastingDelay();
-                        if (sRegion->IsVisibleRegion(m_pOwner, pProp) == 0)
+                        if (sRegion.IsVisibleRegion(m_pOwner, pProp) == 0)
                             return TS_RESULT_NOT_ACTABLE;
                         pProp->Cast();
                         m_nErrorCode = TS_RESULT_SUCCESS;
@@ -262,7 +262,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 
 uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr || item->m_pItemBase->group != GROUP_SUMMONCARD || item->m_Instance.OwnerHandle != m_pOwner->GetHandle())
     {
         return TS_RESULT_NOT_ACTABLE;
@@ -429,7 +429,7 @@ void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, 
     uint8   layer = pUnit->GetLayer();
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld->Broadcast((uint)rx, (uint)ry, layer, skillPct);
+    sWorld.Broadcast((uint)rx, (uint)ry, layer, skillPct);
 }
 
 void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int cost_mp, int nType)
@@ -439,14 +439,14 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
 
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld->Broadcast((uint)(pUnit1->GetPositionX() / g_nRegionSize), (uint)(pUnit1->GetPositionY() / g_nRegionSize),
+    sWorld.Broadcast((uint)(pUnit1->GetPositionX() / g_nRegionSize), (uint)(pUnit1->GetPositionY() / g_nRegionSize),
                       (uint)(pUnit2->GetPositionX() / g_nRegionSize), (uint)(pUnit2->GetPositionY() / g_nRegionSize),
                       pUnit1->GetLayer(), skillPct);
 }
 
 void Skill::ProcSkill()
 {
-    if (sWorld->GetArTime() < m_nFireTime || m_Status == SkillStatus::SS_IDLE)
+    if (sWorld.GetArTime() < m_nFireTime || m_Status == SkillStatus::SS_IDLE)
         return;
 
     if (m_Status == SkillStatus::SS_CAST)
@@ -459,7 +459,7 @@ void Skill::ProcSkill()
 
     }*/
 
-    auto pTarget = sMemoryPool->GetObjectInWorld<Unit>(m_hTarget);
+    auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(m_hTarget);
 
     if (m_pOwner == nullptr || m_pOwner->GetHealth() == 0)
     {
@@ -492,7 +492,7 @@ void Skill::ProcSkill()
         }
     }
 
-    if (m_Status == SkillStatus::SS_COMPLETE && sWorld->GetArTime() >= m_nFireTime)
+    if (m_Status == SkillStatus::SS_COMPLETE && sWorld.GetArTime() >= m_nFireTime)
     {
         broadcastSkillMessage(m_pOwner, 0, 0, 5);
         m_pOwner->OnCompleteSkill();
@@ -516,7 +516,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             FireSkillStateSkillFunctor fn{ };
             fn.pvList = m_vResultList;
-            process_target(sWorld->GetArTime(), fn, pTarget);
+            process_target(sWorld.GetArTime(), fn, pTarget);
         }
             break;
         case EF_MAGIC_SINGLE_DAMAGE:
@@ -610,7 +610,7 @@ void Skill::PostFireSkill(Unit *pTarget)
     std::vector<Unit *> vNeedStateList{ };
     for (const auto     &sr : m_vResultList)
     {
-        auto pDealTarget = sMemoryPool->GetObjectInWorld<Unit>(sr.hTarget);
+        auto pDealTarget = sMemoryPool.GetObjectInWorld<Unit>(sr.hTarget);
         if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
         {
 
@@ -679,7 +679,7 @@ void Skill::PostFireSkill(Unit *pTarget)
     {
         FireSkillStateSkillFunctor fn{ };
         fn.pvList = m_vResultList;
-        auto t = sWorld->GetArTime();
+        auto t = sWorld.GetArTime();
 
         for (auto &unit : vNeedStateList)
         {
@@ -759,7 +759,7 @@ uint Skill::GetSkillCoolTime() const
 
 void Skill::SetRemainCoolTime(uint time)
 {
-    m_nNextCoolTime = time + sWorld->GetArTime();
+    m_nNextCoolTime = time + sWorld.GetArTime();
 }
 
 uint Skill::GetSkillEnhance() const
@@ -773,7 +773,7 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
         return TS_RESULT_NOT_ACTABLE;
 
     auto player  = m_pOwner->As<Player>();
-    auto monster = sMemoryPool->GetObjectInWorld<Monster>(handle);
+    auto monster = sMemoryPool.GetObjectInWorld<Monster>(handle);
     if (monster == nullptr)
     {
         return TS_RESULT_NOT_ACTABLE;
@@ -845,11 +845,11 @@ uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint cur
 // Function       :   protected void StructSkill::MAGIC_ABSORB_DAMAGE(struct StructCreature *)
 void Skill::CREATURE_TAMING()
 {
-    auto pTarget = sMemoryPool->GetObjectInWorld<Monster>(m_hTarget);
+    auto pTarget = sMemoryPool.GetObjectInWorld<Monster>(m_hTarget);
     if (pTarget == nullptr || !pTarget->IsMonster() || !m_pOwner->IsPlayer())
         return;
 
-    bool bResult = sWorld->SetTamer(pTarget, m_pOwner->As<Player>(), m_nRequestedSkillLevel);
+    bool bResult = sWorld.SetTamer(pTarget, m_pOwner->As<Player>(), m_nRequestedSkillLevel);
     if (bResult)
     {
         pTarget->AddHate(m_pOwner->GetHandle(), 1, true, true);
@@ -875,7 +875,7 @@ void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
                                                    m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
                                                    m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
 
-    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
+    sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
@@ -894,7 +894,7 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
                                                   m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl), 0);
 
-    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
+    sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
@@ -913,7 +913,7 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
                                                   (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)), 0);
 
-    sWorld->AddSkillDamageResult(m_vResultList, 1, (uint8)elemental_type, damage, pTarget->GetHandle());
+    sWorld.AddSkillDamageResult(m_vResultList, 1, (uint8)elemental_type, damage, pTarget->GetHandle());
 
     auto nAddHP = (int)(((m_SkillBase->var[8] * m_nEnhance) + (m_SkillBase->var[6] + (m_SkillBase->var[7] * m_nRequestedSkillLevel))) * damage.nDamage);
     auto nAddMP = (int)(((m_SkillBase->var[11] * m_nEnhance) + (m_SkillBase->var[9] + (m_SkillBase->var[10] * m_nRequestedSkillLevel))) * damage.nDamage);
@@ -938,10 +938,10 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
 
 void Skill::ACTIVATE_FIELD_PROP()
 {
-    auto fp = sMemoryPool->GetObjectInWorld<FieldProp>(m_hTarget);
+    auto fp = sMemoryPool.GetObjectInWorld<FieldProp>(m_hTarget);
     if (fp != nullptr)
     {
-        sWorld->AddSkillResult(m_vResultList, fp->UseProp(m_pOwner->As<Player>()), 0, 0);
+        sWorld.AddSkillResult(m_vResultList, fp->UseProp(m_pOwner->As<Player>()), 0, 0);
     }
 }
 
@@ -972,7 +972,7 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
      * Not sure about why I went this way "as some kind of workaround", but it was the wrong
      * approach. Make sure to fix this later
     */
-    //sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
+    //sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
 }
 
 void Skill::TOWN_PORTAL()
@@ -983,7 +983,7 @@ void Skill::TOWN_PORTAL()
 
         auto pos = pPlayer->GetLastTownPosition();
         pPlayer->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
-        pos = pPlayer->GetCurrentPosition(sWorld->GetArTime());
+        pos = pPlayer->GetCurrentPosition(sWorld.GetArTime());
         pPlayer->SetMove(pos, 0, 0);
     }
 }
@@ -1015,7 +1015,7 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
                                                   (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)), 0);
 
-    sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, Damage, pTarget->GetHandle());
+    sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, Damage, pTarget->GetHandle());
     m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);
 }
 
@@ -1026,7 +1026,7 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
     {
         // TODO: Party functor
     }
-    sWorld->AddSkillResult(m_vResultList, true, 0, m_pOwner->GetHandle());
+    sWorld.AddSkillResult(m_vResultList, true, 0, m_pOwner->GetHandle());
 }
 
 void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
@@ -1099,7 +1099,7 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
                          * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
                          + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
 
-    auto  ct            = sWorld->GetArTime();
+    auto  ct            = sWorld.GetArTime();
     float fEffectLength = m_SkillBase->var[9] * 12;
     m_fRange = fEffectLength;
 
@@ -1125,7 +1125,7 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
         auto hitBonus = m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - target->GetLevel());
         int  nFlag    = m_SkillBase->critical_bonus + m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl;
         auto damage   = target->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental, hitBonus, nFlag, 0);
-        sWorld->AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, target->GetHandle());
+        sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, damage, target->GetHandle());
     }
     m_nFireTime = (uint)((m_SkillBase->var[8] * 100) + m_nFireTime);
 }
@@ -1140,7 +1140,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
     {
         if (!pTarget->IsMonster() || pTarget->GetHealth() != 0)
             return;
-        sWorld->RemoveObjectFromWorld(pTarget);
+        sWorld.RemoveObjectFromWorld(pTarget);
     }
 
     auto nMagicPoint = static_cast<int>(m_pOwner->m_Attribute.nMagicPoint); // m_pOwner->GetMagicPoint();
@@ -1166,7 +1166,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
     }
 
     m_fRange = effectLength;
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
                                                          m_pOwner->GetLayer(),
                                                          pTarget->GetCurrentPosition(ct),
@@ -1188,7 +1188,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
         auto hitBonus = m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - unit->GetLevel());
         int  nFlag    = m_SkillBase->critical_bonus + m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl;
         auto damage   = unit->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental, hitBonus, nFlag, 0);
-        sWorld->AddSkillDamageResult(m_vResultList, 1, (uint8)m_SkillBase->elemental, damage, unit->GetHandle());
+        sWorld.AddSkillDamageResult(m_vResultList, 1, (uint8)m_SkillBase->elemental, damage, unit->GetHandle());
     }
 
 }

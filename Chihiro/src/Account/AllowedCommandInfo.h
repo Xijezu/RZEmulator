@@ -24,7 +24,11 @@ class Player;
 class AllowedCommandInfo
 {
     public:
-        AllowedCommandInfo() = default;
+        static AllowedCommandInfo &Instance()
+        {
+            static AllowedCommandInfo instance;
+            return instance;
+        }
         ~AllowedCommandInfo() = default;
 
         void Run(Player *pClient, const std::string &szMessage);
@@ -44,8 +48,10 @@ class AllowedCommandInfo
         void onPartyInfo(Player *pClient, const std::string &);
         void onLeaveParty(Player *pClient, const std::string &);
         void onPartyDestroy(Player *pClient, const std::string &);
+    protected:
+        AllowedCommandInfo() = default;
 };
 
-#define sAllowedCommandInfo ACE_Singleton<AllowedCommandInfo, ACE_Null_Mutex>::instance()
+#define sAllowedCommandInfo AllowedCommandInfo::Instance()
 
 #endif // NGEMITY_ALLOWEDCOMMANDINFO_H

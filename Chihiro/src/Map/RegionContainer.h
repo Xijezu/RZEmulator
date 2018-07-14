@@ -35,6 +35,12 @@ enum class RegionVisitor : uint8_t
 class RegionContainer
 {
     public:
+        static RegionContainer &Instance()
+        {
+            static RegionContainer instance;
+            return instance;
+        }
+
         ~RegionContainer();
         void InitRegion(float map_width, float map_height);
         bool IsValidRegion(uint rx, uint ry, uint8 layer);
@@ -193,6 +199,8 @@ class RegionContainer
         uint                       m_nRegionBlockHeight;
         std::vector<RegionBlock *> m_RegionBlock;
         NG_SHARED_MUTEX i_lock;
+    protected:
+        RegionContainer() = default;
 };
-#define sRegion ACE_Singleton<RegionContainer, ACE_Thread_Mutex>::instance()
+#define sRegion RegionContainer::Instance()
 #endif // NGEMITY_REGIONCONTAINER_H

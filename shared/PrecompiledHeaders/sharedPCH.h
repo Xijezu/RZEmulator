@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Log.h"
-#include "DatabaseWorker.h"
-#include "SQLOperation.h"
+#include "DatabaseEnv.h"
+#include "DatabaseLoader.h"
+#include "MySQLThreading.h"
 #include "Errors.h"

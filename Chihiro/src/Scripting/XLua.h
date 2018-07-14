@@ -25,7 +25,11 @@ class Unit;
 class XLua
 {
     public:
-        XLua();
+        static XLua &Instance()
+        {
+            static XLua instance;
+            return instance;
+        }
         bool InitializeLua();
         ~XLua() = default;
 
@@ -122,7 +126,9 @@ class XLua
 
         Unit       *m_pUnit{nullptr};
         sol::state m_pState{ };
+    protected:
+        XLua();
 };
 
-#define sScriptingMgr ACE_Singleton<XLua, ACE_Thread_Mutex>::instance()
+#define sScriptingMgr XLua::Instance()
 #endif // NGEMITY_XLUA_H

@@ -141,3 +141,5 @@ bool DatabaseLoader::Process(std::queue<Predicate> &queue)
 
 template DatabaseLoader& DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection>&, std::string const&);
 template DatabaseLoader& DatabaseLoader::AddDatabase<CharacterDatabaseConnection>(DatabaseWorkerPool<CharacterDatabaseConnection>&, std::string const&);
+template DatabaseLoader& DatabaseLoader::AddDatabase<GameDatabaseConnection>(DatabaseWorkerPool<GameDatabaseConnection>&, std::string const&);
+

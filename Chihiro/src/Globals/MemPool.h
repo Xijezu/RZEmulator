@@ -25,6 +25,7 @@
 #include "Item.h"
 #include "Player.h"
 #include "Summon.h"
+#include "LockedQueue.h"
 #include "Monster.h"
 #include <unordered_map>
 
@@ -32,6 +33,13 @@ typedef std::unordered_map<uint32, WorldObject*> UpdateMap;
 class MemoryPoolMgr
 {
     public:
+        ~MemoryPoolMgr() = default;
+        static MemoryPoolMgr &Instance()
+        {
+            static MemoryPoolMgr instance;
+            return instance;
+        }
+
         template<class T>
         T *GetObjectInWorld(uint handle)
         {
@@ -86,7 +94,7 @@ class MemoryPoolMgr
         void _unload();
         void AddToDeleteList(WorldObject *obj);
         std::set<WorldObject *>                                 i_objectsToRemove{ };
-        ACE_Based::LockedQueue<WorldObject *, ACE_Thread_Mutex> addUpdateQueue{ };
+        LockedQueue<WorldObject*> addUpdateQueue;
 
         UpdateMap i_objectsToUpdate{ };
 
@@ -98,7 +106,10 @@ class MemoryPoolMgr
         uint32_t m_nPetTop{0xE0000001};
 #endif
         uint32_t m_nItemTop{0x00000001};
+
+    protected:
+        MemoryPoolMgr() = default;
 };
 
-#define sMemoryPool ACE_Singleton<MemoryPoolMgr, ACE_Thread_Mutex>::instance()
+#define sMemoryPool MemoryPoolMgr::Instance()
 #endif //MEMORYPOOL_H

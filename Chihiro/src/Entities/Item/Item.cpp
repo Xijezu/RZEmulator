@@ -25,11 +25,11 @@
 Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
 {
-    Item *item = sMemoryPool->AllocItem();
+    Item *item = sMemoryPool.AllocItem();
     if(item == nullptr)
         return nullptr;
 
-    item->m_pItemBase = sObjectMgr->GetItemBase((uint)code);
+    item->m_pItemBase = sObjectMgr.GetItemBase((uint)code);
 
     item->m_Instance.UID          = uid;
     item->m_Instance.Code         = code;
@@ -189,7 +189,7 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 
 void Item::PendFreeItem(Item *pItem)
 {
-    //sMemoryPool->RemoveObject(pItem, true);
+    //sMemoryPool.RemoveObject(pItem, true);
     pItem->DeleteThis();
 }
 
@@ -246,7 +246,7 @@ int Item::GetMaxEndurance() const
         {
             if(m_Instance.Socket[i] != 0)
             {
-                total_endurance += sObjectMgr->GetItemBase(m_Instance.Socket[i])->endurance;
+                total_endurance += sObjectMgr.GetItemBase(m_Instance.Socket[i])->endurance;
             }
         }
         if (total_endurance != 0)

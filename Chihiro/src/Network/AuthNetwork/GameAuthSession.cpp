@@ -18,13 +18,12 @@
 #include "Common.h"
 #include "GameAuthSession.h"
 #include "AuthNetwork.h"
+#include "Player.h"
+#include "WorldSession.h"
 #include "World.h"
 
-GameAuthSession::GameAuthSession(AuthSocket *socket) : m_pSocket(socket)
+GameAuthSession::GameAuthSession(XSocket *socket) : m_pSocket(socket)
 {
-    if (socket)
-        socket->AddReference();
-
     m_nGameIDX           = (uint16)sConfigMgr->GetIntDefault("GameServer.Index", 1);
     m_szGameName         = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
     m_szGameSSU          = sConfigMgr->GetStringDefault("GameServer.SSU", "about:blank");
@@ -35,8 +34,7 @@ GameAuthSession::GameAuthSession(AuthSocket *socket) : m_pSocket(socket)
 
 GameAuthSession::~GameAuthSession()
 {
-    if (m_pSocket)
-        m_pSocket->RemoveReference();
+
 }
 
 typedef struct AuthHandler
@@ -54,7 +52,7 @@ constexpr AuthHandler packetHandler[] =
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(AuthHandler));
 
-void GameAuthSession::ProcessIncoming(XPacket *pGamePct)
+ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
 {
             ASSERT(pGamePct);
 
@@ -65,7 +63,7 @@ void GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd)
         {
-            pGamePct->read_skip(7); // ignoring header
+            //pGamePct->read_skip(7); // ignoring header
             (*this.*packetHandler[i].handler)(pGamePct);
             break;
         }
@@ -74,9 +72,10 @@ void GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
-        return;
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        return ReadDataHandlerResult::Error;
     }
+    return ReadDataHandlerResult::Ok;
 }
 
 void GameAuthSession::HandleClientLoginResult(XPacket *pRecvPct)
@@ -96,7 +95,7 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
     auto player   = Player::FindPlayer(szPlayer);
     if (player != nullptr)
     {
-        player->GetSession().KickPlayer();
+        ((WorldSession)player->GetSession()).KickPlayer();
     }
 }
 

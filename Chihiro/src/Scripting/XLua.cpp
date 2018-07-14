@@ -165,12 +165,12 @@ bool XLua::RunString(std::string szScript)
 
 void XLua::SCRIPT_SetWayPointType(int waypoint_id, int waypoint_type)
 {
-    sObjectMgr->SetWayPointType(waypoint_id, waypoint_type);
+    sObjectMgr.SetWayPointType(waypoint_id, waypoint_type);
 }
 
 void XLua::SCRIPT_AddWayPoint(int waypoint_id, int x, int y)
 {
-    sObjectMgr->AddWayPoint(waypoint_id, x, y);
+    sObjectMgr.AddWayPoint(waypoint_id, x, y);
 }
 
 void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
@@ -190,7 +190,7 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
     int   wander_id  = args.size() > 7 ? args[8].get<uint>() : 0;
 
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
-    sObjectMgr->RegisterMonsterRespawnInfo(info);
+    sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
 void XLua::SCRIPT_RespawnRoamingMob(int, int, int, int, int)
@@ -209,7 +209,7 @@ int XLua::SCRIPT_GetNPCID()
     if (player == nullptr)
         return -1;
 
-    auto t = sMemoryPool->GetObjectInWorld<WorldObject>(player->GetLastContactLong("npc"));
+    auto t = sMemoryPool.GetObjectInWorld<WorldObject>(player->GetLastContactLong("npc"));
     if (t != nullptr)
     {
         return t->GetUInt32Value(UNIT_FIELD_UID);
@@ -233,7 +233,7 @@ void ::XLua::SCRIPT_DialogText(std::string szText)
         return;
 
     player->SetDialogText(szText);
-    sWorld->ShowQuestMenu(player);
+    sWorld.ShowQuestMenu(player);
 }
 
 void XLua::SCRIPT_DialogTextWithoutQuestMenu(std::string szText)
@@ -408,7 +408,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     }
     else if (szKey == "level" || szKey == "lv")
     {
-        m_pUnit->SetEXP((uint)sObjectMgr->GetNeedExp(args[0].get<uint>()));
+        m_pUnit->SetEXP((uint)sObjectMgr.GetNeedExp(args[0].get<uint>()));
     }
     else if (szKey == "job_level" || szKey == "jlv")
     {
@@ -496,7 +496,7 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
     if (player == nullptr)
         return;
 
-    auto info = sObjectMgr->GetMarketInfo(szMarket);
+    auto info = sObjectMgr.GetMarketInfo(szMarket);
 
     if (info != nullptr && !info->empty())
     {
@@ -532,7 +532,7 @@ void XLua::SCRIPT_Message(std::string szMsg)
 
 void XLua::SCRIPT_SetCurrentLocationID(int location_id)
 {
-    sObjectMgr->g_currentLocationId = location_id;
+    sObjectMgr.g_currentLocationId = location_id;
 }
 
 void XLua::SCRIPT_Warp(sol::variadic_args args)
@@ -576,7 +576,7 @@ int XLua::SCRIPT_GetWearItemHandle(int index)
 
 int XLua::SCRIPT_GetItemLevel(uint handle)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
     return item->m_Instance.nLevel;
@@ -584,7 +584,7 @@ int XLua::SCRIPT_GetItemLevel(uint handle)
 
 int XLua::SCRIPT_GetItemEnhance(uint handle)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
     return item->m_Instance.nEnhance;
@@ -594,7 +594,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 {
     if (level > 255)
         return 0;
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
     item->m_Instance.nLevel   = level;
@@ -618,7 +618,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
 
 int XLua::SCRIPT_GetItemRank(uint handle)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr)
         return 0;
     return item->m_pItemBase->rank;
@@ -626,7 +626,7 @@ int XLua::SCRIPT_GetItemRank(uint handle)
 
 int XLua::SCRIPT_GetItemPrice(uint handle)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr)
         return 0;
     return item->m_pItemBase->price;
@@ -634,7 +634,7 @@ int XLua::SCRIPT_GetItemPrice(uint handle)
 
 int XLua::SCRIPT_GetItemNameID(int code)
 {
-    auto base = sObjectMgr->GetItemBase(code);
+    auto base = sObjectMgr.GetItemBase(code);
     if (base == nullptr)
         return 0;
     else
@@ -643,7 +643,7 @@ int XLua::SCRIPT_GetItemNameID(int code)
 
 int XLua::SCRIPT_GetItemCode(uint handle)
 {
-    auto item = sMemoryPool->GetObjectInWorld<Item>(handle);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
     return item->m_Instance.Code;
@@ -712,7 +712,7 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
     auto               inc        = args[8].get<uint>();
     auto               wander_id  = args.size() > 9 ? args[9].get<int>() : 0;
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
-    sObjectMgr->RegisterMonsterRespawnInfo(info);
+    sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
 void XLua::SCRIPT_CPrint(sol::variadic_args)
@@ -744,7 +744,7 @@ int XLua::SCRIPT_GetCreatureHandle(int idx)
 
 void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object value)
 {
-    auto summon = sMemoryPool->GetObjectInWorld<Summon>((uint)handle);
+    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint)handle);
     if (summon == nullptr && handle < 6 && handle > 0)
     {
         auto player = dynamic_cast<Player *>(m_pUnit);
@@ -765,7 +765,7 @@ void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object valu
     {
         if (key == "level"s || key == "lv"s)
         {
-            summon->SetEXP(sObjectMgr->GetNeedSummonExp(value.as<int>()));
+            summon->SetEXP(sObjectMgr.GetNeedSummonExp(value.as<int>()));
             Messages::SendEXPMessage(m_pUnit->As<Player>(), summon);
         }
         else if (key == "ev_1_ID"s)
@@ -799,7 +799,7 @@ void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object valu
 
 sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
 {
-    auto summon = sMemoryPool->GetObjectInWorld<Summon>((uint)handle);
+    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint)handle);
     if (summon == nullptr && handle < 6 && handle > 0)
     {
         auto player = dynamic_cast<Player *>(m_pUnit);
@@ -928,7 +928,7 @@ void XLua::SCRIPT_EndQuest(int quest_id, int reward_id, sol::variadic_args args)
 
 void XLua::SCRIPT_EnterDungeon(int nDungeonID)
 {
-    auto pos = sDungeonManager->GetRaidStartPosition(nDungeonID);
+    auto pos = sDungeonManager.GetRaidStartPosition(nDungeonID);
     if (pos.GetPositionX() != 0 && pos.GetPositionY() != 0)
     {
         dynamic_cast<Player *>(m_pUnit)->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
@@ -954,7 +954,7 @@ void XLua::SCRIPT_WarpToRevivePosition(sol::variadic_args)
     auto revive_pos = player->GetLastTownPosition();
 
     player->PendWarp((int)revive_pos.GetPositionX(), (int)revive_pos.GetPositionY(), 0);
-    player->SetMove(player->GetCurrentPosition(sWorld->GetArTime()), 0, 0);
+    player->SetMove(player->GetCurrentPosition(sWorld.GetArTime()), 0, 0);
 }
 
 void XLua::SCRIPT_ShowSoulStoneCraftWindow()
@@ -996,5 +996,5 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
         return;
     }
 
-    player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(), nStateLevel, sWorld->GetArTime(), sWorld->GetArTime() + nStateTime, false, 0, "");
+    player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
 }

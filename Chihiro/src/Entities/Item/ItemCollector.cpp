@@ -53,16 +53,16 @@ bool ItemCollector::UnregisterItem(Item *pItem)
 void ItemCollector::Update()
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next)
     {
         next = itr;
         ++next;
 
-        if(itr->second->m_nDropTime + sWorld->getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct)
+        if(itr->second->m_nDropTime + sWorld.getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct)
         {
             if(itr->second->IsInWorld())
-                sWorld->RemoveObjectFromWorld(itr->second);
+                sWorld.RemoveObjectFromWorld(itr->second);
             m_vItemList.erase(itr);
             Item::PendFreeItem(itr->second);
         }

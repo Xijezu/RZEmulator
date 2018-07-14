@@ -21,6 +21,7 @@
 #include "Errors.h"
 #include "Implementation/LoginDatabase.h"
 #include "Implementation/CharacterDatabase.h"
+#include "Implementation/GameDatabase.h"
 #include "Log.h"
 #include "PreparedStatement.h"
 #include "ProducerConsumerQueue.h"
@@ -443,3 +444,5 @@ void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction& trans, PreparedState
 
 template class DatabaseWorkerPool<LoginDatabaseConnection>;
 template class DatabaseWorkerPool<CharacterDatabaseConnection>;
+template class DatabaseWorkerPool<GameDatabaseConnection>;
+
