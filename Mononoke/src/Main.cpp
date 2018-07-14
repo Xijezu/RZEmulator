@@ -16,7 +16,12 @@
  */
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
+
+#include "DatabaseEnv.h"
+#include "DatabaseLoader.h"
+#include "Implementation/LoginDatabase.h"
+#include "MySQLThreading.h"
+
 #include "AuthClientSocketMgr.h"
 #include "AuthGameSocketMgr.h"
 #include "SystemConfigs.h"
@@ -27,8 +32,6 @@ bool StartDB();
 void StopDB();
 
 bool                    stopEvent{false};                                     // Setting it to true stops the server
-LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the auth server database
-
 
 #ifndef _MONONOKE_CORE_CONFIG
 # define _MONONOKE_CORE_CONFIG  "authserver.conf"
@@ -133,29 +136,9 @@ bool StartDB()
 {
     MySQL::Library_Init();
 
-    std::string dbstring = sConfigMgr->GetStringDefault("AuthDatabase.CString", "");
-    if (dbstring.empty())
-    {
-        NG_LOG_ERROR("server.authserver", "Database not specified");
-        return false;
-    }
-
-    auto worker_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.WorkerThreads", 1);
-    if (worker_threads < 1 || worker_threads > 32)
-    {
-        NG_LOG_ERROR("server.authserver", "Improper value specified for LoginDatabase.WorkerThreads, defaulting to 1.");
-        worker_threads = 1;
-    }
-
-    auto synch_threads = (uint8)sConfigMgr->GetIntDefault("AuthDatabase.SynchThreads", 1);;
-    if (synch_threads < 1 || synch_threads > 32)
-    {
-        NG_LOG_ERROR("server.authserver", "Improper value specified for LoginDatabase.SynchThreads, defaulting to 1.");
-        synch_threads = 1;
-    }
-
-    // NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
-    if (!LoginDatabase.Open(dbstring, worker_threads, synch_threads))
+    DatabaseLoader loader("server.authserver", DatabaseLoader::DATABASE_NONE);
+    loader.AddDatabase(LoginDatabase, "Auth");
+    if(!loader.Load())
     {
         NG_LOG_ERROR("server.authserver", "Cannot connect to database");
         return false;

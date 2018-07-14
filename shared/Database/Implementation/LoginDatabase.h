@@ -1,31 +1,31 @@
 #ifndef _LOGINDATABASE_H
 #define _LOGINDATABASE_H
 
-#include "DatabaseWorkerPool.h"
 #include "MySQLConnection.h"
+
+enum LoginDatabaseStatements : uint32
+{
+    /*  Naming standard for defines:
+    {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
+    When updating more than one field, consider looking at the calling function
+    name for a suiting suffix.
+    */
+            LOGIN_GET_ACCOUNT,
+            MAX_LOGINDATABASE_STATEMENTS
+};
 
 class LoginDatabaseConnection : public MySQLConnection
 {
-public:
-	//- Constructors for sync and async connections
-	LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
-	LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
+    public:
+        typedef LoginDatabaseStatements Statements;
 
-	//- Loads database type specific prepared statements
-	void DoPrepareStatements();
-};
+//- Constructors for sync and async connections
+        LoginDatabaseConnection(MySQLConnectionInfo &connInfo);
+        LoginDatabaseConnection(ProducerConsumerQueue<SQLOperation *> *q, MySQLConnectionInfo &connInfo);
+        ~LoginDatabaseConnection();
 
-typedef DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabaseWorkerPool;
-
-enum LoginDatabaseStatements
-{
-	/*  Naming standard for defines:
-	{DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
-	When updating more than one field, consider looking at the calling function
-	name for a suiting suffix.
-	*/
-	LOGIN_GET_ACCOUNT,
-	MAX_LOGINDATABASE_STATEMENTS,
+//- Loads database type specific prepared statements
+        void DoPrepareStatements() override;
 };
 
 #endif

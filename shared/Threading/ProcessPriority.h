@@ -15,27 +15,15 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ADHOCSTATEMENT_H
-#define _ADHOCSTATEMENT_H
+#ifndef _PROCESSPRIO_H
+#define _PROCESSPRIO_H
 
 #include "Define.h"
-#include "DatabaseEnvFwd.h"
-#include "SQLOperation.h"
+#include <string>
 
-/*! Raw, ad-hoc query. */
-class BasicStatementTask : public SQLOperation
-{
-    public:
-        BasicStatementTask(const char* sql, bool async = false);
-        ~BasicStatementTask();
+#define CONFIG_PROCESSOR_AFFINITY "UseProcessors"
+#define CONFIG_HIGH_PRIORITY "ProcessPriority"
 
-        bool Execute() override;
-        QueryResultFuture GetFuture() const { return m_result->get_future(); }
-
-    private:
-        const char* m_sql;      //- Raw query to be executed
-        bool m_has_result;
-        QueryResultPromise* m_result;
-};
+void SetProcessPriority(std::string const& logChannel, uint32 affinity, bool highPriority);
 
 #endif
