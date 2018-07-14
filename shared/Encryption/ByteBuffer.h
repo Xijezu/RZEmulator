@@ -461,7 +461,7 @@ class ByteBuffer
                 return;
             //throw ByteBufferSourceException(_wpos, size(), cnt);
 
-                    ASSERT(size() < 10000000);
+                    ASSERT(size() < 10000000, "Size too big");
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);

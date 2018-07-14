@@ -15,27 +15,18 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ADHOCSTATEMENT_H
-#define _ADHOCSTATEMENT_H
-
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
-#include "SQLOperation.h"
-
-/*! Raw, ad-hoc query. */
-class BasicStatementTask : public SQLOperation
-{
-    public:
-        BasicStatementTask(const char* sql, bool async = false);
-        ~BasicStatementTask();
-
-        bool Execute() override;
-        QueryResultFuture GetFuture() const { return m_result->get_future(); }
-
-    private:
-        const char* m_sql;      //- Raw query to be executed
-        bool m_has_result;
-        QueryResultPromise* m_result;
-};
-
+#include "MySQLThreading.h"
+#ifdef _WIN32 // hack for broken mysql.h not including the correct winsock header for SOCKET definition, fixed in 5.7
+#include <winsock2.h>
 #endif
+#include <mysql.h>
+
+void MySQL::Library_Init()
+{
+    mysql_library_init(-1, NULL, NULL);
+}
+
+void MySQL::Library_End()
+{
+    mysql_library_end();
+}

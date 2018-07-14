@@ -21,6 +21,10 @@
 #define SKYFIRE_COMMON_H
 
 #include "Define.h"
+#include <memory>
+#include <string>
+#include <utility>
+
 #include <ace/Stack_Trace.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Null_Mutex.h>
@@ -29,12 +33,12 @@
 #include <unordered_map>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <math.h>
 #include <errno.h>
 #include <signal.h>
 #include <assert.h>
+#include "Errors.h"
 
 #include "Log.h"
 #include "Config.h"
@@ -169,20 +173,9 @@ typedef std::vector<std::string> StringVector;
 
 #define MAX_QUERY_LEN 32*1024
 
-#define SKYFIRE_GUARD(MUTEX, LOCK) \
-  ACE_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
-    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
-
-//! For proper implementation of multiple-read, single-write pattern, use
-//! ACE_RW_Mutex as underlying @MUTEX
-# define SKYFIRE_WRITE_GUARD(MUTEX, LOCK) \
-  ACE_Write_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
-    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
-
-//! For proper implementation of multiple-read, single-write pattern, use
-//! ACE_RW_Mutex as underlying @MUTEX
-# define SKYFIRE_READ_GUARD(MUTEX, LOCK) \
-  ACE_Read_Guard< MUTEX > SKYFIRE_GUARD_OBJECT (LOCK); \
-    if (SKYFIRE_GUARD_OBJECT.locked() == 0) ASSERT(false);
+namespace Trinity
+{
+    using std::make_unique;
+}
 
 #endif

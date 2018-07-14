@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,10 +18,12 @@
 #ifndef _TRANSACTION_H
 #define _TRANSACTION_H
 
+#include "Define.h"
+#include "DatabaseEnvFwd.h"
 #include "SQLOperation.h"
-
-//- Forward declare (don't include header to prevent circular includes)
-class PreparedStatement;
+#include "StringFormat.h"
+#include <mutex>
+#include <vector>
 
 /*! Transactions, high level class. */
 class Transaction
@@ -40,19 +40,22 @@ class Transaction
 
         void Append(PreparedStatement* statement);
         void Append(const char* sql);
-        void PAppend(const char* sql, ...);
+        template<typename Format, typename... Args>
+        void PAppend(Format&& sql, Args&&... args)
+        {
+            Append(Trinity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+        }
 
-        size_t GetSize() const { return m_queries.size(); }
+        std::size_t GetSize() const { return m_queries.size(); }
 
     protected:
         void Cleanup();
-        std::list<SQLElementData> m_queries;
+        std::vector<SQLElementData> m_queries;
 
     private:
         bool _cleanedUp;
 
 };
-typedef Skyfire::AutoPtr<Transaction, ACE_Thread_Mutex> SQLTransaction;
 
 /*! Low level class*/
 class TransactionTask : public SQLOperation
@@ -61,13 +64,14 @@ class TransactionTask : public SQLOperation
     friend class DatabaseWorker;
 
     public:
-        TransactionTask(SQLTransaction trans) : m_trans(trans) { } ;
-        ~TransactionTask(){ };
+        TransactionTask(SQLTransaction trans) : m_trans(trans) { }
+        ~TransactionTask() { }
 
     protected:
-        bool Execute();
+        bool Execute() override;
 
         SQLTransaction m_trans;
+        static std::mutex _deadlockLock;
 };
 
 #endif

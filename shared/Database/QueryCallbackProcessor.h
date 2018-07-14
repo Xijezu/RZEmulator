@@ -15,27 +15,28 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ADHOCSTATEMENT_H
-#define _ADHOCSTATEMENT_H
+#ifndef QueryCallbackProcessor_h__
+#define QueryCallbackProcessor_h__
 
 #include "Define.h"
-#include "DatabaseEnvFwd.h"
-#include "SQLOperation.h"
+#include <vector>
 
-/*! Raw, ad-hoc query. */
-class BasicStatementTask : public SQLOperation
+class QueryCallback;
+
+class QueryCallbackProcessor
 {
-    public:
-        BasicStatementTask(const char* sql, bool async = false);
-        ~BasicStatementTask();
+public:
+    QueryCallbackProcessor();
+    ~QueryCallbackProcessor();
 
-        bool Execute() override;
-        QueryResultFuture GetFuture() const { return m_result->get_future(); }
+    void AddQuery(QueryCallback&& query);
+    void ProcessReadyQueries();
 
-    private:
-        const char* m_sql;      //- Raw query to be executed
-        bool m_has_result;
-        QueryResultPromise* m_result;
+private:
+    QueryCallbackProcessor(QueryCallbackProcessor const&) = delete;
+    QueryCallbackProcessor& operator=(QueryCallbackProcessor const&) = delete;
+
+    std::vector<QueryCallback> _callbacks;
 };
 
-#endif
+#endif // QueryCallbackProcessor_h__

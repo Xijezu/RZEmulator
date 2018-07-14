@@ -16,11 +16,24 @@
 */
 
 #include "LoginDatabase.h"
+#include "PreparedStatement.h"
 
 void LoginDatabaseConnection::DoPrepareStatements()
 {
-	if (!m_reconnecting)
-		m_stmts.resize(MAX_LOGINDATABASE_STATEMENTS);
+    if (!m_reconnecting)
+        m_stmts.resize(MAX_LOGINDATABASE_STATEMENTS);
 
-	PrepareStatement(LOGIN_GET_ACCOUNT, "SELECT account_id, login_name, last_login_server_idx, block, permission FROM Accounts WHERE login_name = ? AND password = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_GET_ACCOUNT, "SELECT account_id, login_name, last_login_server_idx, block, permission FROM Accounts WHERE login_name = ? AND password = ?", CONNECTION_SYNCH);
+}
+
+LoginDatabaseConnection::LoginDatabaseConnection(MySQLConnectionInfo &connInfo) : MySQLConnection(connInfo)
+{
+}
+
+LoginDatabaseConnection::LoginDatabaseConnection(ProducerConsumerQueue<SQLOperation *> *q, MySQLConnectionInfo &connInfo) : MySQLConnection(q, connInfo)
+{
+}
+
+LoginDatabaseConnection::~LoginDatabaseConnection()
+{
 }

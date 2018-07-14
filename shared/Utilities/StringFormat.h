@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,27 +16,31 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ADHOCSTATEMENT_H
-#define _ADHOCSTATEMENT_H
+#ifndef TRINITYCORE_STRING_FORMAT_H
+#define TRINITYCORE_STRING_FORMAT_H
 
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
-#include "SQLOperation.h"
+#include "fmt/printf.h"
 
-/*! Raw, ad-hoc query. */
-class BasicStatementTask : public SQLOperation
+namespace Trinity
 {
-    public:
-        BasicStatementTask(const char* sql, bool async = false);
-        ~BasicStatementTask();
+    /// Default TC string format function.
+    template<typename Format, typename... Args>
+    inline std::string StringFormat(Format&& fmt, Args&&... args)
+    {
+        return fmt::sprintf(std::forward<Format>(fmt), std::forward<Args>(args)...);
+    }
 
-        bool Execute() override;
-        QueryResultFuture GetFuture() const { return m_result->get_future(); }
+    /// Returns true if the given char pointer is null.
+    inline bool IsFormatEmptyOrNull(const char* fmt)
+    {
+        return fmt == nullptr;
+    }
 
-    private:
-        const char* m_sql;      //- Raw query to be executed
-        bool m_has_result;
-        QueryResultPromise* m_result;
-};
+    /// Returns true if the given std::string is empty.
+    inline bool IsFormatEmptyOrNull(std::string const& fmt)
+    {
+        return fmt.empty();
+    }
+}
 
 #endif
