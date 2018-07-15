@@ -6,18 +6,21 @@ matrix:
       addons:
         apt:
           sources:
+            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
             - george-edison55-precise-backports
           packages:
             - g++-7
             - cmake-data
             - cmake
+            - boost1.67
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
       addons:
         apt:
           sources:
+            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-5.0
             - george-edison55-precise-backports
@@ -26,6 +29,7 @@ matrix:
             - clang-5.0
             - cmake-data
             - cmake
+            - boost1.67
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
@@ -34,7 +38,7 @@ branches:
     - master
 
 before_install:
-  - sudo apt-get install libmysqlclient15-dev libmysql++-dev libboost-all-dev
+  - sudo apt-get install libmysqlclient15-dev libmysql++-dev
   - eval "${MATRIX_EVAL}"
 
 script:
