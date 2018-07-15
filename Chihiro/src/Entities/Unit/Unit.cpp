@@ -43,7 +43,7 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject), m_unitTypeMask(0)
 
 Unit::~Unit()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
     for (auto &skill : m_vSkillList)
     {
@@ -56,7 +56,7 @@ Unit::~Unit()
 
 void Unit::_InitTimerFieldsAndStatus()
 {
-    auto ct = sWorld->GetArTime();
+    auto ct = sWorld.GetArTime();
     SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
     SetUInt32Value(UNIT_LAST_UPDATE_TIME, ct);
     SetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME, ct);
@@ -140,19 +140,19 @@ void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
 
 void Unit::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time)
 {
-    ArMoveVector::SetMultipleMove(_to, _speed, _start_time, sWorld->GetArTime());
+    ArMoveVector::SetMultipleMove(_to, _speed, _start_time, sWorld.GetArTime());
     lastStepTime = start_time;
 }
 
 void Unit::SetMove(Position _to, uint8 _speed, uint _start_time)
 {
-    ArMoveVector::SetMove(_to, _speed, _start_time, sWorld->GetArTime());
+    ArMoveVector::SetMove(_to, _speed, _start_time, sWorld.GetArTime());
     lastStepTime = start_time;
 }
 
 void Unit::processPendingMove()
 {
-    uint     ct = sWorld->GetArTime();
+    uint     ct = sWorld.GetArTime();
     Position pos{ };//             = ArPosition ptr -10h
 
 
@@ -164,7 +164,7 @@ void Unit::processPendingMove()
             if (IsActable() && IsMovable())
             {
                 pos = GetCurrentPosition(ct);
-                sWorld->SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
+                sWorld.SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
                 if (IsPlayer())
                 {
                     //auto p = dynamic_cast<Player*>(this);
@@ -181,7 +181,7 @@ void Unit::processPendingMove()
 
 void Unit::OnUpdate()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT))
     {
         CalculateStat();
@@ -285,7 +285,7 @@ void Unit::regenHPMP(uint t)
                     this->m_fRegenMP = 0;
                     if (IsInWorld())
                     {
-                        sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
+                        sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
                     }
                     /*if (this.IsSummon())
                     {
@@ -326,7 +326,7 @@ Skill *Unit::GetSkill(int skill_id) const
 Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID)
 {
     Skill *pSkill = nullptr;
-    int   nNeedJP = sObjectMgr->GetNeedJpForSkillLevelUp(skill_id, skill_level, nJobID);
+    int   nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(skill_id, skill_level, nJobID);
     if (GetJP() >= nNeedJP)
     {
         SetJP(GetJP() - nNeedJP);
@@ -339,7 +339,7 @@ Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
         int   nPrevLevel = GetBaseSkillLevel(skill_id);
         if (nPrevLevel == 0)
         {
-            nSkillUID = sWorld->GetSkillIndex();
+            nSkillUID = sWorld.GetSkillIndex();
             pSkill    = new Skill{this, nSkillUID, skill_id};
             m_vSkillList.emplace_back(pSkill);
         }
@@ -370,7 +370,7 @@ void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_coo
     skill->m_nSkillID      = skill_id;
     skill->m_nSkillLevel   = skill_level;
     skill->m_nSkillUID     = skill_uid;
-    skill->m_nNextCoolTime = remain_cool_time + sWorld->GetArTime();
+    skill->m_nNextCoolTime = remain_cool_time + sWorld.GetArTime();
     m_vSkillList.emplace_back(skill);
 }
 
@@ -385,8 +385,8 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     if (pSkill == nullptr || pSkill->m_SkillBase == nullptr || m_castingSkill != nullptr /*|| using storage */)
         return TS_RESULT_NOT_ACTABLE;
 
-    //auto pSkillTarget = sMemoryPool->getPtrFromId(target_handle);
-    auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(target_handle);
+    //auto pSkillTarget = sMemoryPool.getPtrFromId(target_handle);
+    auto obj = sMemoryPool.GetObjectInWorld<WorldObject>(target_handle);
     if (obj != nullptr && (!obj->IsItem() && !obj->IsFieldProp()))
     {
         pSkillTarget = dynamic_cast<Unit *>(obj);
@@ -427,7 +427,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
         if (!pSkillTarget->IsInWorld())
             return TS_RESULT_NOT_ACTABLE;
 
-        uint ct = sWorld->GetArTime();
+        uint ct = sWorld.GetArTime();
 
         Position t               = (pSkillTarget->GetCurrentPosition(ct));
         float    target_distance = (GetCurrentPosition(ct).GetExactDist2d(&t) - GetUnitSize() * 0.5f);
@@ -533,7 +533,7 @@ bool Unit::StartAttack(uint target, bool bNeedFastReaction)
 
 void Unit::processAttack()
 {
-    uint t = sWorld->GetArTime();
+    uint t = sWorld.GetArTime();
     if (GetHealth() == 0 /*IsAttackable()*/)
         return;
 
@@ -551,8 +551,8 @@ void Unit::processAttack()
             }
         }
 
-        //auto enemy = dynamic_cast<Unit *>(sMemoryPool->getPtrFromId(GetTargetHandle()));
-        auto enemy = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
+        //auto enemy = dynamic_cast<Unit *>(sMemoryPool.getPtrFromId(GetTargetHandle()));
+        auto enemy = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
         if (GetHealth() == 0)
         {
             CancelAttack();
@@ -561,7 +561,7 @@ void Unit::processAttack()
         if (IsMoving(t) || GetTargetHandle() == 0)
             return;
 
-        if (enemy == nullptr || !IsEnemy(enemy, false) || enemy->GetHealth() == 0 || sRegion->IsVisibleRegion(this, enemy) == 0)
+        if (enemy == nullptr || !IsEnemy(enemy, false) || enemy->GetHealth() == 0 || sRegion.IsVisibleRegion(this, enemy) == 0)
         {
             if (IsPlayer())
             {
@@ -686,7 +686,7 @@ void Unit::Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDam
 {
     uint ct = t;
     if (ct == 0)
-        ct = sWorld->GetArTime();
+        ct = sWorld.GetArTime();
 
     DamageInfo di{ };
 
@@ -1150,7 +1150,7 @@ int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
 
         if (GetHealth() == 0)
         {
-            SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld->GetArTime());
+            SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld.GetArTime());
             onDead(pFrom, decreaseEXPOnDead);
         }
         result = nDamage;
@@ -1231,7 +1231,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         pct << (int)arDamage[i].attacker_hp;
         pct << (uint16)arDamage[i].attacker_mp;
     }
-    sWorld->Broadcast((uint)GetPositionX() / g_nRegionSize, (uint)GetPositionY() / g_nRegionSize, GetLayer(), pct);
+    sWorld.Broadcast((uint)GetPositionX() / g_nRegionSize, (uint)GetPositionY() / g_nRegionSize, GetLayer(), pct);
 }
 
 void Unit::EndAttack()
@@ -1240,12 +1240,12 @@ void Unit::EndAttack()
     if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer() && m_nNextAttackMode == 0)
     {
         m_nNextAttackMode = 1;
-        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
+        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld.GetArTime());
     }
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED))
     {
-        //auto target = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(GetTargetHandle()));
-        auto target = sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle());
+        //auto target = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(GetTargetHandle()));
+        auto target = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
         if (IsPlayer() || IsSummon())
         {
             if (target != nullptr)
@@ -1267,7 +1267,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     if (bIsMoving && IsInWorld())
     {
         pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
-        sWorld->SetMove(this, pos, pos, 0, true, sWorld->GetArTime(), true);
+        sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
         if (IsPlayer())
         {
             // Ride handle
@@ -1306,11 +1306,11 @@ void Unit::CancelAttack()
     if ((IsUsingCrossBow() || IsUsingBow()) && (IsPlayer() && m_nNextAttackMode == 0))
     {
         m_nNextAttackMode = 1;
-        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld->GetArTime());
+        SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld.GetArTime());
     }
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED))
     {
-        this->broadcastAttackMessage(sMemoryPool->GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
+        this->broadcastAttackMessage(sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
     SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
@@ -1463,7 +1463,7 @@ float Unit::GetItemChance() const
 uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
 {
     SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_UPDATE_STATE);
-    auto stateInfo = sObjectMgr->GetStateInfo(code);
+    auto stateInfo = sObjectMgr.GetStateInfo(code);
     if (stateInfo == nullptr)
     {
         return TS_RESULT_NOT_EXIST;
@@ -1484,8 +1484,8 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     if (code == StateCode::SC_FEAR)
         ToggleFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
 
-    //auto pCaster = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(caster));
-    auto pCaster     = sMemoryPool->GetObjectInWorld<Unit>(caster);
+    //auto pCaster = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(caster));
+    auto pCaster     = sMemoryPool.GetObjectInWorld<Unit>(caster);
     int  base_damage = 0;
     if (pCaster != nullptr && stateInfo->base_effect_id > 0)
     {
@@ -1596,7 +1596,7 @@ void Unit::procMoveSpeedChange()
 
     if (bIsMoving && IsInWorld())
     {
-        uint ct  = sWorld->GetArTime();
+        uint ct  = sWorld.GetArTime();
         auto pos = GetCurrentPosition(ct);
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE))
         {
@@ -1604,12 +1604,12 @@ void Unit::procMoveSpeedChange()
             {
                 for (const auto &mi : ends)
                     vMovePos.emplace_back(mi.end);
-                sWorld->SetMultipleMove(this, pos, vMovePos, (uint8)(m_Attribute.nMoveSpeed / 7), true, ct, true);
+                sWorld.SetMultipleMove(this, pos, vMovePos, (uint8)(m_Attribute.nMoveSpeed / 7), true, ct, true);
             }
         }
         else
         {
-            sWorld->SetMove(this, pos, pos, 0, true, ct, true);
+            sWorld.SetMove(this, pos, pos, 0, true, ct, true);
         }
     }
 }
@@ -1625,7 +1625,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
     uint        target_handle{0};
     Position    pos{ };
     std::string error{ };
-    uint        ct = sWorld->GetArTime();
+    uint        ct = sWorld.GetArTime();
     uint        prev_hp;
     uint        prev_mp;
 
@@ -1657,7 +1657,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
                          pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");
                 return TS_RESULT_SUCCESS;
             }
-            auto state = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
+            auto state = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
             if (state == nullptr)
                 return TS_RESULT_NOT_ACTABLE;
             if (state->effect_type != StateBaseEffect::SEF_RIDING)
@@ -1689,7 +1689,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
             {
                 if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
                 {
-                    auto si = sObjectMgr->GetStateInfo(pItem->m_pItemBase->state_id);
+                    auto si = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
                     if (si != nullptr && si->effect_type == StateBaseEffect::SEF_RIDING)
                         return TS_RESULT_ACCESS_DENIED;
                 }
@@ -1858,7 +1858,7 @@ DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType
 
 uint Unit::GetRemainCoolTime(int skill_id) const
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     auto sk = GetSkill(skill_id);
     if (sk == nullptr || sk->m_nNextCoolTime < ct)
         return 0;
@@ -1947,7 +1947,7 @@ void Unit::procStateDamage(uint t)
     {
         if (IsPlayer() || IsSummon())
         {
-            auto caster = sMemoryPool->GetObjectInWorld<Unit>(st.m_hCaster[0]);
+            auto caster = sMemoryPool.GetObjectInWorld<Unit>(st.m_hCaster[0]);
             if (caster == nullptr)
             {
                 if (st.m_nCode != StateCode::SC_GAIA_MEMBER_SHIP
@@ -1964,7 +1964,7 @@ void Unit::procStateDamage(uint t)
         }
 
         bool bNeedToProcLightningForceCongestion = false;
-        auto stateBase                           = sObjectMgr->GetStateInfo((int)st.m_nCode);
+        auto stateBase                           = sObjectMgr.GetStateInfo((int)st.m_nCode);
         if (stateBase == nullptr)
             continue;
         int  nBaseEffectID = 0;
@@ -2031,7 +2031,7 @@ void Unit::procStateDamage(uint t)
 
     for (auto &sd : vDamageList)
     {
-        auto   caster = sMemoryPool->GetObjectInWorld<Unit>(sd.caster);
+        auto   caster = sMemoryPool.GetObjectInWorld<Unit>(sd.caster);
         int    nFlag  = 0;
         Damage dmg{ };
         if (sd.base_effect_id < 11)
@@ -2070,7 +2070,7 @@ void Unit::procStateDamage(uint t)
             {
                 if (st.m_nUID == sd.uid)
                 {
-                    auto stateBase = sObjectMgr->GetStateInfo((int)st.m_nCode);
+                    auto stateBase = sObjectMgr.GetStateInfo((int)st.m_nCode);
                     if (stateBase == nullptr)
                         continue;
                     st.m_nTotalDamage += dmg.nDamage;
@@ -2090,7 +2090,7 @@ void Unit::procStateDamage(uint t)
             statePct << (uint8)(sd.final ? 1 : 0);
             statePct << total_amount;
 
-            sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+            sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
                               (uint)(GetPositionY() / g_nRegionSize),
                               GetLayer(),
                               statePct);
@@ -2154,7 +2154,7 @@ void Unit::procStateDamage(uint t)
                 statePct << (uint8)(sd.final ? 1 : 0);
                 statePct << total_amount;
 
-                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
                                   (uint)(GetPositionY() / g_nRegionSize),
                                   GetLayer(),
                                   statePct);
@@ -2176,7 +2176,7 @@ void Unit::procStateDamage(uint t)
                 statePct << (uint8)(sd.final ? 1 : 0);
                 statePct << df;
 
-                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize),
+                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
                                   (uint)(GetPositionY() / g_nRegionSize),
                                   GetLayer(),
                                   statePct);
@@ -2252,7 +2252,7 @@ int Unit::MPHealByItem(int mp)
 
 bool Unit::IsMovable()
 {
-    if (GetHealth() == 0 || IsSitdown() || m_nMovableTime > sWorld->GetArTime() || m_castingSkill != nullptr)
+    if (GetHealth() == 0 || IsSitdown() || m_nMovableTime > sWorld.GetArTime() || m_castingSkill != nullptr)
         return false;
     else
         return HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
@@ -2335,7 +2335,7 @@ bool Unit::TurnOnAura(Skill *pSkill)
     }
 
     m_vAura[pSkill->m_SkillBase->toggle_group] = pSkill;
-    AddState(SG_NORMAL, (StateCode)pSkill->m_SkillBase->state_id, GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nSkillLevel, pSkill->GetSkillEnhance()), sWorld->GetArTime(), 0, true, 0, "");
+    AddState(SG_NORMAL, (StateCode)pSkill->m_SkillBase->state_id, GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nSkillLevel, pSkill->GetSkillEnhance()), sWorld.GetArTime(), 0, true, 0, "");
 
     Messages::SendToggleInfo(this, pSkill->m_nSkillID, true);
     return true;

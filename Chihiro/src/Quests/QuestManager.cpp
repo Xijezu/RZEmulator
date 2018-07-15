@@ -302,7 +302,7 @@ void QuestManager::GetRelatedQuest(std::vector<Quest*> &vQuestList, int flag)
     for(auto& q : m_vActiveQuest) {
         if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE)
         {
-            if(sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag)) {
+            if(sObjectMgr.checkQuestTypeFlag(q->m_QuestBase->nType, flag)) {
                 vQuestList.emplace_back(q);
             }
         }
@@ -312,7 +312,7 @@ void QuestManager::GetRelatedQuest(std::vector<Quest*> &vQuestList, int flag)
 void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest*> &vQuest, int flag)
 {
     for(auto& q : m_vActiveQuest) {
-        if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE || !sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag))
+        if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE || !sObjectMgr.checkQuestTypeFlag(q->m_QuestBase->nType, flag))
             continue;
 
         switch(q->m_QuestBase->nType) {
@@ -350,7 +350,7 @@ void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest*> &vQuest, 
 void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*> &vQuest, int flag)
 {
     for (auto &q :m_vActiveQuest) {
-        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && sObjectMgr->checkQuestTypeFlag(q->m_QuestBase->nType, flag))
+        if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && sObjectMgr.checkQuestTypeFlag(q->m_QuestBase->nType, flag))
         {
             if (q->m_QuestBase->nType == QuestType::QUEST_KILL_TOTAL || q->m_QuestBase->nType == QuestType::QUEST_KILL_INDIVIDUAL)
             {
@@ -538,7 +538,7 @@ bool QuestManager::IsStartableQuest(int code)
     bool res{false};
     if (FindQuest(code) != nullptr)
         return false;
-    auto qbs = sObjectMgr->GetQuestBase(code);
+    auto qbs = sObjectMgr.GetQuestBase(code);
     if (qbs == nullptr)
         return false;
     if (!qbs->bIsRepeatable && IsFinishedQuest(code))
@@ -560,7 +560,6 @@ bool QuestManager::IsStartableQuest(int code)
         }
         return false;
     }
-    ACE_NOTREACHED(return false);
 }
 
 void QuestManager::SetDropFlagToRandomQuestInfo(int code)

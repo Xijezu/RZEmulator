@@ -95,7 +95,11 @@ class Item;
 class MixManager
 {
     public:
-        MixManager() = default;
+        static MixManager &Instance()
+        {
+            static MixManager instance;
+            return instance;
+        }
         ~MixManager() = default;
 
         /// \brief Enhances an item
@@ -176,7 +180,9 @@ class MixManager
         std::vector<EnhanceInfo> m_vEnhanceInfo{ };
         /// \brief Check if a mix makes sense
         bool CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
+    protected:
+        MixManager() = default;
 };
 
-#define sMixManager ACE_Singleton<MixManager, ACE_Null_Mutex>::instance()
+#define sMixManager MixManager::Instance()
 #endif // NGEMITY_MIXMANAGER_H

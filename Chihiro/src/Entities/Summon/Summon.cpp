@@ -53,14 +53,14 @@ Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
 
 Summon* Summon::AllocSummon(Player * pMaster, uint pCode)
 {
-    Summon* summon = sMemoryPool->AllocSummon(pCode);
+    Summon* summon = sMemoryPool.AllocSummon(pCode);
     summon->m_pMaster = pMaster;
     return summon;
 }
 
 void Summon::SetSummonInfo(int idx)
 {
-    m_tSummonBase = sObjectMgr->GetSummonBase(idx);
+    m_tSummonBase = sObjectMgr.GetSummonBase(idx);
     if(m_tSummonBase == nullptr)
         ASSERT(false);
     SetCurrentJob(idx);
@@ -147,7 +147,7 @@ void Summon::processWalk(uint t)
     {
         if (bIsMoving && IsInWorld())
         {
-            sWorld->onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
+            sWorld.onRegionChange(this, t - lastStepTime, !tmp_mv.bIsMoving);
         }
     }
 }
@@ -181,7 +181,7 @@ void Summon::onExpChange()
     }
     if (lvl > 1) {
         do {
-            auto need = sObjectMgr->GetNeedSummonExp(level);
+            auto need = sObjectMgr.GetNeedSummonExp(level);
             if (need == 0 || need > GetEXP())
                 break;
             ++level;
@@ -268,7 +268,7 @@ bool Summon::DoEvolution()
             evoPct << m_tSummonBase->id;
             if (IsInWorld())
             {
-                sWorld->Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), evoPct);
+                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), evoPct);
             }
             else
             {
@@ -276,7 +276,7 @@ bool Summon::DoEvolution()
                     m_pMaster->SendPacket(evoPct);
             }
 
-            if (sRegion->IsVisibleRegion(this, GetMaster()) == 0)
+            if (sRegion.IsVisibleRegion(this, GetMaster()) == 0)
             {
                 m_pMaster->SendPacket(evoPct);
             }
@@ -332,14 +332,14 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<in
 
 CreatureStat *Summon::GetBaseStat() const
 {
-    return sObjectMgr->GetStatInfo((uint)m_tSummonBase->stat_id);
+    return sObjectMgr.GetStatInfo((uint)m_tSummonBase->stat_id);
 }
 
 Summon::~Summon()
 {
     if(IsInWorld())
     {
-        sWorld->RemoveObjectFromWorld(this);
+        sWorld.RemoveObjectFromWorld(this);
     }
 }
 
@@ -354,7 +354,7 @@ void Summon::Update(uint /*diff*/)
     if (!IsInWorld())
         return;
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     if (GetHealth() == 0)
     {
         if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 6000 < ct)
@@ -500,7 +500,7 @@ LABEL_12:
 
 void Summon::applyJobLevelBonus()
 {
-    auto stat = sObjectMgr->GetSummonLevelBonus(m_tSummonBase->id, m_tSummonBase->form, GetLevel());
+    auto stat = sObjectMgr.GetSummonLevelBonus(m_tSummonBase->id, m_tSummonBase->form, GetLevel());
     m_cStat.strength += stat.strength;
     m_cStat.vital += stat.vital;
     m_cStat.agility += stat.agility;

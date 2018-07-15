@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,60 +19,39 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "Define.h"
 #include <string>
-#include <list>
-#include <ace/Singleton.h>
-#include <ace/Configuration_Import_Export.h>
-#include <AutoPtr.h>
-#include <mutex>
-
-typedef Skyfire::AutoPtr<ACE_Configuration_Heap, ACE_Null_Mutex> Config;
+#include <vector>
 
 class ConfigMgr
 {
-    friend class ACE_Singleton<ConfigMgr, ACE_Null_Mutex>;
-    friend class ConfigLoader;
-
-    ConfigMgr() { }
-    ~ConfigMgr() { }
+    ConfigMgr() = default;
+    ConfigMgr(ConfigMgr const&) = delete;
+    ConfigMgr& operator=(ConfigMgr const&) = delete;
+    ~ConfigMgr() = default;
 
 public:
-    /// Method used only for loading main configuration files (authserver.conf and worldserver.conf)
-    bool LoadInitial(char const* file);
+    /// Method used only for loading main configuration files (bnetserver.conf and worldserver.conf)
+    bool LoadInitial(std::string const& file, std::vector<std::string> args, std::string& error);
 
-    /**
-     * This method loads additional configuration files
-     * It is recommended to use this method in WorldScript::OnConfigLoad hooks
-     *
-     * @return true if loading was successful
-     */
-    bool LoadMore(char const* file);
+    static ConfigMgr* instance();
 
-    bool Reload();
+    bool Reload(std::string& error);
 
-    std::string GetStringDefault(const char* name, const std::string& def);
-    bool GetBoolDefault(const char* name, bool def);
-    int GetIntDefault(const char* name, int def);
-    float GetFloatDefault(const char* name, float def);
+    std::string GetStringDefault(std::string const& name, const std::string& def) const;
+    bool GetBoolDefault(std::string const& name, bool def) const;
+    int GetIntDefault(std::string const& name, int def) const;
+    float GetFloatDefault(std::string const& name, float def) const;
 
     std::string const& GetFilename();
-    std::list<std::string> GetKeysByString(std::string const& name);
+    std::vector<std::string> const& GetArguments() const;
+    std::vector<std::string> GetKeysByString(std::string const& name);
 
 private:
-    bool GetValueHelper(const char* name, ACE_TString &result);
-    bool LoadData(char const* file);
-
-    typedef std::mutex LockType;
-    typedef std::lock_guard<std::mutex> GuardType;
-
-    std::string _filename;
-    Config _config;
-    LockType _configLock;
-
-    ConfigMgr(ConfigMgr const&);
-    ConfigMgr& operator=(ConfigMgr const&);
+    template<class T>
+    T GetValueDefault(std::string const& name, T def) const;
 };
 
-#define sConfigMgr ACE_Singleton<ConfigMgr, ACE_Null_Mutex>::instance()
+#define sConfigMgr ConfigMgr::instance()
 
 #endif

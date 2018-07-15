@@ -19,56 +19,100 @@
 #define NGEMITY_AUTHSESSION_H_
 
 #include "Common.h"
-#include "Declarations.h"
 #include "Configuration/Config.h"
+#include "IoContext.h"
+#include "XSocket.h"
 #include "GameAuthSession.h"
-#include <ace/Connector.h>
-#include <ace/SOCK_Connector.h>
 #include "Encryption/ByteBuffer.h"
+#include <boost/asio/deadline_timer.hpp>
 
-class AuthNetwork : public ACE_Connector<WorldSocket<GameAuthSession>, ACE_SOCK_Connector> {
-public:
-	AuthNetwork()
-    {
-		m_pSocket = new WorldSocket<GameAuthSession>();
-    }
+class AuthNetwork
+{
+    public:
+        static AuthNetwork &Instance()
+        {
+            static AuthNetwork instance;
+            return instance;
+        }
 
-	~AuthNetwork() override = default;
+        ~AuthNetwork() = default;
 
-	int InitializeNetwork(ACE_INET_Addr& auth_addr)
-    {
-        open(ACE_Reactor::instance(), ACE_NONBLOCK);
-		if (connect(m_pSocket, auth_addr) != 0)
-		{
-			return -1;
-		}
-		m_pSocket->GetSession()->SendGameLogin();
-		return 0;
-	}
+        void Update()
+        {
+            if (m_bClosed)
+                return;
 
-	void Stop()
-	{
-		this->close();
-		delete m_pSocket;
-	}
+            _updateTimer->expires_from_now(boost::posix_time::milliseconds(10));
+            _updateTimer->async_wait(std::bind(&AuthNetwork::Update, this));
 
-     int close() override
-	 {
-		 return ACE_Connector::close();
-	 }
+            if (!m_pSocket->Update())
+            {
+                if (m_pSocket->IsOpen())
+                    m_pSocket->CloseSocket();
+                m_bClosed = true;
+            }
+        }
 
-	void SendAccountToAuth(WorldSession& session, const std::string& login_name, uint64 one_time_key)
-	{
-		m_pSocket->GetSession()->AccountToAuth(&session, login_name, one_time_key);
-	}
+        void Stop()
+        {
+            m_bClosed = true;
+            if (m_pThread != nullptr && m_pThread->joinable())
+            {
+                m_pThread->join();
+            }
+            _updateTimer->cancel();
 
-	void SendClientLogoutToAuth(const std::string& account)
-	{
-		m_pSocket->GetSession()->ClientLogoutToAuth(account);
-	}
-private:
-	WorldSocket<GameAuthSession>* m_pSocket;
+            delete _updateTimer;
+            delete m_pThread;
+        }
+
+        int InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
+        {
+            boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
+            boost::asio::ip::tcp::socket  _socket(ioContext);
+
+            _socket.connect(endpoint);
+            _updateTimer = new boost::asio::deadline_timer(ioContext);
+
+            m_pSocket.reset(new XSocket(std::move(_socket)));
+            m_pSocket->SetSession(new GameAuthSession{m_pSocket.get()});
+            m_pSocket->Start();
+            reinterpret_cast<GameAuthSession*>(m_pSocket->GetSession())->SendGameLogin();
+
+            m_pThread = new std::thread(&AuthNetwork::Run, this);
+            return 0;
+        }
+
+        void Run()
+        {
+            _updateTimer->expires_from_now(boost::posix_time::milliseconds(10));
+            _updateTimer->async_wait(std::bind(&AuthNetwork::Update, this));
+
+            Update();
+        }
+
+        void SendAccountToAuth(WorldSession &session, const std::string &login_name, uint64 one_time_key)
+        {
+            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->AccountToAuth(&session, login_name, one_time_key);
+        }
+
+        void SendClientLogoutToAuth(const std::string &account)
+        {
+            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->ClientLogoutToAuth(account);
+        }
+
+    private:
+        bool                     m_bClosed;
+        std::shared_ptr<XSocket> m_pSocket;
+        boost::asio::deadline_timer *_updateTimer;
+        std::thread *m_pThread;
+
+    protected:
+        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), _updateTimer(nullptr)
+        {
+
+        }
 };
 
-#define sAuthNetwork ACE_Singleton<AuthNetwork, ACE_Thread_Mutex>::instance()
+#define sAuthNetwork AuthNetwork::Instance()
 #endif // NGEMITY_AUTHSESSION_H_

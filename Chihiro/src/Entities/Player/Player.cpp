@@ -51,7 +51,7 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
     _InitValues();
     _InitTimerFieldsAndStatus();
 
-    SetUInt32Value(PLAYER_LAST_STAMINA_UPDATE_TIME, sWorld->GetArTime());
+    SetUInt32Value(PLAYER_LAST_STAMINA_UPDATE_TIME, sWorld.GetArTime());
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     clearPendingBonusMsg();
 
@@ -63,7 +63,7 @@ Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(2
 Player::~Player()
 {
     /*if(m_pSubSummon != nullptr) {
-        sWorld->RemoveObjectFromWorld(m_pSubSummon);
+        sWorld.RemoveObjectFromWorld(m_pSubSummon);
         m_pSubSummon = nullptr;
     }*/
 }
@@ -74,11 +74,11 @@ void Player::CleanupsBeforeDelete()
     if (IsInWorld())
     {
         RemoveAllSummonFromWorld();
-        sWorld->RemoveObjectFromWorld(this);
+        sWorld.RemoveObjectFromWorld(this);
     }
 
     if (GetPartyID() != 0)
-        sGroupManager->onLogout(GetPartyID(), this);
+        sGroupManager.onLogout(GetPartyID(), this);
 
     for (auto &t : m_vStorageSummonList)
     {
@@ -490,7 +490,7 @@ bool Player::ReadStateList(Unit *pUnit)
     auto              uid   = pUnit->GetUInt32Value(UNIT_FIELD_UID);
     stmt->setInt32(0, pUnit->IsPlayer() ? uid : 0);
     stmt->setInt32(1, pUnit->IsSummon() ? uid : 0);
-    uint                    ct     = sWorld->GetArTime();
+    uint                    ct     = sWorld.GetArTime();
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         do
@@ -518,8 +518,8 @@ bool Player::ReadStateList(Unit *pUnit)
             int   base_damage_3    = fields[idx++].GetInt32();
             int   remain_fire_time = fields[idx].GetInt32();
             State state{ };
-            auto  si               = sObjectMgr->GetStateInfo(code);
-            state.SetState(code, 0, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld->GetArTime()), base_damage, 0, "");
+            auto  si               = sObjectMgr.GetStateInfo(code);
+            state.SetState(code, 0, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld.GetArTime()), base_damage, 0, "");
             pUnit->m_vStateList.emplace_back(state);
         } while (result->NextRow());
     }
@@ -530,7 +530,7 @@ bool Player::ReadItemCoolTimeList(int uid)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_ITEMCOOLTIME);
     stmt->setInt32(0, uid);
-    uint                    ct     = sWorld->GetArTime();
+    uint                    ct     = sWorld.GetArTime();
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         do
@@ -814,7 +814,7 @@ void Player::SendLoginProperties()
     CharacterDatabase.DirectPExecute("UPDATE `Character` SET login_time = NOW() WHERE sid = %u", GetUInt32Value(UNIT_FIELD_UID));
 
     if (GetPartyID() != 0)
-        sGroupManager->onLogin(GetPartyID(), this);
+        sGroupManager.onLogin(GetPartyID(), this);
 
     Messages::SendQuestList(this);
     for (auto &summon: m_vSummonList)
@@ -866,7 +866,7 @@ void Player::SendLoginProperties()
 
     if (!_bIsInWorld)
     {
-        sWorld->AddObjectToWorld(this);
+        sWorld.AddObjectToWorld(this);
     }
 
     if (m_pMainSummon != nullptr)
@@ -875,7 +875,7 @@ void Player::SendLoginProperties()
         m_pMainSummon->SetCurrentXY(GetPositionX(), GetPositionY());
         m_pMainSummon->AddNoise(rand32(), rand32(), 50);
         m_pMainSummon->SetLayer(GetLayer());
-        sWorld->AddSummonToWorld(m_pMainSummon);
+        sWorld.AddSummonToWorld(m_pMainSummon);
     }
     for (auto &s : m_vStateList)
     {
@@ -1004,7 +1004,7 @@ void Player::Save(bool bOnlyPlayer)
 
 int Player::GetJobDepth()
 {
-    auto res = sObjectMgr->GetJobInfo(GetCurrentJob());
+    auto res = sObjectMgr.GetJobInfo(GetCurrentJob());
     if (res != nullptr)
         return res->job_depth;
     return 0;
@@ -1029,7 +1029,7 @@ void Player::applyJobLevelBonus()
 
         jobs[i]   = GetCurrentJob();
         levels[i] = GetCurrentJLv();
-        stat = sObjectMgr->GetJobLevelBonus(jobDepth, jobs, levels);
+        stat = sObjectMgr.GetJobLevelBonus(jobDepth, jobs, levels);
         m_cStat.Add(stat);
     }
 }
@@ -1296,7 +1296,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         UpdateWeightWithInventory();
         return;
     }
-    sMemoryPool->AllocItemHandle(pItem);
+    sMemoryPool.AllocItemHandle(pItem);
     if (!bSkipUpdateItemToDB)
     {
         pItem->DBInsert();
@@ -1334,7 +1334,7 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
             }
             if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
             {
-                auto scu = sMemoryPool->GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
+                auto scu = sMemoryPool.GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
                 if (scu != nullptr)
                     scu->UnBindSkillCard(pItem);
             }
@@ -1451,7 +1451,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
 {
     Position client_pos{ };
     client_pos.Relocate(x, y, 0, 0);
-    uint     ct  = sWorld->GetArTime();
+    uint     ct  = sWorld.GetArTime();
     Position pos = this->GetCurrentPosition(ct);
     if (client_pos.GetExactDist2d(&pos) < 120.0f)
     {
@@ -1470,12 +1470,12 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
     {
         if (m_nWorldLocationId != 0)
         {
-            sWorldLocationMgr->RemoveFromLocation(this);
+            sWorldLocationMgr.RemoveFromLocation(this);
             this->m_WorldLocation = nullptr;
         }
         if (nl != 0)
         {
-            this->m_WorldLocation = sWorldLocationMgr->AddToLocation(nl, this);
+            this->m_WorldLocation = sWorldLocationMgr.AddToLocation(nl, this);
         }
         m_nWorldLocationId = nl;
     }
@@ -1486,7 +1486,7 @@ void Player::Update(uint diff)
     if (!IsInWorld())
         return;
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
     bool bIsMoving = IsMoving(ct);
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
@@ -1503,7 +1503,7 @@ void Player::Update(uint diff)
 
 void Player::OnUpdate()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     if (GetUInt32Value(PLAYER_LAST_STAMINA_UPDATE_TIME) + 6000 < ct)
     {
         uint lst = (ct - GetUInt32Value(PLAYER_LAST_STAMINA_UPDATE_TIME)) / 0x1770;
@@ -1529,7 +1529,7 @@ void Player::OnUpdate()
 
 void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
 {
-    auto sb = sObjectMgr->GetSkillBase((uint)skill_id);
+    auto sb = sObjectMgr.GetSkillBase((uint)skill_id);
     if (sb->id != 0 && sb->is_valid == 2)
         return;
     Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
@@ -1542,14 +1542,14 @@ void Player::onExpChange()
 {
     int  level = 1;
     auto exp   = GetEXP();
-    if (sObjectMgr->GetNeedExp(1) <= exp)
+    if (sObjectMgr.GetNeedExp(1) <= exp)
     {
         do
         {
             if (level >= 300)
                 break;
             ++level;
-        } while (sObjectMgr->GetNeedExp(level) <= exp);
+        } while (sObjectMgr.GetNeedExp(level) <= exp);
     }
     level -= 1;
     Messages::SendEXPMessage(this, this);
@@ -1564,7 +1564,7 @@ void Player::onExpChange()
         }
         else
         {
-            sScriptingMgr->RunString(this, "on_player_level_up()");
+            sScriptingMgr.RunString(this, "on_player_level_up()");
 
             /*if(GetLevel() > GetUInt32Value(UNIT_FIELD_MAX_REACHED_LEVEL))
                 SetUInt64Value(UNIT_FIELD_MAX_REACHED_LEVEL)*/
@@ -1583,7 +1583,7 @@ void Player::onExpChange()
     }
     else
     {
-        if (GetUInt32Value(UNIT_LAST_SAVE_TIME) + 3000 < sWorld->GetArTime())
+        if (GetUInt32Value(UNIT_LAST_SAVE_TIME) + 3000 < sWorld.GetArTime())
             Save(true);
     }
 }
@@ -1597,7 +1597,7 @@ void Player::onChangeProperty(std::string key, int value)
     }
     else if (key == "lvl" || key == "lv" || key == "level")
     {
-        SetEXP(sObjectMgr->GetNeedExp(value));
+        SetEXP(sObjectMgr.GetNeedExp(value));
         return;
     }
     else if (key == "exp")
@@ -1673,8 +1673,8 @@ void Player::PendWarp(int x, int y, uint8_t layer)
             Position pos{ };
             pos.Relocate(x, y, 0);
 
-            sWorld->WarpBegin(this);
-            sWorld->WarpEnd(this, pos, layer);
+            sWorld.WarpBegin(this);
+            sWorld.WarpEnd(this, pos, layer);
             ClearDialogMenu();
         }
     }
@@ -1690,7 +1690,7 @@ void Player::LogoutNow(int /*callerIdx*/)
     if (IsInWorld())
     {
         //RemoveAllSummonFromWorld();
-        //sWorld->RemoveObjectFromWorld(this);
+        //sWorld.RemoveObjectFromWorld(this);
     }
     Save(false);
 }
@@ -1703,7 +1703,7 @@ void Player::RemoveAllSummonFromWorld()
             continue;
         if (s->IsInWorld())
         {
-            sWorld->RemoveObjectFromWorld(s);
+            sWorld.RemoveObjectFromWorld(s);
         }
     }
 }
@@ -1735,8 +1735,8 @@ void Player::DoSummon(Summon *pSummon, Position pPosition)
     pSummon->m_nLayer = this->GetLayer();
     pSummon->StopMove();
     if (pSummon->GetHealth() == 0)
-        pSummon->SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld->GetArTime());
-    sWorld->AddSummonToWorld(pSummon);
+        pSummon->SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld.GetArTime());
+    sWorld.AddSummonToWorld(pSummon);
     pSummon->SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
 }
 
@@ -1752,13 +1752,13 @@ void Player::DoUnSummon(Summon *pSummon)
 
     XPacket usPct(TS_SC_UNSUMMON);
     usPct << pSummon->GetHandle();
-    sWorld->Broadcast((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize), pSummon->GetLayer(), usPct);
-    if (sRegion->IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
+    sWorld.Broadcast((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize), pSummon->GetLayer(), usPct);
+    if (sRegion.IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
                                  (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) == 0)
     {
         SendPacket(usPct);
     }
-    sWorld->RemoveObjectFromWorld(pSummon);
+    sWorld.RemoveObjectFromWorld(pSummon);
 }
 
 void Player::onCantAttack(uint target, uint t)
@@ -2083,7 +2083,7 @@ bool Player::IsHunter()
                 break;
         }
     }
-    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+    auto info = sObjectMgr.GetJobInfo((uint)job_id);
 
     if (info != nullptr)
         return info->job_class == 2;
@@ -2110,7 +2110,7 @@ bool Player::IsFighter()
                 break;
         }
     }
-    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+    auto info = sObjectMgr.GetJobInfo((uint)job_id);
 
     if (info != nullptr)
         return info->job_class == 1;
@@ -2137,7 +2137,7 @@ bool Player::IsMagician()
                 break;
         }
     }
-    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+    auto info = sObjectMgr.GetJobInfo((uint)job_id);
 
     if (info != nullptr)
         return info->job_class == 3;
@@ -2164,7 +2164,7 @@ bool Player::IsSummoner()
                 break;
         }
     }
-    auto info = sObjectMgr->GetJobInfo((uint)job_id);
+    auto info = sObjectMgr.GetJobInfo((uint)job_id);
 
     if (info != nullptr)
         return info->job_class == 4;
@@ -2185,7 +2185,7 @@ bool Player::IsInProgressQuest(int code)
 
 bool Player::IsStartableQuest(int code, bool bForQuestMark)
 {
-    auto qbs = sObjectMgr->GetQuestBase(code);
+    auto qbs = sObjectMgr.GetQuestBase(code);
     if (qbs == nullptr)
         return false;
 
@@ -2212,7 +2212,7 @@ bool Player::IsStartableQuest(int code, bool bForQuestMark)
     int fgid = qbs->nLimitFavorGroupID;
     if (fgid == 999)
     {
-        auto npc = sMemoryPool->GetObjectInWorld<NPC>(GetLastContactLong("npc"));
+        auto npc = sMemoryPool.GetObjectInWorld<NPC>(GetLastContactLong("npc"));
 
         if (npc != nullptr)
             fgid = npc->m_pBase->id;
@@ -2281,7 +2281,7 @@ void Player::onModifyStatAndAttribute()
 
 uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     if (pItem->m_pItemBase->cool_time_group < 0
         || pItem->m_pItemBase->cool_time_group > 40
         || (pItem->m_pItemBase->cool_time_group != 0
@@ -2331,7 +2331,7 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 
     if (result == TS_RESULT_SUCCESS)
     {
-        m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld->GetArTime() + (pItem->m_pItemBase->cool_time * 100);
+        m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld.GetArTime() + (pItem->m_pItemBase->cool_time * 100);
         Messages::SendItemCoolTimeInfo(this);
 
         auto itemCode = pItem->m_Instance.Code;
@@ -2352,10 +2352,10 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 CreatureStat *Player::GetBaseStat() const
 {
     uint stat_id = 0;
-    auto job     = sObjectMgr->GetJobInfo(GetCurrentJob());
+    auto job     = sObjectMgr.GetJobInfo(GetCurrentJob());
     if (job != nullptr)
         stat_id = job->stat_id;
-    return sObjectMgr->GetStatInfo(stat_id);
+    return sObjectMgr.GetStatInfo(stat_id);
 }
 
 Item *Player::FindItem(uint code, uint flag, bool bFlag)
@@ -2366,7 +2366,7 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
     NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
-    auto const      &m = sMemoryPool->GetPlayers();
+    auto const      &m = sMemoryPool.GetPlayers();
     for (auto       &itr : m)
     {
         if (itr.second != nullptr)
@@ -2377,7 +2377,7 @@ void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 Player *Player::FindPlayer(const std::string &szName)
 {
     NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
-    auto const      &m = sMemoryPool->GetPlayers();
+    auto const      &m = sMemoryPool.GetPlayers();
 
     auto pos = std::find_if(m.begin(),
                             m.end(),
@@ -2388,7 +2388,7 @@ Player *Player::FindPlayer(const std::string &szName)
 
 void Player::StartQuest(int code, int nStartQuestID, bool bForce)
 {
-    auto rQuestBase = sObjectMgr->GetQuestBase(code);
+    auto rQuestBase = sObjectMgr.GetQuestBase(code);
     if (rQuestBase == nullptr)
         return;
 
@@ -2427,7 +2427,7 @@ void Player::StartQuest(int code, int nStartQuestID, bool bForce)
             Messages::SendQuestList(this);
             if (!q->m_QuestBase->strAcceptScript.empty())
             {
-                sScriptingMgr->RunString(this, q->m_QuestBase->strAcceptScript);
+                sScriptingMgr.RunString(this, q->m_QuestBase->strAcceptScript);
             }
             return;
         }
@@ -2548,11 +2548,11 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         auto nRewardEXP = q->m_QuestBase->nEXP;
         if (GameRule::GetMaxLevel() > 0)
         {
-            if (q->m_QuestBase->nEXP + GetEXP() >= sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1))
+            if (q->m_QuestBase->nEXP + GetEXP() >= sObjectMgr.GetNeedExp(GameRule::GetMaxLevel() - 1))
             {
-                if (GetEXP() < sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1))
+                if (GetEXP() < sObjectMgr.GetNeedExp(GameRule::GetMaxLevel() - 1))
                 {
-                    nRewardEXP = sObjectMgr->GetNeedExp(GameRule::GetMaxLevel() - 1) - GetEXP();
+                    nRewardEXP = sObjectMgr.GetNeedExp(GameRule::GetMaxLevel() - 1) - GetEXP();
                 }
                 else
                 {
@@ -2611,7 +2611,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         onEndQuest(q);
         Messages::SendQuestList(this);
         if (!q->m_QuestBase->strClearScript.empty())
-            sScriptingMgr->RunString(this, q->m_QuestBase->strClearScript);
+            sScriptingMgr.RunString(this, q->m_QuestBase->strClearScript);
         Save(false);
     }
     else
@@ -2772,7 +2772,7 @@ void Player::DB_ItemCoolTime(Player *pPlayer)
 
     uint8             idx       = 0;
     int               cool_down = 0;
-    uint              ct        = sWorld->GetArTime();
+    uint              ct        = sWorld.GetArTime();
     PreparedStatement *stmt     = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_ITEMCOOLTIME);
     stmt->setInt32(idx++, pPlayer->GetUInt32Value(UNIT_FIELD_UID));
     for (auto &cd : pPlayer->m_nItemCooltime)
@@ -2840,7 +2840,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
             }
         }
 
-        uint ct = sWorld->GetArTime();
+        uint ct = sWorld.GetArTime();
 
         std::vector<Summon *> vDeActiveSummonList{ }, vActiveSummonList{ };
 
@@ -3052,12 +3052,12 @@ bool Player::IsInSiegeDungeon()
 
 bool Player::IsInDungeon()
 {
-    return sDungeonManager->GetDungeonID(GetPositionX(), GetPositionY()) != 0;
+    return sDungeonManager.GetDungeonID(GetPositionX(), GetPositionY()) != 0;
 }
 
 bool Player::IsInSiegeOrRaidDungeon()
 {
-    return sDungeonManager->GetDungeonID(GetPositionX(), GetPositionY()) != 0 && GetLayer() > 1;
+    return sDungeonManager.GetDungeonID(GetPositionX(), GetPositionY()) != 0 && GetLayer() > 1;
 }
 
 bool Player::IsInEventmap()
@@ -3181,7 +3181,7 @@ void Player::DB_UpdateStorageGold()
     auto sid = (int64)GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID);
     if (sid == 0)
     {
-        sid = sWorld->GetItemIndex();
+        sid = sWorld.GetItemIndex();
         SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64)sid);
     }
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STORAGE_GOLD);
@@ -3243,7 +3243,7 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     {
         if (pItem->m_Instance.OwnSummonHandle != 0)
         {
-            auto summon = sMemoryPool->GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
+            auto summon = sMemoryPool.GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
             if (summon != nullptr)
                 summon->Putoff(pItem->m_Instance.nWearInfo);
             else
@@ -3458,7 +3458,7 @@ Player *Player::GetTradeTarget()
 {
     if (GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) == 0)
         return nullptr;
-    return sMemoryPool->GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
+    return sMemoryPool.GetObjectInWorld<Player>(GetUInt32Value(PLAYER_FIELD_TRADE_TARGET));
 }
 
 void Player::UpdateWeightWithInventory()
@@ -3718,7 +3718,7 @@ bool Player::CheckTradeWeight()
 
     for (auto &it : m_vTradeItemList)
     {
-        auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
+        auto pItem = sMemoryPool.GetObjectInWorld<Item>(it.first);
         if (pItem == nullptr)
             return false;
 
@@ -3732,7 +3732,7 @@ bool Player::CheckTradeItem()
 {
     for (auto &it : m_vTradeItemList)
     {
-        auto pItem = sMemoryPool->GetObjectInWorld<Item>(it.first);
+        auto pItem = sMemoryPool.GetObjectInWorld<Item>(it.first);
         if (pItem == nullptr)
             return false;
 

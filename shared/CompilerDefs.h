@@ -16,8 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SKYFIRE_COMPILERDEFS_H
-#define SKYFIRE_COMPILERDEFS_H
+#ifndef NGEMITY_COMPILERDEFS_H
+#define NGEMITY_COMPILERDEFS_H
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_UNIX    1

@@ -53,14 +53,14 @@ constexpr int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
 void AllowedCommandInfo::onCheatPosition(Player *pClient, const std::string &/* tokens*/)
 {
-    auto pos     = pClient->GetCurrentPosition(sWorld->GetArTime());
+    auto pos     = pClient->GetCurrentPosition(sWorld.GetArTime());
     auto message = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)pos.GetPositionX(), (int)pos.GetPositionY(), (int)pos.GetLayer());
     Messages::SendChatMessage(30, "@SYSTEM", pClient, message);
 }
 
 void AllowedCommandInfo::onRunScript(Player *pClient, const std::string &pScript)
 {
-    sScriptingMgr->RunString(pClient, pScript);
+    sScriptingMgr.RunString(pClient, pScript);
 }
 
 void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string &/* tokens*/)
@@ -77,7 +77,7 @@ void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string &/* t
 void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string &tokens)
 {
     auto target_handle = (uint)std::stoul(tokens);
-    auto unit          = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
+    auto unit          = sMemoryPool.GetObjectInWorld<Unit>(target_handle);
     if (unit != nullptr)
         Messages::BroadcastStatusMessage(unit);
 }
@@ -123,7 +123,7 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
         }
     };
 
-    sRegion->DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize,
+    sRegion.DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize,
                                  (uint)(pClient->GetPositionY() / g_nRegionSize),
                                  pClient->GetLayer(),
                                  functor,
@@ -140,9 +140,9 @@ void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string &str)
     auto i = std::stoi(tokens[0]);
     if (tokens.size() == 2)
         cnt = std::stoi(tokens[1]);
-    auto pos = pClient->GetCurrentPosition(sWorld->GetArTime());
+    auto pos = pClient->GetCurrentPosition(sWorld.GetArTime());
     auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
-    sScriptingMgr->RunString(pClient, res);
+    sScriptingMgr.RunString(pClient, res);
 }
 
 void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &partyName)
@@ -150,7 +150,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
     if (pClient->GetPartyID() != 0)
         return;
 
-    auto partyID = sGroupManager->CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
+    auto partyID = sGroupManager.CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
     if (partyID == -1)
     {
         NG_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
@@ -170,11 +170,11 @@ void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPla
     if (player == nullptr)
         return;
 
-    auto partyname = sGroupManager->GetPartyName(pClient->GetPartyID());
+    auto partyname = sGroupManager.GetPartyName(pClient->GetPartyID());
     if (partyname.empty())
         return;
 
-    auto nPW = sGroupManager->GetPassword(pClient->GetPartyID());
+    auto nPW = sGroupManager.GetPassword(pClient->GetPartyID());
 
     Messages::SendChatMessage(100, "@PARTY", player, string_format("INVITE|%s|%s|%d|%d", pClient->GetName(), partyname.c_str(), pClient->GetPartyID(), nPW));
 }
@@ -198,13 +198,13 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
     int  partyID = std::stoi(tokenizer[0]);
     uint partyPW = (uint)std::stoi(tokenizer[1]);
 
-    if (!sGroupManager->JoinParty(partyID, pClient, partyPW))
+    if (!sGroupManager.JoinParty(partyID, pClient, partyPW))
     {
         NG_LOG_ERROR("group", "JoinParty failed!");
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    Messages::SendPartyChatMessage(100, "@PARTY", partyID, string_format("JOIN|%s|", sGroupManager->GetPartyName(pClient->GetPartyID()).c_str()));
+    Messages::SendPartyChatMessage(100, "@PARTY", partyID, string_format("JOIN|%s|", sGroupManager.GetPartyName(pClient->GetPartyID()).c_str()));
     Messages::SendPartyInfo(pClient);
     Messages::BroadcastPartyMemberInfo(pClient);
 }
@@ -216,10 +216,10 @@ void AllowedCommandInfo::onPartyInfo(Player *pClient, const std::string &)
 
 void AllowedCommandInfo::onPartyDestroy(Player *pClient, const std::string &)
 {
-    if (pClient->GetPartyID() != 0 && !sGroupManager->IsLeader(pClient->GetPartyID(), pClient->GetName()))
+    if (pClient->GetPartyID() != 0 && !sGroupManager.IsLeader(pClient->GetPartyID(), pClient->GetName()))
         return;
 
-    sGroupManager->DestroyParty(pClient->GetPartyID());
+    sGroupManager.DestroyParty(pClient->GetPartyID());
 }
 
 void AllowedCommandInfo::onCheatStandup(Player *pClient, const std::string &)
@@ -236,6 +236,6 @@ void AllowedCommandInfo::onLeaveParty(Player *pClient, const std::string &)
     if (pClient == nullptr || pClient->GetPartyID() == 0)
         return;
 
-    if (sGroupManager->LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
+    if (sGroupManager.LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
         pClient->SetUInt32Value(PLAYER_FIELD_PARTY_ID, 0);
 }

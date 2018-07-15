@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -17,8 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DatabaseEnv.h"
 #include "Transaction.h"
+#include "MySQLConnection.h"
+#include "PreparedStatement.h"
+#include <mysqld_error.h>
+
+std::mutex TransactionTask::_deadlockLock;
 
 //- Append a raw ad-hoc query to the transaction
 void Transaction::Append(const char* sql)
@@ -27,17 +29,6 @@ void Transaction::Append(const char* sql)
     data.type = SQL_ELEMENT_RAW;
     data.element.query = strdup(sql);
     m_queries.push_back(data);
-}
-
-void Transaction::PAppend(const char* sql, ...)
-{
-    va_list ap;
-    char szQuery [MAX_QUERY_LEN];
-    va_start(ap, sql);
-    vsnprintf(szQuery, MAX_QUERY_LEN, sql, ap);
-    va_end(ap);
-
-    Append(szQuery);
 }
 
 //- Append a prepared statement to the transaction
@@ -55,9 +46,8 @@ void Transaction::Cleanup()
     if (_cleanedUp)
         return;
 
-    while (!m_queries.empty())
+    for (SQLElementData const &data : m_queries)
     {
-        SQLElementData const &data = m_queries.front();
         switch (data.type)
         {
             case SQL_ELEMENT_PREPARED:
@@ -67,23 +57,25 @@ void Transaction::Cleanup()
                 free((void*)(data.element.query));
             break;
         }
-
-        m_queries.pop_front();
     }
 
+    m_queries.clear();
     _cleanedUp = true;
 }
 
 bool TransactionTask::Execute()
 {
-    if (m_conn->ExecuteTransaction(m_trans))
+    int errorCode = m_conn->ExecuteTransaction(m_trans);
+    if (!errorCode)
         return true;
 
-    if (m_conn->GetLastError() == 1213)
+    if (errorCode == ER_LOCK_DEADLOCK)
     {
+        // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
+        std::lock_guard<std::mutex> lock(_deadlockLock);
         uint8 loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
         for (uint8 i = 0; i < loopBreaker; ++i)
-            if (m_conn->ExecuteTransaction(m_trans))
+            if (!m_conn->ExecuteTransaction(m_trans))
                 return true;
     }
 

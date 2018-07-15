@@ -19,23 +19,22 @@
 #define NGEMITY_GAMEAUTHSESSION_H
 
 #include "Common.h"
+#include "XSocket.h"
 
-template<class T> class WorldSocket;
 class XPacket;
 class WorldSession;
 
 // Handle login commands
-class GameAuthSession
+class GameAuthSession : public XSession
 {
 public:
-	typedef WorldSocket<GameAuthSession> AuthSocket;
 	typedef std::unordered_map<std::string, WorldSession*> AuthQueue;
-	explicit GameAuthSession(AuthSocket *pSocket);
+	explicit GameAuthSession(XSocket *pSocket);
 	~GameAuthSession();
 
 	// Network handlers
 	void OnClose();
-	void ProcessIncoming(XPacket *);
+	ReadDataHandlerResult ProcessIncoming(XPacket *);
 
 	// Packet handlers
 	void HandleGameLoginResult(XPacket *);
@@ -52,7 +51,7 @@ public:
 
 private:
 	AuthQueue  m_queue;
-	AuthSocket *m_pSocket;
+	XSocket *m_pSocket;
 
 	uint16 m_nGameIDX;
 	std::string m_szGameName;

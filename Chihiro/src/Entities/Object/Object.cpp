@@ -366,7 +366,7 @@ WorldObject::~WorldObject() = default;
 
 void WorldObject::SendEnterMsg(Player *pPlayer)
 {
-    Position tmpPos = this->GetCurrentPosition(sWorld->GetArTime());
+    Position tmpPos = this->GetCurrentPosition(sWorld.GetArTime());
     XPacket packet(TS_SC_ENTER);
     packet << (uint8_t) GetMainType();
     packet << GetHandle();
@@ -566,7 +566,7 @@ void ArMoveVector::SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, u
         speed = _speed;
         uint ct = _start_time;
         if (ct == 0)
-            ct = sWorld->GetArTime();
+            ct = sWorld.GetArTime();
 
         start_time = ct;
         proc_time  = ct;
@@ -602,7 +602,7 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     speed = _speed;
     uint st = _start_time;
     if (_start_time == 0)
-        st = sWorld->GetArTime();
+        st = sWorld.GetArTime();
 
     start_time = st;
     proc_time  = st;

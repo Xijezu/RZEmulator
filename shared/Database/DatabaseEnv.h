@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,28 +19,23 @@
 #ifndef DATABASEENV_H
 #define DATABASEENV_H
 
-#include "Common.h"
-#include "Errors.h"
-#include "Log.h"
+#include "Define.h"
+#include "DatabaseWorkerPool.h"
 
-#include "Field.h"
-#include "QueryResult.h"
-
-#include "MySQLThreading.h"
-#include "Transaction.h"
-
-#define _LIKE_           "LIKE"
-#define _TABLE_SIM_      "`"
-#define _CONCAT3_(A, B, C) "CONCAT( " A ", " B ", " C " )"
-#define _OFFSET_         "LIMIT %d, 1"
-
-#include "Implementation/LoginDatabase.h"
 #include "Implementation/CharacterDatabase.h"
 #include "Implementation/GameDatabase.h"
+#include "Implementation/LoginDatabase.h"
 
-extern GameDatabaseWorkerPool GameDatabase;
-extern CharacterDatabaseWorkerPool CharacterDatabase;
-extern LoginDatabaseWorkerPool LoginDatabase;
+#include "Field.h"
+#include "PreparedStatement.h"
+#include "QueryCallback.h"
+#include "QueryResult.h"
+#include "Transaction.h"
 
+/// Accessor to the character database
+extern DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
+/// Accessor to the realm/login database
+extern DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
+
+extern DatabaseWorkerPool<GameDatabaseConnection> GameDatabase;
 #endif
-

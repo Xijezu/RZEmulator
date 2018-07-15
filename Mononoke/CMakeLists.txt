@@ -6,20 +6,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthClient
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthGame
+                    ${Boost_INCLUDE_DIR}
                     ${CMAKE_BINARY_DIR}
                     ${SHARED_INCLUDE_DIR}
-                    ${ACE_INCLUDE_DIR}
                     ${MYSQL_INCLUDE_DIR})
 
 file(GLOB_RECURSE SOURCE_FILES src/*.*)
 
-add_executable(Mononoke ${SOURCE_FILES} )
-target_link_libraries(Mononoke shared ${MYSQL_LIB})
-if(ACE_USE_EXTERNAL)
-    target_link_libraries(Mononoke ${ACE_LIBRARIES})
-else()
-    target_link_libraries(Mononoke ace)
-endif()
+add_executable(Mononoke ${SOURCE_FILES})
+target_link_libraries(Mononoke shared fmt ${MYSQL_LIB} boost)
+
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")
@@ -30,3 +26,5 @@ if(UNIX)
     endif()
     set_target_properties(Mononoke PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
 endif()
+
+add_cxx_pch(Mononoke ${CMAKE_SOURCE_DIR}/Mononoke/src/PrecompiledHeaders/mononokePCH.h)

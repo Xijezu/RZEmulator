@@ -25,7 +25,11 @@ class Item;
 class ItemCollector
 {
     public:
-        ItemCollector() = default;
+        static ItemCollector &Instance()
+        {
+            static ItemCollector instance;
+            return instance;
+        }
         ~ItemCollector();
         void RegisterItem(Item *pItem);
         bool UnregisterItem(Item *pItem);
@@ -36,6 +40,9 @@ class ItemCollector
 
         ItemMap m_vItemList;
         NG_SHARED_MUTEX i_lock;
+
+    protected:
+        ItemCollector() = default;
 };
-#define sItemCollector ACE_Singleton<ItemCollector, ACE_Null_Mutex>::instance()
+#define sItemCollector ItemCollector::Instance()
 #endif // NGEMITY_ITEMCOLLECTOR_H

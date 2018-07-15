@@ -31,7 +31,6 @@
 #include "Common.h"
 #include "ByteConverter.h"
 
-#include <ace/OS_NS_time.h>
 #include <exception>
 #include <list>
 #include <map>
@@ -39,7 +38,7 @@
 #include <vector>
 #include <cstring>
 #include <time.h>
-
+#include "MessageBuffer.h"
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
 {
@@ -92,6 +91,8 @@ class ByteBuffer
                                                      _bitpos(buf._bitpos), _curbitval(buf._curbitval), _storage(buf._storage)
         {
         }
+
+        explicit ByteBuffer(MessageBuffer&& buffer);
 
         void clear()
         {
@@ -459,7 +460,7 @@ class ByteBuffer
                 return;
             //throw ByteBufferSourceException(_wpos, size(), cnt);
 
-                    ASSERT(size() < 10000000);
+                    ASSERT(size() < 10000000, "Size too big");
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);

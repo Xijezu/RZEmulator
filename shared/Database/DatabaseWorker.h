@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,24 +18,33 @@
 #ifndef _WORKERTHREAD_H
 #define _WORKERTHREAD_H
 
-#include <ace/Task.h>
-#include <ace/Activation_Queue.h>
+#include "Define.h"
+#include <atomic>
+#include <thread>
+
+template <typename T>
+class ProducerConsumerQueue;
 
 class MySQLConnection;
+class SQLOperation;
 
-class DatabaseWorker : protected ACE_Task_Base
+class DatabaseWorker
 {
     public:
-        DatabaseWorker(ACE_Activation_Queue* new_queue, MySQLConnection* con);
-
-        ///- Inherited from ACE_Task_Base
-        int svc();
-        int wait() { return ACE_Task_Base::wait(); }
+        DatabaseWorker(ProducerConsumerQueue<SQLOperation*>* newQueue, MySQLConnection* connection);
+        ~DatabaseWorker();
 
     private:
-        DatabaseWorker() : ACE_Task_Base() { }
-        ACE_Activation_Queue* m_queue;
-        MySQLConnection* m_conn;
+        ProducerConsumerQueue<SQLOperation*>* _queue;
+        MySQLConnection* _connection;
+
+        void WorkerThread();
+        std::thread _workerThread;
+
+        std::atomic<bool> _cancelationToken;
+
+        DatabaseWorker(DatabaseWorker const& right) = delete;
+        DatabaseWorker& operator=(DatabaseWorker const& right) = delete;
 };
 
 #endif

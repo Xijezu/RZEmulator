@@ -32,12 +32,12 @@ void SkillProp::Update(uint/* diff*/)
 
     Unit *pCaster{nullptr};
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     if (ct > m_Info.m_nEndTime || m_bIsRemovePended)
     {
         m_bProcessEnded = true;
 
-        sWorld->RemoveObjectFromWorld(this);
+        sWorld.RemoveObjectFromWorld(this);
         DeleteThis();
     }
     else
@@ -46,7 +46,7 @@ void SkillProp::Update(uint/* diff*/)
             return;
 
         m_Info.m_nLastFireTime = ct;
-        pCaster = sMemoryPool->GetObjectInWorld<Unit>(m_hCaster);
+        pCaster = sMemoryPool.GetObjectInWorld<Unit>(m_hCaster);
         if (pCaster != nullptr)
         {
             m_pSkill->m_targetPosition.Relocate(this);
@@ -101,7 +101,7 @@ void SkillProp::Update(uint/* diff*/)
         else
         {
             m_bProcessEnded = true;
-            sWorld->RemoveObjectFromWorld(this);
+            sWorld.RemoveObjectFromWorld(this);
             DeleteThis();
         }
     }
@@ -122,7 +122,7 @@ void SkillProp::PendRemove()
 
 void SkillProp::INIT_AREA_EFFECT_MAGIC_DAMAGE()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     m_Info.m_nStartTime = ct;
     m_Info.m_nEndTime   = (uint)(((m_pSkill->m_SkillBase->var[3] + (m_pSkill->m_SkillBase->var[4] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
     m_Info.m_nInterval  = (uint)(m_pSkill->m_SkillBase->var[6] * 100);
@@ -130,7 +130,7 @@ void SkillProp::INIT_AREA_EFFECT_MAGIC_DAMAGE()
 
 void SkillProp::INIT_AREA_EFFECT_HEAL()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     m_Info.m_nStartTime = ct;
     m_Info.m_nEndTime   = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
     m_Info.m_nInterval  = (uint)(m_pSkill->m_SkillBase->var[10] * 100);
@@ -138,7 +138,7 @@ void SkillProp::INIT_AREA_EFFECT_HEAL()
 
 void SkillProp::INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP()
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     m_Info.m_nStartTime = ct;
     m_Info.m_nEndTime   = (uint)(((m_pSkill->m_SkillBase->var[7] + (m_pSkill->m_SkillBase->var[8] * m_pSkill->m_nRequestedSkillLevel)) * 100) + ct);
     m_Info.m_nInterval  = (uint)(m_pSkill->m_SkillBase->var[5] * 100);
@@ -146,7 +146,7 @@ void SkillProp::INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP()
 
 void SkillProp::INIT_SKILL_PROP_PARAMETER(uint nDuration, uint nInterval)
 {
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     m_Info.m_nLastFireTime = 0;
     m_Info.m_nStartTime    = ct;
     m_Info.m_nEndTime      = nDuration + ct;
@@ -164,14 +164,14 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
                                                      + (m_pSkill->m_SkillBase->var[2] * m_pSkill->m_nEnhance))
                              + (m_pSkill->m_SkillBase->var[3] + (m_pSkill->m_SkillBase->var[4] * m_pSkill->m_nRequestedSkillLevel))));
 
-    // sWorld->EnumMovableObject()
+    // sWorld.EnumMovableObject()
 
-    auto t = sWorld->GetArTime();
+    auto t = sWorld.GetArTime();
     Unit *pUnit{nullptr};
 
     for (const auto &uid : vResult)
     {
-        pUnit = sMemoryPool->GetObjectInWorld<Unit>(uid);
+        pUnit = sMemoryPool.GetObjectInWorld<Unit>(uid);
         if (pUnit == nullptr || !pCaster->IsEnemy(pUnit, true) || pUnit->GetHealth() == 0)
         {
             continue;
@@ -230,7 +230,7 @@ SkillProp::SkillProp(uint caster, Skill *pSkill, int nMagicPoint, float fHateRat
     m_pSkill           = pSkill;
     m_fHateRatio       = fHateRatio;
     m_nOwnerMagicPoint = nMagicPoint;
-    sMemoryPool->AllocMiscHandle(this);
+    sMemoryPool.AllocMiscHandle(this);
 
     _valuesCount = 1;
     _InitValues();

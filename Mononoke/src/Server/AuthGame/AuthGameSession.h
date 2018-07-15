@@ -21,45 +21,50 @@
 #include "Common.h"
 #include "GameList.h"
 #include "PlayerList.h"
+#include "XSocket.h"
 
-template<class T> class WorldSocket;
 class XPacket;
 
 // Handle login commands
-class AuthGameSession
+class AuthGameSession : public XSession
 {
-	public:
-		typedef WorldSocket<AuthGameSession> GameSocket;
-		explicit AuthGameSession(GameSocket *pSocket);
-		~AuthGameSession();
+    public:
+        explicit AuthGameSession(XSocket *pSocket);
+        ~AuthGameSession();
 
-		// Network handlers
-		void OnClose();
-		void ProcessIncoming(XPacket *);
+        // Network handlers
+        void OnClose();
+        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
-		/// \brief Handles game login (packet contains servername, ...)
-		void HandleGameLogin(XPacket *);
-		/// \brief Handles client login on server - checks one-time-key
-		void HandleClientLogin(XPacket *);
-		/// \brief Handles client logout on server - removes player from our list
-		void HandleClientLogout(XPacket *);
-		/// \brief Handles client kick failed - not used yet
-		void HandleClientKickFailed(XPacket *);
-		/// \brief Kicks a player from the gameserver
-		/// \param pPlayer The player to be kicked
-		void KickPlayer(Player *pPlayer);
+        bool IsEncrypted() const override
+        {
+            return true;
+        }
 
-		/// \brief Gets the GameIDX - used in WorldSocket
-		/// \return GameIDX
-		int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
-		/// \brief Gets the server name - used in WorldSocket
-		/// \return server name
-		std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
+        /// \brief Handles game login (packet contains servername, ...)
+        void HandleGameLogin(XPacket *);
+        /// \brief Handles client login on server - checks one-time-key
+        void HandleClientLogin(XPacket *);
+        /// \brief Handles client logout on server - removes player from our list
+        void HandleClientLogout(XPacket *);
+        /// \brief Handles client kick failed - not used yet
+        void HandleClientKickFailed(XPacket *);
+        /// \brief Kicks a player from the gameserver
+        /// \param pPlayer The player to be kicked
+        void KickPlayer(Player *pPlayer);
 
-	private:
-		GameSocket *m_pSocket;
-		Game       *m_pGame;
-		bool       m_bIsAuthed;
+        /// \brief Gets the GameIDX - used in WorldSocket
+        /// \return GameIDX
+        int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
+
+        /// \brief Gets the server name - used in WorldSocket
+        /// \return server name
+        std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
+
+    private:
+        XSocket *m_pSocket;
+        Game    *m_pGame;
+        bool    m_bIsAuthed;
 };
 
 #endif // NGEMITY_AUTHGAMESESSION_H

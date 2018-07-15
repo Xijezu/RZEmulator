@@ -16,9 +16,9 @@
   */
 
 #include "Common.h"
-#include "GameNetwork/WorldSession.h"
+#include "WorldSession.h"
 #include "World.h"
-#include "GameNetwork/ClientPackets.h"
+#include "ClientPackets.h"
 #include "AuthNetwork.h"
 #include "MemPool.h"
 #include "Messages.h"
@@ -36,12 +36,8 @@
 #include "GameContent.h"
 
 // Constructo - give it a socket
-WorldSession::WorldSession(WorldSocket<WorldSession> *socket) : _socket(socket)
+WorldSession::WorldSession(XSocket *socket) : _socket(socket)
 {
-    if (socket)
-    {
-        socket->AddReference();
-    }
 }
 
 // Close patch file descriptor before leaving
@@ -49,19 +45,12 @@ WorldSession::~WorldSession()
 {
     if (m_pPlayer)
         onReturnToLobby(nullptr);
-
-    if (_socket)
-    {
-        _socket->CloseSocket();
-        _socket->RemoveReference();
-        _socket = nullptr;
-    }
 }
 
 void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
-        sAuthNetwork->SendClientLogoutToAuth(_accountName);
+        sAuthNetwork.SendClientLogoutToAuth(_accountName);
 }
 
 enum eStatus
@@ -133,12 +122,9 @@ constexpr WorldSessionHandler packetHandler[] =
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
 
 /// Handler for incoming packets
-void WorldSession::ProcessIncoming(XPacket *pRecvPct)
+ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 {
-    ACE_ASSERT(pRecvPct);
-
-    // Manage memory
-    ACE_Auto_Ptr<XPacket> aptr(pRecvPct);
+    ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
     int  i    = 0;
@@ -147,7 +133,7 @@ void WorldSession::ProcessIncoming(XPacket *pRecvPct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            pRecvPct->read_skip(7); // Ignoring packet header
+            //pRecvPct->read_skip(7); // Ignoring packet header
             (*this.*packetHandler[i].handler)(pRecvPct);
             break;
         }
@@ -156,17 +142,17 @@ void WorldSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteAddress().c_str());
-        return;
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_string().c_str());
+        return ReadDataHandlerResult::Error;
     }
-    aptr.release();
+    return ReadDataHandlerResult::Ok;
 }
 
 /// TODO: The whole stuff needs a rework, it is working as intended but it's just a dirty hack
 void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
     s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *)(pGamePct)->contents());
-    sAuthNetwork->SendAccountToAuth(*this, result->account, result->one_time_key);
+    sAuthNetwork.SendAccountToAuth(*this, result->account, result->one_time_key);
 }
 
 void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
@@ -176,7 +162,6 @@ void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
     packet << (uint16)_result;
     packet << (int32)_value;
     _socket->SendPacket(packet);
-    _socket->handle_output();
 }
 
 void WorldSession::onCharacterList(XPacket */*pGamePct*/)
@@ -281,7 +266,7 @@ void WorldSession::onAuthResult(XPacket *pGamePct)
         _isAuthed    = true;
         _accountId   = nAccountID;
         _accountName = szAccount;
-        sWorld->AddSession(this);
+        sWorld.AddSession(this);
     }
     _SendResultMsg(TS_CS_ACCOUNT_WITH_AUTH, result, 0);
 }
@@ -291,7 +276,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     s_ClientLogin_CS *result = ((s_ClientLogin_CS *)(pRecvPct)->contents());
 
     //m_pPlayer = new Player(this);
-    m_pPlayer = sMemoryPool->AllocPlayer();
+    m_pPlayer = sMemoryPool.AllocPlayer();
     m_pPlayer->SetSession(this);
     if (!m_pPlayer->ReadCharacter(result->szName, _accountId))
     {
@@ -301,7 +286,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
 
     Messages::SendTimeSynch(m_pPlayer);
 
-    sScriptingMgr->RunString(m_pPlayer, string_format("on_login('%s')", m_pPlayer->GetName()));
+    sScriptingMgr.RunString(m_pPlayer, string_format("on_login('%s')", m_pPlayer->GetName()));
 
     XPacket packet(TS_SC_LOGIN_RESULT); // Login Result
     packet << (uint8)1;
@@ -360,7 +345,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
     Position curPosFromClient{ };
     Position wayPoint{ };
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     speed = (int)m_pPlayer->GetMoveSpeed() / 7;
     auto mover = dynamic_cast<Unit *>(m_pPlayer);
 
@@ -487,7 +472,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                         npos.m_positionY = y;
                         npos.m_positionZ = 0.0f;
 
-                        sWorld->SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
+                        sWorld.SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
                         // TODO: Mount
                     }
                 }
@@ -563,7 +548,7 @@ void WorldSession::onCreateCharacter(XPacket *pRecvPct)
         {
             stmt->setUInt32(j++, i);
         }
-        auto     playerUID      = sWorld->GetPlayerIndex();
+        auto     playerUID      = sWorld.GetPlayerIndex();
         stmt->setUInt32(j, playerUID);
         CharacterDatabase.Query(stmt);
 
@@ -593,21 +578,21 @@ void WorldSession::onCreateCharacter(XPacket *pRecvPct)
         }
 
         auto itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->GetItemIndex());
+        itemStmt->setInt32(0, sWorld.GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultWeaponCode);
         itemStmt->setInt32(3, WEAR_WEAPON);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->GetItemIndex());
+        itemStmt->setInt32(0, sWorld.GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultArmorCode);
         itemStmt->setInt32(3, WEAR_ARMOR);
         CharacterDatabase.Execute(itemStmt);
 
         itemStmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_DEFAULT_ITEM);
-        itemStmt->setInt32(0, sWorld->GetItemIndex());
+        itemStmt->setInt32(0, sWorld.GetItemIndex());
         itemStmt->setInt32(1, playerUID);
         itemStmt->setInt32(2, nDefaultBagCode);
         itemStmt->setInt32(3, WEAR_BAG_SLOT);
@@ -654,7 +639,7 @@ void WorldSession::onChatRequest(XPacket *_packet)
 
     if (request.type != 3 && request.szMsg[0] == 47)
     {
-        sAllowedCommandInfo->Run(m_pPlayer, request.szMsg);
+        sAllowedCommandInfo.Run(m_pPlayer, request.szMsg);
         return;
     }
 
@@ -691,7 +676,7 @@ void WorldSession::onChatRequest(XPacket *_packet)
         {
             if (m_pPlayer->GetPartyID() != 0)
             {
-                sGroupManager->DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &request](PartyMemberTag &tag) {
+                sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &request](PartyMemberTag &tag) {
                     if (tag.bIsOnline)
                     {
                         auto player = Player::FindPlayer(tag.strName);
@@ -722,8 +707,8 @@ void WorldSession::onPutOnItem(XPacket *_packet)
 
     if (m_pPlayer->GetHealth() != 0)
     {
-        //Item *ci = sMemoryPool->FindItem(item_handle);
-        auto ci = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+        //Item *ci = sMemoryPool.FindItem(item_handle);
+        auto ci = sMemoryPool.GetObjectInWorld<Item>(item_handle);
 
         if (ci != nullptr)
         {
@@ -736,7 +721,7 @@ void WorldSession::onPutOnItem(XPacket *_packet)
             auto *unit = (Unit *)m_pPlayer;
             if (target_handle != 0)
             {
-                auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+                auto summon = sMemoryPool.GetObjectInWorld<Summon>(target_handle);
                 if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
                 {
                     Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
@@ -773,7 +758,7 @@ void WorldSession::onPutOffItem(XPacket *_packet)
     auto *unit = (Unit *)m_pPlayer;
     if (target_handle != 0)
     {
-        auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+        auto summon = sMemoryPool.GetObjectInWorld<Summon>(target_handle);
         if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
         {
             Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
@@ -816,7 +801,7 @@ void WorldSession::onRegionUpdate(XPacket *pRecvPct)
 
     if (m_pPlayer->IsInWorld())
     {
-        sWorld->onRegionChange(m_pPlayer, update_time, bIsStopMessage);
+        sWorld.onRegionChange(m_pPlayer, update_time, bIsStopMessage);
     }
 }
 
@@ -831,12 +816,12 @@ void WorldSession::onContact(XPacket *pRecvPct)
 {
 
     auto handle = pRecvPct->read<uint32_t>();
-    auto npc    = sMemoryPool->GetObjectInWorld<NPC>(handle);
+    auto npc    = sMemoryPool.GetObjectInWorld<NPC>(handle);
 
     if (npc != nullptr)
     {
         m_pPlayer->SetLastContact("npc", handle);
-        sScriptingMgr->RunString(m_pPlayer, npc->m_pBase->contact_script);
+        sScriptingMgr.RunString(m_pPlayer, npc->m_pBase->contact_script);
     }
 }
 
@@ -858,15 +843,15 @@ void WorldSession::onDialog(XPacket *pRecvPct)
         }
     }
 
-    //auto npc = dynamic_cast<NPC *>(sMemoryPool->getPtrFromId(m_pPlayer->GetLastContactLong("npc")));
-    auto npc = sMemoryPool->GetObjectInWorld<NPC>(m_pPlayer->GetLastContactLong("npc"));
+    //auto npc = dynamic_cast<NPC *>(sMemoryPool.getPtrFromId(m_pPlayer->GetLastContactLong("npc")));
+    auto npc = sMemoryPool.GetObjectInWorld<NPC>(m_pPlayer->GetLastContactLong("npc"));
     if (npc == nullptr)
     {
         NG_LOG_TRACE("scripting", "onDialog: NPC not found!");
         return;
     }
 
-    sScriptingMgr->RunString(m_pPlayer, trigger);
+    sScriptingMgr.RunString(m_pPlayer, trigger);
     if (m_pPlayer->HasDialog())
         m_pPlayer->ShowDialog();
 }
@@ -884,7 +869,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
         return;
     }
 
-    auto market = sObjectMgr->GetMarketInfo(szMarketName);
+    auto market = sObjectMgr.GetMarketInfo(szMarketName);
     if (market->empty())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_UNKNOWN, 0);
@@ -898,7 +883,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
     {
         if (mt.code == item_code)
         {
-            auto ibs = sObjectMgr->GetItemBase((uint)item_code);
+            auto ibs = sObjectMgr.GetItemBase((uint)item_code);
             if (ibs == nullptr)
                 continue;
             if (ibs->flaglist[FLAG_DUPLICATE] == 1)
@@ -1002,7 +987,7 @@ void WorldSession::onTimeSync(XPacket *pRecvPct)
 {
 
     auto packet_time = pRecvPct->read<int>();
-    uint ct          = sWorld->GetArTime();
+    uint ct          = sWorld.GetArTime();
     m_pPlayer->m_TS.onEcho(ct - packet_time);
     if (m_pPlayer->m_TS.m_vT.size() >= 4)
     {
@@ -1026,9 +1011,9 @@ void WorldSession::onQuery(XPacket *pRecvPct)
 
     auto handle = pRecvPct->read<uint>();
 
-    //WorldObject* obj = sMemoryPool->getPtrFromId(handle);
-    auto obj = sMemoryPool->GetObjectInWorld<WorldObject>(handle);
-    if (obj != nullptr && obj->IsInWorld() && obj->GetLayer() == m_pPlayer->GetLayer() && sRegion->IsVisibleRegion(obj, m_pPlayer) != 0)
+    //WorldObject* obj = sMemoryPool.getPtrFromId(handle);
+    auto obj = sMemoryPool.GetObjectInWorld<WorldObject>(handle);
+    if (obj != nullptr && obj->IsInWorld() && obj->GetLayer() == m_pPlayer->GetLayer() && sRegion.IsVisibleRegion(obj, m_pPlayer) != 0)
     {
         Messages::sendEnterMessage(m_pPlayer, obj, false);
     }
@@ -1067,7 +1052,7 @@ void WorldSession::onJobLevelUp(XPacket *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, target);
         return;
     }
-    int jp = sObjectMgr->GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), m_pPlayer->GetJobDepth());
+    int jp = sObjectMgr.GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), m_pPlayer->GetJobDepth());
     if (cr->GetJP() < jp)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ENOUGH_JP, target);
@@ -1112,7 +1097,7 @@ void WorldSession::onLearnSkill(XPacket *pRecvPct)
 
     if (m_pPlayer->GetHandle() != target_handle)
     {
-        auto summon = sMemoryPool->GetObjectInWorld<Summon>(target_handle);
+        auto summon = sMemoryPool.GetObjectInWorld<Summon>(target_handle);
         if (summon == nullptr || !summon->IsSummon() || summon->GetMaster() == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
         {
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
@@ -1207,13 +1192,13 @@ void WorldSession::onEquipSummon(XPacket *pRecvPct)
                 summon = pItem->m_pSummon;
                 if (summon == nullptr)
                 {
-                    summon = sMemoryPool->AllocNewSummon(m_pPlayer, pItem);
+                    summon = sMemoryPool.AllocNewSummon(m_pPlayer, pItem);
                     summon->SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
                     m_pPlayer->AddSummon(summon, true);
                     Messages::SendItemMessage(m_pPlayer, pItem);
 
                     Summon::DB_InsertSummon(m_pPlayer, summon);
-                    sScriptingMgr->RunString(m_pPlayer, string_format("on_first_summon( %d, %d)", summon->GetSummonCode(), summon->GetHandle()));
+                    sScriptingMgr.RunString(m_pPlayer, string_format("on_first_summon( %d, %d)", summon->GetSummonCode(), summon->GetHandle()));
                     summon->SetCurrentJLv(summon->GetLevel());
                     summon->CalculateStat();
                 }
@@ -1334,7 +1319,7 @@ void WorldSession::onSkill(XPacket *pRecvPct)
         Messages::SendSkillCastFailMessage(m_pPlayer, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_EXIST);
         return;
     }
-    auto base = sObjectMgr->GetSkillBase(skill_id);
+    auto base = sObjectMgr.GetSkillBase(skill_id);
     if (base == nullptr || base->id == 0 || base->is_valid == 0 || base->is_valid == 2)
     {
         Messages::SendSkillCastFailMessage(m_pPlayer, caster, target, skill_id, skill_level, pos, TS_RESULT_ACCESS_DENIED);
@@ -1343,8 +1328,8 @@ void WorldSession::onSkill(XPacket *pRecvPct)
     /// @todo isCastable
     if (target != 0)
     {
-        //pTarget = dynamic_cast<WorldObject*>(sMemoryPool->getPtrFromId(target));
-        pTarget = sMemoryPool->GetObjectInWorld<WorldObject>(target);
+        //pTarget = dynamic_cast<WorldObject*>(sMemoryPool.getPtrFromId(target));
+        pTarget = sMemoryPool.GetObjectInWorld<WorldObject>(target);
         if (pTarget == nullptr)
         {
             Messages::SendSkillCastFailMessage(m_pPlayer, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_EXIST);
@@ -1352,7 +1337,7 @@ void WorldSession::onSkill(XPacket *pRecvPct)
         }
     }
 
-    auto ct = sWorld->GetArTime();
+    auto ct = sWorld.GetArTime();
     if (pCaster->IsMoving(ct))
     {
         Messages::SendSkillCastFailMessage(m_pPlayer, caster, target, skill_id, skill_level, pos, TS_RESULT_NOT_ACTABLE);
@@ -1419,7 +1404,7 @@ void WorldSession::onAttackRequest(XPacket *pRecvPct)
         return;
     }
 
-    auto pTarget = sMemoryPool->GetObjectInWorld<Unit>(target);
+    auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(target);
     if (pTarget == nullptr)
     {
         if (unit->GetTargetHandle() != 0)
@@ -1481,10 +1466,10 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
 
     auto item_handle = pRecvPct->read<uint>();
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
-    //auto item = dynamic_cast<Item*>(sMemoryPool->getPtrFromId(item_handle));
-    auto item = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+    //auto item = dynamic_cast<Item*>(sMemoryPool.getPtrFromId(item_handle));
+    auto item = sMemoryPool.GetObjectInWorld<Item>(item_handle);
     if (item == nullptr || !item->IsInWorld())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
@@ -1548,21 +1533,21 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     XPacket resultPct(TS_SC_TAKE_ITEM_RESULT);
     resultPct << item_handle;
     resultPct << m_pPlayer->GetHandle();
-    sWorld->Broadcast((uint)(m_pPlayer->GetPositionX() / g_nRegionSize), (uint)(m_pPlayer->GetPositionY() / g_nRegionSize), m_pPlayer->GetLayer(), resultPct);
-    if (sWorld->RemoveItemFromWorld(item))
+    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / g_nRegionSize), (uint)(m_pPlayer->GetPositionY() / g_nRegionSize), m_pPlayer->GetLayer(), resultPct);
+    if (sWorld.RemoveItemFromWorld(item))
     {
         if (m_pPlayer->GetPartyID() != 0)
         {
             if (item->m_Instance.Code != 0)
             {
                 ///- Actual Item
-                sWorld->procPartyShare(m_pPlayer, item);
+                sWorld.procPartyShare(m_pPlayer, item);
             }
             else
             {
                 ///- Gold
                 std::vector<Player *> vList{ };
-                sGroupManager->GetNearMember(m_pPlayer, 400.0f, vList);
+                sGroupManager.GetNearMember(m_pPlayer, 400.0f, vList);
                 auto incGold = (int64)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
 
                 for (auto &np : vList)
@@ -1574,7 +1559,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
             }
             return;
         }
-        uint nih = sWorld->procAddItem(m_pPlayer, item, false);
+        uint nih = sWorld.procAddItem(m_pPlayer, item, false);
         if (nih != 0)
         { // nih = new item handle
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, nih);
@@ -1592,7 +1577,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     auto target_handle = pRecvPct->read<uint>();
     auto szParameter   = pRecvPct->ReadString(32);
 
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
 
     auto item = m_pPlayer->FindItemByHandle(item_handle);
     if (item == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
@@ -1637,8 +1622,8 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
     }
     else
     {
-        //auto unit = dynamic_cast<Unit*>(sMemoryPool->getPtrFromId(target_handle));
-        auto unit = sMemoryPool->GetObjectInWorld<Unit>(target_handle);
+        //auto unit = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(target_handle));
+        auto unit = sMemoryPool.GetObjectInWorld<Unit>(target_handle);
         if (unit == nullptr || unit->GetHandle() == 0)
         {
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
@@ -1665,14 +1650,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
 
 bool WorldSession::Update(uint /*diff*/)
 {
-    if (_socket && _socket->IsClosed())
-    {
-        _socket->RemoveReference();
-        _socket = nullptr;
-    }
-
     return _socket != nullptr;
-
 }
 
 void WorldSession::onRevive(XPacket *)
@@ -1683,7 +1661,7 @@ void WorldSession::onRevive(XPacket *)
     if (m_pPlayer->GetHealth() != 0)
         return;
 
-    sScriptingMgr->RunString(m_pPlayer, string_format("revive_in_town(%d)", 0));
+    sScriptingMgr.RunString(m_pPlayer, string_format("revive_in_town(%d)", 0));
 }
 
 void WorldSession::onDropItem(XPacket *pRecvPct)
@@ -1692,12 +1670,12 @@ void WorldSession::onDropItem(XPacket *pRecvPct)
 
     auto target = pRecvPct->read<uint>();
 
-    auto item = sMemoryPool->GetObjectInWorld<Item>(target);
+    auto item = sMemoryPool.GetObjectInWorld<Item>(target);
     if (item != nullptr)
     {
         item->SetOwnerInfo(0, 0, 0);
         item->Relocate(m_pPlayer->GetPosition());
-        sWorld->AddItemToWorld(item);
+        sWorld.AddItemToWorld(item);
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
     }
 }
@@ -1729,7 +1707,7 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
         return;
     }
 
-    auto pMainItem         = sMixManager->check_mixable_item(m_pPlayer, main_item.handle, 1);
+    auto pMainItem         = sMixManager.check_mixable_item(m_pPlayer, main_item.handle, 1);
     if (main_item.handle != 0 && pMainItem == nullptr)
         return;
 
@@ -1739,14 +1717,14 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
     {
         for (auto &mixInfo : vSubItems)
         {
-            auto item = sMixManager->check_mixable_item(m_pPlayer, mixInfo.handle, mixInfo.count);
+            auto item = sMixManager.check_mixable_item(m_pPlayer, mixInfo.handle, mixInfo.count);
             if (item == nullptr)
                 return;
             pSubItem.emplace_back(item);
             pCountList.emplace_back(mixInfo.count);
         }
     }
-    auto                mb = sMixManager->GetProperMixInfo(pMainItem, count, pSubItem, pCountList);
+    auto                mb = sMixManager.GetProperMixInfo(pMainItem, count, pSubItem, pCountList);
 
     if (mb == nullptr)
     {
@@ -1759,19 +1737,19 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
         case 0:
             break;
         case 101: //EnchantItem without E-Protect Powder
-            sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         case 102:
-            sMixManager->EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
+            sMixManager.EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
             return;
         case 103: //EnchantItem WITH E-Protect Powder
-            sMixManager->EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         case 311:
-            sMixManager->MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            sMixManager.MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         case 501:
-            sMixManager->RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
+            sMixManager.RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         default:
             break;
@@ -1831,7 +1809,7 @@ void WorldSession::onSoulStoneCraft(XPacket *pRecvPct)
             {
                 if (pItem->m_Instance.Socket[k] != 0 && k != i)
                 {
-                    auto ibs = sObjectMgr->GetItemBase(pItem->m_Instance.Socket[k]);
+                    auto ibs = sObjectMgr.GetItemBase(pItem->m_Instance.Socket[k]);
                     if (ibs->base_type[0] == pSoulStoneList[i]->m_pItemBase->base_type[0]
                         && ibs->base_type[1] == pSoulStoneList[i]->m_pItemBase->base_type[1]
                         && ibs->base_type[2] == pSoulStoneList[i]->m_pItemBase->base_type[2]
@@ -1927,7 +1905,7 @@ void WorldSession::onStorage(XPacket *pRecvPct)
                 return;
             }
 
-            auto *pItem = sMemoryPool->GetObjectInWorld<Item>(handle);
+            auto *pItem = sMemoryPool.GetObjectInWorld<Item>(handle);
             if (pItem == nullptr)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, handle);
@@ -2015,7 +1993,7 @@ void WorldSession::onBindSkillCard(XPacket *pRecvPct)
     auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
 
-    auto pItem = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+    auto pItem = sMemoryPool.GetObjectInWorld<Item>(item_handle);
     if (pItem == nullptr)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
@@ -2042,7 +2020,7 @@ void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
     auto item_handle   = pRecvPct->read<uint>();
     auto target_handle = pRecvPct->read<uint>();
 
-    auto pItem = sMemoryPool->GetObjectInWorld<Item>(item_handle);
+    auto pItem = sMemoryPool.GetObjectInWorld<Item>(item_handle);
     if (pItem == nullptr)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item_handle);
@@ -2083,7 +2061,7 @@ void WorldSession::onTrade(XPacket *pRecvPct)
     {
         if (m_pPlayer->GetTargetHandle() != 0)
         {
-            auto pTarget = sMemoryPool->GetObjectInWorld<Player>(m_pPlayer->GetTargetHandle());
+            auto pTarget = sMemoryPool.GetObjectInWorld<Player>(m_pPlayer->GetTargetHandle());
             pTarget->CancelTrade(false);
         }
         m_pPlayer->CancelTrade(false);
@@ -2126,7 +2104,7 @@ void WorldSession::onTrade(XPacket *pRecvPct)
 
 void WorldSession::onRequestTrade(uint32 hTradeTarget)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
         return;
 
@@ -2145,7 +2123,7 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
 
 void WorldSession::onAcceptTrade(uint32 hTradeTarget)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
         return;
 
@@ -2184,7 +2162,7 @@ void WorldSession::onCancelTrade()
 
 void WorldSession::onRejectTrade(uint32 hTradeTarget)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
         return;
 
@@ -2196,7 +2174,7 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
 
 void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
         return;
 
@@ -2235,7 +2213,7 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
 
 void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
     {
         m_pPlayer->CancelTrade(false);
@@ -2269,7 +2247,7 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
 {
     if (!m_pPlayer->m_bTradeFreezed)
     {
-        auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+        auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
         if (!isValidTradeTarget(tradeTarget))
             return;
 
@@ -2324,7 +2302,7 @@ void WorldSession::onFreezeTrade()
 
 void WorldSession::onConfirmTrade(uint hTradeTarget)
 {
-    auto tradeTarget = sMemoryPool->GetObjectInWorld<Player>(hTradeTarget);
+    auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
         return;
 

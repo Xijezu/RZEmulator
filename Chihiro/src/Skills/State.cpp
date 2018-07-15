@@ -31,7 +31,7 @@ State::State(StateType type, StateCode code, int uid, uint caster, uint16 level,
     m_nStartTime[(int)type] = start_time;
     m_nEndTime[(int)type] = end_time;
     m_bAura = bIsAura;
-    m_nLastProcessedTime = sWorld->GetArTime();
+    m_nLastProcessedTime = sWorld.GetArTime();
     m_nStateValue = nStateValue;
     m_szStateValue = std::move(szStateValue);
 }
@@ -100,7 +100,7 @@ bool State::IsDuplicatedGroup(int nGroupID)
 
 void State::SetState(int code, int uid, uint caster, const uint16 *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)
 {
-    uint t = sWorld->GetArTime();
+    uint t = sWorld.GetArTime();
     init(uid, code);
 
     for(int i = 0; i < 3; i++) {
@@ -136,7 +136,7 @@ int State::GetTimeType() const
 
 void State::init(int uid, int code)
 {
-    m_pTemplate = sObjectMgr->GetStateInfo(code);
+    m_pTemplate = sObjectMgr.GetStateInfo(code);
     m_nUID = (uint16)uid;
 }
 
@@ -144,9 +144,9 @@ void State::DB_InsertState(Unit *pOwner, State &pState)
 {
     if(pState.m_bAura)
         return;
-    uint ct = sWorld->GetArTime();
+    uint ct = sWorld.GetArTime();
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STATE);
-    stmt->setUInt64(0, sWorld->GetStateIndex());
+    stmt->setUInt64(0, sWorld.GetStateIndex());
     auto uid = pOwner->GetUInt32Value(UNIT_FIELD_UID);
     stmt->setInt32(1, pOwner->IsPlayer() ? uid : 0);
     stmt->setInt32(2, pOwner->IsSummon() ? uid : 0);
@@ -169,7 +169,7 @@ void State::DB_InsertState(Unit *pOwner, State &pState)
     stmt->setInt32(13, pState.m_nBaseDamage[0]);
     stmt->setInt32(14, pState.m_nBaseDamage[1]);
     stmt->setInt32(15, pState.m_nBaseDamage[2]);
-    auto si = sObjectMgr->GetStateInfo(pState.m_nCode);
+    auto si = sObjectMgr.GetStateInfo(pState.m_nCode);
     if(si == nullptr)
         return;
     stmt->setInt32(16, (int)(pState.m_nLastProcessedTime + (100 * (uint)si->fire_interval - ct)));

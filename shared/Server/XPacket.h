@@ -5,6 +5,8 @@
 #include "Encryption/ByteBuffer.h"
 #include "Server/TS_MESSAGE.h"
 
+class MessageBuffer;
+
 class XPacket : public ByteBuffer
 {
 public:
@@ -26,6 +28,10 @@ public:
 	XPacket(const XPacket &packet) : ByteBuffer(packet), m_nPacketID(packet.m_nPacketID)
 	{
 
+	}
+
+	explicit XPacket(uint16 packID, MessageBuffer&& buffer) : m_nPacketID(packID), ByteBuffer(std::move(buffer))
+	{
 	}
 
 	void FinalizePacket() {
