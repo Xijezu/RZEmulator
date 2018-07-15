@@ -27,10 +27,8 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <ace/INET_Addr.h>
 #include <memory>
 #include <cctype>
-#include <ace/OS_NS_time.h>
 
 // Searcher for map of structs
 template<typename T, class S> struct Finder
@@ -370,14 +368,6 @@ bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
 bool Utf8FitTo(const std::string& str, std::wstring search);
 void utf8printf(FILE* out, const char *str, ...);
 void vutf8printf(FILE* out, const char *str, va_list* ap);
-
-bool IsIPAddress(char const* ipaddress);
-
-/// Checks if address belongs to the a network with specified submask
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask);
-
-/// Transforms ACE_INET_Addr address into string format "dotted_ip:port"
-std::string GetAddressString(ACE_INET_Addr const& addr);
 
 uint32 CreatePIDFile(const std::string& filename);
 

@@ -24,8 +24,9 @@ include_directories(
         ${CMAKE_BINARY_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${SHARED_INCLUDE_DIR}
-        ${ACE_INCLUDE_DIR}
         ${MYSQL_INCLUDE_DIR})
 
+
 add_library(shared STATIC ${SHARED_SOURCE_FILES})
-target_link_libraries(shared ${ACE_LIBRARY})
+
+add_cxx_pch(shared ${CMAKE_SOURCE_DIR}/shared/PrecompiledHeaders/sharedPCH.h)

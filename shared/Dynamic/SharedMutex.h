@@ -16,8 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SKYFIRE_SHAREDMUTEX_H
-#define SKYFIRE_SHAREDMUTEX_H
+#ifndef NGEMITY_SHAREDMUTEX_H
+#define NGEMITY_SHAREDMUTEX_H
 
 #if COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1900
 #include <shared_mutex>

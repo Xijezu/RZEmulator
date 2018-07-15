@@ -26,3 +26,5 @@ if(UNIX)
     endif()
     set_target_properties(Mononoke PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
 endif()
+
+add_cxx_pch(Mononoke ${CMAKE_SOURCE_DIR}/Mononoke/src/PrecompiledHeaders/mononokePCH.h)

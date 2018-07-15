@@ -560,7 +560,6 @@ bool QuestManager::IsStartableQuest(int code)
         }
         return false;
     }
-    ACE_NOTREACHED(return false);
 }
 
 void QuestManager::SetDropFlagToRandomQuestInfo(int code)

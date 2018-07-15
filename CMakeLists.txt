@@ -22,20 +22,14 @@ if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# Note: Even is ACE_FORCE_INTERNAL is disabled,
-# if it doesn't find ACE it uses the distributed
-# version of ACE.
-option(ACE_FORCE_INTERNAL "Force the usage of internal ACE"              0)
 option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 
-# Find the correct ACE package
-include(cmake/ImportACE.cmake)
-
 FIND_PACKAGE(Boost REQUIRED system filesystem)
 find_package(Platform REQUIRED)
+find_package(PCHSupport REQUIRED)
 find_package(MYSQL REQUIRED)
 
 IF(NOT WITHOUT_GIT)

@@ -21,7 +21,6 @@
 #include "Common.h"
 #include "Log.h"
 
-#include <ace/Stack_Trace.h>
 #include <sstream>
 
 ByteBuffer::ByteBuffer(MessageBuffer&& buffer) : _rpos(0), _wpos(0), _curbitval(0), _storage(buffer.Move())

@@ -136,7 +136,7 @@ class Field
         bool IsNumeric() const;
 
     private:
-        #ifdef TRINITY_DEBUG
+        #ifdef NGEMITY_DEBUG
         void LogWrongType(char* getter) const;
         void SetMetadata(MYSQL_FIELD* field, uint32 fieldIndex);
         Metadata meta;

@@ -172,7 +172,6 @@ bool FieldProp::UseProp(Player * pPlayer)
         m_nUseCount++;
         return false;
     }
-    ACE_NOTREACHED(return false);
 }
 
 uint FieldProp::GetCastingDelay() const

@@ -22,6 +22,8 @@
 #include "utf8.h"
 #include <random>
 #include "Errors.h" // for ASSERT
+#include <float.h>
+#include <cstdarg>
 
 std::random_device r;
 std::mt19937 randGenerator(r());
