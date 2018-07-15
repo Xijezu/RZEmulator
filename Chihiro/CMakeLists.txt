@@ -51,3 +51,5 @@ if(UNIX)
     set_target_properties(Chihiro PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
 	target_link_libraries(Chihiro stdc++fs)
 endif()
+
+add_cxx_pch(Chihiro ${CMAKE_SOURCE_DIR}/Chihiro/src/PrecompiledHeaders/chihiroPCH.h)

@@ -16,8 +16,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRINITYCORE_LOG_H
-#define TRINITYCORE_LOG_H
+#ifndef NGEMITY_LOG_H
+#define NGEMITY_LOG_H
 
 #include "Define.h"
 #include "AsioHacksFwd.h"

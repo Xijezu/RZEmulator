@@ -59,7 +59,6 @@ class MemoryPoolMgr
                 default:
                     return nullptr;
             }
-            ACE_NOTREACHED(return nullptr);
         }
 
         template<class T>

@@ -17,31 +17,29 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SKYFIRE_DEFINE_H
-#define SKYFIRE_DEFINE_H
+#ifndef NGEMITY_DEFINE_H
+#define NGEMITY_DEFINE_H
 
 #include "CompilerDefs.h"
-
-#include <ace/Basic_Types.h>
-#include <ace/ACE_export.h>
-
-#include <cstddef>
+#include <boost/detail/endian.hpp>
 
 #define EPIC 4
+#define NGEMITY_LITTLEENDIAN 0
+#define NGEMITY_BIGENDIAN    1
 
-#define SKYFIRE_LITTLEENDIAN 0
-#define SKYFIRE_BIGENDIAN    1
+#if !defined(NGEMITY_ENDIAN)
+#  if defined (BOOST_BIG_ENDIAN)
+#    define NGEMITY_ENDIAN NGEMITY_BIGENDIAN
+#  else
+#    define NGEMITY_ENDIAN NGEMITY_LITTLEENDIAN
+#  endif
+#endif
 
-#if !defined(SKYFIRE_ENDIAN)
-#  if defined (ACE_BIG_ENDIAN)
-#    define SKYFIRE_ENDIAN SKYFIRE_BIGENDIAN
-#  else //ACE_BYTE_ORDER != ACE_BIG_ENDIAN
-#    define SKYFIRE_ENDIAN SKYFIRE_LITTLEENDIAN
-#  endif //ACE_BYTE_ORDER
-#endif //SKYFIRE_ENDIAN
+#include <cstddef>
+#include <cinttypes>
+#include <climits>
 
 #if PLATFORM == PLATFORM_WINDOWS
-
 #  define NGEMITY_PATH_MAX MAX_PATH
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
@@ -55,15 +53,6 @@
 #  define DECLSPEC_DEPRECATED
 #endif //PLATFORM
 
-#if !defined(COREDEBUG)
-#  define SKYFIRE_INLINE inline
-#else //COREDEBUG
-#  if !defined(SKYFIRE_DEBUG)
-#    define SKYFIRE_DEBUG
-#  endif //SKYFIRE_DEBUG
-#  define SKYFIRE_INLINE
-#endif //!COREDEBUG
-
 #if COMPILER == COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((noreturn))
 #  define ATTR_PRINTF(F, V) __attribute__ ((format (printf, F, V)))
@@ -74,27 +63,15 @@
 #  define ATTR_DEPRECATED
 #endif //COMPILER == COMPILER_GNU
 
-
-#define OVERRIDE override
-#define FINAL final
-
-
-#define UI64FMTD ACE_UINT64_FORMAT_SPECIFIER
-#define UI64LIT(N) ACE_UINT64_LITERAL(N)
-
 typedef unsigned long  DWORD;
 typedef unsigned short WORD;
 #ifndef LOWORD
-#define LOWORD(a) ((WORD)(a))
-#endif
+# define LOWORD(a) ((WORD)(a))
+#endif // #ifndef LOWORD
 #ifndef HIWORD
-#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
-#endif
+# define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#endif // #ifndef HIWORD
 
-#define SI64FMTD ACE_INT64_FORMAT_SPECIFIER
-#define SI64LIT(N) ACE_INT64_LITERAL(N)
-
-#define SIZEFMTD ACE_SIZE_T_FORMAT_SPECIFIER
 
 #define UI64FMTD "%" PRIu64
 #define UI64LIT(N) UINT64_C(N)
@@ -115,4 +92,4 @@ typedef uint8_t uint8;
 
 typedef uint32 uint;
 typedef uint16 ushort;
-#endif //SKYFIRE_DEFINE_H
+#endif //NGEMITY_DEFINE_H

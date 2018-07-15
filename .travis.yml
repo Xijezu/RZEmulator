@@ -12,6 +12,7 @@ matrix:
             - g++-7
             - cmake-data
             - cmake
+            - boost
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
@@ -26,6 +27,7 @@ matrix:
             - clang-5.0
             - cmake-data
             - cmake
+            - boost
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 

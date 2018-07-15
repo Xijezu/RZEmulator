@@ -125,5 +125,4 @@ bool SkillBase::IsUsable(uint8 nUseIndex) const
         default:
             return false;
     }
-    ACE_NOTREACHED(return false);
 }

@@ -20,8 +20,18 @@
 //add here most rarely modified headers to speed up debug build compilation
 
 #include "Common.h"
-#include "Log.h"
-#include "DatabaseEnv.h"
-#include "DatabaseLoader.h"
-#include "MySQLThreading.h"
+#include "Config.h"
+#include "Define.h"
 #include "Errors.h"
+#include "Log.h"
+#include "LogMessage.h"
+#include "Util.h"
+#include <algorithm>
+#include <cstring>
+#include <memory>
+#include <mutex>
+#include <set>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
