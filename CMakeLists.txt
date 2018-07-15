@@ -42,8 +42,8 @@ add_custom_target(revision.h ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(dep/boost)
-#add_subdirectory(dep/liblua)
+add_subdirectory(dep/liblua)
 add_subdirectory(dep/fmt)
 add_subdirectory(shared)
 add_subdirectory(Mononoke)
-#add_subdirectory(Chihiro)
+add_subdirectory(Chihiro)
