@@ -14,7 +14,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
 file(GLOB_RECURSE SOURCE_FILES src/*.*)
 
 add_executable(Mononoke ${SOURCE_FILES})
-target_link_libraries(Mononoke shared fmt ${MYSQL_LIB} ${Boost_LIBRARIES})
+target_link_libraries(Mononoke shared fmt ${MYSQL_LIB} boost)
 
 
 if(UNIX)
