@@ -68,7 +68,7 @@ class AuthNetwork
 
         int InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
         {
-            boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::address::from_string(bindIp), port);
+            boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
             boost::asio::ip::tcp::socket  _socket(ioContext);
 
             _socket.connect(endpoint);

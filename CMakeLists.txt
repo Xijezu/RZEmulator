@@ -27,7 +27,6 @@ option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 
-FIND_PACKAGE(Boost REQUIRED system filesystem)
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)
 find_package(MYSQL REQUIRED)
@@ -42,6 +41,7 @@ add_custom_target(revision.h ALL
         COMMAND ${CMAKE_COMMAND} -DNO_GIT=${WITHOUT_GIT} -DGIT_EXEC=${GIT_EXECUTABLE} -DBUILDDIR=${CMAKE_BINARY_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/genrev.cmake
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+add_subdirectory(dep/boost)
 add_subdirectory(dep/liblua)
 add_subdirectory(dep/fmt)
 add_subdirectory(shared)

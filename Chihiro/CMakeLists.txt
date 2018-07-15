@@ -34,14 +34,12 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/World
         ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
         ${SHARED_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${MYSQL_INCLUDE_DIR})
 
 add_executable(Chihiro ${SOURCE_FILES})
-target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} ${Boost_LIBRARIES} lualib)
-message(${Boost_LIBRARIES})
-message(${Boost_LIBRARY_DIRS})
+target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} boost lualib)
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")
