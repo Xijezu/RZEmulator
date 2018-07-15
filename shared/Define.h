@@ -40,7 +40,7 @@
 #include <climits>
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define NGEMITY_PATH_MAX MAX_PATH
+#  define NGEMITY_PATH_MAX 260
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif //DECLSPEC_NORETURN
@@ -65,6 +65,7 @@
 
 typedef unsigned long  DWORD;
 typedef unsigned short WORD;
+
 #ifndef LOWORD
 # define LOWORD(a) ((WORD)(a))
 #endif // #ifndef LOWORD

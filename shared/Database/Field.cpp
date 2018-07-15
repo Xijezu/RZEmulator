@@ -295,7 +295,7 @@ bool Field::IsNumeric() const
 
 void Field::LogWrongType(char* getter) const
 {
-    TC_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
+    NG_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
         getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
 }
 
