@@ -25,6 +25,10 @@
 #include <float.h>
 #include <cstdarg>
 
+#if PLATFORM == PLATFORM_WINDOWS
+# include <Windows.h>
+#endif
+
 std::random_device r;
 std::mt19937 randGenerator(r());
 
@@ -374,6 +378,16 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
 }
 
 typedef wchar_t const* const* wstrlist;
+
+
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+struct tm* localtime_r(const time_t* time, struct tm *result)
+{
+    localtime_s(result, time);
+    return result;
+}
+#endif
+
 
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
 {
