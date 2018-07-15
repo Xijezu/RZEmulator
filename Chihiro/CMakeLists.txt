@@ -34,7 +34,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/World
         ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
         ${SHARED_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${MYSQL_INCLUDE_DIR})
 

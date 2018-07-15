@@ -6,9 +6,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthClient
                     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthGame
-        ${Boost_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIRS}
-        boost
+                    ${Boost_INCLUDE_DIR}
                     ${CMAKE_BINARY_DIR}
                     ${SHARED_INCLUDE_DIR}
                     ${MYSQL_INCLUDE_DIR})
