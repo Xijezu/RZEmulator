@@ -361,6 +361,8 @@ inline void wstrToLower(std::wstring& str)
     std::transform( str.begin(), str.end(), str.begin(), wcharToLower );
 }
 
+struct tm* localtime_r(const time_t* time, struct tm *result);
+
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
 bool Utf8FitTo(const std::string& str, std::wstring search);
