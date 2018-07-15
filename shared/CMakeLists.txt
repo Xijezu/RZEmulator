@@ -18,6 +18,9 @@ set(SHARED_INCLUDE_DIR
         ${CMAKE_SOURCE_DIR}/shared/Utilities
         ${CMAKE_SOURCE_DIR}/shared/Updater
         ${CMAKE_SOURCE_DIR}/dep/fmt
+        ${Boost_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIRS}
+        boost
         CACHE INTERNAL "" FORCE) # dont mind, dirty hack
 
 include_directories(
