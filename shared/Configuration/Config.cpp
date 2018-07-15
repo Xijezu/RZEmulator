@@ -23,8 +23,10 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <boost/filesystem.hpp>
 
 namespace bpt = boost::property_tree;
+
 
 namespace
 {
@@ -39,17 +41,21 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> ar
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
+    auto configDir = boost::filesystem::system_complete(args[0]).parent_path();
+    auto configFilePath{file};
+    auto configFile = (configDir /= configFilePath).string();
+
     _filename = file;
     _args = args;
 
     try
     {
         bpt::ptree fullTree;
-        bpt::ini_parser::read_ini(file, fullTree);
+        bpt::ini_parser::read_ini(configFile, fullTree);
 
         if (fullTree.empty())
         {
-            error = "empty file (" + file + ")";
+            error = "empty file (" + configFile + ")";
             return false;
         }
 
