@@ -40,6 +40,8 @@ include_directories(
 
 add_executable(Chihiro ${SOURCE_FILES})
 target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} ${Boost_LIBRARIES} lualib)
+message(${Boost_LIBRARIES})
+message(${Boost_LIBRARY_DIRS})
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")
