@@ -27,10 +27,8 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <ace/INET_Addr.h>
 #include <memory>
 #include <cctype>
-#include <ace/OS_NS_time.h>
 
 // Searcher for map of structs
 template<typename T, class S> struct Finder
@@ -182,6 +180,7 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
 
 size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
 void utf8truncate(std::string& utf8str, size_t len);
+bool StringToBool(std::string const& str);
 
 inline bool isBasicLatinCharacter(wchar_t wchar)
 {
@@ -362,21 +361,13 @@ inline void wstrToLower(std::wstring& str)
     std::transform( str.begin(), str.end(), str.begin(), wcharToLower );
 }
 
-std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
+struct tm* localtime_r(const time_t* time, struct tm *result);
 
 bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
 bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
 bool Utf8FitTo(const std::string& str, std::wstring search);
 void utf8printf(FILE* out, const char *str, ...);
 void vutf8printf(FILE* out, const char *str, va_list* ap);
-
-bool IsIPAddress(char const* ipaddress);
-
-/// Checks if address belongs to the a network with specified submask
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask);
-
-/// Transforms ACE_INET_Addr address into string format "dotted_ip:port"
-std::string GetAddressString(ACE_INET_Addr const& addr);
 
 uint32 CreatePIDFile(const std::string& filename);
 

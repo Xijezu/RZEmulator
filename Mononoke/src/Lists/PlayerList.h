@@ -17,6 +17,7 @@
 
 #ifndef NGEMITY_PLAYERLIST_H_
 #define NGEMITY_PLAYERLIST_H_
+
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -24,71 +25,79 @@ class AuthClientSession;
 // Storage object for a player
 struct Player
 {
-	Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
-			   nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
-			   nPermission(0)
-	{
-	}
-	uint32 nAccountID;
-	std::string szLoginName;
-	bool bIsBlocked;
-	uint32 nLastServerIDX;
-	bool bIsInGame;
-	bool bKickNextLogin;
-	uint64 nOneTimeKey;
-	int nGameIDX;
-	int nPermission;
+    Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
+               nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
+               nPermission(0)
+    {
+    }
+
+    uint32      nAccountID;
+    std::string szLoginName;
+    bool        bIsBlocked;
+    uint32      nLastServerIDX;
+    bool        bIsInGame;
+    bool        bKickNextLogin;
+    uint64      nOneTimeKey;
+    int         nGameIDX;
+    int         nPermission;
 };
 
 /// Storage object for the list of players on the server
 class PlayerList
 {
-public:
-	typedef std::map<std::string, Player*> PlayerMap;
+    public:
+        typedef std::map<std::string, Player *> PlayerMap;
+        ~PlayerList() = default;
 
-	PlayerList() = default;
-	~PlayerList() = default;
+        static PlayerList &Instance()
+        {
+            static PlayerList instance;
+            return instance;
+        }
 
-	void AddPlayer(Player* pNewPlayer)
-	{
-		// Adds a player to the list
-		{
-			NG_UNIQUE_GUARD writeGuard(*GetGuard());
-			m_players[pNewPlayer->szLoginName] = pNewPlayer;
-		}
-	}
+        void AddPlayer(Player *pNewPlayer)
+        {
+            // Adds a player to the list
+            {
+                NG_UNIQUE_GUARD writeGuard(*GetGuard());
+                m_players[pNewPlayer->szLoginName] = pNewPlayer;
+            }
+        }
 
-	void RemovePlayer(const std::string& szAccount)
-	{
-		// Removes a player from the list
-		{
-			NG_UNIQUE_GUARD writeGuard(*GetGuard());
-			if (m_players.count(szAccount) == 1)
-				m_players.erase(szAccount);
-		}
-	}
+        void RemovePlayer(const std::string &szAccount)
+        {
+            // Removes a player from the list
+            {
+                NG_UNIQUE_GUARD writeGuard(*GetGuard());
+                if (m_players.count(szAccount) == 1)
+                    m_players.erase(szAccount);
+            }
+        }
 
-	NG_SHARED_MUTEX *GetGuard()
-	{
-		return &i_lock;
-	}
+        NG_SHARED_MUTEX *GetGuard()
+        {
+            return &i_lock;
+        }
 
-	// You need to use the mutex while working with the map!
-	PlayerMap* GetMap()
-	{
-		return &m_players;
-	}
+        // You need to use the mutex while working with the map!
+        PlayerMap *GetMap()
+        {
+            return &m_players;
+        }
 
-	Player* GetPlayer(const std::string& szAccount)
-	{
-		if(m_players.count(szAccount) == 1)
-			return m_players[szAccount];
-		return nullptr;
-	}
-private:
-	NG_SHARED_MUTEX i_lock;
-	PlayerMap m_players;                                  ///< Internal map of players
+        Player *GetPlayer(const std::string &szAccount)
+        {
+            if (m_players.count(szAccount) == 1)
+                return m_players[szAccount];
+            return nullptr;
+        }
+
+    private:
+        NG_SHARED_MUTEX i_lock;
+        PlayerMap                               m_players;                                  ///< Internal map of players
+    protected:
+        PlayerList() = default;
 };
 
-#define sPlayerMapList ACE_Singleton<PlayerList, ACE_Null_Mutex>::instance()
+#define sPlayerMapList PlayerList::Instance()
 #endif // !NGEMITY_PLAYERLIST_H_

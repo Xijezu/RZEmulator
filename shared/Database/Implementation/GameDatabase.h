@@ -1,33 +1,30 @@
-#ifndef _GAMEDATABASE_H
-#define _GAMEDATABASE_H
+#ifndef __GAMEDATABASE_H__
+#define __GAMEDATABASE_H__
 
-#include "DatabaseWorkerPool.h"
 #include "MySQLConnection.h"
+
+enum GameDatabaseStatements : uint32
+{
+    /*  Naming standard for defines:
+    {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
+    When updating more than one field, consider looking at the calling function
+    name for a suiting suffix.
+    */
+            MAX_GAMEDATABASE_STATEMENTS
+};
 
 class GameDatabaseConnection : public MySQLConnection
 {
-public:
-	//- Constructors for sync and async connections
-	GameDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
-	GameDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
+    public:
+        typedef GameDatabaseStatements Statements;
 
-	//- Loads database type specific prepared statements
-	void DoPrepareStatements();
+//- Constructors for sync and async connections
+        GameDatabaseConnection(MySQLConnectionInfo &connInfo);
+        GameDatabaseConnection(ProducerConsumerQueue<SQLOperation *> *q, MySQLConnectionInfo &connInfo);
+        ~GameDatabaseConnection();
+
+//- Loads database type specific prepared statements
+        void DoPrepareStatements() override;
 };
 
-typedef DatabaseWorkerPool<GameDatabaseConnection> GameDatabaseWorkerPool;
-
-enum GameDatabaseStatements
-{
-	/*  Naming standard for defines:
-	{DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
-	When updating more than one field, consider looking at the calling function
-	name for a suiting suffix.
-	*/
-	GAME_GET_NPC = 0,
-// 	GAME_GET_MONSTER,
-// 	GAME_GET_ITEM,
-	MAX_GAMEDATABASE_STATEMENTS
-};
-
-#endif
+#endif // _GAMEDATABASE_H_

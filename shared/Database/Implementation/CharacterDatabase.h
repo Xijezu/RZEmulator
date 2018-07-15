@@ -1,23 +1,9 @@
 #ifndef _GAMEDATABASE_H_
 #define _GAMEDATABASE_H_
 
-#include "DatabaseWorkerPool.h"
 #include "MySQLConnection.h"
 
-class CharacterDatabaseConnection : public MySQLConnection
-{
-public:
-	//- Constructors for sync and async connections
-	CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
-	CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
-
-	//- Loads database type specific prepared statements
-	void DoPrepareStatements();
-};
-
-typedef DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabaseWorkerPool;
-
-enum CharacterDatabaseStatements
+enum CharacterDatabaseStatements : uint32
 {
 	/*  Naming standard for defines:
 	{DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
@@ -57,6 +43,20 @@ enum CharacterDatabaseStatements
 	CHARACTER_GET_STORAGE,
 	CHARACTER_REP_STORAGE_GOLD,
 	MAX_CHARACTERDATABASE_STATEMENTS,
+};
+
+class CharacterDatabaseConnection : public MySQLConnection
+{
+	public:
+		typedef CharacterDatabaseStatements Statements;
+
+//- Constructors for sync and async connections
+		CharacterDatabaseConnection(MySQLConnectionInfo& connInfo);
+		CharacterDatabaseConnection(ProducerConsumerQueue<SQLOperation*>* q, MySQLConnectionInfo& connInfo);
+		~CharacterDatabaseConnection();
+
+//- Loads database type specific prepared statements
+		void DoPrepareStatements() override;
 };
 
 #endif // _GAMEDATABASE_H_

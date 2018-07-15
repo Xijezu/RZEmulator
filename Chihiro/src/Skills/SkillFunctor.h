@@ -132,7 +132,7 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
                 }
             }
         }
-        sWorld->AddSkillResult(pvList, bResult, 10, pTarget->GetHandle());
+        sWorld.AddSkillResult(pvList, bResult, 10, pTarget->GetHandle());
     }
 };
 
@@ -154,7 +154,7 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 			if(bResult)
 				pTarget->RemoveState((StateCode)static_cast<int>(pSkill->m_SkillBase->var[0]), nSkillLevel);
 
-			sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
+			sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
 			auto counter = 304;
 
 
@@ -166,14 +166,14 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 
                 if(bResult)
                     pTarget->RemoveState((StateCode)static_cast<int>(val), nSkillLevel);
-                sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
+                sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
             }
 		}
 		else
 		{
 			if(bResult)
 				pTarget->RemoveGoodState(nSkillLevel);
-			sWorld->AddSkillResult(pvList, bResult, 11, targetHandle);
+			sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
 		}
 	}
 };

@@ -21,33 +21,33 @@
 #include "Common.h"
 #include "Log.h"
 
-#include <ace/Stack_Trace.h>
 #include <sstream>
+
+ByteBuffer::ByteBuffer(MessageBuffer&& buffer) : _rpos(0), _wpos(0), _curbitval(0), _storage(buffer.Move())
+{
+}
+
 
 ByteBufferPositionException::ByteBufferPositionException(bool add, size_t pos,
         size_t size, size_t valueSize)
 {
     std::ostringstream ss;
-    ACE_Stack_Trace trace;
 
-    ss << "Attempted to " << (add ? "put" : "get") << " value with size: "
+    ss << "Attempted to get value with size: "
        << valueSize << " in ByteBuffer (pos: " << pos << " size: " << size
-       << ")\n\n" << trace.c_str();
+       << ")";
 
     message().assign(ss.str());
-    printf("\nError Message => [%s]\n\n", message().c_str());
 }
 
 ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size,
         size_t valueSize)
 {
     std::ostringstream ss;
-    ACE_Stack_Trace trace;
 
     ss << "Attempted to put a "
        << (valueSize > 0 ? "NULL-pointer" : "zero-sized value")
-       << " in ByteBuffer (pos: " << pos << " size: " << size << ")\n\n"
-       << trace.c_str();
+       << " in ByteBuffer (pos: " << pos << " size: " << size << ")\n\n";
 
     message().assign(ss.str());
 }

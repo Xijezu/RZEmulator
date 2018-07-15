@@ -19,15 +19,15 @@
 
 // Core configuration options
 
-#ifndef SKYFIRE_SYSTEMCONFIG_H
-#define SKYFIRE_SYSTEMCONFIG_H
+#ifndef NGEMITY_SYSTEMCONFIG_H
+#define NGEMITY_SYSTEMCONFIG_H
 
 #include "Define.h"
 #include "revision.h"
 
 #define _PACKAGENAME "Rappelz-Emulator"
 
-#if SKYFIRE_ENDIAN == SKYFIRE_BIGENDIAN
+#if NGEMITY_ENDIAN == NGEMITY_BIGENDIAN
 # define _ENDIAN_STRING "big-endian"
 #else
 # define _ENDIAN_STRING "little-endian"

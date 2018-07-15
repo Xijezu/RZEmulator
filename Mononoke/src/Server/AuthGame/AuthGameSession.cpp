@@ -17,18 +17,13 @@
 
 #include "GameList.h"
 #include "PlayerList.h"
-#include "WorldSocket.h"
 #include "XPacket.h"
 
 #include "AuthGame/AuthGameSession.h"
 
 // Constructor - set the default server name to <null>, also give it a socket
-AuthGameSession::AuthGameSession(GameSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
+AuthGameSession::AuthGameSession(XSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
 {
-    if (pSocket)
-    {
-        pSocket->AddReference();
-    }
     m_pGame->nIDX   = 255;
     m_pGame->szName = "<null>";
 }
@@ -39,19 +34,15 @@ AuthGameSession::~AuthGameSession()
     {
         if (m_bIsAuthed)
         {
-            auto g = sGameMapList->GetGame(m_pGame->nIDX);
+            auto g = sGameMapList.GetGame(m_pGame->nIDX);
             if (g != nullptr)
             {
-                sGameMapList->RemoveGame(g->nIDX);
+                sGameMapList.RemoveGame(g->nIDX);
 
             }
         }
         delete m_pGame;
         m_pGame = nullptr;
-    }
-    if (m_pSocket)
-    {
-        m_pSocket->RemoveReference();
     }
 }
 
@@ -59,12 +50,12 @@ void AuthGameSession::OnClose()
 {
     if (m_pGame == nullptr)
         return;
-    auto g = sGameMapList->GetGame(m_pGame->nIDX);
+    auto g = sGameMapList.GetGame(m_pGame->nIDX);
     if (g != nullptr && g->szName == m_pGame->szName)
     {
         {
-            NG_UNIQUE_GUARD writeGuard(*sPlayerMapList->GetGuard());
-            auto            map = sPlayerMapList->GetMap();
+            NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
+            auto            map = sPlayerMapList.GetMap();
             for (auto &player : *map)
             {
                 if (player.second->nGameIDX == g->nIDX)
@@ -74,7 +65,7 @@ void AuthGameSession::OnClose()
                 }
             }
         }
-        sGameMapList->RemoveGame(g->nIDX);
+        sGameMapList.RemoveGame(g->nIDX);
         NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
     }
 }
@@ -104,7 +95,7 @@ constexpr AuthHandler packetHandler[] =
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
 // Handler for incoming packets
-void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
+ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
 {
             ASSERT(pGamePct);
 
@@ -115,7 +106,7 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            pGamePct->read_skip(7); // ignoring header
+            //pGamePct->read_skip(7); // ignoring header
             (*this.*packetHandler[i].handler)(pGamePct);
             break;
         }
@@ -124,9 +115,10 @@ void AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == tableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteAddress().c_str());
-        return;
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        return ReadDataHandlerResult::Error;
     }
+    return ReadDataHandlerResult::Ok;
 }
 
 void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
@@ -139,12 +131,12 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
     m_pGame->nPort          = pGamePct->read<int>();
     m_pGame->m_pSession     = this;
 
-    auto pGame = sGameMapList->GetGame(m_pGame->nIDX);
+    auto pGame = sGameMapList.GetGame(m_pGame->nIDX);
 
     if (pGame == nullptr)
     {
         m_bIsAuthed = true;
-        sGameMapList->AddGame(m_pGame);
+        sGameMapList.AddGame(m_pGame);
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
         XPacket resultPct(TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_SUCCESS;
@@ -166,7 +158,7 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
     auto szAccount   = pGamePct->ReadString(61);
     auto nOneTimeKey = pGamePct->read<uint64>();
 
-    auto   p      = sPlayerMapList->GetPlayer(szAccount);
+    auto   p      = sPlayerMapList.GetPlayer(szAccount);
     uint16 result = TS_RESULT_ACCESS_DENIED;
 
     if (p != nullptr)
@@ -199,10 +191,10 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
 void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
 {
     auto szPlayer = pGamePct->ReadString(61);
-    auto p        = sPlayerMapList->GetPlayer(szPlayer);
+    auto p        = sPlayerMapList.GetPlayer(szPlayer);
     if (p != nullptr)
     {
-        sPlayerMapList->RemovePlayer(szPlayer);
+        sPlayerMapList.RemovePlayer(szPlayer);
         delete p;
     }
 }
@@ -210,10 +202,10 @@ void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
 void AuthGameSession::HandleClientKickFailed(XPacket *pGamePct)
 {
     auto szPlayer = pGamePct->ReadString(61);
-    auto p        = sPlayerMapList->GetPlayer(szPlayer);
+    auto p        = sPlayerMapList.GetPlayer(szPlayer);
     if (p != nullptr)
     {
-        sPlayerMapList->RemovePlayer(szPlayer);
+        sPlayerMapList.RemovePlayer(szPlayer);
         delete p;
     }
 }

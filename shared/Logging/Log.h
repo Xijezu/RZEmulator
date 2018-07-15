@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -17,137 +16,174 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SKYFIRESERVER_LOG_H
-#define SKYFIRESERVER_LOG_H
+#ifndef NGEMITY_LOG_H
+#define NGEMITY_LOG_H
 
 #include "Define.h"
-#include "Appender.h"
-#include "LogWorker.h"
-#include "Logger.h"
-#include <string>
-#include <ace/Singleton.h>
+#include "AsioHacksFwd.h"
+#include "LogCommon.h"
+#include "StringFormat.h"
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+class Appender;
+class Logger;
+struct LogMessage;
+
+namespace NGemity
+{
+    namespace Asio
+    {
+        class IoContext;
+    }
+}
 
 #define LOGGER_ROOT "root"
 
-#define LOG_FILTER_NETWORKIO 1
+typedef Appender *(*AppenderCreatorFn)(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> &&extraArgs);
+
+template<class AppenderImpl>
+Appender *CreateAppender(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> &&extraArgs)
+{
+    return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const *>>(extraArgs));
+}
 
 class Log
 {
-    friend class ACE_Singleton<Log, ACE_Thread_Mutex>;
-
-    typedef std::unordered_map<std::string, Logger> LoggerMap;
-
     private:
         Log();
         ~Log();
+        Log(Log const &) = delete;
+        Log(Log &&) = delete;
+        Log &operator=(Log const &) = delete;
+        Log &operator=(Log &&) = delete;
 
     public:
+        static Log *instance();
+
+        void Initialize(NGemity::Asio::IoContext *ioContext);
+        void SetSynchronous();  // Not threadsafe - should only be called from main() after all threads are joined
         void LoadFromConfig();
         void Close();
-        bool ShouldLog(std::string const& type, LogLevel level) const;
-        bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
+        bool ShouldLog(std::string const &type, LogLevel level) const;
+        bool SetLogLevel(std::string const &name, char const *level, bool isLogger = true);
 
-        void outTrace(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outDebug(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outInfo(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outWarn(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outError(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
-        void outFatal(std::string const& f, char const* str, ...) ATTR_PRINTF(3, 4);
+        template<typename Format, typename... Args>
+        inline void outMessage(std::string const &filter, LogLevel const level, Format &&fmt, Args &&... args)
+        {
+            outMessage(filter, level, NGemity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+        }
 
-        void outCommand(uint32 account, const char * str, ...) ATTR_PRINTF(3, 4);
-        void outCharDump(char const* str, uint32 account_id, uint32 guid, char const* name);
-        static std::string GetTimestampStr();
+        template<typename Format, typename... Args>
+        void outCommand(uint32 account, Format &&fmt, Args &&... args)
+        {
+            if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
+                return;
+
+            outCommand(NGemity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
+        }
+
+        void outCharDump(char const *str, uint32 account_id, uint64 guid, char const *name);
 
         void SetRealmId(uint32 id);
 
-    private:
-        void vlog(std::string const& f, LogLevel level, char const* str, va_list argptr);
-        void write(LogMessage* msg) const;
+        template<class AppenderImpl>
+        void RegisterAppender()
+        {
+            using Index = typename AppenderImpl::TypeIndex;
+            RegisterAppender(Index::value, &CreateAppender<AppenderImpl>);
+        }
 
-        Logger const* GetLoggerByType(std::string const& type) const;
-        Appender* GetAppenderByName(std::string const& name);
+        std::string const &GetLogsDir() const { return m_logsDir; }
+
+        std::string const &GetLogsTimestamp() const { return m_logsTimestamp; }
+
+    private:
+        static std::string GetTimestampStr();
+        void write(std::unique_ptr<LogMessage> &&msg) const;
+
+        Logger const *GetLoggerByType(std::string const &type) const;
+        Appender *GetAppenderByName(std::string const &name);
         uint8 NextAppenderId();
-        void CreateAppenderFromConfig(std::string const& name);
-        void CreateLoggerFromConfig(std::string const& name);
+        void CreateAppenderFromConfig(std::string const &name);
+        void CreateLoggerFromConfig(std::string const &name);
         void ReadAppendersFromConfig();
         void ReadLoggersFromConfig();
+        void RegisterAppender(uint8 index, AppenderCreatorFn appenderCreateFn);
+        void outMessage(std::string const &filter, LogLevel const level, std::string &&message);
+        void outCommand(std::string &&message, std::string &&param1);
 
-        AppenderMap appenders;
-        LoggerMap loggers;
-        uint8 AppenderId;
+        std::unordered_map<uint8, AppenderCreatorFn>             appenderFactory;
+        std::unordered_map<uint8, std::unique_ptr<Appender>>     appenders;
+        std::unordered_map<std::string, std::unique_ptr<Logger>> loggers;
+        uint8                                                    AppenderId;
+        LogLevel                                                 lowestLogLevel;
 
         std::string m_logsDir;
         std::string m_logsTimestamp;
 
-        LogWorker* worker;
+        NGemity::Asio::IoContext *_ioContext;
+        NGemity::Asio::Strand    *_strand;
 };
 
-inline Logger const* Log::GetLoggerByType(std::string const& type) const
-{
-    LoggerMap::const_iterator it = loggers.find(type);
-    if (it != loggers.end())
-        return &(it->second);
+#define sLog Log::instance()
 
-    if (type == LOGGER_ROOT)
-        return NULL;
+#define LOG_EXCEPTION_FREE(filterType__, level__, ...) \
+    { \
+        try \
+        { \
+            sLog->outMessage(filterType__, level__, __VA_ARGS__); \
+        } \
+        catch (std::exception& e) \
+        { \
+            sLog->outMessage("server", LOG_LEVEL_ERROR, "Wrong format occurred (%s) at %s:%u.", \
+                e.what(), __FILE__, __LINE__); \
+        } \
+    }
 
-    std::string parentLogger = LOGGER_ROOT;
-    size_t found = type.find_last_of('.');
-    if (found != std::string::npos)
-        parentLogger = type.substr(0,found);
+#if PLATFORM != PLATFORM_WINDOWS
+void check_args(const char *, ...) ATTR_PRINTF(1, 2);
+void check_args(std::string const &, ...);
 
-    return GetLoggerByType(parentLogger);
-}
-
-inline bool Log::ShouldLog(std::string const& type, LogLevel level) const
-{
-    // TODO: Use cache to store "Type.sub1.sub2": "Type" equivalence, should
-    // Speed up in cases where requesting "Type.sub1.sub2" but only configured
-    // Logger "Type"
-
-    Logger const* logger = GetLoggerByType(type);
-    if (!logger)
-        return false;
-
-    LogLevel logLevel = logger->getLogLevel();
-    return logLevel != LOG_LEVEL_DISABLED && logLevel <= level;
-}
-
-#define sLog ACE_Singleton<Log, ACE_Thread_Mutex>::instance()
-
-#if COMPILER != COMPILER_MICROSOFT
-#define NG_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
-        do {                                                        \
-            if (sLog->ShouldLog(filterType__, level__))             \
-                sLog->call__(filterType__, __VA_ARGS__);            \
-        } while (false)
+// This will catch format errors on build time
+#define NG_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+        do {                                                            \
+            if (sLog->ShouldLog(filterType__, level__))                 \
+            {                                                           \
+                if (false)                                              \
+                    check_args(__VA_ARGS__);                            \
+                                                                        \
+                LOG_EXCEPTION_FREE(filterType__, level__, __VA_ARGS__); \
+            }                                                           \
+        } while (0)
 #else
-#define NG_LOG_MESSAGE_BODY(level__, call__, filterType__, ...)     \
-        __pragma(warning(push))                                     \
-        __pragma(warning(disable:4127))                             \
-        do {                                                        \
-            if (sLog->ShouldLog(filterType__, level__))             \
-                sLog->call__(filterType__, __VA_ARGS__);            \
-        } while (0)                                                 \
+#define NG_LOG_MESSAGE_BODY(filterType__, level__, ...)                 \
+        __pragma(warning(push))                                         \
+        __pragma(warning(disable:4127))                                 \
+        do {                                                            \
+            if (sLog->ShouldLog(filterType__, level__))                 \
+                LOG_EXCEPTION_FREE(filterType__, level__, __VA_ARGS__); \
+        } while (0)                                                     \
         __pragma(warning(pop))
 #endif
 
 #define NG_LOG_TRACE(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_TRACE, outTrace, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
 
 #define NG_LOG_DEBUG(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_DEBUG, outDebug, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
 
 #define NG_LOG_INFO(filterType__, ...)  \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_INFO, outInfo, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
 
 #define NG_LOG_WARN(filterType__, ...)  \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_WARN, outWarn, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
 
 #define NG_LOG_ERROR(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_ERROR, outError, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
 #define NG_LOG_FATAL(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(LOG_LEVEL_FATAL, outFatal, filterType__, __VA_ARGS__)
+    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
 
 #endif

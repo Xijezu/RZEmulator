@@ -1,11 +1,9 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -21,26 +19,29 @@
 #define APPENDERFILE_H
 
 #include "Appender.h"
-#include "ace/Atomic_Op.h"
+#include <atomic>
 
-class AppenderFile: public Appender
+class AppenderFile : public Appender
 {
     public:
-        AppenderFile(uint8 _id, std::string const& _name, LogLevel level, const char* filename, const char* logDir, const char* mode, AppenderFlags flags, uint64 maxSize);
+        typedef std::integral_constant<AppenderType, APPENDER_FILE>::type TypeIndex;
+
+        AppenderFile(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs);
         ~AppenderFile();
-        FILE* OpenFile(std::string const& _name, std::string const& _mode, bool _backup);
+        FILE *OpenFile(std::string const &name, std::string const &mode, bool backup);
+
+        AppenderType getType() const override { return TypeIndex::value; }
 
     private:
         void CloseFile();
-        void _write(LogMessage const& message);
-        FILE* logfile;
-        std::string filename;
-        std::string logDir;
-        std::string mode;
-        bool dynamicName;
-        bool backup;
-        uint64 maxFileSize;
-        ACE_Atomic_Op<ACE_Thread_Mutex, uint64> fileSize;
+        void _write(LogMessage const *message) override;
+        FILE *logfile;
+        std::string         _fileName;
+        std::string         _logDir;
+        bool                _dynamicName;
+        bool                _backup;
+        uint64              _maxFileSize;
+        std::atomic<uint64> _fileSize;
 };
 
 #endif

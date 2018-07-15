@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -20,15 +19,9 @@
 #ifndef QUERYRESULT_H
 #define QUERYRESULT_H
 
-#include "AutoPtr.h"
-#include <ace/Thread_Mutex.h>
-
-#include "Field.h"
-
-#ifdef _WIN32
-  #include <winsock2.h>
-#endif
-#include <mysql.h>
+#include "Define.h"
+#include "DatabaseEnvFwd.h"
+#include <vector>
 
 class ResultSet
 {
@@ -41,11 +34,7 @@ class ResultSet
         uint32 GetFieldCount() const { return _fieldCount; }
 
         Field* Fetch() const { return _currentRow; }
-        const Field & operator [] (uint32 index) const
-        {
-            ASSERT(index < _fieldCount);
-            return _currentRow[index];
-        }
+        Field const& operator[](std::size_t index) const;
 
     protected:
         uint64 _rowCount;
@@ -56,9 +45,10 @@ class ResultSet
         void CleanUp();
         MYSQL_RES* _result;
         MYSQL_FIELD* _fields;
-};
 
-typedef Skyfire::AutoPtr<ResultSet, ACE_Thread_Mutex> QueryResult;
+        ResultSet(ResultSet const& right) = delete;
+        ResultSet& operator=(ResultSet const& right) = delete;
+};
 
 class PreparedResultSet
 {
@@ -70,21 +60,11 @@ class PreparedResultSet
         uint64 GetRowCount() const { return m_rowCount; }
         uint32 GetFieldCount() const { return m_fieldCount; }
 
-        Field* Fetch() const
-        {
-            ASSERT(m_rowPosition < m_rowCount);
-            return m_rows[uint32(m_rowPosition)];
-        }
-
-        const Field & operator [] (uint32 index) const
-        {
-            ASSERT(m_rowPosition < m_rowCount);
-            ASSERT(index < m_fieldCount);
-            return m_rows[uint32(m_rowPosition)][index];
-        }
+        Field* Fetch() const;
+        Field const& operator[](std::size_t index) const;
 
     protected:
-        std::vector<Field*> m_rows;
+        std::vector<Field> m_rows;
         uint64 m_rowCount;
         uint64 m_rowPosition;
         uint32 m_fieldCount;
@@ -92,18 +72,13 @@ class PreparedResultSet
     private:
         MYSQL_BIND* m_rBind;
         MYSQL_STMT* m_stmt;
-        MYSQL_RES* m_res;
+        MYSQL_RES* m_metadataResult;    ///< Field metadata, returned by mysql_stmt_result_metadata
 
-        my_bool* m_isNull;
-        unsigned long* m_length;
-
-        void FreeBindBuffer();
         void CleanUp();
         bool _NextRow();
 
+        PreparedResultSet(PreparedResultSet const& right) = delete;
+        PreparedResultSet& operator=(PreparedResultSet const& right) = delete;
 };
 
-typedef Skyfire::AutoPtr<PreparedResultSet, ACE_Thread_Mutex> PreparedQueryResult;
-
 #endif
-

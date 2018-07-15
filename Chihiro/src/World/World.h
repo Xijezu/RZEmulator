@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "RespawnObject.h"
 #include "Timer.h"
+#include "LockedQueue.h"
 
 enum ShutdownExitCode
 {
@@ -89,11 +90,15 @@ constexpr float                               g_fMapLength  = 16128.0f;
 class World
 {
     public:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32>  m_worldLoopCounter;
-        typedef ACE_Atomic_Op<ACE_Thread_Mutex, uint64> AtomicIndex;
-
-        World();
+        static std::atomic<uint32> m_worldLoopCounter;
+        typedef std::atomic<uint64> AtomicIndex;
         ~World();
+
+        static World &Instance()
+        {
+            static World instance;
+            return instance;
+        }
 
         void InitWorld();
         void LoadConfigSettings(bool reload);
@@ -161,7 +166,7 @@ class World
             m_ExitCode  = exitcode;
         }
 
-        static bool IsStopped() { return m_stopEvent.value(); }
+        static bool IsStopped() { return m_stopEvent; }
 
         /// Gets and increments the identifier for DB insert statements
         uint64 GetItemIndex();
@@ -205,7 +210,7 @@ class World
 
         std::vector<RespawnObject *> m_vRespawnList{ };
     private:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_stopEvent;
+        static std::atomic<bool> m_stopEvent;
 
         static uint8 m_ExitCode;
 
@@ -213,7 +218,7 @@ class World
         const uint startTime;
 
         void AddSession_(WorldSession *s);
-        ACE_Based::LockedQueue<WorldSession *, ACE_Thread_Mutex> addSessQueue{ };
+        LockedQueue<WorldSession*> addSessQueue;
 
         void onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos);
         bool onSetMove(WorldObject *pObject, Position curPos, Position lastpos);
@@ -232,7 +237,9 @@ class World
         bool   m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
 
         IntervalTimer m_timers[WUPDATE_COUNT];
+    protected:
+        World();
 };
 
-#define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
+#define sWorld World::Instance()
 #endif // NGEMITY_WORLD_H

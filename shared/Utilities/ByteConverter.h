@@ -17,8 +17,8 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SKYFIRE_BYTECONVERTER_H
-#define SKYFIRE_BYTECONVERTER_H
+#ifndef NGEMITY_BYTECONVERTER_H
+#define NGEMITY_BYTECONVERTER_H
 
 /** ByteConverter reverse your byte order.  This is use
     for cross platform where they have different endians.
@@ -45,7 +45,7 @@ namespace ByteConverter
     }
 }
 
-#if SKYFIRE_ENDIAN == SKYFIRE_BIGENDIAN
+#if NGEMITY_ENDIAN == NGEMITY_BIGENDIAN
 template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
 template<typename T> inline void EndianConvertReverse(T&) { }
 template<typename T> inline void EndianConvertPtr(void* val) { ByteConverter::apply<T>(val); }

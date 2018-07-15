@@ -20,7 +20,7 @@
 
 #include "Common.h"
 #include "Log.h"
-#include "WorldSocket.h"
+#include "XSocket.h"
 #include "Encryption/XRc4Cipher.h"
 #include "Entities/Player/Player.h"
 
@@ -55,11 +55,11 @@ enum STORAGE_MODE : int
 };
 
 // Handle the player network
-class WorldSession
+class WorldSession : public XSession
 {
 	public:
 		friend class Player;
-		explicit WorldSession(WorldSocket<WorldSession> *socket);
+		explicit WorldSession(XSocket *socket);
 		virtual ~WorldSession();
 
 		// Accept & Close handler
@@ -70,7 +70,7 @@ class WorldSession
 
 		//void Decrypt(void *, size_t, bool/* =false */) override;
 		//void Encrypt(void *, size_t, bool/* =false */) override;
-		void ProcessIncoming(XPacket *);
+		ReadDataHandlerResult ProcessIncoming(XPacket *);
 
 		uint32 GetAccountId() const { return _accountId; }
 
@@ -78,7 +78,7 @@ class WorldSession
 
 		Player *GetPlayer() const { return m_pPlayer != nullptr ? m_pPlayer : nullptr; }
 
-		WorldSocket<WorldSession> *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
+		XSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
 
 		void HandleNullPacket(XPacket *) {}
 
@@ -152,7 +152,7 @@ class WorldSession
 	private:
 		bool checkCharacterName(const std::string &);
 		bool isValidTradeTarget(Player*);
-		WorldSocket<WorldSession> *_socket{nullptr};
+		XSocket *_socket{nullptr};
 
 		uint32      _accountId{ };
 		std::string _accountName{ };

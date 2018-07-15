@@ -1,11 +1,10 @@
 /*
- * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
- * Copyright (C) 2005-2017 MaNGOS <https://www.getmangos.eu/>
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
+ * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
@@ -18,135 +17,154 @@
  */
 
 #include "Config.h"
-#include "Errors.h"
+#include "Log.h"
+#include "Util.h"
+#include <boost/property_tree/ini_parser.hpp>
+#include <algorithm>
+#include <memory>
+#include <mutex>
 
-// Defined here as it must not be exposed to end-users.
-bool ConfigMgr::GetValueHelper(const char* name, ACE_TString &result)
+namespace bpt = boost::property_tree;
+
+namespace
 {
-    GuardType guard(_configLock);
-
-    if (_config.get() == 0)
-        return false;
-
-    ACE_TString section_name;
-    ACE_Configuration_Section_Key section_key;
-    const ACE_Configuration_Section_Key &root_key = _config->root_section();
-
-    int i = 0;
-    while (_config->enumerate_sections(root_key, i, section_name) == 0)
-    {
-        _config->open_section(root_key, section_name.c_str(), 0, section_key);
-        if (_config->get_string_value(section_key, name, result) == 0)
-            return true;
-        ++i;
-    }
-
-    return false;
+    std::string _filename;
+    std::vector<std::string> _args;
+    bpt::ptree _config;
+    std::mutex _configLock;
 }
 
-bool ConfigMgr::LoadInitial(char const* file)
+bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> args,
+                            std::string& error)
 {
-    ASSERT(file);
-
-    GuardType guard(_configLock);
+    std::lock_guard<std::mutex> lock(_configLock);
 
     _filename = file;
-    _config.reset(new ACE_Configuration_Heap());
-    if (_config->open() == 0)
-        if (LoadData(_filename.c_str()))
-            return true;
+    _args = args;
 
-    _config.reset();
-    return false;
+    try
+    {
+        bpt::ptree fullTree;
+        bpt::ini_parser::read_ini(file, fullTree);
+
+        if (fullTree.empty())
+        {
+            error = "empty file (" + file + ")";
+            return false;
+        }
+
+        // Since we're using only one section per config file, we skip the section and have direct property access
+        _config = fullTree.begin()->second;
+    }
+    catch (bpt::ini_parser::ini_parser_error const& e)
+    {
+        if (e.line() == 0)
+            error = e.message() + " (" + e.filename() + ")";
+        else
+            error = e.message() + " (" + e.filename() + ":" + std::to_string(e.line()) + ")";
+        return false;
+    }
+
+    return true;
 }
 
-bool ConfigMgr::LoadMore(char const* file)
+ConfigMgr* ConfigMgr::instance()
 {
-    ASSERT(file);
-    ASSERT(_config);
-
-    GuardType guard(_configLock);
-
-    return LoadData(file);
+    static ConfigMgr instance;
+    return &instance;
 }
 
-bool ConfigMgr::Reload()
+bool ConfigMgr::Reload(std::string& error)
 {
-    return LoadInitial(_filename.c_str());
+    return LoadInitial(_filename, std::move(_args), error);
 }
 
-bool ConfigMgr::LoadData(char const* file)
+template<class T>
+T ConfigMgr::GetValueDefault(std::string const& name, T def) const
 {
-    ACE_Ini_ImpExp config_importer(*_config.get());
-    if (config_importer.import_config(file) == 0)
-        return true;
+    try
+    {
+        return _config.get<T>(bpt::ptree::path_type(name, '/'));
+    }
+    catch (bpt::ptree_bad_path)
+    {
+        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
+            name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
+    }
+    catch (bpt::ptree_bad_data)
+    {
+        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
+            name.c_str(), _filename.c_str(), std::to_string(def).c_str());
+    }
 
-    return false;
+    return def;
 }
 
-std::string ConfigMgr::GetStringDefault(const char* name, const std::string &def)
+template<>
+std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std::string def) const
 {
-    ACE_TString val;
-    return GetValueHelper(name, val) ? val.c_str() : def;
+    try
+    {
+        return _config.get<std::string>(bpt::ptree::path_type(name, '/'));
+    }
+    catch (bpt::ptree_bad_path)
+    {
+        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
+            name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
+    }
+    catch (bpt::ptree_bad_data)
+    {
+        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
+            name.c_str(), _filename.c_str(), def.c_str());
+    }
+
+    return def;
 }
 
-bool ConfigMgr::GetBoolDefault(const char* name, bool def)
+std::string ConfigMgr::GetStringDefault(std::string const& name, const std::string& def) const
 {
-    ACE_TString val;
-
-    if (!GetValueHelper(name, val))
-        return def;
-
-    return (val == "true" || val == "TRUE" || val == "yes" || val == "YES" ||
-        val == "1");
+    std::string val = GetValueDefault(name, def);
+    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
+    return val;
 }
 
-int ConfigMgr::GetIntDefault(const char* name, int def)
+bool ConfigMgr::GetBoolDefault(std::string const& name, bool def) const
 {
-    ACE_TString val;
-    return GetValueHelper(name, val) ? atoi(val.c_str()) : def;
+    std::string val = GetValueDefault(name, std::string(def ? "1" : "0"));
+    val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
+    return StringToBool(val);
 }
 
-float ConfigMgr::GetFloatDefault(const char* name, float def)
+int ConfigMgr::GetIntDefault(std::string const& name, int def) const
 {
-    ACE_TString val;
-    return GetValueHelper(name, val) ? (float)atof(val.c_str()) : def;
+    return GetValueDefault(name, def);
+}
+
+float ConfigMgr::GetFloatDefault(std::string const& name, float def) const
+{
+    return GetValueDefault(name, def);
 }
 
 std::string const& ConfigMgr::GetFilename()
 {
-    GuardType guard(_configLock);
+    std::lock_guard<std::mutex> lock(_configLock);
     return _filename;
 }
 
-std::list<std::string> ConfigMgr::GetKeysByString(std::string const& name)
+std::vector<std::string> const& ConfigMgr::GetArguments() const
 {
-    GuardType guard(_configLock);
+    return _args;
+}
 
-    std::list<std::string> keys;
-    if (_config.get() == 0)
-        return keys;
+std::vector<std::string> ConfigMgr::GetKeysByString(std::string const& name)
+{
+    std::lock_guard<std::mutex> lock(_configLock);
 
-    ACE_TString section_name;
-    ACE_Configuration_Section_Key section_key;
-    const ACE_Configuration_Section_Key &root_key = _config->root_section();
+    std::vector<std::string> keys;
 
-    int i = 0;
-    while (_config->enumerate_sections(root_key, i++, section_name) == 0)
-    {
-        _config->open_section(root_key, section_name.c_str(), 0, section_key);
-
-        ACE_TString key_name;
-        ACE_Configuration::VALUETYPE type;
-        int j = 0;
-        while (_config->enumerate_values(section_key, j++, key_name, type) == 0)
-        {
-            std::string temp = key_name.c_str();
-
-            if (!temp.find(name))
-                keys.push_back(temp);
-        }
-    }
+    for (bpt::ptree::value_type const& child : _config)
+        if (child.first.compare(0, name.length(), name) == 0)
+            keys.push_back(child.first);
 
     return keys;
 }

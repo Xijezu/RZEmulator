@@ -1265,7 +1265,7 @@ void Unit::applyStatByItem()
                 {
                     if (x != 0)
                     {
-                        auto ibs = sObjectMgr->GetItemBase(x);
+                        auto ibs = sObjectMgr.GetItemBase(x);
                         if (ibs == nullptr)
                             continue;
 

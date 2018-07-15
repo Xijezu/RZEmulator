@@ -26,7 +26,7 @@ Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const in
     if(result != nullptr) {
         result->m_Handler = handler;
         result->m_bIsNeedUpdateToDB = false;
-        result->m_QuestBase = sObjectMgr->GetQuestBase(code);
+        result->m_QuestBase = sObjectMgr.GetQuestBase(code);
         if(result->m_QuestBase == nullptr) {
             NG_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
             delete result;
@@ -45,7 +45,7 @@ Quest* Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const in
 
 bool Quest::IsRandomQuest(int code)
 {
-    auto base = sObjectMgr->GetQuestBase(code);
+    auto base = sObjectMgr.GetQuestBase(code);
     if(base == nullptr) {
         NG_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
         return false;

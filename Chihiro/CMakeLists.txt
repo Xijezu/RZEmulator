@@ -34,19 +34,12 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/World
         ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
         ${SHARED_INCLUDE_DIR}
-        ${ACE_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${MYSQL_INCLUDE_DIR})
 
 add_executable(Chihiro ${SOURCE_FILES})
-target_link_libraries(Chihiro shared ${MYSQL_LIB} lualib)
-
-
-if(NOT ACE_USE_EXTERNAL)
-    target_link_libraries(Chihiro ace)
-else()
-    target_link_libraries(Chihiro ${ACE_LIBRARIES})
-endif()
+target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} boost lualib)
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")
@@ -58,3 +51,5 @@ if(UNIX)
     set_target_properties(Chihiro PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
 	target_link_libraries(Chihiro stdc++fs)
 endif()
+
+add_cxx_pch(Chihiro ${CMAKE_SOURCE_DIR}/Chihiro/src/PrecompiledHeaders/chihiroPCH.h)

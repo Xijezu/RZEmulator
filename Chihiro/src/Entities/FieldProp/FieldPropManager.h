@@ -22,30 +22,41 @@
 #include "Common.h"
 #include "SharedMutex.h"
 
-struct FieldPropRegenInfo {
+struct FieldPropRegenInfo
+{
     FieldPropRegenInfo(uint t, uint lt)
     {
-        tNextRegen = t;
-        nLifeTime = lt;
-        pRespawnInfo = {};
+        tNextRegen   = t;
+        nLifeTime    = lt;
+        pRespawnInfo = { };
     }
+
     FieldPropRespawnInfo pRespawnInfo;
-    uint tNextRegen;
-    uint nLifeTime;
+    uint                 tNextRegen;
+    uint                 nLifeTime;
 };
 
 class FieldPropManager : public FieldPropDeleteHandler
 {
-public:
-    void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime);
-    void RegisterFieldProp(FieldPropRespawnInfo prop);
-    void onFieldPropDelete(FieldProp* prop) override;
-    void Update(uint diff);
-private:
-    std::vector<FieldPropRespawnInfo> m_vRespawnInfo{};
-    std::vector<FieldPropRegenInfo> m_vRespawnList{};
-    std::vector<FieldProp*> m_vExpireObject{};
-    NG_SHARED_MUTEX i_lock;
+    public:
+        static FieldPropManager &Instance()
+        {
+            static FieldPropManager instance;
+            return instance;
+        }
+
+        ~FieldPropManager() = default;
+        void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime);
+        void RegisterFieldProp(FieldPropRespawnInfo prop);
+        void onFieldPropDelete(FieldProp *prop) override;
+        void Update(uint diff);
+    private:
+        std::vector<FieldPropRespawnInfo> m_vRespawnInfo{ };
+        std::vector<FieldPropRegenInfo>   m_vRespawnList{ };
+        std::vector<FieldProp *>          m_vExpireObject{ };
+        NG_SHARED_MUTEX i_lock;
+    protected:
+        FieldPropManager() = default;
 };
-#define sFieldPropManager ACE_Singleton<FieldPropManager, ACE_Null_Mutex>::instance()
+#define sFieldPropManager FieldPropManager::Instance()
 #endif // NGEMITY_FIELDPROPMANAGER_H

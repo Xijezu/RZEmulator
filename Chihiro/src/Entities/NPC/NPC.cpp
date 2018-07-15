@@ -38,7 +38,7 @@ NPC::NPC(NPCTemplate* base) : Unit(true)
 
     _InitValues();
 
-    sMemoryPool->AllocMiscHandle(this);
+    sMemoryPool.AllocMiscHandle(this);
     SetUInt32Value(UNIT_FIELD_UID, m_pBase->id);
     SetInt32Value(UNIT_FIELD_RACE, 0xac);
 
@@ -90,7 +90,7 @@ bool NPC::HasStartableQuest(Player *player)
 
     for (auto &ql : m_vQuestLink_Start)
     {
-        auto b = sObjectMgr->GetQuestBase(ql->code);
+        auto b = sObjectMgr.GetQuestBase(ql->code);
         if (b == nullptr)
             continue;
         auto qt = b->nType;

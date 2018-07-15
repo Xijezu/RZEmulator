@@ -48,7 +48,6 @@ bool DirectionRegionTester::IsInRegion(Position pos)
         auto _V2ye = _x / v6;
         return v7 + _V2ye * V1x >= 0.0f;
     }
-    ACE_NOTREACHED(return false);
 }
 
 void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
