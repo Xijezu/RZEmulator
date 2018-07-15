@@ -34,7 +34,7 @@ class AuthGameSession : public XSession
 
         // Network handlers
         void OnClose();
-        ReadDataHandlerResult ProcessIncoming(XPacket *);
+        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
         bool IsEncrypted() const override
         {

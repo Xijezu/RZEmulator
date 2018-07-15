@@ -165,7 +165,7 @@ const static int nibblebit[] = {010, 04, 02, 01};
 
 
 
-#define REGISTER        register
+#define REGISTER
 
 /* permute inblock with perm : inblock, perm, outblock) */
 /*    char perm[16][16][8],     2K bytes defining perm. */
