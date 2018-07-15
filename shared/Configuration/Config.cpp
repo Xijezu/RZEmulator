@@ -42,7 +42,8 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> ar
     std::lock_guard<std::mutex> lock(_configLock);
 
     auto configDir = boost::filesystem::system_complete(args[0]).parent_path();
-    auto configFile = configDir.string() + "/" + file;
+    auto configFilePath{file};
+    auto configFile = (configDir /= configFilePath).string();
 
     _filename = file;
     _args = args;
