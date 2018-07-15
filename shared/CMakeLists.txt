@@ -22,6 +22,7 @@ set(SHARED_INCLUDE_DIR
 
 include_directories(
         ${CMAKE_BINARY_DIR}
+        ${Boost_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${SHARED_INCLUDE_DIR}
         ${MYSQL_INCLUDE_DIR})
