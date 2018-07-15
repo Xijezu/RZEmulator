@@ -12,7 +12,6 @@ matrix:
             - g++-7
             - cmake-data
             - cmake
-            - boost
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - os: linux
@@ -27,7 +26,6 @@ matrix:
             - clang-5.0
             - cmake-data
             - cmake
-            - boost
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 
@@ -36,7 +34,7 @@ branches:
     - master
 
 before_install:
-  - sudo apt-get install libmysqlclient15-dev libmysql++-dev
+  - sudo apt-get install libmysqlclient15-dev libmysql++-dev libboost-all-dev
   - eval "${MATRIX_EVAL}"
 
 script:
