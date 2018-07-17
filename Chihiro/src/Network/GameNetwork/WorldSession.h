@@ -64,7 +64,7 @@ class WorldSession : public XSession
 
 		// Accept & Close handler
 		//void OnAccept() override;
-		void OnClose();
+		void OnClose() override;
 		void KickPlayer();
 		bool Update(uint diff);
 
