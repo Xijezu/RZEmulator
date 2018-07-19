@@ -48,14 +48,22 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> ar
     _filename = file;
     _args = args;
 
+    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
+
     try
     {
         bpt::ptree fullTree;
-        bpt::ini_parser::read_ini(configFile, fullTree);
+        if(bIsRunningDir)
+            bpt::ini_parser::read_ini(file, fullTree);
+        else
+            bpt::ini_parser::read_ini(configFile, fullTree);
 
         if (fullTree.empty())
         {
-            error = "empty file (" + configFile + ")";
+            if(bIsRunningDir)
+                error = "empty file (" + file + ")";
+            else
+                error = "empty file (" + configFile + ")";
             return false;
         }
 
