@@ -41,8 +41,7 @@ int main(int argc, char **argv)
     std::string configError;
     if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG, std::vector<std::string>(argv, argv + argc), configError))
     {
-        NG_LOG_ERROR("server.worldserver", "Invalid or missing configuration file : %s", _CHIHIRO_CORE_CONFIG);
-        NG_LOG_ERROR("server.worldserver", "Verify that the file exists and has \'[chihiro]' written in the top of the file!");
+        printf("Error in config file or file not found: %s\n", configError.c_str());
         return 1;
     }
 
