@@ -51,6 +51,8 @@ void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork.SendClientLogoutToAuth(_accountName);
+    if(m_pPlayer)
+        onReturnToLobby(nullptr);
 }
 
 enum eStatus

@@ -72,6 +72,8 @@ class AuthNetwork
             boost::asio::ip::tcp::socket  _socket(ioContext);
 
             _socket.connect(endpoint);
+            boost::asio::socket_base::keep_alive option(true);
+            _socket.set_option(option);
             _updateTimer = new boost::asio::deadline_timer(ioContext);
 
             m_pSocket.reset(new XSocket(std::move(_socket)));
