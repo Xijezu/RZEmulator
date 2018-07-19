@@ -49,7 +49,7 @@ extern int main(int argc, char **argv)
                                  std::vector<std::string>(argv, argv + argc),
                                  configError))
     {
-        printf("Error in config file: %s\n", configError.c_str());
+        printf("Error in config file or file not found: %s\n", configError.c_str());
         return 1;
     }
 
