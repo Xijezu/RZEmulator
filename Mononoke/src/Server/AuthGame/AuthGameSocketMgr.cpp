@@ -98,6 +98,9 @@ void AuthGameSocketMgr::OnSocketOpen(tcp::socket&& sock, uint32 threadIndex)
         }
     }
 
+    boost::system::error_code error_code;
+    sock.set_option(boost::asio::socket_base::keep_alive(true), error_code);
+
     // Set TCP_NODELAY.
     if (_tcpNoDelay)
     {
