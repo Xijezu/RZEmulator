@@ -66,12 +66,20 @@ class AuthNetwork
             delete m_pThread;
         }
 
-        int InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
+        bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
         {
             boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
             boost::asio::ip::tcp::socket  _socket(ioContext);
 
-            _socket.connect(endpoint);
+            try
+            {
+                _socket.connect(endpoint);
+            }
+            catch(std::exception&)
+            {
+                NG_LOG_ERROR("server.network", "Cannot connect to login server at %s:%d", bindIp.c_str(), port);
+                return false;
+            }
             _updateTimer = new boost::asio::deadline_timer(ioContext);
 
             m_pSocket.reset(new XSocket(std::move(_socket)));
@@ -80,7 +88,7 @@ class AuthNetwork
             reinterpret_cast<GameAuthSession*>(m_pSocket->GetSession())->SendGameLogin();
 
             m_pThread = new std::thread(&AuthNetwork::Run, this);
-            return 0;
+            return true;
         }
 
         void Run()
