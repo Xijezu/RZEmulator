@@ -48,6 +48,7 @@ constexpr AuthHandler packetHandler[] =
                                       {TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
                                       {TS_AG_KICK_CLIENT,  &GameAuthSession::HandleClientKick},
                                       {TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
+                                      {TS_CA_PING, &GameAuthSession::HandleNullPacket}
                               };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(AuthHandler));
@@ -151,4 +152,9 @@ void GameAuthSession::SendGameLogin()
     loginPct.fill(m_szGameIP, 16);
     loginPct << (uint)m_nGamePort;
     m_pSocket->SendPacket(loginPct);
+}
+
+void GameAuthSession::HandleNullPacket(XPacket *)
+{
+
 }

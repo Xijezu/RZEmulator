@@ -49,6 +49,8 @@ class AuthGameSession : public XSession
         void HandleClientLogout(XPacket *);
         /// \brief Handles client kick failed - not used yet
         void HandleClientKickFailed(XPacket *);
+        /// \brief Receives and sends a Ping packet from/to the Gameserver
+        void HandlePingPacket(XPacket *);
         /// \brief Kicks a player from the gameserver
         /// \param pPlayer The player to be kicked
         void KickPlayer(Player *pPlayer);
