@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Skill.h"
 #include "Unit.h"
@@ -128,7 +128,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         }
     }
 
-    /* ******* SKILL COST CALCULATION ******* */
+    /* ******* SKILL COST CALCULATION ********/
     int   nHP       = m_pOwner->GetHealth();
     int   nMP       = m_pOwner->GetMana();
     float decHP     = 0;
@@ -187,7 +187,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     }
 
 
-    /* ******* SKILL COST CALCULATION ******* */
+    /* ******* SKILL COST CALCULATION ********/
 
     m_Status = SkillStatus::SS_CAST;
     switch (m_SkillBase->effect_type)
@@ -971,7 +971,7 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
     /* @todo: This implementation is wrong. skillResult.type should be 1, not SRT_ADD_HP.
      * Not sure about why I went this way "as some kind of workaround", but it was the wrong
      * approach. Make sure to fix this later
-    */
+   */
     //sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
 }
 

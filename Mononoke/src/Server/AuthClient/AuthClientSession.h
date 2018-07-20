@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include <Lists/PlayerList.h>
 #include "Common.h"
 #include "Encryption/XRc4Cipher.h"
@@ -30,7 +30,7 @@ class AuthClientSession : public XSession
         explicit AuthClientSession(XSocket *socket);
         virtual ~AuthClientSession();
 
-        void OnClose();
+        void OnClose() override;
         ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
         /// \brief Handler for the Login packet - checks accountname and password

@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "Object.h"
 
@@ -35,7 +35,7 @@ class Unit;
  *
  * However, some day this needs a revamp. How? I don't know.
  * But it is annoying.
- */
+*/
 
 
 struct WorldObjectFunctor

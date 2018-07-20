@@ -7,7 +7,7 @@ enum GameDatabaseStatements : uint32
     {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
     When updating more than one field, consider looking at the calling function
     name for a suiting suffix.
-    */
+   */
             MAX_GAMEDATABASE_STATEMENTS
 };
 

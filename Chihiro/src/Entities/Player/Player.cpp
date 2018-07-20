@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Player.h"
 #include "MemPool.h"
@@ -3527,7 +3527,7 @@ LABEL_10:
   }
   return result;
 }
- */
+*/
 
 void Player::AddGoldToTradeWindow(int64 nGold)
 {

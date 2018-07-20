@@ -14,14 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "Unit.h"
 #include "MonsterBase.h"
 
 class Monster;
 struct MonsterDeleteHandler;
-class DropGroup;
+struct DropGroup;
 struct WayPointInfo;
 class NPC;
 struct NPCTemplate;

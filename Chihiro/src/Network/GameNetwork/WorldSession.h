@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "Log.h"
 #include "XSocket.h"
@@ -66,9 +66,7 @@ class WorldSession : public XSession
         void KickPlayer();
         bool Update(uint diff);
 
-        //void Decrypt(void *, size_t, bool/* =false */) override;
-        //void Encrypt(void *, size_t, bool/* =false */) override;
-        ReadDataHandlerResult ProcessIncoming(XPacket *);
+        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
         uint32 GetAccountId() const { return _accountId; }
 
@@ -105,7 +103,7 @@ class WorldSession : public XSession
         void onJobLevelUp(XPacket *);
         void onLearnSkill(XPacket *);
 
-        /* Trade related */
+        /* Trade related*/
         void onTrade(XPacket *); // Main packet
         // Those aren't actually packethandlers, but they get used by onTrade
         void onRequestTrade(uint);

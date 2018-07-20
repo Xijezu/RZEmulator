@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #if COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1900
 #include <shared_mutex>
 #define NG_SHARED_MUTEX std::shared_mutex

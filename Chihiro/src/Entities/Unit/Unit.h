@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Common.h"
 #include "CreatureAttribute.h"
@@ -145,7 +145,7 @@ class Unit : public WorldObject
 
         uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
 
-        /* FloatCreatureMastery */
+        /* FloatCreatureMastery*/
         virtual float GetFCM() const { return 1.0f; }
 
         State *GetState(StateCode code);
@@ -316,7 +316,7 @@ class Unit : public WorldObject
         void calcAttribute(CreatureAtributeServer &attribute);
         void applyItemEffect();
 
-        virtual void onCompleteCalculateStat() {}; /* overwritten in player class */
+        virtual void onCompleteCalculateStat() {}; /* overwritten in player class*/
         int64 GetBulletCount() const;
         ///- Gets overwritten in player for Beltslots and Max Chaos
         virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);

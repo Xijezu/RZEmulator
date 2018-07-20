@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "SQLOperation.h"
@@ -22,7 +22,7 @@
 #include <mutex>
 #include <vector>
 
-/*! Transactions, high level class. */
+/*! Transactions, high level class.*/
 class Transaction
 {
         friend class TransactionTask;

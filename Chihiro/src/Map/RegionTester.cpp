@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "RegionTester.h"
 
@@ -57,7 +57,7 @@ void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float Reg
        this->x1 = TargetPos->y - OriginalPos->y;
        *(float *)&OriginalPosa = OriginalPos->x - TargetPos->x;
        this->y1 = *(float *)&OriginalPosa;
-     */
+  */
     y1 = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
     x1 = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
 

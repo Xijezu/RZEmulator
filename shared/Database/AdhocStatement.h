@@ -14,12 +14,12 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "SQLOperation.h"
 
-/*! Raw, ad-hoc query. */
+/*! Raw, ad-hoc query.*/
 class BasicStatementTask : public SQLOperation
 {
     public:

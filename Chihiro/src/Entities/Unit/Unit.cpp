@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include <limits>
 #include "Unit.h"
 #include "ObjectMgr.h"
@@ -382,7 +382,7 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
     auto   tpos   = pos.GetPosition();
 
     auto pSkill = GetSkill(nSkillID);
-    if (pSkill == nullptr || pSkill->m_SkillBase == nullptr || m_castingSkill != nullptr /*|| using storage */)
+    if (pSkill == nullptr || pSkill->m_SkillBase == nullptr || m_castingSkill != nullptr /*|| using storage*/)
         return TS_RESULT_NOT_ACTABLE;
 
     //auto pSkillTarget = sMemoryPool.getPtrFromId(target_handle);
@@ -1471,7 +1471,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     if (GetHealth() == 0 && (stateInfo->state_time_type & 0x81) != 0)
         return TS_RESULT_NOT_ACTABLE;
 
-    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap */)
+    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap*/)
     {
         return TS_RESULT_LIMIT_TARGET;
     } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL

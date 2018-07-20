@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "StringFormat.h"
@@ -40,7 +40,7 @@ class DatabaseWorkerPool
         };
 
     public:
-        /* Activity state */
+        /* Activity state*/
         DatabaseWorkerPool();
 
         ~DatabaseWorkerPool();
@@ -61,7 +61,7 @@ class DatabaseWorkerPool
 
         /**
             Delayed one-way statement methods.
-        */
+       */
 
         //! Enqueues a one-way SQL operation in string format that will be executed asynchronously.
         //! This method should only be used for queries that are only executed once, e.g during startup.
@@ -84,7 +84,7 @@ class DatabaseWorkerPool
 
         /**
             Direct synchronous one-way statement methods.
-        */
+       */
 
         //! Directly executes a one-way SQL operation in string format, that will block the calling thread until finished.
         //! This method should only be used for queries that are only executed once, e.g during startup.
@@ -107,7 +107,7 @@ class DatabaseWorkerPool
 
         /**
             Synchronous query (with resultset) methods.
-        */
+       */
 
         //! Directly executes an SQL query in string format that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
@@ -142,7 +142,7 @@ class DatabaseWorkerPool
 
         /**
             Asynchronous query (with resultset) methods.
-        */
+       */
 
         //! Enqueues a query in string format that will set the value of the QueryResultFuture return object as soon as the query is executed.
         //! The return value is then processed in ProcessQueryCallback methods.
@@ -161,7 +161,7 @@ class DatabaseWorkerPool
 
         /**
             Transaction context methods.
-        */
+       */
 
         //! Begins an automanaged transaction pointer that will automatically rollback if not commited. (Autocommit=0)
         SQLTransaction BeginTransaction();
@@ -184,7 +184,7 @@ class DatabaseWorkerPool
 
         /**
             Other
-        */
+       */
 
         typedef typename T::Statements PreparedStatementIndex;
 

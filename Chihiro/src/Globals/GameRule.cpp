@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "GameRule.h"
 #include "Util.h"
@@ -40,7 +40,7 @@ float GameRule::GetItemValue(float item_current_value, int item_rank_value, int 
  * but for some odd reasons I always got odd results
  * finally I tried to reconstruct it more or less 1:1 and this is the result
  * I fricking hate IDAs pseudocode plugin...
- */
+*/
 float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_level)
 {
     float result      = 0;

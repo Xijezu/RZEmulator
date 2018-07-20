@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "AdhocStatement.h"
 #include "Errors.h"
@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 
-/*! Basic, ad-hoc queries. */
+/*! Basic, ad-hoc queries.*/
 BasicStatementTask::BasicStatementTask(const char* sql, bool async) :
 m_result(nullptr)
 {

@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "Unit.h"
 #include "TimeSync.h"
@@ -84,14 +84,14 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         void CleanupsBeforeDelete();
 
-        /* ****************** STATIC FUNCTIONS ****************** */
+        /* ****************** STATIC FUNCTIONS *******************/
         static void EnterPacket(XPacket &, Player *, Player *);
         static void DoEachPlayer(const std::function<void(Player *)> &fn);
         static Player *FindPlayer(const std::string &szName);
         static void DB_ItemCoolTime(Player *);
-        /* ****************** STATIC END ****************** */
+        /* ****************** STATIC END *******************/
 
-        /* ****************** QUEST ****************** */
+        /* ****************** QUEST *******************/
         void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
 
         void UpdateQuestStatusByMonsterKill(int monster_id);
@@ -115,7 +115,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Quest *FindQuest(int code);
         bool DropQuest(int code);
 
-        /* ****************** QUEST END ****************** */
+        /* ****************** QUEST END *******************/
 
         int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
 
@@ -140,7 +140,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
-        /* ****************** DATABASE ****************** */
+        /* ****************** DATABASE *******************/
         bool ReadCharacter(const std::string &, int);
         bool ReadItemList(int);
         bool ReadItemCoolTimeList(int);
@@ -152,7 +152,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool ReadStorageSummonList(std::vector<Summon *> &);
         void DB_ReadStorage();
         void DB_UpdateStorageGold();
-        /* ****************** DATABASE END ****************** */
+        /* ****************** DATABASE END *******************/
 
         // Warping
         void PendWarp(int x, int y, uint8_t layer);
@@ -183,11 +183,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         Item *FindItemByHandle(uint);
         Item *FindItem(uint code, uint flag, bool bFlag);
         Item *FindStorageItem(int code);
-        /* InventoryEventReceiver Start */
+        /* InventoryEventReceiver Start*/
         void onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
         void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
         void onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
-        /* InventoryEventReceiver End */
+        /* InventoryEventReceiver End*/
         Item *PushItem(Item *, int64, bool);
         Item *PopItem(Item *, int64, bool);
         Item *GetItem(uint idx);
@@ -231,7 +231,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         bool IsAlly(const Unit *pUnit) override;
 
-        /* ****************** DIALOG ****************** */
+        /* ****************** DIALOG *******************/
         void SetLastContact(const std::string &, uint32_t);
         void SetLastContact(const std::string &, const std::string &);
         std::string GetLastContactStr(const std::string &);
@@ -247,9 +247,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         void ShowDialog();
         bool IsValidTrigger(const std::string &);
-        /* ****************** DIALOG END ****************** */
+        /* ****************** DIALOG END *******************/
 
-        /* ****************** WORLDLOCATION BEGIN ****************** */
+        /* ****************** WORLDLOCATION BEGIN *******************/
         bool IsInTown();
 // Function       :   public bool StructPlayer::IsInField()
         bool IsInBattleField();
@@ -258,7 +258,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool IsInSiegeOrRaidDungeon();
         bool IsInSiegeDungeon();
         bool IsInDungeon();
-        /* ****************** WORLDLOCATION END ****************** */
+        /* ****************** WORLDLOCATION END *******************/
 
 
         void onChangeProperty(std::string, int);

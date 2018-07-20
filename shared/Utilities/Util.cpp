@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Util.h"
 #include "Common.h"
@@ -508,7 +508,7 @@ void vutf8printf(FILE* out, const char *str, va_list* ap)
 #endif
 }
 
-std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse /* = false */)
+std::string ByteArrayToHexStr(uint8 const *bytes, uint32 arrayLen, bool reverse /* = false*/)
 {
     int32 init = 0;
     int32 end = arrayLen;

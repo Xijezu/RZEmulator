@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Summon.h"
 #include "MemPool.h"
@@ -420,7 +420,7 @@ uint16 Summon::putoffItem(ItemWearType pos)
 
 void Summon::onCompleteCalculateStat()
 {
-    /* todo: riding mount */
+    /* todo: riding mount*/
     m_Attribute.nAttackRange = m_tSummonBase->attack_range;
 }
 
@@ -494,7 +494,7 @@ LABEL_12:
     (c_fixed<10000>)__PAIR__(v10, v11),
     (c_fixed<10000>)__PAIR__(v15, v14),
     fRatio);
- */
+*/
     Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
 }
 
