@@ -30,7 +30,7 @@ enum SkillStatus : int
     SS_COMPLETE = 3
 };
 
-class SkillTargetFunctor;
+struct SkillTargetFunctor;
 class Skill
 {
         friend class SkillProp;
