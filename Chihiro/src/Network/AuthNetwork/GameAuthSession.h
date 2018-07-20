@@ -41,6 +41,8 @@ public:
 	void HandleClientLoginResult(XPacket *);
 	void HandleClientKick(XPacket *);
 
+	void HandleNullPacket(XPacket* );
+
     void SendGameLogin();
 	void AccountToAuth(WorldSession* pSession, const std::string& szLoginName, uint64 nOneTimeKey);
     void ClientLogoutToAuth(const std::string& account);

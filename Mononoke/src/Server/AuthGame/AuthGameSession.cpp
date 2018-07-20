@@ -89,7 +89,8 @@ constexpr AuthHandler packetHandler[] =
                                       {TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
                                       {TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
                                       {TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
-                                      {TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed}
+                                      {TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed},
+                                      {TS_CA_PING,               STATUS_CONNECTED, &AuthGameSession::HandlePingPacket}
                               };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -218,4 +219,10 @@ void AuthGameSession::KickPlayer(Player *pPlayer)
     XPacket kickPct(TS_AG_KICK_CLIENT);
     kickPct.fill(pPlayer->szLoginName, 61);
     m_pSocket->SendPacket(kickPct);
+}
+
+void AuthGameSession::HandlePingPacket(XPacket *)
+{
+    XPacket _packet(TS_CA_PING);
+    m_pSocket->SendPacket(_packet);
 }

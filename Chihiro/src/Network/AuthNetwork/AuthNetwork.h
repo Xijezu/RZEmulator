@@ -72,8 +72,6 @@ class AuthNetwork
             boost::asio::ip::tcp::socket  _socket(ioContext);
 
             _socket.connect(endpoint);
-            boost::asio::socket_base::keep_alive option(true);
-            _socket.set_option(option);
             _updateTimer = new boost::asio::deadline_timer(ioContext);
 
             m_pSocket.reset(new XSocket(std::move(_socket)));
@@ -89,6 +87,13 @@ class AuthNetwork
         {
             _updateTimer->expires_from_now(boost::posix_time::milliseconds(10));
             _updateTimer->async_wait(std::bind(&AuthNetwork::Update, this));
+
+            if(m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
+            {
+                m_nLastPingTime = sWorld.GetArTime();
+                XPacket _packet(TS_CA_PING);
+                m_pSocket->SendPacket(_packet);
+            }
 
             Update();
         }
@@ -108,9 +113,10 @@ class AuthNetwork
         std::shared_ptr<XSocket> m_pSocket;
         boost::asio::deadline_timer *_updateTimer;
         std::thread *m_pThread;
+        std::atomic<uint32> m_nLastPingTime;
 
     protected:
-        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), _updateTimer(nullptr)
+        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), _updateTimer(nullptr), m_nLastPingTime(0)
         {
 
         }
