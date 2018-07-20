@@ -8,7 +8,7 @@
 #if !defined(_BRANCH)
 # define _BRANCH                    "@rev_branch@"
 #endif
-#if !defined(_VER_COMPANYNAME_STR)
+#if !defined(VER_COMPANYNAME_STR)
 # define VER_COMPANYNAME_STR        "NGemity"
 #endif
 #if !defined(VER_LEGALCOPYRIGHT_STR)
