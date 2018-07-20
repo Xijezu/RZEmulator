@@ -1,10 +1,20 @@
-//
-// Created by xijezu on 29.11.17.
-//
-
-#ifndef __TS_MESSAGE_H
-#define __TS_MESSAGE_H
-
+#pragma once
+/*
+ *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 enum TS_ResultCode
 {
     TS_RESULT_SUCCESS                               = 0x0,
@@ -161,5 +171,3 @@ enum class ReadDataHandlerResult
         Error           = 1,
         WaitingForQuery = 2
 };
-
-#endif // __TS_MESSAGE_H

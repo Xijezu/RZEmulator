@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef LogMessage_h__
-#define LogMessage_h__
-
 #include "Define.h"
 #include "LogCommon.h"
 #include <string>
@@ -47,5 +44,3 @@ struct LogMessage
         return static_cast<uint32>(prefix.size() + text.size());
     }
 };
-
-#endif // LogMessage_h__

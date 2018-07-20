@@ -15,8 +15,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_MIXMANAGER_H
-#define NGEMITY_MIXMANAGER_H
+#pragma once
 
 #include "Common.h"
 
@@ -185,4 +184,3 @@ class MixManager
 };
 
 #define sMixManager MixManager::Instance()
-#endif // NGEMITY_MIXMANAGER_H

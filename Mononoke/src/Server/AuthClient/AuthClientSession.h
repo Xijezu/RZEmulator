@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_AUTHCLIENTSESSION_H_
-#define NGEMITY_AUTHCLIENTSESSION_H_
-
 #include <Lists/PlayerList.h>
 #include "Common.h"
 #include "Encryption/XRc4Cipher.h"
@@ -74,5 +71,3 @@ class AuthClientSession : public XSession
         Player *m_pPlayer{nullptr};
         bool   _isAuthed{false};
 };
-
-#endif // NGEMITY_AUTHCLIENTSESSION_H_

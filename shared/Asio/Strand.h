@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef Strand_h__
-#define Strand_h__
-
 #include "IoContext.h"
 #include <boost/asio/strand.hpp>
 
@@ -34,8 +31,8 @@ namespace NGemity
         */
         class Strand : public IoContextBaseNamespace::IoContextBase::strand
         {
-        public:
-            Strand(IoContext& ioContext) : IoContextBaseNamespace::IoContextBase::strand(ioContext) { }
+            public:
+                Strand(IoContext& ioContext) : IoContextBaseNamespace::IoContextBase::strand(ioContext) { }
         };
 
 #if BOOST_VERSION >= 106600
@@ -49,5 +46,3 @@ namespace NGemity
 #endif
     }
 }
-
-#endif // Strand_h__

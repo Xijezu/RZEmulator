@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_POINTF_H
-#define NGEMITY_POINTF_H
-
 #include "Common.h"
 
 namespace X2D
@@ -55,5 +52,3 @@ namespace X2D
             float y;
     };
 }
-
-#endif // NGEMITY_POINTF_H

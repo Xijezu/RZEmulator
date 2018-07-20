@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_QUADTREEMLI_H
-#define NGEMITY_QUADTREEMLI_H
-
 #include "Common.h"
 #include "MapLocationInfo.h"
 #include "Boxf.h"
@@ -57,4 +54,3 @@ namespace X2D
             Node m_masterNode{ };
     };
 }
-#endif // NGEMITY_QUADTREEMLI_H

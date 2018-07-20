@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -15,9 +16,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_ITEMCOLLECTOR_H
-#define NGEMITY_ITEMCOLLECTOR_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -30,6 +28,7 @@ class ItemCollector
             static ItemCollector instance;
             return instance;
         }
+
         ~ItemCollector();
         void RegisterItem(Item *pItem);
         bool UnregisterItem(Item *pItem);
@@ -45,4 +44,3 @@ class ItemCollector
         ItemCollector() = default;
 };
 #define sItemCollector ItemCollector::Instance()
-#endif // NGEMITY_ITEMCOLLECTOR_H

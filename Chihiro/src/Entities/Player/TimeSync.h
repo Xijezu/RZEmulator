@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_TIMESYNCHER_H
-#define NGEMITY_TIMESYNCHER_H
-
 #include "Common.h"
 
 class TimeSynch
@@ -47,7 +44,7 @@ class TimeSynch
         uint GetInterval()
         {
             uint tc   = 0;
-            uint  CDC  = 0;
+            uint CDC  = 0;
             auto size = static_cast<uint>(m_vT.size());
 
             for (auto &i : m_vT)
@@ -73,5 +70,3 @@ class TimeSynch
         uint m_DC{ };
         uint m_MAX{ };
 };
-
-#endif // NGEMITY_TIMESYNCHER_H

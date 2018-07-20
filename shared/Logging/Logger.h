@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef LOGGER_H
-#define LOGGER_H
-
 #include "Define.h"
 #include "LogCommon.h"
 #include <unordered_map>
@@ -44,5 +41,3 @@ class Logger
         LogLevel                              level;
         std::unordered_map<uint8, Appender *> appenders;
 };
-
-#endif

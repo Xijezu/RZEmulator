@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef AsioHacksFwd_h__
-#define AsioHacksFwd_h__
-
 #include <boost/version.hpp>
 
 /**
@@ -59,7 +56,7 @@ namespace boost
             class basic_resolver;
 
             typedef basic_resolver<tcp> tcp_resolver;
-    }
+        }
 #else
         template <typename TimeType, typename TimeTraits>
         class deadline_timer_service;
@@ -90,5 +87,3 @@ namespace NGemity
         class Strand;
     }
 }
-
-#endif // AsioHacksFwd_h__

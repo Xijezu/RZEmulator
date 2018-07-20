@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_CLIENTPACKETS_H
-#define NGEMITY_CLIENTPACKETS_H
 
 #include "Server/TS_MESSAGE.h"
 #include "Server/XPacket.h"
@@ -339,5 +337,3 @@ typedef struct TS_CS_CHATREQUET
 #else
 #pragma pack(pop)
 #endif
-
-#endif // NGEMITY_CLIENTPACKETS_H

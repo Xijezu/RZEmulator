@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef QUERYRESULT_H
-#define QUERYRESULT_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include <vector>
@@ -30,21 +27,24 @@ class ResultSet
         ~ResultSet();
 
         bool NextRow();
+
         uint64 GetRowCount() const { return _rowCount; }
+
         uint32 GetFieldCount() const { return _fieldCount; }
 
         Field* Fetch() const { return _currentRow; }
+
         Field const& operator[](std::size_t index) const;
 
     protected:
         uint64 _rowCount;
-        Field* _currentRow;
+        Field * _currentRow;
         uint32 _fieldCount;
 
     private:
         void CleanUp();
-        MYSQL_RES* _result;
-        MYSQL_FIELD* _fields;
+        MYSQL_RES   * _result;
+        MYSQL_FIELD * _fields;
 
         ResultSet(ResultSet const& right) = delete;
         ResultSet& operator=(ResultSet const& right) = delete;
@@ -57,7 +57,9 @@ class PreparedResultSet
         ~PreparedResultSet();
 
         bool NextRow();
+
         uint64 GetRowCount() const { return m_rowCount; }
+
         uint32 GetFieldCount() const { return m_fieldCount; }
 
         Field* Fetch() const;
@@ -65,14 +67,14 @@ class PreparedResultSet
 
     protected:
         std::vector<Field> m_rows;
-        uint64 m_rowCount;
-        uint64 m_rowPosition;
-        uint32 m_fieldCount;
+        uint64             m_rowCount;
+        uint64             m_rowPosition;
+        uint32             m_fieldCount;
 
     private:
-        MYSQL_BIND* m_rBind;
-        MYSQL_STMT* m_stmt;
-        MYSQL_RES* m_metadataResult;    ///< Field metadata, returned by mysql_stmt_result_metadata
+        MYSQL_BIND * m_rBind;
+        MYSQL_STMT * m_stmt;
+        MYSQL_RES  * m_metadataResult;    ///< Field metadata, returned by mysql_stmt_result_metadata
 
         void CleanUp();
         bool _NextRow();
@@ -80,5 +82,3 @@ class PreparedResultSet
         PreparedResultSet(PreparedResultSet const& right) = delete;
         PreparedResultSet& operator=(PreparedResultSet const& right) = delete;
 };
-
-#endif

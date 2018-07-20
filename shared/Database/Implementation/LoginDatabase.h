@@ -1,6 +1,4 @@
-#ifndef _LOGINDATABASE_H
-#define _LOGINDATABASE_H
-
+#pragma once
 #include "MySQLConnection.h"
 
 enum LoginDatabaseStatements : uint32
@@ -27,5 +25,3 @@ class LoginDatabaseConnection : public MySQLConnection
 //- Loads database type specific prepared statements
         void DoPrepareStatements() override;
 };
-
-#endif

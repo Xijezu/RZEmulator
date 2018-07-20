@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef QueryCallbackProcessor_h__
-#define QueryCallbackProcessor_h__
-
 #include "Define.h"
 #include <vector>
 
@@ -26,17 +23,15 @@ class QueryCallback;
 class QueryCallbackProcessor
 {
 public:
-    QueryCallbackProcessor();
-    ~QueryCallbackProcessor();
+        QueryCallbackProcessor();
+        ~QueryCallbackProcessor();
 
-    void AddQuery(QueryCallback&& query);
-    void ProcessReadyQueries();
+        void AddQuery(QueryCallback&& query);
+        void ProcessReadyQueries();
 
-private:
-    QueryCallbackProcessor(QueryCallbackProcessor const&) = delete;
-    QueryCallbackProcessor& operator=(QueryCallbackProcessor const&) = delete;
+    private:
+        QueryCallbackProcessor(QueryCallbackProcessor const&) = delete;
+        QueryCallbackProcessor& operator=(QueryCallbackProcessor const&) = delete;
 
-    std::vector<QueryCallback> _callbacks;
+        std::vector<QueryCallback> _callbacks;
 };
-
-#endif // QueryCallbackProcessor_h__

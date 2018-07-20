@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,98 +15,95 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_GAMESESSION_H_
-#define NGEMITY_GAMESESSION_H_
-
 #include "Common.h"
 #include "Log.h"
 #include "XSocket.h"
 #include "Encryption/XRc4Cipher.h"
 #include "Entities/Player/Player.h"
 
-struct LobbyCharacterInfo {
-	int sex;
-	int race;
-	int model_id[5] = { 0 };
-	int wear_info[24] = { 0 };
-	int level;
-	int job;
-	int job_level;
-	int exp;
-	int hp;
-	int mp;
-	int permission;
-	bool is_banned;
-	std::string name;
-	uint32 skin_color;
-	std::string szCreateTime;
-	std::string szDeleteTime;
-	int wear_item_enhance_info[24] = { 0 };
-	int wear_item_level_info[24] = { 0 };
+struct LobbyCharacterInfo
+{
+    int         sex;
+    int         race;
+    int         model_id[5]                = {0};
+    int         wear_info[24]              = {0};
+    int         level;
+    int         job;
+    int         job_level;
+    int         exp;
+    int         hp;
+    int         mp;
+    int         permission;
+    bool        is_banned;
+    std::string name;
+    uint32      skin_color;
+    std::string szCreateTime;
+    std::string szDeleteTime;
+    int         wear_item_enhance_info[24] = {0};
+    int         wear_item_level_info[24]   = {0};
 };
 
 enum STORAGE_MODE : int
 {
-	ITEM_INVENTORY_TO_STORAGE = 0x0,
-	ITEM_STORAGE_TO_INVENTORY = 0x1,
-	GOLD_INVENTORY_TO_STORAGE = 0x2,
-	GOLD_STORAGE_TO_INVENTORY = 0x3,
-	STORAGE_CLOSE = 0x4,
+    ITEM_INVENTORY_TO_STORAGE = 0x0,
+    ITEM_STORAGE_TO_INVENTORY = 0x1,
+    GOLD_INVENTORY_TO_STORAGE = 0x2,
+    GOLD_STORAGE_TO_INVENTORY = 0x3,
+    STORAGE_CLOSE             = 0x4,
 };
 
 // Handle the player network
 class WorldSession : public XSession
 {
-	public:
-		friend class Player;
-		explicit WorldSession(XSocket *socket);
-		virtual ~WorldSession();
+    public:
+        friend class Player;
+        explicit WorldSession(XSocket *socket);
+        virtual ~WorldSession();
 
-		// Accept & Close handler
-		//void OnAccept() override;
-		void OnClose() override;
-		void KickPlayer();
-		bool Update(uint diff);
+        // Accept & Close handler
+        //void OnAccept() override;
+        void OnClose() override;
+        void KickPlayer();
+        bool Update(uint diff);
 
-		//void Decrypt(void *, size_t, bool/* =false */) override;
-		//void Encrypt(void *, size_t, bool/* =false */) override;
-		ReadDataHandlerResult ProcessIncoming(XPacket *);
+        //void Decrypt(void *, size_t, bool/* =false */) override;
+        //void Encrypt(void *, size_t, bool/* =false */) override;
+        ReadDataHandlerResult ProcessIncoming(XPacket *);
 
-		uint32 GetAccountId() const { return _accountId; }
+        uint32 GetAccountId() const { return _accountId; }
 
-		std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->GetName() : "<null>"; }
+        std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->GetName() : "<null>"; }
 
-		Player *GetPlayer() const { return m_pPlayer != nullptr ? m_pPlayer : nullptr; }
+        Player *GetPlayer() const { return m_pPlayer != nullptr ? m_pPlayer : nullptr; }
 
-		XSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
+        XSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
 
-		void HandleNullPacket(XPacket *) {}
+        void HandleNullPacket(XPacket *) {}
 
-		// Client-Auth & Logout
-		void onAuthResult(XPacket *);
-		void onAccountWithAuth(XPacket *);
-		void onCharacterList(XPacket *);
-		void onLogin(XPacket *);
-		void onReturnToLobby(XPacket *);
-		void onLogoutTimerRequest(XPacket *);
-		// Game itself
-		void onCharacterName(XPacket *);
-		void onCreateCharacter(XPacket *);
-		void onDeleteCharacter(XPacket *);
-		void onChatRequest(XPacket *);
+        // Client-Auth & Logout
+        void onAuthResult(XPacket *);
+        void onAccountWithAuth(XPacket *);
+        void onCharacterList(XPacket *);
+        void onLogin(XPacket *);
+        void onReturnToLobby(XPacket *);
+        void onLogoutTimerRequest(XPacket *);
+        // Game itself
+        void onCharacterName(XPacket *);
+        void onCreateCharacter(XPacket *);
+        void onDeleteCharacter(XPacket *);
+        void onChatRequest(XPacket *);
 
-		void onMoveRequest(XPacket *);
-		void onRegionUpdate(XPacket *);
-		void onChangeLocation(XPacket *);
-		void onQuery(XPacket *);
-		void onUpdate(XPacket *);
-		void onTimeSync(XPacket *);
-		void onGameTime(XPacket *);
-		void onSetProperty(XPacket *);
+        void onMoveRequest(XPacket *);
+        void onRegionUpdate(XPacket *);
+        void onChangeLocation(XPacket *);
+        void onQuery(XPacket *);
+        void onUpdate(XPacket *);
+        void onTimeSync(XPacket *);
+        void onGameTime(XPacket *);
+        void onSetProperty(XPacket *);
 
-		void onJobLevelUp(XPacket *);
-		void onLearnSkill(XPacket *);
+        void onJobLevelUp(XPacket *);
+        void onLearnSkill(XPacket *);
 
         /* Trade related */
         void onTrade(XPacket *); // Main packet
@@ -120,45 +118,42 @@ class WorldSession : public XSession
         void onFreezeTrade();
         void onConfirmTrade(uint);
 
+        void onPutOnItem(XPacket *);
+        void onPutOffItem(XPacket *);
+        void onBindSkillCard(XPacket *);
+        void onUnBindSkilLCard(XPacket *);
+        void onEquipSummon(XPacket *);
+        void onSoulStoneCraft(XPacket *);
 
-		void onPutOnItem(XPacket *);
-		void onPutOffItem(XPacket *);
-		void onBindSkillCard(XPacket *);
-		void onUnBindSkilLCard(XPacket *);
-		void onEquipSummon(XPacket *);
-		void onSoulStoneCraft(XPacket *);
+        void onContact(XPacket *);
+        void onDialog(XPacket *);
+        void onDropQuest(XPacket *);
 
-		void onContact(XPacket *);
-		void onDialog(XPacket *);
-        void onDropQuest(XPacket*);
+        void onBuyItem(XPacket *);
+        void onSellItem(XPacket *);
+        void onUseItem(XPacket *);
 
-		void onBuyItem(XPacket *);
-		void onSellItem(XPacket *);
-		void onUseItem(XPacket *);
+        void onSkill(XPacket *);
+        void onDropItem(XPacket *);
+        void onMixRequest(XPacket *);
+        void onRevive(XPacket *);
+        void onAttackRequest(XPacket *);
+        void onCancelAction(XPacket *);
+        void onTakeItem(XPacket *);
 
-		void onSkill(XPacket *);
-		void onDropItem(XPacket *);
-		void onMixRequest(XPacket *);
-		void onRevive(XPacket *);
-		void onAttackRequest(XPacket *);
-		void onCancelAction(XPacket *);
-		void onTakeItem(XPacket *);
+        void onGetSummonSetupInfo(XPacket *);
+        void onStorage(XPacket *);
 
-		void onGetSummonSetupInfo(XPacket *);
-		void onStorage(XPacket *);
+        void _SendResultMsg(uint16, uint16, int);
+        std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
+    private:
+        bool checkCharacterName(const std::string &);
+        bool isValidTradeTarget(Player *);
+        XSocket *_socket{nullptr};
 
-		void _SendResultMsg(uint16, uint16, int);
-		std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
-	private:
-		bool checkCharacterName(const std::string &);
-		bool isValidTradeTarget(Player*);
-		XSocket *_socket{nullptr};
-
-		uint32      _accountId{ };
-		std::string _accountName{ };
-		Player      *m_pPlayer{nullptr};
-		bool        _isAuthed{false};
-		int 		m_nPermission;
+        uint32      _accountId{ };
+        std::string _accountName{ };
+        Player      *m_pPlayer{nullptr};
+        bool        _isAuthed{false};
+        int         m_nPermission;
 };
-
-#endif // NGEMITY_GAMESESSION_H_

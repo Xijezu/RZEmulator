@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_MONSTERBASE_H
-#define NGEMITY_MONSTERBASE_H
 
 #include "Common.h"
 
@@ -92,7 +90,6 @@ struct takePriority
 {
     ItemPickupOrder PickupOrder{ };
 };
-
 
 struct HateTag
 {
@@ -184,5 +181,3 @@ struct MonsterRespawnInfo
         way_point_id = _way_point_id;
     }
 };
-
-#endif // NGEMITY_MONSTERBASE_H

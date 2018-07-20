@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef IpAddress_h__
-#define IpAddress_h__
-
 #include "Define.h"
 #include <boost/asio/ip/address.hpp>
 
@@ -28,6 +25,7 @@ namespace NGemity
 #if BOOST_VERSION >= 106600
         using boost::asio::ip::make_address;
         using boost::asio::ip::make_address_v4;
+
         inline uint32 address_to_uint(boost::asio::ip::address_v4 const& address) { return address.to_uint(); }
 #else
         inline boost::asio::ip::address make_address(char const* str) { return boost::asio::ip::address::from_string(str); }
@@ -42,5 +40,3 @@ namespace NGemity
 #endif
     }
 }
-
-#endif // IpAddress_h__

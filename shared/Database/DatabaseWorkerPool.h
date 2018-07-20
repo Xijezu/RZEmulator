@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _DATABASEWORKERPOOL_H
-#define _DATABASEWORKERPOOL_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "StringFormat.h"
@@ -218,8 +215,6 @@ class DatabaseWorkerPool
         //! Queue shared by async worker threads.
         std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> _queue;
         std::array<std::vector<std::unique_ptr<T>>, IDX_SIZE> _connections;
-        std::unique_ptr<MySQLConnectionInfo> _connectionInfo;
-        uint8 _async_threads, _synch_threads;
+        std::unique_ptr<MySQLConnectionInfo>                  _connectionInfo;
+        uint8                                                 _async_threads, _synch_threads;
 };
-
-#endif

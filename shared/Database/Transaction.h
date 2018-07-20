@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _TRANSACTION_H
-#define _TRANSACTION_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "SQLOperation.h"
@@ -28,18 +25,20 @@
 /*! Transactions, high level class. */
 class Transaction
 {
-    friend class TransactionTask;
-    friend class MySQLConnection;
+        friend class TransactionTask;
+        friend class MySQLConnection;
 
-    template <typename T>
-    friend class DatabaseWorkerPool;
+        template <typename T>
+        friend class DatabaseWorkerPool;
 
     public:
         Transaction() : _cleanedUp(false) { }
+
         ~Transaction() { Cleanup(); }
 
         void Append(PreparedStatement* statement);
         void Append(const char* sql);
+
         template<typename Format, typename... Args>
         void PAppend(Format&& sql, Args&&... args)
         {
@@ -60,18 +59,17 @@ class Transaction
 /*! Low level class*/
 class TransactionTask : public SQLOperation
 {
-    template <class T> friend class DatabaseWorkerPool;
-    friend class DatabaseWorker;
+        template <class T> friend class DatabaseWorkerPool;
+        friend class DatabaseWorker;
 
     public:
         TransactionTask(SQLTransaction trans) : m_trans(trans) { }
+
         ~TransactionTask() { }
 
     protected:
         bool Execute() override;
 
-        SQLTransaction m_trans;
+        SQLTransaction    m_trans;
         static std::mutex _deadlockLock;
 };
-
-#endif

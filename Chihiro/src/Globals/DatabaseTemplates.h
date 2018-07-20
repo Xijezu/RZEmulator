@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_DATABASETEMPLATES_H
-#define NGEMITY_DATABASETEMPLATES_H
 
 constexpr int MAX_DROP_GROUP = 10;
 
@@ -101,13 +99,13 @@ struct JobLevelBonusTemplate
 
 struct JobResourceTemplate
 {
-    int  id;
+    int id;
     int stat_id;
-    int  job_class;
+    int job_class;
     int job_depth;
-    int  up_lv;
-    int  up_jlv;
-    int  available_job[4];
+    int up_lv;
+    int up_jlv;
+    int available_job[4];
 };
 
 struct MarketInfo
@@ -118,4 +116,3 @@ struct MarketInfo
     float       price_ratio;
     float       huntaholic_ratio;
 };
-#endif //NGEMITY_DATABASETEMPLATES_H

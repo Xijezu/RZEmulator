@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_REGION_H
-#define NGEMITY_REGION_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 #include "Functors.h"
@@ -79,5 +76,3 @@ class Region
         uint       y;
         uint8      layer;
 };
-
-#endif // NGEMITY_REGION_H

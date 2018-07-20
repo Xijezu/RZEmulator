@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,52 +15,46 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_QUESTMANAGER_H
-#define NGEMITY_QUESTMANAGER_H
-
 #include "Common.h"
 #include "Quest.h"
 
 class QuestManager {
 public:
-    friend class Player;
-    QuestManager() = default;
-    ~QuestManager() = default;
+        friend class Player;
+        QuestManager() = default;
+        ~QuestManager() = default;
 
-    bool DoEachActiveQuest(const std::function<void (Quest*)>& fn);
-    void SetMaxQuestID(int id);
-    bool AddQuest(Quest* quest);
-    void AddRandomQuestInfo(int code, int key[], int value[], bool is_dropped) { };
-    bool StartQuest(int code, int nStartID);
-    bool EndQuest(Quest* pQuest);
-    Quest* FindQuest(int code);
-    bool IsFinishedQuest(int code);
-    bool IsTakeableQuestItem(int code);
-    void GetRelatedQuest(std::vector<Quest*>& vQuestList, int flag);
-    void GetRelatedQuestByItem(int code, std::vector<Quest*>& vQuest, int flag);
-    void GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*>& vQuest, int flag);
-    void UpdateQuestStatusByItemCount(int code, int64 count);
-    void UpdateQuestStatusByMonsterKill(int nMonsterID);
-    void UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel);
-    void UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel);
-    void UpdateQuestStatusByParameter(int parameter_id, int value);
-    void PopFromActiveQuest(Quest* pQuest);
-    bool IsStartableQuest(int code);
-    void SetDropFlagToRandomQuestInfo(int code);
-    bool HasRandomQuestInfo(int code);
+        bool DoEachActiveQuest(const std::function<void (Quest*)>& fn);
+        void SetMaxQuestID(int id);
+        bool AddQuest(Quest* quest);
 
-    QuestEventHandler* m_pHandler{nullptr};
+        void AddRandomQuestInfo(int code, int key[], int value[], bool is_dropped) { };
+        bool StartQuest(int code, int nStartID);
+        bool EndQuest(Quest* pQuest);
+        Quest* FindQuest(int code);
+        bool IsFinishedQuest(int code);
+        bool IsTakeableQuestItem(int code);
+        void GetRelatedQuest(std::vector<Quest*>& vQuestList, int flag);
+        void GetRelatedQuestByItem(int code, std::vector<Quest*>& vQuest, int flag);
+        void GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest*>& vQuest, int flag);
+        void UpdateQuestStatusByItemCount(int code, int64 count);
+        void UpdateQuestStatusByMonsterKill(int nMonsterID);
+        void UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel);
+        void UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel);
+        void UpdateQuestStatusByParameter(int parameter_id, int value);
+        void PopFromActiveQuest(Quest* pQuest);
+        bool IsStartableQuest(int code);
+        void SetDropFlagToRandomQuestInfo(int code);
+        bool HasRandomQuestInfo(int code);
 
-private:
-    std::map<int, bool> m_hsFinishedQuest{};
-    std::vector<Quest*> m_vActiveQuest{};
-    int m_QuestIndex{0};
-    std::vector<RandomQuestInfo> m_vRandomQuestInfo{};
+        QuestEventHandler * m_pHandler{nullptr};
 
-protected:
-    int allocQuestID();
+    private:
+        std::map<int, bool>          m_hsFinishedQuest{};
+        std::vector<Quest*>          m_vActiveQuest{};
+        int                          m_QuestIndex{0};
+        std::vector<RandomQuestInfo> m_vRandomQuestInfo{};
+
+    protected:
+        int allocQuestID();
 };
-
-
-#endif // NGEMITY_QUESTMANAGER_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_GAMELIST_H
-#define NGEMITY_GAMELIST_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -94,5 +91,3 @@ class GameList
 };
 
 #define sGameMapList GameList::Instance()
-
-#endif // NGEMITY_GAMELIST_H

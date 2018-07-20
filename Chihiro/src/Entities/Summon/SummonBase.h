@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -15,12 +16,9 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_SUMMONBASE_H
-#define NGEMITY_SUMMONBASE_H
-
 struct SummonLevelBonus
 {
-    int summon_id;
+    int   summon_id;
     float strength;
     float vital;
     float dexterity;
@@ -50,5 +48,3 @@ struct SummonResourceTemplate {
     int   evolve_target;
     int   card_id;
 };
-
-#endif // NGEMITY_SUMMONBASE_H

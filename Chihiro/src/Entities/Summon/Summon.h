@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_SUMMON_H
-#define NGEMITY_SUMMON_H
-
 #include "Common.h"
 #include "Unit.h"
 #include "SummonBase.h"
@@ -47,6 +44,7 @@ class Summon : public Unit
         uint32_t GetCardHandle();
 
         bool IsSummon() const override { return true; }
+
         bool IsAlly(const Unit *pTarget) override;
 
         int32_t GetSummonCode();
@@ -64,9 +62,9 @@ class Summon : public Unit
         void SetSummonInfo(int);
         bool DoEvolution();
 
-        int m_nSummonInfo{ };
-        int m_nCardUID{ };
-        int m_nTransform{ };
+        int     m_nSummonInfo{ };
+        int     m_nCardUID{ };
+        int     m_nTransform{ };
         uint8_t m_cSlotIdx{ };
         Item    *m_pItem{nullptr};
     protected:
@@ -87,10 +85,7 @@ class Summon : public Unit
         void onCompleteCalculateStat() override;
     private:
         SummonResourceTemplate *m_tSummonBase{nullptr};
-        Player *m_pMaster{nullptr};
+        Player                 *m_pMaster{nullptr};
 
         int m_nAccountID{};
 };
-
-
-#endif // NGEMITY_SUMMON_H

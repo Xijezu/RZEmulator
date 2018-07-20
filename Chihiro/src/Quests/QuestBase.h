@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_QUESTBASE_H
-#define NGEMITY_QUESTBASE_H
-
 #include "Common.h"
 
 constexpr int MAX_VALUE_NUMBER       = 12;
@@ -137,5 +134,3 @@ struct RandomQuestInfo
     int  value[MAX_RANDOM_QUEST_VALUE];
     bool is_dropped;
 };
-
-#endif // NGEMITY_QUESTBASE_H

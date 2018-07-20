@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_SKILLPROP_H
-#define NGEMITY_SKILLPROP_H
 
 #include "Common.h"
 #include "Unit.h"
@@ -54,14 +52,12 @@ class SkillProp : public WorldObject
     private:
         explicit SkillProp(uint caster, Skill* pSkill, int nMagicPoint, float fHateRatio);
 
-        uint m_hCaster;
+        uint          m_hCaster;
         SkillPropInfo m_Info;
-        Skill* m_pSkill;
-        bool m_bFired;
-        bool m_bProcessEnded;
-        bool m_bIsRemovePended;
-        int m_nOwnerMagicPoint;
+        Skill * m_pSkill;
+        bool  m_bFired;
+        bool  m_bProcessEnded;
+        bool  m_bIsRemovePended;
+        int   m_nOwnerMagicPoint;
         float m_fHateRatio;
 };
-
-#endif // NGEMITY_SKILLPROP_H

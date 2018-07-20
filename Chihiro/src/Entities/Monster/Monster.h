@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -15,9 +16,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_MONSTER_H
-#define NGEMITY_MONSTER_H
-
 #include "Common.h"
 #include "Unit.h"
 #include "MonsterBase.h"
@@ -28,21 +26,21 @@ struct VirtualParty {
     VirtualParty(int id, int d, int lv)
     {
         fContribute = 0.0f;
-        hPlayer = 0;
-        nPartyID = id;
-        nDamage = d;
-        nLevel = lv;
-        bTamer = false;
+        hPlayer     = 0;
+        nPartyID    = id;
+        nDamage     = d;
+        nLevel      = lv;
+        bTamer      = false;
     }
 
     VirtualParty(uint h, int d, int lv)
     {
         fContribute = 0.0f;
-        hPlayer = h;
-        nPartyID = 0;
-        nDamage = d;
-        nLevel = lv;
-        bTamer = false;
+        hPlayer     = h;
+        nPartyID    = 0;
+        nDamage     = d;
+        nLevel      = lv;
+        bTamer      = false;
     }
 
     static bool GreaterByDamage(VirtualParty lh, VirtualParty rh)
@@ -55,12 +53,12 @@ struct VirtualParty {
         return lh.fContribute > rh.fContribute;
     }
 
-    int nPartyID;
-    uint hPlayer;
-    int nDamage;
+    int   nPartyID;
+    uint  hPlayer;
+    int   nDamage;
     float fContribute;
-    bool bTamer;
-    int nLevel;
+    bool  bTamer;
+    int   nLevel;
 };
 
 struct DamageTag {
@@ -104,6 +102,7 @@ class Monster : public Unit
         float GetSize() const override { return m_Base->size; }
 
         float GetScale() const override { return m_Base->scale; }
+
         const std::string& GetNameAsString() override;
 
         MONSTER_STATUS GetStatus() const { return m_nStatus; }
@@ -142,7 +141,7 @@ class Monster : public Unit
         void TriggerForceKill(Player *pPlayer);
 
         MonsterDeleteHandler *m_pDeleteHandler{nullptr};
-        bool m_bNearClient;
+        bool                 m_bNearClient;
     protected:
         HateTag *getHateTag(uint handle, uint t);
         HateTag *addHate(uint handle, int nHate);
@@ -182,34 +181,31 @@ class Monster : public Unit
         std::vector<HateTag>         m_vHateList{ };
         std::vector<HateModifierTag> m_vHateModifierByState{ };
 
-        Position m_pRespawn{ };
+        Position    m_pRespawn{ };
         MonsterBase *m_Base{nullptr};
 
         float m_nLastEnemyDistance;
-        uint   m_nLastTrackTime;
+        uint  m_nLastTrackTime;
 
-        bool m_bComeBackHome;
-        uint m_nLastHateUpdateTime;
+        bool         m_bComeBackHome;
+        uint         m_nLastHateUpdateTime;
         // Attack related
-        bool m_bNeedToFindEnemy{false};
-        uint m_hFirstAttacker;
-        uint m_nFirstAttackTime;
-        uint m_nTotalDamage;
-        int  m_nMaxHate;
-        uint m_hEnemy;
+        bool         m_bNeedToFindEnemy{false};
+        uint         m_hFirstAttacker;
+        uint         m_nFirstAttackTime;
+        uint         m_nTotalDamage;
+        int          m_nMaxHate;
+        uint         m_hEnemy;
         // Taming related
-        int  m_nTamingSkillLevel;
-        uint m_hTamer;
-        int  m_nTamedTime;
-        Player *pFCClient{nullptr};
-        bool bForceKill{false};
-        bool m_bTamedSuccess;
-        int m_nWayPointIdx;
-        bool m_bIsWandering;
+        int          m_nTamingSkillLevel;
+        uint         m_hTamer;
+        int          m_nTamedTime;
+        Player       *pFCClient{nullptr};
+        bool         bForceKill{false};
+        bool         m_bTamedSuccess;
+        int          m_nWayPointIdx;
+        bool         m_bIsWandering;
         WayPointInfo *m_pWayPointInfo;
 
         MONSTER_STATUS m_nStatus;
 };
-
-
-#endif // NGEMITY_MONSTER_H

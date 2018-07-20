@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_XSOCKETTHREAD_H
-#define NGEMITY_XSOCKETTHREAD_H
-
 #include "XSocket.h"
 
 template<class T>
@@ -35,5 +32,3 @@ class XSocketThread : public NetworkThread<XSocket>
 
         }
 };
-
-#endif //NGEMITY_XSOCKETTHREAD_H

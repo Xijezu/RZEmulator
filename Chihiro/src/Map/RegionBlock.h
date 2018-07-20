@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_REGIONBLOCK_H
-#define NGEMITY_REGIONBLOCK_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 #include "Region.h"
@@ -61,10 +58,10 @@ class RegionBlock
 
         Region *getRegionPtr(uint rx, uint ry, uint8 layer)
         {
-            Region* res{nullptr};
+            Region * res{nullptr};
             {
                 NG_UNIQUE_GUARD writeGuard(i_lock);
-                RegionBase* rb = m_RegionBases[layer];
+                RegionBase * rb = m_RegionBases[layer];
                 if(rb != nullptr)
                     res = rb->m_Regions[ry + (100 * rx)];
             }
@@ -76,7 +73,7 @@ class RegionBlock
             Region *res{nullptr};
             {
                 NG_UNIQUE_GUARD writeGuard(i_lock);
-                RegionBase *rb = m_RegionBases[layer];
+                RegionBase      *rb = m_RegionBases[layer];
                 if (rb == nullptr)
                 {
                     rb = new RegionBase{ };
@@ -99,4 +96,3 @@ class RegionBlock
         NG_SHARED_MUTEX           i_lock;
         std::vector<RegionBase *> m_RegionBases;
 };
-#endif // NGEMITY_REGIONBLOCK_H

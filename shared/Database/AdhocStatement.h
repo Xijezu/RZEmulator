@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _ADHOCSTATEMENT_H
-#define _ADHOCSTATEMENT_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include "SQLOperation.h"
@@ -30,12 +27,11 @@ class BasicStatementTask : public SQLOperation
         ~BasicStatementTask();
 
         bool Execute() override;
+
         QueryResultFuture GetFuture() const { return m_result->get_future(); }
 
     private:
-        const char* m_sql;      //- Raw query to be executed
+        const char * m_sql;      //- Raw query to be executed
         bool m_has_result;
-        QueryResultPromise* m_result;
+        QueryResultPromise * m_result;
 };
-
-#endif

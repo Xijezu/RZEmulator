@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_AUTHSESSION_H_
-#define NGEMITY_AUTHSESSION_H_
-
 #include "Common.h"
 #include "Configuration/Config.h"
 #include "IoContext.h"
@@ -117,11 +114,11 @@ class AuthNetwork
         }
 
     private:
-        bool                     m_bClosed;
-        std::shared_ptr<XSocket> m_pSocket;
+        bool                        m_bClosed;
+        std::shared_ptr<XSocket>    m_pSocket;
         boost::asio::deadline_timer *_updateTimer;
-        std::thread *m_pThread;
-        std::atomic<uint32> m_nLastPingTime;
+        std::thread                 *m_pThread;
+        std::atomic<uint32>         m_nLastPingTime;
 
     protected:
         AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), _updateTimer(nullptr), m_nLastPingTime(0)
@@ -131,4 +128,3 @@ class AuthNetwork
 };
 
 #define sAuthNetwork AuthNetwork::Instance()
-#endif // NGEMITY_AUTHSESSION_H_

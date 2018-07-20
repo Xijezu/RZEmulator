@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_TERRAINSEAMLESSWORLD_H
-#define NGEMITY_TERRAINSEAMLESSWORLD_H
-
 #include "Common.h"
 
 struct KRect
@@ -76,5 +73,3 @@ class TerrainSeamlessWorldInfo
 
         std::map<int, FilenameMapInfo> m_FileNameMap{ };
 };
-
-#endif // NGEMITY_TERRAINSEAMLESSWORLD_H

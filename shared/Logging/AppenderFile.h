@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef APPENDERFILE_H
-#define APPENDERFILE_H
-
 #include "Appender.h"
 #include <atomic>
 
@@ -35,13 +32,11 @@ class AppenderFile : public Appender
     private:
         void CloseFile();
         void _write(LogMessage const *message) override;
-        FILE *logfile;
-        std::string         _fileName;
-        std::string         _logDir;
-        bool                _dynamicName;
-        bool                _backup;
-        uint64              _maxFileSize;
-        std::atomic<uint64> _fileSize;
+        FILE                                                              *logfile;
+        std::string                                                       _fileName;
+        std::string                                                       _logDir;
+        bool                                                              _dynamicName;
+        bool                                                              _backup;
+        uint64                                                            _maxFileSize;
+        std::atomic<uint64>                                               _fileSize;
 };
-
-#endif

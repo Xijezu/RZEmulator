@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_NPCBASE_H
-#define NGEMITY_NPCBASE_H
-
 #include "Common.h"
 
 struct NPCTemplate
@@ -49,5 +46,3 @@ enum NPC_SpawnType : int
     SPAWN_NONE           = 3,
     SPAWN_CASH           = 4,
 };
-
-#endif // NGEMITY_NPCBASE_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_MAPLOADER_H
-#define NGEMITY_MAPLOADER_H
-
 #include "Common.h"
 #include "TerrainSeamlessWorld.h"
 #include "TerrainPropInfo.h"
@@ -112,5 +109,3 @@ class Maploader
 };
 
 #define sMapContent Maploader::Instance()
-
-#endif // NGEMITY_MAPLOADER_H

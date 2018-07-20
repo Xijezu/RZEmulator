@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_REGIONTESTER_H
-#define NGEMITY_REGIONTESTER_H
-
 #include "Object.h"
 #include <memory>
 
@@ -96,7 +93,3 @@ struct CircleRegionTester : public RegionTester
         return true;
     }
 };
-
-
-
-#endif // NGEMITY_REGIONTESTER_H

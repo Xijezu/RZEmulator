@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_TERRAINPROPINFO_H
-#define NGEMITY_TERRAINPROPINFO_H
-
 #include "Common.h"
 
 enum PropType : int
@@ -63,5 +60,3 @@ class TerrainPropInfo
         bool CheckPropFileType(std::string rname, std::string szTail);
         void SetPropInfo(int nLineIndex, uint16 wPropNum, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag);
 };
-
-#endif // NGEMITY_TERRAINPROPINFO_H

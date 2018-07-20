@@ -15,8 +15,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_ALLOWEDCOMMANDINFO_H
-#define NGEMITY_ALLOWEDCOMMANDINFO_H
+#pragma once
 
 #include "Common.h"
 
@@ -53,5 +52,3 @@ class AllowedCommandInfo
 };
 
 #define sAllowedCommandInfo AllowedCommandInfo::Instance()
-
-#endif // NGEMITY_ALLOWEDCOMMANDINFO_H

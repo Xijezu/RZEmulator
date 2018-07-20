@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,18 +15,14 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_RESPAWNOBJECT_H
-#define NGEMITY_RESPAWNOBJECT_H
-
 #include "Common.h"
 #include "Monster.h"
 
 struct RespawnInfo : public MonsterRespawnInfo {
     explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info)
     {
-        count = 0;
-        prespawn_count = info.max_num / 2;
+        count              = 0;
+        prespawn_count     = info.max_num / 2;
         if(prespawn_count < 1 || dungeon_id != 0 || way_point_id != 0)
             prespawn_count = info.max_num;
     }
@@ -36,18 +33,15 @@ struct RespawnInfo : public MonsterRespawnInfo {
 
 class RespawnObject : public MonsterDeleteHandler{
 public:
-    explicit RespawnObject(MonsterRespawnInfo rh);
-    ~RespawnObject() = default;
+        explicit RespawnObject(MonsterRespawnInfo rh);
+        ~RespawnObject() = default;
 
-    void onMonsterDelete(Monster* mob) override;
-    void Update(uint diff);
+        void onMonsterDelete(Monster* mob) override;
+        void Update(uint diff);
 
-private:
-    RespawnInfo info;
-    uint m_nMaxRespawnNum;
-    std::vector<uint> m_vRespawnedMonster;
-    uint lastDeadTime;
+    private:
+        RespawnInfo       info;
+        uint              m_nMaxRespawnNum;
+        std::vector<uint> m_vRespawnedMonster;
+        uint              lastDeadTime;
 };
-
-
-#endif // NGEMITY_RESPAWNOBJECT_H

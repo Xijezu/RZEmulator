@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,26 +15,22 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _FIELD_H
-#define _FIELD_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include <vector>
 
 enum class DatabaseFieldTypes : uint8
 {
-    Null,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Float,
-    Double,
-    Decimal,
-    Date,
-    Binary
+        Null,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        Float,
+        Double,
+        Decimal,
+        Date,
+        Binary
 };
 
 /**
@@ -68,8 +65,8 @@ enum class DatabaseFieldTypes : uint8
 */
 class Field
 {
-    friend class ResultSet;
-    friend class PreparedResultSet;
+        friend class ResultSet;
+        friend class PreparedResultSet;
 
     public:
         Field();
@@ -101,24 +98,24 @@ class Field
 
         struct Metadata
         {
-            char const* TableName;
-            char const* TableAlias;
-            char const* Name;
-            char const* Alias;
-            char const* Type;
+            char const * TableName;
+            char const * TableAlias;
+            char const * Name;
+            char const * Alias;
+            char const * Type;
             uint32 Index;
         };
 
     protected:
-        #pragma pack(push, 1)
+#pragma pack(push, 1)
         struct
         {
             uint32 length;          // Length (prepared strings only)
-            void* value;            // Actual data in memory
+            void * value;            // Actual data in memory
             DatabaseFieldTypes type;  // Field type
-            bool raw;               // Raw bytes? (Prepared statement or ad hoc)
-         } data;
-        #pragma pack(pop)
+            bool               raw;               // Raw bytes? (Prepared statement or ad hoc)
+        } data;
+#pragma pack(pop)
 
         void SetByteValue(void* newValue, DatabaseFieldTypes newType, uint32 length);
         void SetStructuredValue(char* newValue, DatabaseFieldTypes newType, uint32 length);
@@ -136,11 +133,9 @@ class Field
         bool IsNumeric() const;
 
     private:
-        #ifdef NGEMITY_DEBUG
+#ifdef NGEMITY_DEBUG
         void LogWrongType(char* getter) const;
         void SetMetadata(MYSQL_FIELD* field, uint32 fieldIndex);
         Metadata meta;
-        #endif
-};
-
 #endif
+};
