@@ -107,7 +107,7 @@ void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
 void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
     int nCharSize;
-    LocationInfoHeader lih{};
+    LocationInfoHeader lih;
     int nPolygonCount;
     int nPointCount;
 

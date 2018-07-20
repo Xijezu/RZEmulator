@@ -207,9 +207,7 @@ uint64 World::GetSkillIndex()
 bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
 {
     Position oldPos{ };
-    Position lastpos = newPos.back();
-
-    bool result = false;
+    bool result{false};
     if (bAbsoluteMove || true/* onSetMove Quadtreepotato*/)
     {
         oldPos.m_positionX  = pUnit->GetPositionX();

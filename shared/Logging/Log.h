@@ -182,3 +182,5 @@ void check_args(std::string const &, ...);
 
 #define NG_LOG_FATAL(filterType__, ...) \
     NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+
+////////////////////////////////////////////////////////////////////

@@ -21,6 +21,9 @@ endif()
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE "Release")
 endif()
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(DEBUG 1)
+endif()
 
 option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
 

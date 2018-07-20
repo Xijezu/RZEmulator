@@ -207,7 +207,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
 
     uint   t                   = sWorld.GetArTime();
     uint   hKiller             = 0;
-    float  fMaxDamageAdd       = 0.1f;
+    float  fMaxDamageAdd{0.1f};
     uint   totalDamage         = 0;
     int    nLastAttackPartyID  = 0;
     int    nFirstAttackPartyID = 0;

@@ -356,8 +356,8 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 }
 
 WorldObject::WorldObject(bool isWorldObject)
-        : m_name(""), _isActive(false), m_isWorldObject(isWorldObject),
-          pRegion(nullptr), region_index(-1)
+        : m_name(""), _isActive(false),
+          pRegion(nullptr), region_index(-1), m_isWorldObject(isWorldObject)
 {
 }
 

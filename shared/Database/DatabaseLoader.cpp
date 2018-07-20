@@ -23,7 +23,7 @@
 #include <mysqld_error.h>
 
 
-DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const defaultUpdateMask)
+DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const /*defaultUpdateMask*/)
         : _logger(logger), _autoSetup(false), _updateFlags(false)
 {
 }
@@ -31,7 +31,7 @@ DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const defaultUp
 template<class T>
 DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name)
 {
-    bool const updatesEnabledForThis = false;
+    bool constexpr updatesEnabledForThis = false;
 
     _open.push([this, name, updatesEnabledForThis, &pool]() -> bool {
         std::string const dbString = sConfigMgr->GetStringDefault((name + "Database.CString").c_str(), "");
