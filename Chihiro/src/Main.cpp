@@ -20,10 +20,10 @@
 #include "AuthNetwork.h"
 #include "World.h"
 #include "SystemConfigs.h"
-#include "GameClientSocketMgr.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "Maploader.h"
+#include "XSocketMgr.h"
 
 #include <fstream>
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
     std::shared_ptr<void> sDBHandle(nullptr, [](void*) { StopDB(); });
 
     sWorld.InitWorld();
-    if (sAuthNetwork.InitializeNetwork(*ioContext, sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1"), sConfigMgr->GetIntDefault("AuthServer.Port", 4502)) != 0)
+    if (!sAuthNetwork.InitializeNetwork(*ioContext, sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1"), sConfigMgr->GetIntDefault("AuthServer.Port", 4502)))
     {
         NG_LOG_ERROR("server.worldserver", "Cannot connect to the auth server!");
         return 1;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
     auto        worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
     std::string bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
-    if (sGCSocketMgr.StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2) == -1)
+    if (XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2) == -1)
     {
         NG_LOG_ERROR("server.worldserver", "Failed to start network");
         return -1;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     }
     std::shared_ptr<void> sWorldHandle(nullptr, [](void*) {
         sWorld.KickAll();
-        sGCSocketMgr.StopNetwork();
+        XSocketMgr<WorldSession>::Instance().StopNetwork();
         sMemoryPool.Destroy();
 
         sObjectMgr.UnloadAll();

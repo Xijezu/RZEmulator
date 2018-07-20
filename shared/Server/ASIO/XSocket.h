@@ -134,6 +134,7 @@ class XSocket : public Socket<XSocket>
                 _encryption.SetKey("}h79q~B%al;k'y $E");
                 _decryption.SetKey("}h79q~B%al;k'y $E");
             }
+            SetSendBufferSize(65536);
         }
 
         void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }

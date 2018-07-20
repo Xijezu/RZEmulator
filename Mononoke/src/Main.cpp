@@ -16,22 +16,19 @@
  */
 
 #include "Common.h"
-
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
 #include "MySQLThreading.h"
-
-#include "AuthClientSocketMgr.h"
-#include "AuthGameSocketMgr.h"
+#include "AuthGameSession.h"
+#include "AuthClientSession.h"
+#include "XSocketMgr.h"
 #include "SystemConfigs.h"
 #include <boost/asio/signal_set.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <csignal>
 
 bool StartDB();
 void StopDB();
 
-bool stopEvent{false};                                     // Setting it to true stops the server
 # define _MONONOKE_CORE_CONFIG  "authserver.conf"
 
 namespace fs = boost::filesystem;
@@ -71,19 +68,19 @@ extern int main(int argc, char **argv)
 
     auto                  authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
     std::string           authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
-    if (!sACSocketMgr.StartWorldNetwork(*ioContext, authBindIp, authPort, 1))
+    if (!XSocketMgr<AuthClientSession>::Instance().StartWorldNetwork(*ioContext, authBindIp, authPort, 1))
     {
         NG_LOG_ERROR("server.authserver", "Authnetwork startup failed: %s:%d", authBindIp.c_str(), authPort);
     }
-    std::shared_ptr<void> sACNetwork(nullptr, [](void *) { sACSocketMgr.StopNetwork(); });
+    std::shared_ptr<void> sACNetwork(nullptr, [](void *) { XSocketMgr<AuthClientSession>::Instance().StopNetwork(); });
 
     auto                  gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
     std::string           bindIp   = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
-    if (!sAGSocketMgr.StartWorldNetwork(*ioContext, bindIp, gamePort, 1))
+    if (!XSocketMgr<AuthGameSession>::Instance().StartWorldNetwork(*ioContext, bindIp, gamePort, 1))
     {
         NG_LOG_ERROR("server.authserver", "Gamenetwork startup failed: %s:%d", bindIp.c_str(), gamePort);
     }
-    std::shared_ptr<void> sAGNetwork(nullptr, [](void *) { sAGSocketMgr.StopNetwork(); });
+    std::shared_ptr<void> sAGNetwork(nullptr, [](void *) { XSocketMgr<AuthGameSession>::Instance().StopNetwork(); });
 
     // Initialize the database connection
     if (!StartDB())
