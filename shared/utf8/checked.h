@@ -1,3 +1,4 @@
+#pragma once
 // Copyright 2006 Nemanja Trifunovic
 
 /*
@@ -23,11 +24,6 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-
-#ifndef UTF8_FOR_CPP_CHECKED_H_2675DCD0_9480_4c0c_B92A_CC14C027B731
-#define UTF8_FOR_CPP_CHECKED_H_2675DCD0_9480_4c0c_B92A_CC14C027B731
-
 #include "core.h"
 #include <stdexcept>
 
@@ -39,32 +35,38 @@ namespace utf8
 
     // Exceptions that may be thrown from the library functions.
     class invalid_code_point : public exception {
-        uint32_t cp;
-    public:
-        invalid_code_point(uint32_t cp) : cp(cp) {}
-        virtual const char* what() const throw() { return "Invalid code point"; }
-        uint32_t code_point() const {return cp;}
+            uint32_t cp;
+        public:
+            invalid_code_point(uint32_t cp) : cp(cp) {}
+
+            virtual const char* what() const throw() { return "Invalid code point"; }
+
+            uint32_t code_point() const {return cp;}
     };
 
     class invalid_utf8 : public exception {
-        uint8_t u8;
-    public:
-        invalid_utf8 (uint8_t u) : u8(u) {}
-        virtual const char* what() const throw() { return "Invalid UTF-8"; }
-        uint8_t utf8_octet() const {return u8;}
+            uint8_t u8;
+        public:
+            invalid_utf8 (uint8_t u) : u8(u) {}
+
+            virtual const char* what() const throw() { return "Invalid UTF-8"; }
+
+            uint8_t utf8_octet() const {return u8;}
     };
 
     class invalid_utf16 : public exception {
-        uint16_t u16;
-    public:
-        invalid_utf16 (uint16_t u) : u16(u) {}
-        virtual const char* what() const throw() { return "Invalid UTF-16"; }
-        uint16_t utf16_word() const {return u16;}
+            uint16_t u16;
+        public:
+            invalid_utf16 (uint16_t u) : u16(u) {}
+
+            virtual const char* what() const throw() { return "Invalid UTF-16"; }
+
+            uint16_t utf16_word() const {return u16;}
     };
 
     class not_enough_room : public exception {
-    public:
-        virtual const char* what() const throw() { return "Not enough space"; }
+        public:
+            virtual const char* what() const throw() { return "Not enough space"; }
     };
 
     /// The library API - functions intended to be called by the users
@@ -73,7 +75,7 @@ namespace utf8
     output_iterator replace_invalid(octet_iterator start, octet_iterator end, output_iterator out, uint32_t replacement)
     {
         while (start != end) {
-            octet_iterator sequence_start = start;
+            octet_iterator      sequence_start = start;
             internal::utf_error err_code = internal::validate_next(start, end);
             switch (err_code) {
                 case internal::UTF8_OK :
@@ -136,7 +138,7 @@ namespace utf8
     template <typename octet_iterator>
     uint32_t next(octet_iterator& it, octet_iterator end)
     {
-        uint32_t cp = 0;
+        uint32_t            cp = 0;
         internal::utf_error err_code = internal::validate_next(it, end, &cp);
         switch (err_code) {
             case internal::UTF8_OK :
@@ -217,7 +219,7 @@ namespace utf8
                     throw invalid_utf16(static_cast<uint16_t>(cp));
 
             }
-            // Lone trail surrogate
+                // Lone trail surrogate
             else if (internal::is_trail_surrogate(cp))
                 throw invalid_utf16(static_cast<uint16_t>(cp));
 
@@ -262,62 +264,67 @@ namespace utf8
     // The iterator class
     template <typename octet_iterator>
     class iterator : public std::iterator <std::bidirectional_iterator_tag, uint32_t> {
-      octet_iterator it;
-      octet_iterator range_start;
-      octet_iterator range_end;
-      public:
-      iterator () {};
-      explicit iterator (const octet_iterator& octet_it,
-                         const octet_iterator& range_start,
-                         const octet_iterator& range_end) :
-               it(octet_it), range_start(range_start), range_end(range_end)
-      {
-          if (it < range_start || it > range_end)
-              throw std::out_of_range("Invalid utf-8 iterator position");
-      }
-      // the default "big three" are OK
-      octet_iterator base () const { return it; }
-      uint32_t operator * () const
-      {
-          octet_iterator temp = it;
-          return next(temp, range_end);
-      }
-      bool operator == (const iterator& rhs) const
-      {
-          if (range_start != rhs.range_start || range_end != rhs.range_end)
-              throw std::logic_error("Comparing utf-8 iterators defined with different ranges");
-          return (it == rhs.it);
-      }
-      bool operator != (const iterator& rhs) const
-      {
-          return !(operator == (rhs));
-      }
-      iterator& operator ++ ()
-      {
-          next(it, range_end);
-          return *this;
-      }
-      iterator operator ++ (int)
-      {
-          iterator temp = *this;
-          next(it, range_end);
-          return temp;
-      }
-      iterator& operator -- ()
-      {
-          prior(it, range_start);
-          return *this;
-      }
-      iterator operator -- (int)
-      {
-          iterator temp = *this;
-          prior(it, range_start);
-          return temp;
-      }
+            octet_iterator it;
+            octet_iterator range_start;
+            octet_iterator range_end;
+        public:
+            iterator () {};
+
+            explicit iterator (const octet_iterator& octet_it,
+                    const octet_iterator& range_start,
+                    const octet_iterator& range_end) :
+                    it(octet_it), range_start(range_start), range_end(range_end)
+            {
+                if (it < range_start || it > range_end)
+                    throw std::out_of_range("Invalid utf-8 iterator position");
+            }
+
+            // the default "big three" are OK
+            octet_iterator base () const { return it; }
+
+            uint32_t operator * () const
+            {
+                octet_iterator temp = it;
+                return next(temp, range_end);
+            }
+
+            bool operator == (const iterator& rhs) const
+            {
+                if (range_start != rhs.range_start || range_end != rhs.range_end)
+                    throw std::logic_error("Comparing utf-8 iterators defined with different ranges");
+                return (it == rhs.it);
+            }
+
+            bool operator != (const iterator& rhs) const
+            {
+                return !(operator == (rhs));
+            }
+
+            iterator& operator ++ ()
+            {
+                next(it, range_end);
+                return *this;
+            }
+
+            iterator operator ++ (int)
+            {
+                iterator temp = *this;
+                next(it, range_end);
+                return temp;
+            }
+
+            iterator& operator -- ()
+            {
+                prior(it, range_start);
+                return *this;
+            }
+
+            iterator operator -- (int)
+            {
+                iterator temp = *this;
+                prior(it, range_start);
+                return temp;
+            }
     }; // class iterator
 
 } // namespace utf8
-
-#endif //header guard
-
-

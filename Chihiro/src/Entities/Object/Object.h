@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_OBJECT_H_
-#define NGEMITY_OBJECT_H_
 
 #include "Common.h"
 #include "ByteBuffer.h"
@@ -143,7 +141,9 @@ class Object
         virtual ~Object();
 
         bool IsInWorld() const { return m_inWorld; }
+
         bool IsDeleteRequested() const { return m_bDeleteRequest; }
+
         void DeleteThis() { m_bDeleteRequest = true; }
 
         virtual void AddToWorld();
@@ -310,12 +310,19 @@ class Object
         }
 
         uint16 GetValuesCount() const { return _valuesCount; }
+
         virtual bool IsPlayer() const { return false; }
+
         virtual bool IsSummon() const { return false; }
+
         virtual bool IsMonster() const { return false; }
+
         virtual bool IsFieldProp() const { return false; }
+
         virtual bool IsItem() const { return false; }
+
         virtual bool IsNPC() const { return false; }
+
         virtual bool IsSkillProp() const { return false; }
 
     protected:
@@ -344,10 +351,10 @@ class Object
 };
 
 struct Position {
-    float  m_positionX{ };
-    float  m_positionY{ };
-    float  m_positionZ{ };
-    float  _orientation{ };
+    float m_positionX{ };
+    float m_positionY{ };
+    float m_positionZ{ };
+    float _orientation{ };
     uint8 m_nLayer{ };
 
     bool operator==(Position pos) {
@@ -364,11 +371,9 @@ struct Position {
         this->m_positionY = y;
     }
 
-    uint8 GetLayer() const
-    { return m_nLayer; }
+    uint8 GetLayer() const { return m_nLayer; }
 
-    void SetLayer(uint8 value)
-    { m_nLayer = value; }
+    void SetLayer(uint8 value) { m_nLayer = value; }
 
     void Relocate(float x, float y)
     {
@@ -412,17 +417,13 @@ struct Position {
         _orientation = orientation;
     }
 
-    float GetPositionX() const
-    { return m_positionX; }
+    float GetPositionX() const { return m_positionX; }
 
-    float GetPositionY() const
-    { return m_positionY; }
+    float GetPositionY() const { return m_positionY; }
 
-    float GetPositionZ() const
-    { return m_positionZ; }
+    float GetPositionZ() const { return m_positionZ; }
 
-    float GetOrientation() const
-    { return _orientation; }
+    float GetOrientation() const { return _orientation; }
 
     void GetPosition(float &x, float &y) const
     {
@@ -454,9 +455,9 @@ struct Position {
     Position GetPosition() const
     {
         Position pos{ };
-        pos.m_positionX = GetPositionX();
-        pos.m_positionY = GetPositionY();
-        pos.m_positionZ = GetPositionZ();
+        pos.m_positionX  = GetPositionX();
+        pos.m_positionY  = GetPositionY();
+        pos.m_positionZ  = GetPositionZ();
         pos._orientation = GetOrientation();
         return pos;
     }
@@ -515,7 +516,6 @@ struct Position {
         return string_format("Position: X: %u, Y: %u, Layer: %u", GetPositionX(), GetPositionY(), GetLayer());
     }
 };
-
 
 class ArMoveVector : public Position
 {
@@ -587,7 +587,9 @@ class WorldObject : public Object, public ArMoveVector
         bool Step(uint tm) override;
 
         virtual float GetScale() const { return 1.0f; }
+
         virtual float GetSize() const { return 1.0f; }
+
         float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
 
         void SendEnterMsg(Player *);
@@ -599,12 +601,14 @@ class WorldObject : public Object, public ArMoveVector
         Position GetCurrentPosition(uint t);
 
         const char *GetName() const { return m_name.c_str(); }
+
         virtual const std::string& GetNameAsString() { return m_name; }
+
         void SetName(const std::string &newname) { m_name = newname; }
 
-        Region *pRegion;
-        int    region_index;
-        bool   _bIsInWorld{false};
+        Region                *pRegion;
+        int                   region_index;
+        bool                  _bIsInWorld{false};
 
     protected:
         explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
@@ -614,5 +618,3 @@ class WorldObject : public Object, public ArMoveVector
         bool                  _isActive;
         const bool            m_isWorldObject;
 };
-
-#endif // NGEMITY_OBJECT_H_

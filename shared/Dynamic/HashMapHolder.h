@@ -1,6 +1,4 @@
-#ifndef PROJECT_HASHMAPHOLDER_H
-#define PROJECT_HASHMAPHOLDER_H
-
+#pragma once
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -50,6 +48,3 @@ private:
     static NG_SHARED_MUTEX i_lock;
     static MapType m_objectMap;
 };
-
-
-#endif // PROJECT_HASHMAPHOLDER_H

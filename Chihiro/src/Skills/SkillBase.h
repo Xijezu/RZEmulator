@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_SKILLBASE_H
-#define NGEMITY_SKILLBASE_H
-
 #include "Common.h"
 #include "ItemFields.h"
 
@@ -98,7 +95,6 @@ struct SR_RebirthType
     int   nRecoveryEXP;
     int16 target_mp;
 };
-
 
 struct SkillResult
 {
@@ -656,5 +652,3 @@ struct SkillBase
     float   projectile_speed{ };
     float   projectile_acceleration{ };
 };
-
-#endif // NGEMITY_SKILLBASE_H

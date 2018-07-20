@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,34 +15,28 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_MAPLOCATIONINFO_H
-#define NGEMITY_MAPLOCATIONINFO_H
-
 #include "Common.h"
 #include "PolygonF.h"
 
 class MapLocationInfo : public X2D::PolygonF {
 public:
-    MapLocationInfo(X2D::Pointf p1, X2D::Pointf p2, int id, int _pri) : X2D::PolygonF(p1, p2)
-    {
-        location_id = id;
-        priority    = _pri;
-    }
+        MapLocationInfo(X2D::Pointf p1, X2D::Pointf p2, int id, int _pri) : X2D::PolygonF(p1, p2)
+        {
+            location_id = id;
+            priority    = _pri;
+        }
 
-    MapLocationInfo(std::vector<X2D::Pointf> points, int id, int _pri) : X2D::PolygonF(std::move(points))
-    {
-        location_id = id;
-        priority    = _pri;
-    }
+        MapLocationInfo(std::vector<X2D::Pointf> points, int id, int _pri) : X2D::PolygonF(std::move(points))
+        {
+            location_id = id;
+            priority    = _pri;
+        }
 
-    std::string ToString()
-    {
-        return std::to_string(location_id);
-    }
+        std::string ToString()
+        {
+            return std::to_string(location_id);
+        }
 
-    int location_id;
-    int priority;
+        int location_id;
+        int priority;
 };
-
-#endif // NGEMITY_MAPLOCATIONINFO_H

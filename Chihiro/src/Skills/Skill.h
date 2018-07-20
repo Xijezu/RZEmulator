@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_SKILL_H
-#define NGEMITY_SKILL_H
-
 #include "Common.h"
 #include "Object.h"
 #include "SkillBase.h"
@@ -56,12 +53,12 @@ class Skill
         void SetRequestedSkillLevel(int nLevel);
 
         int64 m_nSkillUID;
-        Unit *m_pOwner{nullptr};
-        int m_nSummonID;
-        int m_nSkillID;
-        int m_nSkillLevel;
-        int m_nSkillLevelAdd{0};
-        int cool_time;
+        Unit  *m_pOwner{nullptr};
+        int   m_nSummonID;
+        int   m_nSkillID;
+        int   m_nSkillLevel;
+        int   m_nSkillLevelAdd{0};
+        int   cool_time;
 
         SkillBase *m_SkillBase{nullptr};
 
@@ -92,7 +89,7 @@ class Skill
         void Init();
     private:
         std::vector<SkillResult> m_vResultList{ };
-        void process_target(uint t, SkillTargetFunctor& fn, Unit *pTarget);
+        void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
         void PostFireSkill(Unit *pTarget);
         uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time);
@@ -119,6 +116,3 @@ class Skill
         void CREATURE_TAMING();
 
 };
-
-
-#endif // NGEMITY_SKILL_H

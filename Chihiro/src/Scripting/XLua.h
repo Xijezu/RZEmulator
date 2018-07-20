@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_XLUA_H
-#define NGEMITY_XLUA_H
-
 #include "Common.h"
 #include "sol.hpp"
 
@@ -30,6 +27,7 @@ class XLua
             static XLua instance;
             return instance;
         }
+
         bool InitializeLua();
         ~XLua() = default;
 
@@ -131,4 +129,3 @@ class XLua
 };
 
 #define sScriptingMgr XLua::Instance()
-#endif // NGEMITY_XLUA_H

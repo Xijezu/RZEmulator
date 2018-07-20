@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef APPENDER_H
-#define APPENDER_H
-
 #include "Define.h"
 #include "LogCommon.h"
 #include <stdexcept>
@@ -61,5 +58,3 @@ class InvalidAppenderArgsException
         const &message) :
                 std::length_error(message) {}
 };
-
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef LOGOPERATION_H
-#define LOGOPERATION_H
-
 #include "Define.h"
 #include <memory>
 
@@ -34,8 +31,6 @@ class LogOperation
         int call();
 
     protected:
-        Logger const *logger;
+        Logger const                *logger;
         std::unique_ptr<LogMessage> msg;
 };
-
-#endif

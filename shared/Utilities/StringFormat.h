@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_STRING_FORMAT_H
-#define NGEMITY_STRING_FORMAT_H
-
 #include "fmt/printf.h"
 
 namespace NGemity
@@ -42,5 +39,3 @@ namespace NGemity
         return fmt.empty();
     }
 }
-
-#endif

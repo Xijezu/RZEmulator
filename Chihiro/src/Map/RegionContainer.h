@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,16 +15,11 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_REGIONCONTAINER_H
-#define NGEMITY_REGIONCONTAINER_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 #include "RegionBlock.h"
 
 #define NG_REGION_FUNCTOR(fn) [&fn](RegionType& pRegionType) { (fn).Run(pRegionType); }
-
 
 enum class RegionVisitor : uint8_t
 {
@@ -203,4 +199,3 @@ class RegionContainer
         RegionContainer() = default;
 };
 #define sRegion RegionContainer::Instance()
-#endif // NGEMITY_REGIONCONTAINER_H

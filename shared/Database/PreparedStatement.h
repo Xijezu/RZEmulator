@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _PREPAREDSTATEMENT_H
-#define _PREPAREDSTATEMENT_H
-
 #include "Define.h"
 #include "SQLOperation.h"
 #include <future>
@@ -30,16 +27,16 @@
 //- Union for data buffer (upper-level bind -> queue -> lower-level bind)
 union PreparedStatementDataUnion
 {
-    bool boolean;
-    uint8 ui8;
-    int8 i8;
+    bool   boolean;
+    uint8  ui8;
+    int8   i8;
     uint16 ui16;
-    int16 i16;
+    int16  i16;
     uint32 ui32;
-    int32 i32;
+    int32  i32;
     uint64 ui64;
-    int64 i64;
-    float f;
+    int64  i64;
+    float  f;
     double d;
 };
 
@@ -66,7 +63,7 @@ struct PreparedStatementData
 {
     PreparedStatementDataUnion data;
     PreparedStatementValueType type;
-    std::vector<uint8> binary;
+    std::vector<uint8>         binary;
 };
 
 //- Forward declare
@@ -75,9 +72,9 @@ class MySQLPreparedStatement;
 //- Upper-level class that is used in code
 class PreparedStatement
 {
-    friend class PreparedStatementTask;
-    friend class MySQLPreparedStatement;
-    friend class MySQLConnection;
+        friend class PreparedStatementTask;
+        friend class MySQLPreparedStatement;
+        friend class MySQLConnection;
 
     public:
         explicit PreparedStatement(uint32 index);
@@ -102,8 +99,8 @@ class PreparedStatement
         void BindParameters();
 
     protected:
-        MySQLPreparedStatement* m_stmt;
-        uint32 m_index;
+        MySQLPreparedStatement * m_stmt;
+        uint32                             m_index;
         std::vector<PreparedStatementData> statement_data;    //- Buffer of parameters, not tied to MySQL in any way yet
 
         PreparedStatement(PreparedStatement const& right) = delete;
@@ -115,8 +112,8 @@ class PreparedStatement
 //- is executed.
 class MySQLPreparedStatement
 {
-    friend class MySQLConnection;
-    friend class PreparedStatement;
+        friend class MySQLConnection;
+        friend class PreparedStatement;
 
     public:
         MySQLPreparedStatement(MYSQL_STMT* stmt);
@@ -138,17 +135,19 @@ class MySQLPreparedStatement
 
     protected:
         MYSQL_STMT* GetSTMT() { return m_Mstmt; }
+
         MYSQL_BIND* GetBind() { return m_bind; }
-        PreparedStatement* m_stmt;
+
+        PreparedStatement * m_stmt;
         void ClearParameters();
         void CheckValidIndex(uint8 index);
         std::string getQueryString(std::string const& sqlPattern) const;
 
     private:
-        MYSQL_STMT* m_Mstmt;
-        uint32 m_paramCount;
+        MYSQL_STMT * m_Mstmt;
+        uint32            m_paramCount;
         std::vector<bool> m_paramsSet;
-        MYSQL_BIND* m_bind;
+        MYSQL_BIND * m_bind;
 
         MySQLPreparedStatement(MySQLPreparedStatement const& right) = delete;
         MySQLPreparedStatement& operator=(MySQLPreparedStatement const& right) = delete;
@@ -162,11 +161,11 @@ class PreparedStatementTask : public SQLOperation
         ~PreparedStatementTask();
 
         bool Execute() override;
+
         PreparedQueryResultFuture GetFuture() { return m_result->get_future(); }
 
     protected:
-        PreparedStatement* m_stmt;
+        PreparedStatement * m_stmt;
         bool m_has_result;
-        PreparedQueryResultPromise* m_result;
+        PreparedQueryResultPromise * m_result;
 };
-#endif

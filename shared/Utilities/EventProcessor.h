@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef __EVENTPROCESSOR_H
-#define __EVENTPROCESSOR_H
-
 #include "Define.h"
 
 #include <map>
@@ -30,6 +27,7 @@ class BasicEvent
 {
     public:
         BasicEvent() { to_Abort = false; }
+
         virtual ~BasicEvent() { }                           // override destructor to perform some actions on event removal
 
         // this method executes when the event is triggered
@@ -62,8 +60,7 @@ class EventProcessor
         void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
         uint64 CalculateTime(uint64 t_offset) const;
     protected:
-        uint64 m_time;
+        uint64    m_time;
         EventList m_events;
-        bool m_aborting;
+        bool      m_aborting;
 };
-#endif

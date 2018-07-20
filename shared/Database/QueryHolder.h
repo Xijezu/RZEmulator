@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,19 +15,16 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _QUERYHOLDER_H
-#define _QUERYHOLDER_H
-
 #include "SQLOperation.h"
 
 class SQLQueryHolder
 {
-    friend class SQLQueryHolderTask;
+        friend class SQLQueryHolderTask;
     private:
         std::vector<std::pair<PreparedStatement*, PreparedQueryResult>> m_queries;
     public:
         SQLQueryHolder() { }
+
         virtual ~SQLQueryHolder();
         bool SetPreparedQuery(size_t index, PreparedStatement* stmt);
         void SetSize(size_t size);
@@ -37,18 +35,17 @@ class SQLQueryHolder
 class SQLQueryHolderTask : public SQLOperation
 {
     private:
-        SQLQueryHolder* m_holder;
+        SQLQueryHolder * m_holder;
         QueryResultHolderPromise m_result;
-        bool m_executed;
+        bool                     m_executed;
 
     public:
         SQLQueryHolderTask(SQLQueryHolder* holder)
-            : m_holder(holder), m_executed(false) { }
+                : m_holder(holder), m_executed(false) { }
 
         ~SQLQueryHolderTask();
 
         bool Execute() override;
+
         QueryResultHolderFuture GetFuture() { return m_result.get_future(); }
 };
-
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_BYTECONVERTER_H
-#define NGEMITY_BYTECONVERTER_H
-
 /** ByteConverter reverse your byte order.  This is use
     for cross platform where they have different endians.
  */
@@ -37,6 +34,7 @@ namespace ByteConverter
     }
 
     template<> inline void convert<0>(char *) { }
+
     template<> inline void convert<1>(char *) { }           // ignore central byte
 
     template<typename T> inline void apply(T *val)
@@ -64,6 +62,3 @@ inline void EndianConvert(uint8&) { }
 inline void EndianConvert( int8&) { }
 inline void EndianConvertReverse(uint8&) { }
 inline void EndianConvertReverse( int8&) { }
-
-#endif
-

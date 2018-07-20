@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_RECTANGLEF_H
-#define NGEMITY_RECTANGLEF_H
-
 #include "Common.h"
 #include "Pointf.h"
 #include "Linef.h"
@@ -51,5 +48,3 @@ namespace X2D
             Pointf m_BottomRight;
     };
 }
-
-#endif // NGEMITY_RECTANGLEF_H

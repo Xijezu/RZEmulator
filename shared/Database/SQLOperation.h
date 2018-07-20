@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,18 +15,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _SQLOPERATION_H
-#define _SQLOPERATION_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 
 //- Union that holds element data
 union SQLElementUnion
 {
-    PreparedStatement* stmt;
-    const char* query;
+    PreparedStatement * stmt;
+    const char        * query;
 };
 
 //- Type specifier of our element data
@@ -38,15 +35,15 @@ enum SQLElementDataType
 //- The element
 struct SQLElementData
 {
-    SQLElementUnion element;
+    SQLElementUnion    element;
     SQLElementDataType type;
 };
 
 //- For ambigious resultsets
 union SQLResultSetUnion
 {
-    PreparedResultSet* presult;
-    ResultSet* qresult;
+    PreparedResultSet * presult;
+    ResultSet         * qresult;
 };
 
 class MySQLConnection;
@@ -55,6 +52,7 @@ class SQLOperation
 {
     public:
         SQLOperation(): m_conn(NULL) { }
+
         virtual ~SQLOperation() { }
 
         virtual int call()
@@ -62,14 +60,14 @@ class SQLOperation
             Execute();
             return 0;
         }
+
         virtual bool Execute() = 0;
+
         virtual void SetConnection(MySQLConnection* con) { m_conn = con; }
 
-        MySQLConnection* m_conn;
+        MySQLConnection * m_conn;
 
     private:
         SQLOperation(SQLOperation const& right) = delete;
         SQLOperation& operator=(SQLOperation const& right) = delete;
 };
-
-#endif

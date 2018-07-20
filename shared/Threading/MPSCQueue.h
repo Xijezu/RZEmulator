@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef MPSCQueue_h__
-#define MPSCQueue_h__
-
 #include <atomic>
 #include <utility>
 
@@ -26,58 +23,56 @@
 template<typename T>
 class MPSCQueue
 {
-public:
-    MPSCQueue() : _head(new Node()), _tail(_head.load(std::memory_order_relaxed))
-    {
-        Node* front = _head.load(std::memory_order_relaxed);
-        front->Next.store(nullptr, std::memory_order_relaxed);
-    }
+    public:
+        MPSCQueue() : _head(new Node()), _tail(_head.load(std::memory_order_relaxed))
+        {
+            Node *front = _head.load(std::memory_order_relaxed);
+            front->Next.store(nullptr, std::memory_order_relaxed);
+        }
 
-    ~MPSCQueue()
-    {
-        T* output;
-        while (this->Dequeue(output))
-            ;
+        ~MPSCQueue()
+        {
+            T *output;
+            while (this->Dequeue(output));
 
-        Node* front = _head.load(std::memory_order_relaxed);
-        delete front;
-    }
+            Node *front = _head.load(std::memory_order_relaxed);
+            delete front;
+        }
 
-    void Enqueue(T* input)
-    {
-        Node* node = new Node(input);
-        Node* prevHead = _head.exchange(node, std::memory_order_acq_rel);
-        prevHead->Next.store(node, std::memory_order_release);
-    }
+        void Enqueue(T *input)
+        {
+            Node *node     = new Node(input);
+            Node *prevHead = _head.exchange(node, std::memory_order_acq_rel);
+            prevHead->Next.store(node, std::memory_order_release);
+        }
 
-    bool Dequeue(T*& result)
-    {
-        Node* tail = _tail.load(std::memory_order_relaxed);
-        Node* next = tail->Next.load(std::memory_order_acquire);
-        if (!next)
-            return false;
+        bool Dequeue(T *&result)
+        {
+            Node *tail = _tail.load(std::memory_order_relaxed);
+            Node *next = tail->Next.load(std::memory_order_acquire);
+            if (!next)
+                return false;
 
-        result = next->Data;
-        _tail.store(next, std::memory_order_release);
-        delete tail;
-        return true;
-    }
+            result = next->Data;
+            _tail.store(next, std::memory_order_release);
+            delete tail;
+            return true;
+        }
 
-private:
-    struct Node
-    {
-        Node() = default;
-        explicit Node(T* data) : Data(data) { Next.store(nullptr, std::memory_order_relaxed); }
+    private:
+        struct Node
+        {
+            Node() = default;
 
-        T* Data;
-        std::atomic<Node*> Next;
-    };
+            explicit Node(T *data) : Data(data) { Next.store(nullptr, std::memory_order_relaxed); }
 
-    std::atomic<Node*> _head;
-    std::atomic<Node*> _tail;
+            T                   *Data;
+            std::atomic<Node *> Next;
+        };
 
-    MPSCQueue(MPSCQueue const&) = delete;
-    MPSCQueue& operator=(MPSCQueue const&) = delete;
+        std::atomic<Node *> _head;
+        std::atomic<Node *> _tail;
+
+        MPSCQueue(MPSCQueue const &) = delete;
+        MPSCQueue &operator=(MPSCQueue const &) = delete;
 };
-
-#endif // MPSCQueue_h__

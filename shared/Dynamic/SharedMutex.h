@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_SHAREDMUTEX_H
-#define NGEMITY_SHAREDMUTEX_H
-
 #if COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1900
 #include <shared_mutex>
 #define NG_SHARED_MUTEX std::shared_mutex
@@ -29,6 +26,4 @@
 #define NG_SHARED_MUTEX std::mutex
 #define NG_SHARED_GUARD std::lock_guard<std::mutex>
 #define NG_UNIQUE_GUARD std::unique_lock<std::mutex>
-#endif
-
 #endif

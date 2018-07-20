@@ -1,4 +1,6 @@
+#pragma once
 /*
+ * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -15,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef __XSOCKET_H__
-#define __XSOCKET_H__
-
 #include "Common.h"
 #include "MessageBuffer.h"
 #include "Socket.h"
@@ -138,6 +136,7 @@ class XSocket : public Socket<XSocket>
         }
 
         void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }
+
         XSession* GetSession() { return _session; }
 
     protected:
@@ -267,5 +266,3 @@ class XSocket : public Socket<XSocket>
         std::size_t                  _sendBufferSize;
 
 };
-
-#endif // __XSOCKET_H__

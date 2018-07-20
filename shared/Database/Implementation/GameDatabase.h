@@ -1,6 +1,4 @@
-#ifndef __GAMEDATABASE_H__
-#define __GAMEDATABASE_H__
-
+#pragma once
 #include "MySQLConnection.h"
 
 enum GameDatabaseStatements : uint32
@@ -26,5 +24,3 @@ class GameDatabaseConnection : public MySQLConnection
 //- Loads database type specific prepared statements
         void DoPrepareStatements() override;
 };
-
-#endif // _GAMEDATABASE_H_

@@ -1,3 +1,4 @@
+#pragma once
 // Copyright 2006 Nemanja Trifunovic
 
 /*
@@ -23,11 +24,6 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-
-
-#ifndef UTF8_FOR_CPP_CORE_H_2675DCD0_9480_4c0c_B92A_CC14C027B731
-#define UTF8_FOR_CPP_CORE_H_2675DCD0_9480_4c0c_B92A_CC14C027B731
-
 #include <iterator>
 
 namespace utf8
@@ -35,9 +31,9 @@ namespace utf8
     // The typedefs for 8-bit, 16-bit and 32-bit unsigned integers
     // You may need to change them to match your system.
     // These typedefs have the same names as ones from cstdint, or boost/cstdint
-    typedef unsigned char   uint8_t;
-    typedef unsigned short  uint16_t;
-    typedef unsigned int    uint32_t;
+    typedef unsigned char  uint8_t;
+    typedef unsigned short uint16_t;
+    typedef unsigned int   uint32_t;
 
 // Helper code - not intended to be directly called by the library users. May be changed at any time
 namespace internal
@@ -60,11 +56,13 @@ namespace internal
     {
         return static_cast<uint8_t>(0xff & oc);
     }
+
     template<typename u16_type>
     inline uint16_t mask16(u16_type oc)
     {
         return static_cast<uint16_t>(0xffff & oc);
     }
+
     template<typename octet_type>
     inline bool is_trail(octet_type oc)
     {
@@ -116,15 +114,15 @@ namespace internal
     inline bool is_overlong_sequence(uint32_t cp, octet_difference_type length)
     {
         if (cp < 0x80) {
-            if (length != 1) 
+            if (length != 1)
                 return true;
         }
         else if (cp < 0x800) {
-            if (length != 2) 
+            if (length != 2)
                 return true;
         }
         else if (cp < 0x10000) {
-            if (length != 3) 
+            if (length != 3)
                 return true;
         }
 
@@ -189,7 +187,7 @@ namespace internal
                                 *code_point = cp;
                             ret_code = UTF8_OK;
                         }
-                        else 
+                        else
                             ret_code = INCOMPLETE_SEQUENCE;
                     }
                     else
@@ -238,7 +236,7 @@ namespace internal
                     else
                         ret_code = NOT_ENOUGH_ROOM;
                 }
-                else 
+                else
                     ret_code = INCOMPLETE_SEQUENCE;
             }
             else
@@ -255,10 +253,10 @@ namespace internal
         // Of course, it does not make much sense with i.e. stream iterators
         octet_iterator original_it = it;
 
-        uint32_t cp = 0;
+        uint32_t                                                               cp = 0;
         // Determine the sequence length based on the lead octet
         typedef typename std::iterator_traits<octet_iterator>::difference_type octet_difference_type;
-        octet_difference_type length = sequence_length(it);
+        octet_difference_type                                                  length = sequence_length(it);
         if (length == 0)
             return INVALID_LEAD;
 
@@ -270,13 +268,13 @@ namespace internal
                 break;
             case 2:
                 err = get_sequence_2(it, end, &cp);
-            break;
+                break;
             case 3:
                 err = get_sequence_3(it, end, &cp);
-            break;
+                break;
             case 4:
                 err = get_sequence_4(it, end, &cp);
-            break;
+                break;
         }
 
         if (err == UTF8_OK) {
@@ -292,7 +290,7 @@ namespace internal
                 else
                     err = OVERLONG_SEQUENCE;
             }
-            else 
+            else
                 err = INVALID_CODE_POINT;
         }
 
@@ -335,24 +333,20 @@ namespace internal
     inline bool starts_with_bom (octet_iterator it, octet_iterator end)
     {
         return (
-            ((it != end) && (internal::mask8(*it++)) == bom[0]) &&
-            ((it != end) && (internal::mask8(*it++)) == bom[1]) &&
-            ((it != end) && (internal::mask8(*it))   == bom[2])
-           );
+                ((it != end) && (internal::mask8(*it++)) == bom[0]) &&
+                ((it != end) && (internal::mask8(*it++)) == bom[1]) &&
+                ((it != end) && (internal::mask8(*it))   == bom[2])
+        );
     }
-	
-	//Deprecated in release 2.3 
+
+    //Deprecated in release 2.3
     template <typename octet_iterator>
     inline bool is_bom (octet_iterator it)
     {
         return (
-            (internal::mask8(*it++)) == bom[0] &&
-            (internal::mask8(*it++)) == bom[1] &&
-            (internal::mask8(*it))   == bom[2]
-           );
+                (internal::mask8(*it++)) == bom[0] &&
+                (internal::mask8(*it++)) == bom[1] &&
+                (internal::mask8(*it)) == bom[2]
+        );
     }
 } // namespace utf8
-
-#endif // header guard
-
-

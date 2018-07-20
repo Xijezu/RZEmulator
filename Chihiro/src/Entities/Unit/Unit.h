@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_UNIT_H_
-#define NGEMITY_UNIT_H_
 
 #include "Common.h"
 #include "CreatureAttribute.h"
@@ -57,7 +55,7 @@ enum CREATURE_STATUS : uint
     STATUS_MOVE_SPEED_FIXED       = 0x400000,
     STATUS_HP_REGEN_STOPPED       = 0x800000,
     STATUS_MP_REGEN_STOPPED       = 0x1000000,
-    STATUS_USING_DOUBLE_WEAPON    = 0x2000000,
+    STATUS_USING_DOUBLE_WEAPON = 0x2000000,
 };
 
 enum DamageType : int
@@ -75,9 +73,9 @@ enum DamageType : int
 
 enum DamageFlag : int
 {
-    IGNORE_AVOID = 2,
-    IGNORE_DEFENCE = 4,
-    IGNORE_BLOCK = 8,
+    IGNORE_AVOID    = 2,
+    IGNORE_DEFENCE  = 4,
+    IGNORE_BLOCK    = 8,
     IGNORE_CRITICAL = 16,
 };
 
@@ -93,8 +91,8 @@ class Unit : public WorldObject
         explicit Unit(bool isWorldObject);
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        Unit (const Unit&) = delete;
-        Unit& operator= (const Unit&) = delete;
+        Unit(const Unit &) = delete;
+        Unit &operator=(const Unit &) = delete;
         virtual ~Unit();
 
         static void EnterPacket(XPacket &, Unit *, Player *);
@@ -140,6 +138,7 @@ class Unit : public WorldObject
         uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
         virtual int GetMoveSpeed();
+
         uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
         float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
@@ -179,6 +178,7 @@ class Unit : public WorldObject
 
         // Setters
         void SetLevel(uint8 lvl) { SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int>(lvl)); }
+
         void SetCurrentJob(uint job) { SetInt32Value(UNIT_FIELD_JOB, job); }
 
         void SetJP(int jp);
@@ -193,11 +193,15 @@ class Unit : public WorldObject
         virtual bool IsAlly(const Unit *pTarget);
         bool IsVisible(const Unit *pTarget);
         virtual bool IsActable() const;
+
         virtual bool IsSitdown() const { return false; }
 
         void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
+
         void SetMaxMana(uint32 val) { SetUInt32Value(UNIT_FIELD_MAX_MANA, val); };
+
         void SetFullHealth() { SetHealth(GetMaxHealth()); }
+
         void SetEXP(int64 exp);
 
         // eh
@@ -216,19 +220,33 @@ class Unit : public WorldObject
 
         // Getters
         int GetLevel() const { return GetInt32Value(UNIT_FIELD_LEVEL); }
+
         virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
+
         int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
+
         int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }
+
         int GetMana() const { return GetInt32Value(UNIT_FIELD_MANA); }
+
         int GetMaxMana() const { return GetInt32Value(UNIT_FIELD_MAX_MANA); }
+
         int GetCurrentJob() const { return GetInt32Value(UNIT_FIELD_JOB); };
+
         int GetCurrentJLv() const { return GetInt32Value(UNIT_FIELD_JLV); }
+
         int GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
+
         int GetJP() const { return GetInt32Value(UNIT_FIELD_JOBPOINT); }
+
         uint32 GetTotalJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
+
         float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) { return 1.0f; }
+
         float GetItemChance() const;
+
         int64 GetEXP() const { return static_cast<int64>(GetUInt64Value(UNIT_FIELD_EXP)); }
+
         virtual uint GetCreatureGroup() const;
 
         void AddHealth(int hp) { SetHealth(GetHealth() + hp); }
@@ -240,7 +258,7 @@ class Unit : public WorldObject
         void CancelAttack();
         int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);
         bool OnCompleteSkill();
-        void SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time);
+        void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time);
         void SetMove(Position _to, uint8 _speed, uint _start_time);
         void CalculateStat();
         int GetArmorClass() const;
@@ -326,8 +344,8 @@ class Unit : public WorldObject
         void procMoveSpeedChange();
         void processPendingMove();
         void _InitTimerFieldsAndStatus();
-        std::vector<State>          m_vStateList{ };
-        uint32                      m_unitTypeMask;
+        std::vector<State> m_vStateList{ };
+        uint32             m_unitTypeMask;
         //	typedef std::list<GameObject*> GameObjectList;
         //	GameObjectList m_gameObj;
 
@@ -367,4 +385,3 @@ class Unit : public WorldObject
         void ampParameter2(uint nBitset, float fValue);
         void ampParameter(uint nBitset, float fValue, bool bStat);
 };
-#endif // !NGEMITY_UNIT_H_

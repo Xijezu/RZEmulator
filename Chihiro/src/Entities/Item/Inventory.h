@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef PROJECT_INVENTORY_H
-#define PROJECT_INVENTORY_H
 
 #include "Common.h"
 
@@ -49,12 +47,10 @@ class Inventory
         void pop(Item* pItem, bool bSkipUpdateItemToDB);
         bool check(Item* pItem);
 
-        InventoryEventReceiver* m_pEventReceiver;
-        float m_fWeight;
-        float m_fWeightModifier;
+        InventoryEventReceiver * m_pEventReceiver;
+        float              m_fWeight;
+        float              m_fWeightModifier;
         std::vector<Item*> m_vList;
         std::vector<Item*> m_vExpireItemList;
-        int m_nIndex;
+        int                m_nIndex;
 };
-
-#endif // PROJECT_INVENTORY_H

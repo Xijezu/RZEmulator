@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_FIELDPROPMANAGER_H
-#define NGEMITY_FIELDPROPMANAGER_H
 
 #include "FieldProp.h"
 #include "Common.h"
@@ -59,4 +57,3 @@ class FieldPropManager : public FieldPropDeleteHandler
         FieldPropManager() = default;
 };
 #define sFieldPropManager FieldPropManager::Instance()
-#endif // NGEMITY_FIELDPROPMANAGER_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_BOXF_H
-#define NGEMITY_BOXF_H
-
 #include "Common.h"
 #include "Pointf.h"
 
@@ -41,5 +38,3 @@ namespace X2D
             void normalize();
     };
 }
-
-#endif // NGEMITY_BOXF_H

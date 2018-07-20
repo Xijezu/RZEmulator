@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_WORLDLOCATION_H
-#define NGEMITY_WORLDLOCATION_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -85,12 +82,13 @@ class WorldLocation
 
 class WorldLocationManager
 {
-        public:
+    public:
         static WorldLocationManager &Instance()
         {
             static WorldLocationManager instance;
             return instance;
         }
+
         ~WorldLocationManager() = default;
 
         WorldLocation *AddToLocation(uint idx, Player *player);
@@ -102,12 +100,11 @@ class WorldLocationManager
         void RegisterMonsterLocation(uint idx, uint monster_id);
 
     private:
-        NG_SHARED_MUTEX                        i_lock;
-        std::vector<WorldLocation>             m_vWorldLocation{ };
+        NG_SHARED_MUTEX                             i_lock;
+        std::vector<WorldLocation>                  m_vWorldLocation{ };
         std::unordered_map<uint, std::vector<uint>> m_hsMonsterID{ };
 
     protected:
         WorldLocationManager() = default;
 };
 #define sWorldLocationMgr WorldLocationManager::Instance()
-#endif // NGEMITY_WORLDLOCATION_H

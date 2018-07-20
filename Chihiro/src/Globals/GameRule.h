@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef NGEMITY_GAMERULE_H
-#define NGEMITY_GAMERULE_H
-
 #include "Common.h"
 
 class GameRule
@@ -35,7 +33,9 @@ class GameRule
         static float GetItemValue(float, int, int, int, int);
         static float GetPickableRange();
         static int GetChipLevelLimit(int idx);
+
         static int GetMaxLevel() { return 150; }
+
         static int GetIntValueByRandomInt(double fValue);
         static int64 GetIntValueByRandomInt64(double fValue);
         static float GetStaminaRatio(int level);
@@ -46,5 +46,3 @@ class GameRule
         static int   _modtable[];
         static float _staminaExpRate[];
 };
-
-#endif //NGEMITY_GAMERULE_H

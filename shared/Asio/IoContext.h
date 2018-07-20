@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,15 +15,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef IoContext_h__
-#define IoContext_h__
-
 #include <boost/version.hpp>
 
 #if BOOST_VERSION >= 106600
+
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
+
 #define IoContextBaseNamespace boost::asio
 #define IoContextBase io_context
 #else
@@ -37,11 +36,11 @@ namespace NGemity
     {
         class IoContext : public IoContextBaseNamespace::IoContextBase
         {
-            using IoContextBaseNamespace::IoContextBase::IoContextBase;
+                using IoContextBaseNamespace::IoContextBase::IoContextBase;
         };
 
         template<typename T>
-        inline decltype(auto) post(IoContextBaseNamespace::IoContextBase& ioContext, T&& t)
+        inline decltype(auto) post(IoContextBaseNamespace::IoContextBase &ioContext, T &&t)
         {
 #if BOOST_VERSION >= 106600
             return boost::asio::post(ioContext, std::forward<T>(t));
@@ -51,7 +50,7 @@ namespace NGemity
         }
 
         template<typename T>
-        inline decltype(auto) get_io_context(T&& ioObject)
+        inline decltype(auto) get_io_context(T &&ioObject)
         {
 #if BOOST_VERSION >= 106600
             return ioObject.get_executor().context();
@@ -61,5 +60,3 @@ namespace NGemity
         }
     }
 }
-
-#endif // IoContext_h__

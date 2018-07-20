@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
@@ -22,10 +23,6 @@
  *  \file WorldSocketMgr.h
  *  \author Derex <derex101@gmail.com>
  */
-
-#ifndef __XSOCKETMGR_H__
-#define __XSOCKETMGR_H__
-
 #include "SocketMgr.h"
 #include "XSocketThread.h"
 #include "Config.h"
@@ -142,6 +139,3 @@ static void OnSocketAccept(tcp::socket&& sock, uint32 threadIndex)
 {
     XSocketMgr<T>::Instance().OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
 }
-
-#endif
-/// @}

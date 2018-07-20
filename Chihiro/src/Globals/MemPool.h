@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -15,9 +16,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MEMORYPOOL_H
-#define MEMORYPOOL_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 #include "HashMapHolder.h"
@@ -34,6 +32,7 @@ class MemoryPoolMgr
 {
     public:
         ~MemoryPoolMgr() = default;
+
         static MemoryPoolMgr &Instance()
         {
             static MemoryPoolMgr instance;
@@ -92,7 +91,7 @@ class MemoryPoolMgr
         template<class T>
         void _unload();
         void AddToDeleteList(WorldObject *obj);
-        std::set<WorldObject *>                                 i_objectsToRemove{ };
+        std::set<WorldObject *>   i_objectsToRemove{ };
         LockedQueue<WorldObject*> addUpdateQueue;
 
         UpdateMap i_objectsToUpdate{ };
@@ -111,4 +110,3 @@ class MemoryPoolMgr
 };
 
 #define sMemoryPool MemoryPoolMgr::Instance()
-#endif //MEMORYPOOL_H

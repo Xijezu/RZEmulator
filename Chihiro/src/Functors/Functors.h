@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_FUNCTORS_H
-#define NGEMITY_FUNCTORS_H
-
 #include "Common.h"
 #include "Object.h"
 
@@ -129,5 +126,3 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor
     EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
     void Run(Region *region) override;
 };
-
-#endif // NGEMITY_FUNCTORS_H

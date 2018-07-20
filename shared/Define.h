@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_DEFINE_H
-#define NGEMITY_DEFINE_H
-
 #include "CompilerDefs.h"
 #include <boost/detail/endian.hpp>
 
@@ -73,7 +70,6 @@ typedef unsigned short WORD;
 # define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
 #endif // #ifndef HIWORD
 
-
 #define UI64FMTD "%" PRIu64
 #define UI64LIT(N) UINT64_C(N)
 
@@ -82,15 +78,14 @@ typedef unsigned short WORD;
 
 #define SZFMTD "%" PRIuPTR
 
-typedef int64_t int64;
-typedef int32_t int32;
-typedef int16_t int16;
-typedef int8_t int8;
+typedef int64_t  int64;
+typedef int32_t  int32;
+typedef int16_t  int16;
+typedef int8_t   int8;
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint16_t uint16;
-typedef uint8_t uint8;
+typedef uint8_t  uint8;
 
 typedef uint32 uint;
 typedef uint16 ushort;
-#endif //NGEMITY_DEFINE_H

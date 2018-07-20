@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_STATE_H
-#define NGEMITY_STATE_H
-
 #include "StateBase.h"
 #include "SkillBase.h"
 
@@ -68,23 +65,21 @@ class State
         void SetState(int code, int uid, uint caster, const uint16 levels[], const uint durations[], const int remain_times[], uint last_fire_time, const int base_damage[], int state_value, std::string szStateValue);
         int GetTimeType() const;
 
-        uint16    m_nUID;
-        StateCode m_nCode;
-        uint16    m_nLevel[3]{ };
-        int       m_nBaseDamage[3]{ };
-        uint      m_hCaster[3]{ };
-        uint      m_nStartTime[3]{ };
-        uint      m_nEndTime[3]{ };
-        uint      m_nRemainDuration[3]{ };
-        uint      m_nLastProcessedTime;
+        uint16        m_nUID;
+        StateCode     m_nCode;
+        uint16        m_nLevel[3]{ };
+        int           m_nBaseDamage[3]{ };
+        uint          m_hCaster[3]{ };
+        uint          m_nStartTime[3]{ };
+        uint          m_nEndTime[3]{ };
+        uint          m_nRemainDuration[3]{ };
+        uint          m_nLastProcessedTime;
         StateTemplate *m_pTemplate{nullptr};
-        int         m_nTotalDamage;
-        bool        m_bAura;
-        int         m_nStateValue;
-        std::string m_szStateValue;
-        bool        m_bByEvent;
+        int           m_nTotalDamage;
+        bool          m_bAura;
+        int           m_nStateValue;
+        std::string   m_szStateValue;
+        bool          m_bByEvent;
     protected:
         void init(int uid, int code);
 };
-
-#endif // NGEMITY_STATE_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,11 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef Resolver_h__
-#define Resolver_h__
-
-#include "Optional.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <string>
 
@@ -26,8 +22,8 @@ namespace NGemity
 {
     namespace Net
     {
-        inline Optional<boost::asio::ip::tcp::endpoint> Resolve(boost::asio::ip::tcp::resolver& resolver, boost::asio::ip::tcp const& protocol,
-            std::string const& host, std::string const& service)
+        inline std::optional<boost::asio::ip::tcp::endpoint> Resolve(boost::asio::ip::tcp::resolver &resolver, boost::asio::ip::tcp const &protocol,
+                std::string const& host, std::string const& service)
         {
             boost::system::error_code ec;
 #if BOOST_VERSION >= 106600
@@ -48,5 +44,3 @@ namespace NGemity
         }
     }
 }
-
-#endif // Resolver_h__

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_NPC_H_
-#define NGEMITY_NPC_H_
-
 #include "Unit.h"
 #include "NPCBase.h"
 #include "Quest.h"
@@ -59,5 +56,3 @@ class NPC : public Unit
         std::vector<QuestLink *> m_vQuestLink_End{ };
         std::vector<int>         m_vQuest{ };
 };
-
-#endif // NGEMITY_NPC_H_

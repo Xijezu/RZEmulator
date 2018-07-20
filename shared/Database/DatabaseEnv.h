@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef DATABASEENV_H
-#define DATABASEENV_H
-
 #include "Define.h"
 #include "DatabaseWorkerPool.h"
 
@@ -35,7 +32,6 @@
 /// Accessor to the character database
 extern DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
 /// Accessor to the realm/login database
-extern DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
+extern DatabaseWorkerPool<LoginDatabaseConnection>     LoginDatabase;
 
 extern DatabaseWorkerPool<GameDatabaseConnection> GameDatabase;
-#endif

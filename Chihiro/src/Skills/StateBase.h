@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_STATEBASE_H
-#define NGEMITY_STATEBASE_H
-
 #include "Common.h"
 
 enum AttributeFlag {
@@ -36,7 +33,7 @@ enum StateCode {
     SC_INC_ITEM_CHANCE                     = 0x3FC,
     SC_INC_BLOCK_CHANCE                    = 0x3FD,
     SC_HUNTING_CREATURE_CARD               = 0x803,
-	SC_STAMINA_SAVE                        = 0xFA3,
+    SC_STAMINA_SAVE                        = 0xFA3,
     SC_HAVOC_BURST                         = 0x1195,
     SC_FRENZY                              = 0x1197,
     SC_ADD_ENERGY                          = 0x1198,
@@ -159,26 +156,23 @@ enum StateBaseEffect : int {
 };
 
 struct StateTemplate {
-    int state_id;
-    int text_id;
-    int tooltip_id;
+    int   state_id;
+    int   text_id;
+    int   tooltip_id;
     uint8 is_harmful;
-    int state_time_type;
-    int state_group;
-    int duplicate_group[3]{0};
+    int   state_time_type;
+    int   state_group;
+    int   duplicate_group[3]{0};
     uint8 uf_avatar;
     uint8 uf_summon;
     uint8 uf_monster;
-    int base_effect_id;
-    int fire_interval;
-    int elemental_type;
+    int   base_effect_id;
+    int   fire_interval;
+    int   elemental_type;
     float amplify_base;
     float amplify_per_skl;
-    int add_damage_base;
-    int add_damage_per_skl;
-    int effect_type;
+    int   add_damage_base;
+    int   add_damage_per_skl;
+    int   effect_type;
     float value[20]{0};
 };
-
-
-#endif // NGEMITY_STATEBASE_H

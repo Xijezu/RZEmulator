@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,19 +15,15 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_GROUPMANAGER_H
-#define NGEMITY_GROUPMANAGER_H
-
 #include "Common.h"
 #include "SharedMutex.h"
 
 enum PARTY_TYPE : int
 {
-    TYPE_UNKNOWN                    = 0xFF,
-    TYPE_NORMAL_PARTY               = 0,
-    TYPE_RAID_ATTACKTEAM            = 1,
-    TYPE_SIEGE_ATTACKTEAM           = 2,
+    TYPE_UNKNOWN          = 0xFF,
+    TYPE_NORMAL_PARTY     = 0,
+    TYPE_RAID_ATTACKTEAM  = 1,
+    TYPE_SIEGE_ATTACKTEAM = 2,
     /*TYPE_HUNTAHOLIC_PARTY           = 3,
     TYPE_BATTLE_ARENA_TEAM          = 4,
     TYPE_BATTLE_ARENA_EXERCISE_TEAM = 5*/
@@ -42,12 +39,12 @@ enum ITEM_SHARE_MODE : int
 class Player;
 struct PartyMemberTag
 {
-    bool bIsOnline;
-    int sid;
+    bool        bIsOnline;
+    int         sid;
     std::string strName;
-    Player *pPlayer;
-    int nLevel;
-    int nJobID;
+    Player      *pPlayer;
+    int         nLevel;
+    int         nJobID;
 };
 
 struct PartyInfo
@@ -71,10 +68,11 @@ class GroupManager
 {
     public:
         ~GroupManager() = default;
+
         static GroupManager &Instance()
         {
-                static GroupManager instance;
-                return instance;
+            static GroupManager instance;
+            return instance;
         }
 
         void InitGroupSystem();
@@ -121,4 +119,3 @@ class GroupManager
 };
 
 #define sGroupManager GroupManager::Instance()
-#endif // NGEMITY_GROUPMANAGER_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _BYTEBUFFER_H
-#define _BYTEBUFFER_H
-
 #ifndef MX_TIMEZONE
 #if _MSC_VER >= 1900
 #define MX_TIMEZONE _timezone
@@ -460,7 +457,7 @@ class ByteBuffer
                 return;
             //throw ByteBufferSourceException(_wpos, size(), cnt);
 
-                    ASSERT(size() < 10000000, "Size too big");
+            ASSERT(size() < 10000000, "Size too big");
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);
@@ -601,5 +598,3 @@ inline void ByteBuffer::read_skip<std::string>()
 {
     read_skip<char *>();
 }
-
-#endif

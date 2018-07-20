@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef APPENDERCONSOLE_H
-#define APPENDERCONSOLE_H
-
 #include "Appender.h"
 
 enum ColorTypes
@@ -58,5 +55,3 @@ class AppenderConsole : public Appender
         bool                                                                 _colored;
         ColorTypes                                                           _colors[NUM_ENABLED_LOG_LEVELS];
 };
-
-#endif

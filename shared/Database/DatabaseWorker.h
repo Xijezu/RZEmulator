@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _WORKERTHREAD_H
-#define _WORKERTHREAD_H
-
 #include "Define.h"
 #include <atomic>
 #include <thread>
@@ -35,16 +32,14 @@ class DatabaseWorker
         ~DatabaseWorker();
 
     private:
-        ProducerConsumerQueue<SQLOperation*>* _queue;
-        MySQLConnection* _connection;
+        ProducerConsumerQueue<SQLOperation*> * _queue;
+        MySQLConnection * _connection;
 
         void WorkerThread();
-        std::thread _workerThread;
+        std::thread     _workerThread;
 
         std::atomic<bool> _cancelationToken;
 
         DatabaseWorker(DatabaseWorker const& right) = delete;
         DatabaseWorker& operator=(DatabaseWorker const& right) = delete;
 };
-
-#endif

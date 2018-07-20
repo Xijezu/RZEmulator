@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2011-2017 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
@@ -16,10 +17,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _UTIL_H
-#define _UTIL_H
-
 #include "Define.h"
 #include "Errors.h"
 
@@ -37,35 +34,39 @@ template<typename T, class S> struct Finder
     T S::* idMember_;
 
     Finder(T val, T S::* idMember) : val_(val), idMember_(idMember) {}
+
     bool operator()(const std::pair<int, S> &obj) { return obj.second.*idMember_ == val_; }
 };
 
 class Tokenizer
 {
 public:
-    typedef std::vector<char const*> StorageType;
+        typedef std::vector<char const*> StorageType;
 
-    typedef StorageType::size_type size_type;
+        typedef StorageType::size_type size_type;
 
-    typedef StorageType::const_iterator const_iterator;
-    typedef StorageType::reference reference;
-    typedef StorageType::const_reference const_reference;
+        typedef StorageType::const_iterator  const_iterator;
+        typedef StorageType::reference       reference;
+        typedef StorageType::const_reference const_reference;
 
-public:
-    Tokenizer(const std::string &src, char const sep, uint32 vectorReserve = 0);
-    ~Tokenizer() { delete[] m_str; }
+    public:
+        Tokenizer(const std::string &src, char const sep, uint32 vectorReserve = 0);
 
-    const_iterator begin() const { return m_storage.begin(); }
-    const_iterator end() const { return m_storage.end(); }
+        ~Tokenizer() { delete[] m_str; }
 
-    size_type size() const { return m_storage.size(); }
+        const_iterator begin() const { return m_storage.begin(); }
 
-    reference operator [] (size_type i) { return m_storage[i]; }
-    const_reference operator [] (size_type i) const { return m_storage[i]; }
+        const_iterator end() const { return m_storage.end(); }
 
-private:
-    char* m_str;
-    StorageType m_storage;
+        size_type size() const { return m_storage.size(); }
+
+        reference operator [] (size_type i) { return m_storage[i]; }
+
+        const_reference operator [] (size_type i) const { return m_storage[i]; }
+
+    private:
+        char * m_str;
+        StorageType m_storage;
 };
 
 void stripLineInvisibleChars(std::string &src);
@@ -378,23 +379,17 @@ void string_replace(std::string& str, const std::string& from, const std::string
 template<typename ... Args>
 std::string string_format( const std::string& format, Args ... args )
 {
-    size_t size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+    size_t                  size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
     std::unique_ptr<char[]> buf( new char[ size ] );
     snprintf( buf.get(), size, format.c_str(), args ... );
     return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
 }
 
-#endif
-
-//handler for operations on large flags
-#ifndef _FLAG96
-#define _FLAG96
-
 // simple class for not-modifyable list
 template <typename T>
 class HookList
 {
-    typedef typename std::list<T>::iterator ListIterator;
+        typedef typename std::list<T>::iterator ListIterator;
     private:
         typename std::list<T> m_list;
     public:
@@ -403,19 +398,23 @@ class HookList
             m_list.push_back(t);
             return *this;
         }
+
         HookList<T> & operator-=(T t)
         {
             m_list.remove(t);
             return *this;
         }
+
         size_t size()
         {
             return m_list.size();
         }
+
         ListIterator begin()
         {
             return m_list.begin();
         }
+
         ListIterator end()
         {
             return m_list.end();
@@ -425,289 +424,289 @@ class HookList
 class flag128
 {
 private:
-    uint32 part[4];
+        uint32 part[4];
 
-public:
-    flag128(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0)
-    {
-        part[0] = p1;
-        part[1] = p2;
-        part[2] = p3;
-        part[3] = p4;
-    }
-
-    flag128(uint64 p1, uint64 p2)
-    {
-        part[0] = (uint32)(p1 & UI64LIT(0x00000000FFFFFFFF));
-        part[1] = (uint32)((p1 >> 32) & UI64LIT(0x00000000FFFFFFFF));
-        part[0] = (uint32)(p2 & UI64LIT(0x00000000FFFFFFFF));
-        part[1] = (uint32)((p2 >> 32) & UI64LIT(0x00000000FFFFFFFF));
-    }
-
-    inline bool IsEqual(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0) const
-    {
-        return (part[0] == p1 && part[1] == p2 && part[2] == p3 && part[3] == p4);
-    }
-
-    inline bool HasFlag(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0) const
-    {
-        return (part[0] & p1 || part[1] & p2 || part[2] & p3 || part[3] & p4);
-    }
-
-    inline void Set(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0)
-    {
-        part[0] = p1;
-        part[1] = p2;
-        part[2] = p3;
-        part[3] = p4;
-    }
-
-    inline bool operator <(const flag128 &right) const
-    {
-        for (uint8 i = 4; i > 0; --i)
+    public:
+        flag128(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0)
         {
-            if (part[i - 1] < right.part[i - 1])
-                return true;
-            else if (part[i - 1] > right.part[i - 1])
-                return false;
+            part[0] = p1;
+            part[1] = p2;
+            part[2] = p3;
+            part[3] = p4;
         }
-        return false;
-    }
 
-    inline bool operator ==(const flag128 &right) const
-    {
-        return
-        (
-            part[0] == right.part[0] &&
-            part[1] == right.part[1] &&
-            part[2] == right.part[2] &&
-            part[3] == right.part[3]
-        );
-    }
+        flag128(uint64 p1, uint64 p2)
+        {
+            part[0] = (uint32)(p1 & UI64LIT(0x00000000FFFFFFFF));
+            part[1] = (uint32)((p1 >> 32) & UI64LIT(0x00000000FFFFFFFF));
+            part[0] = (uint32)(p2 & UI64LIT(0x00000000FFFFFFFF));
+            part[1] = (uint32)((p2 >> 32) & UI64LIT(0x00000000FFFFFFFF));
+        }
 
-    inline bool operator !=(const flag128 &right) const
-    {
-        return !this->operator ==(right);
-    }
+        inline bool IsEqual(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0) const
+        {
+            return (part[0] == p1 && part[1] == p2 && part[2] == p3 && part[3] == p4);
+        }
 
-    inline flag128 & operator =(const flag128 &right)
-    {
-        part[0] = right.part[0];
-        part[1] = right.part[1];
-        part[2] = right.part[2];
-        part[3] = right.part[3];
-        return *this;
-    }
+        inline bool HasFlag(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0) const
+        {
+            return (part[0] & p1 || part[1] & p2 || part[2] & p3 || part[3] & p4);
+        }
 
-    inline flag128 operator &(const flag128 &right) const
-    {
-        return flag128(part[0] & right.part[0], part[1] & right.part[1],
-            part[2] & right.part[2], part[3] & right.part[3]);
-    }
+        inline void Set(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0, uint32 p4 = 0)
+        {
+            part[0] = p1;
+            part[1] = p2;
+            part[2] = p3;
+            part[3] = p4;
+        }
 
-    inline flag128 & operator &=(const flag128 &right)
-    {
-        part[0] &= right.part[0];
-        part[1] &= right.part[1];
-        part[2] &= right.part[2];
-        part[3] &= right.part[3];
-        return *this;
-    }
+        inline bool operator <(const flag128 &right) const
+        {
+            for (uint8 i = 4; i > 0; --i)
+            {
+                if (part[i - 1] < right.part[i - 1])
+                    return true;
+                else if (part[i - 1] > right.part[i - 1])
+                    return false;
+            }
+            return false;
+        }
 
-    inline flag128 operator |(const flag128 &right) const
-    {
-        return flag128(part[0] | right.part[0], part[1] | right.part[1],
-            part[2] | right.part[2], part[3] | right.part[3]);
-    }
+        inline bool operator ==(const flag128 &right) const
+        {
+            return
+                    (
+                            part[0] == right.part[0] &&
+                            part[1] == right.part[1] &&
+                            part[2] == right.part[2] &&
+                            part[3] == right.part[3]
+                    );
+        }
 
-    inline flag128 & operator |=(const flag128 &right)
-    {
-        part[0] |= right.part[0];
-        part[1] |= right.part[1];
-        part[2] |= right.part[2];
-        part[3] |= right.part[3];
-        return *this;
-    }
+        inline bool operator !=(const flag128 &right) const
+        {
+            return !this->operator ==(right);
+        }
 
-    inline flag128 operator ~() const
-    {
-        return flag128(~part[0], ~part[1], ~part[2], ~part[3]);
-    }
+        inline flag128 & operator =(const flag128 &right)
+        {
+            part[0] = right.part[0];
+            part[1] = right.part[1];
+            part[2] = right.part[2];
+            part[3] = right.part[3];
+            return *this;
+        }
 
-    inline flag128 operator ^(const flag128 &right) const
-    {
-        return flag128(part[0] ^ right.part[0], part[1] ^ right.part[1],
-            part[2] ^ right.part[2], part[3] ^ right.part[3]);
-    }
+        inline flag128 operator &(const flag128 &right) const
+        {
+            return flag128(part[0] & right.part[0], part[1] & right.part[1],
+                           part[2] & right.part[2], part[3] & right.part[3]);
+        }
 
-    inline flag128 & operator ^=(const flag128 &right)
-    {
-        part[0] ^= right.part[0];
-        part[1] ^= right.part[1];
-        part[2] ^= right.part[2];
-        part[3] ^= right.part[3];
-        return *this;
-    }
+        inline flag128 & operator &=(const flag128 &right)
+        {
+            part[0] &= right.part[0];
+            part[1] &= right.part[1];
+            part[2] &= right.part[2];
+            part[3] &= right.part[3];
+            return *this;
+        }
 
-    inline operator bool() const
-    {
-        return (part[0] != 0 || part[1] != 0 || part[2] != 0 || part[3] != 0);
-    }
+        inline flag128 operator |(const flag128 &right) const
+        {
+            return flag128(part[0] | right.part[0], part[1] | right.part[1],
+                           part[2] | right.part[2], part[3] | right.part[3]);
+        }
 
-    inline bool operator !() const
-    {
-        return !this->operator bool();
-    }
+        inline flag128 & operator |=(const flag128 &right)
+        {
+            part[0] |= right.part[0];
+            part[1] |= right.part[1];
+            part[2] |= right.part[2];
+            part[3] |= right.part[3];
+            return *this;
+        }
 
-    inline uint32 & operator [](uint8 el)
-    {
-        return part[el];
-    }
+        inline flag128 operator ~() const
+        {
+            return flag128(~part[0], ~part[1], ~part[2], ~part[3]);
+        }
 
-    inline const uint32 & operator [](uint8 el) const
-    {
-        return part[el];
-    }
+        inline flag128 operator ^(const flag128 &right) const
+        {
+            return flag128(part[0] ^ right.part[0], part[1] ^ right.part[1],
+                           part[2] ^ right.part[2], part[3] ^ right.part[3]);
+        }
+
+        inline flag128 & operator ^=(const flag128 &right)
+        {
+            part[0] ^= right.part[0];
+            part[1] ^= right.part[1];
+            part[2] ^= right.part[2];
+            part[3] ^= right.part[3];
+            return *this;
+        }
+
+        inline operator bool() const
+        {
+            return (part[0] != 0 || part[1] != 0 || part[2] != 0 || part[3] != 0);
+        }
+
+        inline bool operator !() const
+        {
+            return !this->operator bool();
+        }
+
+        inline uint32 & operator [](uint8 el)
+        {
+            return part[el];
+        }
+
+        inline const uint32 & operator [](uint8 el) const
+        {
+            return part[el];
+        }
 };
 
 class flag96
 {
 private:
-    uint32 part[3];
+        uint32 part[3];
 
-public:
-    flag96(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0)
-    {
-        part[0] = p1;
-        part[1] = p2;
-        part[2] = p3;
-    }
-
-    flag96(uint64 p1, uint32 p2)
-    {
-        part[0] = (uint32)(p1 & UI64LIT(0x00000000FFFFFFFF));
-        part[1] = (uint32)((p1 >> 32) & UI64LIT(0x00000000FFFFFFFF));
-        part[2] = p2;
-    }
-
-    inline bool IsEqual(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0) const
-    {
-        return (part[0] == p1 && part[1] == p2 && part[2] == p3);
-    }
-
-    inline bool HasFlag(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0) const
-    {
-        return (part[0] & p1 || part[1] & p2 || part[2] & p3);
-    }
-
-    inline void Set(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0)
-    {
-        part[0] = p1;
-        part[1] = p2;
-        part[2] = p3;
-    }
-
-    inline bool operator <(const flag96 &right) const
-    {
-        for (uint8 i = 3; i > 0; --i)
+    public:
+        flag96(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0)
         {
-            if (part[i - 1] < right.part[i - 1])
-                return true;
-            else if (part[i - 1] > right.part[i - 1])
-                return false;
+            part[0] = p1;
+            part[1] = p2;
+            part[2] = p3;
         }
-        return false;
-    }
 
-    inline bool operator ==(const flag96 &right) const
-    {
-        return
-        (
-            part[0] == right.part[0] &&
-            part[1] == right.part[1] &&
-            part[2] == right.part[2]
-        );
-    }
+        flag96(uint64 p1, uint32 p2)
+        {
+            part[0] = (uint32)(p1 & UI64LIT(0x00000000FFFFFFFF));
+            part[1] = (uint32)((p1 >> 32) & UI64LIT(0x00000000FFFFFFFF));
+            part[2] = p2;
+        }
 
-    inline bool operator !=(const flag96 &right) const
-    {
-        return !this->operator ==(right);
-    }
+        inline bool IsEqual(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0) const
+        {
+            return (part[0] == p1 && part[1] == p2 && part[2] == p3);
+        }
 
-    inline flag96 & operator =(const flag96 &right)
-    {
-        part[0] = right.part[0];
-        part[1] = right.part[1];
-        part[2] = right.part[2];
-        return *this;
-    }
+        inline bool HasFlag(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0) const
+        {
+            return (part[0] & p1 || part[1] & p2 || part[2] & p3);
+        }
 
-    inline flag96 operator &(const flag96 &right) const
-    {
-        return flag96(part[0] & right.part[0], part[1] & right.part[1],
-            part[2] & right.part[2]);
-    }
+        inline void Set(uint32 p1 = 0, uint32 p2 = 0, uint32 p3 = 0)
+        {
+            part[0] = p1;
+            part[1] = p2;
+            part[2] = p3;
+        }
 
-    inline flag96 & operator &=(const flag96 &right)
-    {
-        part[0] &= right.part[0];
-        part[1] &= right.part[1];
-        part[2] &= right.part[2];
-        return *this;
-    }
+        inline bool operator <(const flag96 &right) const
+        {
+            for (uint8 i = 3; i > 0; --i)
+            {
+                if (part[i - 1] < right.part[i - 1])
+                    return true;
+                else if (part[i - 1] > right.part[i - 1])
+                    return false;
+            }
+            return false;
+        }
 
-    inline flag96 operator |(const flag96 &right) const
-    {
-        return flag96(part[0] | right.part[0], part[1] | right.part[1],
-            part[2] | right.part[2]);
-    }
+        inline bool operator ==(const flag96 &right) const
+        {
+            return
+                    (
+                            part[0] == right.part[0] &&
+                            part[1] == right.part[1] &&
+                            part[2] == right.part[2]
+                    );
+        }
 
-    inline flag96 & operator |=(const flag96 &right)
-    {
-        part[0] |= right.part[0];
-        part[1] |= right.part[1];
-        part[2] |= right.part[2];
-        return *this;
-    }
+        inline bool operator !=(const flag96 &right) const
+        {
+            return !this->operator ==(right);
+        }
 
-    inline flag96 operator ~() const
-    {
-        return flag96(~part[0], ~part[1], ~part[2]);
-    }
+        inline flag96 & operator =(const flag96 &right)
+        {
+            part[0] = right.part[0];
+            part[1] = right.part[1];
+            part[2] = right.part[2];
+            return *this;
+        }
 
-    inline flag96 operator ^(const flag96 &right) const
-    {
-        return flag96(part[0] ^ right.part[0], part[1] ^ right.part[1],
-            part[2] ^ right.part[2]);
-    }
+        inline flag96 operator &(const flag96 &right) const
+        {
+            return flag96(part[0] & right.part[0], part[1] & right.part[1],
+                          part[2] & right.part[2]);
+        }
 
-    inline flag96 & operator ^=(const flag96 &right)
-    {
-        part[0] ^= right.part[0];
-        part[1] ^= right.part[1];
-        part[2] ^= right.part[2];
-        return *this;
-    }
+        inline flag96 & operator &=(const flag96 &right)
+        {
+            part[0] &= right.part[0];
+            part[1] &= right.part[1];
+            part[2] &= right.part[2];
+            return *this;
+        }
 
-    inline operator bool() const
-    {
-        return (part[0] != 0 || part[1] != 0 || part[2] != 0);
-    }
+        inline flag96 operator |(const flag96 &right) const
+        {
+            return flag96(part[0] | right.part[0], part[1] | right.part[1],
+                          part[2] | right.part[2]);
+        }
 
-    inline bool operator !() const
-    {
-        return !this->operator bool();
-    }
+        inline flag96 & operator |=(const flag96 &right)
+        {
+            part[0] |= right.part[0];
+            part[1] |= right.part[1];
+            part[2] |= right.part[2];
+            return *this;
+        }
 
-    inline uint32 & operator [](uint8 el)
-    {
-        return part[el];
-    }
+        inline flag96 operator ~() const
+        {
+            return flag96(~part[0], ~part[1], ~part[2]);
+        }
 
-    inline const uint32 & operator [](uint8 el) const
-    {
-        return part[el];
-    }
+        inline flag96 operator ^(const flag96 &right) const
+        {
+            return flag96(part[0] ^ right.part[0], part[1] ^ right.part[1],
+                          part[2] ^ right.part[2]);
+        }
+
+        inline flag96 & operator ^=(const flag96 &right)
+        {
+            part[0] ^= right.part[0];
+            part[1] ^= right.part[1];
+            part[2] ^= right.part[2];
+            return *this;
+        }
+
+        inline operator bool() const
+        {
+            return (part[0] != 0 || part[1] != 0 || part[2] != 0);
+        }
+
+        inline bool operator !() const
+        {
+            return !this->operator bool();
+        }
+
+        inline uint32 & operator [](uint8 el)
+        {
+            return part[el];
+        }
+
+        inline const uint32 & operator [](uint8 el) const
+        {
+            return part[el];
+        }
 };
 
 enum ComparisionType
@@ -737,8 +736,7 @@ bool CompareValues(ComparisionType type, T val1, T val2)
             return val1 <= val2;
         default:
             // incorrect parameter
-            ASSERT(false);
+                    ASSERT(false);
             return false;
     }
 }
-#endif

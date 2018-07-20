@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_WORLD_H
-#define NGEMITY_WORLD_H
-
 #include "Common.h"
 #include "RespawnObject.h"
 #include "Timer.h"
@@ -82,15 +79,15 @@ class Summon;
 class XPacket;
 
 typedef std::unordered_map<uint32, WorldSession *> SessionMap;
-constexpr int                                 g_nRegionSize = 180;
-constexpr int                                 g_nMapWidth   = 700000;
-constexpr int                                 g_nMapHeight  = 1000000;
-constexpr float                               g_fMapLength  = 16128.0f;
+constexpr int                                      g_nRegionSize = 180;
+constexpr int                                      g_nMapWidth   = 700000;
+constexpr int                                      g_nMapHeight  = 1000000;
+constexpr float                                    g_fMapLength  = 16128.0f;
 
 class World
 {
     public:
-        static std::atomic<uint32> m_worldLoopCounter;
+        static std::atomic<uint32>  m_worldLoopCounter;
         typedef std::atomic<uint64> AtomicIndex;
         ~World();
 
@@ -214,8 +211,8 @@ class World
 
         static uint8 m_ExitCode;
 
-        SessionMap m_sessions;
-        const uint startTime;
+        SessionMap                 m_sessions;
+        const uint                 startTime;
 
         void AddSession_(WorldSession *s);
         LockedQueue<WorldSession*> addSessQueue;
@@ -242,4 +239,3 @@ class World
 };
 
 #define sWorld World::Instance()
-#endif // NGEMITY_WORLD_H

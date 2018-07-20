@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_COMPILERDEFS_H
-#define NGEMITY_COMPILERDEFS_H
-
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_UNIX    1
 #define PLATFORM_APPLE   2
@@ -57,5 +54,4 @@
 #if COMPILER == COMPILER_MICROSOFT
 #  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
 #  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
-#endif
 #endif

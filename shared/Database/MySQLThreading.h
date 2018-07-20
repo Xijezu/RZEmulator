@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _MYSQLTHREADING_H
-#define _MYSQLTHREADING_H
-
 #include "Define.h"
 
 namespace MySQL
@@ -25,5 +22,3 @@ namespace MySQL
     void Library_Init();
     void Library_End();
 };
-
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _PROCESSPRIO_H
-#define _PROCESSPRIO_H
-
 #include "Define.h"
 #include <string>
 
@@ -25,5 +22,3 @@
 #define CONFIG_HIGH_PRIORITY "ProcessPriority"
 
 void SetProcessPriority(std::string const& logChannel, uint32 affinity, bool highPriority);
-
-#endif

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
@@ -14,10 +15,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _MYSQLCONNECTION_H
-#define _MYSQLCONNECTION_H
-
 #include "Define.h"
 #include "DatabaseEnvFwd.h"
 #include <map>
@@ -37,7 +34,7 @@ enum ConnectionFlags
 {
     CONNECTION_ASYNC = 0x1,
     CONNECTION_SYNCH = 0x2,
-    CONNECTION_BOTH = CONNECTION_ASYNC | CONNECTION_SYNCH
+    CONNECTION_BOTH  = CONNECTION_ASYNC | CONNECTION_SYNCH
 };
 
 struct MySQLConnectionInfo
@@ -55,8 +52,8 @@ typedef std::map<uint32 /*index*/, std::pair<std::string /*query*/, ConnectionFl
 
 class MySQLConnection
 {
-    template <class T> friend class DatabaseWorkerPool;
-    friend class PingOperation;
+        template <class T> friend class DatabaseWorkerPool;
+        friend class PingOperation;
 
     public:
         MySQLConnection(MySQLConnectionInfo& connInfo);                               //! Constructor for synchronous connections.
@@ -94,6 +91,7 @@ class MySQLConnection
         void Unlock();
 
         MYSQL* GetHandle()  { return m_Mysql; }
+
         MySQLPreparedStatement* GetPreparedStatement(uint32 index);
         void PrepareStatement(uint32 index, const char* sql, ConnectionFlags flags);
 
@@ -101,23 +99,21 @@ class MySQLConnection
 
     protected:
         std::vector<std::unique_ptr<MySQLPreparedStatement>> m_stmts; //! PreparedStatements storage
-        PreparedStatementMap                 m_queries;       //! Query storage
-        bool                                 m_reconnecting;  //! Are we reconnecting?
-        bool                                 m_prepareError;  //! Was there any error while preparing statements?
+        PreparedStatementMap                                 m_queries;       //! Query storage
+        bool                                                 m_reconnecting;  //! Are we reconnecting?
+        bool                                                 m_prepareError;  //! Was there any error while preparing statements?
 
     private:
         bool _HandleMySQLErrno(uint32 errNo, uint8 attempts = 5);
 
     private:
-        ProducerConsumerQueue<SQLOperation*>* m_queue;      //! Queue shared with other asynchronous connections.
-        std::unique_ptr<DatabaseWorker> m_worker;           //! Core worker task.
-        MYSQL*                m_Mysql;                      //! MySQL Handle.
-        MySQLConnectionInfo&  m_connectionInfo;             //! Connection info (used for logging)
-        ConnectionFlags       m_connectionFlags;            //! Connection flags (for preparing relevant statements)
-        std::mutex            m_Mutex;
+        ProducerConsumerQueue<SQLOperation*> * m_queue;      //! Queue shared with other asynchronous connections.
+        std::unique_ptr<DatabaseWorker>      m_worker;           //! Core worker task.
+        MYSQL               *                m_Mysql;                      //! MySQL Handle.
+        MySQLConnectionInfo &  m_connectionInfo;             //! Connection info (used for logging)
+        ConnectionFlags m_connectionFlags;            //! Connection flags (for preparing relevant statements)
+        std::mutex      m_Mutex;
 
         MySQLConnection(MySQLConnection const& right) = delete;
         MySQLConnection& operator=(MySQLConnection const& right) = delete;
 };
-
-#endif

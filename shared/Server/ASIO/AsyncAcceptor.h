@@ -1,4 +1,6 @@
+#pragma once
 /*
+ * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -14,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef __ASYNCACCEPT_H_
-#define __ASYNCACCEPT_H_
-
 #include "IoContext.h"
 #include "IpAddress.h"
 #include "Log.h"
@@ -36,97 +34,95 @@ using boost::asio::ip::tcp;
 class AsyncAcceptor
 {
 public:
-    typedef void(*AcceptCallback)(tcp::socket&& newSocket, uint32 threadIndex);
+        typedef void(*AcceptCallback)(tcp::socket&& newSocket, uint32 threadIndex);
 
-    AsyncAcceptor(NGemity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port) :
-        _acceptor(ioContext), _endpoint(NGemity::Net::make_address(bindIp), port),
-        _socket(ioContext), _closed(false), _socketFactory(std::bind(&AsyncAcceptor::DefeaultSocketFactory, this))
-    {
-    }
-
-    template<class T>
-    void AsyncAccept();
-
-    template<AcceptCallback acceptCallback>
-    void AsyncAcceptWithCallback()
-    {
-        tcp::socket* socket;
-        uint32 threadIndex;
-        std::tie(socket, threadIndex) = _socketFactory();
-        _acceptor.async_accept(*socket, [this, socket, threadIndex](boost::system::error_code error)
+        AsyncAcceptor(NGemity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port) :
+                _acceptor(ioContext), _endpoint(NGemity::Net::make_address(bindIp), port),
+                _socket(ioContext), _closed(false), _socketFactory(std::bind(&AsyncAcceptor::DefeaultSocketFactory, this))
         {
-            if (!error)
-            {
-                try
-                {
-                    socket->non_blocking(true);
+        }
 
-                    acceptCallback(std::move(*socket), threadIndex);
-                }
-                catch (boost::system::system_error const& err)
+        template<class T>
+        void AsyncAccept();
+
+        template<AcceptCallback acceptCallback>
+        void AsyncAcceptWithCallback()
+        {
+            tcp::socket * socket;
+            uint32 threadIndex;
+            std::tie(socket, threadIndex) = _socketFactory();
+            _acceptor.async_accept(*socket, [this, socket, threadIndex](boost::system::error_code error) {
+                if (!error)
                 {
-                    NG_LOG_INFO("network", "Failed to initialize client's socket %s", err.what());
+                    try
+                    {
+                        socket->non_blocking(true);
+
+                        acceptCallback(std::move(*socket), threadIndex);
+                    }
+                    catch (boost::system::system_error const& err)
+                    {
+                        NG_LOG_INFO("network", "Failed to initialize client's socket %s", err.what());
+                    }
                 }
+
+                if (!_closed)
+                    this->AsyncAcceptWithCallback<acceptCallback>();
+            });
+        }
+
+        bool Bind()
+        {
+            boost::system::error_code errorCode;
+            _acceptor.open(_endpoint.protocol(), errorCode);
+            if (errorCode)
+            {
+                NG_LOG_INFO("network", "Failed to open acceptor %s", errorCode.message().c_str());
+                return false;
             }
 
-            if (!_closed)
-                this->AsyncAcceptWithCallback<acceptCallback>();
-        });
-    }
+            _acceptor.bind(_endpoint, errorCode);
+            if (errorCode)
+            {
+                NG_LOG_INFO("network", "Could not bind to %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
+                return false;
+            }
 
-    bool Bind()
-    {
-        boost::system::error_code errorCode;
-        _acceptor.open(_endpoint.protocol(), errorCode);
-        if (errorCode)
-        {
-            NG_LOG_INFO("network", "Failed to open acceptor %s", errorCode.message().c_str());
-            return false;
+            _acceptor.listen(NGEMITY_MAX_LISTEN_CONNECTIONS, errorCode);
+            if (errorCode)
+            {
+                NG_LOG_INFO("network", "Failed to start listening on %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
+                return false;
+            }
+
+            return true;
         }
 
-        _acceptor.bind(_endpoint, errorCode);
-        if (errorCode)
+        void Close()
         {
-            NG_LOG_INFO("network", "Could not bind to %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
-            return false;
+            if (_closed.exchange(true))
+                return;
+
+            boost::system::error_code err;
+            _acceptor.close(err);
         }
 
-        _acceptor.listen(NGEMITY_MAX_LISTEN_CONNECTIONS, errorCode);
-        if (errorCode)
-        {
-            NG_LOG_INFO("network", "Failed to start listening on %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
-            return false;
-        }
+        void SetSocketFactory(std::function<std::pair<tcp::socket*, uint32>()> func) { _socketFactory = func; }
 
-        return true;
-    }
+    private:
+        std::pair<tcp::socket*, uint32> DefeaultSocketFactory() { return std::make_pair(&_socket, 0); }
 
-    void Close()
-    {
-        if (_closed.exchange(true))
-            return;
-
-        boost::system::error_code err;
-        _acceptor.close(err);
-    }
-
-    void SetSocketFactory(std::function<std::pair<tcp::socket*, uint32>()> func) { _socketFactory = func; }
-
-private:
-    std::pair<tcp::socket*, uint32> DefeaultSocketFactory() { return std::make_pair(&_socket, 0); }
-
-    tcp::acceptor _acceptor;
-    tcp::endpoint _endpoint;
-    tcp::socket _socket;
-    std::atomic<bool> _closed;
-    std::function<std::pair<tcp::socket*, uint32>()> _socketFactory;
+        tcp::acceptor                                    _acceptor;
+        tcp::endpoint                                    _endpoint;
+        tcp::socket                                      _socket;
+        std::atomic<bool>                                _closed;
+        std::function<std::pair<tcp::socket*, uint32>()> _socketFactory;
 };
 
 template<class T>
 void AsyncAcceptor::AsyncAccept()
 {
-    _acceptor.async_accept(_socket, [this](boost::system::error_code error)
-    {
+    _acceptor.async_accept(_socket, [this](boost::system::error_code error) {
         if (!error)
         {
             try
@@ -145,5 +141,3 @@ void AsyncAcceptor::AsyncAccept()
             this->AsyncAccept<T>();
     });
 }
-
-#endif /* __ASYNCACCEPT_H_ */

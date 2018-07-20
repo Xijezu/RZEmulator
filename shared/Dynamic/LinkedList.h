@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2014 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2014 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _LINKEDLIST
-#define _LINKEDLIST
-
 #include "Common.h"
 
 //============================================
@@ -29,24 +26,33 @@ class LinkedListElement
     private:
         friend class LinkedListHead;
 
-        LinkedListElement* iNext;
-        LinkedListElement* iPrev;
+        LinkedListElement * iNext;
+        LinkedListElement * iPrev;
     public:
         LinkedListElement() { iNext = NULL; iPrev = NULL; }
+
         ~LinkedListElement() { delink(); }
 
         bool hasNext() const { if(iNext) return (iNext->iNext != NULL); else return false; }
+
         bool hasPrev() const { if(iPrev) return (iPrev->iPrev != NULL); else return false; }
+
         bool isInList() const { return(iNext != NULL && iPrev != NULL); }
 
         LinkedListElement      * next()       { return hasNext() ? iNext : NULL; }
+
         LinkedListElement const* next() const { return hasNext() ? iNext : NULL; }
+
         LinkedListElement      * prev()       { return hasPrev() ? iPrev : NULL; }
+
         LinkedListElement const* prev() const { return hasPrev() ? iPrev : NULL; }
 
         LinkedListElement      * nocheck_next()       { return iNext; }
+
         LinkedListElement const* nocheck_next() const { return iNext; }
+
         LinkedListElement      * nocheck_prev()       { return iPrev; }
+
         LinkedListElement const* nocheck_prev() const { return iPrev; }
 
         void delink()
@@ -81,23 +87,25 @@ class LinkedListHead
     private:
         LinkedListElement iFirst;
         LinkedListElement iLast;
-        uint32 iSize;
+        uint32            iSize;
     public:
         LinkedListHead()
         {
             // create empty list
 
             iFirst.iNext = &iLast;
-            iLast.iPrev = &iFirst;
+            iLast.iPrev  = &iFirst;
             iSize = 0;
         }
 
         bool isEmpty() const { return(!iFirst.iNext->isInList()); }
 
         LinkedListElement      * getFirst()       { return(isEmpty() ? NULL : iFirst.iNext); }
+
         LinkedListElement const* getFirst() const { return(isEmpty() ? NULL : iFirst.iNext); }
 
         LinkedListElement      * getLast() { return(isEmpty() ? NULL : iLast.iPrev); }
+
         LinkedListElement const* getLast() const  { return(isEmpty() ? NULL : iLast.iPrev); }
 
         void insertFirst(LinkedListElement* pElem)
@@ -115,7 +123,7 @@ class LinkedListHead
             if (!iSize)
             {
                 uint32 result = 0;
-                LinkedListElement const* e = getFirst();
+                LinkedListElement const * e = getFirst();
                 while (e)
                 {
                     ++result;
@@ -128,19 +136,20 @@ class LinkedListHead
         }
 
         void incSize() { ++iSize; }
+
         void decSize() { --iSize; }
 
         template<class _Ty>
-            class Iterator
+        class Iterator
         {
             public:
-                typedef std::bidirectional_iterator_tag     iterator_category;
-                typedef _Ty                                 value_type;
-                typedef ptrdiff_t                           difference_type;
-                typedef ptrdiff_t                           distance_type;
-                typedef _Ty*                                pointer;
-                typedef _Ty const*                          const_pointer;
-                typedef _Ty&                                reference;
+                typedef std::bidirectional_iterator_tag iterator_category;
+                typedef _Ty                             value_type;
+                typedef ptrdiff_t                       difference_type;
+                typedef ptrdiff_t                       distance_type;
+                typedef _Ty       *                                pointer;
+                typedef _Ty const *                          const_pointer;
+                typedef _Ty       &                                reference;
                 typedef _Ty const &                         const_reference;
 
                 Iterator() : _Ptr(0)
@@ -241,4 +250,3 @@ class LinkedListHead
 };
 
 //============================================
-#endif

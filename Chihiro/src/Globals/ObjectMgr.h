@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_OBJECTMGR_H_
-#define NGEMITY_OBJECTMGR_H_
-
 #include "Common.h"
 #include "DatabaseTemplates.h"
 #include <unordered_map>
@@ -169,5 +166,3 @@ class ObjectMgr
 };
 
 #define sObjectMgr ObjectMgr::Instance()
-
-#endif // NGEMITY_OBJECTMGR_H_

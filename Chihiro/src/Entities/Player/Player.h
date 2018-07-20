@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_PLAYER_H_
-#define NGEMITY_PLAYER_H_
-
 #include "Common.h"
 #include "Unit.h"
 #include "TimeSync.h"
@@ -58,10 +55,10 @@ enum TRADE_MODE : int
 
 struct BonusInfo
 {
-    int type;
-    int rate;
+    int   type;
+    int   rate;
     int64 exp;
-    int jp;
+    int   jp;
 };
 
 enum CONDITION_INFO : int
@@ -315,9 +312,9 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         int GetMaxChaos() const;
         void AddChaos(int chaos);
         bool   m_bSitdown{false};
-        bool m_bTrading{false};
-        bool m_bTradeFreezed{false};
-        bool m_bTradeAccepted{false};
+        bool   m_bTrading{false};
+        bool   m_bTradeFreezed{false};
+        bool   m_bTradeAccepted{false};
     protected:
 
         bool isInLocationType(uint8 nLocationType);
@@ -355,7 +352,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool         m_bUsingTent{false};
         float        m_fDistEXPMod{1.0f};
         float        m_fActiveSummonExpAmp{0.0f};
-        float                                   m_fDeactiveSummonExpAmp{0.0f};
+        float        m_fDeactiveSummonExpAmp{0.0f};
 
         uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 
@@ -388,5 +385,3 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         std::string m_szSpecialDialogMenu{ };
         std::string m_szClientInfo{ };
 };
-
-#endif // NGEMITY_PLAYER_H_

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_PLAYERLIST_H_
-#define NGEMITY_PLAYERLIST_H_
-
 #include "Common.h"
 #include "SharedMutex.h"
 
@@ -100,4 +97,3 @@ class PlayerList
 };
 
 #define sPlayerMapList PlayerList::Instance()
-#endif // !NGEMITY_PLAYERLIST_H_

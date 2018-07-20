@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -15,9 +16,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NGEMITY_ITEM_H
-#define NGEMITY_ITEM_H
-
 #include "Common.h"
 #include "ItemFields.h"
 #include "DatabaseTemplates.h"
@@ -34,7 +32,7 @@ class ItemInstance
 
         uint         OwnerHandle{0};                            // 0x0
         uint         OwnSummonHandle{0};                        // 0x4
-        int64       UID{0};                                    // 0x8
+        int64        UID{0};                                    // 0x8
         int          Code{0};                                    // 0x10
         int          nIdx{0};                                    // 0x14
         int          nLevel{0};                                  // 0x18
@@ -95,7 +93,6 @@ class Item : public WorldObject
 
         bool IsItem() const override { return true; }
 
-
         void SetOwnerInfo(uint, int, int);
         void SetPickupOrder(const ItemPickupOrder &order);
 
@@ -114,6 +111,3 @@ class Item : public WorldObject
         bool            m_bIsNeedUpdateToDB{false};
         ItemPickupOrder m_pPickupOrder{ };
 };
-
-
-#endif //NGEMITY_ITEM_H

@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_DUNGEONMANAGER_H
-#define NGEMITY_DUNGEONMANAGER_H
 
 #include "X2D/Boxf.h"
 #include "Common.h"
@@ -99,4 +97,3 @@ class DungeonManager
 };
 
 #define sDungeonManager DungeonManager::Instance()
-#endif // NGEMITY_DUNGEONMANAGER_H

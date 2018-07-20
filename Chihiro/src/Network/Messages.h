@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_MESSAGES_H
-#define NGEMITY_MESSAGES_H
-
 #include "Common.h"
 #include "Object.h"
 
@@ -36,15 +33,15 @@ class Quest;
 struct scramble_map {
     scramble_map()
     {
-        int  v3;
-        int  i;
+        int     v3;
+        int     i;
         uint8_t v5;
 
         for (i = 0; i < 32; ++i) {
             map[i] = (uint8_t ) i;
         }
 
-        v3     = 3;
+        v3 = 3;
         for (i = 0; i < 32; ++i) {
             v5 = map[i];
             if (v3 >= 32)
@@ -74,7 +71,6 @@ static int bits_scramble(int c)
     } while (v2 < 32);
     return result;
 }
-
 
 class Messages
 {
@@ -138,6 +134,3 @@ class Messages
     private:
         static void fillItemInfo(XPacket &, Item *);
 };
-
-
-#endif // NGEMITY_MESSAGES_H

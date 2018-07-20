@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,9 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_ITEMFIELDS_H
-#define NGEMITY_ITEMFIELDS_H
 
 constexpr int64 MAX_GOLD_FOR_INVENTORY = 100000000000;
 constexpr int64 MAX_GOLD_FOR_STORAGE   = 100000000000;
@@ -44,7 +42,7 @@ enum ElementalType {
 
 enum FlagBits : uint
 {
-	ITEM_FLAG_NORMAL		  = 0x00,
+    ITEM_FLAG_NORMAL          = 0x00,
     ITEM_FLAG_CARD            = 0x01,
     ITEM_FLAG_FULL            = 0x02,
     ITEM_FLAG_INSERTED        = 0x04,
@@ -210,39 +208,39 @@ enum ItemType : int {
     TYPE_CHARM     = 5,
     TYPE_USE       = 6,
     TYPE_SOULSTONE = 7,
-    TYPE_USE_CARD   = 8,
+    TYPE_USE_CARD  = 8,
 };
 
 enum ItemGroup : int
 {
-    GROUP_ETC               = 0,
-    GROUP_WEAPON            = 1,
-    GROUP_ARMOR             = 2,
-    GROUP_SHIELD            = 3,
-    GROUP_HELM              = 4,
-    GROUP_GLOVE             = 5,
-    GROUP_BOOTS             = 6,
-    GROUP_BELT              = 7,
-    GROUP_MANTLE            = 8,
-    GROUP_ACCESSORY         = 9,
-    GROUP_SKILLCARD         = 10,
-    GROUP_ITEMCARD          = 11,
-    GROUP_SPELLCARD         = 12,
-    GROUP_SUMMONCARD        = 13,
-    GROUP_FACE              = 15,
-    GROUP_UNDERWEAR         = 16,
-    GROUP_BAG               = 17,
-    GROUP_PET_CAGE          = 18,
-    GROUP_STRIKE_CUBE       = 21,
-    GROUP_DEFENCE_CUBE      = 22,
-    GROUP_SKILL_CUBE        = 23,
-    GROUP_RESTORATION_CUBE  = 24,
-    GROUP_SOULSTONE         = 93,
-    GROUP_BULLET            = 98,
-    GROUP_CONSUMABLE        = 99,
-    GROUP_NPC_FACE          = 100,
-    GROUP_DECO              = 110,
-    GROUP_RIDING            = 120,
+    GROUP_ETC              = 0,
+    GROUP_WEAPON           = 1,
+    GROUP_ARMOR            = 2,
+    GROUP_SHIELD           = 3,
+    GROUP_HELM             = 4,
+    GROUP_GLOVE            = 5,
+    GROUP_BOOTS            = 6,
+    GROUP_BELT             = 7,
+    GROUP_MANTLE           = 8,
+    GROUP_ACCESSORY        = 9,
+    GROUP_SKILLCARD        = 10,
+    GROUP_ITEMCARD         = 11,
+    GROUP_SPELLCARD        = 12,
+    GROUP_SUMMONCARD       = 13,
+    GROUP_FACE             = 15,
+    GROUP_UNDERWEAR        = 16,
+    GROUP_BAG              = 17,
+    GROUP_PET_CAGE         = 18,
+    GROUP_STRIKE_CUBE      = 21,
+    GROUP_DEFENCE_CUBE     = 22,
+    GROUP_SKILL_CUBE       = 23,
+    GROUP_RESTORATION_CUBE = 24,
+    GROUP_SOULSTONE        = 93,
+    GROUP_BULLET           = 98,
+    GROUP_CONSUMABLE       = 99,
+    GROUP_NPC_FACE         = 100,
+    GROUP_DECO             = 110,
+    GROUP_RIDING           = 120,
 };
 
 enum LIMIT_FLAG : int
@@ -258,12 +256,10 @@ enum LIMIT_FLAG : int
 
 enum ItemCode : int
 {
-	CHALK_OF_RESTORATION 	 = 800000,
-	UNIT_CARD				 = 800001,
-	FEATHER_OF_RETURN	     = 910006,
-	FEATHER_OF_REINSTATEMENT = 910009,
-	E_REPAIR_POWDER			 = 950021,
-	FEATHER_OF_RETURN_EVENT  = 2902104
+    CHALK_OF_RESTORATION     = 800000,
+    UNIT_CARD                = 800001,
+    FEATHER_OF_RETURN        = 910006,
+    FEATHER_OF_REINSTATEMENT = 910009,
+    E_REPAIR_POWDER          = 950021,
+    FEATHER_OF_RETURN_EVENT  = 2902104
 };
-
-#endif //NGEMITY_ITEMFIELDS_H

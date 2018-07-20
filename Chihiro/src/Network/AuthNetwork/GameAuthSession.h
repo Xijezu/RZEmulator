@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_GAMEAUTHSESSION_H
-#define NGEMITY_GAMEAUTHSESSION_H
-
 #include "Common.h"
 #include "XSocket.h"
 
@@ -27,40 +24,37 @@ class WorldSession;
 // Handle login commands
 class GameAuthSession : public XSession
 {
-public:
-	typedef std::unordered_map<std::string, WorldSession*> AuthQueue;
-	explicit GameAuthSession(XSocket *pSocket);
-	~GameAuthSession();
+    public:
+        typedef std::unordered_map<std::string, WorldSession *> AuthQueue;
+        explicit GameAuthSession(XSocket *pSocket);
+        ~GameAuthSession();
 
-	// Network handlers
-	void OnClose();
-	ReadDataHandlerResult ProcessIncoming(XPacket *);
+        // Network handlers
+        void OnClose();
+        ReadDataHandlerResult ProcessIncoming(XPacket *);
 
-	// Packet handlers
-	void HandleGameLoginResult(XPacket *);
-	void HandleClientLoginResult(XPacket *);
-	void HandleClientKick(XPacket *);
+        // Packet handlers
+        void HandleGameLoginResult(XPacket *);
+        void HandleClientLoginResult(XPacket *);
+        void HandleClientKick(XPacket *);
 
-	void HandleNullPacket(XPacket* );
+        void HandleNullPacket(XPacket *);
 
-    void SendGameLogin();
-	void AccountToAuth(WorldSession* pSession, const std::string& szLoginName, uint64 nOneTimeKey);
-    void ClientLogoutToAuth(const std::string& account);
+        void SendGameLogin();
+        void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey);
+        void ClientLogoutToAuth(const std::string &account);
 
+        int GetAccountId() const;
+        std::string GetAccountName();
 
-    int GetAccountId() const;
-	std::string GetAccountName();
+    private:
+        AuthQueue m_queue;
+        XSocket   *m_pSocket;
 
-private:
-	AuthQueue  m_queue;
-	XSocket *m_pSocket;
-
-	uint16 m_nGameIDX;
-	std::string m_szGameName;
-	std::string m_szGameSSU;
-	bool m_bGameIsAdultServer;
-	std::string m_szGameIP;
-	int m_nGamePort;
+        uint16      m_nGameIDX;
+        std::string m_szGameName;
+        std::string m_szGameSSU;
+        bool        m_bGameIsAdultServer;
+        std::string m_szGameIP;
+        int         m_nGamePort;
 };
-
-#endif // NGEMITY_GAMEAUTHSESSION_H

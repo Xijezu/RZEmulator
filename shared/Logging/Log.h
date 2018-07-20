@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
@@ -15,10 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_LOG_H
-#define NGEMITY_LOG_H
-
 #include "Define.h"
 #include "AsioHacksFwd.h"
 #include "LogCommon.h"
@@ -185,5 +182,3 @@ void check_args(std::string const &, ...);
 
 #define NG_LOG_FATAL(filterType__, ...) \
     NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
-
-#endif

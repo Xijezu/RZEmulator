@@ -1,3 +1,4 @@
+#pragma once
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -14,10 +15,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef NGEMITY_QUEST_H
-#define NGEMITY_QUEST_H
-
 #include "Common.h"
 #include "QuestBase.h"
 
@@ -30,33 +27,30 @@ struct QuestEventHandler {
 
 class Quest {
 public:
-    static Quest* AllocQuest(QuestEventHandler* handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
-    static bool IsRandomQuest(int code);
-    static void DB_Insert(Player* pPlayer, Quest* pQuest);
+        static Quest* AllocQuest(QuestEventHandler* handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
+        static bool IsRandomQuest(int code);
+        static void DB_Insert(Player* pPlayer, Quest* pQuest);
 
-    Quest() = default;
-    ~Quest() = default;
+        Quest() = default;
+        ~Quest() = default;
 
-    void FreeQuest();
-    int GetQuestCode() const;
-    QuestInstance* GetQuestInstance();
-    int GetQuestID() const;
-    QuestType GetQuestType() const;
+        void FreeQuest();
+        int GetQuestCode() const;
+        QuestInstance* GetQuestInstance();
+        int GetQuestID() const;
+        QuestType GetQuestType() const;
 
-    void SetProgress(QuestProgress progress);
-    int GetValue(int idx) const;
-    int GetStatus(int idx) const;
-    void UpdateStatus(int idx, int value);
-    void IncStatus(int idx, int value);
-    int GetRandomKey(int idx) const;
-    int GetRandomValue(int idx) const;
-    bool IsFinishable() const;
+        void SetProgress(QuestProgress progress);
+        int GetValue(int idx) const;
+        int GetStatus(int idx) const;
+        void UpdateStatus(int idx, int value);
+        void IncStatus(int idx, int value);
+        int GetRandomKey(int idx) const;
+        int GetRandomValue(int idx) const;
+        bool IsFinishable() const;
 
-    QuestBaseServer *m_QuestBase{nullptr};
-    QuestEventHandler *m_Handler{nullptr};
-    QuestInstance m_Instance{};
-    bool m_bIsNeedUpdateToDB{false};
+        QuestBaseServer   *m_QuestBase{nullptr};
+        QuestEventHandler *m_Handler{nullptr};
+        QuestInstance     m_Instance{};
+        bool              m_bIsNeedUpdateToDB{false};
 };
-
-
-#endif // NGEMITY_QUEST_H
