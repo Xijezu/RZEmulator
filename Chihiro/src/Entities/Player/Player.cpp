@@ -38,7 +38,7 @@
 #pragma warning(disable:4355)
 #endif
 
-Player::Player(uint32 handle) : Unit(true), m_session(nullptr), m_TS(TimeSynch(200, 2, 10))
+Player::Player(uint32 handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_session(nullptr)
 {
 #ifdef _MSC_VER
 #   pragma warning(default:4355)
@@ -143,8 +143,8 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
 
 bool Player::ReadCharacter(const std::string &_name, int _race)
 {
-    int mainSummon = 0;
-    int subSummon  = 0;
+    int mainSummon{0};
+    int subSummon{0};
 
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_CHARACTER);
     stmt->setString(0, _name);
@@ -2406,7 +2406,7 @@ void Player::StartQuest(int code, int nStartQuestID, bool bForce)
         return;
     }
 
-    bool bHasRandomQuest = false;
+    bool bHasRandomQuest{false};
     if (Quest::IsRandomQuest(code) && m_QuestManager.HasRandomQuestInfo(code))
         bHasRandomQuest = true;
     if (m_QuestManager.StartQuest(code, nStartQuestID))

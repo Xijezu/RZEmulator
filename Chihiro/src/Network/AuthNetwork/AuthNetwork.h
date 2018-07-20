@@ -121,7 +121,7 @@ class AuthNetwork
         std::atomic<uint32>         m_nLastPingTime;
 
     protected:
-        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), _updateTimer(nullptr), m_nLastPingTime(0)
+        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), _updateTimer(nullptr), m_pThread(nullptr), m_nLastPingTime(0)
         {
 
         }

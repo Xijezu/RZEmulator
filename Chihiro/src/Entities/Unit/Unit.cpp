@@ -1963,7 +1963,7 @@ void Unit::procStateDamage(uint t)
             }
         }
 
-        bool bNeedToProcLightningForceCongestion = false;
+        bool bNeedToProcLightningForceCongestion{false};
         auto stateBase                           = sObjectMgr.GetStateInfo((int)st.m_nCode);
         if (stateBase == nullptr)
             continue;

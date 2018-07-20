@@ -86,13 +86,13 @@ elseif(UNIX)
     # Run out of build tree
     set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 
-   if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
         if(NOT DEBUG)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --no-warnings")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -Wno-narrowing -Wno-deprecated-register")
         else()
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -g3")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -g3 -Wno-narrowing -Wno-deprecated-register")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Wno-overloaded-virtual -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Winvalid-pch -Wfatal-errors -g3 -Wno-narrowing")
         endif()
 
     elseif(CMAKE_C_COMPILER MATCHES "icc")

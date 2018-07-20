@@ -27,7 +27,7 @@ class XSocketThread : public NetworkThread<XSocket>
             sock->Start();
         }
 
-        void SocketRemoved(std::shared_ptr<XSocket> sock) override
+        void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
         {
 
         }

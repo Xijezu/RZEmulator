@@ -44,7 +44,7 @@ public:
 
 	}
 
-	explicit XPacket(uint16 packID, MessageBuffer&& buffer) : m_nPacketID(packID), ByteBuffer(std::move(buffer))
+	explicit XPacket(uint16 packID, MessageBuffer&& buffer) : ByteBuffer(std::move(buffer)), m_nPacketID(packID)
 	{
 	}
 

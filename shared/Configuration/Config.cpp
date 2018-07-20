@@ -100,12 +100,12 @@ T ConfigMgr::GetValueDefault(std::string const& name, T def) const
     {
         return _config.get<T>(bpt::ptree::path_type(name, '/'));
     }
-    catch (bpt::ptree_bad_path)
+    catch (bpt::ptree_bad_path&)
     {
         NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
             name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
     }
-    catch (bpt::ptree_bad_data)
+    catch (bpt::ptree_bad_data&)
     {
         NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
             name.c_str(), _filename.c_str(), std::to_string(def).c_str());
@@ -121,12 +121,12 @@ std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std
     {
         return _config.get<std::string>(bpt::ptree::path_type(name, '/'));
     }
-    catch (bpt::ptree_bad_path)
+    catch (bpt::ptree_bad_path&)
     {
         NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
             name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
     }
-    catch (bpt::ptree_bad_data)
+    catch (bpt::ptree_bad_data&)
     {
         NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
             name.c_str(), _filename.c_str(), def.c_str());

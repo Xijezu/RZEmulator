@@ -22,8 +22,8 @@ class AuthClientSession;
 // Storage object for a player
 struct Player
 {
-    Player() : nAccountID(0), szLoginName(), bIsInGame(false), bIsBlocked(false),
-               nLastServerIDX(0), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
+    Player() : nAccountID(0), szLoginName(), bIsBlocked(false), nLastServerIDX(0),
+               bIsInGame(false), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
                nPermission(0)
     {
     }

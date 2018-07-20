@@ -61,7 +61,6 @@ void ObjectMgr::InitGameContent()
     LoadSummonNameResource();
 }
 
-
 void ObjectMgr::UnloadAll()
 {
     g_vWayPoint.clear();
@@ -94,19 +93,19 @@ void ObjectMgr::LoadItemResource()
     uint32 oldMSTime = getMSTime();
 
     QueryResult result = GameDatabase.Query("SELECT id, type, `group`, class, wear_type, set_id, set_part_flag, rank, level,"
-                                                    "enhance, socket, status_flag, limit_deva, limit_asura, limit_gaia, limit_fighter,"
-                                                    "limit_hunter, limit_magician, limit_summoner, use_min_level, use_max_level, target_min_level,"
-                                                    "target_max_level, `range`, weight, price, endurance, material, summon_id, flag_cashitem,"
-                                                    "flag_wear, flag_use, flag_target_use, flag_duplicate, flag_drop, flag_trade, flag_sell,"
-                                                    "flag_storage, flag_overweight, flag_riding, flag_move, flag_sit, flag_enhance, flag_quest,"
-                                                    "flag_raid, flag_secroute, flag_eventmap, flag_huntaholic, available_period, decrease_type,"
-                                                    "throw_range, distribute_type, base_type_0, base_var1_0, base_var2_0, base_type_1, base_var1_1,"
-                                                    "base_var2_1, base_type_2, base_var1_2, base_var2_2, base_type_3, base_var1_3, base_var2_3, "
-                                                    "opt_type_0, opt_var1_0, opt_var2_0, opt_type_1, opt_var1_1, opt_var2_1, opt_type_2,"
-                                                    "opt_var1_2, opt_var2_2, opt_type_3, opt_var1_3, opt_var2_3, enhance_0_id, enhance_0_01,"
-                                                    "enhance_0_02, enhance_0_03, enhance_0_04, enhance_1_id, enhance_1_01, enhance_1_02,"
-                                                    "enhance_1_03, enhance_1_04, skill_id, state_id, state_level, state_time, state_type, cool_time, "
-                                                    "cool_time_group, script_text, name_id FROM ItemResource;");
+                                            "enhance, socket, status_flag, limit_deva, limit_asura, limit_gaia, limit_fighter,"
+                                            "limit_hunter, limit_magician, limit_summoner, use_min_level, use_max_level, target_min_level,"
+                                            "target_max_level, `range`, weight, price, endurance, material, summon_id, flag_cashitem,"
+                                            "flag_wear, flag_use, flag_target_use, flag_duplicate, flag_drop, flag_trade, flag_sell,"
+                                            "flag_storage, flag_overweight, flag_riding, flag_move, flag_sit, flag_enhance, flag_quest,"
+                                            "flag_raid, flag_secroute, flag_eventmap, flag_huntaholic, available_period, decrease_type,"
+                                            "throw_range, distribute_type, base_type_0, base_var1_0, base_var2_0, base_type_1, base_var1_1,"
+                                            "base_var2_1, base_type_2, base_var1_2, base_var2_2, base_type_3, base_var1_3, base_var2_3, "
+                                            "opt_type_0, opt_var1_0, opt_var2_0, opt_type_1, opt_var1_1, opt_var2_1, opt_type_2,"
+                                            "opt_var1_2, opt_var2_2, opt_type_3, opt_var1_3, opt_var2_3, enhance_0_id, enhance_0_01,"
+                                            "enhance_0_02, enhance_0_03, enhance_0_04, enhance_1_id, enhance_1_01, enhance_1_02,"
+                                            "enhance_1_03, enhance_1_04, skill_id, state_id, state_level, state_time, state_type, cool_time, "
+                                            "cool_time_group, script_text, name_id FROM ItemResource;");
 
     if (!result)
     {
@@ -914,8 +913,8 @@ void ObjectMgr::LoadJobResource()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, stati_id, job_class, job_depth, up_lv, up_jlv,"
-                                                       "available_job_0, available_job_1, available_job_2,"
-                                                       "available_job_3 FROM JobResource;");
+                                               "available_job_0, available_job_1, available_job_2,"
+                                               "available_job_3 FROM JobResource;");
     if (!result)
     {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
@@ -1004,11 +1003,11 @@ void ObjectMgr::LoadJobLevelBonus()
 {
     uint32_t    oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT job_id, "
-                                                       "strength_0, vital_0, dexterity_0, agility_0, intelligence_0, mentality_0, luck_0, "
-                                                       "strength_1, vital_1, dexterity_1, agility_1, intelligence_1, mentality_1, luck_1, "
-                                                       "strength_2, vital_2, dexterity_2, agility_2, intelligence_2, mentality_2, luck_2, "
-                                                       "strength_3, vital_3, dexterity_3, agility_3, intelligence_3, mentality_3, luck_3 "
-                                                       "FROM JobLevelBonus;");
+                                               "strength_0, vital_0, dexterity_0, agility_0, intelligence_0, mentality_0, luck_0, "
+                                               "strength_1, vital_1, dexterity_1, agility_1, intelligence_1, mentality_1, luck_1, "
+                                               "strength_2, vital_2, dexterity_2, agility_2, intelligence_2, mentality_2, luck_2, "
+                                               "strength_3, vital_3, dexterity_3, agility_3, intelligence_3, mentality_3, luck_3 "
+                                               "FROM JobLevelBonus;");
     if (!result)
     {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
@@ -1217,8 +1216,8 @@ void ObjectMgr::LoadSummonResource()
 {
     uint32      oldMSTime = getMSTime();
     QueryResult result    = GameDatabase.Query("SELECT id, type, magic_type, rate, stat_id, size, scale, standard_walk_speed, standard_run_speed,"
-                                                       "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
-                                                       "form, evolve_target, card_id FROM SummonResource;");
+                                               "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
+                                               "form, evolve_target, card_id FROM SummonResource;");
 
     if (!result)
     {
@@ -1309,21 +1308,21 @@ void ObjectMgr::LoadSummonNameResource()
     NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-CreatureStat *const ObjectMgr::GetStatInfo(const int stat_id)
+CreatureStat *ObjectMgr::GetStatInfo(const int stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
         return &_creatureBaseStore[stat_id];
     return nullptr;
 }
 
-ItemTemplate *const ObjectMgr::GetItemBase(const int item_id)
+ItemTemplate *ObjectMgr::GetItemBase(const int item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1)
         return &_itemTemplateStore[item_id];
     return nullptr;
 }
 
-FieldPropTemplate *const ObjectMgr::GetFieldPropBase(int idx)
+FieldPropTemplate *ObjectMgr::GetFieldPropBase(int idx)
 {
     if (_fieldPropTemplateStore.count(idx) == 1)
         return &_fieldPropTemplateStore[idx];
@@ -1431,21 +1430,21 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
     return stat;
 }
 
-JobResourceTemplate *const ObjectMgr::GetJobInfo(const int job_id)
+JobResourceTemplate *ObjectMgr::GetJobInfo(const int job_id)
 {
     if (_jobTemplateStore.count(job_id) == 1)
         return &_jobTemplateStore[job_id];
     return nullptr;
 }
 
-SummonResourceTemplate *const ObjectMgr::GetSummonBase(const int idx)
+SummonResourceTemplate *ObjectMgr::GetSummonBase(const int idx)
 {
     if (_summonResourceStore.count(idx) == 1)
         return &_summonResourceStore[idx];
     return nullptr;
 }
 
-std::vector<MarketInfo> *const ObjectMgr::GetMarketInfo(const std::string &szKey)
+std::vector<MarketInfo> *ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
     if (_marketResourceStore.count(szKey) == 1)
         return &_marketResourceStore[szKey];
@@ -1513,7 +1512,7 @@ int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobI
     return -1;
 }
 
-SkillBase *const ObjectMgr::GetSkillBase(const int skill_id)
+SkillBase *ObjectMgr::GetSkillBase(const int skill_id)
 {
     if (_skillBaseStore.count(skill_id) == 1)
         return &_skillBaseStore[skill_id];
@@ -1532,7 +1531,7 @@ int64 ObjectMgr::GetNeedExp(int level)
     return _levelResourceStore[l - 1].normal_exp;
 }
 
-MonsterBase *const ObjectMgr::GetMonsterInfo(int idx)
+MonsterBase *ObjectMgr::GetMonsterInfo(int idx)
 {
     if (_monsterBaseStore.count(idx) == 1)
         return &_monsterBaseStore[idx];
@@ -1546,7 +1545,7 @@ int64 ObjectMgr::GetNeedSummonExp(int level)
     return 0;
 }
 
-QuestBaseServer *const ObjectMgr::GetQuestBase(int code)
+QuestBaseServer *ObjectMgr::GetQuestBase(int code)
 {
     if (_questTemplateStore.count(code) == 1)
         return &_questTemplateStore[code];
@@ -1603,17 +1602,17 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
 
 }
 
-QuestLink *const ObjectMgr::GetQuestLink(int code, int start_id)
+QuestLink *ObjectMgr::GetQuestLink(int code, int start_id)
 {
     auto l = std::find_if(_questLinkStore.begin(),
-                       _questLinkStore.end(),
-                       [&code, start_id](const QuestLink &ql) {
-                           return ql.code == code && (ql.nStartTextID == start_id || start_id == 0);
-                       });
+                          _questLinkStore.end(),
+                          [&code, start_id](const QuestLink &ql) {
+                              return ql.code == code && (ql.nStartTextID == start_id || start_id == 0);
+                          });
     return l != _questLinkStore.end() ? &*l : nullptr;
 }
 
-StateTemplate *const ObjectMgr::GetStateInfo(int code)
+StateTemplate *ObjectMgr::GetStateInfo(int code)
 {
     if (_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];
