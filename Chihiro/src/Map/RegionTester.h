@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Object.h"
 #include <memory>
 
@@ -22,6 +22,7 @@ struct RegionTester
 {
     virtual void Init(Position OriginalPos, Position TargetPos, float RegionProperty) = 0;
     virtual bool IsInRegion(Position pos) = 0;
+    virtual ~RegionTester() = default;
 };
 
 struct DirectionRegionTester : public RegionTester

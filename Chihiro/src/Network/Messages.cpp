@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Messages.h"
 #include "Player.h"
@@ -26,7 +26,6 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "GroupManager.h"
-#include "Monster.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -740,7 +739,7 @@ void Messages::SendQuestList(Player *pPlayer)
     XPacket questPct(TS_SC_QUEST_LIST);
     questPct << (uint16)pPlayer->GetActiveQuestCount();
 
-    /* FUNCTOR BEGIN */
+    /* FUNCTOR BEGIN*/
     auto functor = [&questPct](Quest *pQuest) -> void {
         questPct << pQuest->m_Instance.Code;
         questPct << pQuest->m_Instance.nStartID;
@@ -766,7 +765,7 @@ void Messages::SendQuestList(Player *pPlayer)
             questPct << nStatu;
         }
     };
-    /* FUNCTOR END */
+    /* FUNCTOR END*/
     pPlayer->DoEachActiveQuest(functor);
     pPlayer->SendPacket(questPct);
 }

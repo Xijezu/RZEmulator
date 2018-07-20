@@ -16,13 +16,13 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 /** \addtogroup u2w User to World Communication
  *  @{
  *  \file WorldSocketMgr.h
  *  \author Derex <derex101@gmail.com>
- */
+*/
 #include "SocketMgr.h"
 #include "XSocketThread.h"
 #include "Config.h"

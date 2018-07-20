@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #ifndef MX_TIMEZONE
 #if _MSC_VER >= 1900
 #define MX_TIMEZONE _timezone
@@ -133,7 +133,7 @@ class ByteBuffer
 
         * @param  value Data to write.
         * @param  bitCount Number of bits to store the value on.
-        */
+       */
         template<typename T>
         void PutBits(size_t pos, T value, uint32 bitCount)
         {

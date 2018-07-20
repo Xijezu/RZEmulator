@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "QueryResult.h"
 #include "Errors.h"
@@ -68,7 +68,7 @@ static uint32 SizeForType(MYSQL_FIELD* field)
             Following types are not sent over the wire:
             MYSQL_TYPE_ENUM:
             MYSQL_TYPE_SET:
-            */
+           */
         default:
             NG_LOG_WARN("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32(field->type));
             return 0;

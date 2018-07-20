@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "GameList.h"
 #include "PlayerList.h"
@@ -30,7 +30,7 @@ class AuthGameSession : public XSession
         ~AuthGameSession();
 
         // Network handlers
-        void OnClose();
+        void OnClose() override;
         ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
         bool IsEncrypted() const override

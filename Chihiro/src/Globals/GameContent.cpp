@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "GameContent.h"
 #include "World.h"
@@ -384,7 +384,7 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
     sWorld.EnumMovableObject(rOriginalPos, layer, fEffectLength, vList, true, true);
     vTargetList.clear();
 
-    std::unique_ptr<RegionTester> regionTest{ };
+    std::unique_ptr<RegionTester> regionTest;
     switch (nRegionType)
     {
         case 0:

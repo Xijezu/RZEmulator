@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "CompilerDefs.h"
 #include <boost/detail/endian.hpp>
 
@@ -63,10 +63,10 @@
 typedef unsigned long  DWORD;
 typedef unsigned short WORD;
 
-#ifndef LOWORD
+#if PLATFORM != PLATFORM_WINDOWS && !defined(LOWORD)
 # define LOWORD(a) ((WORD)(a))
 #endif // #ifndef LOWORD
-#ifndef HIWORD
+#if PLATFORM != PLATFORM_WINDOWS && !defined(HIWORD)
 # define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
 #endif // #ifndef HIWORD
 

@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "SharedMutex.h"
 #include "RegionBlock.h"
@@ -42,7 +42,7 @@ class RegionContainer
         bool IsValidRegion(uint rx, uint ry, uint8 layer);
         Region *GetRegion(WorldObject *pObject);
         Region *GetRegion(uint rx, uint ry, uint8 layer);
-        /* Deprecated */
+        /* Deprecated*/
         void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, RegionFunctor &fn);
         void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, RegionFunctor &fn);
         void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, RegionFunctor &fn);

@@ -13,7 +13,7 @@
   *
   *  You should have received a copy of the GNU General Public License along
   *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ */
 
 #include "Common.h"
 #include "WorldSession.h"
@@ -479,7 +479,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                     }
                 }
                 return;
-            } //if (true /* IsActable() && IsMovable() && isInWorld */)
+            } //if (true /* IsActable() && IsMovable() && isInWorld*/)
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, 0);
             return;
         }

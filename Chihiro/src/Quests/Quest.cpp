@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Quest.h"
 #include "ObjectMgr.h"
@@ -173,7 +173,7 @@ bool Quest::IsFinishable() const
                 /*&& m_Instance.nStatus[3] >= m_QuestBase->nValue[7]
                 && m_Instance.nStatus[4] >= m_QuestBase->nValue[9])
                  * For later usage
-                 */
+                */
                 return true;
             return false;
 

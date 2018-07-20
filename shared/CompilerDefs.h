@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_UNIX    1
 #define PLATFORM_APPLE   2

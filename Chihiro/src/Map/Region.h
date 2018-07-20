@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "Common.h"
 #include "SharedMutex.h"
 #include "Functors.h"
@@ -31,7 +31,7 @@ class Region
 
         void AddObject(WorldObject *obj);
         void RemoveObject(WorldObject *obj);
-        /* Deprecated */
+        /* Deprecated*/
         uint DoEachClient(WorldObjectFunctor &fn);
         uint DoEachStaticObject(WorldObjectFunctor &fn);
         uint DoEachMovableObject(WorldObjectFunctor &fn);

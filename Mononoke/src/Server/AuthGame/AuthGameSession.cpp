@@ -13,7 +13,7 @@
   *
   *  You should have received a copy of the GNU General Public License along
   *  with this program. If not, see <http://www.gnu.org/licenses/>.
-  */
+ */
 
 #include "GameList.h"
 #include "PlayerList.h"
@@ -68,6 +68,7 @@ void AuthGameSession::OnClose()
         sGameMapList.RemoveGame(g->nIDX);
         NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
     }
+
 }
 
 enum eStatus

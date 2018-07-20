@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "ObjectMgr.h"
 #include <fstream>
@@ -22,12 +22,9 @@
 #include "Timer.h"
 #include "MemPool.h"
 #include "World.h"
-#include "Maploader.h"
-#include "NPC.h"
 #include "DungeonManager.h"
 #include "MixManager.h"
 #include "GameRule.h"
-#include "Skill.h"
 #include "WorldLocation.h"
 
 ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
@@ -1623,7 +1620,7 @@ StateTemplate *const ObjectMgr::GetStateInfo(int code)
     return nullptr;
 }
 
-CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type */, int level)
+CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type*/, int level)
 {
     if (_summonBonusStore.count(summon_code) == 0)
         return CreatureStat{ };

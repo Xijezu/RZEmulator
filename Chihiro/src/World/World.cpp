@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "World.h"
 #include "DatabaseEnv.h"
@@ -411,7 +411,7 @@ void World::Update(uint diff)
         m_timers[WUPDATE_WORLDLOCATION].Reset();
         // @todo: Update worldlocation
     }
-    */
+  */
 }
 
 void World::UpdateSessions(uint diff)
@@ -645,7 +645,7 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     if (code > 0)
     {
         if (sObjectMgr.GetItemBase(code)->group == 13)
-            fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway? */
+            fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway?*/
     }
     auto perc = percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod;
     auto rand = irand(1, 0x5F5E100u);
@@ -719,7 +719,7 @@ bool World::ProcTame(Monster *pMonster)
      * However, since I'm not interested in having bs mechanics, I wont add it.
      * lPenalty = 0.05f * (float)((20 - pMonster->GetLevel()) + player->GetLevel());
      * lPenalty is multiplied with the TamePercentage here
-     */
+   */
     float fTameProbability = pMonster->GetTamePercentage();
     auto  pSkill           = player->GetSkill(SKILL_CREATURE_TAMING);
     if (pSkill == nullptr)

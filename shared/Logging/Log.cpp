@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Log.h"
 #include "AppenderConsole.h"
@@ -280,7 +280,7 @@ std::string Log::GetTimestampStr()
     }
 }
 
-bool Log::SetLogLevel(std::string const& name, const char* newLevelc, bool isLogger /* = true */)
+bool Log::SetLogLevel(std::string const &name, const char *newLevelc, bool isLogger /* = true*/)
 {
     LogLevel newLevel = LogLevel(atoi(newLevelc));
     if (newLevel < 0)

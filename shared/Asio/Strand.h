@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 #include "IoContext.h"
 #include <boost/asio/strand.hpp>
 
@@ -28,7 +28,7 @@ namespace NGemity
     {
         /**
           Hack to make it possible to forward declare strand (which is a inner class)
-        */
+       */
         class Strand : public IoContextBaseNamespace::IoContextBase::strand
         {
             public:

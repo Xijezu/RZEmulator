@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Monster.h"
 #include "Messages.h"
@@ -143,7 +143,7 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
         int       i = 0;
         for (auto &vp : vPartyContribute)
         {
-            if (m_Base->monster_type >= 31 /* && isDungeonRaidMonster */)
+            if (m_Base->monster_type >= 31 /* && isDungeonRaidMonster*/)
             {
                 Priority.PickupOrder.hPlayer[i]  = 0;
                 Priority.PickupOrder.nPartyID[i] = 0;
@@ -419,7 +419,7 @@ void Monster::Update(uint diff)
             //if(GetHealth() == GetMaxHealth())
             //clearHateList();
         }
-        if (IsInWorld() && IsActable() && (/* m_bIsDungeonRaidMonster && */!m_bComeBackHome))
+        if (IsInWorld() && IsActable() && (/* m_bIsDungeonRaidMonster &&*/!m_bComeBackHome))
             processFirstAttack(ct);
         if (IsInWorld() && IsActable() && IsMovable() && !m_bComeBackHome)
             processMove(ct);
@@ -680,7 +680,7 @@ void Monster::findNextEnemy()
                 if (unit != nullptr
                     && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize), (uint)(unit->GetPositionY() / g_nRegionSize),
                                                 (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) != 0
-                    /*&&  IsVisible(unit) */)
+                    /*&&  IsVisible(unit)*/)
                 {
                     nMaxHate = nHate;
                     target   = ht.uid;
@@ -844,7 +844,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
         SetStatus(STATUS_TRACKING);
         auto homePosition   = m_pRespawn.GetPosition();
         auto track_distance = myPosition.GetExactDist2d(&homePosition);
-        if (/*isDungeonRaidMonster || */GetChaseRange() >= track_distance)
+        if (/*isDungeonRaidMonster ||*/GetChaseRange() >= track_distance)
         {
             if (m_nLastTrackTime + 50 < t)
             {

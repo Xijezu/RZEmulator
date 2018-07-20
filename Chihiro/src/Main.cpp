@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
     auto        worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
     std::string bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
-    if (XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2) == -1)
+    if (!XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2))
     {
         NG_LOG_ERROR("server.worldserver", "Failed to start network");
         return -1;
