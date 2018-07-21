@@ -679,7 +679,7 @@ void Monster::findNextEnemy()
                 auto *unit = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
                 if (unit != nullptr
                     && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize), (uint)(unit->GetPositionY() / g_nRegionSize),
-                                                (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) != 0
+                                               (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) != 0
                     /*&&  IsVisible(unit)*/)
                 {
                     nMaxHate = nHate;
@@ -828,9 +828,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint t)
             && IsInWorld()
             && !pEnemy->IsMoving(t)
             && ((GetRealAttackRange() * 1.2f >= GetTargetPos().GetExactDist2d(&enemyPosition) - rx1)
-            || !IsActable()
-            || !IsMovable()
-            || m_nMovableTime > t))
+                || !IsActable()
+                || !IsMovable()
+                || m_nMovableTime > t))
         {
             return;
         }
@@ -1066,9 +1066,9 @@ HateTag *Monster::getHateTag(uint handle, uint t)
 {
     auto pos = std::find_if(m_vHateList.begin(),
                             m_vHateList.end(),
-                            [handle] (const HateTag& ht) { return ht.uid == handle; });
+                            [handle](const HateTag &ht) { return ht.uid == handle; });
 
-    if(pos != m_vHateList.end())
+    if (pos != m_vHateList.end())
     {
         pos->nTime = t;
         return &*pos;

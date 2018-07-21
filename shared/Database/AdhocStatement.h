@@ -23,7 +23,7 @@
 class BasicStatementTask : public SQLOperation
 {
     public:
-        BasicStatementTask(const char* sql, bool async = false);
+        BasicStatementTask(const char *sql, bool async = false);
         ~BasicStatementTask();
 
         bool Execute() override;
@@ -31,7 +31,7 @@ class BasicStatementTask : public SQLOperation
         QueryResultFuture GetFuture() const { return m_result->get_future(); }
 
     private:
-        const char * m_sql;      //- Raw query to be executed
+        const char *m_sql;      //- Raw query to be executed
         bool m_has_result;
-        QueryResultPromise * m_result;
+        QueryResultPromise *m_result;
 };

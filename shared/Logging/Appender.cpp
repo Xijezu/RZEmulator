@@ -21,16 +21,16 @@
 #include <sstream>
 
 Appender::Appender(uint8 _id, std::string const &_name, LogLevel _level /* = LOG_LEVEL_DISABLED*/, AppenderFlags _flags /* = APPENDER_FLAGS_NONE*/) :
-        id(_id), name(_name), level(_level), flags(_flags) { }
+        id(_id), name(_name), level(_level), flags(_flags) {}
 
-Appender::~Appender() { }
+Appender::~Appender() {}
 
 uint8 Appender::getId() const
 {
     return id;
 }
 
-std::string const& Appender::getName() const
+std::string const &Appender::getName() const
 {
     return name;
 }
@@ -50,7 +50,7 @@ void Appender::setLogLevel(LogLevel _level)
     level = _level;
 }
 
-void Appender::write(LogMessage* message)
+void Appender::write(LogMessage *message)
 {
     if (!level || level > message->level)
         return;
@@ -70,7 +70,7 @@ void Appender::write(LogMessage* message)
     _write(message);
 }
 
-const char* Appender::getLogLevelString(LogLevel level)
+const char *Appender::getLogLevelString(LogLevel level)
 {
     switch (level)
     {

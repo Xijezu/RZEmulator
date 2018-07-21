@@ -21,8 +21,8 @@
 //- Union that holds element data
 union SQLElementUnion
 {
-    PreparedStatement * stmt;
-    const char        * query;
+    PreparedStatement *stmt;
+    const char        *query;
 };
 
 //- Type specifier of our element data
@@ -42,8 +42,8 @@ struct SQLElementData
 //- For ambigious resultsets
 union SQLResultSetUnion
 {
-    PreparedResultSet * presult;
-    ResultSet         * qresult;
+    PreparedResultSet *presult;
+    ResultSet         *qresult;
 };
 
 class MySQLConnection;
@@ -51,9 +51,9 @@ class MySQLConnection;
 class SQLOperation
 {
     public:
-        SQLOperation(): m_conn(NULL) { }
+        SQLOperation() : m_conn(NULL) {}
 
-        virtual ~SQLOperation() { }
+        virtual ~SQLOperation() {}
 
         virtual int call()
         {
@@ -63,11 +63,11 @@ class SQLOperation
 
         virtual bool Execute() = 0;
 
-        virtual void SetConnection(MySQLConnection* con) { m_conn = con; }
+        virtual void SetConnection(MySQLConnection *con) { m_conn = con; }
 
-        MySQLConnection * m_conn;
+        MySQLConnection *m_conn;
 
     private:
-        SQLOperation(SQLOperation const& right) = delete;
-        SQLOperation& operator=(SQLOperation const& right) = delete;
+        SQLOperation(SQLOperation const &right) = delete;
+        SQLOperation &operator=(SQLOperation const &right) = delete;
 };

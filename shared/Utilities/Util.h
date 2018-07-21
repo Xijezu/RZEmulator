@@ -40,8 +40,8 @@ template<typename T, class S> struct Finder
 
 class Tokenizer
 {
-public:
-        typedef std::vector<char const*> StorageType;
+    public:
+        typedef std::vector<char const *> StorageType;
 
         typedef StorageType::size_type size_type;
 
@@ -60,21 +60,21 @@ public:
 
         size_type size() const { return m_storage.size(); }
 
-        reference operator [] (size_type i) { return m_storage[i]; }
+        reference operator[](size_type i) { return m_storage[i]; }
 
-        const_reference operator [] (size_type i) const { return m_storage[i]; }
+        const_reference operator[](size_type i) const { return m_storage[i]; }
 
     private:
-        char * m_str;
+        char *m_str;
         StorageType m_storage;
 };
 
 void stripLineInvisibleChars(std::string &src);
 
-int64 MoneyStringToMoney(const std::string& moneyString);
+int64 MoneyStringToMoney(const std::string &moneyString);
 
 std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hoursOnly = false);
-uint32 TimeStringToSecs(const std::string& timestring);
+uint32 TimeStringToSecs(const std::string &timestring);
 std::string TimeToTimestampStr(time_t t);
 
 // See here: http://www.martinbroadhurst.com/case-insensitive-string-comparison-in-c.html
@@ -86,7 +86,7 @@ struct iequal
     }
 };
 
-inline bool iequals(const std::string& str1, const std::string& str2)
+inline bool iequals(const std::string &str1, const std::string &str2)
 {
     return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
 }
@@ -128,7 +128,7 @@ inline bool roll_chance_i(int chance)
     return chance > irand(0, 99);
 }
 
-inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
+inline void ApplyPercentModFloatVar(float &var, float val, bool apply)
 {
     if (val == -100.0f)     // prevent set var to zero
         val = -99.99f;
@@ -136,52 +136,53 @@ inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
 }
 
 // Percentage calculation
-template <class T, class U>
+template<class T, class U>
 inline T CalculatePct(T base, U pct)
 {
     return T(base * static_cast<float>(pct) / 100.0f);
 }
 
-template <class T, class U>
+template<class T, class U>
 inline T GetPct(T curr, U max)
 {
     return T(curr / static_cast<float>(max) * 100);
 };
 
-template <class T, class U>
+template<class T, class U>
 inline T AddPct(T &base, U pct)
 {
     return base += CalculatePct(base, pct);
 }
 
-template <class T, class U>
+template<class T, class U>
 inline T ApplyPct(T &base, U pct)
 {
     return base = CalculatePct(base, pct);
 }
 
-template <class T>
-inline T RoundToInterval(T& num, T floor, T ceil)
+template<class T>
+inline T RoundToInterval(T &num, T floor, T ceil)
 {
     return num = std::min(std::max(num, floor), ceil);
 }
 
 // UTF8 handling
-bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr);
+bool Utf8toWStr(const std::string &utf8str, std::wstring &wstr);
 // in wsize==max size of buffer, out wsize==real string size
-bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize);
-inline bool Utf8toWStr(const std::string& utf8str, wchar_t* wstr, size_t& wsize)
+bool Utf8toWStr(char const *utf8str, size_t csize, wchar_t *wstr, size_t &wsize);
+
+inline bool Utf8toWStr(const std::string &utf8str, wchar_t *wstr, size_t &wsize)
 {
     return Utf8toWStr(utf8str.c_str(), utf8str.size(), wstr, wsize);
 }
 
-bool WStrToUtf8(std::wstring wstr, std::string& utf8str);
+bool WStrToUtf8(std::wstring wstr, std::string &utf8str);
 // size==real string size
-bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
+bool WStrToUtf8(wchar_t *wstr, size_t size, std::string &utf8str);
 
-size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
-void utf8truncate(std::string& utf8str, size_t len);
-bool StringToBool(std::string const& str);
+size_t utf8length(std::string &utf8str);                    // set string to "" if invalid utf8 sequence
+void utf8truncate(std::string &utf8str, size_t len);
+bool StringToBool(std::string const &str);
 
 inline bool isBasicLatinCharacter(wchar_t wchar)
 {
@@ -245,19 +246,19 @@ inline bool isEastAsianCharacter(wchar_t wchar)
 
 inline bool isNumeric(wchar_t wchar)
 {
-    return (wchar >= L'0' && wchar <=L'9');
+    return (wchar >= L'0' && wchar <= L'9');
 }
 
 inline bool isNumeric(char c)
 {
-    return (c >= '0' && c <='9');
+    return (c >= '0' && c <= '9');
 }
 
 bool isMXNumeric(std::string);
 
-inline bool isNumeric(char const* str)
+inline bool isNumeric(char const *str)
 {
-    for (char const* c = str; *c; ++c)
+    for (char const *c = str; *c; ++c)
         if (!isNumeric(*c))
             return false;
 
@@ -304,20 +305,20 @@ inline bool isEastAsianString(const std::wstring &wstr, bool numericOrSpace)
 inline wchar_t wcharToUpper(wchar_t wchar)
 {
     if (wchar >= L'a' && wchar <= L'z')                      // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
-        return wchar_t(uint16(wchar)-0x0020);
+        return wchar_t(uint16(wchar) - 0x0020);
     if (wchar == 0x00DF)                                     // LATIN SMALL LETTER SHARP S
         return wchar_t(0x1E9E);
     if (wchar >= 0x00E0 && wchar <= 0x00F6)                  // LATIN SMALL LETTER A WITH GRAVE - LATIN SMALL LETTER O WITH DIAERESIS
-        return wchar_t(uint16(wchar)-0x0020);
+        return wchar_t(uint16(wchar) - 0x0020);
     if (wchar >= 0x00F8 && wchar <= 0x00FE)                  // LATIN SMALL LETTER O WITH STROKE - LATIN SMALL LETTER THORN
-        return wchar_t(uint16(wchar)-0x0020);
+        return wchar_t(uint16(wchar) - 0x0020);
     if (wchar >= 0x0101 && wchar <= 0x012F)                  // LATIN SMALL LETTER A WITH MACRON - LATIN SMALL LETTER I WITH OGONEK (only %2=1)
     {
         if (wchar % 2 == 1)
-            return wchar_t(uint16(wchar)-0x0001);
+            return wchar_t(uint16(wchar) - 0x0001);
     }
     if (wchar >= 0x0430 && wchar <= 0x044F)                  // CYRILLIC SMALL LETTER A - CYRILLIC SMALL LETTER YA
-        return wchar_t(uint16(wchar)-0x0020);
+        return wchar_t(uint16(wchar) - 0x0020);
     if (wchar == 0x0451)                                     // CYRILLIC SMALL LETTER IO
         return wchar_t(0x0401);
 
@@ -332,74 +333,74 @@ inline wchar_t wcharToUpperOnlyLatin(wchar_t wchar)
 inline wchar_t wcharToLower(wchar_t wchar)
 {
     if (wchar >= L'A' && wchar <= L'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
-        return wchar_t(uint16(wchar)+0x0020);
+        return wchar_t(uint16(wchar) + 0x0020);
     if (wchar >= 0x00C0 && wchar <= 0x00D6)                  // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
-        return wchar_t(uint16(wchar)+0x0020);
+        return wchar_t(uint16(wchar) + 0x0020);
     if (wchar >= 0x00D8 && wchar <= 0x00DE)                  // LATIN CAPITAL LETTER O WITH STROKE - LATIN CAPITAL LETTER THORN
-        return wchar_t(uint16(wchar)+0x0020);
+        return wchar_t(uint16(wchar) + 0x0020);
     if (wchar >= 0x0100 && wchar <= 0x012E)                  // LATIN CAPITAL LETTER A WITH MACRON - LATIN CAPITAL LETTER I WITH OGONEK (only %2=0)
     {
         if (wchar % 2 == 0)
-            return wchar_t(uint16(wchar)+0x0001);
+            return wchar_t(uint16(wchar) + 0x0001);
     }
     if (wchar == 0x1E9E)                                     // LATIN CAPITAL LETTER SHARP S
         return wchar_t(0x00DF);
     if (wchar == 0x0401)                                     // CYRILLIC CAPITAL LETTER IO
         return wchar_t(0x0451);
     if (wchar >= 0x0410 && wchar <= 0x042F)                  // CYRILLIC CAPITAL LETTER A - CYRILLIC CAPITAL LETTER YA
-        return wchar_t(uint16(wchar)+0x0020);
+        return wchar_t(uint16(wchar) + 0x0020);
 
     return wchar;
 }
 
-inline void wstrToUpper(std::wstring& str)
+inline void wstrToUpper(std::wstring &str)
 {
-    std::transform( str.begin(), str.end(), str.begin(), wcharToUpper );
+    std::transform(str.begin(), str.end(), str.begin(), wcharToUpper);
 }
 
-inline void wstrToLower(std::wstring& str)
+inline void wstrToLower(std::wstring &str)
 {
-    std::transform( str.begin(), str.end(), str.begin(), wcharToLower );
+    std::transform(str.begin(), str.end(), str.begin(), wcharToLower);
 }
 
-struct tm* localtime_r(const time_t* time, struct tm *result);
+struct tm *localtime_r(const time_t *time, struct tm *result);
 
-bool utf8ToConsole(const std::string& utf8str, std::string& conStr);
-bool consoleToUtf8(const std::string& conStr, std::string& utf8str);
-bool Utf8FitTo(const std::string& str, std::wstring search);
-void utf8printf(FILE* out, const char *str, ...);
-void vutf8printf(FILE* out, const char *str, va_list* ap);
+bool utf8ToConsole(const std::string &utf8str, std::string &conStr);
+bool consoleToUtf8(const std::string &conStr, std::string &utf8str);
+bool Utf8FitTo(const std::string &str, std::wstring search);
+void utf8printf(FILE *out, const char *str, ...);
+void vutf8printf(FILE *out, const char *str, va_list *ap);
 
-uint32 CreatePIDFile(const std::string& filename);
+uint32 CreatePIDFile(const std::string &filename);
 
-std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
+std::string ByteArrayToHexStr(uint8 const *bytes, uint32 length, bool reverse = false);
 
-void string_replace(std::string& str, const std::string& from, const std::string& to);
+void string_replace(std::string &str, const std::string &from, const std::string &to);
 
 template<typename ... Args>
-std::string string_format( const std::string& format, Args ... args )
+std::string string_format(const std::string &format, Args ... args)
 {
-    size_t                  size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
-    std::unique_ptr<char[]> buf( new char[ size ] );
-    snprintf( buf.get(), size, format.c_str(), args ... );
-    return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+    size_t                  size = snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+    std::unique_ptr<char[]> buf(new char[size]);
+    snprintf(buf.get(), size, format.c_str(), args ...);
+    return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
 }
 
 // simple class for not-modifyable list
-template <typename T>
+template<typename T>
 class HookList
 {
         typedef typename std::list<T>::iterator ListIterator;
     private:
         typename std::list<T> m_list;
     public:
-        HookList<T> & operator+=(T t)
+        HookList<T> &operator+=(T t)
         {
             m_list.push_back(t);
             return *this;
         }
 
-        HookList<T> & operator-=(T t)
+        HookList<T> &operator-=(T t)
         {
             m_list.remove(t);
             return *this;
@@ -423,7 +424,7 @@ class HookList
 
 class flag128
 {
-private:
+    private:
         uint32 part[4];
 
     public:
@@ -461,7 +462,7 @@ private:
             part[3] = p4;
         }
 
-        inline bool operator <(const flag128 &right) const
+        inline bool operator<(const flag128 &right) const
         {
             for (uint8 i = 4; i > 0; --i)
             {
@@ -473,7 +474,7 @@ private:
             return false;
         }
 
-        inline bool operator ==(const flag128 &right) const
+        inline bool operator==(const flag128 &right) const
         {
             return
                     (
@@ -484,12 +485,12 @@ private:
                     );
         }
 
-        inline bool operator !=(const flag128 &right) const
+        inline bool operator!=(const flag128 &right) const
         {
-            return !this->operator ==(right);
+            return !this->operator==(right);
         }
 
-        inline flag128 & operator =(const flag128 &right)
+        inline flag128 &operator=(const flag128 &right)
         {
             part[0] = right.part[0];
             part[1] = right.part[1];
@@ -498,13 +499,13 @@ private:
             return *this;
         }
 
-        inline flag128 operator &(const flag128 &right) const
+        inline flag128 operator&(const flag128 &right) const
         {
             return flag128(part[0] & right.part[0], part[1] & right.part[1],
                            part[2] & right.part[2], part[3] & right.part[3]);
         }
 
-        inline flag128 & operator &=(const flag128 &right)
+        inline flag128 &operator&=(const flag128 &right)
         {
             part[0] &= right.part[0];
             part[1] &= right.part[1];
@@ -513,13 +514,13 @@ private:
             return *this;
         }
 
-        inline flag128 operator |(const flag128 &right) const
+        inline flag128 operator|(const flag128 &right) const
         {
             return flag128(part[0] | right.part[0], part[1] | right.part[1],
                            part[2] | right.part[2], part[3] | right.part[3]);
         }
 
-        inline flag128 & operator |=(const flag128 &right)
+        inline flag128 &operator|=(const flag128 &right)
         {
             part[0] |= right.part[0];
             part[1] |= right.part[1];
@@ -528,18 +529,18 @@ private:
             return *this;
         }
 
-        inline flag128 operator ~() const
+        inline flag128 operator~() const
         {
             return flag128(~part[0], ~part[1], ~part[2], ~part[3]);
         }
 
-        inline flag128 operator ^(const flag128 &right) const
+        inline flag128 operator^(const flag128 &right) const
         {
             return flag128(part[0] ^ right.part[0], part[1] ^ right.part[1],
                            part[2] ^ right.part[2], part[3] ^ right.part[3]);
         }
 
-        inline flag128 & operator ^=(const flag128 &right)
+        inline flag128 &operator^=(const flag128 &right)
         {
             part[0] ^= right.part[0];
             part[1] ^= right.part[1];
@@ -553,17 +554,17 @@ private:
             return (part[0] != 0 || part[1] != 0 || part[2] != 0 || part[3] != 0);
         }
 
-        inline bool operator !() const
+        inline bool operator!() const
         {
             return !this->operator bool();
         }
 
-        inline uint32 & operator [](uint8 el)
+        inline uint32 &operator[](uint8 el)
         {
             return part[el];
         }
 
-        inline const uint32 & operator [](uint8 el) const
+        inline const uint32 &operator[](uint8 el) const
         {
             return part[el];
         }
@@ -571,7 +572,7 @@ private:
 
 class flag96
 {
-private:
+    private:
         uint32 part[3];
 
     public:
@@ -606,7 +607,7 @@ private:
             part[2] = p3;
         }
 
-        inline bool operator <(const flag96 &right) const
+        inline bool operator<(const flag96 &right) const
         {
             for (uint8 i = 3; i > 0; --i)
             {
@@ -618,7 +619,7 @@ private:
             return false;
         }
 
-        inline bool operator ==(const flag96 &right) const
+        inline bool operator==(const flag96 &right) const
         {
             return
                     (
@@ -628,12 +629,12 @@ private:
                     );
         }
 
-        inline bool operator !=(const flag96 &right) const
+        inline bool operator!=(const flag96 &right) const
         {
-            return !this->operator ==(right);
+            return !this->operator==(right);
         }
 
-        inline flag96 & operator =(const flag96 &right)
+        inline flag96 &operator=(const flag96 &right)
         {
             part[0] = right.part[0];
             part[1] = right.part[1];
@@ -641,13 +642,13 @@ private:
             return *this;
         }
 
-        inline flag96 operator &(const flag96 &right) const
+        inline flag96 operator&(const flag96 &right) const
         {
             return flag96(part[0] & right.part[0], part[1] & right.part[1],
                           part[2] & right.part[2]);
         }
 
-        inline flag96 & operator &=(const flag96 &right)
+        inline flag96 &operator&=(const flag96 &right)
         {
             part[0] &= right.part[0];
             part[1] &= right.part[1];
@@ -655,13 +656,13 @@ private:
             return *this;
         }
 
-        inline flag96 operator |(const flag96 &right) const
+        inline flag96 operator|(const flag96 &right) const
         {
             return flag96(part[0] | right.part[0], part[1] | right.part[1],
                           part[2] | right.part[2]);
         }
 
-        inline flag96 & operator |=(const flag96 &right)
+        inline flag96 &operator|=(const flag96 &right)
         {
             part[0] |= right.part[0];
             part[1] |= right.part[1];
@@ -669,18 +670,18 @@ private:
             return *this;
         }
 
-        inline flag96 operator ~() const
+        inline flag96 operator~() const
         {
             return flag96(~part[0], ~part[1], ~part[2]);
         }
 
-        inline flag96 operator ^(const flag96 &right) const
+        inline flag96 operator^(const flag96 &right) const
         {
             return flag96(part[0] ^ right.part[0], part[1] ^ right.part[1],
                           part[2] ^ right.part[2]);
         }
 
-        inline flag96 & operator ^=(const flag96 &right)
+        inline flag96 &operator^=(const flag96 &right)
         {
             part[0] ^= right.part[0];
             part[1] ^= right.part[1];
@@ -693,17 +694,17 @@ private:
             return (part[0] != 0 || part[1] != 0 || part[2] != 0);
         }
 
-        inline bool operator !() const
+        inline bool operator!() const
         {
             return !this->operator bool();
         }
 
-        inline uint32 & operator [](uint8 el)
+        inline uint32 &operator[](uint8 el)
         {
             return part[el];
         }
 
-        inline const uint32 & operator [](uint8 el) const
+        inline const uint32 &operator[](uint8 el) const
         {
             return part[el];
         }
@@ -719,7 +720,7 @@ enum ComparisionType
     COMP_TYPE_MAX
 };
 
-template <class T>
+template<class T>
 bool CompareValues(ComparisionType type, T val1, T val2)
 {
     switch (type)

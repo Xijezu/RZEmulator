@@ -58,43 +58,52 @@ documentation and/or software.
 ///////////////////////////////////////////////
 
 // F, G, H and I are basic MD5 functions.
-inline MD5::uint4 MD5::F(uint4 x, uint4 y, uint4 z) {
+inline MD5::uint4 MD5::F(uint4 x, uint4 y, uint4 z)
+{
     return (x & y) | (~x & z);
 }
 
-inline MD5::uint4 MD5::G(uint4 x, uint4 y, uint4 z) {
+inline MD5::uint4 MD5::G(uint4 x, uint4 y, uint4 z)
+{
     return (x & z) | (y & (~z));
 }
 
-inline MD5::uint4 MD5::H(uint4 x, uint4 y, uint4 z) {
-	return x^y^z;
+inline MD5::uint4 MD5::H(uint4 x, uint4 y, uint4 z)
+{
+    return x ^ y ^ z;
 }
 
-inline MD5::uint4 MD5::I(uint4 x, uint4 y, uint4 z) {
-	return y ^ (x | ~z);
+inline MD5::uint4 MD5::I(uint4 x, uint4 y, uint4 z)
+{
+    return y ^ (x | ~z);
 }
 
 // rotate_left rotates x left n bits.
-inline MD5::uint4 MD5::rotate_left(uint4 x, int n) {
-	return (x << n) | (x >> (32 - n));
+inline MD5::uint4 MD5::rotate_left(uint4 x, int n)
+{
+    return (x << n) | (x >> (32 - n));
 }
 
 // FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 // Rotation is separate from addition to prevent recomputation.
-inline void MD5::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {
-	a = rotate_left(a + F(b, c, d) + x + ac, s) + b;
+inline void MD5::FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+{
+    a = rotate_left(a + F(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {
-	a = rotate_left(a + G(b, c, d) + x + ac, s) + b;
+inline void MD5::GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+{
+    a = rotate_left(a + G(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {
-	a = rotate_left(a + H(b, c, d) + x + ac, s) + b;
+inline void MD5::HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+{
+    a = rotate_left(a + H(b, c, d) + x + ac, s) + b;
 }
 
-inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac) {
-	a = rotate_left(a + I(b, c, d) + x + ac, s) + b;
+inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac)
+{
+    a = rotate_left(a + I(b, c, d) + x + ac, s) + b;
 }
 
 //////////////////////////////////////////////
@@ -102,7 +111,7 @@ inline void MD5::II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4
 // default ctor, just initailize
 MD5::MD5()
 {
-	init();
+    init();
 }
 
 //////////////////////////////////////////////
@@ -110,25 +119,25 @@ MD5::MD5()
 // nifty shortcut ctor, compute MD5 for string and finalize it right away
 MD5::MD5(const std::string &text)
 {
-	init();
-	update(text.c_str(), (size_type)text.length());
-	finalize();
+    init();
+    update(text.c_str(), (size_type)text.length());
+    finalize();
 }
 
 //////////////////////////////
 
 void MD5::init()
 {
-	finalized = false;
+    finalized = false;
 
-	count[0] = 0;
-	count[1] = 0;
+    count[0] = 0;
+    count[1] = 0;
 
-	// load magic initialization constants.
-	state[0] = 0x67452301;
-	state[1] = 0xefcdab89;
-	state[2] = 0x98badcfe;
-	state[3] = 0x10325476;
+    // load magic initialization constants.
+    state[0] = 0x67452301;
+    state[1] = 0xefcdab89;
+    state[2] = 0x98badcfe;
+    state[3] = 0x10325476;
 }
 
 //////////////////////////////
@@ -136,9 +145,9 @@ void MD5::init()
 // decodes input (unsigned char) into output (uint4). Assumes len is a multiple of 4.
 void MD5::decode(uint4 output[], const uint1 input[], size_type len)
 {
-	for (unsigned int i = 0, j = 0; j < len; i++, j += 4)
-		output[i] = ((uint4)input[j]) | (((uint4)input[j + 1]) << 8) |
-		(((uint4)input[j + 2]) << 16) | (((uint4)input[j + 3]) << 24);
+    for (unsigned int i = 0, j = 0; j < len; i++, j += 4)
+        output[i] = ((uint4)input[j]) | (((uint4)input[j + 1]) << 8) |
+                    (((uint4)input[j + 2]) << 16) | (((uint4)input[j + 3]) << 24);
 }
 
 //////////////////////////////
@@ -147,12 +156,13 @@ void MD5::decode(uint4 output[], const uint1 input[], size_type len)
 // a multiple of 4.
 void MD5::encode(uint1 output[], const uint4 input[], size_type len)
 {
-	for (size_type i = 0, j = 0; j < len; i++, j += 4) {
-		output[j] = input[i] & 0xff;
-		output[j + 1] = (input[i] >> 8) & 0xff;
-		output[j + 2] = (input[i] >> 16) & 0xff;
-		output[j + 3] = (input[i] >> 24) & 0xff;
-	}
+    for (size_type i = 0, j = 0; j < len; i++, j += 4)
+    {
+        output[j]     = input[i] & 0xff;
+        output[j + 1] = (input[i] >> 8) & 0xff;
+        output[j + 2] = (input[i] >> 16) & 0xff;
+        output[j + 3] = (input[i] >> 24) & 0xff;
+    }
 }
 
 //////////////////////////////
@@ -160,8 +170,8 @@ void MD5::encode(uint1 output[], const uint4 input[], size_type len)
 // apply MD5 algo on a block
 void MD5::transform(const uint1 block[blocksize])
 {
-	uint4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
-	decode(x, block, blocksize);
+    uint4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+    decode(x, block, blocksize);
 
     /* Round 1*/
     FF(a, b, c, d, x[0], S11, 0xd76aa478); /* 1*/
@@ -235,13 +245,13 @@ void MD5::transform(const uint1 block[blocksize])
     II(c, d, a, b, x[2], S43, 0x2ad7d2bb); /* 63*/
     II(b, c, d, a, x[9], S44, 0xeb86d391); /* 64*/
 
-	state[0] += a;
-	state[1] += b;
-	state[2] += c;
-	state[3] += d;
+    state[0] += a;
+    state[1] += b;
+    state[2] += c;
+    state[3] += d;
 
-	// Zeroize sensitive information.
-	memset(x, 0, sizeof x);
+    // Zeroize sensitive information.
+    memset(x, 0, sizeof x);
 }
 
 //////////////////////////////
@@ -250,37 +260,37 @@ void MD5::transform(const uint1 block[blocksize])
 // operation, processing another message block
 void MD5::update(const unsigned char input[], size_type length)
 {
-	// compute number of bytes mod 64
-	size_type index = count[0] / 8 % blocksize;
+    // compute number of bytes mod 64
+    size_type index = count[0] / 8 % blocksize;
 
-	// Update number of bits
-	if ((count[0] += (length << 3)) < (length << 3))
-		count[1]++;
-	count[1] += (length >> 29);
+    // Update number of bits
+    if ((count[0] += (length << 3)) < (length << 3))
+        count[1]++;
+    count[1] += (length >> 29);
 
-	// number of bytes we need to fill in buffer
-	size_type firstpart = 64 - index;
+    // number of bytes we need to fill in buffer
+    size_type firstpart = 64 - index;
 
-	size_type i;
+    size_type i;
 
-	// transform as many times as possible.
-	if (length >= firstpart)
-	{
-		// fill buffer first, transform
-		memcpy(&buffer[index], input, firstpart);
-		transform(buffer);
+    // transform as many times as possible.
+    if (length >= firstpart)
+    {
+        // fill buffer first, transform
+        memcpy(&buffer[index], input, firstpart);
+        transform(buffer);
 
-		// transform chunks of blocksize (64 bytes)
-		for (i = firstpart; i + blocksize <= length; i += blocksize)
-			transform(&input[i]);
+        // transform chunks of blocksize (64 bytes)
+        for (i = firstpart; i + blocksize <= length; i += blocksize)
+            transform(&input[i]);
 
-		index = 0;
-	}
-	else
-		i = 0;
+        index = 0;
+    }
+    else
+        i = 0;
 
-	// buffer remaining input
-	memcpy(&buffer[index], &input[i], length - i);
+    // buffer remaining input
+    memcpy(&buffer[index], &input[i], length - i);
 }
 
 //////////////////////////////
@@ -288,45 +298,46 @@ void MD5::update(const unsigned char input[], size_type length)
 // for convenience provide a verson with signed char
 void MD5::update(const char input[], size_type length)
 {
-	update((const unsigned char*)input, length);
+    update((const unsigned char *)input, length);
 }
 
 //////////////////////////////
 
 // MD5 finalization. Ends an MD5 message-digest operation, writing the
 // the message digest and zeroizing the context.
-MD5& MD5::finalize()
+MD5 &MD5::finalize()
 {
-	static unsigned char padding[64] = {
-		0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-	};
+    static unsigned char padding[64] = {
+            0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
-	if (!finalized) {
-		// Save number of bits
-		unsigned char bits[8];
-		encode(bits, count, 8);
+    if (!finalized)
+    {
+        // Save number of bits
+        unsigned char bits[8];
+        encode(bits, count, 8);
 
-		// pad out to 56 mod 64.
-		size_type index = count[0] / 8 % 64;
-		size_type padLen = (index < 56) ? (56 - index) : (120 - index);
-		update(padding, padLen);
+        // pad out to 56 mod 64.
+        size_type index  = count[0] / 8 % 64;
+        size_type padLen = (index < 56) ? (56 - index) : (120 - index);
+        update(padding, padLen);
 
-		// Append length (before padding)
-		update(bits, 8);
+        // Append length (before padding)
+        update(bits, 8);
 
-		// Store state in digest
-		encode(digest, state, 16);
+        // Store state in digest
+        encode(digest, state, 16);
 
-		// Zeroize sensitive information.
-		memset(buffer, 0, sizeof buffer);
-		memset(count, 0, sizeof count);
+        // Zeroize sensitive information.
+        memset(buffer, 0, sizeof buffer);
+        memset(count, 0, sizeof count);
 
-		finalized = true;
-	}
+        finalized = true;
+    }
 
-	return *this;
+    return *this;
 }
 
 //////////////////////////////
@@ -334,29 +345,29 @@ MD5& MD5::finalize()
 // return hex representation of digest as string
 std::string MD5::hexdigest() const
 {
-	if (!finalized)
-		return "";
+    if (!finalized)
+        return "";
 
-	char buf[33];
-	for (int i = 0; i<16; i++)
-		sprintf(buf + i * 2, "%02x", digest[i]);
-	buf[32] = 0;
+    char     buf[33];
+    for (int i = 0; i < 16; i++)
+        sprintf(buf + i * 2, "%02x", digest[i]);
+    buf[32] = 0;
 
-	return std::string(buf);
+    return std::string(buf);
 }
 
 //////////////////////////////
 
-std::ostream& operator<<(std::ostream& out, MD5 md5)
+std::ostream &operator<<(std::ostream &out, MD5 md5)
 {
-	return (out << md5.hexdigest());
+    return (out << md5.hexdigest());
 }
 
 //////////////////////////////
 
 std::string md5(const std::string str)
 {
-	MD5 md5 = MD5(str);
+    MD5 md5 = MD5(str);
 
-	return md5.hexdigest();
+    return md5.hexdigest();
 }

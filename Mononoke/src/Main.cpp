@@ -39,7 +39,7 @@ void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingT
 extern int main(int argc, char **argv)
 {
     //sLog->Initialize();
-    auto configFile = fs::absolute((std::string)_MONONOKE_CORE_CONFIG);
+    auto        configFile = fs::absolute((std::string)_MONONOKE_CORE_CONFIG);
     std::string configError;
 
     if (!sConfigMgr->LoadInitial(_MONONOKE_CORE_CONFIG,

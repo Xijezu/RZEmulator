@@ -16,13 +16,11 @@
 */
 
 #include "GameContent.h"
-#include "World.h"
 #include "RegionTester.h"
 #include "MemPool.h"
 #include "FieldPropManager.h"
 #include "Skill.h"
 #include "Maploader.h"
-#include "ObjectMgr.h"
 #include "NPC.h"
 
 bool GameContent::IsBlocked(float x, float y)
@@ -37,7 +35,7 @@ bool GameContent::IsBlocked(float x, float y)
 bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
 {
     return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
-                                                      {x2, y2}});
+                                                                 {x2, y2}});
 }
 
 bool GameContent::LearnAllSkill(Player *pPlayer)
@@ -298,7 +296,6 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
     if (st.empty())
         return TS_RESULT_ACCESS_DENIED;
 
-
     for (auto stree : st)
     {
         if (stree.skill_id == skill_id)
@@ -403,8 +400,8 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
 
     regionTest->Init(rOriginalPos, rTargetPos, fRegionProperty);
 
-    int nTargetCount = 0;
-    int nAllyCount   = 0;
+    int  nTargetCount = 0;
+    int  nAllyCount   = 0;
     bool bIsAlly{false};
 
     for (const uint &uid : vList)
@@ -459,7 +456,7 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
 //                    Array.Resize(ref vTargetList, nTargetMax + nAllyCount);
     }
 
-    if(nDistributeType == 4)
+    if (nDistributeType == 4)
     {
 //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
 //                     (v14 - 36),
@@ -481,15 +478,15 @@ int GameContent::EnumSkillTargetsAndCalcDamage(Position _OriginalPos, uint8_t la
 //                     *(v14 + 8));
     }
 
-    if(nDistributeType == 2 || nDistributeType == 4)
+    if (nDistributeType == 2 || nDistributeType == 4)
     {
 //                if (nTargetCount > nTargetMax)
 //                    List.Resize(ref vTargetList, nTargetMax + nAllyCount);
     }
 
-    if(nDistributeType == 1)
+    if (nDistributeType == 1)
     {
-        if(nTargetCount > nTargetMax)
+        if (nTargetCount > nTargetMax)
             nResult = nTargetMax * nOriginalDamage / nTargetCount;
     }
     return nResult;

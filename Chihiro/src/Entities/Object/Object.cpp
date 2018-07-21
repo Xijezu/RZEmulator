@@ -38,14 +38,15 @@ Object::Object()
     _changedFields = nullptr;
     _valuesCount   = 0;
 
-    m_inWorld       = false;
-    m_bDeleteRequest= false;
+    m_inWorld = false;
+    m_bDeleteRequest = false;
     m_objectUpdated = false;
 }
 
 Object::~Object()
 {
-    if (IsInWorld()) {
+    if (IsInWorld())
+    {
         //sLog->outCrash("Object::~Object");
         //ASSERT(false);
         RemoveFromWorld();
@@ -88,11 +89,13 @@ void Object::SetInt32Value(uint16 index, int32 value)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (m_int32Values[index] != value) {
+    if (m_int32Values[index] != value)
+    {
         m_int32Values[index]  = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -102,11 +105,13 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (_uint32Values[index] != value) {
+    if (_uint32Values[index] != value)
+    {
         _uint32Values[index]  = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -123,13 +128,15 @@ void Object::UpdateUInt32Value(uint16 index, uint32 value)
 void Object::SetUInt64Value(uint16 index, uint64 value)
 {
             ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (*((uint64 *) &(_uint32Values[index])) != value) {
+    if (*((uint64 *)&(_uint32Values[index])) != value)
+    {
         _uint32Values[index]      = PAIR64_LOPART(value);
         _uint32Values[index + 1]  = PAIR64_HIPART(value);
         _changedFields[index]     = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -138,13 +145,15 @@ void Object::SetUInt64Value(uint16 index, uint64 value)
 bool Object::AddUInt64Value(uint16 index, uint64 value)
 {
             ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && !*((uint64 *) &(_uint32Values[index]))) {
+    if (value && !*((uint64 *)&(_uint32Values[index])))
+    {
         _uint32Values[index]      = PAIR64_LOPART(value);
         _uint32Values[index + 1]  = PAIR64_HIPART(value);
         _changedFields[index]     = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
 
@@ -157,13 +166,15 @@ bool Object::AddUInt64Value(uint16 index, uint64 value)
 bool Object::RemoveUInt64Value(uint16 index, uint64 value)
 {
             ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && *((uint64 *) &(_uint32Values[index])) == value) {
+    if (value && *((uint64 *)&(_uint32Values[index])) == value)
+    {
         _uint32Values[index]      = 0;
         _uint32Values[index + 1]  = 0;
         _changedFields[index]     = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
 
@@ -177,11 +188,13 @@ void Object::SetFloatValue(uint16 index, float value)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (m_floatValues[index] != value) {
+    if (m_floatValues[index] != value)
+    {
         m_floatValues[index]  = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -191,17 +204,20 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4) {
+    if (offset > 4)
+    {
         NG_LOG_DEBUG("game", "Object::SetByteValue: wrong offset %u", offset);
         return;
     }
 
-    if (uint8(_uint32Values[index] >> (offset * 8)) != value) {
+    if (uint8(_uint32Values[index] >> (offset * 8)) != value)
+    {
         _uint32Values[index] &= ~uint32(uint32(0xFF) << (offset * 8));
         _uint32Values[index] |= uint32(uint32(value) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -211,17 +227,20 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 2) {
+    if (offset > 2)
+    {
         NG_LOG_ERROR("game", "Object::SetUInt16Value: wrong offset %u", offset);
         return;
     }
 
-    if (uint16(_uint32Values[index] >> (offset * 16)) != value) {
+    if (uint16(_uint32Values[index] >> (offset * 16)) != value)
+    {
         _uint32Values[index] &= ~uint32(uint32(0xFFFF) << (offset * 16));
         _uint32Values[index] |= uint32(uint32(value) << (offset * 16));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -281,11 +300,13 @@ void Object::SetFlag(uint16 index, uint32 newFlag)
     uint32 oldval = _uint32Values[index];
     uint32 newval = oldval | newFlag;
 
-    if (oldval != newval) {
+    if (oldval != newval)
+    {
         _uint32Values[index]  = newval;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -299,11 +320,13 @@ void Object::RemoveFlag(uint16 index, uint32 oldFlag)
     uint32 oldval = _uint32Values[index];
     uint32 newval = oldval & ~oldFlag;
 
-    if (oldval != newval) {
+    if (oldval != newval)
+    {
         _uint32Values[index]  = newval;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -313,16 +336,19 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4) {
+    if (offset > 4)
+    {
         NG_LOG_ERROR("entities", "Object::SetByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if (!(uint8(_uint32Values[index] >> (offset * 8)) & newFlag)) {
+    if (!(uint8(_uint32Values[index] >> (offset * 8)) & newFlag))
+    {
         _uint32Values[index] |= uint32(uint32(newFlag) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -332,16 +358,19 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
 {
             ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4) {
+    if (offset > 4)
+    {
         NG_LOG_ERROR("entities", "Object::RemoveByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if (uint8(_uint32Values[index] >> (offset * 8)) & oldFlag) {
+    if (uint8(_uint32Values[index] >> (offset * 8)) & oldFlag)
+    {
         _uint32Values[index] &= ~uint32(uint32(oldFlag) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated) {
+        if (m_inWorld && !m_objectUpdated)
+        {
             m_objectUpdated = true;
         }
     }
@@ -363,12 +392,11 @@ WorldObject::WorldObject(bool isWorldObject)
 
 WorldObject::~WorldObject() = default;
 
-
 void WorldObject::SendEnterMsg(Player *pPlayer)
 {
     Position tmpPos = this->GetCurrentPosition(sWorld.GetArTime());
-    XPacket packet(TS_SC_ENTER);
-    packet << (uint8_t) GetMainType();
+    XPacket  packet(TS_SC_ENTER);
+    packet << (uint8_t)GetMainType();
     packet << GetHandle();
     packet << tmpPos.GetPositionX();
     packet << tmpPos.GetPositionY();
@@ -376,7 +404,8 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
     packet << (uint8)GetLayer();
     packet << (uint8_t)GetSubType();
 
-    switch (GetSubType()) {
+    switch (GetSubType())
+    {
         case ST_NPC:
             NPC::EnterPacket(packet, dynamic_cast<NPC *>(this), pPlayer);
             break;
@@ -387,29 +416,32 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
             Summon::EnterPacket(packet, dynamic_cast<Summon *>(this), pPlayer);
             break;
         case ST_Mob:
-            Monster::EnterPacket(packet, dynamic_cast<Monster*>(this), pPlayer);
+            Monster::EnterPacket(packet, dynamic_cast<Monster *>(this), pPlayer);
             break;
         case ST_Object:
-            Item::EnterPacket(packet, dynamic_cast<Item*>(this));
+            Item::EnterPacket(packet, dynamic_cast<Item *>(this));
             break;
         case ST_FieldProp:
-            FieldProp::EnterPacket(packet, dynamic_cast<FieldProp*>(this), pPlayer);
+            FieldProp::EnterPacket(packet, dynamic_cast<FieldProp *>(this), pPlayer);
             break;
         default:
             break;
     }
 
     pPlayer->SendPacket(packet);
-    if(IsPlayer())
-        Messages::SendWearInfo(pPlayer, dynamic_cast<Unit*>(this));
+    if (IsPlayer())
+        Messages::SendWearInfo(pPlayer, dynamic_cast<Unit *>(this));
 
 }
 
 bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
 {
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
+    {
         return false;
-    } else {
+    }
+    else
+    {
         m_PendingMovePos    = std::move(vMoveInfo);
         m_nPendingMoveSpeed = speed;
         SetFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
@@ -419,13 +451,13 @@ bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
 
 bool WorldObject::Step(uint tm)
 {
-    bool res = ArMoveVector::Step(tm);
-    if(res)
+    bool res           = ArMoveVector::Step(tm);
+    if (res)
     {
         auto pos = GetTargetPos();
-        this->m_positionX = pos.GetPositionX();
-        this->m_positionY = pos.GetPositionY();
-        this->m_positionZ = pos.GetPositionZ();
+        this->m_positionX  = pos.GetPositionX();
+        this->m_positionY  = pos.GetPositionY();
+        this->m_positionZ  = pos.GetPositionZ();
         this->_orientation = pos.GetOrientation();
     }
     this->lastStepTime = tm;
@@ -434,7 +466,7 @@ bool WorldObject::Step(uint tm)
 
 void WorldObject::RemoveFromWorld()
 {
-    if(!IsInWorld())
+    if (!IsInWorld())
         return;
     Object::RemoveFromWorld();
 }
@@ -450,10 +482,10 @@ void WorldObject::AddNoise(int r1, int r2, int v)
     float prev_y = GetPositionY();
 
     auto rs = (double)g_nRegionSize;
-    auto tx = (int) (GetPositionX() / rs);
-    auto ty = (int) (GetPositionY() / rs);
-    m_positionX = (float)(r1 % v - v / 2) + GetPositionX();
-    m_positionY = (float)(r2 % v - v / 2) + GetPositionY();
+    auto tx = (int)(GetPositionX() / rs);
+    auto ty = (int)(GetPositionY() / rs);
+    m_positionX     = (float)(r1 % v - v / 2) + GetPositionX();
+    m_positionY     = (float)(r2 % v - v / 2) + GetPositionY();
     if ((int)(m_positionX / rs) != tx)
         m_positionX = prev_x;
     if ((int)(m_positionY / rs) != ty)
@@ -485,23 +517,24 @@ Position WorldObject::GetCurrentPosition(uint t)
 
 void ArMoveVector::Copy(const ArMoveVector &src)
 {
-    this->m_positionX = src.m_positionX;
-    this->m_positionY = src.m_positionY;
-    this->m_positionZ = src.m_positionZ;
+    this->m_positionX  = src.m_positionX;
+    this->m_positionY  = src.m_positionY;
+    this->m_positionZ  = src.m_positionZ;
     this->_orientation = src._orientation;
 
-    this->bIsMoving = src.bIsMoving;
+    this->bIsMoving    = src.bIsMoving;
     this->bWithZMoving = src.bWithZMoving;
-    this->speed = src.speed;
-    this->start_time = src.start_time;
-    this->proc_time = src.proc_time;
-    for(auto& mi : src.ends) {
+    this->speed        = src.speed;
+    this->start_time   = src.start_time;
+    this->proc_time    = src.proc_time;
+    for (auto &mi : src.ends)
+    {
         this->ends.emplace_back(MoveInfo(mi.end, mi.end_time));
     }
-    this->bHasDirectionChanged = src.bHasDirectionChanged;
-    this->direction.m_positionX = src.direction.m_positionX;
-    this->direction.m_positionY = src.direction.m_positionY;
-    this->direction.m_positionZ = src.direction.m_positionZ;
+    this->bHasDirectionChanged   = src.bHasDirectionChanged;
+    this->direction.m_positionX  = src.direction.m_positionX;
+    this->direction.m_positionY  = src.direction.m_positionY;
+    this->direction.m_positionZ  = src.direction.m_positionZ;
     this->direction._orientation = src.direction._orientation;
 }
 
@@ -535,13 +568,13 @@ bool ArMoveVector::Step(uint current_time)
                 SetDirection(ends[0].end);
         }
         proc_time = current_time;
-        for (auto& info : removed)
+        for (auto &info : removed)
         {
             this->ends.erase(std::remove(ends.begin(), ends.end(), info), ends.end());
         }
         if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX &&
-                            m_positionY == (ends.back()).end.m_positionY &&
-                            m_positionZ == (ends.back()).end.m_positionZ))
+                             m_positionY == (ends.back()).end.m_positionY &&
+                             m_positionZ == (ends.back()).end.m_positionZ))
         {
             bIsMoving = false;
             ends.clear();
@@ -559,10 +592,11 @@ bool ArMoveVector::Step(uint current_time)
     return res;
 }
 
-void ArMoveVector::SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time, uint current_time)
+void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time, uint current_time)
 {
     ends.clear();
-    if (!_to.empty()) {
+    if (!_to.empty())
+    {
         speed = _speed;
         uint ct = _start_time;
         if (ct == 0)
@@ -575,7 +609,8 @@ void ArMoveVector::SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, u
         float before_x = m_positionX;
         float before_y = m_positionY;
 
-        for (const auto& pos : _to) {
+        for (const auto &pos : _to)
+        {
             float cx = pos.m_positionX - before_x;
             float cy = pos.m_positionY - before_y;
 
@@ -607,16 +642,16 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     start_time = st;
     proc_time  = st;
     float X = _to.GetPositionX() - GetPositionX();
-    float Y = _to.GetPositionY()- GetPositionY();
+    float Y = _to.GetPositionY() - GetPositionY();
     SetDirection(_to);
     lengtha = sqrt(Y * Y + X * X);
     lengthb = speed;
-    v9 = lengtha / (lengthb / 30.0);
-    v10 = start_time;
-    if((start_time & 0x80000000) != 0)
+    v9      = lengtha / (lengthb / 30.0);
+    v10     = start_time;
+    if ((start_time & 0x80000000) != 0)
         v10 = v10 + 4294967300.0f;
 
-    MoveInfo mi{_to, (uint)(v9+v10)};
+    MoveInfo mi{_to, (uint)(v9 + v10)};
     ends.emplace_back(mi);
 
     bIsMoving = true;
@@ -624,10 +659,11 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
 
 void ArMoveVector::SetDirection(Position pos)
 {
-    float px{ }, py {};
+    float px{ }, py{ };
     px = pos.m_positionX - m_positionX;
     py = pos.m_positionY - m_positionY;
-    if(0.0 != px || 0.0 != py) {
+    if (0.0 != px || 0.0 != py)
+    {
         bHasDirectionChanged = true;
         direction.m_positionX = pos.m_positionX;
         direction.m_positionY = pos.m_positionY;
@@ -639,7 +675,7 @@ void ArMoveVector::SetDirection(Position pos)
 Position ArMoveVector::GetTargetPos()
 {
     Position result{ };
-    if(!ends.empty())
+    if (!ends.empty())
         result = (ends.back()).end;
     else
         result = this->GetPosition();
@@ -648,7 +684,7 @@ Position ArMoveVector::GetTargetPos()
 
 bool ArMoveVector::IsMoving(uint t)
 {
-    if(bIsMoving && !ends.empty())
+    if (bIsMoving && !ends.empty())
         return t < (ends.back()).end_time;
     else
         return false;

@@ -30,13 +30,13 @@ struct SkillPropInfo
 class SkillProp : public WorldObject
 {
     public:
-        static SkillProp* Create(uint caster, Skill* pSkill, int nMagicPoint, float fHateRatio);
+        static SkillProp *Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
         SkillProp() = delete;
         ~SkillProp() override = default;
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        SkillProp (const SkillProp&) = delete;
-        SkillProp& operator= (const SkillProp&) = delete;
+        SkillProp(const SkillProp &) = delete;
+        SkillProp &operator=(const SkillProp &) = delete;
 
         void Update(uint diff) override;
         bool IsSkillProp() const override;
@@ -47,14 +47,14 @@ class SkillProp : public WorldObject
         void INIT_AREA_EFFECT_HEAL();
         void INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP();
         void INIT_SKILL_PROP_PARAMETER(uint nDuration, uint nInterval);
-        void FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit* pCaster);
+        void FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster);
 
     private:
-        explicit SkillProp(uint caster, Skill* pSkill, int nMagicPoint, float fHateRatio);
+        explicit SkillProp(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
 
         uint          m_hCaster;
         SkillPropInfo m_Info;
-        Skill * m_pSkill;
+        Skill *m_pSkill;
         bool  m_bFired;
         bool  m_bProcessEnded;
         bool  m_bIsRemovePended;

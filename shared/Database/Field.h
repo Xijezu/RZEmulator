@@ -87,7 +87,7 @@ class Field
         int64 GetInt64() const;
         float GetFloat() const;
         double GetDouble() const;
-        char const* GetCString() const;
+        char const *GetCString() const;
         std::string GetString() const;
         std::vector<uint8> GetBinary() const;
 
@@ -98,11 +98,11 @@ class Field
 
         struct Metadata
         {
-            char const * TableName;
-            char const * TableAlias;
-            char const * Name;
-            char const * Alias;
-            char const * Type;
+            char const *TableName;
+            char const *TableAlias;
+            char const *Name;
+            char const *Alias;
+            char const *Type;
             uint32 Index;
         };
 
@@ -111,20 +111,20 @@ class Field
         struct
         {
             uint32 length;          // Length (prepared strings only)
-            void * value;            // Actual data in memory
+            void *value;            // Actual data in memory
             DatabaseFieldTypes type;  // Field type
             bool               raw;               // Raw bytes? (Prepared statement or ad hoc)
         } data;
 #pragma pack(pop)
 
-        void SetByteValue(void* newValue, DatabaseFieldTypes newType, uint32 length);
-        void SetStructuredValue(char* newValue, DatabaseFieldTypes newType, uint32 length);
+        void SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32 length);
+        void SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32 length);
 
         void CleanUp()
         {
             // Field does not own the data if fetched with prepared statement
             if (!data.raw)
-                delete[] ((char*)data.value);
+                delete[] ((char *)data.value);
             data.value = NULL;
         }
 

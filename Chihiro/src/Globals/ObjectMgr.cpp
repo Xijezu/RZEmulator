@@ -15,13 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ObjectMgr.h"
 #include <fstream>
 
-#include "DatabaseEnv.h"
-#include "Timer.h"
-#include "MemPool.h"
-#include "World.h"
 #include "DungeonManager.h"
 #include "MixManager.h"
 #include "GameRule.h"

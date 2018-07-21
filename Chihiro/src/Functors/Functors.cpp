@@ -16,11 +16,8 @@
 */
 
 #include "Functors.h"
-#include "Player.h"
 #include "RegionContainer.h"
 #include "Messages.h"
-#include "Monster.h"
-#include "World.h"
 
 void BroadcastFunctor::Run(RegionType &list)
 {
@@ -65,8 +62,8 @@ void AddObjectFunctor::Run()
     fn.obj = newObj;
 
     sRegion.DoEachVisibleRegion(x, y, layer,
-                                 NG_REGION_FUNCTOR(fn),
-                                 (uint8_t)RegionVisitor::ClientVisitor);
+                                NG_REGION_FUNCTOR(fn),
+                                (uint8_t)RegionVisitor::ClientVisitor);
     if (fn.bSent)
         bSend = true;
 
@@ -75,8 +72,8 @@ void AddObjectFunctor::Run()
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
         sRegion.DoEachVisibleRegion(x, y, layer,
-                                     NG_REGION_FUNCTOR(fn2),
-                                     (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
+                                    NG_REGION_FUNCTOR(fn2),
+                                    (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 
@@ -86,10 +83,10 @@ void AddObjectFunctor::Run2()
     fn.obj = newObj;
 
     sRegion.DoEachNewRegion(x, y,
-                             x2, y2,
-                             layer,
-                             NG_REGION_FUNCTOR(fn),
-                             (uint8_t)RegionVisitor::ClientVisitor);
+                            x2, y2,
+                            layer,
+                            NG_REGION_FUNCTOR(fn),
+                            (uint8_t)RegionVisitor::ClientVisitor);
     if (fn.bSent)
         bSend = true;
 
@@ -98,10 +95,10 @@ void AddObjectFunctor::Run2()
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
         sRegion.DoEachNewRegion(x, y,
-                                 x2, y2,
-                                 layer,
-                                 NG_REGION_FUNCTOR(fn2),
-                                 (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
+                                x2, y2,
+                                layer,
+                                NG_REGION_FUNCTOR(fn2),
+                                (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 

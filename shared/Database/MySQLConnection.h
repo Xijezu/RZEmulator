@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-template <typename T>
+template<typename T>
 class ProducerConsumerQueue;
 
 class DatabaseWorker;
@@ -39,7 +39,7 @@ enum ConnectionFlags
 
 struct MySQLConnectionInfo
 {
-    explicit MySQLConnectionInfo(std::string const& infoString);
+    explicit MySQLConnectionInfo(std::string const &infoString);
 
     std::string user;
     std::string password;
@@ -52,12 +52,12 @@ typedef std::map<uint32 /*index*/, std::pair<std::string /*query*/, ConnectionFl
 
 class MySQLConnection
 {
-        template <class T> friend class DatabaseWorkerPool;
+        template<class T> friend class DatabaseWorkerPool;
         friend class PingOperation;
 
     public:
-        MySQLConnection(MySQLConnectionInfo& connInfo);                               //! Constructor for synchronous connections.
-        MySQLConnection(ProducerConsumerQueue<SQLOperation*>* queue, MySQLConnectionInfo& connInfo);  //! Constructor for asynchronous connections.
+        MySQLConnection(MySQLConnectionInfo &connInfo);                               //! Constructor for synchronous connections.
+        MySQLConnection(ProducerConsumerQueue<SQLOperation *> *queue, MySQLConnectionInfo &connInfo);  //! Constructor for asynchronous connections.
         virtual ~MySQLConnection();
 
         virtual uint32 Open();
@@ -66,17 +66,17 @@ class MySQLConnection
         bool PrepareStatements();
 
     public:
-        bool Execute(const char* sql);
-        bool Execute(PreparedStatement* stmt);
-        ResultSet* Query(const char* sql);
-        PreparedResultSet* Query(PreparedStatement* stmt);
-        bool _Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **pFields, uint64* pRowCount, uint32* pFieldCount);
-        bool _Query(PreparedStatement* stmt, MYSQL_RES **pResult, uint64* pRowCount, uint32* pFieldCount);
+        bool Execute(const char *sql);
+        bool Execute(PreparedStatement *stmt);
+        ResultSet *Query(const char *sql);
+        PreparedResultSet *Query(PreparedStatement *stmt);
+        bool _Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **pFields, uint64 *pRowCount, uint32 *pFieldCount);
+        bool _Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint64 *pRowCount, uint32 *pFieldCount);
 
         void BeginTransaction();
         void RollbackTransaction();
         void CommitTransaction();
-        int ExecuteTransaction(SQLTransaction& transaction);
+        int ExecuteTransaction(SQLTransaction &transaction);
 
         void Ping();
 
@@ -90,10 +90,10 @@ class MySQLConnection
         /// Called by parent databasepool. Will let other threads access this connection
         void Unlock();
 
-        MYSQL* GetHandle()  { return m_Mysql; }
+        MYSQL *GetHandle() { return m_Mysql; }
 
-        MySQLPreparedStatement* GetPreparedStatement(uint32 index);
-        void PrepareStatement(uint32 index, const char* sql, ConnectionFlags flags);
+        MySQLPreparedStatement *GetPreparedStatement(uint32 index);
+        void PrepareStatement(uint32 index, const char *sql, ConnectionFlags flags);
 
         virtual void DoPrepareStatements() = 0;
 
@@ -107,13 +107,13 @@ class MySQLConnection
         bool _HandleMySQLErrno(uint32 errNo, uint8 attempts = 5);
 
     private:
-        ProducerConsumerQueue<SQLOperation*> * m_queue;      //! Queue shared with other asynchronous connections.
-        std::unique_ptr<DatabaseWorker>      m_worker;           //! Core worker task.
-        MYSQL               *                m_Mysql;                      //! MySQL Handle.
-        MySQLConnectionInfo &  m_connectionInfo;             //! Connection info (used for logging)
+        ProducerConsumerQueue<SQLOperation *> *m_queue;      //! Queue shared with other asynchronous connections.
+        std::unique_ptr<DatabaseWorker>       m_worker;           //! Core worker task.
+        MYSQL               *m_Mysql;                      //! MySQL Handle.
+        MySQLConnectionInfo &m_connectionInfo;             //! Connection info (used for logging)
         ConnectionFlags m_connectionFlags;            //! Connection flags (for preparing relevant statements)
         std::mutex      m_Mutex;
 
-        MySQLConnection(MySQLConnection const& right) = delete;
-        MySQLConnection& operator=(MySQLConnection const& right) = delete;
+        MySQLConnection(MySQLConnection const &right) = delete;
+        MySQLConnection &operator=(MySQLConnection const &right) = delete;
 };

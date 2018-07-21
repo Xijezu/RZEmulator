@@ -30,19 +30,22 @@ class WorldObject;
 class State;
 class Quest;
 
-struct scramble_map {
+struct scramble_map
+{
     scramble_map()
     {
         int     v3;
         int     i;
         uint8_t v5;
 
-        for (i = 0; i < 32; ++i) {
-            map[i] = (uint8_t ) i;
+        for (i = 0; i < 32; ++i)
+        {
+            map[i] = (uint8_t)i;
         }
 
-        v3 = 3;
-        for (i = 0; i < 32; ++i) {
+        v3     = 3;
+        for (i = 0; i < 32; ++i)
+        {
             v5 = map[i];
             if (v3 >= 32)
                 v3 += -32 * (v3 >> 5);
@@ -55,7 +58,7 @@ struct scramble_map {
     uint8_t map[32]{0};
 };
 
-static scramble_map map{};
+static scramble_map map{ };
 
 static int bits_scramble(int c)
 {
@@ -64,8 +67,9 @@ static int bits_scramble(int c)
 
     result = 0;
     v2     = 0;
-    do {
-        if ((((uint) 1 << (int) v2) & c) != 0)
+    do
+    {
+        if ((((uint)1 << (int)v2) & c) != 0)
             result |= 1 << map.map[v2];
         ++v2;
     } while (v2 < 32);
@@ -88,7 +92,7 @@ class Messages
         static void SendDialogMessage(Player *, uint32_t, int, const std::string &, const std::string &, const std::string &);
         static void SendSkillList(Player *, Unit *, int);
         static void SendChatMessage(int, const std::string &, Player *, const std::string &);
-        static void SendPartyChatMessage(int, const std::string&, int, const std::string&);
+        static void SendPartyChatMessage(int, const std::string &, int, const std::string &);
         static void SendMarketInfo(Player *, uint32_t, const std::vector<MarketInfo> &);
         static void SendItemList(Player *, bool);
         static void SendItemMessage(Player *, Item *);
@@ -122,13 +126,13 @@ class Messages
         static void ShowSoulStoneRepairWindow(Player *);
         static void ShowSoulStoneCraftWindow(Player *);
         static void SendPartyInfo(Player *);
-        static void SendRegionAckMessage(Player* pPlayer, uint rx, uint ry);
-        static void SendOpenStorageMessage(Player* pPlayer);
-        static void SendSkillCardInfo(Player* pPlayer, Item *pItem);
+        static void SendRegionAckMessage(Player *pPlayer, uint rx, uint ry);
+        static void SendOpenStorageMessage(Player *pPlayer);
+        static void SendSkillCardInfo(Player *pPlayer, Item *pItem);
         static void SendToggleInfo(Unit *pUnit, int skill_id, bool status);
-        static void SendRemoveSummonMessage(Player* pPlayer, Summon *pSummon);
-        static void BroadcastPartyMemberInfo(Player* pClient);
-        static void BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string& szName);
+        static void SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon);
+        static void BroadcastPartyMemberInfo(Player *pClient);
+        static void BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName);
         static void SendTradeCancelMessage(Player *);
         static void SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget);
     private:

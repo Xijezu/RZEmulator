@@ -25,8 +25,8 @@ class NPC : public Unit
         explicit NPC(NPCTemplate *base);
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        NPC (const NPC&) = delete;
-        NPC& operator= (const NPC&) = delete;
+        NPC(const NPC &) = delete;
+        NPC &operator=(const NPC &) = delete;
 
         static void EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer);
 

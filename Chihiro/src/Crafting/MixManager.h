@@ -44,31 +44,31 @@ enum MIX_TYPE
 
 enum CheckType : int
 {
-    CT_ItemGroup = 1,
-    CT_ItemClass = 2,
-    CT_ItemId = 3,
-    CT_ItemRank = 4,
-    CT_ItemLevel = 5,
-    CT_FlagOn = 6,
-    CT_FlagOff = 7,
-    CT_EnhanceMatch = 8,
-    CT_EnhanceMismatch = 9,
-    CT_ItemCount = 10,
-    CT_ElementalEffectMatch = 11,
-    CT_ElementalEffectMismatch = 12,
-    CT_ItemWearPositionMatch = 13,
+    CT_ItemGroup                = 1,
+    CT_ItemClass                = 2,
+    CT_ItemId                   = 3,
+    CT_ItemRank                 = 4,
+    CT_ItemLevel                = 5,
+    CT_FlagOn                   = 6,
+    CT_FlagOff                  = 7,
+    CT_EnhanceMatch             = 8,
+    CT_EnhanceMismatch          = 9,
+    CT_ItemCount                = 10,
+    CT_ElementalEffectMatch     = 11,
+    CT_ElementalEffectMismatch  = 12,
+    CT_ItemWearPositionMatch    = 13,
     CT_ItemWearPositionMismatch = 14,
 };
 
 struct EnhanceInfo
 {
-    int nSID;
-    uint Flag;
-    int nRank;
-    int nFailResult;
-    int nMaxEnhance;
-    uint nLocalFlag;
-    int nNeedItemCode;
+    int   nSID;
+    uint  Flag;
+    int   nRank;
+    int   nFailResult;
+    int   nMaxEnhance;
+    uint  nLocalFlag;
+    int   nNeedItemCode;
     float fPercentage[20];
 };
 
@@ -80,14 +80,13 @@ struct MaterialInfo
 
 struct MixBase
 {
-    int id;
-    int type;
-    int value[MIX_VALUE_COUNT];
-    int sub_material_cnt;
+    int          id;
+    int          type;
+    int          value[MIX_VALUE_COUNT];
+    int          sub_material_cnt;
     MaterialInfo main_material;
     MaterialInfo sub_material[MAX_SUB_MATERIAL_COUNT];
 };
-
 
 class Player;
 class Item;
@@ -99,6 +98,7 @@ class MixManager
             static MixManager instance;
             return instance;
         }
+
         ~MixManager() = default;
 
         /// \brief Enhances an item

@@ -15,13 +15,9 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "AuthNetwork.h"
-#include "World.h"
 #include "SystemConfigs.h"
 #include "MemPool.h"
-#include "ObjectMgr.h"
 #include "Maploader.h"
 #include "XSocketMgr.h"
 
@@ -67,7 +63,7 @@ int main(int argc, char **argv)
         NG_LOG_ERROR("server.worldserver", "Cannot connect to database.");
         return 1;
     }
-    std::shared_ptr<void> sDBHandle(nullptr, [](void*) { StopDB(); });
+    std::shared_ptr<void>                     sDBHandle(nullptr, [](void *) { StopDB(); });
 
     sWorld.InitWorld();
     if (!sAuthNetwork.InitializeNetwork(*ioContext, sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1"), sConfigMgr->GetIntDefault("AuthServer.Port", 4502)))
@@ -75,17 +71,17 @@ int main(int argc, char **argv)
         NG_LOG_ERROR("server.worldserver", "Cannot connect to the auth server!");
         return 1;
     }
-    std::shared_ptr<void> sAuthHandle(nullptr, [](void*) { sAuthNetwork.Stop(); });
+    std::shared_ptr<void>                     sAuthHandle(nullptr, [](void *) { sAuthNetwork.Stop(); });
 
-    auto        worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
-    std::string bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
+    auto                  worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+    std::string           bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
     if (!XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2))
     {
         NG_LOG_ERROR("server.worldserver", "Failed to start network");
         return -1;
         // go down and shutdown the server
     }
-    std::shared_ptr<void> sWorldHandle(nullptr, [](void*) {
+    std::shared_ptr<void> sWorldHandle(nullptr, [](void *) {
         sWorld.KickAll();
         XSocketMgr<WorldSession>::Instance().StopNetwork();
         sMemoryPool.Destroy();
@@ -96,11 +92,10 @@ int main(int argc, char **argv)
 
 
     // Start the Boost based thread pool
-    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
-    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread>* del)
-    {
+    int                                       numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
         ioContext->stop();
-        for (std::thread& thr : *del)
+        for (std::thread &thr : *del)
             thr.join();
 
         delete del;

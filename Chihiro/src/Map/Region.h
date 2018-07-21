@@ -20,7 +20,7 @@
 #include "Functors.h"
 
 class WorldObject;
-using RegionType = std::vector<WorldObject*>;
+using RegionType = std::vector<WorldObject *>;
 
 class Region
 {

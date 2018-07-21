@@ -45,7 +45,7 @@ class XSession
 
         virtual bool IsEncrypted() const { return true; }
 
-        virtual void OnClose() { }
+        virtual void OnClose() {}
 
         virtual ~XSession() = default;
 
@@ -137,13 +137,13 @@ class XSocket : public Socket<XSocket>
 
         void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }
 
-        XSession* GetSession() { return _session; }
+        XSession *GetSession() { return _session; }
 
     protected:
         void OnClose() override
         {
             {
-                if(_session)
+                if (_session)
                     _session->OnClose();
                 std::lock_guard<std::mutex> sessionGuard(_sessionLock);
                 _session = nullptr;

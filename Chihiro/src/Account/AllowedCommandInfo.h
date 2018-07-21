@@ -28,6 +28,7 @@ class AllowedCommandInfo
             static AllowedCommandInfo instance;
             return instance;
         }
+
         ~AllowedCommandInfo() = default;
 
         void Run(Player *pClient, const std::string &szMessage);

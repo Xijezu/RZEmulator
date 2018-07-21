@@ -823,7 +823,7 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     if (!result.bMiss && !result.bPerfectBlock)
     {
         std::vector<AdditionalDamageInfo> v_add = bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage;
-        for (auto &addi : v_add)
+        for (auto                         &addi : v_add)
         {
             if (addi.ratio > (uint8)((uint)rand32() % 100))
             {
@@ -1740,7 +1740,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
                         GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
                     if (nItemID != 0)
                     {
-                        auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
+                        auto pCItem    = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
                         if (pCItem == nullptr)
                         {
                             NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
@@ -1943,7 +1943,7 @@ int Unit::GetArmorClass() const
 void Unit::procStateDamage(uint t)
 {
     std::vector<StateDamage> vDamageList{ };
-    for (auto &st : m_vStateList)
+    for (auto                &st : m_vStateList)
     {
         if (IsPlayer() || IsSummon())
         {
@@ -1964,7 +1964,7 @@ void Unit::procStateDamage(uint t)
         }
 
         bool bNeedToProcLightningForceCongestion{false};
-        auto stateBase                           = sObjectMgr.GetStateInfo((int)st.m_nCode);
+        auto stateBase = sObjectMgr.GetStateInfo((int)st.m_nCode);
         if (stateBase == nullptr)
             continue;
         int  nBaseEffectID = 0;
@@ -2065,7 +2065,7 @@ void Unit::procStateDamage(uint t)
                     continue;
             }
 
-            int total_amount = 0;
+            int       total_amount = 0;
             for (auto &st : m_vStateList)
             {
                 if (st.m_nUID == sd.uid)
@@ -2091,9 +2091,9 @@ void Unit::procStateDamage(uint t)
             statePct << total_amount;
 
             sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                              (uint)(GetPositionY() / g_nRegionSize),
-                              GetLayer(),
-                              statePct);
+                             (uint)(GetPositionY() / g_nRegionSize),
+                             GetLayer(),
+                             statePct);
         }
         else
         {
@@ -2123,7 +2123,7 @@ void Unit::procStateDamage(uint t)
                     continue;
             }
 
-            int total_amount = 0;
+            int       total_amount = 0;
             for (auto &st : m_vStateList)
             {
                 if (st.m_nUID == sd.uid)
@@ -2155,9 +2155,9 @@ void Unit::procStateDamage(uint t)
                 statePct << total_amount;
 
                 sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                                  (uint)(GetPositionY() / g_nRegionSize),
-                                  GetLayer(),
-                                  statePct);
+                                 (uint)(GetPositionY() / g_nRegionSize),
+                                 GetLayer(),
+                                 statePct);
             }
 
             if (nHealMP != 0)
@@ -2177,9 +2177,9 @@ void Unit::procStateDamage(uint t)
                 statePct << df;
 
                 sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                                  (uint)(GetPositionY() / g_nRegionSize),
-                                  GetLayer(),
-                                  statePct);
+                                 (uint)(GetPositionY() / g_nRegionSize),
+                                 GetLayer(),
+                                 statePct);
             }
         }
     }
@@ -2210,10 +2210,10 @@ void Unit::RemoveState(StateCode code, int state_level)
 void Unit::RemoveState(int uid)
 {
     auto state = std::find_if(m_vStateList.begin(),
-                                m_vStateList.end(),
-                                [uid](const State& s) { return s.m_nUID == uid; });
+                              m_vStateList.end(),
+                              [uid](const State &s) { return s.m_nUID == uid; });
 
-    if(state != m_vStateList.end())
+    if (state != m_vStateList.end())
     {
         onUpdateState(*state, true);
         m_vStateList.erase(state);
@@ -2224,11 +2224,11 @@ void Unit::RemoveState(int uid)
 
 void Unit::RemoveGoodState(int state_level)
 {
-	for(auto &s : m_vStateList)
-	{
-		if( !s.IsHarmful() && s.GetTimeType() != 0)
-			RemoveState(s.m_nCode, state_level);
-	}
+    for (auto &s : m_vStateList)
+    {
+        if (!s.IsHarmful() && s.GetTimeType() != 0)
+            RemoveState(s.m_nCode, state_level);
+    }
 }
 
 int Unit::MPHeal(int mp)

@@ -26,22 +26,22 @@ using boost::asio::ip::tcp;
 template<class SocketType>
 class SocketMgr
 {
-public:
+    public:
         virtual ~SocketMgr()
         {
                     ASSERT(!_threads && !_acceptor && !_threadCount, "StopNetwork must be called prior to SocketMgr destruction");
         }
 
-        virtual bool StartNetwork(NGemity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port, int threadCount)
+        virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount)
         {
                     ASSERT(threadCount > 0);
 
-            AsyncAcceptor * acceptor = nullptr;
+            AsyncAcceptor *acceptor = nullptr;
             try
             {
                 acceptor = new AsyncAcceptor(ioContext, bindIp, port);
             }
-            catch (boost::system::system_error const& err)
+            catch (boost::system::system_error const &err)
             {
                 NG_LOG_ERROR("network", "Exception caught in SocketMgr.StartNetwork (%s:%u): %s", bindIp.c_str(), port, err.what());
                 return false;
@@ -89,7 +89,7 @@ public:
                     _threads[i].Wait();
         }
 
-        virtual void OnSocketOpen(tcp::socket&& sock, uint32 threadIndex)
+        virtual void OnSocketOpen(tcp::socket &&sock, uint32 threadIndex)
         {
             try
             {
@@ -97,7 +97,7 @@ public:
 
                 _threads[threadIndex].AddSocket(newSocket);
             }
-            catch (boost::system::system_error const& err)
+            catch (boost::system::system_error const &err)
             {
                 NG_LOG_WARN("network", "Failed to retrieve client's remote address %s", err.what());
             }
@@ -116,7 +116,7 @@ public:
             return min;
         }
 
-        std::pair<tcp::socket*, uint32> GetSocketForAccept()
+        std::pair<tcp::socket *, uint32> GetSocketForAccept()
         {
             uint32 threadIndex = SelectThreadWithMinConnections();
             return std::make_pair(_threads[threadIndex].GetSocketForAccept(), threadIndex);
@@ -127,9 +127,9 @@ public:
         {
         }
 
-        virtual NetworkThread<SocketType>* CreateThreads() const = 0;
+        virtual NetworkThread<SocketType> *CreateThreads() const = 0;
 
-        AsyncAcceptor             * _acceptor;
-        NetworkThread<SocketType> * _threads;
+        AsyncAcceptor             *_acceptor;
+        NetworkThread<SocketType> *_threads;
         int32 _threadCount;
 };

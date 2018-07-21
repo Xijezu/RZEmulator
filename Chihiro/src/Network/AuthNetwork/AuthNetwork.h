@@ -72,7 +72,7 @@ class AuthNetwork
             {
                 _socket.connect(endpoint);
             }
-            catch(std::exception&)
+            catch (std::exception &)
             {
                 NG_LOG_ERROR("server.network", "Cannot connect to login server at %s:%d", bindIp.c_str(), port);
                 return false;
@@ -82,7 +82,7 @@ class AuthNetwork
             m_pSocket.reset(new XSocket(std::move(_socket)));
             m_pSocket->SetSession(new GameAuthSession{m_pSocket.get()});
             m_pSocket->Start();
-            reinterpret_cast<GameAuthSession*>(m_pSocket->GetSession())->SendGameLogin();
+            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->SendGameLogin();
 
             m_pThread = new std::thread(&AuthNetwork::Run, this);
             return true;
@@ -93,7 +93,7 @@ class AuthNetwork
             _updateTimer->expires_from_now(boost::posix_time::milliseconds(10));
             _updateTimer->async_wait(std::bind(&AuthNetwork::Update, this));
 
-            if(m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
+            if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
             {
                 m_nLastPingTime = sWorld.GetArTime();
                 XPacket _packet(TS_CA_PING);

@@ -29,7 +29,7 @@
 /// Manages all sockets connected to peers and network threads
 
 template<class T>
-static void OnSocketAccept(tcp::socket&& sock, uint32 threadIndex);
+static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex);
 
 template<class T>
 class XSocketMgr : public SocketMgr<XSocket>
@@ -113,7 +113,7 @@ class XSocketMgr : public SocketMgr<XSocket>
         std::size_t GetApplicationSendBufferSize() const { return _socketApplicationSendBufferSize; }
 
     protected:
-        XSocketMgr(): BaseSocketMgr(), _socketSystemSendBufferSize(-1), _socketApplicationSendBufferSize(65536), _tcpNoDelay(true)
+        XSocketMgr() : BaseSocketMgr(), _socketSystemSendBufferSize(-1), _socketApplicationSendBufferSize(65536), _tcpNoDelay(true)
         {
         }
 
@@ -135,7 +135,7 @@ class XSocketMgr : public SocketMgr<XSocket>
 };
 
 template<class T>
-static void OnSocketAccept(tcp::socket&& sock, uint32 threadIndex)
+static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex)
 {
     XSocketMgr<T>::Instance().OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
 }

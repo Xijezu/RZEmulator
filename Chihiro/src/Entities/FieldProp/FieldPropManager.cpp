@@ -22,7 +22,7 @@
 void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime)
 {
     auto propTemplate = sObjectMgr.GetFieldPropBase(prop.nPropID);
-    if(propTemplate == nullptr)
+    if (propTemplate == nullptr)
         return;
 
     {
@@ -38,9 +38,9 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int l
 void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
     FieldPropRespawnInfo info{prop};
-    int nPropID = prop.nPropID;
-    FieldPropTemplate* propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
-    if(propTemplate == nullptr)
+    int                  nPropID = prop.nPropID;
+    FieldPropTemplate *propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
+    if (propTemplate == nullptr)
         return;
 
     {
@@ -66,8 +66,8 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 
         auto pos = std::find_if(m_vExpireObject.begin(),
                                 m_vExpireObject.end(),
-                                [&prop] (const FieldProp* fp) { return fp->GetHandle() == prop->GetHandle(); });
-        if(pos != m_vExpireObject.end())
+                                [&prop](const FieldProp *fp) { return fp->GetHandle() == prop->GetHandle(); });
+        if (pos != m_vExpireObject.end())
         {
             m_vExpireObject.erase(pos);
         }
@@ -83,14 +83,14 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 
 void FieldPropManager::Update(uint/* diff*/)
 {
-    uint ct = sWorld.GetArTime();
-    std::vector<FieldPropRegenInfo> vRegenInfo{};
-    std::vector<FieldProp*> vDeleteList{};
+    uint                            ct = sWorld.GetArTime();
+    std::vector<FieldPropRegenInfo> vRegenInfo{ };
+    std::vector<FieldProp *>        vDeleteList{ };
 
     // "Critical section" for lock (yeah, I prefer those)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        for (auto it = m_vRespawnList.begin(); it != m_vRespawnList.end(); )
+        for (auto       it = m_vRespawnList.begin(); it != m_vRespawnList.end();)
         {
             if (it->tNextRegen < ct)
             {

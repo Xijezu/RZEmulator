@@ -34,7 +34,7 @@ using boost::asio::ip::tcp;
 template<class SocketType>
 class NetworkThread
 {
-public:
+    public:
         NetworkThread() : _connections(0), _stopped(false), _thread(nullptr), _ioContext(1),
                           _acceptSocket(_ioContext), _updateTimer(_ioContext)
         {
@@ -88,12 +88,12 @@ public:
             SocketAdded(sock);
         }
 
-        tcp::socket* GetSocketForAccept() { return &_acceptSocket; }
+        tcp::socket *GetSocketForAccept() { return &_acceptSocket; }
 
     protected:
-        virtual void SocketAdded(std::shared_ptr<SocketType> /*sock*/) { }
+        virtual void SocketAdded(std::shared_ptr<SocketType> /*sock*/) {}
 
-        virtual void SocketRemoved(std::shared_ptr<SocketType> /*sock*/) { }
+        virtual void SocketRemoved(std::shared_ptr<SocketType> /*sock*/) {}
 
         void AddNewSockets()
         {
@@ -161,7 +161,7 @@ public:
         std::atomic<int32> _connections;
         std::atomic<bool>  _stopped;
 
-        std::thread * _thread;
+        std::thread *_thread;
 
         SocketContainer _sockets;
 

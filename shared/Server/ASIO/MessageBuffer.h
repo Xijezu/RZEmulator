@@ -34,11 +34,11 @@ class MessageBuffer
             _storage.resize(initialSize);
         }
 
-        MessageBuffer(MessageBuffer const& right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right._storage)
+        MessageBuffer(MessageBuffer const &right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right._storage)
         {
         }
 
-        MessageBuffer(MessageBuffer&& right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right.Move()) { }
+        MessageBuffer(MessageBuffer &&right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right.Move()) {}
 
         void Reset()
         {
@@ -51,11 +51,11 @@ class MessageBuffer
             _storage.resize(bytes);
         }
 
-        uint8* GetBasePointer() { return _storage.data(); }
+        uint8 *GetBasePointer() { return _storage.data(); }
 
-        uint8* GetReadPointer() { return GetBasePointer() + _rpos; }
+        uint8 *GetReadPointer() { return GetBasePointer() + _rpos; }
 
-        uint8* GetWritePointer() { return GetBasePointer() + _wpos; }
+        uint8 *GetWritePointer() { return GetBasePointer() + _wpos; }
 
         void ReadCompleted(size_type bytes) { _rpos += bytes; }
 
@@ -87,7 +87,7 @@ class MessageBuffer
                 _storage.resize(_storage.size() * 3 / 2);
         }
 
-        void Write(void const* data, std::size_t size)
+        void Write(void const *data, std::size_t size)
         {
             if (size)
             {
@@ -96,14 +96,14 @@ class MessageBuffer
             }
         }
 
-        std::vector<uint8>&& Move()
+        std::vector<uint8> &&Move()
         {
             _wpos = 0;
             _rpos = 0;
             return std::move(_storage);
         }
 
-        MessageBuffer& operator=(MessageBuffer const& right)
+        MessageBuffer &operator=(MessageBuffer const &right)
         {
             if (this != &right)
             {
@@ -115,7 +115,7 @@ class MessageBuffer
             return *this;
         }
 
-        MessageBuffer& operator=(MessageBuffer&& right)
+        MessageBuffer &operator=(MessageBuffer &&right)
         {
             if (this != &right)
             {

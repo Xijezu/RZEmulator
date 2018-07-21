@@ -31,6 +31,7 @@
 #    endif // !defined(BOOST_ASIO_HAS_MOVE)
 #  endif // if NGEMITY_COMPILER == NGEMITY_COMPILER_INTEL
 #else
+
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
 #  include <sys/socket.h>
@@ -38,6 +39,7 @@
 #  include <unistd.h>
 #  include <netdb.h>
 #  include <cstdlib>
+
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
@@ -50,19 +52,20 @@
 #  define strnicmp strncasecmp
 #endif
 
-inline unsigned long atoul(char const* str) { return strtoul(str, nullptr, 10); }
-inline unsigned long long atoull(char const* str) { return strtoull(str, nullptr, 10); }
+inline unsigned long atoul(char const *str) { return strtoul(str, nullptr, 10); }
+
+inline unsigned long long atoull(char const *str) { return strtoull(str, nullptr, 10); }
 
 #define STRINGIZE(a) #a
 
 enum TimeConstants
 {
     MINUTE          = 60,
-    HOUR            = MINUTE*60,
-    DAY             = HOUR*24,
-    WEEK            = DAY*7,
-    MONTH           = DAY*30,
-    YEAR            = MONTH*12,
+    HOUR            = MINUTE * 60,
+    DAY             = HOUR * 24,
+    WEEK            = DAY * 7,
+    MONTH           = DAY * 30,
+    YEAR            = MONTH * 12,
     IN_MILLISECONDS = 1000
 };
 

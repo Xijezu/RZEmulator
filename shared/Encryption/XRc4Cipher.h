@@ -2,24 +2,24 @@
 
 struct XRC4Cipher
 {
-public:
+    public:
 
-	XRC4Cipher();
-	virtual ~XRC4Cipher();
+        XRC4Cipher();
+        virtual ~XRC4Cipher();
 
-	void SetKey( const char* pKey );
+        void SetKey(const char *pKey);
 
-	// pSource ¿Í pTarget ÀÌ °°¾Æµµ ¹«¹æÇÔ.
-	virtual void Encode( const void* pSource, void* pTarget, unsigned len, bool bIsPeek = false );
-	virtual void Decode( const void* pSource, void* pTarget, unsigned len, bool bIsPeek = false );
-	virtual void Clear();
+        // pSource ï¿½ï¿½ pTarget ï¿½ï¿½ ï¿½ï¿½ï¿½Æµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        virtual void Encode(const void *pSource, void *pTarget, unsigned len, bool bIsPeek = false);
+        virtual void Decode(const void *pSource, void *pTarget, unsigned len, bool bIsPeek = false);
+        virtual void Clear();
 
-private:
+    private:
 
-	inline void tryCipher( const void* pSource, void* pTarget, unsigned len );
-	inline void doCipher( const void* pSource, void* pTarget, unsigned len );
+        inline void tryCipher(const void *pSource, void *pTarget, unsigned len);
+        inline void doCipher(const void *pSource, void *pTarget, unsigned len);
 
-	struct TImpl;
-	TImpl* m_pImpl;
+        struct TImpl;
+        TImpl *m_pImpl;
 };
 

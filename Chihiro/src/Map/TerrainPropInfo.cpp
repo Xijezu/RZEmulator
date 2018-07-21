@@ -17,7 +17,6 @@
 
 #include "TerrainPropInfo.h"
 #include "fstream"
-#include "Util.h"
 
 bool TerrainPropInfo::Initialize(std::string szFileName)
 {

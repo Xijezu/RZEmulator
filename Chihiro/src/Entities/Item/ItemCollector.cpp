@@ -22,7 +22,7 @@
 ItemCollector::~ItemCollector()
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    for(auto& item : m_vItemList)
+    for (auto &item : m_vItemList)
     {
         Item::PendFreeItem(item.second);
     }
@@ -30,20 +30,20 @@ ItemCollector::~ItemCollector()
 
 void ItemCollector::RegisterItem(Item *pItem)
 {
-    if(pItem == nullptr)
+    if (pItem == nullptr)
         return;
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    if(m_vItemList.count(pItem->GetHandle()) != 0)
+    if (m_vItemList.count(pItem->GetHandle()) != 0)
         return;
     m_vItemList[pItem->GetHandle()] = pItem;
 }
 
 bool ItemCollector::UnregisterItem(Item *pItem)
 {
-    if(pItem == nullptr)
+    if (pItem == nullptr)
         return false;
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    if(m_vItemList.count(pItem->GetHandle()) == 0)
+    if (m_vItemList.count(pItem->GetHandle()) == 0)
         return false;
 
     m_vItemList.erase(pItem->GetHandle());
@@ -52,16 +52,16 @@ bool ItemCollector::UnregisterItem(Item *pItem)
 
 void ItemCollector::Update()
 {
-    NG_UNIQUE_GUARD writeGuard(i_lock);
-    uint ct = sWorld.GetArTime();
+    NG_UNIQUE_GUARD        writeGuard(i_lock);
+    uint                   ct  = sWorld.GetArTime();
     for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next)
     {
         next = itr;
         ++next;
 
-        if(itr->second->m_nDropTime + sWorld.getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct)
+        if (itr->second->m_nDropTime + sWorld.getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct)
         {
-            if(itr->second->IsInWorld())
+            if (itr->second->IsInWorld())
                 sWorld.RemoveObjectFromWorld(itr->second);
             m_vItemList.erase(itr);
             Item::PendFreeItem(itr->second);

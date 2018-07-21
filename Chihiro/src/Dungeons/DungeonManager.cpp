@@ -19,19 +19,19 @@
 
 Position DungeonManager::GetRaidStartPosition(int nDungeonID)
 {
-    for(auto& dt : m_vDungeonInfo)
+    for (auto &dt : m_vDungeonInfo)
     {
-        if(dt.id == nDungeonID)
+        if (dt.id == nDungeonID)
             return dt.raid_start_pos;
     }
-    return Position{};
+    return Position{ };
 }
 
 int DungeonManager::GetDungeonID(float x, float y)
 {
-    for(auto& dt : m_vDungeonInfo)
+    for (auto &dt : m_vDungeonInfo)
     {
-        if(dt.box.IsInclude(x, y))
+        if (dt.box.IsInclude(x, y))
             return dt.id;
     }
     return 0;

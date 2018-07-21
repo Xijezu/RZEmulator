@@ -24,12 +24,14 @@ constexpr int   MAX_COOLTIME_GROUP     = 40;
 constexpr int   MAX_SOCKET_NUMBER      = 4;
 constexpr int   MAX_ITEM_NAME_LENGTH   = 32;
 
-struct ItemPickupOrder {
+struct ItemPickupOrder
+{
     uint hPlayer[3];
     int  nPartyID[3];
 };
 
-enum ElementalType {
+enum ElementalType
+{
     TYPE_NONE  = 0,
     TYPE_FIRE  = 1,
     TYPE_WATER = 2,
@@ -199,7 +201,8 @@ enum ItemClass : int
     CLASS_DECO_ONEHAND_AXE   = 621,
 };
 
-enum ItemType : int {
+enum ItemType : int
+{
     TYPE_ETC       = 0,
     TYPE_ARMOR     = 1,
     TYPE_CARD      = 2,

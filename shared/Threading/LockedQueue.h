@@ -19,7 +19,7 @@
 #include <deque>
 #include <mutex>
 
-template <class T, typename StorageType = std::deque<T> >
+template<class T, typename StorageType = std::deque<T> >
 class LockedQueue
 {
         //! Lock access to the queue.
@@ -45,7 +45,7 @@ class LockedQueue
         }
 
         //! Adds an item to the queue.
-        void add(const T& item)
+        void add(const T &item)
         {
             lock();
 
@@ -63,7 +63,7 @@ class LockedQueue
         }
 
         //! Gets the next result in the queue, if any.
-        bool next(T& result)
+        bool next(T &result)
         {
             std::lock_guard<std::mutex> lock(_lock);
 
@@ -77,7 +77,7 @@ class LockedQueue
         }
 
         template<class Checker>
-        bool next(T& result, Checker& check)
+        bool next(T &result, Checker &check)
         {
             std::lock_guard<std::mutex> lock(_lock);
 
@@ -93,11 +93,11 @@ class LockedQueue
         }
 
         //! Peeks at the top of the queue. Check if the queue is empty before calling! Remember to unlock after use if autoUnlock == false.
-        T& peek(bool autoUnlock = false)
+        T &peek(bool autoUnlock = false)
         {
             lock();
 
-            T & result = _queue.front();
+            T &result = _queue.front();
 
             if (autoUnlock)
                 unlock();

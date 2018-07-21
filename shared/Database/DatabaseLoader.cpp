@@ -22,7 +22,6 @@
 
 #include <mysqld_error.h>
 
-
 DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const /*defaultUpdateMask*/)
         : _logger(logger), _autoSetup(false), _updateFlags(false)
 {
@@ -139,7 +138,7 @@ bool DatabaseLoader::Process(std::queue<Predicate> &queue)
     return true;
 }
 
-template DatabaseLoader& DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection>&, std::string const&);
-template DatabaseLoader& DatabaseLoader::AddDatabase<CharacterDatabaseConnection>(DatabaseWorkerPool<CharacterDatabaseConnection>&, std::string const&);
-template DatabaseLoader& DatabaseLoader::AddDatabase<GameDatabaseConnection>(DatabaseWorkerPool<GameDatabaseConnection>&, std::string const&);
+template DatabaseLoader &DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection> &, std::string const &);
+template DatabaseLoader &DatabaseLoader::AddDatabase<CharacterDatabaseConnection>(DatabaseWorkerPool<CharacterDatabaseConnection> &, std::string const &);
+template DatabaseLoader &DatabaseLoader::AddDatabase<GameDatabaseConnection>(DatabaseWorkerPool<GameDatabaseConnection> &, std::string const &);
 

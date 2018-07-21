@@ -24,43 +24,49 @@
 RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo(rh))
 {
     m_nMaxRespawnNum = info.prespawn_count;
-    lastDeadTime = 0;
+    lastDeadTime     = 0;
 }
 
 void RespawnObject::Update(uint diff)
 {
     /// No need to update anything
-    if(info.count >= m_nMaxRespawnNum)
+    if (info.count >= m_nMaxRespawnNum)
         return;
 
     uint ct = sWorld.GetArTime();
 
     /// Only update based on spawn rates (each X seconds after dead)
-    if(lastDeadTime != 0 && lastDeadTime + info.interval > ct)
+    if (lastDeadTime != 0 && lastDeadTime + info.interval > ct)
         return;
 
     auto respawn_count = m_nMaxRespawnNum - info.count;
 
-    if(lastDeadTime == 0) {
-        lastDeadTime = ct;
+    if (lastDeadTime == 0)
+    {
+        lastDeadTime  = ct;
         respawn_count = m_nMaxRespawnNum;
     }
 
     /// Do we need a respawn?
-    if(respawn_count > 0) {
-        while (true) {
+    if (respawn_count > 0)
+    {
+        while (true)
+        {
             /// Generate random respawn coordinates based on a rectangle
             int x = irand((int)info.left, (int)info.right);
             int y = irand((int)info.top, (int)info.bottom);
 
             /// Generate monster if not blocked
-            Monster* monster{nullptr};
-            if (!GameContent::IsBlocked(x, y)) {
+            Monster *monster{nullptr};
+            if (!GameContent::IsBlocked(x, y))
+            {
                 monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
             }
             /// Put it to the list when it's not blocked
-            if (monster != nullptr) {
-                if (info.dungeon_id != 0) {
+            if (monster != nullptr)
+            {
+                if (info.dungeon_id != 0)
+                {
                     //monster.m_nDungeonId = info.dungeon_id;
                 }
                 m_vRespawnedMonster.emplace_back(monster->GetHandle());
@@ -75,11 +81,12 @@ void RespawnObject::Update(uint diff)
 
 void RespawnObject::onMonsterDelete(Monster *mob)
 {
-    if(mob == nullptr)
+    if (mob == nullptr)
         return;
 
     auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
-    if(pos != m_vRespawnedMonster.end()) {
+    if (pos != m_vRespawnedMonster.end())
+    {
         m_vRespawnedMonster.erase(pos);
         mob->m_pDeleteHandler = nullptr;
         lastDeadTime = sWorld.GetArTime();

@@ -22,16 +22,16 @@ class QueryCallback;
 
 class QueryCallbackProcessor
 {
-public:
+    public:
         QueryCallbackProcessor();
         ~QueryCallbackProcessor();
 
-        void AddQuery(QueryCallback&& query);
+        void AddQuery(QueryCallback &&query);
         void ProcessReadyQueries();
 
     private:
-        QueryCallbackProcessor(QueryCallbackProcessor const&) = delete;
-        QueryCallbackProcessor& operator=(QueryCallbackProcessor const&) = delete;
+        QueryCallbackProcessor(QueryCallbackProcessor const &) = delete;
+        QueryCallbackProcessor &operator=(QueryCallbackProcessor const &) = delete;
 
         std::vector<QueryCallback> _callbacks;
 };

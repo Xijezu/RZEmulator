@@ -18,12 +18,13 @@
 #include "Common.h"
 #include "Monster.h"
 
-struct RespawnInfo : public MonsterRespawnInfo {
+struct RespawnInfo : public MonsterRespawnInfo
+{
     explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info)
     {
         count              = 0;
         prespawn_count     = info.max_num / 2;
-        if(prespawn_count < 1 || dungeon_id != 0 || way_point_id != 0)
+        if (prespawn_count < 1 || dungeon_id != 0 || way_point_id != 0)
             prespawn_count = info.max_num;
     }
 
@@ -31,12 +32,13 @@ struct RespawnInfo : public MonsterRespawnInfo {
     uint prespawn_count;
 };
 
-class RespawnObject : public MonsterDeleteHandler{
-public:
+class RespawnObject : public MonsterDeleteHandler
+{
+    public:
         explicit RespawnObject(MonsterRespawnInfo rh);
         ~RespawnObject() = default;
 
-        void onMonsterDelete(Monster* mob) override;
+        void onMonsterDelete(Monster *mob) override;
         void Update(uint diff);
 
     private:

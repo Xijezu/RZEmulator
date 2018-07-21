@@ -27,7 +27,7 @@
 #include "Monster.h"
 #include <unordered_map>
 
-typedef std::unordered_map<uint32, WorldObject*> UpdateMap;
+typedef std::unordered_map<uint32, WorldObject *> UpdateMap;
 class MemoryPoolMgr
 {
     public:
@@ -91,8 +91,8 @@ class MemoryPoolMgr
         template<class T>
         void _unload();
         void AddToDeleteList(WorldObject *obj);
-        std::set<WorldObject *>   i_objectsToRemove{ };
-        LockedQueue<WorldObject*> addUpdateQueue;
+        std::set<WorldObject *>    i_objectsToRemove{ };
+        LockedQueue<WorldObject *> addUpdateQueue;
 
         UpdateMap i_objectsToUpdate{ };
 

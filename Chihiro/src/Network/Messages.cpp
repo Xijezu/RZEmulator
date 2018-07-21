@@ -16,15 +16,11 @@
 */
 
 #include "Messages.h"
-#include "Player.h"
 #include "ClientPackets.h"
-#include "World.h"
 #include "Skill.h"
 #include "NPC.h"
 #include "MemPool.h"
 #include "RegionContainer.h"
-#include "ObjectMgr.h"
-#include "WorldSession.h"
 #include "GroupManager.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
@@ -786,10 +782,10 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
     };
 
     sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                 (uint)(obj->GetPositionY() / g_nRegionSize),
-                                 obj->GetLayer(),
-                                 functor,
-                                 (uint8_t)RegionVisitor::ClientVisitor);
+                                (uint)(obj->GetPositionY() / g_nRegionSize),
+                                obj->GetLayer(),
+                                functor,
+                                (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
@@ -919,10 +915,10 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
     };
 
     sRegion.DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
-                                 (uint)(pPlayer->GetPositionY() / g_nRegionSize),
-                                 pPlayer->GetLayer(),
-                                 functor,
-                                 (uint8_t)RegionVisitor::MovableVisitor);
+                                (uint)(pPlayer->GetPositionY() / g_nRegionSize),
+                                pPlayer->GetLayer(),
+                                functor,
+                                (uint8_t)RegionVisitor::MovableVisitor);
 }
 
 void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)

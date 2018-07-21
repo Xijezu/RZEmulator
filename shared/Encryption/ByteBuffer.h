@@ -36,6 +36,7 @@
 #include <cstring>
 #include <time.h>
 #include "MessageBuffer.h"
+
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
 {
@@ -89,7 +90,7 @@ class ByteBuffer
         {
         }
 
-        explicit ByteBuffer(MessageBuffer&& buffer);
+        explicit ByteBuffer(MessageBuffer &&buffer);
 
         void clear()
         {
@@ -402,7 +403,7 @@ class ByteBuffer
                 append(str.c_str(), len);
         }
 
-        void fill(const std::string& src, size_t cnt)
+        void fill(const std::string &src, size_t cnt)
         {
             append(src.c_str(), src.length());
             if (src.length() < cnt)
@@ -457,7 +458,7 @@ class ByteBuffer
                 return;
             //throw ByteBufferSourceException(_wpos, size(), cnt);
 
-            ASSERT(size() < 10000000, "Size too big");
+                    ASSERT(size() < 10000000, "Size too big");
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);

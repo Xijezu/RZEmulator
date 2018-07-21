@@ -17,7 +17,6 @@
 
 #include "TerrainSeamlessWorld.h"
 #include <fstream>
-#include "Util.h"
 
 bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileCheck)
 {

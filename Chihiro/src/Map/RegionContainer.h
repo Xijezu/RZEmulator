@@ -48,7 +48,7 @@ class RegionContainer
         void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, RegionFunctor &fn);
 
         template<typename Visitor>
-        void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Visitor&& visitor, uint8_t nBitset)
+        void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
             uint left = rx - 3;
             if (rx < 3)
@@ -87,7 +87,7 @@ class RegionContainer
         }
 
         template<typename Visitor>
-        void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, Visitor&& visitor, uint8_t nBitset)
+        void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
             uint left = rx2 - 3;
             if ((rx2 - 3) >= (rx1 - 3))
@@ -135,7 +135,7 @@ class RegionContainer
         }
 
         template<typename Visitor>
-        void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, Visitor&& visitor, uint8_t nBitset)
+        void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
             uint left = rx - 3;
             if (rx < 3)

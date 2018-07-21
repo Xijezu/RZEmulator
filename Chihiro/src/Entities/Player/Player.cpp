@@ -1754,7 +1754,7 @@ void Player::DoUnSummon(Summon *pSummon)
     usPct << pSummon->GetHandle();
     sWorld.Broadcast((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize), pSummon->GetLayer(), usPct);
     if (sRegion.IsVisibleRegion((uint)(pSummon->GetPositionX() / g_nRegionSize), (uint)(pSummon->GetPositionY() / g_nRegionSize),
-                                 (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) == 0)
+                                (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) == 0)
     {
         SendPacket(usPct);
     }
@@ -1858,8 +1858,8 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                     || item2->m_pItemBase->iclass != CLASS_ONEHAND_AXE)
                 || m_anWear[14] == nullptr
                 || (GetCurrentSkillLevel(1181) < 1
-                   && GetCurrentSkillLevel(61010) < 1
-                   && GetCurrentSkillLevel(61015) < 1))
+                    && GetCurrentSkillLevel(61010) < 1
+                    && GetCurrentSkillLevel(61015) < 1))
             {
                 pos = WEAR_DECO_WEAPON;
             }
@@ -1923,8 +1923,8 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 if (curr_capacity != new_capacity
                     && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight
                     && (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
-                    || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
-                       && curr_capacity > new_capacity)))
+                        || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
+                            && curr_capacity > new_capacity)))
                 {
                     return false;
                 }
@@ -2285,7 +2285,7 @@ uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
     if (pItem->m_pItemBase->cool_time_group < 0
         || pItem->m_pItemBase->cool_time_group > 40
         || (pItem->m_pItemBase->cool_time_group != 0
-           && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
+            && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
         return TS_RESULT_COOL_TIME;
     // Ride IDX
     if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
@@ -2309,7 +2309,6 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
         pTarget = this;
     if (pItem->m_Instance.nCount < 1)
         return TS_RESULT_ACCESS_DENIED;
-
 
     uint16   result{TS_RESULT_SUCCESS};
     for (int i  = 0; i < MAX_OPTION_NUMBER; ++i)
@@ -2335,15 +2334,15 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
         Messages::SendItemCoolTimeInfo(this);
 
         auto itemCode = pItem->m_Instance.Code;
-        if(itemCode != FEATHER_OF_RETURN &&
-           itemCode != FEATHER_OF_REINSTATEMENT &&
-		   itemCode != FEATHER_OF_RETURN_EVENT)
+        if (itemCode != FEATHER_OF_RETURN &&
+            itemCode != FEATHER_OF_REINSTATEMENT &&
+            itemCode != FEATHER_OF_RETURN_EVENT)
         {
-            if(pItem->m_pItemBase->type != 6)
-            	EraseItem(pItem, 1);
+            if (pItem->m_pItemBase->type != 6)
+                EraseItem(pItem, 1);
 
-            if(pItem->IsCashItem())
-            	this->Save(false);
+            if (pItem->IsCashItem())
+                this->Save(false);
         }
     }
     return result;
@@ -3710,10 +3709,10 @@ bool Player::CheckTradeWeight()
         return false;
 
     auto tradeTarget = GetTradeTarget();
-    if(tradeTarget == nullptr)
+    if (tradeTarget == nullptr)
         return false;
 
-    float weight = 0;
+    float weight       = 0;
     float targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
 
     for (auto &it : m_vTradeItemList)
@@ -3725,7 +3724,7 @@ bool Player::CheckTradeWeight()
         weight += pItem->m_pItemBase->weight * it.second;
     }
 
-    return (weight <= tradeTarget->m_Attribute.nMaxWeight - targetWeight );
+    return (weight <= tradeTarget->m_Attribute.nMaxWeight - targetWeight);
 }
 
 bool Player::CheckTradeItem()
@@ -3746,20 +3745,20 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 {
     Item *origItem = FindItemByHandle(ItemHandle);
 
-    if(origItem == nullptr || !IsTradable(origItem))
+    if (origItem == nullptr || !IsTradable(origItem))
         return false;
 
-    if(count > origItem->m_Instance.nCount)
+    if (count > origItem->m_Instance.nCount)
         return false;
 
     Item *item = popItem(origItem, count, false);
 
-    item->m_Instance.nIdx = 0;
+    item->m_Instance.nIdx     = 0;
     item->m_bIsNeedUpdateToDB = true;
 
     Item *target_item = pTarget->PushItem(item, count, false);
 
-    if(target_item != nullptr && target_item != item)
+    if (target_item != nullptr && target_item != item)
         Item::PendFreeItem(item);
 
     return true;

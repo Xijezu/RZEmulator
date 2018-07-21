@@ -33,10 +33,10 @@ using boost::asio::ip::tcp;
 
 class AsyncAcceptor
 {
-public:
-        typedef void(*AcceptCallback)(tcp::socket&& newSocket, uint32 threadIndex);
+    public:
+        typedef void(*AcceptCallback)(tcp::socket &&newSocket, uint32 threadIndex);
 
-        AsyncAcceptor(NGemity::Asio::IoContext& ioContext, std::string const& bindIp, uint16 port) :
+        AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port) :
                 _acceptor(ioContext), _endpoint(NGemity::Net::make_address(bindIp), port),
                 _socket(ioContext), _closed(false), _socketFactory(std::bind(&AsyncAcceptor::DefeaultSocketFactory, this))
         {
@@ -48,7 +48,7 @@ public:
         template<AcceptCallback acceptCallback>
         void AsyncAcceptWithCallback()
         {
-            tcp::socket * socket;
+            tcp::socket *socket;
             uint32 threadIndex;
             std::tie(socket, threadIndex) = _socketFactory();
             _acceptor.async_accept(*socket, [this, socket, threadIndex](boost::system::error_code error) {
@@ -60,7 +60,7 @@ public:
 
                         acceptCallback(std::move(*socket), threadIndex);
                     }
-                    catch (boost::system::system_error const& err)
+                    catch (boost::system::system_error const &err)
                     {
                         NG_LOG_INFO("network", "Failed to initialize client's socket %s", err.what());
                     }
@@ -107,16 +107,16 @@ public:
             _acceptor.close(err);
         }
 
-        void SetSocketFactory(std::function<std::pair<tcp::socket*, uint32>()> func) { _socketFactory = func; }
+        void SetSocketFactory(std::function<std::pair<tcp::socket *, uint32>()> func) { _socketFactory = func; }
 
     private:
-        std::pair<tcp::socket*, uint32> DefeaultSocketFactory() { return std::make_pair(&_socket, 0); }
+        std::pair<tcp::socket *, uint32> DefeaultSocketFactory() { return std::make_pair(&_socket, 0); }
 
-        tcp::acceptor                                    _acceptor;
-        tcp::endpoint                                    _endpoint;
-        tcp::socket                                      _socket;
-        std::atomic<bool>                                _closed;
-        std::function<std::pair<tcp::socket*, uint32>()> _socketFactory;
+        tcp::acceptor                                     _acceptor;
+        tcp::endpoint                                     _endpoint;
+        tcp::socket                                       _socket;
+        std::atomic<bool>                                 _closed;
+        std::function<std::pair<tcp::socket *, uint32>()> _socketFactory;
 };
 
 template<class T>
@@ -130,7 +130,7 @@ void AsyncAcceptor::AsyncAccept()
                 // this-> is required here to fix an segmentation fault in gcc 4.7.2 - reason is lambdas in a templated class
                 std::make_shared<T>(std::move(this->_socket))->Start();
             }
-            catch (boost::system::system_error const& err)
+            catch (boost::system::system_error const &err)
             {
                 NG_LOG_INFO("network", "Failed to retrieve client's remote address %s", err.what());
             }

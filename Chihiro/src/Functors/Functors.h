@@ -73,7 +73,7 @@ struct AddObjectFunctor
             : newObj(obj), bSend(false), x(_x), y(_y), x2(0), y2(0), layer(_layer) {}
 
     explicit AddObjectFunctor(uint _x, uint _y, uint _x2, uint _y2, uint8_t _layer, WorldObject *obj)
-            :  newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
+            : newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
 
     void Run();
     void Run2();

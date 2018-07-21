@@ -20,7 +20,8 @@
 #include "Unit.h"
 #include "MonsterBase.h"
 
-struct VirtualParty {
+struct VirtualParty
+{
     VirtualParty() = default;
 
     VirtualParty(int id, int d, int lv)
@@ -61,7 +62,8 @@ struct VirtualParty {
     int   nLevel;
 };
 
-struct DamageTag {
+struct DamageTag
+{
     DamageTag(uint _uid, uint _time, int _damage)
     {
         uid     = _uid;
@@ -86,8 +88,8 @@ class Monster : public Unit
         ~Monster() = default;
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        Monster (const Monster&) = delete;
-        Monster& operator= (const Monster&) = delete;
+        Monster(const Monster &) = delete;
+        Monster &operator=(const Monster &) = delete;
 
         void Update(uint) override;
         void OnUpdate() override;
@@ -103,7 +105,7 @@ class Monster : public Unit
 
         float GetScale() const override { return m_Base->scale; }
 
-        const std::string& GetNameAsString() override;
+        const std::string &GetNameAsString() override;
 
         MONSTER_STATUS GetStatus() const { return m_nStatus; }
 

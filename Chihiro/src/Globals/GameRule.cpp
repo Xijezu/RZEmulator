@@ -16,13 +16,11 @@
 */
 
 #include "GameRule.h"
-#include "Util.h"
-#include "World.h"
 
-int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
-int GameRule::_chipLevelLimit[8] = {0, 20, 50, 80, 100, 120, 150, 180};
-float GameRule::_staminaExpRate[300] = { 0 };
-int GameRule::nEnhanceFailType = 2;
+int   GameRule::_modtable[8]         = {0, 3, 3, 2, 2, 3, 2, 2};
+int   GameRule::_chipLevelLimit[8]   = {0, 20, 50, 80, 100, 120, 150, 180};
+float GameRule::_staminaExpRate[300] = {0};
+int   GameRule::nEnhanceFailType     = 2;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
 {
@@ -47,9 +45,12 @@ float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_
     int   recommended = GetItemRecommendedLevel(item_rank, item_level);
     int   limit       = GetItemLevelLimit(item_rank);
 
-    if (item_level == 1 || creature_level < limit || creature_level >= recommended) {
+    if (item_level == 1 || creature_level < limit || creature_level >= recommended)
+    {
         result = 10000;
-    } else {
+    }
+    else
+    {
         int64 B = 500ll;
 
         int64 n       = 10000ll * (recommended - limit);                                        // 0
@@ -83,7 +84,8 @@ int GameRule::GetRankLevel(int rank)
     if (idx > 8)
         idx = 8;
 
-    switch (idx) {
+    switch (idx)
+    {
         case 1:
             return 0;
         case 2:
@@ -113,9 +115,12 @@ int GameRule::GetItemLevelLimit(int item_rank)
 int GameRule::GetItemRecommendedLevel(int item_rank, int item_level)
 {
     int result;
-    if (item_rank > 1) {
+    if (item_rank > 1)
+    {
         result = (GetItemRecommendModTable(item_rank) * (item_level - 1)) + GetItemLevelLimit(item_rank);
-    } else {
+    }
+    else
+    {
         result = 0;
     }
     return result;
@@ -153,8 +158,8 @@ float GameRule::GetChaosDropRate()
 
 int GameRule::GetIntValueByRandomInt(double fValue)
 {
-    double result = fValue +1;
-    if(((uint)rand32() % 100) / 100.0 + fValue >= fValue)
+    double result = fValue + 1;
+    if (((uint)rand32() % 100) / 100.0 + fValue >= fValue)
         result = fValue;
     return (int)result;
 }
@@ -169,11 +174,11 @@ int64 GameRule::GetIntValueByRandomInt64(double fValue)
 
 float GameRule::GetStaminaRatio(int level)
 {
-    if(level < 1)
+    if (level < 1)
         level = 1;
-    if(level > 300)
+    if (level > 300)
         level = 300;
-    if(_staminaExpRate[level] == 0.0f)
+    if (_staminaExpRate[level] == 0.0f)
     {
         double v2 = pow(level, 1.46) + (double)level * 2.4;
         _staminaExpRate[level] = (float)((pow(level, 2) * 0.1 + v2 + 2.0f) * 0.00055f);

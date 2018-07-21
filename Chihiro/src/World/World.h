@@ -211,11 +211,11 @@ class World
 
         static uint8 m_ExitCode;
 
-        SessionMap                 m_sessions;
-        const uint                 startTime;
+        SessionMap                  m_sessions;
+        const uint                  startTime;
 
         void AddSession_(WorldSession *s);
-        LockedQueue<WorldSession*> addSessQueue;
+        LockedQueue<WorldSession *> addSessQueue;
 
         void onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos);
         bool onSetMove(WorldObject *pObject, Position curPos, Position lastpos);

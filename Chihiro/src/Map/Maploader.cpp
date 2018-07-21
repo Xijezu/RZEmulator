@@ -16,7 +16,6 @@
 */
 
 #include "Maploader.h"
-#include "ObjectMgr.h"
 #include "Scripting/XLua.h"
 #include <fstream>
 #include "FieldPropManager.h"
@@ -84,77 +83,81 @@ bool Maploader::LoadMapContent()
 
 void Maploader::SetDefaultLocation(int x, int y, float fMapLength, int LocationId)
 {
-    X2D::Pointf begin{};
-    X2D::Pointf end{};
+    X2D::Pointf begin{ };
+    X2D::Pointf end{ };
 
     begin.x = (x * fMapLength);
     begin.y = (y * fMapLength);
-    end.x = ((x + 1) * fMapLength);
-    end.y = ((y + 1) * fMapLength);
-    MapLocationInfo li(begin,end, LocationId, 2147483646);
+    end.x   = ((x + 1) * fMapLength);
+    end.y   = ((y + 1) * fMapLength);
+    MapLocationInfo li(begin, end, LocationId, 2147483646);
     RegisterMapLocationInfo(li);
 }
 
 void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
 {
-    if(g_qtLocationInfo == nullptr)
+    if (g_qtLocationInfo == nullptr)
     {
         g_qtLocationInfo = new X2D::QuadTreeMapInfo(g_nMapWidth, g_nMapHeight);
     }
     g_qtLocationInfo->Add(std::move(location_info));
 }
 
-void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, float fAttrLen, float fMapLength)
+void Maploader::LoadLocationFile(const std::string &szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
-    int nCharSize;
+    int                nCharSize;
     LocationInfoHeader lih;
-    int nPolygonCount;
-    int nPointCount;
+    int                nPolygonCount;
+    int                nPointCount;
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
-    infile.seekg(0,std::ios::end);
+    infile.seekg(0, std::ios::end);
     int64 size = infile.tellg();
-    infile.seekg(0,std::ios::beg);
-    if(size == -1)
+    infile.seekg(0, std::ios::beg);
+    if (size == -1)
         return;
-    ByteBuffer buffer{};
+    ByteBuffer buffer{ };
     buffer.resize((size_t)size);
-    infile.read(reinterpret_cast<char*>(&buffer[0]), size);
+    infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    auto total_entries = buffer.read<int>();
-    for(int i = 0; i < total_entries; ++i) {
+    auto     total_entries = buffer.read<int>();
+    for (int i             = 0; i < total_entries; ++i)
+    {
         lih.nPriority = buffer.read<int>();
-        lih.x = buffer.read<float>();
-        lih.y = buffer.read<float>();
-        lih.z = buffer.read<float>();
-        lih.fRadius = buffer.read<float>();
+        lih.x         = buffer.read<float>();
+        lih.y         = buffer.read<float>();
+        lih.z         = buffer.read<float>();
+        lih.fRadius   = buffer.read<float>();
 
         nCharSize = buffer.read<int>();
-        if(nCharSize > 1) {
+        if (nCharSize > 1)
+        {
             buffer.read_skip((size_t)nCharSize);
         }
         nCharSize = buffer.read<int>();
         sObjectMgr.g_currentLocationId = 0;
-        if(nCharSize <= 1)
+        if (nCharSize <= 1)
             continue;
 
         auto script = buffer.ReadString((uint)nCharSize);
         sScriptingMgr.RunString(script);
-        if(sObjectMgr.g_currentLocationId == 0)
+        if (sObjectMgr.g_currentLocationId == 0)
             continue;
 
         nPolygonCount = buffer.read<int>();
-        for(int cp = 0; cp < nPolygonCount; ++cp) {
+        for (int cp = 0; cp < nPolygonCount; ++cp)
+        {
             nPointCount = buffer.read<int>();
-            float sx = x * fMapLength;
-            float sy = y * fMapLength;
-            std::vector<X2D::Pointf> points{};
+            float                    sx = x * fMapLength;
+            float                    sy = y * fMapLength;
+            std::vector<X2D::Pointf> points{ };
 
-            for(int p = 0; p < nPointCount; ++p) {
+            for (int p = 0; p < nPointCount; ++p)
+            {
                 X2D::Pointf pt{ };
-                pt.x = sx + ((float) buffer.read<int>() * fAttrLen);
-                pt.x = sy + ((float) buffer.read<int>() * fAttrLen);
+                pt.x = sx + ((float)buffer.read<int>() * fAttrLen);
+                pt.x = sy + ((float)buffer.read<int>() * fAttrLen);
                 points.emplace_back(pt);
                 auto location_info = MapLocationInfo(points, sObjectMgr.g_currentLocationId, 0);
                 RegisterMapLocationInfo(location_info);
@@ -163,68 +166,69 @@ void Maploader::LoadLocationFile(const std::string& szFilename, int x, int y, fl
     }
 }
 
-void Maploader::LoadAttributeFile(const std::string&  szFilename, int x, int y, float fAttrLen, float fMapLength)
+void Maploader::LoadAttributeFile(const std::string &szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
-    infile.seekg(0,std::ios::end);
+    infile.seekg(0, std::ios::end);
     int64 size = infile.tellg();
-    infile.seekg(0,std::ios::beg);
-    if(size == -1)
+    infile.seekg(0, std::ios::beg);
+    if (size == -1)
         return;
 
-    ByteBuffer buffer{};
+    ByteBuffer buffer{ };
     buffer.resize((size_t)size);
-    infile.read(reinterpret_cast<char*>(&buffer[0]), size);
+    infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    auto total_entries = buffer.read<int>();
-    float sx = x * fMapLength;
-    float sy = y * fMapLength;
+    auto  total_entries = buffer.read<int>();
+    float sx            = x * fMapLength;
+    float sy            = y * fMapLength;
 
-    for(int i = 0; i < total_entries; ++i)
+    for (int i = 0; i < total_entries; ++i)
     {
-        auto nPointCount = buffer.read<int>();
+        auto nPointCount           = buffer.read<int>();
 
-        std::vector<X2D::Pointf> points{};
-        for(int p = 0; p < nPointCount; ++p)
+        std::vector<X2D::Pointf> points{ };
+        for (int                 p = 0; p < nPointCount; ++p)
         {
-            X2D::Pointf pt{};
+            X2D::Pointf pt{ };
             pt.x = sx + ((float)buffer.read<int>() * fAttrLen);
-            pt.y = sy +((float)buffer.read<int>() * fAttrLen);
+            pt.y = sy + ((float)buffer.read<int>() * fAttrLen);
             points.emplace_back(pt);
         }
-        X2D::PolygonF pg{points};
+        X2D::PolygonF            pg{points};
         sObjectMgr.g_qtBlockInfo.Add({points, 0, 0});
     }
 }
 
-
-void Maploader::LoadScriptFile(const std::string&  szFilename, int x, int y, float fMapLength)
+void Maploader::LoadScriptFile(const std::string &szFilename, int x, int y, float fMapLength)
 {
-    NfsHeader header{};
+    NfsHeader header{ };
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
-    infile.seekg(0,std::ios::end);
+    infile.seekg(0, std::ios::end);
     int64 size = infile.tellg();
-    infile.seekg(0,std::ios::beg);
-    if(size == -1)
+    infile.seekg(0, std::ios::beg);
+    if (size == -1)
         return;
-    ByteBuffer buffer{};
+    ByteBuffer buffer{ };
     buffer.resize((size_t)size);
-    infile.read(reinterpret_cast<char*>(&buffer[0]), size);
+    infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    header.szSign = buffer.ReadString(16);
-    header.dwVersion = buffer.read<uint>();
+    header.szSign                = buffer.ReadString(16);
+    header.dwVersion             = buffer.read<uint>();
     header.dwEventLocationOffset = buffer.read<uint>();
-    header.dwEventScriptOffset = buffer.read<uint>();
-    header.dwPropScriptOffset = buffer.read<uint>();
+    header.dwEventScriptOffset   = buffer.read<uint>();
+    header.dwPropScriptOffset    = buffer.read<uint>();
 
-    if(header.szSign != "nFlavor Script"s) {
+    if (header.szSign != "nFlavor Script"s)
+    {
         NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Sign: %s", szFilename.c_str(), header.szSign.c_str());
         return;
     }
-    if(header.dwVersion != 2) {
+    if (header.dwVersion != 2)
+    {
         NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Version: %d", szFilename.c_str(), header.dwVersion);
         return;
     }
@@ -238,18 +242,19 @@ void Maploader::LoadScriptFile(const std::string&  szFilename, int x, int y, flo
 
 void Maploader::LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLength)
 {
-    auto nLocationCount = buffer.read<int>();
-    float sx = x * fMapLength;
-    float sy = y * fMapLength;
+    auto  nLocationCount = buffer.read<int>();
+    float sx             = x * fMapLength;
+    float sy             = y * fMapLength;
 
-    for(int i = 0; i < nLocationCount; ++i) {
-        ScriptRegion sr{};
-        sr.left = (fTileSize * (float)buffer.read<int>()) + sx;
-        sr.top = (fTileSize * (float)buffer.read<int>()) + sy;
-        sr.right = (fTileSize * (float)buffer.read<int>()) + sx;
+    for (int i = 0; i < nLocationCount; ++i)
+    {
+        ScriptRegion sr{ };
+        sr.left   = (fTileSize * (float)buffer.read<int>()) + sx;
+        sr.top    = (fTileSize * (float)buffer.read<int>()) + sy;
+        sr.right  = (fTileSize * (float)buffer.read<int>()) + sx;
         sr.bottom = (fTileSize * (float)buffer.read<int>()) + sy;
         auto nLength = buffer.read<int>();
-        if(nLength > 0)
+        if (nLength > 0)
             sr.szName = buffer.ReadString((uint)nLength);
 
         m_vRegionList.emplace_back(sr);
@@ -300,9 +305,12 @@ void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
 
 bool Maploader::InitMapInfo()
 {
-    for(auto& ri : m_vScriptEvent) {
-        for(auto& tag : ri.vInfoList) {
-            if(tag.nTrigger == 0) {
+    for (auto &ri : m_vScriptEvent)
+    {
+        for (auto &tag : ri.vInfoList)
+        {
+            if (tag.nTrigger == 0)
+            {
                 sScriptingMgr.RunString(tag.strFunction);
             }
         }

@@ -15,8 +15,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "PolygonF.h"
-
 bool X2D::Polygonf::Set(X2D::Pointf _begin, X2D::Pointf _end)
 {
     this->Clear();
@@ -162,8 +160,8 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
             if (rc.IsInclude(p1))
                 return true;
         }
-        float rsx = rc.size.x + rc.pos.x;
-        float rsy = rc.size.y + rc.pos.y;
+        float     rsx = rc.size.x + rc.pos.x;
+        float     rsy = rc.size.y + rc.pos.y;
 
         line_a.begin.x = rc.pos.x;
         line_a.begin.y = rc.pos.y;
@@ -360,8 +358,8 @@ bool X2D::PolygonF::IsLooseInclude(X2D::Pointf pt)
 
     if (!m_Points.empty())
     {
-        auto size = static_cast<int>(m_Points.size());
-        for (int i = 0; i < size; ++i)
+        auto     size = static_cast<int>(m_Points.size());
+        for (int i    = 0; i < size; ++i)
         {
             Pointf p = this->m_Points[i];
 
@@ -412,8 +410,8 @@ bool X2D::PolygonF::IsInclude(X2D::Pointf pt)
 
         if (!m_Points.empty())
         {
-            auto size = static_cast<int>(m_Points.size());
-            for (int i = 0; i < size; ++i)
+            auto     size = static_cast<int>(m_Points.size());
+            for (int i    = 0; i < size; ++i)
             {
                 tp1 = m_Points[i];
                 if (tp1.x == pt.x && tp1.y == pt.y)

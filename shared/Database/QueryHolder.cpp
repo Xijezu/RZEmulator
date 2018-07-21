@@ -21,7 +21,7 @@
 #include "Log.h"
 #include "QueryResult.h"
 
-bool SQLQueryHolder::SetPreparedQuery(size_t index, PreparedStatement* stmt)
+bool SQLQueryHolder::SetPreparedQuery(size_t index, PreparedStatement *stmt)
 {
     if (m_queries.size() <= index)
     {
@@ -42,7 +42,7 @@ PreparedQueryResult SQLQueryHolder::GetPreparedResult(size_t index)
         return PreparedQueryResult(nullptr);
 }
 
-void SQLQueryHolder::SetPreparedResult(size_t index, PreparedResultSet* result)
+void SQLQueryHolder::SetPreparedResult(size_t index, PreparedResultSet *result)
 {
     if (result && !result->GetRowCount())
     {
@@ -86,7 +86,7 @@ bool SQLQueryHolderTask::Execute()
 
     /// execute all queries in the holder and pass the results
     for (size_t i = 0; i < m_holder->m_queries.size(); i++)
-        if (PreparedStatement* stmt = m_holder->m_queries[i].first)
+        if (PreparedStatement *stmt = m_holder->m_queries[i].first)
             m_holder->SetPreparedResult(i, m_conn->Query(stmt));
 
     m_result.set_value(m_holder);

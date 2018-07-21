@@ -20,23 +20,25 @@
 
 class Quest;
 class Player;
-struct QuestEventHandler {
-    virtual void onStatusChanged(Quest* quest, int nOldStatus, int nNewStatus) = 0;
-    virtual void onProgressChanged(Quest* quest, QuestProgress oldProgress, QuestProgress newProgress) = 0;
+struct QuestEventHandler
+{
+    virtual void onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus) = 0;
+    virtual void onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress) = 0;
 };
 
-class Quest {
-public:
-        static Quest* AllocQuest(QuestEventHandler* handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
+class Quest
+{
+    public:
+        static Quest *AllocQuest(QuestEventHandler *handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
         static bool IsRandomQuest(int code);
-        static void DB_Insert(Player* pPlayer, Quest* pQuest);
+        static void DB_Insert(Player *pPlayer, Quest *pQuest);
 
         Quest() = default;
         ~Quest() = default;
 
         void FreeQuest();
         int GetQuestCode() const;
-        QuestInstance* GetQuestInstance();
+        QuestInstance *GetQuestInstance();
         int GetQuestID() const;
         QuestType GetQuestType() const;
 
@@ -51,6 +53,6 @@ public:
 
         QuestBaseServer   *m_QuestBase{nullptr};
         QuestEventHandler *m_Handler{nullptr};
-        QuestInstance     m_Instance{};
+        QuestInstance     m_Instance{ };
         bool              m_bIsNeedUpdateToDB{false};
 };

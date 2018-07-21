@@ -27,40 +27,39 @@
 
 namespace bpt = boost::property_tree;
 
-
 namespace
 {
-    std::string _filename;
+    std::string              _filename;
     std::vector<std::string> _args;
-    bpt::ptree _config;
-    std::mutex _configLock;
+    bpt::ptree               _config;
+    std::mutex               _configLock;
 }
 
-bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> args,
-                            std::string& error)
+bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> args,
+        std::string &error)
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
-    auto configDir = boost::filesystem::system_complete(args[0]).parent_path();
+    auto configDir  = boost::filesystem::system_complete(args[0]).parent_path();
     auto configFilePath{file};
     auto configFile = (configDir /= configFilePath).string();
 
     _filename = file;
-    _args = args;
+    _args     = args;
 
     bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
 
     try
     {
         bpt::ptree fullTree;
-        if(bIsRunningDir)
+        if (bIsRunningDir)
             bpt::ini_parser::read_ini(file, fullTree);
         else
             bpt::ini_parser::read_ini(configFile, fullTree);
 
         if (fullTree.empty())
         {
-            if(bIsRunningDir)
+            if (bIsRunningDir)
                 error = "empty file (" + file + ")";
             else
                 error = "empty file (" + configFile + ")";
@@ -70,7 +69,7 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> ar
         // Since we're using only one section per config file, we skip the section and have direct property access
         _config = fullTree.begin()->second;
     }
-    catch (bpt::ini_parser::ini_parser_error const& e)
+    catch (bpt::ini_parser::ini_parser_error const &e)
     {
         if (e.line() == 0)
             error = e.message() + " (" + e.filename() + ")";
@@ -82,101 +81,101 @@ bool ConfigMgr::LoadInitial(std::string const& file, std::vector<std::string> ar
     return true;
 }
 
-ConfigMgr* ConfigMgr::instance()
+ConfigMgr *ConfigMgr::instance()
 {
     static ConfigMgr instance;
     return &instance;
 }
 
-bool ConfigMgr::Reload(std::string& error)
+bool ConfigMgr::Reload(std::string &error)
 {
     return LoadInitial(_filename, std::move(_args), error);
 }
 
 template<class T>
-T ConfigMgr::GetValueDefault(std::string const& name, T def) const
+T ConfigMgr::GetValueDefault(std::string const &name, T def) const
 {
     try
     {
         return _config.get<T>(bpt::ptree::path_type(name, '/'));
     }
-    catch (bpt::ptree_bad_path&)
+    catch (bpt::ptree_bad_path &)
     {
         NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-            name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
+                    name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
     }
-    catch (bpt::ptree_bad_data&)
+    catch (bpt::ptree_bad_data &)
     {
         NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), std::to_string(def).c_str());
+                     name.c_str(), _filename.c_str(), std::to_string(def).c_str());
     }
 
     return def;
 }
 
 template<>
-std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std::string def) const
+std::string ConfigMgr::GetValueDefault<std::string>(std::string const &name, std::string def) const
 {
     try
     {
         return _config.get<std::string>(bpt::ptree::path_type(name, '/'));
     }
-    catch (bpt::ptree_bad_path&)
+    catch (bpt::ptree_bad_path &)
     {
         NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-            name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
+                    name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
     }
-    catch (bpt::ptree_bad_data&)
+    catch (bpt::ptree_bad_data &)
     {
         NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-            name.c_str(), _filename.c_str(), def.c_str());
+                     name.c_str(), _filename.c_str(), def.c_str());
     }
 
     return def;
 }
 
-std::string ConfigMgr::GetStringDefault(std::string const& name, const std::string& def) const
+std::string ConfigMgr::GetStringDefault(std::string const &name, const std::string &def) const
 {
     std::string val = GetValueDefault(name, def);
     val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
     return val;
 }
 
-bool ConfigMgr::GetBoolDefault(std::string const& name, bool def) const
+bool ConfigMgr::GetBoolDefault(std::string const &name, bool def) const
 {
     std::string val = GetValueDefault(name, std::string(def ? "1" : "0"));
     val.erase(std::remove(val.begin(), val.end(), '"'), val.end());
     return StringToBool(val);
 }
 
-int ConfigMgr::GetIntDefault(std::string const& name, int def) const
+int ConfigMgr::GetIntDefault(std::string const &name, int def) const
 {
     return GetValueDefault(name, def);
 }
 
-float ConfigMgr::GetFloatDefault(std::string const& name, float def) const
+float ConfigMgr::GetFloatDefault(std::string const &name, float def) const
 {
     return GetValueDefault(name, def);
 }
 
-std::string const& ConfigMgr::GetFilename()
+std::string const &ConfigMgr::GetFilename()
 {
     std::lock_guard<std::mutex> lock(_configLock);
     return _filename;
 }
 
-std::vector<std::string> const& ConfigMgr::GetArguments() const
+std::vector<std::string> const &ConfigMgr::GetArguments() const
 {
     return _args;
 }
 
-std::vector<std::string> ConfigMgr::GetKeysByString(std::string const& name)
+std::vector<std::string> ConfigMgr::GetKeysByString(std::string const &name)
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
     std::vector<std::string> keys;
 
-    for (bpt::ptree::value_type const& child : _config)
+    for (bpt::ptree::value_type const &child : _config)
         if (child.first.compare(0, name.length(), name) == 0)
             keys.push_back(child.first);
 

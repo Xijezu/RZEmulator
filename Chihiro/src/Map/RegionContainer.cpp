@@ -16,17 +16,16 @@
 */
 
 #include "RegionContainer.h"
-#include "World.h"
 
 #define REGION_BLOCK_COUNT 100
 
 void RegionContainer::InitRegion(float map_width, float map_height)
 {
-    m_MapWidth = map_width;
-    m_MapHeight = map_height;
-    m_nRegionWidth = (uint)((map_width / g_nRegionSize) + 1.0f);
-    m_nRegionHeight = (uint)((map_height / g_nRegionSize) + 1.0f);
-    m_nRegionBlockWidth = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
+    m_MapWidth           = map_width;
+    m_MapHeight          = map_height;
+    m_nRegionWidth       = (uint)((map_width / g_nRegionSize) + 1.0f);
+    m_nRegionHeight      = (uint)((map_height / g_nRegionSize) + 1.0f);
+    m_nRegionBlockWidth  = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
     m_nRegionBlockHeight = (m_nRegionHeight / REGION_BLOCK_COUNT) + 1;
     initRegion();
 }
@@ -36,7 +35,7 @@ void RegionContainer::initRegion()
     NG_UNIQUE_GUARD writeGuard(i_lock);
     {
         uint count = m_nRegionBlockHeight * m_nRegionBlockWidth;
-        m_RegionBlock = std::vector<RegionBlock*>(count, nullptr);
+        m_RegionBlock = std::vector<RegionBlock *>(count, nullptr);
     }
 }
 
@@ -52,8 +51,8 @@ Region *RegionContainer::GetRegion(WorldObject *pObject)
 
 Region *RegionContainer::GetRegion(uint rx, uint ry, uint8 layer)
 {
-    Region* result{nullptr};
-    if(IsValidRegion(rx, ry, layer))
+    Region *result{nullptr};
+    if (IsValidRegion(rx, ry, layer))
         result = getRegion(rx, ry, layer);
     return result;
 }
@@ -225,7 +224,6 @@ uint RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
                            (uint)(obj2->GetPositionX() / g_nRegionSize), (uint)(obj2->GetPositionY() / g_nRegionSize));
 };
 
-
 RegionBlock *RegionContainer::getRegionBlockPtr(uint rcx, uint rcy)
 {
     RegionBlock *res{nullptr};
@@ -236,16 +234,15 @@ RegionBlock *RegionContainer::getRegionBlockPtr(uint rcx, uint rcy)
     return res;
 }
 
-
 RegionBlock *RegionContainer::getRegionBlock(uint rcx, uint rcy)
 {
     RegionBlock *res{nullptr};
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
         res = m_RegionBlock[rcx + rcy * m_nRegionBlockWidth];
-        if(res == nullptr)
+        if (res == nullptr)
         {
-            res = new RegionBlock{};
+            res = new RegionBlock{ };
             m_RegionBlock[rcx + rcy * m_nRegionBlockWidth] = res;
         }
     }
@@ -255,7 +252,7 @@ RegionBlock *RegionContainer::getRegionBlock(uint rcx, uint rcy)
 Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8 layer)
 {
     RegionBlock *b = getRegionBlockPtr(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
-    if(b != nullptr)
+    if (b != nullptr)
         return b->getRegion(rx % REGION_BLOCK_COUNT, ry % REGION_BLOCK_COUNT, layer);
     return nullptr;
 }
@@ -263,7 +260,7 @@ Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8 layer)
 Region *RegionContainer::getRegion(uint rx, uint ry, uint8 layer)
 {
     RegionBlock *b = getRegionBlock(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
-    if(b != nullptr)
+    if (b != nullptr)
         return b->getRegion(rx % REGION_BLOCK_COUNT, ry % REGION_BLOCK_COUNT, layer);
     return nullptr;
 }
@@ -276,7 +273,7 @@ RegionContainer::~RegionContainer()
 void RegionContainer::deinitRegion()
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
-    for(auto &x : m_RegionBlock)
+    for (auto       &x : m_RegionBlock)
     {
         delete x;
         x = nullptr;
