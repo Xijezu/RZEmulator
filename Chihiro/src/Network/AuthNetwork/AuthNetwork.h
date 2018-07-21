@@ -61,6 +61,7 @@ class AuthNetwork
 
             delete _updateTimer;
             delete m_pThread;
+            m_pSocket->DeleteSession();
         }
 
         bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)

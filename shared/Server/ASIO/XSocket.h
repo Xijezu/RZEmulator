@@ -135,6 +135,17 @@ class XSocket : public Socket<XSocket>
             SetSendBufferSize(65536);
         }
 
+        // Make sure to NEVER call this function from the WorldSession (Gameserver)!
+        void DeleteSession()
+        {
+            std::lock_guard<std::mutex> sessionGuard(_sessionLock);
+            if(_session != nullptr)
+            {
+                delete _session;
+                _session = nullptr;
+            }
+        }
+
         void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }
 
         XSession *GetSession() { return _session; }

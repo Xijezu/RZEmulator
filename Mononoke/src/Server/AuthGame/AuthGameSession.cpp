@@ -44,6 +44,7 @@ AuthGameSession::~AuthGameSession()
         delete m_pGame;
         m_pGame = nullptr;
     }
+    m_pSocket->DeleteSession();
 }
 
 void AuthGameSession::OnClose()
