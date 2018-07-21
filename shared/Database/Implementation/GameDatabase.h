@@ -1,4 +1,5 @@
 #pragma once
+
 #include "MySQLConnection.h"
 
 enum GameDatabaseStatements : uint32

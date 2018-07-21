@@ -19,12 +19,12 @@
 #include "SQLOperation.h"
 #include "ProducerConsumerQueue.h"
 
-DatabaseWorker::DatabaseWorker(ProducerConsumerQueue<SQLOperation*>* newQueue, MySQLConnection* connection)
+DatabaseWorker::DatabaseWorker(ProducerConsumerQueue<SQLOperation *> *newQueue, MySQLConnection *connection)
 {
-    _connection = connection;
-    _queue = newQueue;
+    _connection       = connection;
+    _queue            = newQueue;
     _cancelationToken = false;
-    _workerThread = std::thread(&DatabaseWorker::WorkerThread, this);
+    _workerThread     = std::thread(&DatabaseWorker::WorkerThread, this);
 }
 
 DatabaseWorker::~DatabaseWorker()
@@ -43,7 +43,7 @@ void DatabaseWorker::WorkerThread()
 
     for (;;)
     {
-        SQLOperation* operation = nullptr;
+        SQLOperation *operation = nullptr;
 
         _queue->WaitAndPop(operation);
 

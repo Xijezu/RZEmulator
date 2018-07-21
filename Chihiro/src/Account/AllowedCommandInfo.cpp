@@ -16,7 +16,6 @@
 */
 
 #include "AllowedCommandInfo.h"
-#include "World.h"
 #include "Messages.h"
 #include "Scripting/XLua.h"
 #include "MemPool.h"
@@ -31,23 +30,23 @@ typedef struct AllowedCommands
 } GameHandler;
 
 const AllowedCommands commandHandler[] =
-                                  {
-                                          {"/run",        true,  &AllowedCommandInfo::onRunScript},
-                                          {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
-                                          {"/standup",    false, &AllowedCommandInfo::onCheatStandup},
-                                          {"/position",   false, &AllowedCommandInfo::onCheatPosition},
-                                          {"/battle",     false, &AllowedCommandInfo::onBattleMode},
-                                          {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
-                                          {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
-                                          {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
-                                          {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
-                                          {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
-                                          {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
-                                          {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
-                                          {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
-                                          {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy},
-                                          {"/pleave",     false, &AllowedCommandInfo::onLeaveParty}
-                                  };
+                              {
+                                      {"/run",        true,  &AllowedCommandInfo::onRunScript},
+                                      {"/sitdown",    false, &AllowedCommandInfo::onCheatSitdown},
+                                      {"/standup",    false, &AllowedCommandInfo::onCheatStandup},
+                                      {"/position",   false, &AllowedCommandInfo::onCheatPosition},
+                                      {"/battle",     false, &AllowedCommandInfo::onBattleMode},
+                                      {"/notice",     true,  &AllowedCommandInfo::onCheatNotice},
+                                      {"/suicide",    true,  &AllowedCommandInfo::onCheatSuicide},
+                                      {"/doit",       true,  &AllowedCommandInfo::onCheatKillAll},
+                                      {"/pcreate",    false, &AllowedCommandInfo::onCheatCreateParty},
+                                      {"/regenerate", true,  &AllowedCommandInfo::onCheatRespawn},
+                                      {"/pinvite",    false, &AllowedCommandInfo::onInviteParty},
+                                      {"/pjoin",      false, &AllowedCommandInfo::onJoinParty},
+                                      {"/plist",      false, &AllowedCommandInfo::onPartyInfo},
+                                      {"/pdestroy",   false, &AllowedCommandInfo::onPartyDestroy},
+                                      {"/pleave",     false, &AllowedCommandInfo::onLeaveParty}
+                              };
 
 constexpr int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
@@ -115,7 +114,7 @@ void AllowedCommandInfo::onCheatSuicide(Player */*pClient*/, const std::string &
 
 void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
 {
-    auto functor = [&pClient] (RegionType& list) -> void {
+    auto functor = [&pClient](RegionType &list) -> void {
         for (const auto &obj : list)
         {
             if (obj != nullptr && pClient != nullptr && obj->IsMonster())
@@ -124,10 +123,10 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
     };
 
     sRegion.DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize,
-                                 (uint)(pClient->GetPositionY() / g_nRegionSize),
-                                 pClient->GetLayer(),
-                                 functor,
-                                 (uint8_t)RegionVisitor::MovableVisitor);
+                                (uint)(pClient->GetPositionY() / g_nRegionSize),
+                                pClient->GetLayer(),
+                                functor,
+                                (uint8_t)RegionVisitor::MovableVisitor);
 
 }
 

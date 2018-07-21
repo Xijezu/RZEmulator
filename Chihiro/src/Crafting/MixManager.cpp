@@ -18,17 +18,15 @@
 #include "Item.h"
 #include "MixManager.h"
 #include "Messages.h"
-#include "Player.h"
 #include "GameRule.h"
 #include "MemPool.h"
-#include "ObjectMgr.h"
 #include "GameContent.h"
 
 void MixManager::RegisterEnhanceInfo(const EnhanceInfo &info)
 {
-    for(auto& ei : m_vEnhanceInfo)
+    for (auto &ei : m_vEnhanceInfo)
     {
-        if(ei.nSID == info.nSID)
+        if (ei.nSID == info.nSID)
             return;
     }
     m_vEnhanceInfo.emplace_back(info);
@@ -36,53 +34,52 @@ void MixManager::RegisterEnhanceInfo(const EnhanceInfo &info)
 
 void MixManager::RegisterMixInfo(const MixBase &info)
 {
-    for(auto& mi : m_vMixInfo)
+    for (auto &mi : m_vMixInfo)
     {
-        if(mi.id == info.id)
+        if (mi.id == info.id)
             return;
     }
     m_vMixInfo.emplace_back(info);
 }
 
-
-bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item*> &pSubMaterial, std::vector<uint16> &pCountList)
+bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubMaterial, std::vector<uint16> &pCountList)
 {
-    if(pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
+    if (pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-    int nCurrentEnhance = pMainMaterial->m_Instance.nEnhance;
-    auto pInfo = getenhanceInfo(pMixInfo->value[0]);
-    if(pInfo == nullptr)
+    int  nCurrentEnhance = pMainMaterial->m_Instance.nEnhance;
+    auto pInfo           = getenhanceInfo(pMixInfo->value[0]);
+    if (pInfo == nullptr)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
         return false;
     }
 
-    Item* pCube{nullptr};
-    for(auto& ti : pSubMaterial)
+    Item      *pCube{nullptr};
+    for (auto &ti : pSubMaterial)
     {
-        if(ti != nullptr && ti->m_Instance.Code == pInfo->nNeedItemCode)
+        if (ti != nullptr && ti->m_Instance.Code == pInfo->nNeedItemCode)
         {
             pCube = ti;
             break;
         }
     }
-    Item* pPowder{nullptr};
-    if(pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
+    Item      *pPowder{nullptr};
+    if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
     {
-        if(pSubMaterial[0] != nullptr && pSubMaterial[0]->m_pItemBase->type == TYPE_CUBE)
+        if (pSubMaterial[0] != nullptr && pSubMaterial[0]->m_pItemBase->type == TYPE_CUBE)
         {
             pPowder = pSubMaterial[1];
         }
         else
         {
             pPowder = pSubMaterial[0];
-            pCube = pSubMaterial[1];
+            pCube   = pSubMaterial[1];
         }
     }
-    if(pCube == nullptr
-       || pCube->m_Instance.Code != pInfo->nNeedItemCode
-       || (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder == nullptr)
+    if (pCube == nullptr
+        || pCube->m_Instance.Code != pInfo->nNeedItemCode
+        || (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder == nullptr)
         /*|| pInfo->nMaxEnhance <= pMainMaterial->m_Instance.nEnhance*/)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
@@ -91,7 +88,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
 
     // Maybe do logging here like retail?
     pPlayer->EraseItem(pCube, 1);
-    if(pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder != nullptr)
+    if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder != nullptr)
         pPlayer->EraseItem(pPowder, 1);
 
     int itemEnhance{1};
@@ -101,21 +98,21 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     auto nRandom = (uint)(pInfo->fPercentage[nCurrentEnhance] * 100000.0f);
 
     bool bResult = false;
-    if((uint)irand(0, 100000) > nRandom)
+    if ((uint)irand(0, 100000) > nRandom)
     {
         // failed
-        if(pMixInfo->type != 103)
+        if (pMixInfo->type != 103)
         {
             procEnhanceFail(pPlayer, pMainMaterial, pInfo->nFailResult);
             Messages::SendMixResult(pPlayer, nullptr);
         }
         else
         {
-            if(GameRule::nEnhanceFailType == 0)
+            if (GameRule::nEnhanceFailType == 0)
             {
                 pMainMaterial->m_Instance.nEnhance = ((irand(nCurrentEnhance * pMixInfo->value[1], nCurrentEnhance * pMixInfo->value[2]) / 1000) + 5) / 10;
             }
-            else if(GameRule::nEnhanceFailType == 1)
+            else if (GameRule::nEnhanceFailType == 1)
             {
                 pMainMaterial->m_Instance.nEnhance = nCurrentEnhance - 1;
             }
@@ -128,7 +125,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
         pMainMaterial->m_Instance.nEnhance = nCurrentEnhance + itemEnhance;
         pMainMaterial->m_bIsNeedUpdateToDB = true;
         Messages::SendItemMessage(pPlayer, pMainMaterial);
-        std::vector<uint> handles{};
+        std::vector<uint> handles{ };
         handles.emplace_back(pMainMaterial->GetHandle());
         Messages::SendMixResult(pPlayer, &handles);
         bResult = true;
@@ -137,58 +134,57 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     return bResult;
 }
 
-bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount,std::vector<Item*> &pSubMaterial)
+bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubMaterial)
 {
-	if(nSubMaterialCount != 3)
-		return false;
+    if (nSubMaterialCount != 3)
+        return false;
 
-	Item *skillCardMain = nullptr;
-	Item *skillCardSec  = nullptr;
-	Item *skillCube     = nullptr;
+    Item *skillCardMain = nullptr;
+    Item *skillCardSec  = nullptr;
+    Item *skillCube     = nullptr;
 
-	for(int i=0; i<nSubMaterialCount; i++)
-	{
-		if(pSubMaterial[i]->m_pItemBase->group == GROUP_SKILLCARD)
-		{
-			if(skillCardMain == nullptr)
-				skillCardMain = pSubMaterial[i];
+    for (int i = 0; i < nSubMaterialCount; i++)
+    {
+        if (pSubMaterial[i]->m_pItemBase->group == GROUP_SKILLCARD)
+        {
+            if (skillCardMain == nullptr)
+                skillCardMain = pSubMaterial[i];
 
-			else
-				skillCardSec = pSubMaterial[i];
-		}
-		else if(pSubMaterial[i]->m_pItemBase->group == GROUP_SKILL_CUBE)
-		{
-			skillCube = pSubMaterial[i];
-		}
-	}
+            else
+                skillCardSec = pSubMaterial[i];
+        }
+        else if (pSubMaterial[i]->m_pItemBase->group == GROUP_SKILL_CUBE)
+        {
+            skillCube = pSubMaterial[i];
+        }
+    }
 
+    EnhanceInfo *pInfo = getenhanceInfo(pMixInfo->value[0]);
+    if (pInfo == nullptr ||
+        skillCardSec == nullptr ||
+        skillCardMain->m_Instance.Code != skillCardSec->m_Instance.Code ||
+        skillCardMain->m_Instance.nEnhance != skillCardSec->m_Instance.nEnhance)
+    {
+        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+        return false;
+    }
 
-	EnhanceInfo *pInfo = getenhanceInfo(pMixInfo->value[0]);
-	if(pInfo == nullptr 											        ||
-	   skillCardSec == nullptr 										        ||
-	   skillCardMain->m_Instance.Code != skillCardSec->m_Instance.Code      ||
-	   skillCardMain->m_Instance.nEnhance != skillCardSec->m_Instance.nEnhance)
-	{
-		Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
-		return false;
-	}
-
-	pPlayer->EraseItem(skillCube, 1);
+    pPlayer->EraseItem(skillCube, 1);
 
     auto nRandom = (uint)(pInfo->fPercentage[skillCardMain->m_Instance.nEnhance] * 100000.0f);
-    if((uint)irand(0, 100000) > nRandom)
+    if ((uint)irand(0, 100000) > nRandom)
     {
-    	pPlayer->EraseItem(skillCardMain, 1);
-    	pPlayer->EraseItem(skillCardSec, 1);
-    	Messages::SendMixResult(pPlayer, nullptr);
+        pPlayer->EraseItem(skillCardMain, 1);
+        pPlayer->EraseItem(skillCardSec, 1);
+        Messages::SendMixResult(pPlayer, nullptr);
     }
     else
     {
-    	pPlayer->EraseItem(skillCardSec, 1);
+        pPlayer->EraseItem(skillCardSec, 1);
         skillCardMain->m_Instance.nEnhance = skillCardMain->m_Instance.nEnhance + 1;
         skillCardMain->m_bIsNeedUpdateToDB = true;
         Messages::SendItemMessage(pPlayer, skillCardMain);
-        std::vector<uint> handles{};
+        std::vector<uint> handles{ };
         handles.emplace_back(skillCardSec->GetHandle());
         Messages::SendMixResult(pPlayer, &handles);
         skillCardMain->DBUpdate();
@@ -199,62 +195,62 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMa
 
 bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
 {
-    if(pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
+    if (pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-    for(int i = 0; i < nSubMaterialCountItem; ++i)
+    for (int i = 0; i < nSubMaterialCountItem; ++i)
     {
         pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
 
     pMainMaterial->m_Instance.Flag = pMixInfo->value[2];
     Messages::SendItemMessage(pPlayer, pMainMaterial);
-    std::vector<uint> handles{};
+    std::vector<uint> handles{ };
     handles.emplace_back(pMainMaterial->GetHandle());
     Messages::SendMixResult(pPlayer, &handles);
     pMainMaterial->DBUpdate();
     return true;
 }
 
-bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item*> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
 {
-    if(pMainMaterial != nullptr)
+    if (pMainMaterial != nullptr)
     {
         pPlayer->EraseItem(pMainMaterial, pMainMaterial->m_Instance.nCount);
     }
 
-    for(int i = 0; i < nSubMaterialCount; ++i)
+    for (int i       = 0; i < nSubMaterialCount; ++i)
     {
         pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
-    bool bResult = false;
-    if(pMixInfo->value[2] <= irand(0, 99))
+    bool     bResult = false;
+    if (pMixInfo->value[2] <= irand(0, 99))
     {
         Messages::SendMixResult(pPlayer, nullptr);
         return bResult;
     }
 
-    int64 nRandom = irand(pMixInfo->value[3], pMixInfo->value[4]);
+    int64 nRandom    = irand(pMixInfo->value[3], pMixInfo->value[4]);
     int64 nItemCount = 0;
-    if(pMixInfo->value[0] < 0)
+    if (pMixInfo->value[0] < 0)
         nItemCount = nRandom;
     else
         nItemCount = 1;
 
-    if(nItemCount > 0)
+    if (nItemCount > 0)
     {
         bResult = true;
-        Item* pItem{nullptr};
-        while(nItemCount > 0)
+        Item *pItem{nullptr};
+        while (nItemCount > 0)
         {
             int nItemID = pMixInfo->value[0];
             nItemCount = nRandom;
-            while(nItemID < 0)
+            while (nItemID < 0)
             {
                 GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
             }
-            pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0,0,0,0,0);
-            if(!pItem->m_pItemBase->flaglist[FLAG_DUPLICATE])
+            pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0, 0, 0, 0, 0);
+            if (!pItem->m_pItemBase->flaglist[FLAG_DUPLICATE])
             {
                 //chatmsg
             }
@@ -265,7 +261,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
 
             pPlayer->PushItem(pItem, pItem->m_Instance.nCount, false);
             pItem->DBInsert();
-            std::vector<uint> handles{};
+            std::vector<uint> handles{ };
             handles.emplace_back(pItem->GetHandle());
             Messages::SendMixResult(pPlayer, &handles);
             nItemCount--;
@@ -274,39 +270,39 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
     return bResult;
 }
 
-MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item*> &pSubItem, std::vector<uint16> &pCountList)
+MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
 {
-    for(int i = 0; i < static_cast<int>(m_vMixInfo.size()); i++)
+    for (int i = 0; i < static_cast<int>(m_vMixInfo.size()); i++)
     {
-        if(m_vMixInfo[i].sub_material_cnt == nSubMaterialCount)
+        if (m_vMixInfo[i].sub_material_cnt == nSubMaterialCount)
         {
-            if(getProperMixInfoSub(&m_vMixInfo[i], nSubMaterialCount, pSubItem, pCountList))
+            if (getProperMixInfoSub(&m_vMixInfo[i], nSubMaterialCount, pSubItem, pCountList))
             {
-            	if(CompatibilityCheck(&nSubMaterialCount,pSubItem, pMainMaterial))
-            	{
-                	return &m_vMixInfo[i];
-            	}
-            	else
-            	{
-            		return nullptr;
-            	}
+                if (CompatibilityCheck(&nSubMaterialCount, pSubItem, pMainMaterial))
+                {
+                    return &m_vMixInfo[i];
+                }
+                else
+                {
+                    return nullptr;
+                }
             }
         }
     }
     return nullptr;
 }
 
-bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vector<Item*> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
 {
-    bool vCheckInfo[9]{false};
-    for(int i = 0; i < SubMaterialCount; ++i)
+    bool     vCheckInfo[9]{false};
+    for (int i = 0; i < SubMaterialCount; ++i)
     {
-        bool ok{false};
-        for(int j = 0; j < SubMaterialCount; ++j)
+        bool     ok{false};
+        for (int j = 0; j < SubMaterialCount; ++j)
         {
-            if(!vCheckInfo[j])
+            if (!vCheckInfo[j])
             {
-                if(check_material_info(mb->sub_material[j], pSubItem[i], pCountList[i]))
+                if (check_material_info(mb->sub_material[j], pSubItem[i], pCountList[i]))
                 {
                     vCheckInfo[j] = true;
                     ok = true;
@@ -314,27 +310,28 @@ bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vec
                 }
             }
         }
-        if(!ok)
+        if (!ok)
             return false;
     }
     return true;
 }
+
 Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCount)
 {
     auto retItem = sMemoryPool.GetObjectInWorld<Item>(hItem);
-    if(retItem == nullptr)
+    if (retItem == nullptr)
         return nullptr;
-    if(!retItem->IsItem())
+    if (!retItem->IsItem())
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_ACCESS_DENIED, 0);
         return nullptr;
     }
-    if(retItem->m_Instance.nCount < nItemCount)
+    if (retItem->m_Instance.nCount < nItemCount)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_NOT_EXIST, 0);
         return nullptr;
     }
-    if((retItem->m_pItemBase->status_flag & 4) != 0)
+    if ((retItem->m_pItemBase->status_flag & 4) != 0)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_ACCESS_DENIED, 0);
         return nullptr;
@@ -351,15 +348,15 @@ Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCou
 bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint16 &pItemCount)
 {
     bool bIsCountChecked = false;
-    if(info.type[0] == 0)
+    if (info.type[0] == 0)
         return pItem == nullptr;
 
-    if(pItem == nullptr)
+    if (pItem == nullptr)
         return false;
 
-    for(int i = 0; i < MATERIAL_INFO_COUNT; ++i)
+    for (int i = 0; i < MATERIAL_INFO_COUNT; ++i)
     {
-        switch(info.type[i])
+        switch (info.type[i])
         {
             case (int)CheckType::CT_ItemGroup:
                 if (pItem->m_pItemBase->group != info.value[i])
@@ -391,7 +388,7 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
                 break;
 
             case (int)CheckType::CT_FlagOff:
-                if(((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) != 0)
+                if (((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) != 0)
                     return false;
                 break;
 
@@ -425,19 +422,19 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
                 }
                 break;*/
 
-            /*case (int)MixBase.CheckType.ElementalEffectMismatch:
-                tv = ((int)Math.Pow(2.0, (double)pItem.GetElementalEffectType())) >> 1;
-                if (tv != 0)
-                {
-                    if ((tv & info.value[i]) == tv)
-                        return false;
-                }
-                else
-                {
-                    if (info.value[i] == 0)
-                        return false;
-                }
-                break;*/
+                /*case (int)MixBase.CheckType.ElementalEffectMismatch:
+                    tv = ((int)Math.Pow(2.0, (double)pItem.GetElementalEffectType())) >> 1;
+                    if (tv != 0)
+                    {
+                        if ((tv & info.value[i]) == tv)
+                            return false;
+                    }
+                    else
+                    {
+                        if (info.value[i] == 0)
+                            return false;
+                    }
+                    break;*/
 
             case (int)CheckType::CT_ItemWearPositionMatch:
                 if ((int)pItem->GetWearType() != info.value[i])
@@ -461,7 +458,7 @@ EnhanceInfo *MixManager::getenhanceInfo(int sid)
 {
     auto info = std::find_if(m_vEnhanceInfo.begin(),
                              m_vEnhanceInfo.end(),
-                             [sid](const EnhanceInfo& res) { return sid == res.nSID; });
+                             [sid](const EnhanceInfo &res) { return sid == res.nSID; });
 
     return info != m_vEnhanceInfo.end() ? &*info : nullptr;
 }
@@ -515,53 +512,52 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
 
 bool MixManager::CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem)
 {
-	if(*nSubMaterialCount == 1)
-	{
-		if(pItem->m_Instance.Flag % 2 == ITEM_FLAG_CARD)
-		{
-			switch(pSubItem[0]->m_Instance.Code)
-			{
-				case UNIT_CARD:
-					return false;
-				default:
-					break;
-			}
-		}
-		else if(pItem->m_Instance.Flag % 2 == ITEM_FLAG_NORMAL)
-		{
-			switch(pSubItem[0]->m_Instance.Code)
-			{
-				case CHALK_OF_RESTORATION:
-					return false;
-				default:
-					break;
-			}
-		}
+    if (*nSubMaterialCount == 1)
+    {
+        if (pItem->m_Instance.Flag % 2 == ITEM_FLAG_CARD)
+        {
+            switch (pSubItem[0]->m_Instance.Code)
+            {
+                case UNIT_CARD:
+                    return false;
+                default:
+                    break;
+            }
+        }
+        else if (pItem->m_Instance.Flag % 2 == ITEM_FLAG_NORMAL)
+        {
+            switch (pSubItem[0]->m_Instance.Code)
+            {
+                case CHALK_OF_RESTORATION:
+                    return false;
+                default:
+                    break;
+            }
+        }
 
-		if(pItem->m_Instance.Flag == ITEM_FLAG_FAILED)
-		{
+        if (pItem->m_Instance.Flag == ITEM_FLAG_FAILED)
+        {
             return pSubItem[0]->m_Instance.Code == E_REPAIR_POWDER;
-		}
-	}
-	return true;
+        }
+    }
+    return true;
 }
 
 bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
 {
-    if(pPlayer == nullptr || pMainMaterial == nullptr)
+    if (pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-
-    if(pMainMaterial->m_Instance.Flag == ITEM_FLAG_FAILED)
+    if (pMainMaterial->m_Instance.Flag == ITEM_FLAG_FAILED)
     {
-    	for(int i = 0; i < nSubMaterialCountItem; ++i)
-    	{
-    		pPlayer->EraseItem(pSubItem[i], pCountList[i]);
-    	}
+        for (int i = 0; i < nSubMaterialCountItem; ++i)
+        {
+            pPlayer->EraseItem(pSubItem[i], pCountList[i]);
+        }
 
         pMainMaterial->m_Instance.Flag = ITEM_FLAG_NORMAL;
         Messages::SendItemMessage(pPlayer, pMainMaterial);
-        std::vector<uint> handles{};
+        std::vector<uint> handles{ };
         handles.emplace_back(pMainMaterial->GetHandle());
         Messages::SendMixResult(pPlayer, &handles);
         pMainMaterial->DBUpdate();

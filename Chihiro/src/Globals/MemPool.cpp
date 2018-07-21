@@ -16,8 +16,6 @@
 */
 
 #include "MemPool.h"
-#include "World.h"
-#include "ObjectMgr.h"
 #include "FieldPropManager.h"
 #include "ItemCollector.h"
 

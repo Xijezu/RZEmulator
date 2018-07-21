@@ -28,8 +28,8 @@ class Summon : public Unit
         explicit Summon(uint, uint);
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        Summon (const Summon&) = delete;
-        Summon& operator= (const Summon&) = delete;
+        Summon(const Summon &) = delete;
+        Summon &operator=(const Summon &) = delete;
         ~Summon();
 
         static void DB_InsertSummon(Player *, Summon *);
@@ -87,5 +87,5 @@ class Summon : public Unit
         SummonResourceTemplate *m_tSummonBase{nullptr};
         Player                 *m_pMaster{nullptr};
 
-        int m_nAccountID{};
+        int m_nAccountID{ };
 };

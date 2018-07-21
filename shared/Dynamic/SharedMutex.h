@@ -22,7 +22,9 @@
 #define NG_SHARED_GUARD std::shared_lock<std::shared_mutex>
 #define NG_UNIQUE_GUARD std::unique_lock<std::shared_mutex>
 #else
+
 #include <mutex>
+
 #define NG_SHARED_MUTEX std::mutex
 #define NG_SHARED_GUARD std::lock_guard<std::mutex>
 #define NG_UNIQUE_GUARD std::unique_lock<std::mutex>

@@ -15,16 +15,11 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "World.h"
-#include "DatabaseEnv.h"
 #include "RegionContainer.h"
-#include "Globals/ObjectMgr.h"
-#include "Timer.h"
 #include "Scripting/XLua.h"
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Maploader.h"
-#include "WorldSession.h"
 #include "MemPool.h"
 #include "GameRule.h"
 #include "NPC.h"
@@ -207,7 +202,7 @@ uint64 World::GetSkillIndex()
 bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
 {
     Position oldPos{ };
-    bool result{false};
+    bool     result{false};
     if (bAbsoluteMove || true/* onSetMove Quadtreepotato*/)
     {
         oldPos.m_positionX  = pUnit->GetPositionX();

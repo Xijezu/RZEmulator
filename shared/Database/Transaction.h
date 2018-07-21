@@ -28,19 +28,19 @@ class Transaction
         friend class TransactionTask;
         friend class MySQLConnection;
 
-        template <typename T>
+        template<typename T>
         friend class DatabaseWorkerPool;
 
     public:
-        Transaction() : _cleanedUp(false) { }
+        Transaction() : _cleanedUp(false) {}
 
         ~Transaction() { Cleanup(); }
 
-        void Append(PreparedStatement* statement);
-        void Append(const char* sql);
+        void Append(PreparedStatement *statement);
+        void Append(const char *sql);
 
         template<typename Format, typename... Args>
-        void PAppend(Format&& sql, Args&&... args)
+        void PAppend(Format &&sql, Args &&... args)
         {
             Append(NGemity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
@@ -59,13 +59,13 @@ class Transaction
 /*! Low level class*/
 class TransactionTask : public SQLOperation
 {
-        template <class T> friend class DatabaseWorkerPool;
+        template<class T> friend class DatabaseWorkerPool;
         friend class DatabaseWorker;
 
     public:
-        TransactionTask(SQLTransaction trans) : m_trans(trans) { }
+        TransactionTask(SQLTransaction trans) : m_trans(trans) {}
 
-        ~TransactionTask() { }
+        ~TransactionTask() {}
 
     protected:
         bool Execute() override;

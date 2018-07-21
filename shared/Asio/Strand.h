@@ -19,7 +19,9 @@
 #include <boost/asio/strand.hpp>
 
 #if BOOST_VERSION >= 106600
+
 #include <boost/asio/bind_executor.hpp>
+
 #endif
 
 namespace NGemity
@@ -32,7 +34,7 @@ namespace NGemity
         class Strand : public IoContextBaseNamespace::IoContextBase::strand
         {
             public:
-                Strand(IoContext& ioContext) : IoContextBaseNamespace::IoContextBase::strand(ioContext) { }
+                Strand(IoContext &ioContext) : IoContextBaseNamespace::IoContextBase::strand(ioContext) {}
         };
 
 #if BOOST_VERSION >= 106600

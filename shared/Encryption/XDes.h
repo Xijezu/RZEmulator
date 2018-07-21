@@ -1,60 +1,60 @@
 #pragma once
 
-// ¾îµð¼±°¡ ±Ü¾î¿Â des ¾ÏÈ£È­ ¾Ë°í¸®Áò.
-// 8byte ÀÌÇÏ´Â encrypt ¾ÈµÊ.
+// ï¿½ï¿½ð¼±°ï¿½ ï¿½Ü¾ï¿½ï¿½ des ï¿½ï¿½È£È­ ï¿½Ë°ï¿½ï¿½ï¿½.
+// 8byte ï¿½ï¿½ï¿½Ï´ï¿½ encrypt ï¿½Èµï¿½.
 
 class XDes
 {
-public:
-	XDes( const char *password = NULL );
-	virtual ~XDes();
+    public:
+        XDes(const char *password = NULL);
+        virtual ~XDes();
 
-	void Init( const char *password );
-	bool Encrypt( void *buf, int len );
-	bool Decrypt( void *buf, int len );
+        void Init(const char *password);
+        bool Encrypt(void *buf, int len);
+        bool Decrypt(void *buf, int len);
 
-	// ÀÌÇÏ´Â »ç½Ç XDes( password ).Encrypt( buf, len ); ½ÄÀ¸·Î ¾²´Â°Å³ª Â÷ÀÌ ¾øÀ½.
-	static bool Encrypt( const char *password, void *buf, int len );
-	static bool Decrypt( const char *password, void *buf, int len );
+        // ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ XDes( password ).Encrypt( buf, len ); ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â°Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+        static bool Encrypt(const char *password, void *buf, int len);
+        static bool Decrypt(const char *password, void *buf, int len);
 
-private:
+    private:
 
-	// End of DES algorithm (except for calling desinit below)
-	void DesMem( void *buf, int mlen, int isencrypting );
+        // End of DES algorithm (except for calling desinit below)
+        void DesMem(void *buf, int mlen, int isencrypting);
 
-	// 32-bit permutation at end
-	void perm32(char *inblock, char *outblock);
+        // 32-bit permutation at end
+        void perm32(char *inblock, char *outblock);
 
-	// contract f from 48 to 32 bits
-	void contract(char *in48, char *out32);                   
+        // contract f from 48 to 32 bits
+        void contract(char *in48, char *out32);
 
-	// critical cryptographic trans
-	void f(char *right, int num, char *fret);                 
+        // critical cryptographic trans
+        void f(char *right, int num, char *fret);
 
-	// 1 churning operation
-	void iter(int num, char *inblock, char *outblock);        
+        // 1 churning operation
+        void iter(int num, char *inblock, char *outblock);
 
-	// initialize s1-s8 arrays
-	void sinit(void);
+        // initialize s1-s8 arrays
+        void sinit(void);
 
-	// initialize key schedule array
-	void kinit(char *key64bit);
+        // initialize key schedule array
+        void kinit(char *key64bit);
 
-	// initialize 32-bit permutation
-	void p32init(void);
+        // initialize 32-bit permutation
+        void p32init(void);
 
-	// encrypt 64-bit inblock
-	void endes(char *inblock, char *outblock);
+        // encrypt 64-bit inblock
+        void endes(char *inblock, char *outblock);
 
-	// decrypt 64-bit inblock
-	void dedes(char *inblock, char *outblock);
+        // decrypt 64-bit inblock
+        void dedes(char *inblock, char *outblock);
 
-	// inital and final permutations
-	char m_iperm[16][16][8];
-	char m_fperm[16][16][8];
-	
-	char m_s[4][4096];				// S1 thru S8 precomputed
-	char m_p32[4][256][4];			// for permuting 32-bit f output
-	char m_kn[16][6];				// key selections
+        // inital and final permutations
+        char m_iperm[16][16][8];
+        char m_fperm[16][16][8];
+
+        char m_s[4][4096];                // S1 thru S8 precomputed
+        char m_p32[4][256][4];            // for permuting 32-bit f output
+        char m_kn[16][6];                // key selections
 
 };

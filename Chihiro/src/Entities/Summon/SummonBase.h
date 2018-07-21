@@ -28,7 +28,8 @@ struct SummonLevelBonus
     float luck;
 };
 
-struct SummonResourceTemplate {
+struct SummonResourceTemplate
+{
     int   id;
     int   type;
     int   magic_type;

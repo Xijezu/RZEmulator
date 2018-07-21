@@ -24,7 +24,7 @@
 #include <Windows.h>
 #endif
 
-AppenderConsole::AppenderConsole(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags, std::vector<char const*> extraArgs)
+AppenderConsole::AppenderConsole(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs)
         : Appender(id, name, level, flags), _colored(false)
 {
     for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
@@ -34,7 +34,7 @@ AppenderConsole::AppenderConsole(uint8 id, std::string const& name, LogLevel lev
         InitColors(extraArgs[0]);
 }
 
-void AppenderConsole::InitColors(std::string const& str)
+void AppenderConsole::InitColors(std::string const &str)
 {
     if (str.empty())
     {
@@ -96,15 +96,15 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 #else
     enum ANSITextAttr
     {
-        TA_NORMAL                                = 0,
-        TA_BOLD                                  = 1,
-        TA_BLINK                                 = 5,
-        TA_REVERSE                               = 7
+        TA_NORMAL  = 0,
+        TA_BOLD    = 1,
+        TA_BLINK   = 5,
+        TA_REVERSE = 7
     };
 
     enum ANSIFgTextAttr
     {
-        FG_BLACK                                 = 30,
+        FG_BLACK = 30,
         FG_RED,
         FG_GREEN,
         FG_BROWN,
@@ -117,7 +117,7 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 
     enum ANSIBgTextAttr
     {
-        BG_BLACK                                 = 40,
+        BG_BLACK = 40,
         BG_RED,
         BG_GREEN,
         BG_BROWN,
@@ -128,25 +128,25 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
     };
 
     static uint8 UnixColorFG[MaxColors] =
-    {
-        FG_BLACK,                                          // BLACK
-        FG_RED,                                            // RED
-        FG_GREEN,                                          // GREEN
-        FG_BROWN,                                          // BROWN
-        FG_BLUE,                                           // BLUE
-        FG_MAGENTA,                                        // MAGENTA
-        FG_CYAN,                                           // CYAN
-        FG_WHITE,                                          // WHITE
-        FG_YELLOW,                                         // YELLOW
-        FG_RED,                                            // LRED
-        FG_GREEN,                                          // LGREEN
-        FG_BLUE,                                           // LBLUE
-        FG_MAGENTA,                                        // LMAGENTA
-        FG_CYAN,                                           // LCYAN
-        FG_WHITE                                           // LWHITE
-    };
+                         {
+                                 FG_BLACK,                                          // BLACK
+                                 FG_RED,                                            // RED
+                                 FG_GREEN,                                          // GREEN
+                                 FG_BROWN,                                          // BROWN
+                                 FG_BLUE,                                           // BLUE
+                                 FG_MAGENTA,                                        // MAGENTA
+                                 FG_CYAN,                                           // CYAN
+                                 FG_WHITE,                                          // WHITE
+                                 FG_YELLOW,                                         // YELLOW
+                                 FG_RED,                                            // LRED
+                                 FG_GREEN,                                          // LGREEN
+                                 FG_BLUE,                                           // LBLUE
+                                 FG_MAGENTA,                                        // LMAGENTA
+                                 FG_CYAN,                                           // LCYAN
+                                 FG_WHITE                                           // LWHITE
+                         };
 
-    fprintf((stdout_stream? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
+    fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
 #endif
 }
 
@@ -160,7 +160,7 @@ void AppenderConsole::ResetColor(bool stdout_stream)
 #endif
 }
 
-void AppenderConsole::_write(LogMessage const* message)
+void AppenderConsole::_write(LogMessage const *message)
 {
     bool stdout_stream = !(message->level == LOG_LEVEL_ERROR || message->level == LOG_LEVEL_FATAL);
 

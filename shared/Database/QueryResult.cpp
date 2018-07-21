@@ -20,12 +20,14 @@
 #include "Errors.h"
 #include "Field.h"
 #include "Log.h"
+
 #ifdef _WIN32 // hack for broken mysql.h not including the correct winsock header for SOCKET definition, fixed in 5.7
 #include <winsock2.h>
 #endif
+
 #include <mysql.h>
 
-static uint32 SizeForType(MYSQL_FIELD* field)
+static uint32 SizeForType(MYSQL_FIELD *field)
 {
     switch (field->type)
     {
@@ -120,10 +122,10 @@ DatabaseFieldTypes MysqlTypeToFieldType(enum_field_types type)
 }
 
 ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64 rowCount, uint32 fieldCount) :
-_rowCount(rowCount),
-_fieldCount(fieldCount),
-_result(result),
-_fields(fields)
+        _rowCount(rowCount),
+        _fieldCount(fieldCount),
+        _result(result),
+        _fields(fields)
 {
     _currentRow = new Field[_fieldCount];
 #ifdef NGEMITY_DEBUG
@@ -132,13 +134,13 @@ _fields(fields)
 #endif
 }
 
-PreparedResultSet::PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
-m_rowCount(rowCount),
-m_rowPosition(0),
-m_fieldCount(fieldCount),
-m_rBind(NULL),
-m_stmt(stmt),
-m_metadataResult(result)
+PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
+        m_rowCount(rowCount),
+        m_rowPosition(0),
+        m_fieldCount(fieldCount),
+        m_rBind(NULL),
+        m_stmt(stmt),
+        m_metadataResult(result)
 {
     if (!m_metadataResult)
         return;
@@ -154,8 +156,8 @@ m_metadataResult(result)
     //- for future readers wondering where the fuck this is freed - mysql_stmt_bind_result moves pointers to these
     // from m_rBind to m_stmt->bind and it is later freed by the `if (m_stmt->bind_result_done)` block just above here
     // MYSQL_STMT lifetime is equal to connection lifetime
-    my_bool* m_isNull = new my_bool[m_fieldCount];
-    unsigned long* m_length = new unsigned long[m_fieldCount];
+    my_bool       *m_isNull = new my_bool[m_fieldCount];
+    unsigned long *m_length = new unsigned long[m_fieldCount];
 
     memset(m_isNull, 0, sizeof(my_bool) * m_fieldCount);
     memset(m_rBind, 0, sizeof(MYSQL_BIND) * m_fieldCount);
@@ -174,22 +176,22 @@ m_metadataResult(result)
     m_rowCount = mysql_stmt_num_rows(m_stmt);
 
     //- This is where we prepare the buffer based on metadata
-    MYSQL_FIELD* field = mysql_fetch_fields(m_metadataResult);
+    MYSQL_FIELD *field = mysql_fetch_fields(m_metadataResult);
     std::size_t rowSize = 0;
-    for (uint32 i = 0; i < m_fieldCount; ++i)
+    for (uint32 i       = 0; i < m_fieldCount; ++i)
     {
         uint32 size = SizeForType(&field[i]);
         rowSize += size;
 
-        m_rBind[i].buffer_type = field[i].type;
+        m_rBind[i].buffer_type   = field[i].type;
         m_rBind[i].buffer_length = size;
-        m_rBind[i].length = &m_length[i];
-        m_rBind[i].is_null = &m_isNull[i];
-        m_rBind[i].error = NULL;
-        m_rBind[i].is_unsigned = field[i].flags & UNSIGNED_FLAG;
+        m_rBind[i].length        = &m_length[i];
+        m_rBind[i].is_null       = &m_isNull[i];
+        m_rBind[i].error         = NULL;
+        m_rBind[i].is_unsigned   = field[i].flags & UNSIGNED_FLAG;
     }
 
-    char* dataBuffer = new char[rowSize * m_rowCount];
+    char *dataBuffer = new char[rowSize * m_rowCount];
     for (uint32 i = 0, offset = 0; i < m_fieldCount; ++i)
     {
         m_rBind[i].buffer = dataBuffer + offset;
@@ -212,11 +214,11 @@ m_metadataResult(result)
     {
         for (uint32 fIndex = 0; fIndex < m_fieldCount; ++fIndex)
         {
-            unsigned long buffer_length = m_rBind[fIndex].buffer_length;
+            unsigned long buffer_length  = m_rBind[fIndex].buffer_length;
             unsigned long fetched_length = *m_rBind[fIndex].length;
             if (!*m_rBind[fIndex].is_null)
             {
-                void* buffer = m_stmt->bind[fIndex].buffer;
+                void *buffer = m_stmt->bind[fIndex].buffer;
                 switch (m_rBind[fIndex].buffer_type)
                 {
                     case MYSQL_TYPE_TINY_BLOB:
@@ -231,26 +233,26 @@ m_metadataResult(result)
                         // in this case using Field::GetCString will result in garbage
                         // TODO: remove Field::GetCString and use boost::string_ref (currently proposed for TS as string_view, maybe in C++17)
                         if (fetched_length < buffer_length)
-                            *((char*)buffer + fetched_length) = '\0';
+                            *((char *)buffer + fetched_length) = '\0';
                         break;
                     default:
                         break;
                 }
 
                 m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                    buffer,
-                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                    fetched_length);
+                        buffer,
+                        MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
+                        fetched_length);
 
                 // move buffer pointer to next part
-                m_stmt->bind[fIndex].buffer = (char*)buffer + rowSize;
+                m_stmt->bind[fIndex].buffer = (char *)buffer + rowSize;
             }
             else
             {
                 m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                    nullptr,
-                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                    *m_rBind[fIndex].length);
+                        nullptr,
+                        MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
+                        *m_rBind[fIndex].length);
             }
 
 #ifdef NGEMITY_DEBUG
@@ -289,7 +291,7 @@ bool ResultSet::NextRow()
         return false;
     }
 
-    unsigned long* lengths = mysql_fetch_lengths(_result);
+    unsigned long *lengths = mysql_fetch_lengths(_result);
     if (!lengths)
     {
         NG_LOG_WARN("sql.sql", "%s:mysql_fetch_lengths, cannot retrieve value lengths. Error %s.", __FUNCTION__, mysql_error(_result->handle));
@@ -328,7 +330,7 @@ void ResultSet::CleanUp()
 {
     if (_currentRow)
     {
-        delete [] _currentRow;
+        delete[] _currentRow;
         _currentRow = NULL;
     }
 
@@ -346,27 +348,27 @@ void PreparedResultSet::CleanUp()
 
     if (m_rBind)
     {
-        delete[](char*)m_rBind->buffer;
+        delete[](char *)m_rBind->buffer;
         delete[] m_rBind;
         m_rBind = nullptr;
     }
 }
 
-Field const& ResultSet::operator[](std::size_t index) const
+Field const &ResultSet::operator[](std::size_t index) const
 {
-    ASSERT(index < _fieldCount);
+            ASSERT(index < _fieldCount);
     return _currentRow[index];
 }
 
-Field* PreparedResultSet::Fetch() const
+Field *PreparedResultSet::Fetch() const
 {
-    ASSERT(m_rowPosition < m_rowCount);
-    return const_cast<Field*>(&m_rows[uint32(m_rowPosition) * m_fieldCount]);
+            ASSERT(m_rowPosition < m_rowCount);
+    return const_cast<Field *>(&m_rows[uint32(m_rowPosition) * m_fieldCount]);
 }
 
-Field const& PreparedResultSet::operator[](std::size_t index) const
+Field const &PreparedResultSet::operator[](std::size_t index) const
 {
-    ASSERT(m_rowPosition < m_rowCount);
-    ASSERT(index < m_fieldCount);
+            ASSERT(m_rowPosition < m_rowCount);
+            ASSERT(index < m_fieldCount);
     return m_rows[uint32(m_rowPosition) * m_fieldCount + index];
 }

@@ -20,10 +20,10 @@
 
 Field::Field()
 {
-    data.value = NULL;
-    data.type = DatabaseFieldTypes::Null;
+    data.value  = NULL;
+    data.type   = DatabaseFieldTypes::Null;
     data.length = 0;
-    data.raw = false;
+    data.raw    = false;
 }
 
 Field::~Field()
@@ -45,8 +45,8 @@ uint8 Field::GetUInt8() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint8*>(data.value);
-    return static_cast<uint8>(strtoul((char*)data.value, nullptr, 10));
+        return *reinterpret_cast<uint8 *>(data.value);
+    return static_cast<uint8>(strtoul((char *)data.value, nullptr, 10));
 }
 
 int8 Field::GetInt8() const
@@ -63,8 +63,8 @@ int8 Field::GetInt8() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int8*>(data.value);
-    return static_cast<int8>(strtol((char*)data.value, NULL, 10));
+        return *reinterpret_cast<int8 *>(data.value);
+    return static_cast<int8>(strtol((char *)data.value, NULL, 10));
 }
 
 uint16 Field::GetUInt16() const
@@ -81,8 +81,8 @@ uint16 Field::GetUInt16() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint16*>(data.value);
-    return static_cast<uint16>(strtoul((char*)data.value, nullptr, 10));
+        return *reinterpret_cast<uint16 *>(data.value);
+    return static_cast<uint16>(strtoul((char *)data.value, nullptr, 10));
 }
 
 int16 Field::GetInt16() const
@@ -99,8 +99,8 @@ int16 Field::GetInt16() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int16*>(data.value);
-    return static_cast<int16>(strtol((char*)data.value, NULL, 10));
+        return *reinterpret_cast<int16 *>(data.value);
+    return static_cast<int16>(strtol((char *)data.value, NULL, 10));
 }
 
 uint32 Field::GetUInt32() const
@@ -117,8 +117,8 @@ uint32 Field::GetUInt32() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint32*>(data.value);
-    return static_cast<uint32>(strtoul((char*)data.value, nullptr, 10));
+        return *reinterpret_cast<uint32 *>(data.value);
+    return static_cast<uint32>(strtoul((char *)data.value, nullptr, 10));
 }
 
 int32 Field::GetInt32() const
@@ -135,8 +135,8 @@ int32 Field::GetInt32() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int32*>(data.value);
-    return static_cast<int32>(strtol((char*)data.value, NULL, 10));
+        return *reinterpret_cast<int32 *>(data.value);
+    return static_cast<int32>(strtol((char *)data.value, NULL, 10));
 }
 
 uint64 Field::GetUInt64() const
@@ -153,8 +153,8 @@ uint64 Field::GetUInt64() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint64*>(data.value);
-    return static_cast<uint64>(strtoull((char*)data.value, nullptr, 10));
+        return *reinterpret_cast<uint64 *>(data.value);
+    return static_cast<uint64>(strtoull((char *)data.value, nullptr, 10));
 }
 
 int64 Field::GetInt64() const
@@ -171,8 +171,8 @@ int64 Field::GetInt64() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int64*>(data.value);
-    return static_cast<int64>(strtoll((char*)data.value, NULL, 10));
+        return *reinterpret_cast<int64 *>(data.value);
+    return static_cast<int64>(strtoll((char *)data.value, NULL, 10));
 }
 
 float Field::GetFloat() const
@@ -189,8 +189,8 @@ float Field::GetFloat() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<float*>(data.value);
-    return static_cast<float>(atof((char*)data.value));
+        return *reinterpret_cast<float *>(data.value);
+    return static_cast<float>(atof((char *)data.value));
 }
 
 double Field::GetDouble() const
@@ -207,11 +207,11 @@ double Field::GetDouble() const
 #endif
 
     if (data.raw && !IsType(DatabaseFieldTypes::Decimal))
-        return *reinterpret_cast<double*>(data.value);
-    return static_cast<double>(atof((char*)data.value));
+        return *reinterpret_cast<double *>(data.value);
+    return static_cast<double>(atof((char *)data.value));
 }
 
-char const* Field::GetCString() const
+char const *Field::GetCString() const
 {
     if (!data.value)
         return NULL;
@@ -223,7 +223,7 @@ char const* Field::GetCString() const
         return NULL;
     }
 #endif
-    return static_cast<char const*>(data.value);
+    return static_cast<char const *>(data.value);
 }
 
 std::string Field::GetString() const
@@ -231,7 +231,7 @@ std::string Field::GetString() const
     if (!data.value)
         return "";
 
-    char const* string = GetCString();
+    char const *string = GetCString();
     if (!string)
         return "";
 
@@ -249,16 +249,16 @@ std::vector<uint8> Field::GetBinary() const
     return result;
 }
 
-void Field::SetByteValue(void* newValue, DatabaseFieldTypes newType, uint32 length)
+void Field::SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32 length)
 {
     // This value stores raw bytes that have to be explicitly cast later
-    data.value = newValue;
+    data.value  = newValue;
     data.length = length;
-    data.type = newType;
-    data.raw = true;
+    data.type   = newType;
+    data.raw    = true;
 }
 
-void Field::SetStructuredValue(char* newValue, DatabaseFieldTypes newType, uint32 length)
+void Field::SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32 length)
 {
     if (data.value)
         CleanUp();
@@ -268,12 +268,12 @@ void Field::SetStructuredValue(char* newValue, DatabaseFieldTypes newType, uint3
     {
         data.value = new char[length + 1];
         memcpy(data.value, newValue, length);
-        *(reinterpret_cast<char*>(data.value) + length) = '\0';
+        *(reinterpret_cast<char *>(data.value) + length) = '\0';
         data.length = length;
     }
 
     data.type = newType;
-    data.raw = false;
+    data.raw  = false;
 }
 
 bool Field::IsType(DatabaseFieldTypes type) const
@@ -284,11 +284,11 @@ bool Field::IsType(DatabaseFieldTypes type) const
 bool Field::IsNumeric() const
 {
     return (data.type == DatabaseFieldTypes::Int8 ||
-        data.type == DatabaseFieldTypes::Int16 ||
-        data.type == DatabaseFieldTypes::Int32 ||
-        data.type == DatabaseFieldTypes::Int64 ||
-        data.type == DatabaseFieldTypes::Float ||
-        data.type == DatabaseFieldTypes::Double);
+            data.type == DatabaseFieldTypes::Int16 ||
+            data.type == DatabaseFieldTypes::Int32 ||
+            data.type == DatabaseFieldTypes::Int64 ||
+            data.type == DatabaseFieldTypes::Float ||
+            data.type == DatabaseFieldTypes::Double);
 }
 
 #ifdef NGEMITY_DEBUG

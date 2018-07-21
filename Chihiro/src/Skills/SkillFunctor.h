@@ -20,8 +20,9 @@
 #include "Player.h"
 #include "GameRule.h"
 
-struct SkillTargetFunctor {
-    virtual void onCreature(Skill* pSkill, uint t, Unit* pCaster, Unit* pTarget) = 0;
+struct SkillTargetFunctor
+{
+    virtual void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) = 0;
 };
 
 struct FireSkillStateSkillFunctor : public SkillTargetFunctor
@@ -140,35 +141,35 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 
     void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
     {
-        auto nEnhance  = pSkill->GetSkillEnhance();
-        auto v13 = pSkill->m_SkillBase->var[9] + (pSkill->m_SkillBase->var[10] * pSkill->m_nRequestedSkillLevel);
+        auto nEnhance    = pSkill->GetSkillEnhance();
+        auto v13         = pSkill->m_SkillBase->var[9] + (pSkill->m_SkillBase->var[10] * pSkill->m_nRequestedSkillLevel);
         int  nSkillLevel = ((int)pSkill->m_SkillBase->var[1] * pSkill->m_nRequestedSkillLevel) + ((int)pSkill->m_SkillBase->var[2] * nEnhance);
 
         bool bResult = (v13 <= (uint)rand32() % 100);
 
         auto targetHandle = pTarget->GetHandle();
-        if(pSkill->m_SkillBase->var[8] == 0.0f)
+        if (pSkill->m_SkillBase->var[8] == 0.0f)
         {
-            if(bResult)
+            if (bResult)
                 pTarget->RemoveState((StateCode)static_cast<int>(pSkill->m_SkillBase->var[0]), nSkillLevel);
 
             sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
             auto counter = 304;
 
-            for(int i = 0; i < 5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 auto val = pSkill->m_SkillBase->var[9 + i];
-                if(val == 0.0f)
+                if (val == 0.0f)
                     break;
 
-                if(bResult)
+                if (bResult)
                     pTarget->RemoveState((StateCode)static_cast<int>(val), nSkillLevel);
                 sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
             }
         }
         else
         {
-            if(bResult)
+            if (bResult)
                 pTarget->RemoveGoodState(nSkillLevel);
             sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
         }

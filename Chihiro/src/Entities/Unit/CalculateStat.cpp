@@ -170,7 +170,7 @@ void Unit::amplifyStatByState()
         return;
 
     std::vector<std::pair<int, int>> vDecreaseList{ };
-    for (auto &s : m_vStateList)
+    for (auto                        &s : m_vStateList)
     {
         if (s.GetEffectType() == 84)
         {// Strong Spirit?
@@ -180,16 +180,16 @@ void Unit::amplifyStatByState()
                 if (s.GetValue(i) == 0.0f)
                 {
                     vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
-					break;
+                    break;
                 }
             }
         }
     }
-    for (auto &s :  m_vStateList)
+    for (auto                        &s :  m_vStateList)
     {
         uint16 nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int  i = 0; i < 3; i++)
             nOriginalLevel[i] = s.m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
@@ -272,7 +272,7 @@ void Unit::applyStateEffect()
         return;
 
     std::vector<std::pair<int, int>> vDecreaseList{ };
-    for (auto &s : m_vStateList)
+    for (auto                        &s : m_vStateList)
     {
         if (s.GetEffectType() == 84)
         {// Strong Spirit?
@@ -282,16 +282,16 @@ void Unit::applyStateEffect()
                 if (s.GetValue(i) == 0.0f)
                 {
                     vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
-					break;
+                    break;
                 }
             }
         }
     }
-    for (auto &s :  m_vStateList)
+    for (auto                        &s :  m_vStateList)
     {
         uint16 nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int  i = 0; i < 3; i++)
             nOriginalLevel[i] = s.m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
@@ -336,7 +336,7 @@ void Unit::applyStatByState()
         return;
 
     std::vector<std::pair<int, int>> vDecreaseList{ };
-    for (auto &s : m_vStateList)
+    for (auto                        &s : m_vStateList)
     {
         if (s.GetEffectType() == 84)
         {// Strong Spirit?
@@ -346,16 +346,16 @@ void Unit::applyStatByState()
                 if (s.GetValue(i) == 0.0f)
                 {
                     vDecreaseList.emplace_back(std::pair<int, int>(static_cast<int>(s.GetValue(1)), static_cast<int>(nDecreaseLevel)));
-					break;
+                    break;
                 }
             }
         }
     }
-    for (auto &s :  m_vStateList)
+    for (auto                        &s :  m_vStateList)
     {
         uint16 nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int  i = 0; i < 3; i++)
             nOriginalLevel[i] = s.m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
@@ -687,10 +687,10 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
     }
 }
 
-
 void Unit::incParameter(uint nBitset, float nValue, bool bStat)
 {
-    if (bStat) {
+    if (bStat)
+    {
         if ((nBitset & 1) != 0)
             m_cStat.strength += nValue;
         if ((nBitset & 2) != 0)
@@ -705,8 +705,11 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_cStat.mentality += nValue;
         if ((nBitset & 0x40) != 0)
             m_cStat.luck += nValue;
-    } else {
-        if ((nBitset & 0x80) != 0) {
+    }
+    else
+    {
+        if ((nBitset & 0x80) != 0)
+        {
             m_Attribute.nAttackPointRight += nValue;
             //m_nAttackPointRightWithoutWeapon += (short)nValue;
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
@@ -721,7 +724,8 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_Attribute.nDefence += nValue;
         if ((nBitset & 0x400) != 0)
             m_Attribute.nMagicDefence += nValue;
-        if ((nBitset & 0x800) != 0) {
+        if ((nBitset & 0x800) != 0)
+        {
             m_Attribute.nAttackSpeedRight += nValue;
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAttackSpeedLeft += nValue;
@@ -730,11 +734,12 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_Attribute.nCastingSpeed += nValue;
         if ((nBitset & 0x2000) != 0 && !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         {
-            auto p = dynamic_cast<Player*>(this);
+            auto p = dynamic_cast<Player *>(this);
             if (p != nullptr /*|| p.m_nRidingStateUid == 0*/)
                 m_Attribute.nMoveSpeed += nValue;
         }
-        if ((nBitset & 0x4000) != 0) {
+        if ((nBitset & 0x4000) != 0)
+        {
             m_Attribute.nAccuracyRight += nValue;
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 m_Attribute.nAccuracyLeft += nValue;
@@ -742,7 +747,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
         if ((nBitset & 0x8000) != 0)
             m_Attribute.nMagicAccuracy += nValue;
         if ((nBitset & 0x10000) != 0)
-            m_Attribute.nCritical += (short) nValue;
+            m_Attribute.nCritical += (short)nValue;
         if ((nBitset & 0x20000) != 0)
             m_Attribute.nBlockChance += nValue;
         if ((nBitset & 0x40000) != 0)
@@ -752,9 +757,9 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
         if ((nBitset & 0x100000) != 0)
             m_Attribute.nMagicAvoid += nValue;
         if ((nBitset & 0x200000) != 0)
-            SetInt32Value(UNIT_FIELD_MAX_HEALTH, GetInt32Value(UNIT_FIELD_MAX_HEALTH) + (int) nValue);
+            SetInt32Value(UNIT_FIELD_MAX_HEALTH, GetInt32Value(UNIT_FIELD_MAX_HEALTH) + (int)nValue);
         if ((nBitset & 0x400000) != 0)
-            SetInt32Value(UNIT_FIELD_MAX_MANA, GetInt32Value(UNIT_FIELD_MAX_MANA) + (int) nValue);
+            SetInt32Value(UNIT_FIELD_MAX_MANA, GetInt32Value(UNIT_FIELD_MAX_MANA) + (int)nValue);
         if ((nBitset & 0x1000000) != 0)
             m_Attribute.nHPRegenPoint += nValue;
         if ((nBitset & 0x2000000) != 0)
@@ -842,7 +847,6 @@ void Unit::incParameter2(uint nBitset, float fValue)
         SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
-
 void Unit::getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute)
 {
     attribute.nCritical += (m_AttributeAmplifier.fCritical * attribute.nCritical);
@@ -889,7 +893,7 @@ void Unit::applyStateAmplifyEffect()
         return;
 
     std::vector<std::pair<int, int>> vDecreaseList{ };
-    for (auto &s : m_vStateList)
+    for (auto                        &s : m_vStateList)
     {
         if (s.GetEffectType() == 84)
         {// Strong Spirit?
@@ -899,16 +903,16 @@ void Unit::applyStateAmplifyEffect()
                 if (s.GetValue(i) == 0.0f)
                 {
                     vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
-					break;
+                    break;
                 }
             }
         }
     }
-    for (auto &s :  m_vStateList)
+    for (auto                        &s :  m_vStateList)
     {
         uint16 nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int  i = 0; i < 3; i++)
             nOriginalLevel[i] = s.m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
@@ -1280,7 +1284,6 @@ void Unit::applyStatByItem()
     }
 }
 
-
 void Unit::applyPassiveSkillEffect(Skill *skill)
 {
     float atk = 0;
@@ -1343,7 +1346,7 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
     {
         case 1201:
         case 1202: // Defense Practice
-            if(m_anWear[WEAR_ARMOR] != nullptr)
+            if (m_anWear[WEAR_ARMOR] != nullptr)
                 m_Attribute.nDefence += (skill->m_SkillBase->var[0] * (skill->m_nSkillLevelAdd + skill->m_nSkillLevel));
             break;
         default:
@@ -1353,16 +1356,17 @@ void Unit::applyPassiveSkillEffect(Skill *skill)
 
 void Unit::applyPassiveSkillEffect()
 {
-    for(auto& s : m_vSkillList) {
+    for (auto &s : m_vSkillList)
+    {
         // yes, is_passive == 0 to get passive skills.. Gala :shrug:
-        if(s != nullptr && s->m_SkillBase != nullptr && s->m_SkillBase->is_passive == 0) {
+        if (s != nullptr && s->m_SkillBase != nullptr && s->m_SkillBase->is_passive == 0)
+        {
             bool r = s->m_SkillBase->vf_shield_only == 0 ? s->m_SkillBase->IsUseableWeapon(GetWeaponClass()) : IsWearShield();
-            if(s->m_SkillBase->vf_is_not_need_weapon != 0 || r)
+            if (s->m_SkillBase->vf_is_not_need_weapon != 0 || r)
                 applyPassiveSkillEffect(s);
         }
     }
 }
-
 
 void Unit::applyDoubeWeaponEffect()
 {
@@ -1373,7 +1377,7 @@ void Unit::applyDoubeWeaponEffect()
     {
         auto pSlot0 = GetWornItem(WEAR_WEAPON);
         auto pSlot1 = GetWornItem(WEAR_SHIELD);
-        if(pSlot0 != nullptr || pSlot1 != nullptr)
+        if (pSlot0 != nullptr || pSlot1 != nullptr)
         {
             int skillLevel = 1;
             if (pSlot1->m_pItemBase->iclass == CLASS_ONEHAND_SWORD
@@ -1391,24 +1395,24 @@ void Unit::applyDoubeWeaponEffect()
             {
                 skill = GetSkill((int)SKILL_TWIN_AXE_EXPERT);
             }
-            if(skill != nullptr)
+            if (skill != nullptr)
                 skillLevel = skill->m_nSkillLevel + skill->m_nSkillLevelAdd;
 
-            m_nDoubleWeaponMasteryLevel = skillLevel;
-            m_Attribute.nAttackSpeedRight *= (0.75f+((float)skillLevel*0.005f));
-            m_Attribute.nAttackSpeedLeft *= (0.75f+((float)skillLevel*0.005f));
-            m_Attribute.nAttackSpeed = (m_Attribute.nAttackSpeedLeft+m_Attribute.nAttackSpeedRight) * 0.5f;
-            m_AttributeByState.nAttackSpeedRight *= (0.75f+((float)skillLevel*0.005f));
-            m_AttributeByState.nAttackSpeedLeft *= (0.75f+((float)skillLevel*0.005f));
-            m_AttributeByState.nAttackSpeed = (m_AttributeByState.nAttackSpeedLeft+m_AttributeByState.nAttackSpeedRight) * 0.5f;
+            m_nDoubleWeaponMasteryLevel     = skillLevel;
+            m_Attribute.nAttackSpeedRight *= (0.75f + ((float)skillLevel * 0.005f));
+            m_Attribute.nAttackSpeedLeft *= (0.75f + ((float)skillLevel * 0.005f));
+            m_Attribute.nAttackSpeed        = (m_Attribute.nAttackSpeedLeft + m_Attribute.nAttackSpeedRight) * 0.5f;
+            m_AttributeByState.nAttackSpeedRight *= (0.75f + ((float)skillLevel * 0.005f));
+            m_AttributeByState.nAttackSpeedLeft *= (0.75f + ((float)skillLevel * 0.005f));
+            m_AttributeByState.nAttackSpeed = (m_AttributeByState.nAttackSpeedLeft + m_AttributeByState.nAttackSpeedRight) * 0.5f;
 
             m_Attribute.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
             m_Attribute.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
             m_AttributeByState.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
             m_AttributeByState.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
 
-            m_Attribute.nAttackPointRight *= (0.9f+((float)skillLevel*0.01f));
-            m_Attribute.nAttackPointLeft *= (0.44f+((float)skillLevel*0.02f));
+            m_Attribute.nAttackPointRight *= (0.9f + ((float)skillLevel * 0.01f));
+            m_Attribute.nAttackPointLeft *= (0.44f + ((float)skillLevel * 0.02f));
             /*m_nAttackPointRightWithoutWeapon *= (0.9f + ((float)skillLevel * 0.01f));
             m_nAttackPointRightWithoutWeapon *= (0.44f + ((float)skillLevel * 0.02f));*/
             m_AttributeByState.nAttackPointRight *= (0.9f + ((float)skillLevel * 0.01f));
@@ -1416,6 +1420,6 @@ void Unit::applyDoubeWeaponEffect()
             return;
         }
     }
-    m_Attribute.nAttackSpeed = m_Attribute.nAttackSpeedRight;
+    m_Attribute.nAttackSpeed        = m_Attribute.nAttackSpeedRight;
     m_AttributeByState.nAttackSpeed = m_AttributeByState.nAttackSpeedRight;
 }

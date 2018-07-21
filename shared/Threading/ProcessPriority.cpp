@@ -21,12 +21,14 @@
 #ifdef _WIN32 // Windows
 #include <Windows.h>
 #elif defined(__linux__)
+
 #include <sched.h>
 #include <sys/resource.h>
+
 #define PROCESS_HIGH_PRIORITY -15 // [-20, 19], default is 0
 #endif
 
-void SetProcessPriority(std::string const& logChannel, uint32 affinity, bool highPriority)
+void SetProcessPriority(std::string const &logChannel, uint32 affinity, bool highPriority)
 {
     ///- Handle affinity for multiple processors and process priority
 #ifdef _WIN32 // Windows
@@ -76,7 +78,7 @@ void SetProcessPriority(std::string const& logChannel, uint32 affinity, bool hig
         {
             CPU_ZERO(&mask);
             sched_getaffinity(0, sizeof(mask), &mask);
-            NG_LOG_INFO(logChannel, "Using processors (bitmask, hex): %lx", *(__cpu_mask*)(&mask));
+            NG_LOG_INFO(logChannel, "Using processors (bitmask, hex): %lx", *(__cpu_mask *)(&mask));
         }
     }
 

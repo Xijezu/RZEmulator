@@ -21,7 +21,7 @@
 
 EventProcessor::EventProcessor()
 {
-    m_time = 0;
+    m_time     = 0;
     m_aborting = false;
 }
 
@@ -40,7 +40,7 @@ void EventProcessor::Update(uint32 p_time)
     while (((i = m_events.begin()) != m_events.end()) && i->first <= m_time)
     {
         // get and remove event from queue
-        BasicEvent* Event = i->second;
+        BasicEvent *Event = i->second;
         m_events.erase(i);
 
         if (!Event->to_Abort)
@@ -77,7 +77,7 @@ void EventProcessor::KillAllEvents(bool force)
             delete i_old->second;
 
             if (!force)                                      // need per-element cleanup
-                m_events.erase (i_old);
+                m_events.erase(i_old);
         }
     }
 
@@ -86,15 +86,16 @@ void EventProcessor::KillAllEvents(bool force)
         m_events.clear();
 }
 
-void EventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
+void EventProcessor::AddEvent(BasicEvent *Event, uint64 e_time, bool set_addtime)
 {
-    if (set_addtime) Event->m_addTime = m_time;
-    Event->m_execTime = e_time;
-    m_events.insert(std::pair<uint64, BasicEvent*>(e_time, Event));
+    if (set_addtime)
+        Event->m_addTime = m_time;
+    Event->m_execTime    = e_time;
+    m_events.insert(std::pair<uint64, BasicEvent *>(e_time, Event));
 }
 
 uint64 EventProcessor::CalculateTime(uint64 t_offset) const
 {
-    return(m_time + t_offset);
+    return (m_time + t_offset);
 }
 

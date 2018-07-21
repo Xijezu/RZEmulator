@@ -61,8 +61,8 @@ using boost::asio::ip::tcp;
 template<class T, class Stream = tcp::socket>
 class Socket : public std::enable_shared_from_this<T>
 {
-public:
-        explicit Socket(tcp::socket&& socket) : _socket(std::move(socket)), _remoteAddress(_socket.remote_endpoint().address()),
+    public:
+        explicit Socket(tcp::socket &&socket) : _socket(std::move(socket)), _remoteAddress(_socket.remote_endpoint().address()),
                                                 _remotePort(_socket.remote_endpoint().port()), _readBuffer(), _closed(false), _closing(false), _isWritingAsync(false)
         {
             _readBuffer.Resize(READ_BLOCK_SIZE);
@@ -124,7 +124,7 @@ public:
                                     std::bind(callback, this->shared_from_this(), std::placeholders::_1, std::placeholders::_2));
         }
 
-        void QueuePacket(MessageBuffer&& buffer)
+        void QueuePacket(MessageBuffer &&buffer)
         {
             _writeQueue.push(std::move(buffer));
 
@@ -152,10 +152,10 @@ public:
         /// Marks the socket for closing after write buffer becomes empty
         void DelayedCloseSocket() { _closing = true; }
 
-        MessageBuffer& GetReadBuffer() { return _readBuffer; }
+        MessageBuffer &GetReadBuffer() { return _readBuffer; }
 
     protected:
-        virtual void OnClose() { }
+        virtual void OnClose() {}
 
         virtual void ReadHandler() = 0;
 
@@ -187,7 +187,7 @@ public:
                              GetRemoteIpAddress().to_string().c_str(), err.value(), err.message().c_str());
         }
 
-        Stream& underlying_stream()
+        Stream &underlying_stream()
         {
             return _socket;
         }
@@ -238,9 +238,9 @@ public:
             if (_writeQueue.empty())
                 return false;
 
-            MessageBuffer & queuedMessage = _writeQueue.front();
+            MessageBuffer &queuedMessage = _writeQueue.front();
 
-            std::size_t bytesToSend = queuedMessage.GetActiveSize();
+            std::size_t bytesToSend             = queuedMessage.GetActiveSize();
 
             boost::system::error_code error;
             std::size_t               bytesSent = _socket.write_some(boost::asio::buffer(queuedMessage.GetReadPointer(), bytesToSend), error);

@@ -92,7 +92,7 @@ elseif(UNIX)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -Wno-narrowing -Wno-deprecated-register")
         else()
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -g3")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Wno-overloaded-virtual -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Winvalid-pch -Wfatal-errors -g3 -Wno-narrowing")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Winit-self -Wno-unused-local-typedefs -Wno-overloaded-virtual -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter -Winvalid-pch -Wfatal-errors -g3 -Wno-narrowing")
         endif()
 
     elseif(CMAKE_C_COMPILER MATCHES "icc")

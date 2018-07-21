@@ -20,19 +20,22 @@
 #include "ByteBuffer.h"
 #include "Util.h"
 
-enum ObjType : int {
+enum ObjType : int
+{
     OBJ_STATIC  = 0, // Player (Pyrok)
     OBJ_MOVABLE = 1, // NPC (Pyrok)
     OBJ_CLIENT  = 2 // Static (Pyrok)
 };
 
-enum MainType : int {
+enum MainType : int
+{
     MT_Player       = 0,
     MT_NPC          = 1,
     MT_StaticObject = 2
 };
 
-enum SubType : int {
+enum SubType : int
+{
     ST_Player    = 0,
     ST_NPC       = 1,
     ST_Object    = 2, // Also Item
@@ -136,8 +139,8 @@ class Object
     public:
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        Object (const Object&) = delete;
-        Object& operator= (const Object&) = delete;
+        Object(const Object &) = delete;
+        Object &operator=(const Object &) = delete;
         virtual ~Object();
 
         bool IsInWorld() const { return m_inWorld; }
@@ -350,18 +353,20 @@ class Object
         bool PrintIndexError(uint32 index, bool set) const;
 };
 
-struct Position {
+struct Position
+{
     float m_positionX{ };
     float m_positionY{ };
     float m_positionZ{ };
     float _orientation{ };
     uint8 m_nLayer{ };
 
-    bool operator==(Position pos) {
+    bool operator==(Position pos)
+    {
         return pos.m_positionX == m_positionX &&
-                pos.m_positionY == m_positionY &&
-                pos.m_positionZ == m_positionZ &&
-                pos.m_nLayer == m_nLayer;
+               pos.m_positionY == m_positionY &&
+               pos.m_positionZ == m_positionZ &&
+               pos.m_nLayer == m_nLayer;
 
     }
 
@@ -525,7 +530,7 @@ class ArMoveVector : public Position
 
         virtual bool Step(uint current_time);
         void Copy(const ArMoveVector &);
-        virtual void SetMultipleMove(std::vector<Position>& _to, uint8_t _speed, uint _start_time, uint current_time);
+        virtual void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time, uint current_time);
         virtual void SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time);
         void SetDirection(Position pos);
         Position GetTargetPos();
@@ -575,11 +580,12 @@ class WorldObject : public Object, public ArMoveVector
     public:
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        WorldObject (const WorldObject&) = delete;
-        WorldObject& operator= (const WorldObject&) = delete;
+        WorldObject(const WorldObject &) = delete;
+        WorldObject &operator=(const WorldObject &) = delete;
         ~WorldObject() override;
 
-        template<class T> T* As() { return dynamic_cast<T*>(this); }
+        template<class T>
+        T *As() { return dynamic_cast<T *>(this); }
 
         virtual void Update(uint32 /*time_diff*/) {}
 
@@ -602,7 +608,7 @@ class WorldObject : public Object, public ArMoveVector
 
         const char *GetName() const { return m_name.c_str(); }
 
-        virtual const std::string& GetNameAsString() { return m_name; }
+        virtual const std::string &GetNameAsString() { return m_name; }
 
         void SetName(const std::string &newname) { m_name = newname; }
 

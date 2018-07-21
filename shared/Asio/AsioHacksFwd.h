@@ -29,7 +29,7 @@ namespace boost
 
     namespace asio
     {
-        template <typename Time>
+        template<typename Time>
         struct time_traits;
 
         namespace ip
@@ -38,21 +38,21 @@ namespace boost
 
             class tcp;
 
-            template <typename InternetProtocol>
+            template<typename InternetProtocol>
             class basic_endpoint;
 
             typedef basic_endpoint<tcp> tcp_endpoint;
         }
 
 #if BOOST_VERSION >= 106600
-        template <typename Time, typename TimeTraits>
+        template<typename Time, typename TimeTraits>
         class basic_deadline_timer;
 
         typedef basic_deadline_timer<posix_time::ptime, time_traits<posix_time::ptime>> deadline_timer;
 
         namespace ip
         {
-            template <typename InternetProtocol>
+            template<typename InternetProtocol>
             class basic_resolver;
 
             typedef basic_resolver<tcp> tcp_resolver;

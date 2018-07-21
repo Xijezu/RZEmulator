@@ -155,7 +155,7 @@ bool XLua::RunString(std::string szScript)
     try
     {
         m_pState.script(szScript);
-    } catch (sol::error& err)
+    } catch (sol::error &err)
     {
         NG_LOG_ERROR("scripting", "%s", err.what());
         return false;

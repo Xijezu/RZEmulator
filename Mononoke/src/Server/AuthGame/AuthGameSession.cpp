@@ -56,7 +56,7 @@ void AuthGameSession::OnClose()
         {
             NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
             auto            map = sPlayerMapList.GetMap();
-            for (auto &player : *map)
+            for (auto       &player : *map)
             {
                 if (player.second->nGameIDX == g->nIDX)
                 {

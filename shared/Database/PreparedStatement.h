@@ -91,20 +91,20 @@ class PreparedStatement
         void setInt64(const uint8 index, const int64 value);
         void setFloat(const uint8 index, const float value);
         void setDouble(const uint8 index, const double value);
-        void setString(const uint8 index, const std::string& value);
-        void setBinary(const uint8 index, const std::vector<uint8>& value);
+        void setString(const uint8 index, const std::string &value);
+        void setBinary(const uint8 index, const std::vector<uint8> &value);
         void setNull(const uint8 index);
 
     protected:
         void BindParameters();
 
     protected:
-        MySQLPreparedStatement * m_stmt;
+        MySQLPreparedStatement *m_stmt;
         uint32                             m_index;
         std::vector<PreparedStatementData> statement_data;    //- Buffer of parameters, not tied to MySQL in any way yet
 
-        PreparedStatement(PreparedStatement const& right) = delete;
-        PreparedStatement& operator=(PreparedStatement const& right) = delete;
+        PreparedStatement(PreparedStatement const &right) = delete;
+        PreparedStatement &operator=(PreparedStatement const &right) = delete;
 };
 
 //- Class of which the instances are unique per MySQLConnection
@@ -116,7 +116,7 @@ class MySQLPreparedStatement
         friend class PreparedStatement;
 
     public:
-        MySQLPreparedStatement(MYSQL_STMT* stmt);
+        MySQLPreparedStatement(MYSQL_STMT *stmt);
         ~MySQLPreparedStatement();
 
         void setNull(const uint8 index);
@@ -131,33 +131,33 @@ class MySQLPreparedStatement
         void setInt64(const uint8 index, const int64 value);
         void setFloat(const uint8 index, const float value);
         void setDouble(const uint8 index, const double value);
-        void setBinary(const uint8 index, const std::vector<uint8>& value, bool isString);
+        void setBinary(const uint8 index, const std::vector<uint8> &value, bool isString);
 
     protected:
-        MYSQL_STMT* GetSTMT() { return m_Mstmt; }
+        MYSQL_STMT *GetSTMT() { return m_Mstmt; }
 
-        MYSQL_BIND* GetBind() { return m_bind; }
+        MYSQL_BIND *GetBind() { return m_bind; }
 
-        PreparedStatement * m_stmt;
+        PreparedStatement *m_stmt;
         void ClearParameters();
         void CheckValidIndex(uint8 index);
-        std::string getQueryString(std::string const& sqlPattern) const;
+        std::string getQueryString(std::string const &sqlPattern) const;
 
     private:
-        MYSQL_STMT * m_Mstmt;
+        MYSQL_STMT *m_Mstmt;
         uint32            m_paramCount;
         std::vector<bool> m_paramsSet;
-        MYSQL_BIND * m_bind;
+        MYSQL_BIND *m_bind;
 
-        MySQLPreparedStatement(MySQLPreparedStatement const& right) = delete;
-        MySQLPreparedStatement& operator=(MySQLPreparedStatement const& right) = delete;
+        MySQLPreparedStatement(MySQLPreparedStatement const &right) = delete;
+        MySQLPreparedStatement &operator=(MySQLPreparedStatement const &right) = delete;
 };
 
 //- Lower-level class, enqueuable operation
 class PreparedStatementTask : public SQLOperation
 {
     public:
-        PreparedStatementTask(PreparedStatement* stmt, bool async = false);
+        PreparedStatementTask(PreparedStatement *stmt, bool async = false);
         ~PreparedStatementTask();
 
         bool Execute() override;
@@ -165,7 +165,7 @@ class PreparedStatementTask : public SQLOperation
         PreparedQueryResultFuture GetFuture() { return m_result->get_future(); }
 
     protected:
-        PreparedStatement * m_stmt;
+        PreparedStatement *m_stmt;
         bool m_has_result;
-        PreparedQueryResultPromise * m_result;
+        PreparedQueryResultPromise *m_result;
 };

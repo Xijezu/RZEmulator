@@ -21,10 +21,10 @@
 #include <atomic>
 #include <type_traits>
 
-template <typename T>
+template<typename T>
 class ProducerConsumerQueue
 {
-private:
+    private:
         std::mutex              _queueLock;
         std::queue<T>           _queue;
         std::condition_variable _condition;
@@ -32,9 +32,9 @@ private:
 
     public:
 
-        ProducerConsumerQueue<T>() : _shutdown(false) { }
+        ProducerConsumerQueue<T>() : _shutdown(false) {}
 
-        void Push(const T& value)
+        void Push(const T &value)
         {
             std::lock_guard<std::mutex> lock(_queueLock);
             _queue.push(std::move(value));
@@ -49,7 +49,7 @@ private:
             return _queue.empty();
         }
 
-        bool Pop(T& value)
+        bool Pop(T &value)
         {
             std::lock_guard<std::mutex> lock(_queueLock);
 
@@ -63,7 +63,7 @@ private:
             return true;
         }
 
-        void WaitAndPop(T& value)
+        void WaitAndPop(T &value)
         {
             std::unique_lock<std::mutex> lock(_queueLock);
 
@@ -86,7 +86,7 @@ private:
 
             while (!_queue.empty())
             {
-                T & value = _queue.front();
+                T &value = _queue.front();
 
                 DeleteQueuedObject(value);
 
@@ -100,8 +100,8 @@ private:
 
     private:
         template<typename E = T>
-        typename std::enable_if<std::is_pointer<E>::value>::type DeleteQueuedObject(E& obj) { delete obj; }
+        typename std::enable_if<std::is_pointer<E>::value>::type DeleteQueuedObject(E &obj) { delete obj; }
 
         template<typename E = T>
-        typename std::enable_if<!std::is_pointer<E>::value>::type DeleteQueuedObject(E const& /*packet*/) { }
+        typename std::enable_if<!std::is_pointer<E>::value>::type DeleteQueuedObject(E const & /*packet*/) {}
 };

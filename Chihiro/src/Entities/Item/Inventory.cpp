@@ -27,13 +27,13 @@ Inventory::Inventory() : m_pEventReceiver(nullptr), m_fWeight(0),
 
 Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
 {
-    if(item->IsJoinable())
+    if (item->IsJoinable())
     {
         auto ji = FindByCode(item->m_Instance.Code);
-        if(ji != nullptr)
+        if (ji != nullptr)
         {
             m_fWeight += item->m_pItemBase->weight * (float)cnt;
-            if(ji->m_Instance.nWearInfo != WEAR_NONE)
+            if (ji->m_Instance.nWearInfo != WEAR_NONE)
                 m_fWeightModifier -= item->m_pItemBase->weight * (float)cnt;
             int64 new_cnt = cnt + ji->m_Instance.nCount;
             setCount(ji, new_cnt, bSkipUpdateItemToDB);
@@ -42,12 +42,12 @@ Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
     }
 
     m_fWeight += item->GetWeight();
-    if(item->m_Instance.nWearInfo != WEAR_NONE)
+    if (item->m_Instance.nWearInfo != WEAR_NONE)
     {
         m_fWeightModifier -= item->GetWeight();
     }
     push(item, bSkipUpdateItemToDB);
-    if(item->m_Instance.nIdx > m_nIndex)
+    if (item->m_Instance.nIdx > m_nIndex)
         m_nIndex = item->m_Instance.nIdx;
 
     return item;
@@ -60,24 +60,24 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
     if (!check(pItem))
         return nullptr;
 
-    if(pItem->m_Instance.nCount == cnt)
+    if (pItem->m_Instance.nCount == cnt)
     {
         m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
-        if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
             m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
         pop(pItem, bSkipUpdateItemToDB);
         return pItem;
     }
-    else if(pItem->m_Instance.nCount > cnt)
+    else if (pItem->m_Instance.nCount > cnt)
     {
         new_cnt = pItem->m_Instance.nCount - cnt;
-        auto pNewItem = Item::AllocItem(0, pItem->m_Instance.Code,new_cnt, BY_DIVIDE, -1, -1, -1 -1 ,0 ,0 ,0 ,0 ,0);
+        auto pNewItem = Item::AllocItem(0, pItem->m_Instance.Code, new_cnt, BY_DIVIDE, -1, -1, -1 - 1, 0, 0, 0, 0, 0);
         pNewItem->CopyFrom(pItem);
         pNewItem->SetCount(cnt);
         m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
-        if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
             m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
-        new_cnt = pItem->m_Instance.nCount - cnt;
+        new_cnt       = pItem->m_Instance.nCount - cnt;
         setCount(pItem, new_cnt, bSkipUpdateItemToDB);
         return pNewItem;
     }
@@ -86,13 +86,13 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
 
 bool Inventory::Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB)
 {
-    if(!check(pItem))
+    if (!check(pItem))
         return false;
 
-    if(pItem->m_Instance.nCount <= count)
+    if (pItem->m_Instance.nCount <= count)
     {
         m_fWeight -= pItem->GetWeight();
-        if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
             m_fWeightModifier += pItem->GetWeight();
         pop(pItem, bSkipUpdateItemToDB);
         Item::PendFreeItem(pItem);
@@ -100,7 +100,7 @@ bool Inventory::Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB)
     }
 
     m_fWeight -= pItem->m_pItemBase->weight * (float)count;
-    if(pItem->m_Instance.nWearInfo != WEAR_NONE)
+    if (pItem->m_Instance.nWearInfo != WEAR_NONE)
         m_fWeightModifier += pItem->m_pItemBase->weight * (float)count;
     int64 nc = pItem->m_Instance.nCount - count;
     setCount(pItem, nc, bSkipUpdateItemToDB);
@@ -123,9 +123,9 @@ Item *Inventory::Find(int code, uint flag, bool bFlag)
 
 Item *Inventory::FindByCode(int code)
 {
-    for(auto& i : m_vList)
+    for (auto &i : m_vList)
     {
-        if(i->m_Instance.Code == code)
+        if (i->m_Instance.Code == code)
             return i;
     }
     return nullptr;
@@ -133,9 +133,9 @@ Item *Inventory::FindByCode(int code)
 
 Item *Inventory::FindBySID(int64 uid)
 {
-    for(auto& i : m_vList)
+    for (auto &i : m_vList)
     {
-        if(i->m_Instance.UID == uid)
+        if (i->m_Instance.UID == uid)
             return i;
     }
     return nullptr;
@@ -143,9 +143,9 @@ Item *Inventory::FindBySID(int64 uid)
 
 Item *Inventory::FindByHandle(uint handle)
 {
-    for(auto& i : m_vList)
+    for (auto &i : m_vList)
     {
-        if(i->GetHandle() == handle)
+        if (i->GetHandle() == handle)
             return i;
     }
     return nullptr;
@@ -154,41 +154,41 @@ Item *Inventory::FindByHandle(uint handle)
 void Inventory::setCount(Item *item, int64 newCnt, bool bSkipUpdateItemToDB)
 {
     item->SetCount(newCnt);
-    if(m_pEventReceiver != nullptr)
+    if (m_pEventReceiver != nullptr)
         m_pEventReceiver->onChangeCount(this, item, bSkipUpdateItemToDB);
 }
 
 void Inventory::push(Item *item, bool bSkipUpdateItemToDB)
 {
     m_vList.emplace_back(item);
-    if(item->IsExpireItem())
+    if (item->IsExpireItem())
         m_vExpireItemList.emplace_back(item);
     item->m_unInventoryIndex = (uint)m_vList.size() - 1;
-    if(m_pEventReceiver != nullptr)
+    if (m_pEventReceiver != nullptr)
         m_pEventReceiver->onAdd(this, item, bSkipUpdateItemToDB);
 }
 
 void Inventory::pop(Item *pItem, bool bSkipUpdateItemToDB)
 {
-    if(m_pEventReceiver != nullptr)
+    if (m_pEventReceiver != nullptr)
         m_pEventReceiver->onRemove(this, pItem, bSkipUpdateItemToDB);
 
-    Item* last = m_vList.back();
+    Item *last = m_vList.back();
     auto idx = (int)last->m_unInventoryIndex;
-    if(last->GetHandle() != pItem->GetHandle())
+    if (last->GetHandle() != pItem->GetHandle())
     {
         last->m_unInventoryIndex = pItem->m_unInventoryIndex;
         m_vList[(int)last->m_unInventoryIndex] = last;
     }
     m_vList.erase(m_vList.begin() + idx);
     auto pos = std::find(m_vExpireItemList.begin(), m_vExpireItemList.end(), pItem);
-    if(pos != m_vExpireItemList.end())
+    if (pos != m_vExpireItemList.end())
         m_vExpireItemList.erase(pos);
 }
 
 bool Inventory::check(Item *pItem)
 {
-    if(pItem->m_unInventoryIndex < m_vList.size())
+    if (pItem->m_unInventoryIndex < m_vList.size())
         return m_vList[(int)pItem->m_unInventoryIndex]->GetHandle() == pItem->GetHandle();
     return false;
 }

@@ -23,12 +23,12 @@ struct RegionBase
 {
     RegionBase()
     {
-        m_Regions = std::vector<Region*>(100 * 100, nullptr);
+        m_Regions = std::vector<Region *>(100 * 100, nullptr);
     }
 
     ~RegionBase()
     {
-        for(auto &x : m_Regions)
+        for (auto &x : m_Regions)
         {
             delete x;
             x = nullptr;
@@ -36,7 +36,7 @@ struct RegionBase
         m_Regions.clear();
     }
 
-    std::vector<Region*> m_Regions;
+    std::vector<Region *> m_Regions;
 };
 
 class RegionBlock
@@ -49,7 +49,7 @@ class RegionBlock
 
         ~RegionBlock()
         {
-            for(auto &x : m_RegionBases)
+            for (auto &x : m_RegionBases)
             {
                 delete x;
                 x = nullptr;
@@ -58,11 +58,11 @@ class RegionBlock
 
         Region *getRegionPtr(uint rx, uint ry, uint8 layer)
         {
-            Region * res{nullptr};
+            Region *res{nullptr};
             {
                 NG_UNIQUE_GUARD writeGuard(i_lock);
-                RegionBase * rb = m_RegionBases[layer];
-                if(rb != nullptr)
+                RegionBase      *rb = m_RegionBases[layer];
+                if (rb != nullptr)
                     res = rb->m_Regions[ry + (100 * rx)];
             }
             return res;

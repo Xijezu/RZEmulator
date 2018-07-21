@@ -23,7 +23,7 @@
 class FieldProp;
 struct FieldPropDeleteHandler
 {
-    virtual void onFieldPropDelete(FieldProp* prop) = 0;
+    virtual void onFieldPropDelete(FieldProp *prop) = 0;
 };
 
 class Player;
@@ -37,8 +37,8 @@ class FieldProp : public WorldObject
         FieldProp() = delete;
         // Deleting the copy & assignment operators
         // Better safe than sorry
-        FieldProp (const FieldProp&) = delete;
-        FieldProp& operator= (const FieldProp&) = delete;
+        FieldProp(const FieldProp &) = delete;
+        FieldProp &operator=(const FieldProp &) = delete;
         /// \brief Used to generate the TS_SC_ENTER packet for a FieldProp
         /// \param pEnterPct Writable object
         /// \param pFieldProp The object we're generating for

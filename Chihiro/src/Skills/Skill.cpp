@@ -16,10 +16,6 @@
 */
 
 #include "Skill.h"
-#include "Unit.h"
-#include "Database/DatabaseEnv.h"
-#include "World.h"
-#include "ObjectMgr.h"
 #include "MemPool.h"
 #include "ClientPackets.h"
 #include "SkillFunctor.h"
@@ -440,8 +436,8 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint)(pUnit1->GetPositionX() / g_nRegionSize), (uint)(pUnit1->GetPositionY() / g_nRegionSize),
-                      (uint)(pUnit2->GetPositionX() / g_nRegionSize), (uint)(pUnit2->GetPositionY() / g_nRegionSize),
-                      pUnit1->GetLayer(), skillPct);
+                     (uint)(pUnit2->GetPositionX() / g_nRegionSize), (uint)(pUnit2->GetPositionY() / g_nRegionSize),
+                     pUnit1->GetLayer(), skillPct);
 }
 
 void Skill::ProcSkill()

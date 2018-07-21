@@ -27,7 +27,7 @@ QueryCallbackProcessor::~QueryCallbackProcessor()
 {
 }
 
-void QueryCallbackProcessor::AddQuery(QueryCallback&& query)
+void QueryCallbackProcessor::AddQuery(QueryCallback &&query)
 {
     _callbacks.emplace_back(std::move(query));
 }
@@ -37,10 +37,9 @@ void QueryCallbackProcessor::ProcessReadyQueries()
     if (_callbacks.empty())
         return;
 
-    std::vector<QueryCallback> updateCallbacks{ std::move(_callbacks) };
+    std::vector<QueryCallback> updateCallbacks{std::move(_callbacks)};
 
-    updateCallbacks.erase(std::remove_if(updateCallbacks.begin(), updateCallbacks.end(), [](QueryCallback& callback)
-    {
+    updateCallbacks.erase(std::remove_if(updateCallbacks.begin(), updateCallbacks.end(), [](QueryCallback &callback) {
         return callback.InvokeIfReady() == QueryCallback::Completed;
     }), updateCallbacks.end());
 

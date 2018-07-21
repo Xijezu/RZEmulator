@@ -36,7 +36,6 @@ void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player */
     pEnterPct << pFieldProp->m_PropInfo.fLockHeight;
 }
 
-
 FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint lifeTime)
 {
     auto fp = new FieldProp{propDeleteHandler, pPropInfo};
@@ -49,15 +48,15 @@ FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPro
 
 bool FieldProp::IsUsable(Player *pPlayer) const
 {
-    if(pPlayer == nullptr)
+    if (pPlayer == nullptr)
         return false;
-    if(m_bIsCasting)
+    if (m_bIsCasting)
         return false;
 
     // Level checks
-    if(pPlayer->GetLevel() < m_pFieldPropBase->nMinLevel)
+    if (pPlayer->GetLevel() < m_pFieldPropBase->nMinLevel)
         return false;
-    if(pPlayer->GetLevel() > m_pFieldPropBase->nMaxLevel)
+    if (pPlayer->GetLevel() > m_pFieldPropBase->nMaxLevel)
         return false;
 
     bool bResult = true;
@@ -71,26 +70,26 @@ bool FieldProp::IsUsable(Player *pPlayer) const
         bResult = false;
     if ((m_pFieldPropBase->nLimit & LIMIT_SUMMONER) != 0 && !pPlayer->IsSummoner())
         bResult = false;
-    if(!bResult)
+    if (!bResult)
         return false;
 
     // Race checks
-    if(pPlayer->GetRace() != 3 && (m_pFieldPropBase->nLimit & LIMIT_GAIA) != 0)
+    if (pPlayer->GetRace() != 3 && (m_pFieldPropBase->nLimit & LIMIT_GAIA) != 0)
         bResult = false;
-    if(pPlayer->GetRace() != 4 && (m_pFieldPropBase->nLimit & LIMIT_DEVA) != 0)
+    if (pPlayer->GetRace() != 4 && (m_pFieldPropBase->nLimit & LIMIT_DEVA) != 0)
         bResult = false;
-    if(pPlayer->GetRace() != 5 && (m_pFieldPropBase->nLimit & LIMIT_ASURA) != 0)
+    if (pPlayer->GetRace() != 5 && (m_pFieldPropBase->nLimit & LIMIT_ASURA) != 0)
         bResult = false;
-    if(!bResult)
+    if (!bResult)
         return false;
 
     // Job check
-    if(m_pFieldPropBase->nLimitJobID != 0 && m_pFieldPropBase->nLimitJobID != pPlayer->GetCurrentJob())
+    if (m_pFieldPropBase->nLimitJobID != 0 && m_pFieldPropBase->nLimitJobID != pPlayer->GetCurrentJob())
         return false;
 
-    for(int x = 0; x < 2; ++x)
+    for (int x = 0; x < 2; ++x)
     {
-        switch(m_pFieldPropBase->nActivateID[x])
+        switch (m_pFieldPropBase->nActivateID[x])
         {
             case 1:
             {
@@ -100,16 +99,16 @@ bool FieldProp::IsUsable(Player *pPlayer) const
             }
                 break;
             case 2:
-                if(pPlayer->GetQuestProgress(m_pFieldPropBase->nActivateValue[x][0]) != m_pFieldPropBase->nActivateValue[x][1])
+                if (pPlayer->GetQuestProgress(m_pFieldPropBase->nActivateValue[x][0]) != m_pFieldPropBase->nActivateValue[x][1])
                     return false;
                 break;
             case 3:
-                if(pPlayer->GetCurrentSkillLevel(m_pFieldPropBase->nActivateValue[x][0]) != m_pFieldPropBase->nActivateValue[x][1])
+                if (pPlayer->GetCurrentSkillLevel(m_pFieldPropBase->nActivateValue[x][0]) != m_pFieldPropBase->nActivateValue[x][1])
                     return false;
                 break;
             case 4:
                 if ((m_pFieldPropBase->nActivateValue[x][0] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][0]))
-                     || (m_pFieldPropBase->nActivateValue[x][1] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][1])))
+                    || (m_pFieldPropBase->nActivateValue[x][1] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][1])))
                     return false;
                 break;
             default:
@@ -126,15 +125,15 @@ bool FieldProp::Cast()
     return true;
 }
 
-bool FieldProp::UseProp(Player * pPlayer)
+bool FieldProp::UseProp(Player *pPlayer)
 {
     m_bIsCasting = false;
     //int oldUseCount = m_nUseCount;
-    if(m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
+    if (m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
     {
         for (auto &i : m_pFieldPropBase->drop_info)
         {
-            if(i.code != 0)
+            if (i.code != 0)
             {
                 if (irand(1, 100000000) <= i.ratio)
                 {
@@ -142,26 +141,26 @@ bool FieldProp::UseProp(Player * pPlayer)
                     int  nLevel     = irand(i.min_level, i.max_level + 1);
                     auto ti         = Item::AllocItem(0, i.code, (uint64)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
-                    auto cnt = ti->m_Instance.nCount;
+                    auto cnt       = ti->m_Instance.nCount;
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);
 
-                    if(pNewItem != nullptr)
+                    if (pNewItem != nullptr)
                     {
                         Messages::SendResult(pPlayer, 0xCC, 0, ti->GetHandle());
                     }
-                    if(pNewItem != nullptr && pNewItem->GetHandle() != ti->GetHandle())
+                    if (pNewItem != nullptr && pNewItem->GetHandle() != ti->GetHandle())
                         Item::PendFreeItem(ti);
                 }
             }
         }
-        if(!m_pFieldPropBase->strScript.empty() && m_pFieldPropBase->strScript.length() > 2)
+        if (!m_pFieldPropBase->strScript.empty() && m_pFieldPropBase->strScript.length() > 2)
         {
             sScriptingMgr.RunString(pPlayer, m_pFieldPropBase->strScript);
         }
-        if(m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0)
+        if (m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0)
         {
             sWorld.RemoveObjectFromWorld(this);
-            if(m_pDeleteHandler != nullptr)
+            if (m_pDeleteHandler != nullptr)
                 m_pDeleteHandler->onFieldPropDelete(this);
             DeleteThis();
         }
@@ -181,20 +180,20 @@ uint FieldProp::GetCastingDelay() const
 
 FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : WorldObject(true)
 {
-    _mainType = MT_StaticObject;
-    _subType  = ST_FieldProp;
-    _objType  = OBJ_STATIC;
+    _mainType    = MT_StaticObject;
+    _subType     = ST_FieldProp;
+    _objType     = OBJ_STATIC;
     _valuesCount = 1;
     _InitValues();
 
     m_bIsCasting = false;
     sMemoryPool.AllocMiscHandle(this);
     m_pFieldPropBase = sObjectMgr.GetFieldPropBase(pPropInfo.nPropID);
-    m_PropInfo = pPropInfo;
+    m_PropInfo       = pPropInfo;
     m_pDeleteHandler = propDeleteHandler;
-    nLifeTime = m_pFieldPropBase->nLifeTime;
-    m_nRegenTime = sWorld.GetArTime();
-    m_nUseCount = m_pFieldPropBase->nUseCount;
-    if(m_pFieldPropBase->nUseCount == 0)
-        m_nUseCount = 1;
+    nLifeTime        = m_pFieldPropBase->nLifeTime;
+    m_nRegenTime     = sWorld.GetArTime();
+    m_nUseCount      = m_pFieldPropBase->nUseCount;
+    if (m_pFieldPropBase->nUseCount == 0)
+        m_nUseCount  = 1;
 }

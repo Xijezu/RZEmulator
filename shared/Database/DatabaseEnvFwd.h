@@ -38,8 +38,8 @@ class Transaction;
 typedef std::shared_ptr<Transaction> SQLTransaction;
 
 class SQLQueryHolder;
-typedef std::future<SQLQueryHolder*>  QueryResultHolderFuture;
-typedef std::promise<SQLQueryHolder*> QueryResultHolderPromise;
+typedef std::future<SQLQueryHolder *>  QueryResultHolderFuture;
+typedef std::promise<SQLQueryHolder *> QueryResultHolderPromise;
 
 // mysql
 typedef struct st_mysql       MYSQL;

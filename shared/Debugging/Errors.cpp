@@ -34,17 +34,18 @@
     terminates the application.
 */
 
-namespace NGemity {
+namespace NGemity
+{
 
-    void Assert(char const* file, int line, char const* function, char const* message)
+    void Assert(char const *file, int line, char const *function, char const *message)
     {
         fprintf(stderr, "\n%s:%i in %s ASSERTION FAILED:\n  %s\n",
                 file, line, function, message);
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 
-    void Assert(char const* file, int line, char const* function, char const* message, char const* format, ...)
+    void Assert(char const *file, int line, char const *function, char const *message, char const *format, ...)
     {
         va_list args;
         va_start(args, format);
@@ -55,11 +56,11 @@ namespace NGemity {
         fflush(stderr);
 
         va_end(args);
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 
-    void Fatal(char const* file, int line, char const* function, char const* message, ...)
+    void Fatal(char const *file, int line, char const *function, char const *message, ...)
     {
         va_list args;
         va_start(args, message);
@@ -70,36 +71,36 @@ namespace NGemity {
         fflush(stderr);
 
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 
-    void Error(char const* file, int line, char const* function, char const* message)
+    void Error(char const *file, int line, char const *function, char const *message)
     {
         fprintf(stderr, "\n%s:%i in %s ERROR:\n  %s\n",
                 file, line, function, message);
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 
-    void Warning(char const* file, int line, char const* function, char const* message)
+    void Warning(char const *file, int line, char const *function, char const *message)
     {
         fprintf(stderr, "\n%s:%i in %s WARNING:\n  %s\n",
                 file, line, function, message);
     }
 
-    void Abort(char const* file, int line, char const* function)
+    void Abort(char const *file, int line, char const *function)
     {
         fprintf(stderr, "\n%s:%i in %s ABORTED.\n",
                 file, line, function);
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 
     void AbortHandler(int /*sigval*/)
     {
         // nothing useful to log here, no way to pass args
-        *((volatile int*)NULL) = 0;
+        *((volatile int *)NULL) = 0;
         exit(1);
     }
 

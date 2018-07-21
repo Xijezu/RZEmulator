@@ -22,13 +22,13 @@
 #include <string>
 #include <vector>
 
-template <typename T>
+template<typename T>
 class ProducerConsumerQueue;
 
 class SQLOperation;
 struct MySQLConnectionInfo;
 
-template <class T>
+template<class T>
 class DatabaseWorkerPool
 {
     private:
@@ -45,7 +45,7 @@ class DatabaseWorkerPool
 
         ~DatabaseWorkerPool();
 
-        void SetConnectionInfo(std::string const& infoString, uint8 const asyncThreads, uint8 const synchThreads);
+        void SetConnectionInfo(std::string const &infoString, uint8 const asyncThreads, uint8 const synchThreads);
 
         uint32 Open();
 
@@ -54,7 +54,7 @@ class DatabaseWorkerPool
         //! Prepares all prepared statements
         bool PrepareStatements();
 
-        inline MySQLConnectionInfo const* GetConnectionInfo() const
+        inline MySQLConnectionInfo const *GetConnectionInfo() const
         {
             return _connectionInfo.get();
         }
@@ -65,12 +65,12 @@ class DatabaseWorkerPool
 
         //! Enqueues a one-way SQL operation in string format that will be executed asynchronously.
         //! This method should only be used for queries that are only executed once, e.g during startup.
-        void Execute(const char* sql);
+        void Execute(const char *sql);
 
         //! Enqueues a one-way SQL operation in string format -with variable args- that will be executed asynchronously.
         //! This method should only be used for queries that are only executed once, e.g during startup.
         template<typename Format, typename... Args>
-        void PExecute(Format&& sql, Args&&... args)
+        void PExecute(Format &&sql, Args &&... args)
         {
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return;
@@ -80,7 +80,7 @@ class DatabaseWorkerPool
 
         //! Enqueues a one-way SQL operation in prepared statement format that will be executed asynchronously.
         //! Statement must be prepared with CONNECTION_ASYNC flag.
-        void Execute(PreparedStatement* stmt);
+        void Execute(PreparedStatement *stmt);
 
         /**
             Direct synchronous one-way statement methods.
@@ -88,12 +88,12 @@ class DatabaseWorkerPool
 
         //! Directly executes a one-way SQL operation in string format, that will block the calling thread until finished.
         //! This method should only be used for queries that are only executed once, e.g during startup.
-        void DirectExecute(const char* sql);
+        void DirectExecute(const char *sql);
 
         //! Directly executes a one-way SQL operation in string format -with variable args-, that will block the calling thread until finished.
         //! This method should only be used for queries that are only executed once, e.g during startup.
         template<typename Format, typename... Args>
-        void DirectPExecute(Format&& sql, Args&&... args)
+        void DirectPExecute(Format &&sql, Args &&... args)
         {
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return;
@@ -103,7 +103,7 @@ class DatabaseWorkerPool
 
         //! Directly executes a one-way SQL operation in prepared statement format, that will block the calling thread until finished.
         //! Statement must be prepared with the CONNECTION_SYNCH flag.
-        void DirectExecute(PreparedStatement* stmt);
+        void DirectExecute(PreparedStatement *stmt);
 
         /**
             Synchronous query (with resultset) methods.
@@ -111,12 +111,12 @@ class DatabaseWorkerPool
 
         //! Directly executes an SQL query in string format that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
-        QueryResult Query(const char* sql, T* connection = nullptr);
+        QueryResult Query(const char *sql, T *connection = nullptr);
 
         //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
         template<typename Format, typename... Args>
-        QueryResult PQuery(Format&& sql, T* conn, Args&&... args)
+        QueryResult PQuery(Format &&sql, T *conn, Args &&... args)
         {
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return QueryResult(nullptr);
@@ -127,7 +127,7 @@ class DatabaseWorkerPool
         //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
         template<typename Format, typename... Args>
-        QueryResult PQuery(Format&& sql, Args&&... args)
+        QueryResult PQuery(Format &&sql, Args &&... args)
         {
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return QueryResult(nullptr);
@@ -138,7 +138,7 @@ class DatabaseWorkerPool
         //! Directly executes an SQL query in prepared format that will block the calling thread until finished.
         //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
         //! Statement must be prepared with CONNECTION_SYNCH flag.
-        PreparedQueryResult Query(PreparedStatement* stmt);
+        PreparedQueryResult Query(PreparedStatement *stmt);
 
         /**
             Asynchronous query (with resultset) methods.
@@ -146,18 +146,18 @@ class DatabaseWorkerPool
 
         //! Enqueues a query in string format that will set the value of the QueryResultFuture return object as soon as the query is executed.
         //! The return value is then processed in ProcessQueryCallback methods.
-        QueryCallback AsyncQuery(const char* sql);
+        QueryCallback AsyncQuery(const char *sql);
 
         //! Enqueues a query in prepared format that will set the value of the PreparedQueryResultFuture return object as soon as the query is executed.
         //! The return value is then processed in ProcessQueryCallback methods.
         //! Statement must be prepared with CONNECTION_ASYNC flag.
-        QueryCallback AsyncQuery(PreparedStatement* stmt);
+        QueryCallback AsyncQuery(PreparedStatement *stmt);
 
         //! Enqueues a vector of SQL operations (can be both adhoc and prepared) that will set the value of the QueryResultHolderFuture
         //! return object as soon as the query is executed.
         //! The return value is then processed in ProcessQueryCallback methods.
         //! Any prepared statements added to this holder need to be prepared with the CONNECTION_ASYNC flag.
-        QueryResultHolderFuture DelayQueryHolder(SQLQueryHolder* holder);
+        QueryResultHolderFuture DelayQueryHolder(SQLQueryHolder *holder);
 
         /**
             Transaction context methods.
@@ -172,15 +172,15 @@ class DatabaseWorkerPool
 
         //! Directly executes a collection of one-way SQL operations (can be both adhoc and prepared). The order in which these operations
         //! were appended to the transaction will be respected during execution.
-        void DirectCommitTransaction(SQLTransaction& transaction);
+        void DirectCommitTransaction(SQLTransaction &transaction);
 
         //! Method used to execute ad-hoc statements in a diverse context.
         //! Will be wrapped in a transaction if valid object is present, otherwise executed standalone.
-        void ExecuteOrAppend(SQLTransaction& trans, const char* sql);
+        void ExecuteOrAppend(SQLTransaction &trans, const char *sql);
 
         //! Method used to execute prepared statements in a diverse context.
         //! Will be wrapped in a transaction if valid object is present, otherwise executed standalone.
-        void ExecuteOrAppend(SQLTransaction& trans, PreparedStatement* stmt);
+        void ExecuteOrAppend(SQLTransaction &trans, PreparedStatement *stmt);
 
         /**
             Other
@@ -191,10 +191,10 @@ class DatabaseWorkerPool
         //! Automanaged (internally) pointer to a prepared statement object for usage in upper level code.
         //! Pointer is deleted in this->DirectExecute(PreparedStatement*), this->Query(PreparedStatement*) or PreparedStatementTask::~PreparedStatementTask.
         //! This object is not tied to the prepared statement on the MySQL context yet until execution.
-        PreparedStatement* GetPreparedStatement(PreparedStatementIndex index);
+        PreparedStatement *GetPreparedStatement(PreparedStatementIndex index);
 
         //! Apply escape string'ing for current collation. (utf8)
-        void EscapeString(std::string& str);
+        void EscapeString(std::string &str);
 
         //! Keeps all our MySQL connections alive, prevent the server from disconnecting us.
         void KeepAlive();
@@ -204,17 +204,17 @@ class DatabaseWorkerPool
 
         unsigned long EscapeString(char *to, const char *from, unsigned long length);
 
-        void Enqueue(SQLOperation* op);
+        void Enqueue(SQLOperation *op);
 
         //! Gets a free connection in the synchronous connection pool.
         //! Caller MUST call t->Unlock() after touching the MySQL context to prevent deadlocks.
-        T* GetFreeConnection();
+        T *GetFreeConnection();
 
-        char const* GetDatabaseName() const;
+        char const *GetDatabaseName() const;
 
         //! Queue shared by async worker threads.
-        std::unique_ptr<ProducerConsumerQueue<SQLOperation*>> _queue;
-        std::array<std::vector<std::unique_ptr<T>>, IDX_SIZE> _connections;
-        std::unique_ptr<MySQLConnectionInfo>                  _connectionInfo;
-        uint8                                                 _async_threads, _synch_threads;
+        std::unique_ptr<ProducerConsumerQueue<SQLOperation *>> _queue;
+        std::array<std::vector<std::unique_ptr<T>>, IDX_SIZE>  _connections;
+        std::unique_ptr<MySQLConnectionInfo>                   _connectionInfo;
+        uint8                                                  _async_threads, _synch_threads;
 };

@@ -15,16 +15,13 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "SkillBase.h"
-#include "World.h"
-
 bool SkillBase::IsUseableWeapon(ItemClass cl)
 {
     auto c = (int)cl;
 
     if (c <= 210)
     {
-        switch ( c )
+        switch (c)
         {
             case 101:
                 return vf_one_hand_sword != 0;
@@ -70,7 +67,7 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
 
 int SkillBase::GetStateSecond(int skill_lv, int enhance_lv)
 {
-    return (int) state_second + (int) enhance_lv * (int) state_second_per_enhance + skill_lv * (int) state_second_per_level;
+    return (int)state_second + (int)enhance_lv * (int)state_second_per_enhance + skill_lv * (int)state_second_per_level;
 }
 
 int SkillBase::GetHitBonus(int enhance, int level_diff) const
@@ -80,14 +77,14 @@ int SkillBase::GetHitBonus(int enhance, int level_diff) const
 
 int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
 {
-    return (int) (state_level_base
-                  + (state_level_per_enhance * enhance_lv)
-                  + (state_level_per_skl * skill_lv));
+    return (int)(state_level_base
+                 + (state_level_per_enhance * enhance_lv)
+                 + (state_level_per_skl * skill_lv));
 }
 
 uint SkillBase::GetCastDelay(int skill_lv, int enhance)
 {
-    return (uint)( (float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl ) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
+    return (uint)((float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
 }
 
 uint SkillBase::GetCoolTime(int enhance) const

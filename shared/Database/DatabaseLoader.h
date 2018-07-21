@@ -29,12 +29,12 @@ class DatabaseWorkerPool;
 // handles updating, delays preparing of statements and cleans up on failure.
 class DatabaseLoader
 {
-public:
-        DatabaseLoader(std::string const& logger, uint32 const defaultUpdateMask);
+    public:
+        DatabaseLoader(std::string const &logger, uint32 const defaultUpdateMask);
 
         // Register a database to the loader (lazy implemented)
-        template <class T>
-        DatabaseLoader& AddDatabase(DatabaseWorkerPool<T>& pool, std::string const& name);
+        template<class T>
+        DatabaseLoader &AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name);
 
         // Load all databases
         bool Load();
@@ -62,7 +62,7 @@ public:
 
         // Invokes all functions in the given queue and closes the databases on errors.
         // Returns false when there was an error.
-        bool Process(std::queue<Predicate>& queue);
+        bool Process(std::queue<Predicate> &queue);
 
         std::string const _logger;
         bool const        _autoSetup;

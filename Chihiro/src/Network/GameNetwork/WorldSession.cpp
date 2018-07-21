@@ -51,7 +51,7 @@ void WorldSession::OnClose()
 {
     if (_accountName.length() > 0)
         sAuthNetwork.SendClientLogoutToAuth(_accountName);
-    if(m_pPlayer)
+    if (m_pPlayer)
         onReturnToLobby(nullptr);
 }
 
@@ -126,7 +126,7 @@ constexpr int tableSize = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
 /// Handler for incoming packets
 ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 {
-    ASSERT(pRecvPct);
+            ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
     int  i    = 0;

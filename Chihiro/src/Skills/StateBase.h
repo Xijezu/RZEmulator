@@ -17,7 +17,8 @@
 */
 #include "Common.h"
 
-enum AttributeFlag {
+enum AttributeFlag
+{
     AF_ERASE_ON_DEAD           = 0x1,
     AF_ERASE_ON_LOGOUT         = 0x2,
     AF_TIME_DECREASE_ON_LOGOUT = 0x4,
@@ -28,7 +29,8 @@ enum AttributeFlag {
     AF_ERASE_ON_RESURRECT      = 0x80,
 };
 
-enum StateCode {
+enum StateCode
+{
     SC_NONE                                = 0x000,
     SC_INC_ITEM_CHANCE                     = 0x3FC,
     SC_INC_BLOCK_CHANCE                    = 0x3FD,
@@ -76,13 +78,15 @@ enum StateCode {
     SC_SHINE_WALL                          = 0xF4237,
 };
 
-enum StateType {
+enum StateType
+{
     SG_NORMAL     = 0x0,
     SG_DUPLICATE  = 0x1,
     SG_DEPENDENCE = 0x2,
 };
 
-enum StateGroup {
+enum StateGroup
+{
     GROUP_NONE          = 0x0,
     GROUP_PHYSICAL_BOMB = 0x65,
     GROUP_MAGICAL_BOMB  = 0x66,
@@ -96,7 +100,8 @@ enum StateGroup {
     GROUP_WOUND         = 0x196,
 };
 
-enum StateBaseEffect : int {
+enum StateBaseEffect : int
+{
     SEF_MISC                               = 0x0,
     SEF_PARAMETER_INC                      = 0x1,
     SEF_PARAMETER_AMP                      = 0x2,
@@ -155,7 +160,8 @@ enum StateBaseEffect : int {
     SEF_AMP_AND_INC_ITEM_CHANCE            = 0xC9,
 };
 
-struct StateTemplate {
+struct StateTemplate
+{
     int   state_id;
     int   text_id;
     int   tooltip_id;

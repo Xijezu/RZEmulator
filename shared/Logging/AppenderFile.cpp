@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "StringFormat.h"
 
-AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, AppenderFlags flags, std::vector<char const*> extraArgs) :
+AppenderFile::AppenderFile(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs) :
         Appender(id, name, level, flags),
         logfile(NULL),
         _logDir(sLog->GetLogsDir()),
@@ -33,7 +33,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, Ap
 
     _fileName = extraArgs[0];
 
-    char const* mode = "a";
+    char const *mode = "a";
     if (extraArgs.size() > 1)
         mode = extraArgs[1];
 
@@ -50,7 +50,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, Ap
         _maxFileSize = atoi(extraArgs[2]);
 
     _dynamicName = std::string::npos != _fileName.find("%s");
-    _backup = (flags & APPENDER_FLAGS_MAKE_FILE_BACKUP) != 0;
+    _backup      = (flags & APPENDER_FLAGS_MAKE_FILE_BACKUP) != 0;
 
     if (!_dynamicName)
         logfile = OpenFile(_fileName, mode, !strcmp(mode, "w") && _backup);
@@ -61,7 +61,7 @@ AppenderFile::~AppenderFile()
     CloseFile();
 }
 
-void AppenderFile::_write(LogMessage const* message)
+void AppenderFile::_write(LogMessage const *message)
 {
     bool exceedMaxSize = _maxFileSize > 0 && (_fileSize.load() + message->Size()) > _maxFileSize;
 
@@ -70,7 +70,7 @@ void AppenderFile::_write(LogMessage const* message)
         char namebuf[NGEMITY_PATH_MAX];
         snprintf(namebuf, NGEMITY_PATH_MAX, _fileName.c_str(), message->param1.c_str());
         // always use "a" with dynamic name otherwise it could delete the log we wrote in last _write() call
-        FILE* file = OpenFile(namebuf, "a", _backup || exceedMaxSize);
+        FILE *file = OpenFile(namebuf, "a", _backup || exceedMaxSize);
         if (!file)
             return;
         fprintf(file, "%s%s\n", message->prefix.c_str(), message->text.c_str());
@@ -90,7 +90,7 @@ void AppenderFile::_write(LogMessage const* message)
     _fileSize += uint64(message->Size());
 }
 
-FILE* AppenderFile::OpenFile(std::string const& filename, std::string const& mode, bool backup)
+FILE *AppenderFile::OpenFile(std::string const &filename, std::string const &mode, bool backup)
 {
     std::string fullName(_logDir + filename);
     if (backup)
@@ -103,7 +103,7 @@ FILE* AppenderFile::OpenFile(std::string const& filename, std::string const& mod
         rename(fullName.c_str(), newName.c_str()); // no error handling... if we couldn't make a backup, just ignore
     }
 
-    if (FILE* ret = fopen(fullName.c_str(), mode.c_str()))
+    if (FILE *ret = fopen(fullName.c_str(), mode.c_str()))
     {
         _fileSize = ftell(ret);
         return ret;
