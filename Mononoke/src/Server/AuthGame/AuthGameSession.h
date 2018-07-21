@@ -33,10 +33,7 @@ class AuthGameSession : public XSession
         void OnClose() override;
         ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
-        bool IsEncrypted() const override
-        {
-            return true;
-        }
+        bool IsEncrypted() const override { return false; }
 
         /// \brief Handles game login (packet contains servername, ...)
         void HandleGameLogin(XPacket *);

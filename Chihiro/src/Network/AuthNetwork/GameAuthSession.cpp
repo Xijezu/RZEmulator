@@ -64,7 +64,6 @@ ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd)
         {
-            //pGamePct->read_skip(7); // ignoring header
             (*this.*packetHandler[i].handler)(pGamePct);
             break;
         }

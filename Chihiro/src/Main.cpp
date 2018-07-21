@@ -162,5 +162,5 @@ void WorldUpdateLoop()
         // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
         if (executionTimeDiff < WORLD_SLEEP_CONST)
             std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
-    }
+   }
 }
