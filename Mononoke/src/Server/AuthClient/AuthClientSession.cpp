@@ -46,6 +46,7 @@ void AuthClientSession::OnClose()
         sPlayerMapList.RemovePlayer(g->szLoginName);
         delete m_pPlayer;
     }
+    _socket->DeleteSession();
 }
 
 enum eStatus
