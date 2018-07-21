@@ -391,7 +391,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
     npos.m_positionY = y;
     npos.m_positionZ = 0.0f;
 
-    if (x < 0.0f || sConfigMgr->GetFloatDefault("GameContent.MapWidth", 700000) < x || y < 0.0f || sConfigMgr->GetFloatDefault("GameContent.MapHeight", 1000000) < y || mover->GetExactDist2d(&npos) > 525.0f)
+    if (x < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < x || y < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < y || mover->GetExactDist2d(&npos) > 525.0f)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
         return;
@@ -418,8 +418,8 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         wayPoint.m_positionY         = curPosFromClient.m_positionY;
         wayPoint.m_positionZ         = curPosFromClient.m_positionZ;
         wayPoint._orientation        = curPosFromClient._orientation;
-        if (mi.m_positionX < 0.0f || sConfigMgr->GetFloatDefault("GameContent.MapWidth", 700000) < mi.m_positionX ||
-            mi.m_positionY < 0.0f || sConfigMgr->GetFloatDefault("GameContent.MapHeight", 1000000) < mi.m_positionY)
+        if (mi.m_positionX < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < mi.m_positionX ||
+            mi.m_positionY < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < mi.m_positionY)
         {
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -462,11 +462,11 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                     npos._orientation = 0.0f;
                 }
                 if (mover->GetHandle() != m_pPlayer->GetHandle()
-                    || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) / 5.0 >= tpos2.GetExactDist2d(&cp)
+                    || sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f) / 5.0 >= tpos2.GetExactDist2d(&cp)
                     /*|| !m_pPlayer.m_bAutoUsed*/
                     || m_pPlayer->m_nWorldLocationId != 110900)
                 {
-                    if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("GameContent.MapLength", 16128.0f) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
+                    if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
                     {
                         if (mover->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
                             mover->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);

@@ -32,6 +32,7 @@ class GameAuthSession : public XSession
         // Network handlers
         void OnClose();
         ReadDataHandlerResult ProcessIncoming(XPacket *);
+        bool IsEncrypted() const override { return false; }
 
         // Packet handlers
         void HandleGameLoginResult(XPacket *);

@@ -17,7 +17,7 @@
 */
 #include "Define.h"
 #include <vector>
-#include <cstring>
+#include <string>
 
 class MessageBuffer
 {
@@ -27,6 +27,10 @@ class MessageBuffer
         MessageBuffer() : _wpos(0), _rpos(0), _storage()
         {
             _storage.resize(4096);
+        }
+
+        ~MessageBuffer()
+        {
         }
 
         explicit MessageBuffer(std::size_t initialSize) : _wpos(0), _rpos(0), _storage()
