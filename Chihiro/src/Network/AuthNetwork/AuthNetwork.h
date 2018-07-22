@@ -34,7 +34,13 @@ class AuthNetwork
             return instance;
         }
 
-        ~AuthNetwork() = default;
+        ~AuthNetwork()
+        {
+            if(!m_bClosed)
+            {
+                Stop();
+            }
+        }
 
         void Update()
         {
@@ -61,12 +67,11 @@ class AuthNetwork
             if (m_pThread != nullptr && m_pThread->joinable())
             {
                 m_pThread->join();
+                delete m_pThread;
             }
-            _updateTimer->cancel();
 
-            delete _updateTimer;
-            delete m_pThread;
-            delete m_pNetworkThread;
+            if(m_pNetworkThread != nullptr)
+                delete m_pNetworkThread;
             m_pSocket->DeleteSession();
         }
 
@@ -117,14 +122,13 @@ class AuthNetwork
     private:
         bool                           m_bClosed;
         std::shared_ptr<XSocket>       m_pSocket;
-        boost::asio::deadline_timer    *_updateTimer;
         std::thread                    *m_pThread;
         std::atomic<uint32>            m_nLastPingTime;
         NetworkThread<XSocket> *m_pNetworkThread;
         NG_SHARED_MUTEX _mutex;
 
     protected:
-        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), _updateTimer(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr)
+        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr)
         {
         };
 };
