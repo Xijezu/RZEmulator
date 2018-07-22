@@ -17,11 +17,10 @@
 
 #include "AuthNetwork.h"
 #include "SystemConfigs.h"
+#include "XSocketMgr.h"
 #include "MemPool.h"
 #include "Maploader.h"
-#include "XSocketMgr.h"
-
-#include <fstream>
+#include <boost/asio/signal_set.hpp>
 
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
@@ -30,6 +29,9 @@
 bool StartDB();
 void StopDB();
 void WorldUpdateLoop();
+void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
+
 constexpr int WORLD_SLEEP_CONST = 50;
 
 int main(int argc, char **argv)
@@ -64,6 +66,18 @@ int main(int argc, char **argv)
         return 1;
     }
     std::shared_ptr<void>                     sDBHandle(nullptr, [](void *) { StopDB(); });
+    // Set signal handlers
+    boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
+#if PLATFORM == PLATFORM_WINDOWS
+    signals.add(SIGBREAK);
+#endif
+    signals.async_wait(std::bind(&SignalHandler, std::weak_ptr<NGemity::Asio::IoContext>(ioContext), std::placeholders::_1, std::placeholders::_2));
+
+    // Enabled a timed callback for handling the database keep alive ping
+    int32                                        dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer    = std::make_shared<boost::asio::deadline_timer>(*ioContext);
+    dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
+    dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
     sWorld.InitWorld();
     if (!sAuthNetwork.InitializeNetwork(*ioContext, sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1"), sConfigMgr->GetIntDefault("AuthServer.Port", 4502)))
@@ -71,8 +85,8 @@ int main(int argc, char **argv)
         NG_LOG_ERROR("server.worldserver", "Cannot connect to the auth server!");
         return 1;
     }
-    std::shared_ptr<void>                     sAuthHandle(nullptr, [](void *) { sAuthNetwork.Stop(); });
 
+    std::shared_ptr<void> sAuthHandle(nullptr, [](void *) { sAuthNetwork.Stop(); });
     auto                  worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
     std::string           bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
     if (!XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2))
@@ -109,10 +123,37 @@ int main(int argc, char **argv)
 
     WorldUpdateLoop();
 
+    dbPingTimer->cancel();
+    signals.cancel();
+
     int exitCode = World::GetExitCode();
     NG_LOG_INFO("server.worldserver", "Exiting with code %d", exitCode);
 
     return exitCode;
+}
+
+
+void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/)
+{
+    if (!error)
+        if (std::shared_ptr<NGemity::Asio::IoContext> ioContext = ioContextRef.lock())
+            ioContext->stop();
+}
+
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error)
+{
+    if (!error)
+    {
+        if (std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = dbPingTimerRef.lock())
+        {
+            NG_LOG_INFO("server.worldserver", "Ping MySQL to keep connection alive");
+            GameDatabase.KeepAlive();
+            CharacterDatabase.KeepAlive();
+
+            dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
+            dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, dbPingTimerRef, dbPingInterval, std::placeholders::_1));
+        }
+    }
 }
 
 ///- Initialize connection to the databases
@@ -162,5 +203,5 @@ void WorldUpdateLoop()
         // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
         if (executionTimeDiff < WORLD_SLEEP_CONST)
             std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
-   }
+    }
 }
