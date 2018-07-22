@@ -2012,8 +2012,11 @@ void WorldSession::onBindSkillCard(XPacket *pRecvPct)
         return;
     }
 
-    m_pPlayer->BindSkillCard(pItem);
-
+    auto pSkill = m_pPlayer->GetSkill(pItem->m_pItemBase->skill_id);
+    if(pSkill != nullptr && pSkill->GetSkillEnhance() == 0)
+    {
+        m_pPlayer->BindSkillCard(pItem);
+    }
 }
 
 void WorldSession::onUnBindSkilLCard(XPacket *pRecvPct)
