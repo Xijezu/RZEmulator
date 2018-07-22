@@ -16,7 +16,7 @@
 */
 
 #include "XLua.h"
-#include <experimental/filesystem>
+#include <boost/filesystem.hpp>
 #include "Messages.h"
 #include "ObjectMgr.h"
 #include "MemPool.h"
@@ -24,7 +24,7 @@
 #include "DungeonManager.h"
 #include "GameContent.h"
 
-namespace fs = std::experimental::filesystem;
+namespace fs = boost::filesystem;
 
 XLua::XLua()
 {
@@ -102,6 +102,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
 
+    int nFiles{0};
     for (auto &it : fs::directory_iterator("Resource/Script/"s))
     {
         if (it.path().extension().string() == ".lua"s)
@@ -111,6 +112,10 @@ bool XLua::InitializeLua()
             {
                 sol::error err = t;
                 NG_LOG_ERROR("scripting", "%s", err.what());
+            }
+            else
+            {
+                nFiles++;
             }
         }
     }
@@ -122,6 +127,7 @@ bool XLua::InitializeLua()
         NG_LOG_ERROR("scripting", "%s", ex.what());
         return false;
     }
+    NG_LOG_INFO("scripting", "Loaded %d files.", nFiles);
     return true;
 }
 
