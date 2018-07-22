@@ -29,7 +29,7 @@
 bool StartDB();
 void StopDB();
 
-# define _MONONOKE_CORE_CONFIG  "authserver.conf"
+# define _MONONOKE_CORE_CONFIG  "mononoke.conf"
 
 namespace fs = boost::filesystem;
 
