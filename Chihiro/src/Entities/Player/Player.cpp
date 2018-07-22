@@ -3763,3 +3763,14 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 
     return true;
 }
+
+void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
+{
+    Unit::onDead(pFrom, decreaseEXPOnDead);
+
+    if(m_pMainSummon && m_pMainSummon->IsInWorld())
+    {
+        DoUnSummon(m_pMainSummon);
+    }
+    // @todo: SubSummon
+}
