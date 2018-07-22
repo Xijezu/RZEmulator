@@ -88,9 +88,6 @@ void World::InitWorld()
     }
     GameContent::AddNPCToWorld();
 
-    // Set timers:
-    m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_PINGDB) * MINUTE * IN_MILLISECONDS);    // Mysql ping time in minutes
-
     NG_LOG_INFO("server.worldserver", "World fully initialized in %u ms!", GetMSTimeDiffToNow(oldFullTime));
 }
 
@@ -124,9 +121,6 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
     m_int_configs[CONFIG_LOCAL_FLAG]     = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
     m_int_configs[CONFIG_MAX_LEVEL]      = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
-    // MySQL ping time interval
-    m_int_configs[CONFIG_PINGDB]         = (uint)sConfigMgr->GetIntDefault("MaxPingTime", 30);
-
 
     // Rates
     rate_values[RATES_EXP]                   = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
