@@ -1,4 +1,4 @@
-[authserver]
+[mononoke]
 Authserver.IP = 0.0.0.0
 Authserver.Port = 4500
 Gameserver.IP = 0.0.0.0 # used for local game server connection
@@ -12,6 +12,14 @@ AuthDatabase.CString = IP;PORT;USER;PASSWORD;DATABASE
 AuthDatabase.WorkerThreads = 1
 AuthDatabase.SynchThreads = 1
 
+### Network Settings - Don't change anything if you don't know what you're doing ###
+Network.TcpNodelay = 1
+Network.OutKBuff = -1
+Network.OutUBuff = 65536
+
+### Misc Settings ###
+ThreadPool = 2
+MaxPingTime = 30
 
 ###################################################################################################
 #  LOGGING SYSTEM SETTINGS
