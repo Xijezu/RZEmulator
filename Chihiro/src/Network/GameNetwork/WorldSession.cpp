@@ -154,6 +154,7 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
     s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *)(pGamePct)->contents());
+    std::transform(std::begin(result->account), std::end(result->account), std::begin(result->account), ::tolower);
     sAuthNetwork.SendAccountToAuth(*this, result->account, result->one_time_key);
 }
 
