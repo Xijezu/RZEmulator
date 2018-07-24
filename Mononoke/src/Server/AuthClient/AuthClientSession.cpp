@@ -106,7 +106,6 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
 #else
     std::string szUsername = pRecvPct->ReadString(19);
 #endif
-    std::transform(szUsername.begin(), szUsername.end(), szUsername.begin(), ::tolower);
     std::string szPassword = pRecvPct->ReadString(32);
     _desCipther.Decrypt(&szPassword[0], (int)szPassword.length());
     szPassword.erase(std::remove(szPassword.begin(), szPassword.end(), '\0'), szPassword.end());
@@ -126,6 +125,8 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
         m_pPlayer->bIsBlocked     = (*dbResult)[3].GetBool();
         m_pPlayer->nPermission    = (*dbResult)[4].GetInt32();
         m_pPlayer->bIsInGame      = false;
+
+        std::transform(m_pPlayer->szLoginName.begin(), m_pPlayer->szLoginName.end(), m_pPlayer->szLoginName.begin(), ::tolower);
 
         if (m_pPlayer->bIsBlocked)
         {
