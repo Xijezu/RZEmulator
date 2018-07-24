@@ -106,6 +106,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
 #else
     std::string szUsername = pRecvPct->ReadString(19);
 #endif
+    std::transform(szUsername.begin(), szUsername.end(), szUsername.begin(), ::tolower);
     std::string szPassword = pRecvPct->ReadString(32);
     _desCipther.Decrypt(&szPassword[0], (int)szPassword.length());
     szPassword.erase(std::remove(szPassword.begin(), szPassword.end(), '\0'), szPassword.end());
