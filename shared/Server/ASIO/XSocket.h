@@ -212,8 +212,8 @@ class XSocket : public Socket<XSocket>
                 _headerBuffer.Reset();
                 if (result != ReadDataHandlerResult::Ok)
                 {
-                    if (result != ReadDataHandlerResult::WaitingForQuery)
-                        CloseSocket();
+                    //if (result != ReadDataHandlerResult::WaitingForQuery)
+                    //    CloseSocket();
 
                     return;
                 }
