@@ -299,7 +299,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << m_pPlayer->GetPositionZ();
     packet << (uint8)m_pPlayer->GetLayer();
     packet << (uint32)m_pPlayer->GetOrientation();
-    packet << (uint32)g_nRegionSize;
+    packet << (uint32)sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
     packet << (uint32)m_pPlayer->GetHealth();
     packet << (uint16)m_pPlayer->GetMana();
     packet << (uint32)m_pPlayer->GetMaxHealth();
@@ -312,7 +312,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << m_pPlayer->GetUInt32Value(UNIT_FIELD_MODEL + 1);
     packet << m_pPlayer->GetUInt32Value(UNIT_FIELD_MODEL);
     packet.fill(result->szName, 19);
-    packet << (uint32)sConfigMgr->GetIntDefault("Game.CellSize", 6);
+    packet << (uint32)sWorld.getIntConfig(CONFIG_CELL_SIZE);
     packet << m_pPlayer->GetUInt32Value(PLAYER_FIELD_GUILD_ID);
     GetSocket()->SendPacket(packet);
 
@@ -392,7 +392,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
     npos.m_positionY = y;
     npos.m_positionZ = 0.0f;
 
-    if (x < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < x || y < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < y || mover->GetExactDist2d(&npos) > 525.0f)
+    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y || mover->GetExactDist2d(&npos) > 525.0f)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
         return;
@@ -419,8 +419,8 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         wayPoint.m_positionY         = curPosFromClient.m_positionY;
         wayPoint.m_positionZ         = curPosFromClient.m_positionZ;
         wayPoint._orientation        = curPosFromClient._orientation;
-        if (mi.m_positionX < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < mi.m_positionX ||
-            mi.m_positionY < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < mi.m_positionY)
+        if (mi.m_positionX < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < mi.m_positionX ||
+            mi.m_positionY < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < mi.m_positionY)
         {
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
             return;
@@ -463,11 +463,11 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
                     npos._orientation = 0.0f;
                 }
                 if (mover->GetHandle() != m_pPlayer->GetHandle()
-                    || sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f) / 5.0 >= tpos2.GetExactDist2d(&cp)
+                    || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5.0 >= tpos2.GetExactDist2d(&cp)
                     /*|| !m_pPlayer.m_bAutoUsed*/
                     || m_pPlayer->m_nWorldLocationId != 110900)
                 {
-                    if (vMoveInfo.empty() || sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
+                    if (vMoveInfo.empty() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
                     {
                         if (mover->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
                             mover->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
@@ -1536,7 +1536,8 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     XPacket resultPct(TS_SC_TAKE_ITEM_RESULT);
     resultPct << item_handle;
     resultPct << m_pPlayer->GetHandle();
-    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / g_nRegionSize), (uint)(m_pPlayer->GetPositionY() / g_nRegionSize), m_pPlayer->GetLayer(), resultPct);
+    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
     if (sWorld.RemoveItemFromWorld(item))
     {
         if (m_pPlayer->GetPartyID() != 0)
@@ -2407,7 +2408,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
 bool WorldSession::isValidTradeTarget(Player *pTradeTarget)
 {
-    return !(pTradeTarget == nullptr || !pTradeTarget->IsInWorld() || pTradeTarget->GetExactDist2d(m_pPlayer) > g_nRegionSize);
+    return !(pTradeTarget == nullptr || !pTradeTarget->IsInWorld() || pTradeTarget->GetExactDist2d(m_pPlayer) > sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
 }
 
 void WorldSession::onDropQuest(XPacket *pRecvPct)

@@ -490,7 +490,7 @@ void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool 
     hpmpPct << (int)pUnit->GetMana();
     hpmpPct << (int)pUnit->GetMaxMana();
     hpmpPct << (uint8_t)(need_to_display ? 1 : 0);
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), hpmpPct);
+    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
 }
 
 void Messages::BroadcastLevelMsg(Unit *pUnit)
@@ -499,7 +499,7 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
     levelPct << (uint32)pUnit->GetHandle();
     levelPct << (int)pUnit->GetLevel();
     levelPct << (int)pUnit->GetCurrentJLv();
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), levelPct);
+    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
 }
 
 void Messages::GetEncodedInt(XPacket &packet, uint32 nDecoded)
@@ -781,8 +781,8 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                (uint)(obj->GetPositionY() / g_nRegionSize),
+    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 obj->GetLayer(),
                                 functor,
                                 (uint8_t)RegionVisitor::ClientVisitor);
@@ -826,7 +826,8 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
     statePct << pState.m_nStateValue;
     statePct.fill(pState.m_szStateValue, 32);
 
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / g_nRegionSize), (uint)(pUnit->GetPositionY() / g_nRegionSize), pUnit->GetLayer(), statePct);
+    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), statePct);
 }
 
 void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode)
@@ -839,7 +840,8 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     tamePct << pPlayer->GetHandle();
     tamePct << pMonster->GetHandle();
 
-    sWorld.Broadcast((uint)(pMonster->GetPositionX() / g_nRegionSize), (uint)(pMonster->GetPositionY() / g_nRegionSize), pMonster->GetLayer(), tamePct);
+    sWorld.Broadcast((uint)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                    (uint)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
 
     std::string chatMsg{ };
     switch (mode)
@@ -889,7 +891,8 @@ void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::strin
         result << (uint8)nChatType;
         result.WriteString(szMessage);
         result << (uint8)0;
-        sWorld.Broadcast((uint)(p->GetPositionX() / g_nRegionSize), (uint)(p->GetPositionY() / g_nRegionSize), p->GetLayer(), result);
+        sWorld.Broadcast((uint)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                         (uint)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), result);
         Messages::SendResult(p, TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
     }
 }
@@ -914,8 +917,8 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / g_nRegionSize),
-                                (uint)(pPlayer->GetPositionY() / g_nRegionSize),
+    sRegion.DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint)(pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 pPlayer->GetLayer(),
                                 functor,
                                 (uint8_t)RegionVisitor::MovableVisitor);

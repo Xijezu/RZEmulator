@@ -140,8 +140,8 @@ void Summon::processWalk(uint t)
     // Do Ride check here
     ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector *>(this)};
     tmp_mv.Step(t);
-    if ((tmp_mv.GetPositionX() / g_nRegionSize) != (GetPositionX() / g_nRegionSize) ||
-        (tmp_mv.GetPositionY() / g_nRegionSize) != (GetPositionY() / g_nRegionSize) ||
+    if ((tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
+        (tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
         !tmp_mv.bIsMoving)
     {
         if (bIsMoving && IsInWorld())
@@ -280,7 +280,7 @@ bool Summon::DoEvolution()
             evoPct << m_tSummonBase->id;
             if (IsInWorld())
             {
-                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), evoPct);
+                sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
             }
             else
             {
