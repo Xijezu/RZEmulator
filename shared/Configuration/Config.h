@@ -43,6 +43,7 @@ class ConfigMgr
         std::string const &GetFilename();
         std::vector<std::string> const &GetArguments() const;
         std::vector<std::string> GetKeysByString(std::string const &name);
+        std::string GetCorrectPath(std::string path);
 
     private:
         template<class T>

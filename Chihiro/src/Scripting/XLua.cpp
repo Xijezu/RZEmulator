@@ -23,6 +23,7 @@
 #include "World.h"
 #include "DungeonManager.h"
 #include "GameContent.h"
+#include "Config.h"
 
 namespace fs = boost::filesystem;
 
@@ -33,8 +34,8 @@ XLua::XLua()
 
 bool XLua::InitializeLua()
 {
-    if (!fs::exists("Resource/Script/"s))
-        return false;
+
+	auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
 
     // Monster relevant
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
@@ -103,7 +104,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
 
     int nFiles{0};
-    for (auto &it : fs::directory_iterator("Resource/Script/"s))
+    for (auto &it : fs::directory_iterator(configFile))
     {
         if (it.path().extension().string() == ".lua"s)
         {

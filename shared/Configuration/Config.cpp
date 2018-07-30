@@ -40,29 +40,19 @@ bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> ar
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
-    auto configDir  = boost::filesystem::system_complete(args[0]).parent_path();
-    auto configFilePath{file};
-    auto configFile = (configDir /= configFilePath).string();
-
     _filename = file;
     _args     = args;
 
-    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
+    auto configFile = this->GetCorrectPath(file);
 
     try
     {
         bpt::ptree fullTree;
-        if (bIsRunningDir)
-            bpt::ini_parser::read_ini(file, fullTree);
-        else
-            bpt::ini_parser::read_ini(configFile, fullTree);
+        bpt::ini_parser::read_ini(configFile, fullTree);
 
         if (fullTree.empty())
         {
-            if (bIsRunningDir)
-                error = "empty file (" + file + ")";
-            else
-                error = "empty file (" + configFile + ")";
+            error = "empty file (" + configFile + ")";
             return false;
         }
 
@@ -180,4 +170,18 @@ std::vector<std::string> ConfigMgr::GetKeysByString(std::string const &name)
             keys.push_back(child.first);
 
     return keys;
+}
+
+std::string ConfigMgr::GetCorrectPath(std::string path)
+{
+    auto args = this->GetArguments();
+    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
+
+	auto exePath = boost::filesystem::system_complete(args[0]).parent_path();
+	auto destPath = boost::filesystem::path(path);
+
+	if(!bIsRunningDir)
+		destPath = (exePath /= destPath);
+
+	return destPath.string();
 }
