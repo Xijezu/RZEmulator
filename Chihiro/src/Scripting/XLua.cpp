@@ -23,6 +23,7 @@
 #include "World.h"
 #include "DungeonManager.h"
 #include "GameContent.h"
+#include "Config.h"
 
 namespace fs = boost::filesystem;
 
@@ -31,9 +32,10 @@ XLua::XLua()
     m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::package);
 }
 
-bool XLua::InitializeLua(std::vector<std::string> args)
+bool XLua::InitializeLua()
 {
-    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
+    auto args = ConfigMgr::GetArguments().begin();
+    bool bIsRunningDir = std::find(args, args.end(), "-runningdir") != args.end();
 
 	auto exeDir = fs::system_complete(args[0]).parent_path();
 	auto scriptDir = fs::path("Resource/Script/");

@@ -73,7 +73,7 @@ void World::InitWorld(std::vector<std::string> args)
 
     oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing scripting...");
-    sScriptingMgr.InitializeLua(args);
+    sScriptingMgr.InitializeLua();
     sMapContent.LoadMapContent();
     sMapContent.InitMapInfo();
     NG_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
