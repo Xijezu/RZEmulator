@@ -145,7 +145,7 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
     if (i == tableSize)
     {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_string().c_str());
-        return ReadDataHandlerResult::Ok;
+        return ReadDataHandlerResult::Error;
     }
     return ReadDataHandlerResult::Ok;
 }
