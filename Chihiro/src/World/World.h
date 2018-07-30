@@ -43,19 +43,28 @@ enum WorldBoolConfigs : int
     CONFIG_IGNORE_RANDOM_DAMAGE,
     CONFIG_NO_COLLISION_CHECK,
     CONFIG_NO_SKILL_COOLTIME,
+    CONFIG_SERVICE_SERVER,
     BOOL_CONFIG_VALUE_COUNT
+};
+
+enum WorldFloatConfigs
+{
+    CONFIG_MAP_LENGTH = 0,
+    FLOAT_CONFIG_VALUE_COUNT
 };
 
 enum WorldIntConfigs
 {
     CONFIG_MAP_WIDTH = 0,
     CONFIG_MAP_HEIGHT,
+    CONFIG_MAP_REGION_SIZE,
+    CONFIG_CELL_SIZE,
     CONFIG_REGION_SIZE,
     CONFIG_TILE_SIZE,
     CONFIG_ITEM_HOLD_TIME, // Item disappears after X seconds when not looted
     CONFIG_MAX_LEVEL,
     CONFIG_LOCAL_FLAG,
-    CONFIG_PINGDB,
+    CONFIG_SERVER_INDEX,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -79,10 +88,6 @@ class Summon;
 class XPacket;
 
 typedef std::unordered_map<uint32, WorldSession *> SessionMap;
-constexpr int                                      g_nRegionSize = 180;
-constexpr int                                      g_nMapWidth   = 700000;
-constexpr int                                      g_nMapHeight  = 1000000;
-constexpr float                                    g_fMapLength  = 16128.0f;
 
 class World
 {
@@ -179,6 +184,19 @@ class World
         /// Get a server rate
         float getRate(Rates rate) const { return rate_values[rate]; }
 
+        /// Set a float configuration element
+        void setFloatConfig(WorldFloatConfigs index, float value)
+        {
+            if(index < FLOAT_CONFIG_VALUE_COUNT)
+                m_float_configs[index] = value;
+        }
+
+        /// Get a float configuration element
+        float getFloatConfig(WorldFloatConfigs index)
+        {
+            return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f;
+        }
+
         /// Set a server configuration element
         void setBoolConfig(WorldBoolConfigs index, bool value)
         {
@@ -229,6 +247,7 @@ class World
         AtomicIndex s_nStateIndex{0};
         AtomicIndex s_nItemIndex{0};
 
+        float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
         float  rate_values[MAX_RATES];
         uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
         bool   m_bool_configs[BOOL_CONFIG_VALUE_COUNT];

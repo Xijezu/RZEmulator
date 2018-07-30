@@ -285,7 +285,7 @@ void Unit::regenHPMP(uint t)
                     this->m_fRegenMP = 0;
                     if (IsInWorld())
                     {
-                        sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize), GetLayer(), hpmpPct);
+                        sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), hpmpPct);
                     }
                     /*if (this.IsSummon())
                     {
@@ -1231,7 +1231,8 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         pct << (int)arDamage[i].attacker_hp;
         pct << (uint16)arDamage[i].attacker_mp;
     }
-    sWorld.Broadcast((uint)GetPositionX() / g_nRegionSize, (uint)GetPositionY() / g_nRegionSize, GetLayer(), pct);
+    sWorld.Broadcast((uint)GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE),
+                     (uint)GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), GetLayer(), pct);
 }
 
 void Unit::EndAttack()
@@ -2090,8 +2091,8 @@ void Unit::procStateDamage(uint t)
             statePct << (uint8)(sd.final ? 1 : 0);
             statePct << total_amount;
 
-            sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                             (uint)(GetPositionY() / g_nRegionSize),
+            sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                             (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                              GetLayer(),
                              statePct);
         }
@@ -2154,8 +2155,8 @@ void Unit::procStateDamage(uint t)
                 statePct << (uint8)(sd.final ? 1 : 0);
                 statePct << total_amount;
 
-                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                                 (uint)(GetPositionY() / g_nRegionSize),
+                sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                 (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                  GetLayer(),
                                  statePct);
             }
@@ -2176,8 +2177,8 @@ void Unit::procStateDamage(uint t)
                 statePct << (uint8)(sd.final ? 1 : 0);
                 statePct << df;
 
-                sWorld.Broadcast((uint)(GetPositionX() / g_nRegionSize),
-                                 (uint)(GetPositionY() / g_nRegionSize),
+                sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                 (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                  GetLayer(),
                                  statePct);
             }

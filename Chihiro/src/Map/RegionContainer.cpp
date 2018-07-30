@@ -23,8 +23,8 @@ void RegionContainer::InitRegion(float map_width, float map_height)
 {
     m_MapWidth           = map_width;
     m_MapHeight          = map_height;
-    m_nRegionWidth       = (uint)((map_width / g_nRegionSize) + 1.0f);
-    m_nRegionHeight      = (uint)((map_height / g_nRegionSize) + 1.0f);
+    m_nRegionWidth       = (uint)((map_width / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
+    m_nRegionHeight      = (uint)((map_height / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
     m_nRegionBlockWidth  = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
     m_nRegionBlockHeight = (m_nRegionHeight / REGION_BLOCK_COUNT) + 1;
     initRegion();
@@ -46,7 +46,7 @@ bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8/* layer*/)
 
 Region *RegionContainer::GetRegion(WorldObject *pObject)
 {
-    return GetRegion((uint)(pObject->GetPositionX() / g_nRegionSize), (uint)(pObject->GetPositionY() / g_nRegionSize), pObject->GetLayer());
+    return GetRegion((uint)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
 }
 
 Region *RegionContainer::GetRegion(uint rx, uint ry, uint8 layer)
@@ -220,8 +220,8 @@ uint RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
     if (obj1 == nullptr || obj2 == nullptr)
         return 0;
 
-    return IsVisibleRegion((uint)(obj1->GetPositionX() / g_nRegionSize), (uint)(obj1->GetPositionY() / g_nRegionSize),
-                           (uint)(obj2->GetPositionX() / g_nRegionSize), (uint)(obj2->GetPositionY() / g_nRegionSize));
+    return IsVisibleRegion((uint)(obj1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(obj1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                           (uint)(obj2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(obj2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
 };
 
 RegionBlock *RegionContainer::getRegionBlockPtr(uint rcx, uint rcy)

@@ -25,7 +25,7 @@
 
 bool GameContent::IsBlocked(float x, float y)
 {
-    if (x < 0 || x > g_nMapWidth || y < 0 || y > g_nMapHeight)
+    if (x < 0 || x > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || y < 0 || y > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
         return true;
     if (sWorld.getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;

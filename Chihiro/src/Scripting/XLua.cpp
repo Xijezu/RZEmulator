@@ -276,7 +276,7 @@ void XLua::SCRIPT_DialogShow()
 
 int XLua::SCRIPT_GetLocalFlag()
 {
-    return sConfigMgr->GetIntDefault("Game.LocalFlag", 8);
+    return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }
 
 sol::object XLua::SCRIPT_GetValue(std::string szKey)
@@ -558,7 +558,7 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     int x = args[0].get<int>();
     int y = args[1].get<int>();
 
-    if (x < 0.0f || sConfigMgr->GetFloatDefault("Game.MapWidth", 700000) < x || y < 0.0f || sConfigMgr->GetFloatDefault("Game.MapHeight", 1000000) < y)
+    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y)
     {
         return;
     }
@@ -568,9 +568,9 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
 int XLua::SCRIPT_GetServerCategory()
 {
     int result = 0;
-    result = ((sConfigMgr->GetIntDefault("Game.ServiceServer", 0) != 0) ? 1 : 0) << 29;
-    result = result | (((sConfigMgr->GetIntDefault("Game.PKServer", 0) != 0) ? 1 : 0) << 28);
-    result = result + sConfigMgr->GetIntDefault("Game.ServerIndex", 0);
+    result = (sWorld.getBoolConfig(CONFIG_SERVICE_SERVER) ? 1 : 0) << 29;
+    result = result | ((sWorld.getBoolConfig(CONFIG_PK_SERVER) ? 1 : 0) << 28);
+    result = result + sWorld.getIntConfig(CONFIG_SERVER_INDEX);
     return result;
 }
 

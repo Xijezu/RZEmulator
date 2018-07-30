@@ -55,7 +55,7 @@ void World::InitWorld(std::vector<std::string> args)
 
     uint32_t oldFullTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing region system...");
-    sRegion.InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
+    sRegion.InitRegion(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT));
 
     auto oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing game content...");
@@ -106,6 +106,7 @@ void World::LoadConfigSettings(bool reload)
 
     // Bool configs
     m_bool_configs[CONFIG_PK_SERVER]            = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_SERVICE_SERVER]       = sConfigMgr->GetBoolDefault("Game.ServiceServer", false);
     m_bool_configs[CONFIG_DISABLE_TRADE]        = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
     m_bool_configs[CONFIG_MONSTER_WANDERING]    = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
     m_bool_configs[CONFIG_MONSTER_COLLISION]    = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
@@ -114,13 +115,19 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_NO_SKILL_COOLTIME]    = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
 
     // Int configs
-    m_int_configs[CONFIG_MAP_WIDTH]      = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
-    m_int_configs[CONFIG_MAP_HEIGHT]     = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
-    m_int_configs[CONFIG_REGION_SIZE]    = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_TILE_SIZE]      = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
-    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
-    m_int_configs[CONFIG_LOCAL_FLAG]     = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
-    m_int_configs[CONFIG_MAX_LEVEL]      = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_CELL_SIZE]       = (uint)sConfigMgr->GetIntDefault("Game.CellSize", 6);
+    m_int_configs[CONFIG_MAP_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_MAP_WIDTH]       = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT]      = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE]     = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE]       = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME]  = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
+    m_int_configs[CONFIG_LOCAL_FLAG]      = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
+    m_int_configs[CONFIG_MAX_LEVEL]       = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_SERVER_INDEX]    = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
+
+    // Float Configs
+    setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));
 
     // Rates
     rate_values[RATES_EXP]                   = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
@@ -211,15 +218,15 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
         curPos.SetOrientation(pUnit->GetOrientation());
 
         onMoveObject(pUnit, oldPos, curPos);
-        enterProc(pUnit, (uint)(oldPos.GetPositionX() / g_nRegionSize), (uint)(oldPos.GetPositionY() / g_nRegionSize));
+        enterProc(pUnit, (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
         pUnit->SetMultipleMove(newPos, speed, t);
 
         if (bBroadcastMove)
         {
             SetMoveFunctor fn;
             fn.obj = pUnit;
-            sRegion.DoEachVisibleRegion((uint)(pUnit->GetPositionX() / g_nRegionSize),
-                                        (uint)(pUnit->GetPositionY() / g_nRegionSize),
+            sRegion.DoEachVisibleRegion((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                        (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                         pUnit->GetLayer(), fn);
 
             if (pUnit->IsMonster())
@@ -245,7 +252,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
             obj->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
             curPos2 = obj->GetPosition();
             onMoveObject(obj, oldPos, curPos2);
-            enterProc(obj, (uint)(oldPos.GetPositionX() / g_nRegionSize), (uint)(oldPos.GetPositionY() / g_nRegionSize));
+            enterProc(obj, (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                      (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
             obj->SetMove(newPos, speed, t);
         }
         else
@@ -256,8 +264,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
         {
             SetMoveFunctor fn;
             fn.obj = obj;
-            sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                        (uint)(obj->GetPositionY() / g_nRegionSize),
+            sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                        (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                         obj->GetLayer(), fn);
 
             if (obj->IsMonster())
@@ -273,9 +281,9 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
 
 void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 {
-    auto prev_rx = (uint)(oldPos.GetPositionX() / g_nRegionSize);
-    auto prev_ry = (uint)(oldPos.GetPositionY() / g_nRegionSize);
-    if (prev_rx != (uint)(newPos.GetPositionX() / g_nRegionSize) || prev_ry != (uint)(newPos.GetPositionY() / g_nRegionSize))
+    auto prev_rx = (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto prev_ry = (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    if (prev_rx != (uint)(newPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || prev_ry != (uint)(newPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)))
     {
         auto oldRegion = sRegion.GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
         oldRegion->RemoveObject(pUnit);
@@ -286,8 +294,8 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 
 void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
 {
-    auto rx = (uint)(pUnit->GetPositionX() / g_nRegionSize);
-    auto ry = (uint)(pUnit->GetPositionY() / g_nRegionSize);
+    auto rx = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto ry = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     if (rx != prx || ry != pry)
     {
         AddObjectFunctor fn(rx, ry, prx, pry, pUnit->GetLayer(), pUnit);
@@ -310,8 +318,8 @@ void World::AddObjectToWorld(WorldObject *obj)
     if (region == nullptr)
         return;
 
-    AddObjectFunctor rf((uint)(obj->GetPositionX() / g_nRegionSize),
-                        (uint)(obj->GetPositionY() / g_nRegionSize),
+    AddObjectFunctor rf((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                        (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                         obj->GetLayer(),
                         obj);
     rf.Run();
@@ -323,11 +331,11 @@ void World::AddObjectToWorld(WorldObject *obj)
 
 void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
 {
-    auto oldx = (uint)(obj->GetPositionX() / g_nRegionSize);
-    auto oldy = (uint)(obj->GetPositionY() / g_nRegionSize);
+    auto oldx = (uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto oldy = (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
 
-    if ((uint)(obj->GetPositionX() / g_nRegionSize) != oldx || (uint)(obj->GetPositionY() / g_nRegionSize) != oldy)
+    if ((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldx || (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldy)
     {
         enterProc(obj, oldx, oldy);
     }
@@ -346,8 +354,8 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     sRegion.GetRegion(obj)->RemoveObject(obj);
 
     // Send one to each player in visible region
-    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / g_nRegionSize),
-                                (uint)(obj->GetPositionY() / g_nRegionSize),
+    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 obj->GetLayer(),
                                 NG_REGION_FUNCTOR(broadcastFunctor),
                                 (uint8_t)RegionVisitor::ClientVisitor);
@@ -580,7 +588,7 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
     XPacket itemPct(TS_SC_ITEM_DROP_INFO);
     itemPct << pUnit->GetHandle();
     itemPct << pItem->GetHandle();
-    Broadcast((uint)(pItem->GetPositionX() / g_nRegionSize), (uint)(pItem->GetPositionY() / g_nRegionSize), pItem->GetLayer(), itemPct);
+    Broadcast((uint)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
     AddItemToWorld(pItem);
 }
 
@@ -845,7 +853,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
             chaosPct << (uint8)0; // bonus type
             chaosPct << (uint8)0; // bonus percent
             chaosPct << (uint)0;  // bonus
-            Broadcast((uint)(pCorpse->GetPositionX() / g_nRegionSize), (uint)(pCorpse->GetPositionY() / g_nRegionSize), pCorpse->GetLayer(), chaosPct);
+            Broadcast((uint)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
     }
@@ -948,5 +956,5 @@ void World::procPartyShare(Player *pClient, Item *pItem)
 void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
-    sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / g_nRegionSize), (uint)(pos.GetPositionY() / g_nRegionSize), layer, fn);
+    sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
 }
