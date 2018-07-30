@@ -122,8 +122,8 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint)pClient->GetPositionX() / g_nRegionSize,
-                                (uint)(pClient->GetPositionY() / g_nRegionSize),
+    sRegion.DoEachVisibleRegion((uint)pClient->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE),
+                                (uint)(pClient->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 pClient->GetLayer(),
                                 functor,
                                 (uint8_t)RegionVisitor::MovableVisitor);

@@ -417,8 +417,8 @@ void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, 
     if (pUnit == nullptr)
         return;
 
-    auto    rx    = (uint)(pUnit->GetPositionX() / g_nRegionSize);
-    auto    ry    = (uint)(pUnit->GetPositionY() / g_nRegionSize);
+    auto    rx    = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto    ry    = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     uint8   layer = pUnit->GetLayer();
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
@@ -432,8 +432,8 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
 
     XPacket skillPct(TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld.Broadcast((uint)(pUnit1->GetPositionX() / g_nRegionSize), (uint)(pUnit1->GetPositionY() / g_nRegionSize),
-                     (uint)(pUnit2->GetPositionX() / g_nRegionSize), (uint)(pUnit2->GetPositionY() / g_nRegionSize),
+    sWorld.Broadcast((uint)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      pUnit1->GetLayer(), skillPct);
 }
 

@@ -22,7 +22,7 @@
 #include "GameRule.h"
 #include "WorldLocation.h"
 
-ObjectMgr::ObjectMgr() : g_qtBlockInfo(g_nMapWidth, g_nMapHeight)
+ObjectMgr::ObjectMgr() : g_qtBlockInfo(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
 {
 }
 
@@ -747,8 +747,8 @@ void ObjectMgr::LoadDungeonResource()
         base.max_guild_party = field[idx++].GetInt32();
         idx++;
         base.max_raid_party = field[idx].GetInt32();
-        base.box.begin      = {seamless_x * g_fMapLength, seamless_y * g_fMapLength};
-        base.box.end        = {(seamless_x + 1) * g_fMapLength, (seamless_y + 1) * g_fMapLength};
+        base.box.begin      = {seamless_x * sWorld.getFloatConfig(CONFIG_MAP_LENGTH), seamless_y * sWorld.getFloatConfig(CONFIG_MAP_LENGTH)};
+        base.box.end        = {(seamless_x + 1) * sWorld.getFloatConfig(CONFIG_MAP_LENGTH), (seamless_y + 1) * sWorld.getFloatConfig(CONFIG_MAP_LENGTH)};
         sDungeonManager.RegisterDungeonTemplate(base);
         ++count;
     } while (result->NextRow());
