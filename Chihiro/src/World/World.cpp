@@ -48,7 +48,7 @@ uint World::GetArTime()
     return GetMSTimeDiffToNow(startTime) / 10;
 }
 
-void World::InitWorld(std::vector<std::string> args)
+void World::InitWorld()
 {
     NG_LOG_INFO("server.worldserver", "Initializing world...");
     LoadConfigSettings(false);

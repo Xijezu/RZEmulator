@@ -34,8 +34,8 @@ XLua::XLua()
 
 bool XLua::InitializeLua()
 {
-    auto args = ConfigMgr::GetArguments().begin();
-    bool bIsRunningDir = std::find(args, args.end(), "-runningdir") != args.end();
+    auto args = ConfigMgr::instance()->GetArguments();
+    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
 
 	auto exeDir = fs::system_complete(args[0]).parent_path();
 	auto scriptDir = fs::path("Resource/Script/");

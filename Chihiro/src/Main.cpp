@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
     dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
-    sWorld.InitWorld(std::vector<std::string>(argv, argv + argc));
+    sWorld.InitWorld();
     if (!sAuthNetwork.InitializeNetwork(*ioContext, sConfigMgr->GetStringDefault("AuthServer.IP", "127.0.0.1"), sConfigMgr->GetIntDefault("AuthServer.Port", 4502)))
     {
         NG_LOG_ERROR("server.worldserver", "Cannot connect to the auth server!");
