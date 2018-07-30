@@ -394,21 +394,21 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
 
     switch (pSkill->m_SkillBase->target)
     {
-        case TARGET_MASTER:
+        case TARGET_TYPE::TARGET_MASTER:
             if (!IsSummon())
                 return TS_RESULT_NOT_ACTABLE;
             summon = dynamic_cast<Summon *>(this);
             if (summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
-        case TARGET_SELF_WITH_MASTER:
+        case TARGET_TYPE::TARGET_SELF_WITH_MASTER:
             if (!IsSummon())
                 return TS_RESULT_NOT_ACTABLE;
             summon = this->As<Summon>();
             if (pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;
-        case TARGET_TARGET_EXCEPT_CASTER:
+        case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER:
             if (pSkillTarget->GetHandle() == GetHandle())
                 return TS_RESULT_NOT_ACTABLE;
             break;

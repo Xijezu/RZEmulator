@@ -1226,9 +1226,9 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
 
     switch (m_SkillBase->target)
     {
-        case 1:
-        case 6:
-            if (m_SkillBase->target == 6 && pTarget == m_pOwner)
+        case TARGET_TYPE::TARGET_TARGET: // 1
+        case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER: // 6
+            if (m_SkillBase->target == TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER && pTarget == m_pOwner)
                 return;
             if (m_SkillBase->is_need_target != 0)
             {
@@ -1242,323 +1242,270 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
             }
             return;
 
-        case 2:
-        case 3:
-        case 4:
+        case TARGET_TYPE::TARGET_REGION_WITH_TARGET: // 2
+        case TARGET_TYPE::TARGET_REGION_WITHOUT_TARGET: // 3
+        case TARGET_TYPE::TARGET_REGION: // 4
             if (pTarget == nullptr)
                 return;
             fn.onCreature(this, t, m_pOwner, pTarget);
             return;
+        case TARGET_TYPE::TARGET_PARTY: // 21
+            /*
+    if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
+      return;
+    if ( !(unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
+      return;
+    v15 = v4->m_pOwner;
+    if ( v15 != pTarget )
+    {
+      v16 = *((_DWORD *)&v15[1].m_nRefCount + 1);
+      if ( v16 )
+      {
+        if ( v16 != *((_DWORD *)&pTarget[1].m_nRefCount + 1) )
+          return;
+      }
+    }
+    `StructSkill::process_target'::`23'::myPartyFunctor::myPartyFunctor(&fo, v4, t, v15, functor);
+    v18 = *(_DWORD *)(v17 + 4228);
+    if ( !v18 )
+    {
+      (**(void (__thiscall ***)(_DWORD))v17)(v17);
+      v10 = (void (__thiscall **)(_DWORD))fo.vfptr;
+      v11 = &fo;
+      goto LABEL_16;
+    }
+    v19 = (StructSkill::process_target::__l45::myPartyFunctor *)&fo;
+LABEL_26:
+    v48 = v19;
+    v47 = v18;
+    goto LABEL_27;
+             */
+        case TARGET_TYPE::TARGET_GUILD: // 22
+            /*
+    if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
+    {
+      if ( (unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
+      {
+        v7 = v4->m_pOwner;
+        if ( v7 == pTarget || (v8 = v7[1].quadTreeItem.y) == 0 || v8 == pTarget[1].quadTreeItem.y )
+        {
+          `StructSkill::process_target'::`34'::myGuildFunctor::myGuildFunctor(&v53, v4, t, v7, functor);
+          if ( !*(_DWORD *)(v9 + 4240) )
+          {
+            (**(void (__thiscall ***)(_DWORD))v9)(v9);
+            v10 = (void (__thiscall **)(_DWORD))v53.vfptr;
+            v11 = &v53;
+LABEL_16:
+            (*v10)(v11);
+            return;
+          }
+          v12 = *(_DWORD *)(v9 + 4240);
+          v13 = GuildManager::GetInstance();
+          v14 = GuildManager::DoEachMember(v13, v12, (GuildManager::GuildFunctor *)&v53.vfptr);
+          goto LABEL_28;
+        }
+      }
+    }
+             */
+        case TARGET_TYPE::TARGET_ATTACKTEAM: // 23
+            /*
+    if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
+      return;
+    if ( !(unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
+      return;
+    v21 = v4->m_pOwner;
+    if ( v21 != pTarget )
+    {
+      v22 = *((_DWORD *)&v21[1].m_nRefCount + 1);
+      if ( v22 )
+      {
+        if ( v22 != *((_DWORD *)&pTarget[1].m_nRefCount + 1) )
+          return;
+      }
+    }
+    `StructSkill::process_target'::`45'::myPartyFunctor::myPartyFunctor(&v54, v4, t, v21, functor);
+    v23 = *((_DWORD *)&v21[1].m_nRefCount + 1);
+    v24 = *((_DWORD *)&v21[1].m_nRefCount + 1);
+    v25 = PartyManager::GetInstance();
+    v26 = PartyManager::GetAttackTeamLeadPartyID(v25, v24);
+    if ( v26 )
+    {
+      v27 = v26;
+      v28 = PartyManager::GetInstance();
+      v14 = PartyManager::DoEachAttackTeamMember(v28, v27, (PartyManager::PartyFunctor *)&v54.vfptr);
+      goto LABEL_28;
+    }
+    if ( !v23 )
+    {
+      v29 = v21->vfptr->GetHandle((ArSchedulerObject *)v21);
+      v54.vfptr->operator()((PartyManager::PartyFunctor *)&v54, v29);
+      v4->m_nTargetCount = 1;
+      return;
+    }
+    v48 = &v54;
+    v47 = v23;
+LABEL_27:
+    v20 = PartyManager::GetInstance();
+    v14 = PartyManager::DoEachMember(v20, v47, (PartyManager::PartyFunctor *)&v48->vfptr);
+LABEL_28:
+    v4->m_nTargetCount = v14;
+    return;
+             */
+        case TARGET_TYPE::TARGET_SUMMON: // 31
+            /*
+    if ( (unsigned __int8)pTarget->vfptr[2].GetHandle((ArSchedulerObject *)pTarget) && pTarget->bIsInWorld )
+    {
+      pSummon = (StructSummon *)pTarget;
+    }
+    else
+    {
+      if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
+        return;
+      v44 = pTarget[1].m_anWear[22];
+      if ( !v44 || !v44->bIsInWorld )
+        return;
+      pSummon = (StructSummon *)pTarget[1].m_anWear[22];
+    }
+    if ( *(float *)&pSummon == 0.0 )
+      return;
+    v45 = 12 * v4->m_pSkillBase->valid_range;
+    pos.x = pSummon->mv.x;
+    HIDWORD(v57) = v45;
+    pos.y = pSummon->mv.y;
+    *((float *)&v57 + 1) = (double)v45;
+    pos.z = pSummon->mv.z;
+    v57 = *((float *)&v57 + 1);
+    pos.face = pSummon->mv.face;
+    v46 = ArPosition::GetDistance(&pos, (ArPosition *)&pTarget->mv.x);
+    if ( v46 > v57 )
+      return;
+    v49 = (StructCreature *)pSummon;
+LABEL_94:
+    functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v49);
+    return;
+             */
+        case TARGET_TYPE::TARGET_PARTY_SUMMON: // 32
+            /*
+      if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
+        return;
+      `StructSkill::process_target'::`69'::myPartyFunctor::myPartyFunctor(&v51, v4, t, v4->m_pOwner, functor);
+      v18 = *(_DWORD *)(v43 + 4228);
+      if ( !v18 )
+      {
+        (**(void (__thiscall ***)(_DWORD))v43)(v43);
+        v10 = (void (__thiscall **)(_DWORD))v51.vfptr;
+        v11 = &v51;
+        goto LABEL_16;
+      }
+      v19 = (StructSkill::process_target::__l45::myPartyFunctor *)&v51;
+      goto LABEL_26;
+    }
+             */
+        case TARGET_TYPE::TARGET_SELF_WITH_SUMMON: // 45
+            /*
+        v37 = pTarget;
+          if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
+          {
+            if ( !(unsigned __int8)pTarget->vfptr[2].GetHandle((ArSchedulerObject *)pTarget) )
+              return;
+            v37 = *(StructCreature **)&pTarget[1].bIsRegionChanging;
+            if ( !v37 )
+              return;
+          }
+          pTargetPlayer = (StructPlayer *)v37;
+          if ( !v37 || !v37->bIsInWorld )
+            return;
+          ((void (__stdcall *)(StructSkill *, unsigned int, StructCreature *, StructCreature *))functor->vfptr->onCreature)(
+            v4,
+            t,
+            v4->m_pOwner,
+            v37);
+          v38 = (int)&v4->m_pOwner->mv;
+          v56.x = *(float *)v38;
+          v38 += 4;
+          v56.y = *(float *)v38;
+          v38 += 4;
+          v56.z = *(float *)v38;
+          v56.face = *(float *)(v38 + 4);
+          v39 = (StructCreature *)&pTargetPlayer->m_pMainSummon->vfptr;
+          if ( v39
+            && v39->bIsInWorld
+            && v39->m_nHP
+            && (pSummon = (StructSummon *)(12 * v4->m_pSkillBase->valid_range),
+                *(float *)&pSummon = (double)(signed int)pSummon,
+                v57 = *(float *)&pSummon,
+                v40 = ArPosition::GetDistance(&v56, (ArPosition *)&v39->mv.x),
+                v40 <= v57) )
+          {
+            v34 = functor;
+            functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v39);
+          }
+          else
+          {
+            v34 = functor;
+          }
+          v41 = pTargetPlayer->m_pSubSummon;
+          if ( !v41 )
+            return;
+          if ( !v41->bIsInWorld )
+            return;
+          if ( !v41->m_nHP )
+            return;
+          *(float *)&functora = (double)(12 * v4->m_pSkillBase->valid_range);
+          v57 = *(float *)&functora;
+          v42 = ArPosition::GetDistance(&v56, (ArPosition *)&v41->mv.x);
+          if ( v42 > v57 )
+            return;
+          v50 = pTargetPlayer->m_pSubSummon;
+        }
+        v34->vfptr->onCreature(v34, v4, t, v4->m_pOwner, (StructCreature *)v50);
+        return;
+             */
+        case TARGET_TYPE::TARGET_MASTER: // 101
+            /*
+            if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[2].GetHandle)() )
+            {
+              v36 = *(_DWORD *)&v4->m_pOwner[1].bIsRegionChanging;
+              if ( v36 )
+              {
+                if ( *(_BYTE *)(v36 + 68) )
+                  ((void (__stdcall *)(StructSkill *, unsigned int, StructCreature *, _DWORD))functor->vfptr->onCreature)(
+                    v4,
+                    t,
+                    v4->m_pOwner,
+                    *(_DWORD *)&v4->m_pOwner[1].bIsRegionChanging);
+              }
+            }
+            return;
+             */
+        case TARGET_TYPE::TARGET_SELF_WITH_MASTER: // 102
+/*
+          if ( v33 != 1 )
+            return;
+          if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[2].GetHandle)() )
+            return;
+          if ( !v4->m_pOwner->bIsInWorld )
+            return;
+          v34 = functor;
+          functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v4->m_pOwner);
+          v35 = *(StructSummon **)&v4->m_pOwner[1].bIsRegionChanging;
+          if ( !v35
+            || !v35->bIsInWorld
+            || ArPosition::GetDistance((ArPosition *)&v35->mv.x, (ArPosition *)&v4->m_pOwner->mv.x) > 525.0 )
+          {
+            return;
+          }
+          v50 = v35;
+ */
         default:
+            auto result = string_format("TARGET_TYPE %d in process_target not handled yet.", m_SkillBase->target);
+            if (m_pOwner->IsPlayer())
+                Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
+            else if (m_pOwner->IsSummon())
+            {
+                Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
+            }
+            NG_LOG_DEBUG("skill", "%s", result.c_str());
             return;
     }
-
-/*
-            if (this.m_SkillBase.target > 31 )
-            {
-                v35 = this.m_SkillBase.target - 32;
-                if (this.m_SkillBase.target == 32)
-                {
-                    if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)() )
-                        return;
-                    ::::myPartyFunctor::myPartyFunctor(&v63, v4, t, v4->m_pOwner, functor);
-                    v27 = *(v52 + 4244);
-                    if ( !v27 )
-                    {
-                        (**v52)(v52);
-                        v20 = v63;
-                        v21 = &v63;
-                        goto LABEL_109;
-                    }
-                    v28 = &v63;
-                    goto LABEL_111;
-                }
-                v36 = v35 - 13;
-                if ( v36 )
-                {
-                    v37 = v36 - 6;
-                    if ( !v37 )
-                    {
-                        if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)()
-                          && !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle)()
-                          || !(pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget)
-                          && !pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle(pTarget) )
-                            return;
-                        if ( (v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)() )
-                        {
-                            v41 = v4->m_pOwner;
-                        }
-                        else
-                        {
-                            if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle)() )
-                                return;
-                            v41 = v4->m_pOwner[1].baseclass_0.baseclass_0.prev_ry;
-                        }
-                        if ( !v41 )
-                            return;
-                        v42 = (pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget);
-                        v43 = pTarget;
-                        if ( !v42 )
-                        {
-                            if ( !pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle(pTarget) )
-                                return;
-                            v43 = pTarget[1].baseclass_0.baseclass_0.prev_ry;
-                        }
-                        if ( !v43
-                          || v41 != v43
-                          && (v44 = *(&v41[1].baseclass_0.m_nRefCount + 1)) != 0
-                          && v44 != *(&v43[1].baseclass_0.m_nRefCount + 1) )
-                            return;
-                        ::::myPartyFunctor::myPartyFunctor(&v62, v4, t, v4->m_pOwner, functor);
-                        v27 = *(&v41[1].baseclass_0.m_nRefCount + 1);
-                        if ( !v27 )
-                        {
-                            v41->baseclass_0.baseclass_0.baseclass_0.vfptr->GetHandle(v41);
-                            v20 = v62;
-                            v21 = &v62;
-                            goto LABEL_109;
-                        }
-                        v28 = &v62;
-                        goto LABEL_111;
-                    }
-                    v38 = v37 - 50;
-                    if ( !v38 )
-                    {
-                        if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle)()
-                          || (v40 = v4->m_pOwner[1].baseclass_0.baseclass_0.prev_ry) == 0
-                          || !*(v40 + 68) )
-                            return;
-                        v59 = v4->m_pOwner[1].baseclass_0.baseclass_0.prev_ry;
-                        v56 = v4->m_pOwner;
-        LABEL_47:
-                        (functor->vfptr->onCreature)(v4, t, v56, v59);
-                        return;
-                    }
-                    if ( v38 != 1
-                      || !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle)()
-                      || !v4->m_pOwner->baseclass_0.baseclass_0.bIsInWorld
-                      || (functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v4->m_pOwner),
-                          (v39 = v4->m_pOwner[1].baseclass_0.baseclass_0.prev_ry) == 0)
-                      || !*(v39 + 68)
-                      || ArPosition::GetDistance((v39 + 108), &v4->m_pOwner->baseclass_0.baseclass_0.mv.baseclass_0) > 525.0 )
-                        return;
-                    v29 = functor->vfptr;
-                    v58 = v39;
-                    v55 = v4->m_pOwner;
-        LABEL_40:
-                    (v29->onCreature)(v4, t, v55, v58);
-                    return;
-                }
-                v45 = pTarget;
-                if ( !(pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget) )
-                {
-                    if ( !pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle(pTarget)
-                      || (v45 = pTarget[1].baseclass_0.baseclass_0.prev_ry) == 0 )
-                        return;
-                }
-                pTargetPlayer = v45;
-                if ( !v45 )
-                    return;
-                if ( !v45->baseclass_0.baseclass_0.bIsInWorld )
-                    return;
-                (functor->vfptr->onCreature)(v4, t, v4->m_pOwner, v45);
-                v46 = &v4->m_pOwner->baseclass_0.baseclass_0.mv;
-                LODWORD(v61.x) = *v46;
-                v46 += 4;
-                LODWORD(v61.y) = *v46;
-                v46 += 4;
-                LODWORD(v61.z) = *v46;
-                LODWORD(v61.face) = *(v46 + 4);
-                v47 = pTargetPlayer[1].m_csEnemy.m_cs.DebugInfo;
-                if ( v47 )
-                {
-                    if ( LOBYTE(v47[2].CriticalSection) )
-                    {
-                        if ( v47[6].ContentionCount )
-                        {
-                            LODWORD(v69) = 12 * v4->m_pSkillBase->valid_range;
-                            v69 = SLODWORD(v69);
-                            v68 = v69;
-                            v48 = ArPosition::GetDistance(&v61, &v47[3].ProcessLocksList.Blink);
-                            if ( v48 <= v68 )
-                                (functor->vfptr->onCreature)(v4, t, v4->m_pOwner, v47);
-                        }
-                    }
-                }
-                v49 = pTargetPlayer;
-                v50 = pTargetPlayer[1].m_csEnemy.m_cs.LockCount;
-                if ( !v50
-                  || !*(v50 + 68)
-                  || !*(v50 + 212)
-                  || (pTargetPlayera = (12 * v4->m_pSkillBase->valid_range),
-                      v68 = pTargetPlayera,
-                      v51 = ArPosition::GetDistance(&v61, (v50 + 108)),
-                      v51 > v68) )
-                    return;
-                v58 = v49[1].m_csEnemy.m_cs.LockCount;
-                v55 = v4->m_pOwner;
-        LABEL_39:
-                v29 = functor->vfptr;
-                goto LABEL_40;
-                     (v29->onCreature)(v4, t, v55, v58);
-                    return;
-
-            }
-            if (this.m_SkillBase.target == 31 )
-            {
-                v30 = pTarget;
-                if ( !pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[2].GetHandle(pTarget)
-                  || !pTarget->baseclass_0.baseclass_0.bIsInWorld )
-                {
-                    if ( !(pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget)
-                      || (v31 = pTarget[1].m_csEnemy.m_cs.DebugInfo) == 0
-                      || !LOBYTE(v31[2].CriticalSection) )
-                        return;
-                    v30 = pTarget[1].m_csEnemy.m_cs.DebugInfo;
-                }
-                pSummon = v30;
-                if ( !v30
-                  || (v32 = 12 * v4->m_pSkillBase->valid_range,
-                      v33 = (v30 + 108),
-                      LODWORD(pos.x) = *v33,
-                      v33 += 4,
-                      LODWORD(v69) = v32,
-                      LODWORD(pos.y) = *v33,
-                      v33 += 4,
-                      v69 = v32,
-                      LODWORD(pos.z) = *v33,
-                      v68 = v69,
-                      LODWORD(pos.face) = *(v33 + 4),
-                      v34 = ArPosition::GetDistance(&pos, &pTarget->baseclass_0.baseclass_0.mv.baseclass_0),
-                      v34 > v68) )
-                    return;
-                v58 = pSummon;
-                goto LABEL_38;
-            }
-            if (this.m_SkillBase.target == 1 )
-                goto LABEL_41;
-            if (this.m_SkillBase.target <= 1 )
-                return;
-            if (this.m_SkillBase.target <= 4 )
-            {
-                if ( !pTarget )
-                    return;
-                v58 = pTarget;
-        LABEL_38:
-                v55 = v4->m_pOwner;
-                goto LABEL_39;
-         LABEL_39:
-                v29 = functor->vfptr;
-                goto LABEL_40;
-
-            }
-            if (this.m_SkillBase.target == 6 )
-            {
-        LABEL_41:
-                if ( v5->target == 6 && pTarget == v4->m_pOwner )
-                    return;
-                if ( v5->is_need_target )
-                {
-                    if ( !pTarget )
-                        return;
-                    v59 = pTarget;
-                    v56 = v4->m_pOwner;
-                }
-                else
-                {
-                    v59 = v4->m_pOwner;
-                    v56 = v4->m_pOwner;
-                }
-                goto LABEL_47;
-            }
-            if (this.m_SkillBase.target == 21 )
-            {
-                if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)()
-                  || !(pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget)
-                  || (v24 = v4->m_pOwner, v24 != pTarget)
-                  && (v25 = *(&v24[1].baseclass_0.m_nRefCount + 1)) != 0
-                  && v25 != *(&pTarget[1].baseclass_0.m_nRefCount + 1) )
-                    return;
-                ::::myPartyFunctor::myPartyFunctor(&fo, v4, t, v24, functor);
-                v27 = *(v26 + 4244);
-                if ( !v27 )
-                {
-                    (**v26)(v26);
-                    v20 = fo.baseclass_0.vfptr;
-                    v21 = &fo;
-                    goto LABEL_109;
-                }
-                v28 = &fo;
-        LABEL_111:
-                v57 = v28;
-                v54 = v27;
-                goto LABEL_112;
-            }
-            if (this.m_SkillBase.target == 22 )
-            {
-                if ( !(v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)()
-                  || !(pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget)
-                  || (v17 = v4->m_pOwner, v17 != pTarget)
-                  && (v18 = v17[1].quadTreeItem.y) != 0
-                  && v18 != pTarget[1].quadTreeItem.y )
-                    return;
-                ::::myGuildFunctor::myGuildFunctor(&_fo, v4, t, v17, functor);
-                if ( *(v19 + 4256) )
-                {
-                    v22 = *(v19 + 4256);
-                    v23 = GuildManager::GetInstance();
-                    v15 = GuildManager::DoEachMember(v23, v22, &_fo);
-                    goto LABEL_113;
-                }
-                (**v19)(v19);
-                v20 = _fo.vfptr;
-                v21 = &_fo;
-        LABEL_109:
-                (*v20)(v21);
-                return;
-            }
-            if (this.m_SkillBase.target == 23 )
-            {
-                if ( (v4->m_pOwner->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)() )
-                {
-                    if ( (pTarget->baseclass_0.baseclass_0.baseclass_0.vfptr[1].onProcess)(pTarget) )
-                    {
-                        v7 = v4->m_pOwner;
-                        if ( v7 == pTarget
-                          || (v8 = *(&v7[1].baseclass_0.m_nRefCount + 1)) == 0
-                          || v8 == *(&pTarget[1].baseclass_0.m_nRefCount + 1) )
-                        {
-                            ::::myPartyFunctor::myPartyFunctor(&thisa, v4, t, v7, functor);
-                            v9 = *(&v7[1].baseclass_0.m_nRefCount + 1);
-                            v10 = *(&v7[1].baseclass_0.m_nRefCount + 1);
-                            v11 = PartyManager::GetInstance();
-                            v12 = PartyManager::GetAttackTeamLeadPartyID(v11, v10);
-                            if ( v12 )
-                            {
-                                v13 = v12;
-                                v14 = PartyManager::GetInstance();
-                                v15 = PartyManager::DoEachAttackTeamMember(v14, v13, &thisa.baseclass_0);
-        LABEL_113:
-                                v4->m_nTargetCount = v15;
-                                return;
-                            }
-                            if ( !v9 )
-                            {
-                                v16 = v7->baseclass_0.baseclass_0.baseclass_0.vfptr->GetHandle(v7);
-                                thisa.baseclass_0.vfptr->operator()(&thisa, v16);
-                                v4->m_nTargetCount = 1;
-                                return;
-                            }
-                            v57 = &thisa;
-                            v54 = v9;
-        LABEL_112:
-                            v53 = PartyManager::GetInstance();
-                            v15 = PartyManager::DoEachMember(v53, v54, v57);
-                            goto LABEL_113;
-                        }
-                    }
-                }
-            }
-
-*/
 }
