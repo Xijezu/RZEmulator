@@ -183,7 +183,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (uint16_t)pUnit->m_vSkillList.size();
         skillPct << (uint8_t)0; // reset | modification_type ?
 
-        for (auto t : pUnit->m_vSkillList)
+        for (auto& t : pUnit->m_vSkillList)
         {
             if (t->m_nSkillUID < 0)
                 continue;
