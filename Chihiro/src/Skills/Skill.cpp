@@ -1280,7 +1280,6 @@ LABEL_26:
     v47 = v18;
     goto LABEL_27;
              */
-            return;
         case TARGET_TYPE::TARGET_GUILD: // 22
             /*
     if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
@@ -1308,7 +1307,6 @@ LABEL_16:
       }
     }
              */
-            return;
         case TARGET_TYPE::TARGET_ATTACKTEAM: // 23
             /*
     if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
@@ -1353,7 +1351,6 @@ LABEL_28:
     v4->m_nTargetCount = v14;
     return;
              */
-            return;
         case TARGET_TYPE::TARGET_SUMMON: // 31
             /*
     if ( (unsigned __int8)pTarget->vfptr[2].GetHandle((ArSchedulerObject *)pTarget) && pTarget->bIsInWorld )
@@ -1387,7 +1384,6 @@ LABEL_94:
     functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v49);
     return;
              */
-            return;
         case TARGET_TYPE::TARGET_PARTY_SUMMON: // 32
             /*
       if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
@@ -1405,7 +1401,6 @@ LABEL_94:
       goto LABEL_26;
     }
              */
-            return;
         case TARGET_TYPE::TARGET_SELF_WITH_SUMMON: // 45
             /*
         v37 = pTarget;
@@ -1466,7 +1461,6 @@ LABEL_94:
         v34->vfptr->onCreature(v34, v4, t, v4->m_pOwner, (StructCreature *)v50);
         return;
              */
-            return;
         case TARGET_TYPE::TARGET_MASTER: // 101
             /*
             if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[2].GetHandle)() )
@@ -1484,8 +1478,6 @@ LABEL_94:
             }
             return;
              */
-            return;
-
         case TARGET_TYPE::TARGET_SELF_WITH_MASTER: // 102
 /*
           if ( v33 != 1 )
@@ -1505,8 +1497,15 @@ LABEL_94:
           }
           v50 = v35;
  */
-            return;
         default:
+            auto result = string_format("TARGET_TYPE %d in process_target not handled yet.", m_SkillBase->target);
+            if (m_pOwner->IsPlayer())
+                Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
+            else if (m_pOwner->IsSummon())
+            {
+                Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
+            }
+            NG_LOG_DEBUG("skill", "%s", result.c_str());
             return;
     }
 }
