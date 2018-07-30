@@ -31,10 +31,15 @@ XLua::XLua()
     m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::package);
 }
 
-bool XLua::InitializeLua()
+bool XLua::InitializeLua(std::vector<std::string> args)
 {
-    if (!fs::exists("Resource/Script/"s))
-        return false;
+    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
+
+	auto exeDir = fs::system_complete(args[0]).parent_path();
+	auto scriptDir = fs::path("Resource/Script/");
+
+	if(!bIsRunningDir)
+	    scriptDir = (exeDir /= scriptDir);
 
     // Monster relevant
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
@@ -103,7 +108,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
 
     int nFiles{0};
-    for (auto &it : fs::directory_iterator("Resource/Script/"s))
+    for (auto &it : fs::directory_iterator(scriptDir))
     {
         if (it.path().extension().string() == ".lua"s)
         {
