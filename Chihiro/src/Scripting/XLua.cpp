@@ -34,14 +34,8 @@ XLua::XLua()
 
 bool XLua::InitializeLua()
 {
-    auto args = ConfigMgr::instance()->GetArguments();
-    bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
 
-	auto exeDir = fs::system_complete(args[0]).parent_path();
-	auto scriptDir = fs::path("Resource/Script/");
-
-	if(!bIsRunningDir)
-	    scriptDir = (exeDir /= scriptDir);
+	auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
 
     // Monster relevant
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
@@ -110,7 +104,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
 
     int nFiles{0};
-    for (auto &it : fs::directory_iterator(scriptDir))
+    for (auto &it : fs::directory_iterator(configFile))
     {
         if (it.path().extension().string() == ".lua"s)
         {
