@@ -102,7 +102,7 @@ class World
             return instance;
         }
 
-        void InitWorld(std::vector<std::string> args);
+        void InitWorld();
         void LoadConfigSettings(bool reload);
 
         bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
