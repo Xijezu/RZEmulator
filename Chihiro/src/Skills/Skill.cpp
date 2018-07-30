@@ -1352,38 +1352,32 @@ LABEL_28:
     return;
              */
         case TARGET_TYPE::TARGET_SUMMON: // 31
-            /*
-    if ( (unsigned __int8)pTarget->vfptr[2].GetHandle((ArSchedulerObject *)pTarget) && pTarget->bIsInWorld )
-    {
-      pSummon = (StructSummon *)pTarget;
-    }
-    else
-    {
+        {
+            Summon *pSummon{nullptr};
+            if(pTarget != nullptr && pTarget->IsInWorld())
+            {
+                pSummon = pTarget->As<Summon>();
+            }
+            else
+            {
+     /*
       if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
         return;
       v44 = pTarget[1].m_anWear[22];
       if ( !v44 || !v44->bIsInWorld )
         return;
       pSummon = (StructSummon *)pTarget[1].m_anWear[22];
-    }
-    if ( *(float *)&pSummon == 0.0 )
-      return;
-    v45 = 12 * v4->m_pSkillBase->valid_range;
-    pos.x = pSummon->mv.x;
-    HIDWORD(v57) = v45;
-    pos.y = pSummon->mv.y;
-    *((float *)&v57 + 1) = (double)v45;
-    pos.z = pSummon->mv.z;
-    v57 = *((float *)&v57 + 1);
-    pos.face = pSummon->mv.face;
-    v46 = ArPosition::GetDistance(&pos, (ArPosition *)&pTarget->mv.x);
-    if ( v46 > v57 )
-      return;
-    v49 = (StructCreature *)pSummon;
-LABEL_94:
-    functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v49);
-    return;
-             */
+      */
+            }
+            if(pSummon == nullptr)
+                return;
+
+            if(pSummon->GetExactDist2d(pTarget) > 12 * m_SkillBase->valid_range)
+                return;
+
+            fn.onCreature(this, t, m_pOwner, pSummon);
+            return;
+        }
         case TARGET_TYPE::TARGET_PARTY_SUMMON: // 32
             /*
       if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
