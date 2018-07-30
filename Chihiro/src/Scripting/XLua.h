@@ -28,7 +28,7 @@ class XLua
             return instance;
         }
 
-        bool InitializeLua();
+        bool InitializeLua(std::vector<std::string> args);
         ~XLua() = default;
 
         bool RunString(Unit *, std::string, std::string &);
