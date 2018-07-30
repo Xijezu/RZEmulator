@@ -678,8 +678,8 @@ void Monster::findNextEnemy()
             {
                 auto *unit = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
                 if (unit != nullptr
-                    && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / g_nRegionSize), (uint)(unit->GetPositionY() / g_nRegionSize),
-                                               (uint)(GetPositionX() / g_nRegionSize), (uint)(GetPositionY() / g_nRegionSize)) != 0
+                    && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(unit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                               (uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))) != 0
                     /*&&  IsVisible(unit)*/)
                 {
                     nMaxHate = nHate;
@@ -1172,8 +1172,8 @@ void Monster::processWalk(uint t)
 
     }
 
-    if ((uint)(tmp_mv.GetPositionX() / g_nRegionSize) != (uint)(GetPositionX() / g_nRegionSize)
-        || (uint)(tmp_mv.GetPositionY() / g_nRegionSize) != (uint)(GetPositionY() / g_nRegionSize)
+    if ((uint)(tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))
+        || (uint)(tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))
         || !tmp_mv.bIsMoving)
     {
         if (!IsInWorld())

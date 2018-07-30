@@ -481,7 +481,7 @@ void WorldObject::AddNoise(int r1, int r2, int v)
     float prev_x = GetPositionX();
     float prev_y = GetPositionY();
 
-    auto rs = (double)g_nRegionSize;
+    auto rs = (double)sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
     auto tx = (int)(GetPositionX() / rs);
     auto ty = (int)(GetPositionY() / rs);
     m_positionX     = (float)(r1 % v - v / 2) + GetPositionX();

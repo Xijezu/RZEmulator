@@ -299,7 +299,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << m_pPlayer->GetPositionZ();
     packet << (uint8)m_pPlayer->GetLayer();
     packet << (uint32)m_pPlayer->GetOrientation();
-    packet << (uint32)g_nRegionSize;
+    packet << (uint32)sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
     packet << (uint32)m_pPlayer->GetHealth();
     packet << (uint16)m_pPlayer->GetMana();
     packet << (uint32)m_pPlayer->GetMaxHealth();
@@ -1536,7 +1536,8 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
     XPacket resultPct(TS_SC_TAKE_ITEM_RESULT);
     resultPct << item_handle;
     resultPct << m_pPlayer->GetHandle();
-    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / g_nRegionSize), (uint)(m_pPlayer->GetPositionY() / g_nRegionSize), m_pPlayer->GetLayer(), resultPct);
+    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
     if (sWorld.RemoveItemFromWorld(item))
     {
         if (m_pPlayer->GetPartyID() != 0)
@@ -2407,7 +2408,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
 bool WorldSession::isValidTradeTarget(Player *pTradeTarget)
 {
-    return !(pTradeTarget == nullptr || !pTradeTarget->IsInWorld() || pTradeTarget->GetExactDist2d(m_pPlayer) > g_nRegionSize);
+    return !(pTradeTarget == nullptr || !pTradeTarget->IsInWorld() || pTradeTarget->GetExactDist2d(m_pPlayer) > sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
 }
 
 void WorldSession::onDropQuest(XPacket *pRecvPct)

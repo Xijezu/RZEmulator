@@ -57,6 +57,7 @@ enum WorldIntConfigs
 {
     CONFIG_MAP_WIDTH = 0,
     CONFIG_MAP_HEIGHT,
+    CONFIG_MAP_REGION_SIZE,
     CONFIG_CELL_SIZE,
     CONFIG_REGION_SIZE,
     CONFIG_TILE_SIZE,
@@ -87,10 +88,6 @@ class Summon;
 class XPacket;
 
 typedef std::unordered_map<uint32, WorldSession *> SessionMap;
-constexpr int                                      g_nRegionSize = 180;
-constexpr int                                      g_nMapWidth   = 700000;
-constexpr int                                      g_nMapHeight  = 1000000;
-constexpr float                                    g_fMapLength  = 16128.0f;
 
 class World
 {
