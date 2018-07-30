@@ -17,6 +17,10 @@
 
 #include "TerrainSeamlessWorld.h"
 #include <fstream>
+#include <boost/filesystem.hpp>
+#include "Config.h"
+
+namespace fs = boost::filesystem;
 
 bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileCheck)
 {
@@ -32,7 +36,9 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
 
     std::vector<std::string> TextLines{ };
 
-    std::ifstream ifstream(("Resource/NewMap/"s + szFilename).c_str(), std::ios::in);
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/"+szFilename));
+
+    std::ifstream ifstream(configFile.c_str(), std::ios::in);
     std::string   row;
     while (std::getline(ifstream, row))
     {
