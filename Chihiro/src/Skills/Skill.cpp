@@ -335,17 +335,15 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
     pct << (uint8)m_nFireCount;
     pct << (uint16)m_vResultList.size();
 
-    constexpr int fillSize = 45;
+    // Odd fixed padding for the skill result
+    auto pos = pct.wpos();
+    pct.fill("", 45 * m_vResultList.size());
+    pct.wpos(pos);
 
     if (!m_vResultList.empty())
     {
         for (const auto &sr : m_vResultList)
         {
-            // Odd fixed padding for the skill result
-            auto pos = pct.wpos();
-            pct.fill("", fillSize);
-            pct.wpos(pos);
-
             pct << (uint8)sr.type;
             pct << (uint)sr.hTarget;
 
@@ -410,7 +408,6 @@ void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
                 default:
                     break;
             }
-            pct.wpos(pct.size());
         }
     }
 }
