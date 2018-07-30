@@ -55,7 +55,7 @@ void World::InitWorld()
 
     uint32_t oldFullTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing region system...");
-    sRegion.InitRegion(sConfigMgr->GetIntDefault("Game.MapWidth", 700000), sConfigMgr->GetIntDefault("Game.MapHeight", 1000000));
+    sRegion.InitRegion(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT));
 
     auto oldTime = getMSTime();
     NG_LOG_INFO("server.worldserver", "Initializing game content...");
@@ -106,6 +106,7 @@ void World::LoadConfigSettings(bool reload)
 
     // Bool configs
     m_bool_configs[CONFIG_PK_SERVER]            = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_SERVICE_SERVER]       = sConfigMgr->GetBoolDefault("Game.ServiceServer", false);
     m_bool_configs[CONFIG_DISABLE_TRADE]        = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
     m_bool_configs[CONFIG_MONSTER_WANDERING]    = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
     m_bool_configs[CONFIG_MONSTER_COLLISION]    = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
@@ -114,6 +115,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_NO_SKILL_COOLTIME]    = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
 
     // Int configs
+    m_int_configs[CONFIG_CELL_SIZE]       = (uint)sConfigMgr->GetIntDefault("Game.CellSize", 6);
     m_int_configs[CONFIG_MAP_WIDTH]      = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
     m_int_configs[CONFIG_MAP_HEIGHT]     = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
     m_int_configs[CONFIG_REGION_SIZE]    = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
@@ -121,6 +123,10 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
     m_int_configs[CONFIG_LOCAL_FLAG]     = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
     m_int_configs[CONFIG_MAX_LEVEL]      = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_SERVER_INDEX]   = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
+
+    // Float Configs
+    setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));
 
     // Rates
     rate_values[RATES_EXP]                   = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
