@@ -120,7 +120,7 @@ enum SKILL_STATUS : short
     ST_COMPLETE       = 5
 };
 
-enum TARGET_TYPE : short
+enum TARGET_TYPE : int
 {
     TARGET_MISC                                   = 0,
     TARGET_TARGET                                 = 1,
