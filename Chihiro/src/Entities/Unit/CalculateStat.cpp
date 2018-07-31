@@ -55,6 +55,9 @@ void Unit::CalculateStat()
     SetInt32Value(UNIT_FIELD_ADDITIONAL_HEAL, 0);
     SetInt32Value(UNIT_FIELD_ADDITIONAL_MP_HEAL, 0);
 
+    SetFlag(UNIT_FIELD_STATUS, (STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MOVABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE | STATUS_MORTAL));
+    RemoveFlag(UNIT_FIELD_STATUS, (STATUS_HIDING | STATUS_HAVOC_BURST | STATUS_FEARED | STATUS_FORM_CHANGED | STATUS_MOVE_SPEED_FIXED | STATUS_HP_REGEN_STOPPED | STATUS_MP_REGEN_STOPPED));
+
     m_cStatByState.Reset(0);
     m_StatAmplifier.Reset(0.0f);
     m_AttributeByState.Reset(0);
@@ -243,8 +246,7 @@ void Unit::applyState(State &state)
             {
                 case StateCode::SC_SLEEP:
                 case StateCode::SC_STUN:
-                    //this.m_StatusFlag &= ~(CREATURE_STATUS.STATUS_MOVABLE|CREATURE_STATUS.STATUS_MAGIC_CASTABLE|CREATURE_STATUS.STATUS_ITEM_USABLE);
-
+                    RemoveFlag(UNIT_FIELD_STATUS, (STATUS_MOVABLE | STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE));
                     break;
                 default:
                     break;
