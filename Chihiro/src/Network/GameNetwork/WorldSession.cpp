@@ -388,6 +388,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
         return;
     }
+
     npos.m_positionX = x;
     npos.m_positionY = y;
     npos.m_positionZ = 0.0f;
@@ -444,7 +445,7 @@ void WorldSession::onMoveRequest(XPacket *pRecvPct)
             mover->CancelAttack();
         if (mover->m_nMovableTime <= ct)
         {
-            if (mover->GetHealth() != 0 && mover->IsInWorld())
+            if (mover->IsActable() && mover->IsMovable() && mover->IsInWorld())
             {
                 auto tpos2 = mover->GetCurrentPosition(curr_time);
                 if (!vMoveInfo.empty())
