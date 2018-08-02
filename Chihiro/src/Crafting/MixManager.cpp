@@ -21,6 +21,7 @@
 #include "GameRule.h"
 #include "MemPool.h"
 #include "GameContent.h"
+#include "ItemFields.h"
 
 void MixManager::RegisterEnhanceInfo(const EnhanceInfo &info)
 {
@@ -86,8 +87,30 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
         return false;
     }
 
-    // Maybe do logging here like retail?
-    pPlayer->EraseItem(pCube, 1);
+    if(pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_WEAPON &&
+       pCube->m_pItemBase->group != ItemGroup::GROUP_STRIKE_CUBE)
+    {
+        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+        return false;
+    }
+    else if((
+    		 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_ARMOR ||
+    		 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_SHIELD ||
+			 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_HELM ||
+			 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_GLOVE ||
+			 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_BOOTS ||
+			 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_BELT ||
+			 pMainMaterial->m_pItemBase->group == ItemGroup::GROUP_MANTLE
+			) &&
+    	    pCube->m_pItemBase->group != ItemGroup::GROUP_DEFENCE_CUBE)
+    {
+        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+        return false;
+    }
+    else
+    	// Maybe do logging here like retail?
+    	pPlayer->EraseItem(pCube, 1);
+
     if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL && pPowder != nullptr)
         pPlayer->EraseItem(pPowder, 1);
 
