@@ -246,7 +246,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
 
     marketPct << npc_handle;
     marketPct << (uint16_t)pMarket.size();
-    for (auto info : pMarket)
+    for (const auto &info : pMarket)
     {
         marketPct << (int32_t)info.code;
 #if EPIC >= 5
