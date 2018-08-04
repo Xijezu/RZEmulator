@@ -246,15 +246,15 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
 
     marketPct << npc_handle;
     marketPct << (uint16_t)pMarket.size();
-    for (auto info : pMarket)
+    for (const auto &info : pMarket)
     {
         marketPct << (int32_t)info.code;
 #if EPIC >= 5
         marketPct << (int64_t) info.price_ratio;
         marketPct << (int32_t) 0;//info.huntaholic_ratio;
 #else
-        marketPct << (int32_t)info.price_ratio;
-#endif // EPIC >= 5
+	marketPct << (int64_t)info.price_ratio;
+#endif // EPIC >= 4
     }
 
     pPlayer->SendPacket(marketPct);
@@ -279,11 +279,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     packet << (uint32_t)item->m_nHandle;
     packet << (int32_t)item->m_Instance.Code;
     packet << (int64)item->m_Instance.UID;
-#if EPIC >= 5
     packet << (int64) item->m_Instance.nCount;
-#else
-    packet << (int32)item->m_Instance.nCount;
-#endif // EPIC >= 5
 
     packet << (uint32_t)item->m_Instance.nCurrentEndurance;
     packet << (uint8_t)item->m_Instance.nEnhance;
@@ -325,7 +321,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     else
         packet << (int16_t)item->m_Instance.nWearInfo;
     packet << (uint32_t)(item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0);
-#if EPIC >= 5
+#if EPIC >= 4
     packet << (int32_t) item->m_Instance.nIdx;
 #endif // EPIC >= 5
 }
