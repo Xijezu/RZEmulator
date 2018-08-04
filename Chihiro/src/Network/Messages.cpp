@@ -252,10 +252,8 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
 #if EPIC >= 5
         marketPct << (int64_t) info.price_ratio;
         marketPct << (int32_t) 0;//info.huntaholic_ratio;
-#elif EPIC == 4
-		marketPct << (int64_t)info.price_ratio;
 #else
-        marketPct << (int32_t)info.price_ratio;
+	marketPct << (int64_t)info.price_ratio;
 #endif // EPIC >= 4
     }
 
