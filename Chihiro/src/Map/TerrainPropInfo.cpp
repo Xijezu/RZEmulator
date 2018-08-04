@@ -17,6 +17,7 @@
 
 #include "TerrainPropInfo.h"
 #include "fstream"
+#include <boost/filesystem.hpp>
 
 bool TerrainPropInfo::Initialize(std::string szFileName)
 {
@@ -26,7 +27,9 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
     std::string              strPropNum{ };
     std::string              strPropName{ };
 
-    std::ifstream ifstream(("Resource/NewMap/"s + szFileName).c_str(), std::ios::in);
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/"+szFileName));
+
+    std::ifstream ifstream(configFile.c_str(), std::ios::in);
     std::string   row;
     while (std::getline(ifstream, row))
     {

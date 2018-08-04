@@ -1741,19 +1741,19 @@ void WorldSession::onMixRequest(XPacket *pRecvPct)
     {
         case 0:
             break;
-        case 101: //EnchantItem without E-Protect Powder
+        case MIX_ENHANCE: //EnchantItem without E-Protect Powder
             sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
-        case 102:
+        case MIX_ENHANCE_SKILL_CARD:
             sMixManager.EnhanceSkillCard(mb, m_pPlayer, count, pSubItem);
             return;
-        case 103: //EnchantItem WITH E-Protect Powder
+        case MIX_ENHANCE_WITHOUT_FAIL: //EnchantItem WITH E-Protect Powder
             sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
-        case 311:
+        case MIX_ADD_LEVEL_SET_FLAG:
             sMixManager.MixItem(mb, m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
-        case 501:
+        case MIX_RESTORE_ENHANCE_SET_FLAG:
             sMixManager.RepairItem(m_pPlayer, pMainItem, count, pSubItem, pCountList);
             return;
         default:
