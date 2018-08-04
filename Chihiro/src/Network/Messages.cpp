@@ -279,11 +279,7 @@ void Messages::fillItemInfo(XPacket &packet, Item *item)
     packet << (uint32_t)item->m_nHandle;
     packet << (int32_t)item->m_Instance.Code;
     packet << (int64)item->m_Instance.UID;
-#if EPIC >= 4
     packet << (int64) item->m_Instance.nCount;
-#else
-    packet << (int32)item->m_Instance.nCount;
-#endif // EPIC >= 4
 
     packet << (uint32_t)item->m_Instance.nCurrentEndurance;
     packet << (uint8_t)item->m_Instance.nEnhance;
