@@ -20,7 +20,7 @@ USE `Auth`;
 -- Exportiere Struktur von Tabelle Auth.Accounts
 DROP TABLE IF EXISTS `Accounts`;
 CREATE TABLE IF NOT EXISTS `Accounts` (
-  `account_id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL AUTO_INCREMENT,
   `login_name` varchar(31) DEFAULT NULL,
   `password` varchar(32) DEFAULT NULL,
   `block` int(11) DEFAULT 0,
