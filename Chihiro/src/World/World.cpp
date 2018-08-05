@@ -29,8 +29,8 @@
 #include "ItemCollector.h"
 #include "GameContent.h"
 
-std::atomic<bool>   World::m_stopEvent        = false;
-std::atomic<uint32> World::m_worldLoopCounter = 0;
+std::atomic<bool>   World::m_stopEvent{false};
+std::atomic<uint32> World::m_worldLoopCounter{0};
 uint8  World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 
 World::World() : startTime(getMSTime())
