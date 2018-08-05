@@ -263,6 +263,38 @@ void Unit::applyState(State &state)
         case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
             ampParameter2((uint)(0x200000 * (std::pow(2, (uint)state.GetValue(8)))), state.GetValue(0) + (state.GetValue(1) * state.GetLevel()));
             break;
+        case StateBaseEffect::SEF_DAMAGE_REFLECT_WHEN_EQUIP_SHIELD:
+/*
+      if ( (unsigned __int8)StructCreature::IsWearShield(v3) )
+      {
+        *(double *)&_Val.fPhysicalSkillReflectRatio = (double)StructState::GetValue(v2, &v958, 2)->value / 10000.0;
+        state = (StructState *)(unsigned __int16)StructState::GetLevel(v2);
+        *(double *)&_fPhysicalReflectRatio[4] = (double)(signed int)state * *(double *)&_Val.fPhysicalSkillReflectRatio;
+        v301 = StructState::GetValue(v2, &v954, 1);
+        *(double *)&v1039.value = (double)c_fixed<10000>::operator+<double>(
+                                            v301,
+                                            &v956,
+                                            *(const long double *)&_fPhysicalReflectRatio[4])->value
+                                / 10000.0;
+        *(double *)&_Val.fPhysicalSkillReflectRatio = (double)StructState::GetValue(v2, &v952, 4)->value / 10000.0;
+        state = (StructState *)(unsigned __int16)StructState::GetLevel(v2);
+        *(double *)&_fPhysicalReflectRatio[4] = (double)(signed int)state * *(double *)&_Val.fPhysicalSkillReflectRatio;
+        v302 = StructState::GetValue(v2, &v948, 3);
+        *(double *)&_Val.fPhysicalSkillReflectRatio = (double)c_fixed<10000>::operator+<double>(
+                                                                v302,
+                                                                &v950,
+                                                                *(const long double *)&_fPhysicalReflectRatio[4])->value
+                                                    / 10000.0;
+        v1038.idx = (signed int)((double)StructState::GetValue(v2, &v946, 0)->value / 10000.0);
+        v1038.pPool = (XLinearMemoryPool *)(signed int)*(double *)&_Val.fPhysicalSkillReflectRatio;
+        v1038.pFirstBlock = (const char *)(unsigned __int64)*(double *)&v1039.value;
+        std::vector<_CHANNEL_INFO::CHANNEL_LAYER_MAP,std::allocator<_CHANNEL_INFO::CHANNEL_LAYER_MAP>>::push_back(
+          (std::vector<XMemoryPool::_TAG,std::allocator<XMemoryPool::_TAG> > *)&v3->m_vStateReflectInfo,
+          &v1038);
+      }
+      return;
+ */
+            break;
         default:
             break;
     }
