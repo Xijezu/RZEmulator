@@ -31,7 +31,7 @@
 
 std::atomic<bool>   World::m_stopEvent{false};
 std::atomic<uint32> World::m_worldLoopCounter{0};
-uint8  World::m_ExitCode = SHUTDOWN_EXIT_CODE;
+uint8  World::m_ExitCode{SHUTDOWN_EXIT_CODE};
 
 World::World() : startTime(getMSTime())
 {
