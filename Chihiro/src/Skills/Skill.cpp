@@ -267,6 +267,12 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
     if (player == nullptr)
         return TS_RESULT_NOT_ACTABLE;
     int i = 0;
+
+    if(player->m_aBindSummonCard[i] == nullptr)
+    {
+        return TS_RESULT_NOT_EXIST;
+    }
+
     while (item->m_nHandle != player->m_aBindSummonCard[i]->m_nHandle)
     {
         ++i;
