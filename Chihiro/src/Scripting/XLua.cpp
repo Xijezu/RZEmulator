@@ -102,6 +102,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("show_soulstone_repair_window", &XLua::SCRIPT_ShowSoulStoneRepairWindow, this);
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
+    m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
 
     int nFiles{0};
     for (auto &it : fs::directory_iterator(configFile))
@@ -1004,4 +1005,27 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     }
 
     player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
+}
+
+void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
+{
+    if (args.size() < 3)
+    {
+        NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Parameters");
+        return;
+    }
+
+    int    nStateCode  = args[0].get<int>();
+    int    nStateLevel = args[1].get<uint8>();
+    uint   nStateTime  = args[2].get<uint>();
+    Player *player     = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
+    Summon *summon = player->m_pMainSummon;
+
+    if (summon == nullptr || !summon->IsInWorld())
+    {
+        NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Name");
+        return;
+    }
+
+    summon->AddState(SG_NORMAL, (StateCode)nStateCode, summon->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
 }
