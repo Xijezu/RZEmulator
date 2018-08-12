@@ -266,13 +266,22 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
     auto player = m_pOwner->As<Player>();
     if (player == nullptr)
         return TS_RESULT_NOT_ACTABLE;
-    int i = 0;
 
-    if(player->m_aBindSummonCard[i] == nullptr)
+    bool is_summoncard_bound {false};
+    for(int j=0; j < sizeof(player->m_aBindSummonCard)/sizeof(player->m_aBindSummonCard[0]); j++)
     {
-        return TS_RESULT_NOT_EXIST;
+        if(player->m_aBindSummonCard[j] != nullptr)
+        {
+    	    is_summoncard_bound = true;
+    	    break;
+        }
     }
 
+    if(!is_summoncard_bound)
+    	return TS_RESULT_NOT_EXIST;
+
+
+    int i = 0;
     while (item->m_nHandle != player->m_aBindSummonCard[i]->m_nHandle)
     {
         ++i;
