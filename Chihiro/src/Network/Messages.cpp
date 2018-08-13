@@ -147,11 +147,7 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::stri
     packet << pUnit->GetHandle();
     packet << (uint8)0;
     packet.fill(pszKey, 16);
-#if EPIC > 4
     packet << (uint64) 0;
-#else
-    packet << (uint32)0;
-#endif
     packet << pszValue;
     packet << (uint8)0;
     pPlayer->SendPacket(packet);
