@@ -105,6 +105,7 @@ class XLua
         void SCRIPT_WarpToRevivePosition(sol::variadic_args);
 
         void SCRIPT_AddState(sol::variadic_args args);
+        void SCRIPT_AddCreatureState(sol::variadic_args args);
 
         sol::object SCRIPT_GetEnv(std::string);
         void SCRIPT_ShowMarket(std::string);
