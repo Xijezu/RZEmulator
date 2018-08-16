@@ -21,6 +21,7 @@
 #include "MemPool.h"
 #include "Maploader.h"
 #include <boost/asio/signal_set.hpp>
+#include "Stacktrace.h"
 
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
@@ -36,6 +37,9 @@ constexpr int WORLD_SLEEP_CONST = 50;
 
 int main(int argc, char **argv)
 {
+    Stacktrace::enableStacktracing();
+    Stacktrace::parseDump();
+
     std::string configError;
     if (!sConfigMgr->LoadInitial(_CHIHIRO_CORE_CONFIG, std::vector<std::string>(argv, argv + argc), configError))
     {
