@@ -40,7 +40,6 @@ void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingT
 extern int main(int argc, char **argv)
 {
     Stacktrace::enableStacktracing();
-    Stacktrace::parseDump();
 
     auto        configFile = fs::absolute((std::string)_MONONOKE_CORE_CONFIG);
     std::string configError;

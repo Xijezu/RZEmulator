@@ -7,4 +7,5 @@ CMakeLists.txt.user
 Chihiro.log
 DBErrors.log
 Server.log
+Mononoke.log
 debug/
