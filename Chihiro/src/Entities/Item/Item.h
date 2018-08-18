@@ -67,6 +67,7 @@ class Item : public WorldObject
         Item &operator=(const Item &) = delete;
 
         void SetCount(int64 count);
+		bool IsDropable();
         bool IsWearable();
         bool IsTradable();
         bool IsExpireItem() const;

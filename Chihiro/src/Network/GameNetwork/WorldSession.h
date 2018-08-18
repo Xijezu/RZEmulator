@@ -130,9 +130,9 @@ class WorldSession : public XSession
         void onBuyItem(XPacket *);
         void onSellItem(XPacket *);
         void onUseItem(XPacket *);
+		void onDropItem(XPacket *);
 
         void onSkill(XPacket *);
-        void onDropItem(XPacket *);
         void onMixRequest(XPacket *);
         void onRevive(XPacket *);
         void onAttackRequest(XPacket *);
