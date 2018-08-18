@@ -10,6 +10,9 @@
 #include <signal.h>
 #include <boost/stacktrace.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
+boost::mutex mutex;
 
 void Stacktrace::enableStacktracing()
 {
@@ -34,8 +37,10 @@ void Stacktrace::parseDump()
 
 void Stacktrace::signalHandler(int signum)
 {
+	mutex.lock();
     ::signal(signum, SIG_DFL);
     std::cout << "Server crashed:\n" << boost::stacktrace::stacktrace() << std::endl;
     boost::stacktrace::safe_dump_to("./backtrace.dump");
     ::raise(SIGABRT);
+    mutex.unlock();
 }
