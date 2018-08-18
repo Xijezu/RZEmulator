@@ -410,6 +410,14 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
     worldSession->GetSocket()->SendPacket(packet);
 }
 
+void Messages::SendDropResult(Player * pPlayer, uint itemHandle, bool bIsSuccess)
+{
+	XPacket packet(CSPACKETS::TS_SC_DROP_RESULT);
+	packet << itemHandle;
+	packet << bIsSuccess;
+	pPlayer->SendPacket(packet);
+}
+
 void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbsolute*/)
 {
     if (pObj == nullptr || pPlayer == nullptr)

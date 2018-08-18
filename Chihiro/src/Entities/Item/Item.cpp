@@ -353,6 +353,14 @@ bool Item::IsTradable()
     return m_pItemBase->flaglist[FLAG_TRADE] == 0;
 }
 
+bool Item::IsDropable()
+{
+	if (m_pItemBase == nullptr)
+		return false;
+
+	return m_pItemBase->flaglist[FLAG_DROP] == 0;
+}
+
 void ItemInstance::Copy(const ItemInstance &pFrom)
 {
     OwnerHandle       = pFrom.OwnerHandle;
