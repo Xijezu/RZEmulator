@@ -3763,6 +3763,16 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 
     return true;
 }
+Item *Player::DropItem(Player *pTarget, Item *pItem, int64 count)
+{
+	Item *result;
+	Item *origItem = pItem;
+		Item *pNewItem = popItem(origItem, count, false);
+		pNewItem->Relocate(pTarget->GetPosition());
+		sWorld.AddItemToWorld(pNewItem);
+		result = pNewItem;
+		return result;
+}
 
 void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
