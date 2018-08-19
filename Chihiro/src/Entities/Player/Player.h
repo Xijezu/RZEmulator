@@ -202,6 +202,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool EraseBullet(int64 count);
         bool IsMixable(Item *pItem) const;
         bool IsErasable(Item *pItem) const;
+        bool IsSellable(Item *pItem) const;
 
         // Storage Relevant
         bool RemoveSummon(Summon *pSummon);
