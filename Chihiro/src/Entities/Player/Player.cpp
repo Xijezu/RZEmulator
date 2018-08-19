@@ -3383,6 +3383,16 @@ bool Player::IsErasable(Item *pItem) const
     return !pItem->IsInStorage();
 }
 
+bool Player::IsSellable(Item *pItem) const
+{
+    bool result;
+    if ( !Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING )
+        result = false;
+    else
+        result = (pItem->m_Instance.Flag & FLAG_RIDING != 0);
+    return result;
+}
+
 bool Player::IsMixable(Item *pItem) const
 {
     return IsErasable(pItem);
