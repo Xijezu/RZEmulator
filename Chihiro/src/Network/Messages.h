@@ -102,7 +102,7 @@ class Messages
         static void SendGameTime(Player *);
         static void SendResult(Player *, uint16, uint16, uint32);
         static void SendResult(WorldSession *worldSession, uint16, uint16, uint32);
-	static void SendDropResult(Player *pPlayer, uint itemHandle, bool bIsSuccess);
+        static void SendDropResult(Player *pPlayer, uint itemHandle, bool bIsSuccess);
         static void sendEnterMessage(Player *, WorldObject *, bool);
         static void SendMoveMessage(Player *, Unit *);
         static void SendTimeSynch(Player *);
