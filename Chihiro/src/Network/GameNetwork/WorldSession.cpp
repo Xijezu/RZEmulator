@@ -53,8 +53,6 @@ void WorldSession::OnClose()
         sAuthNetwork.SendClientLogoutToAuth(_accountName);
     if (m_pPlayer)
         onReturnToLobby(nullptr);
-    if (_socket)
-        _socket->CloseSocket();
 }
 
 enum eStatus
