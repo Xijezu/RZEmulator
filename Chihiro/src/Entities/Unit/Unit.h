@@ -253,7 +253,7 @@ class Unit : public WorldObject
 
         void AddMana(int mp) { SetMana(GetMana() + mp); }
 
-        virtual void AddEXP(int64 exp, uint jp, bool bApplyStanima);
+        virtual void AddEXP(int64 exp, uint jp, bool bApplyStamina);
         void CancelSkill();
         void CancelAttack();
         int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);

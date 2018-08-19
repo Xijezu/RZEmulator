@@ -2809,7 +2809,7 @@ bool Player::EraseBullet(int64 count)
     return false;
 }
 
-void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
+void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
 {
     // @todo immoral
 
@@ -2820,7 +2820,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
     int   bonus_jp  = 0;
     if (exp != 0)
     {
-        if (bApplyStanima)
+        if (bApplyStamina)
         {
             gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
             auto s   = GetStamina();
