@@ -1284,7 +1284,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     m_vStateList.clear();
 }
 
-void Unit::AddEXP(int64 exp, uint jp, bool bApplyStanima)
+void Unit::AddEXP(int64 exp, uint jp, bool bApplyStamina)
 {
     SetUInt64Value(UNIT_FIELD_EXP, GetEXP() + exp);
     SetUInt32Value(UNIT_FIELD_JOBPOINT, GetJP() + jp);

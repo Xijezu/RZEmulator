@@ -224,7 +224,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         bool CheckTradeWeight();
         bool CheckTradeItem();
 
-        void AddEXP(int64 exp, uint jp, bool bApplyStanima) override;
+        void AddEXP(int64 exp, uint jp, bool bApplyStamina) override;
         uint16_t putonItem(ItemWearType, Item *) override;
         uint16_t putoffItem(ItemWearType) override;
         void SendItemWearInfoMessage(Item *item, Unit *u);
