@@ -1674,7 +1674,7 @@ void WorldSession::onDropItem(XPacket *pRecvPct)
     auto target = pRecvPct->read<uint>();
 	auto count = pRecvPct->read<uint16>();
     auto item = sMemoryPool.GetObjectInWorld<Item>(target);
-    if (item != nullptr && item->IsDropable() && count > 0 && item->m_pItemBase->group != GROUP_SUMMONCARD && !(item->m_Instance.Flag & ITEM_FLAG_SUMMON))
+    if (item != nullptr && item->IsDropable() && count > 0 && (item->m_pItemBase->group != GROUP_SUMMONCARD || !(item->m_Instance.Flag & ITEM_FLAG_SUMMON)))
     {
 		m_pPlayer->DropItem(m_pPlayer,item,count);
 		Messages::SendDropResult(m_pPlayer, target, true);
