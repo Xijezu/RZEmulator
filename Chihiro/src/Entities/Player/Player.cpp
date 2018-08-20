@@ -3389,7 +3389,7 @@ bool Player::IsSellable(Item *pItem) const
     if ( !Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING )
         result = false;
     else
-        result = (pItem->m_Instance.Flag & FLAG_RIDING != 0);
+        result = true; //this is not 100% correct, needs to be reworked
     return result;
 }
 
