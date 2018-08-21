@@ -2809,7 +2809,7 @@ bool Player::EraseBullet(int64 count)
     return false;
 }
 
-void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
+void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
 {
     // @todo immoral
 
@@ -2820,7 +2820,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStanima)
     int   bonus_jp  = 0;
     if (exp != 0)
     {
-        if (bApplyStanima)
+        if (bApplyStamina)
         {
             gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
             auto s   = GetStamina();
@@ -3383,6 +3383,16 @@ bool Player::IsErasable(Item *pItem) const
     return !pItem->IsInStorage();
 }
 
+bool Player::IsSellable(Item *pItem) const
+{
+    bool result;
+    if ( !Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING )
+        result = false;
+    else
+        result = true; //this is not 100% correct, needs to be reworked
+    return result;
+}
+
 bool Player::IsMixable(Item *pItem) const
 {
     return IsErasable(pItem);
@@ -3762,6 +3772,16 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
         Item::PendFreeItem(item);
 
     return true;
+}
+Item *Player::DropItem(Player *pTarget, Item *pItem, int64 count)
+{
+	Item *result;
+	Item *origItem = pItem;
+		Item *pNewItem = popItem(origItem, count, false);
+		pNewItem->Relocate(pTarget->GetPosition());
+		sWorld.AddItemToWorld(pNewItem);
+		result = pNewItem;
+		return result;
 }
 
 void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
