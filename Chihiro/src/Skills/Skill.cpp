@@ -234,8 +234,6 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
             break;
     } // END SWITCH
 
-    m_pOwner->SetMana(nMP - mana_cost);
-
     // Check for Creature Taming since it doesn't have an effect type
     if (m_SkillBase->id == SKILL_CREATURE_TAMING)
     {
