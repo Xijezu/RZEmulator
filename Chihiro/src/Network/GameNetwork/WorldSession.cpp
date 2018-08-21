@@ -111,14 +111,14 @@ constexpr WorldSessionHandler packetHandler[] =
                                               {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
                                               {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
                                               {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
+											  {TS_CS_DROP_ITEM,				STATUS_AUTHED,	  &WorldSession::onDropItem },
                                               {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
-                                              {TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
                                               {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
                                               {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
                                               {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
                                               {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard},
                                               {TS_CS_TARGETING,             STATUS_AUTHED,    &WorldSession::HandleNullPacket}, // @Todo: Do proper handling here
-                                              {TS_CS_DROP_QUEST,            STATUS_AUTHED,    &WorldSession::onDropQuest}
+                                              {TS_CS_DROP_QUEST,            STATUS_AUTHED,    &WorldSession::onDropQuest},	
                                       };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
@@ -1241,7 +1241,7 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     auto sell_count = pRecvPct->read<uint16>();
 
     auto item = m_pPlayer->FindItemByHandle(handle);
-    if (item == nullptr || item->m_pItemBase == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
+    if (item == nullptr || item->m_pItemBase == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle() || !item->IsInInventory())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
         return;
@@ -1256,7 +1256,8 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     auto nPrice        = GameContent::GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
     auto nResultCount  = item->m_Instance.nCount - sell_count;
     auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
-    if (nResultCount < 0)
+
+    if (!m_pPlayer->IsSellable(item) || nResultCount < 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, item->m_Instance.Code);
         return;
@@ -1671,18 +1672,18 @@ void WorldSession::onRevive(XPacket *)
 
 void WorldSession::onDropItem(XPacket *pRecvPct)
 {
-    return;
-
     auto target = pRecvPct->read<uint>();
-
+	auto count = pRecvPct->read<uint16>();
     auto item = sMemoryPool.GetObjectInWorld<Item>(target);
-    if (item != nullptr)
+    if (item != nullptr && item->IsDropable() && count > 0 && (item->m_pItemBase->group != GROUP_SUMMONCARD || !(item->m_Instance.Flag & ITEM_FLAG_SUMMON)))
     {
-        item->SetOwnerInfo(0, 0, 0);
-        item->Relocate(m_pPlayer->GetPosition());
-        sWorld.AddItemToWorld(item);
-        Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, target);
+		m_pPlayer->DropItem(m_pPlayer,item,count);
+		Messages::SendDropResult(m_pPlayer, target, true);
     }
+	else
+	{
+		Messages::SendDropResult(m_pPlayer, target, false);
+	}
 }
 
 void WorldSession::onMixRequest(XPacket *pRecvPct)

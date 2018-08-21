@@ -2,3 +2,10 @@
 /cmake-*/
 /.idea/
 CMakeLists.txt.user
+.cproject
+.project
+Chihiro.log
+DBErrors.log
+Server.log
+Mononoke.log
+debug/

@@ -86,7 +86,7 @@ MaxPingTime = 30
 #                         Example:  536870912 (512 mb)
 #
 Appender.Console=1,2,3,4,5,6
-Appender.Server=2,2,0,Server.log,w
+Appender.Server=2,2,0,Mononoke.log,w
 Appender.DBErrors=2,2,0,DBErrors.log
 
 #  Logger config values: Given a logger "name"

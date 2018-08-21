@@ -6,10 +6,10 @@
  *      Author: 0x5248
  */
 
+
 class Stacktrace
 {
     public:
         static void enableStacktracing();
-        static void parseDump();
         static void signalHandler(int signum);
 };
