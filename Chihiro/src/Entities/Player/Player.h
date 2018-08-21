@@ -323,6 +323,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
         void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
         void onExpChange() override;
+        void onEnergyChange() override;
         void onJobLevelUp() override;
         void onCantAttack(uint target, uint t) override;
         void onModifyStatAndAttribute() override;

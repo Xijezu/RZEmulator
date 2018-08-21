@@ -145,6 +145,9 @@ class Unit : public WorldObject
 
         uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
 
+        void AddEnergy(int nEnergy);
+        void RemoveEnergy(int nEnergy);
+
         /* FloatCreatureMastery*/
         virtual float GetFCM() const { return 1.0f; }
 
@@ -325,6 +328,8 @@ class Unit : public WorldObject
         virtual void onRegisterSkill(int64, int, int, int) {};
 
         virtual void onExpChange() {};
+
+        virtual void onEnergyChange() {};
 
         virtual void onJobLevelUp() {};
         virtual void onAttackAndSkillProcess();
