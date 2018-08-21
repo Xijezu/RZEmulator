@@ -546,6 +546,7 @@ struct SkillBase
     uint GetCastDelay(int skill_lv, int enhance);
     uint GetCoolTime(int enhance) const;
     bool IsUsable(uint8 nUseIndex) const;
+    int GetCostEnergy(uint8 skill_lv) const;
 
     int m_need_jp[50]{ };
 

@@ -79,16 +79,20 @@ enum EUnitFields
     UNIT_FIELD_HEAL_RATIO_BY_REST    = 0x0025, // Size: 1
     UNIT_FIELD_MP_HEAL_RATIO_BY_REST = 0x0026, // Size: 1
     UNIT_FIELD_HATE_RATIO            = 0x0027, // Size: 1
-    UNIT_FIELD_ADDITIONAL_HEAL       = 0x0028, // Size: 1
-    UNIT_FIELD_ADDITIONAL_MP_HEAL    = 0x0029, // Size: 1
-    UNIT_FIELD_EXP                   = 0x002A, // Size: 2
-    UNIT_FIELD_DEAD_TIME             = 0x002C, // Size: 1
-    UNIT_LAST_UPDATE_TIME            = 0x002D, // Size: 1
-    UNIT_LAST_STATE_PROC_TIME        = 0x002E, // Size: 1
-    UNIT_LAST_CANT_ATTACK_TIME       = 0x002F, // Size: 1
-    UNIT_LAST_SAVE_TIME              = 0x0030, // Size: 1
-    UNIT_LAST_HATE_UPDATE_TIME       = 0x0031, // Size: 1
-    UNIT_END                         = 0x0032
+    UNIT_FIELD_ADDITIONAL_HEAL     = 0x0028, // Size: 1
+    UNIT_FIELD_ADDITIONAL_MP_HEAL  = 0x0029, // Size: 1
+    UNIT_FIELD_EXP                 = 0x002A, // Size: 2
+    UNIT_FIELD_DEAD_TIME           = 0x002C, // Size: 1
+    UNIT_LAST_UPDATE_TIME          = 0x002D, // Size: 1
+    UNIT_LAST_STATE_PROC_TIME      = 0x002E, // Size: 1
+    UNIT_LAST_CANT_ATTACK_TIME     = 0x002F, // Size: 1
+    UNIT_LAST_SAVE_TIME            = 0x0030, // Size: 1
+    UNIT_LAST_HATE_UPDATE_TIME     = 0x0031, // Size: 1
+    UNIT_FIELD_ENERGY              = 0x0032, // Size: 1, Gaia Spheres
+    UNIT_FIELD_MAX_ENERGY          = 0x0033, // Size: 1
+    UNIT_FIELD_ARRAY_ENERGY        = 0x0034, // Size: 10
+    UNIT_FIELD_ENERGY_STARTING_POS = 0x003E, // Size: 1
+    UNIT_END                       = 0x003F
 };
 
 enum EBattleFields

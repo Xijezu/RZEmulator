@@ -2388,3 +2388,32 @@ State *Unit::GetState(StateCode code)
         return &*var; // iterator to State (*var), State to "pointer" (&var)
     return nullptr;
 }
+
+void Unit::AddEnergy(int nEnergy)
+{
+    if (GetInt32Value(UNIT_FIELD_ENERGY) >= GetInt32Value(UNIT_FIELD_MAX_ENERGY))
+        return;
+
+    //@todo: Energy Upkeep time?
+    auto tmp = GetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS) + GetInt32Value(UNIT_FIELD_ENERGY);
+    if (tmp >= 10)
+        tmp -= 10;
+    SetInt32Value(UNIT_FIELD_ARRAY_ENERGY + tmp, sWorld.GetArTime());
+    SetInt32Value(UNIT_FIELD_ENERGY, GetInt32Value(UNIT_FIELD_ENERGY) + 1);
+    onEnergyChange();
+}
+
+void Unit::RemoveEnergy(int nEnergy)
+{
+    auto energy = (GetInt32Value(UNIT_FIELD_ENERGY) < nEnergy) ? GetInt32Value(UNIT_FIELD_ENERGY) : nEnergy;
+
+    if (energy >= 1)
+    {
+        SetInt32Value(UNIT_FIELD_ENERGY, GetInt32Value(UNIT_FIELD_ENERGY) - energy);
+        SetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS, GetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS) + energy);
+
+        if (GetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS) >= 10)
+            SetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS, GetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS) - 10);
+        onEnergyChange();
+    }
+}

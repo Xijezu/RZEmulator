@@ -3774,3 +3774,14 @@ void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     }
     // @todo: SubSummon
 }
+
+void Player::onEnergyChange()
+{
+    XPacket packet(TS_SC_ENERGY);
+    packet << GetHandle();
+    packet << (int16_t)GetInt32Value(UNIT_FIELD_ENERGY);
+    sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     GetLayer(),
+                     packet);
+}

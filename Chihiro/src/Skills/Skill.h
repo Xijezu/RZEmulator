@@ -88,6 +88,9 @@ class Skill
         void assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp);
         void Init();
     private:
+        int GetCurrentMPCost();
+        int GetCurrentHPCost();
+
         std::vector<SkillResult> m_vResultList{ };
         void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
@@ -114,5 +117,5 @@ class Skill
         void DO_SUMMON();
         void DO_UNSUMMON();
         void CREATURE_TAMING();
-
+        void ADD_ENERGY();
 };

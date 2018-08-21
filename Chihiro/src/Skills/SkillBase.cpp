@@ -1,3 +1,6 @@
+
+#include "SkillBase.h"
+
 /*
  *  Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
  *
@@ -122,4 +125,9 @@ bool SkillBase::IsUsable(uint8 nUseIndex) const
         default:
             return false;
     }
+}
+
+int SkillBase::GetCostEnergy(uint8 skill_lv) const
+{
+    return (cost_energy_per_skl * skill_lv) + cost_energy;
 }

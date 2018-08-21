@@ -34,6 +34,7 @@ void Unit::CalculateStat()
     auto prev_hp     = GetHealth();
     auto prev_mp     = GetMana();
 
+    SetInt32Value(UNIT_FIELD_MAX_ENERGY, 5);
     SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, 1.0f);
 

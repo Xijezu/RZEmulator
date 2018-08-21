@@ -96,6 +96,21 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_
     CharacterDatabase.Execute(stmt);
 }
 
+int Skill::GetCurrentMPCost()
+{
+    auto cmp1 = m_SkillBase->cost_mp + (m_nEnhance * m_SkillBase->cost_mp_per_enhance) + (m_nRequestedSkillLevel * m_SkillBase->cost_mp_per_skl);
+    auto cmp2 = (m_SkillBase->cost_mp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_mp_per;
+    return (int)(m_pOwner->GetManaCostRatio((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0)
+                 * (m_pOwner->GetMana() * cmp2 / 100.0f + cmp1));
+}
+
+int Skill::GetCurrentHPCost()
+{
+    auto cmp1 = ((m_SkillBase->cost_hp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_hp_per) * m_pOwner->GetHealth();
+    auto cmp2 = m_SkillBase->cost_hp + (m_nRequestedSkillLevel * m_SkillBase->cost_hp_per_skl);
+    return (int)(cmp1 / 100.0f + cmp2);
+}
+
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
 {
     m_vResultList.clear();
@@ -125,12 +140,16 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     }
 
     /* ******* SKILL COST CALCULATION ********/
-    int   nHP       = m_pOwner->GetHealth();
-    int   nMP       = m_pOwner->GetMana();
-    float decHP     = 0;
-    float decMP     = 0;
-    int   hp_cost   = 0;
-    int   mana_cost = 0;
+    int   nHP{m_pOwner->GetHealth()};
+    int   nMP{m_pOwner->GetMana()};
+    int   energy{m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY)};
+    float decHP{0};
+    float decMP{0};
+    int   hp_cost{ };
+    int   mana_cost{ };
+    float fCostSP{ };
+    float fCostMP{ };
+    float fCostEnergy{ };
 
     if (m_pOwner->GetMaxHealth() != 0)
         decHP = 100 * nHP / m_pOwner->GetMaxHealth();
@@ -138,16 +157,9 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         decMP = 100 * nMP / m_pOwner->GetMaxMana();
 
     if ((m_SkillBase->effect_type == EF_TOGGLE_AURA || m_SkillBase->effect_type == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
-    {
         mana_cost = 0;
-    }
     else
-    {
-        auto cmp1 = m_SkillBase->cost_mp + (m_nEnhance * m_SkillBase->cost_mp_per_enhance) + (m_nRequestedSkillLevel * m_SkillBase->cost_mp_per_skl);
-        auto cmp2 = (m_SkillBase->cost_mp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_mp_per;
-        mana_cost = (int)(m_pOwner->GetManaCostRatio((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0)
-                          * (m_pOwner->GetMana() * cmp2 / 100.0f + cmp1));
-    }
+        mana_cost = GetCurrentMPCost();
 
     if (m_SkillBase->need_hp <= 0)
     {
@@ -159,7 +171,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     }
     else
     {
-        if (decHP < m_SkillBase->need_hp)
+        if (decHP < m_SkillBase->need_hp || nHP < GetCurrentHPCost())
         {
             Init();
             return TS_RESULT_NOT_ENOUGH_HP;
@@ -169,6 +181,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
     {
         Init();
         return TS_RESULT_NOT_ENOUGH_MP;
+    }
+
+    if (m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) < m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel))
+    {
+        Init();
+        return TS_RESULT_NOT_ENOUGH_ENERGY;
     }
 
     if (m_pOwner->GetLevel() < m_SkillBase->need_level)
@@ -181,7 +199,6 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         Init();
         return TS_RESULT_NOT_ENOUGH_JP;
     }
-
 
     /* ******* SKILL COST CALCULATION ********/
 
@@ -267,19 +284,18 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
     if (player == nullptr)
         return TS_RESULT_NOT_ACTABLE;
 
-    bool is_summoncard_bound {false};
-    for(int j=0; j < sizeof(player->m_aBindSummonCard)/sizeof(player->m_aBindSummonCard[0]); j++)
+    bool     is_summoncard_bound{false};
+    for (int j  = 0; j < sizeof(player->m_aBindSummonCard) / sizeof(player->m_aBindSummonCard[0]); j++)
     {
-        if(player->m_aBindSummonCard[j] != nullptr)
+        if (player->m_aBindSummonCard[j] != nullptr)
         {
-    	    is_summoncard_bound = true;
-    	    break;
+            is_summoncard_bound = true;
+            break;
         }
     }
 
-    if(!is_summoncard_bound)
-    	return TS_RESULT_NOT_EXIST;
-
+    if (!is_summoncard_bound)
+        return TS_RESULT_NOT_EXIST;
 
     int i = 0;
     while (item->m_nHandle != player->m_aBindSummonCard[i]->m_nHandle)
@@ -477,6 +493,50 @@ void Skill::ProcSkill()
 
     if (m_Status == SkillStatus::SS_FIRE)
     {
+        // First fire
+        if (!m_bMultiple || m_nCurrentFire == 0)
+        {
+            // Set remaining cooltime of the skill
+            SetRemainCoolTime(GetSkillCoolTime());
+
+            // @todo:
+            // Set remaining cooltime for every other skill in the same cool_time_group_id
+            if (m_SkillBase->cool_time_group_id != 0)
+            {
+//                         v85 = v3->m_pOwner;
+//                         *(v1 - 248) = v84->cool_time_group_id;
+//                         *(v1 - 252) = &::::_mySkillFunctor::_vftable_;
+//                         *(v1 - 244) = v83;
+//                         this.m_Owner.EnumActiveSkill((v1 - 252));
+            }
+            // Send skill list with updated skill cooltimes
+            Player *player{nullptr};
+            if (m_pOwner->IsPlayer())
+            {
+                player = m_pOwner->As<Player>();
+                if (player != nullptr)
+                    Messages::SendSkillList(player, m_pOwner, m_nSkillID);
+            }
+            else if (m_pOwner->IsSummon())
+            {
+                auto pSummon = m_pOwner->As<Summon>();
+                if (pSummon != nullptr)
+                    player = pSummon->GetMaster();
+                if (player != nullptr)
+                    Messages::SendSkillList(player, m_pOwner, m_nSkillID);
+            }
+            // @todo: Add aura handling here, see Pyrok/Pseudocode
+
+            // Calculate skill cost
+            if (GetCurrentMPCost() > 0)
+                m_pOwner->SetMana(m_pOwner->GetMana() - GetCurrentMPCost());
+            if (GetCurrentHPCost() > 0)
+                m_pOwner->SetHealth(m_pOwner->GetHealth() - GetCurrentHPCost());
+            if (m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel) > 0)
+                m_pOwner->RemoveEnergy(m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel));
+
+        }
+
         bool bIsSuccess = false;
 
         FireSkill(pTarget, bIsSuccess);
@@ -494,7 +554,6 @@ void Skill::ProcSkill()
 
         if (bIsSuccess)
         {
-            SetRemainCoolTime(GetSkillCoolTime());
             Player *pOwner = m_pOwner->IsSummon() ? ((Summon *)m_pOwner)->GetMaster() : (Player *)m_pOwner;
             Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
         }
@@ -582,6 +641,10 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             case SKILL_RETURN:
             case SKILL_TOWN_PORTAL:
                 TOWN_PORTAL();
+                bHandled = true;
+                break;
+            case SKILL_GAIA_FORCE_SAVING:
+                ADD_ENERGY();
                 bHandled    = true;
                 break;
             default:
@@ -1198,7 +1261,18 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
         auto damage   = unit->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental, hitBonus, nFlag, 0);
         sWorld.AddSkillDamageResult(m_vResultList, 1, (uint8)m_SkillBase->elemental, damage, unit->GetHandle());
     }
+}
 
+void Skill::ADD_ENERGY()
+{
+    for (int i = 0; i < m_nRequestedSkillLevel; i++)
+    {
+        if (m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) >= m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY))
+            return;
+        m_pOwner->AddEnergy(1);
+    }
+
+    m_vResultList.push_back({ });
 }
 
 void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
@@ -1369,25 +1443,25 @@ LABEL_28:
         case TARGET_TYPE::TARGET_SUMMON: // 31
         {
             Summon *pSummon{nullptr};
-            if(pTarget != nullptr && pTarget->IsInWorld())
+            if (pTarget != nullptr && pTarget->IsInWorld())
             {
                 pSummon = pTarget->As<Summon>();
             }
             else
             {
-     /*
-      if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
-        return;
-      v44 = pTarget[1].m_anWear[22];
-      if ( !v44 || !v44->bIsInWorld )
-        return;
-      pSummon = (StructSummon *)pTarget[1].m_anWear[22];
-      */
+                /*
+                 if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
+                   return;
+                 v44 = pTarget[1].m_anWear[22];
+                 if ( !v44 || !v44->bIsInWorld )
+                   return;
+                 pSummon = (StructSummon *)pTarget[1].m_anWear[22];
+                 */
             }
-            if(pSummon == nullptr)
+            if (pSummon == nullptr)
                 return;
 
-            if(pSummon->GetExactDist2d(pTarget) > 12 * m_SkillBase->valid_range)
+            if (pSummon->GetExactDist2d(pTarget) > 12 * m_SkillBase->valid_range)
                 return;
 
             fn.onCreature(this, t, m_pOwner, pSummon);
