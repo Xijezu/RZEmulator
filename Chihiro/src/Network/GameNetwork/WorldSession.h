@@ -92,6 +92,7 @@ class WorldSession : public XSession
         void onChatRequest(XPacket *);
 
         void onMoveRequest(XPacket *);
+        void onPing(XPacket *);
         void onRegionUpdate(XPacket *);
         void onChangeLocation(XPacket *);
         void onQuery(XPacket *);
@@ -149,6 +150,7 @@ class WorldSession : public XSession
         bool isValidTradeTarget(Player *);
         XSocket *_socket{nullptr};
 
+        uint32      m_nLastPing{0};
         uint32      _accountId{ };
         std::string _accountName{ };
         Player      *m_pPlayer{nullptr};

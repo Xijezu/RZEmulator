@@ -525,7 +525,7 @@ void Summon::applyJobLevelBonus()
 float Summon::GetFCM() const
 {
     Skill *skill{nullptr};
-    if (GetMaster() != nullptr && (skill = GetMaster()->GetSkill(1811)) != nullptr)
+    if (GetMaster() != nullptr && (skill = GetMaster()->GetSkill(SKILL_CREATURE_MASTERY)) != nullptr)
     {
         return skill->m_nSkillLevel * 0.03f + 0.69999999f;
     }
@@ -534,6 +534,9 @@ float Summon::GetFCM() const
 
 void Summon::onBeforeCalculateStat()
 {
+    // @todo Epic > 4: Item Mastery (EffectType 10046)
+    // @todo: if ( StructState::GetEffectType((StructState *)v6) == 112 ) -> EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD ???
+
     if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
         m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - 120;
 }

@@ -427,6 +427,7 @@ void World::UpdateSessions(uint diff)
 
         if (!pSession->Update(diff))    // As interval = 0
         {
+            pSession->KickPlayer();
             m_sessions.erase(itr);
             delete pSession;
         }

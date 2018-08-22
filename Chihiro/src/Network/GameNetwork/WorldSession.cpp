@@ -36,7 +36,7 @@
 #include "GameContent.h"
 
 // Constructo - give it a socket
-WorldSession::WorldSession(XSocket *socket) : _socket(socket)
+WorldSession::WorldSession(XSocket *socket) : _socket(socket), m_nLastPing(sWorld.GetArTime())
 {
 }
 
@@ -70,13 +70,13 @@ typedef struct WorldSessionHandler
 
 constexpr WorldSessionHandler packetHandler[] =
                                       {
-                                              {TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_UNKN,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_REPORT,                STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
-                                              {TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
+                                              {TS_CS_VERSION,           STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_CS_VERSION2,          STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_CS_PING,              STATUS_CONNECTED, &WorldSession::onPing},
+                                              {TS_CS_UNKN,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_CS_REPORT,            STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {TS_AG_CLIENT_LOGIN,      STATUS_CONNECTED, &WorldSession::onAuthResult},
+                                              {TS_CS_ACCOUNT_WITH_AUTH, STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
                                               {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
                                               {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
                                               {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
@@ -111,7 +111,7 @@ constexpr WorldSessionHandler packetHandler[] =
                                               {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
                                               {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
                                               {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
-											  {TS_CS_DROP_ITEM,				STATUS_AUTHED,	  &WorldSession::onDropItem },
+                                              {TS_CS_DROP_ITEM,				STATUS_AUTHED,	  &WorldSession::onDropItem },
                                               {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
                                               {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
                                               {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
@@ -1656,7 +1656,16 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
 
 bool WorldSession::Update(uint /*diff*/)
 {
-    return _socket != nullptr;
+    if (_socket == nullptr)
+        return false;
+
+    if (_accountId != 0 && (m_nLastPing > 0 && m_nLastPing + 30000 < sWorld.GetArTime()))
+    {
+        NG_LOG_DEBUG("server.worldserver", "Kicking Account [%d : %s] due to inactivity.", _accountId, _accountName.c_str());
+        return false;
+    }
+
+    return true;
 }
 
 void WorldSession::onRevive(XPacket *)
@@ -2425,4 +2434,9 @@ void WorldSession::onDropQuest(XPacket *pRecvPct)
         return;
     }
     Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_NOT_ACTABLE, 0);
+}
+
+void WorldSession::onPing(XPacket *)
+{
+    m_nLastPing = sWorld.GetArTime();
 }
