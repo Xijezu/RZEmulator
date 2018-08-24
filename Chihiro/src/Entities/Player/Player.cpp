@@ -889,7 +889,7 @@ void Player::SendLoginProperties()
 
 void Player::SendGoldChaosMessage()
 {
-    XPacket packet(TS_SC_GOLD_UPDATE);
+    XPacket packet(NGemity::Packets::TS_SC_GOLD_UPDATE);
     packet << GetGold();
     packet << GetChaos();
     SendPacket(packet);
@@ -908,7 +908,7 @@ void Player::SendJobInfo()
 
 void Player::SendWearInfo()
 {
-    XPacket packet(TS_SC_WEAR_INFO);
+    XPacket packet(NGemity::Packets::TS_SC_WEAR_INFO);
     packet << GetHandle();
     for (int  i = 0; i < MAX_ITEM_WEAR; i++)
     {
@@ -1112,7 +1112,7 @@ uint16_t Player::putoffItem(ItemWearType pos)
 
 void Player::SendItemWearInfoMessage(Item *item, Unit *u)
 {
-    XPacket packet(TS_SC_ITEM_WEAR_INFO);
+    XPacket packet(NGemity::Packets::TS_SC_ITEM_WEAR_INFO);
     packet << (uint32_t)item->m_nHandle;
     packet << (int16_t)item->m_Instance.nWearInfo;
     packet << (uint32_t)(u != nullptr ? u->GetHandle() : 0);
@@ -1461,7 +1461,7 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
         pos._orientation = client_pos._orientation;
     }
     int     nl = GameContent::GetLocationID(x, y);
-    XPacket locPct(TS_SC_CHANGE_LOCATION);
+    XPacket locPct(NGemity::Packets::TS_SC_CHANGE_LOCATION);
     locPct << m_nWorldLocationId;
     locPct << nl;
     SendPacket(locPct);
@@ -1750,7 +1750,7 @@ void Player::DoUnSummon(Summon *pSummon)
 
     m_pMainSummon = nullptr;
 
-    XPacket usPct(TS_SC_UNSUMMON);
+    XPacket usPct(NGemity::Packets::TS_SC_UNSUMMON);
     usPct << pSummon->GetHandle();
     sWorld.Broadcast((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pSummon->GetLayer(), usPct);
     if (sRegion.IsVisibleRegion((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
@@ -3022,7 +3022,7 @@ void Player::sendBonusEXPJPMsg()
     if (cnt == 0)
         return;
 
-    XPacket bonusPct(TS_SC_BONUS_EXP_JP);
+    XPacket bonusPct(NGemity::Packets::TS_SC_BONUS_EXP_JP);
     bonusPct << GetHandle();
     bonusPct << cnt;
     for (auto &bonus : m_pBonusInfo)
@@ -3596,8 +3596,8 @@ bool Player::ProcessTrade()
         {
             if (resultGold == TS_RESULT_TOO_MUCH_MONEY)
             {
-                Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
-                Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(this, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
@@ -3614,8 +3614,8 @@ bool Player::ProcessTrade()
         {
             if (resultGold == TS_RESULT_TOO_MUCH_MONEY)
             {
-                Messages::SendResult(this, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
-                Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(this, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
+                Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
@@ -3797,7 +3797,7 @@ void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
 void Player::onEnergyChange()
 {
-    XPacket packet(TS_SC_ENERGY);
+    XPacket packet(NGemity::Packets::TS_SC_ENERGY);
     packet << GetHandle();
     packet << (int16_t)GetInt32Value(UNIT_FIELD_ENERGY);
     sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),

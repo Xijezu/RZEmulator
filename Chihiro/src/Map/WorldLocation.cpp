@@ -50,7 +50,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
     if (wl != m_vWorldLocation.end())
     {
         wl->m_vIncludeClient.emplace_back(player);
-        XPacket worldLocationPct(TS_SC_WEATHER_INFO);
+        XPacket worldLocationPct(NGemity::Packets::TS_SC_WEATHER_INFO);
         worldLocationPct << (uint32_t)idx;
         worldLocationPct << (uint16_t)wl->current_weather;
         player->SendPacket(worldLocationPct);
@@ -89,7 +89,7 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
 
     if (wl != m_vWorldLocation.end())
     {
-        XPacket weatherPct(TS_SC_WEATHER_INFO);
+        XPacket weatherPct(NGemity::Packets::TS_SC_WEATHER_INFO);
         weatherPct << (uint32_t)idx;
         weatherPct << (uint16_t)wl->current_weather;
         player->SendPacket(weatherPct);

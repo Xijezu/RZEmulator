@@ -274,7 +274,7 @@ void Unit::regenHPMP(uint t)
                 this->m_nRegenHP += GetHealth() - prev_hp;
                 if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3)
                 {
-                    XPacket hpmpPct(TS_SC_REGEN_HPMP);
+                    XPacket hpmpPct(NGemity::Packets::TS_SC_REGEN_HPMP);
                     hpmpPct << (uint)GetHandle();
                     hpmpPct << (int16)m_nRegenHP;
                     hpmpPct << (int16)m_fRegenMP;
@@ -1172,7 +1172,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
             attack_count *= 2;
     }
 
-    XPacket pct(TS_SC_ATTACK_EVENT);
+    XPacket pct(NGemity::Packets::TS_SC_ATTACK_EVENT);
     pct << GetHandle();
     if (pTarget != nullptr)
         pct << pTarget->GetHandle();
@@ -2080,7 +2080,7 @@ void Unit::procStateDamage(uint t)
                 }
             }
 
-            XPacket statePct(TS_SC_STATE_RESULT);
+            XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
             statePct << (uint)sd.caster;
             statePct << GetHandle();
             statePct << sd.code;
@@ -2144,7 +2144,7 @@ void Unit::procStateDamage(uint t)
             int df = 0;
             if (nHealHP != 0)
             {
-                XPacket statePct(TS_SC_STATE_RESULT);
+                XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
                 statePct << (uint)sd.caster;
                 statePct << GetHandle();
                 statePct << sd.code;
@@ -2166,7 +2166,7 @@ void Unit::procStateDamage(uint t)
                 df = df != 0 ? -1 : 0;
                 df = total_amount & df;
 
-                XPacket statePct(TS_SC_STATE_RESULT);
+                XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
                 statePct << (uint)sd.caster;
                 statePct << GetHandle();
                 statePct << sd.code;

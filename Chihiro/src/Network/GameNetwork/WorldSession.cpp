@@ -63,62 +63,62 @@ enum eStatus
 
 typedef struct WorldSessionHandler
 {
-    uint16_t cmd;
-    uint8_t  status;
+    NGemity::Packets cmd;
+    uint8_t          status;
     void (WorldSession::*handler)(XPacket *);
 } GameHandler;
 
 constexpr WorldSessionHandler packetHandler[] =
                                       {
-                                              {TS_CS_VERSION,           STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_VERSION2,          STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_PING,              STATUS_CONNECTED, &WorldSession::onPing},
-                                              {TS_CS_UNKN,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_CS_REPORT,            STATUS_CONNECTED, &WorldSession::HandleNullPacket},
-                                              {TS_AG_CLIENT_LOGIN,      STATUS_CONNECTED, &WorldSession::onAuthResult},
-                                              {TS_CS_ACCOUNT_WITH_AUTH, STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
-                                              {TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
-                                              {TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
-                                              {TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
-                                              {TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &WorldSession::onCharacterList},
-                                              {TS_CS_LOGIN,                 STATUS_AUTHED,    &WorldSession::onLogin},
-                                              {TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &WorldSession::onCharacterName},
-                                              {TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onCreateCharacter},
-                                              {TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onDeleteCharacter},
-                                              {TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &WorldSession::onMoveRequest},
-                                              {TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
-                                              {TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
-                                              {TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
-                                              {TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
-                                              {TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
-                                              {TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
-                                              {TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
-                                              {TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
-                                              {TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
-                                              {TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
-                                              {TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
-                                              {TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
-                                              {TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
-                                              {TS_TRADE,                    STATUS_AUTHED,    &WorldSession::onTrade},
-                                              {TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
-                                              {TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
-                                              {TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
-                                              {TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
-                                              {TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
-                                              {TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
-                                              {TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
-                                              {TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
-                                              {TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
-                                              {TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
-                                              {TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
-                                              {TS_CS_DROP_ITEM,				STATUS_AUTHED,	  &WorldSession::onDropItem },
-                                              {TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
-                                              {TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
-                                              {TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
-                                              {TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
-                                              {TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard},
-                                              {TS_CS_TARGETING,             STATUS_AUTHED,    &WorldSession::HandleNullPacket}, // @Todo: Do proper handling here
-                                              {TS_CS_DROP_QUEST,            STATUS_AUTHED,    &WorldSession::onDropQuest},	
+                                              {NGemity::Packets::TS_CS_VERSION,               STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {NGemity::Packets::TS_CS_VERSION2,              STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {NGemity::Packets::TS_CS_PING,                  STATUS_CONNECTED, &WorldSession::onPing},
+                                              {NGemity::Packets::TS_CS_UNKN,                  STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {NGemity::Packets::TS_CS_REPORT,                STATUS_CONNECTED, &WorldSession::HandleNullPacket},
+                                              {NGemity::Packets::TS_AG_CLIENT_LOGIN,          STATUS_CONNECTED, &WorldSession::onAuthResult},
+                                              {NGemity::Packets::TS_CS_ACCOUNT_WITH_AUTH,     STATUS_CONNECTED, &WorldSession::onAccountWithAuth},
+                                              {NGemity::Packets::TS_CS_REQUEST_LOGOUT,        STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                              {NGemity::Packets::TS_CS_REQUEST_RETURN_LOBBY,  STATUS_AUTHED,    &WorldSession::onLogoutTimerRequest},
+                                              {NGemity::Packets::TS_CS_RETURN_LOBBY,          STATUS_AUTHED,    &WorldSession::onReturnToLobby},
+                                              {NGemity::Packets::TS_CS_CHARACTER_LIST,        STATUS_AUTHED,    &WorldSession::onCharacterList},
+                                              {NGemity::Packets::TS_CS_LOGIN,                 STATUS_AUTHED,    &WorldSession::onLogin},
+                                              {NGemity::Packets::TS_CS_CHECK_CHARACTER_NAME,  STATUS_AUTHED,    &WorldSession::onCharacterName},
+                                              {NGemity::Packets::TS_CS_CREATE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onCreateCharacter},
+                                              {NGemity::Packets::TS_CS_DELETE_CHARACTER,      STATUS_AUTHED,    &WorldSession::onDeleteCharacter},
+                                              {NGemity::Packets::TS_CS_MOVE_REQUEST,          STATUS_AUTHED,    &WorldSession::onMoveRequest},
+                                              {NGemity::Packets::TS_CS_REGION_UPDATE,         STATUS_AUTHED,    &WorldSession::onRegionUpdate},
+                                              {NGemity::Packets::TS_CS_CHAT_REQUEST,          STATUS_AUTHED,    &WorldSession::onChatRequest},
+                                              {NGemity::Packets::TS_CS_PUTON_ITEM,            STATUS_AUTHED,    &WorldSession::onPutOnItem},
+                                              {NGemity::Packets::TS_CS_PUTOFF_ITEM,           STATUS_AUTHED,    &WorldSession::onPutOffItem},
+                                              {NGemity::Packets::TS_CS_GET_SUMMON_SETUP_INFO, STATUS_AUTHED,    &WorldSession::onGetSummonSetupInfo},
+                                              {NGemity::Packets::TS_CS_CONTACT,               STATUS_AUTHED,    &WorldSession::onContact},
+                                              {NGemity::Packets::TS_CS_DIALOG,                STATUS_AUTHED,    &WorldSession::onDialog},
+                                              {NGemity::Packets::TS_CS_BUY_ITEM,              STATUS_AUTHED,    &WorldSession::onBuyItem},
+                                              {NGemity::Packets::TS_CS_CHANGE_LOCATION,       STATUS_AUTHED,    &WorldSession::onChangeLocation},
+                                              {NGemity::Packets::TS_TIMESYNC,                 STATUS_AUTHED,    &WorldSession::onTimeSync},
+                                              {NGemity::Packets::TS_CS_GAME_TIME,             STATUS_AUTHED,    &WorldSession::onGameTime},
+                                              {NGemity::Packets::TS_CS_QUERY,                 STATUS_AUTHED,    &WorldSession::onQuery},
+                                              {NGemity::Packets::TS_CS_MIX,                   STATUS_AUTHED,    &WorldSession::onMixRequest},
+                                              {NGemity::Packets::TS_TRADE,                    STATUS_AUTHED,    &WorldSession::onTrade},
+                                              {NGemity::Packets::TS_CS_UPDATE,                STATUS_AUTHED,    &WorldSession::onUpdate},
+                                              {NGemity::Packets::TS_CS_JOB_LEVEL_UP,          STATUS_AUTHED,    &WorldSession::onJobLevelUp},
+                                              {NGemity::Packets::TS_CS_LEARN_SKILL,           STATUS_AUTHED,    &WorldSession::onLearnSkill},
+                                              {NGemity::Packets::TS_EQUIP_SUMMON,             STATUS_AUTHED,    &WorldSession::onEquipSummon},
+                                              {NGemity::Packets::TS_CS_SELL_ITEM,             STATUS_AUTHED,    &WorldSession::onSellItem},
+                                              {NGemity::Packets::TS_CS_SKILL,                 STATUS_AUTHED,    &WorldSession::onSkill},
+                                              {NGemity::Packets::TS_CS_SET_PROPERTY,          STATUS_AUTHED,    &WorldSession::onSetProperty},
+                                              {NGemity::Packets::TS_CS_ATTACK_REQUEST,        STATUS_AUTHED,    &WorldSession::onAttackRequest},
+                                              {NGemity::Packets::TS_CS_CANCEL_ACTION,         STATUS_AUTHED,    &WorldSession::onCancelAction},
+                                              {NGemity::Packets::TS_CS_TAKE_ITEM,             STATUS_AUTHED,    &WorldSession::onTakeItem},
+                                              {NGemity::Packets::TS_CS_USE_ITEM,              STATUS_AUTHED,    &WorldSession::onUseItem},
+                                              {NGemity::Packets::TS_CS_DROP_ITEM,             STATUS_AUTHED,    &WorldSession::onDropItem},
+                                              {NGemity::Packets::TS_CS_RESURRECTION,          STATUS_AUTHED,    &WorldSession::onRevive},
+                                              {NGemity::Packets::TS_CS_SOULSTONE_CRAFT,       STATUS_AUTHED,    &WorldSession::onSoulStoneCraft},
+                                              {NGemity::Packets::TS_CS_STORAGE,               STATUS_AUTHED,    &WorldSession::onStorage},
+                                              {NGemity::Packets::TS_CS_BIND_SKILLCARD,        STATUS_AUTHED,    &WorldSession::onBindSkillCard},
+                                              {NGemity::Packets::TS_CS_UNBIND_SKILLCARD,      STATUS_AUTHED,    &WorldSession::onUnBindSkilLCard},
+                                              {NGemity::Packets::TS_CS_TARGETING,             STATUS_AUTHED,    &WorldSession::HandleNullPacket}, // @Todo: Do proper handling here
+                                              {NGemity::Packets::TS_CS_DROP_QUEST,            STATUS_AUTHED,    &WorldSession::onDropQuest},
                                       };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
@@ -160,7 +160,7 @@ void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 
 void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
 {
-    XPacket packet(TS_SC_RESULT);
+    XPacket packet(NGemity::Packets::TS_SC_RESULT);
     packet << (uint16)_msg;
     packet << (uint16)_result;
     packet << (int32)_value;
@@ -169,7 +169,7 @@ void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
 
 void WorldSession::onCharacterList(XPacket */*pGamePct*/)
 {
-    XPacket packet(TS_SC_CHARACTER_LIST);
+    XPacket packet(NGemity::Packets::TS_SC_CHARACTER_LIST);
     packet << (uint32)time(nullptr);
     packet << (uint16)0;
     auto info = _PrepareCharacterList(_accountId);
@@ -271,7 +271,7 @@ void WorldSession::onAuthResult(XPacket *pGamePct)
         _accountName = szAccount;
         sWorld.AddSession(this);
     }
-    _SendResultMsg(TS_CS_ACCOUNT_WITH_AUTH, result, 0);
+    Messages::SendResult(this, NGemity::Packets::TS_CS_ACCOUNT_WITH_AUTH, result, 0);
 }
 
 void WorldSession::onLogin(XPacket *pRecvPct)
@@ -291,7 +291,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
 
     sScriptingMgr.RunString(m_pPlayer, string_format("on_login('%s')", m_pPlayer->GetName()));
 
-    XPacket packet(TS_SC_LOGIN_RESULT); // Login Result
+    XPacket packet(NGemity::Packets::TS_SC_LOGIN_RESULT); // Login Result
     packet << (uint8)1;
     packet << m_pPlayer->GetHandle();
     packet << m_pPlayer->GetPositionX();
@@ -718,7 +718,7 @@ void WorldSession::onPutOnItem(XPacket *_packet)
         {
             if (!ci->IsWearable() || m_pPlayer->FindItemBySID(ci->m_Instance.UID) == nullptr)
             {
-                Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
+                Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return;
             }
 
@@ -728,7 +728,7 @@ void WorldSession::onPutOnItem(XPacket *_packet)
                 auto summon = sMemoryPool.GetObjectInWorld<Summon>(target_handle);
                 if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
                 {
-                    Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
+                    Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
                     return;
                 }
                 unit = summon;
@@ -738,7 +738,7 @@ void WorldSession::onPutOnItem(XPacket *_packet)
             {
                 unit->CalculateStat();
                 Messages::SendStatInfo(m_pPlayer, unit);
-                Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
+                Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
                 if (unit->IsPlayer())
                 {
                     m_pPlayer->SendWearInfo();
@@ -755,7 +755,7 @@ void WorldSession::onPutOffItem(XPacket *_packet)
 
     if (m_pPlayer->GetHealth() == 0)
     {
-        Messages::SendResult(m_pPlayer, TS_CS_PUTOFF_ITEM, 5, 0);
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTOFF_ITEM, 5, 0);
         return;
     }
 
@@ -765,7 +765,7 @@ void WorldSession::onPutOffItem(XPacket *_packet)
         auto summon = sMemoryPool.GetObjectInWorld<Summon>(target_handle);
         if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
         {
-            Messages::SendResult(m_pPlayer, TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
             return;
         }
         unit = summon;
@@ -774,7 +774,7 @@ void WorldSession::onPutOffItem(XPacket *_packet)
     Item *curitem = unit->GetWornItem((ItemWearType)position);
     if (curitem == nullptr)
     {
-        Messages::SendResult(m_pPlayer, TS_CS_PUTOFF_ITEM, 1, 0);
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTOFF_ITEM, 1, 0);
     }
     else
     {
@@ -951,7 +951,7 @@ void WorldSession::onBuyItem(XPacket *pRecvPct)
                 }
             }
             Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item_code);
-            XPacket resultPct(TS_SC_NPC_TRADE_INFO);
+            XPacket resultPct(NGemity::Packets::TS_SC_NPC_TRADE_INFO);
             resultPct << (uint8_t)0;
             resultPct << item_code;
             resultPct << (uint64)buy_count;
@@ -995,7 +995,7 @@ void WorldSession::onTimeSync(XPacket *pRecvPct)
     m_pPlayer->m_TS.onEcho(ct - packet_time);
     if (m_pPlayer->m_TS.m_vT.size() >= 4)
     {
-        XPacket result(TS_SC_SET_TIME);
+        XPacket result(NGemity::Packets::TS_SC_SET_TIME);
         result << (uint32_t)m_pPlayer->m_TS.GetInterval();
         GetSocket()->SendPacket(result);
     }
@@ -1285,7 +1285,7 @@ void WorldSession::onSellItem(XPacket *pRecvPct)
     }
 
     Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, item->GetHandle());
-    XPacket tradePct(TS_SC_NPC_TRADE_INFO);
+    XPacket tradePct(NGemity::Packets::TS_SC_NPC_TRADE_INFO);
     tradePct << (uint8)1;
     tradePct << code;
     tradePct << (int64)sell_count;
@@ -1535,7 +1535,7 @@ void WorldSession::onTakeItem(XPacket *pRecvPct)
         }
     }
 
-    XPacket resultPct(TS_SC_TAKE_ITEM_RESULT);
+    XPacket resultPct(NGemity::Packets::TS_SC_TAKE_ITEM_RESULT);
     resultPct << item_handle;
     resultPct << m_pPlayer->GetHandle();
     sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
@@ -1648,7 +1648,7 @@ void WorldSession::onUseItem(XPacket *pRecvPct)
         }
     }
 
-    XPacket resPct(TS_SC_USE_ITEM_RESULT);
+    XPacket resPct(NGemity::Packets::TS_SC_USE_ITEM_RESULT);
     resPct << item_handle;
     resPct << target_handle;
     m_pPlayer->SendPacket(resPct);
@@ -2127,12 +2127,12 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
         return;
 
     if (tradeTarget->m_bTrading || m_pPlayer->m_bTrading)
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tradeTarget->GetHandle());
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tradeTarget->GetHandle());
     else if (!m_pPlayer->IsTradableWith(tradeTarget))
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
     else
     {
-        XPacket tradePct(TS_TRADE);
+        XPacket tradePct(NGemity::Packets::TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_REQUEST_TRADE; // mode
         tradeTarget->SendPacket(tradePct);
@@ -2147,19 +2147,19 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
 
     if (m_pPlayer->m_bTrading || tradeTarget->m_bTrading || m_pPlayer->m_hTamingTarget || tradeTarget->m_hTamingTarget)
     {
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
     }
     else
     {
         m_pPlayer->StartTrade(tradeTarget->GetHandle());
         tradeTarget->StartTrade(m_pPlayer->GetHandle());
 
-        XPacket tradePlayerPct(TS_TRADE);
+        XPacket tradePlayerPct(NGemity::Packets::TS_TRADE);
         tradePlayerPct << tradeTarget->GetHandle();
         tradePlayerPct << (uint8)TM_BEGIN_TRADE; // mode
         m_pPlayer->SendPacket(tradePlayerPct);
 
-        XPacket tradeTargetPct(TS_TRADE);
+        XPacket tradeTargetPct(NGemity::Packets::TS_TRADE);
         tradeTargetPct << m_pPlayer->GetHandle();
         tradeTargetPct << (uint8)TM_BEGIN_TRADE; // mode
         tradeTarget->SendPacket(tradeTargetPct);
@@ -2184,7 +2184,7 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    XPacket tradePct(TS_TRADE);
+    XPacket tradePct(NGemity::Packets::TS_TRADE);
     tradePct << m_pPlayer->GetHandle();
     tradePct << (uint8)TM_REJECT_TRADE;
     tradeTarget->SendPacket(tradePct);
@@ -2212,13 +2212,13 @@ void WorldSession::onAddItem(uint32 hTradeTarget, XPacket *pRecvPct)
         {
             NG_LOG_ERROR("trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
         }
 
         if (!m_pPlayer->IsTradable(item))
         {
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
 
@@ -2256,7 +2256,7 @@ void WorldSession::onRemoveItem(uint32 hTradeTarget, XPacket *pRecvPct)
         }
         else
         {
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
         }
     }
 }
@@ -2278,13 +2278,13 @@ void WorldSession::onAddGold(uint32 hTradeTarget, XPacket *pRecvPct)
         {
             NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
         }
 
         m_pPlayer->AddGoldToTradeWindow(gold);
 
-        XPacket tradePct(TS_TRADE);
+        XPacket tradePct(NGemity::Packets::TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_ADD_GOLD;
         tradePct << (uint32)0; // Handle
@@ -2308,7 +2308,7 @@ void WorldSession::onFreezeTrade()
     {
         m_pPlayer->FreezeTrade();
 
-        XPacket tradePct(TS_TRADE);
+        XPacket tradePct(NGemity::Packets::TS_TRADE);
         tradePct << m_pPlayer->GetHandle();
         tradePct << (uint8)TM_FREEZE_TRADE;
         tradeTarget->SendPacket(tradePct);
@@ -2340,7 +2340,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
     m_pPlayer->ConfirmTrade();
 
-    XPacket tradePct(TS_TRADE);
+    XPacket tradePct(NGemity::Packets::TS_TRADE);
     tradePct << m_pPlayer->GetHandle();
     tradePct << (uint8)TM_CONFIRM_TRADE;
     tradeTarget->SendPacket(tradePct);
@@ -2355,8 +2355,8 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
 
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
-        Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
+        Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_HEAVY, 0);
 
         return;
     }
@@ -2367,8 +2367,8 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
 
-        Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
-        Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
+        Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
+        Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_ACCESS_DENIED, 0);
 
         return;
     }
@@ -2386,14 +2386,14 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
         if (bExceedGold)
         {
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
-            Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
+            Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
         }
 
         if (bExceedGoldTradeTarget)
         {
-            Messages::SendResult(m_pPlayer, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
-            Messages::SendResult(tradeTarget, TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
+            Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
+            Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
         }
     }
     else
@@ -2406,7 +2406,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
             && tradeTarget->GetTradeTarget() == m_pPlayer
             && m_pPlayer->ProcessTrade())
         {
-            XPacket tradePct(TS_TRADE);
+            XPacket tradePct(NGemity::Packets::TS_TRADE);
             tradePct << m_pPlayer->GetHandle();
             tradePct << (uint8)TM_PROCESS_TRADE;
             tradeTarget->SendPacket(tradePct);

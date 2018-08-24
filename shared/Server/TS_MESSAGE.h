@@ -15,6 +15,8 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+#include "ClientPackets.h"
+
 enum TS_ResultCode
 {
     TS_RESULT_SUCCESS                               = 0x0,
