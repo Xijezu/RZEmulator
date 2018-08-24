@@ -28,6 +28,7 @@
 #include "GroupManager.h"
 #include "ItemCollector.h"
 #include "GameContent.h"
+#include "Packet/PacketEpics.h"
 
 std::atomic<bool>   World::m_stopEvent{false};
 std::atomic<uint32> World::m_worldLoopCounter{0};
@@ -125,6 +126,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_LOCAL_FLAG]      = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
     m_int_configs[CONFIG_MAX_LEVEL]       = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
     m_int_configs[CONFIG_SERVER_INDEX]    = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
+    m_int_configs[CONFIG_PACKET_VERSION]  = (uint)sConfigMgr->GetIntDefault("Game.PacketVersion", EPIC_LATEST);
 
     // Float Configs
     setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));

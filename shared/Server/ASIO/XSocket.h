@@ -26,6 +26,7 @@
 #include "MPSCQueue.h"
 #include "XPacket.h"
 #include <mutex>
+#include "Packet/MessageSerializerBuffer.h"
 
 class EncryptablePacket : public XPacket
 {
@@ -121,6 +122,17 @@ class XSocket : public Socket<XSocket>
             //sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
 
             _bufferQueue.Enqueue(new EncryptablePacket(packet, _session->IsEncrypted()));
+        }
+
+        template<class TS_SERIALIZABLE_PACKET>
+        void SendPacket(TS_SERIALIZABLE_PACKET const &packet, int version)
+        {
+            if (!IsOpen())
+                return;
+
+            MessageSerializerBuffer serializer(version);
+            packet.serialize(&serializer);
+            SendPacket(serializer.getFinalizedPacket());
         }
 
         void SetSession(XSession *session)
