@@ -395,7 +395,7 @@ WorldObject::~WorldObject() = default;
 void WorldObject::SendEnterMsg(Player *pPlayer)
 {
     Position tmpPos = this->GetCurrentPosition(sWorld.GetArTime());
-    XPacket  packet(TS_SC_ENTER);
+    XPacket  packet(NGemity::Packets::TS_SC_ENTER);
     packet << (uint8_t)GetMainType();
     packet << GetHandle();
     packet << tmpPos.GetPositionX();

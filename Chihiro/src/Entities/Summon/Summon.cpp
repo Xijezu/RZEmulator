@@ -273,7 +273,7 @@ bool Summon::DoEvolution()
             CalculateStat();
             m_pMaster->Save(false);
 
-            XPacket evoPct(TS_SC_SUMMON_EVOLUTION);
+            XPacket evoPct(NGemity::Packets::TS_SC_SUMMON_EVOLUTION);
             evoPct << m_pItem->m_nHandle;
             evoPct << GetHandle();
             evoPct.fill(GetName(), 19);

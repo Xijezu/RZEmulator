@@ -16,10 +16,15 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "Encryption/ByteBuffer.h"
-#include "Server/TS_MESSAGE.h"
+#include "ByteBuffer.h"
+#include "TS_MESSAGE.h"
 
 class MessageBuffer;
+
+namespace NGemity
+{
+    enum class Packets;
+}
 
 class XPacket : public ByteBuffer
 {
@@ -27,6 +32,12 @@ class XPacket : public ByteBuffer
         // just container for later use
         XPacket() : ByteBuffer(0), m_nPacketID(0)
         {
+        }
+
+        explicit XPacket(NGemity::Packets packID) : ByteBuffer(0), m_nPacketID(static_cast<uint16>(packID))
+        {
+            resize(7);
+            put(4, m_nPacketID);
         }
 
         explicit XPacket(uint16 packID) : ByteBuffer(0), m_nPacketID(packID)

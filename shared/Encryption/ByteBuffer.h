@@ -28,6 +28,7 @@
 #include "Common.h"
 #include "ByteConverter.h"
 
+#include "Errors.h"
 #include <exception>
 #include <list>
 #include <map>

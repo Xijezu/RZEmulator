@@ -449,7 +449,7 @@ void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, 
     auto    rx    = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     auto    ry    = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     uint8   layer = pUnit->GetLayer();
-    XPacket skillPct(TS_SC_SKILL);
+    XPacket skillPct(NGemity::Packets::TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint)rx, (uint)ry, layer, skillPct);
 }
@@ -459,7 +459,7 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
     if (pUnit1 == nullptr || pUnit2 == nullptr)
         return;
 
-    XPacket skillPct(TS_SC_SKILL);
+    XPacket skillPct(NGemity::Packets::TS_SC_SKILL);
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),

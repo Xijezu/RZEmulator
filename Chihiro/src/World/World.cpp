@@ -344,7 +344,7 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
     // Create & set leave packet
-    XPacket leavePct(TS_SC_LEAVE);
+    XPacket leavePct(NGemity::Packets::TS_SC_LEAVE);
     leavePct << obj->GetHandle();
 
     BroadcastFunctor broadcastFunctor;
@@ -586,7 +586,7 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {
     if (pUnit == nullptr || pItem == nullptr)
         return;
-    XPacket itemPct(TS_SC_ITEM_DROP_INFO);
+    XPacket itemPct(NGemity::Packets::TS_SC_ITEM_DROP_INFO);
     itemPct << pUnit->GetHandle();
     itemPct << pItem->GetHandle();
     Broadcast((uint)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
@@ -847,7 +847,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
 
         if (chaos > 0.0f)
         {
-            XPacket chaosPct(TS_SC_GET_CHAOS);
+            XPacket chaosPct(NGemity::Packets::TS_SC_GET_CHAOS);
             chaosPct << pPlayer->GetHandle();
             chaosPct << pCorpse->GetHandle();
             chaosPct << nChaos;
