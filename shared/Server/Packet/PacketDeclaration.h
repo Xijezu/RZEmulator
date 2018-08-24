@@ -502,35 +502,35 @@ template<typename T> uint32_t getClampedCount(size_t realSize) {
 #define SERIALIZATION_F_impl(x) SERIALIZATION_F_##x
 #define DESERIALIZATION_F_impl(x) DESERIALIZATION_F_##x
 
-#define CREATE_STRUCT_IMPL(name_, basename_, size_base_, definition_header_, serialization_header_, deserialization_header_) \
+#define CREATE_STRUCT_IMPL(name_, size_base_, definition_header_, serialization_header_, deserialization_header_) \
 	struct name_ { \
-		static inline const char* getName() { return #basename_; } \
+		static inline const char* getName() { return #name_; } \
 		definition_header_; \
-		basename_##_DEF(DEFINITION_F); \
+		name_##_DEF(DEFINITION_F); \
 		uint32_t getSize(int version) const { \
 			uint32_t size = size_base_; \
 			(void) (version); \
-			basename_##_DEF(LOCAL_DEFINITION_F); \
-			basename_##_DEF(SIZE_F); \
+			name_##_DEF(LOCAL_DEFINITION_F); \
+			name_##_DEF(SIZE_F); \
 			return size; \
 		} \
 		template<class T> void serialize(T* buffer) const { \
 			const int version = buffer->getVersion(); \
 			(void) (version); \
 			serialization_header_; \
-			basename_##_DEF(LOCAL_DEFINITION_F); \
-			basename_##_DEF(SERIALIZATION_F); \
+			name_##_DEF(LOCAL_DEFINITION_F); \
+			name_##_DEF(SERIALIZATION_F); \
 		} \
 		template<class T> void deserialize(T* buffer) { \
 			const int version = buffer->getVersion(); \
 			(void) (version); \
 			deserialization_header_; \
-			basename_##_DEF(LOCAL_DEFINITION_F); \
-			basename_##_DEF(DESERIALIZATION_F); \
+			name_##_DEF(LOCAL_DEFINITION_F); \
+			name_##_DEF(DESERIALIZATION_F); \
 		} \
 	}
 
-#define CREATE_STRUCT(name_) CREATE_STRUCT_IMPL(name_, name_, 0, /* empty */, /* empty */, /* empty */)
+#define CREATE_STRUCT(name_) CREATE_STRUCT_IMPL(name_, 0, /* empty */, /* empty */, /* empty */)
 
 #define CREATE_PACKET_DEFINITION_HEADER(id_) \
 	static const uint16_t packetID = id_; \
@@ -547,8 +547,7 @@ template<typename T> uint32_t getClampedCount(size_t realSize) {
 #define CREATE_PACKET_DESERIALIZATION_HEADER buffer->readHeader(id);
 
 #define CREATE_PACKET(name_, id_) \
-	CREATE_STRUCT_IMPL(PKT_ ## name_, \
-	                   name_, \
+	CREATE_STRUCT_IMPL(name_, \
 	                   7, \
 	                   CREATE_PACKET_DEFINITION_HEADER(id_), \
 	                   CREATE_PACKET_SERIALIZATION_HEADER, \

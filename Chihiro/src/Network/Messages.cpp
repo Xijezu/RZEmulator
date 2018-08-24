@@ -29,7 +29,7 @@ void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    PKT_TS_SC_EXP_UPDATE packet;
+    TS_SC_EXP_UPDATE packet;
     packet.handle = pUnit->GetHandle();
     packet.exp = pUnit->GetEXP();
     packet.jp = pUnit->GetJP();

@@ -12,7 +12,7 @@ private:
 	XPacket packet;
 
 public:
-	MessageSerializerBuffer(int version);
+	MessageSerializerBuffer();
 	~MessageSerializerBuffer();
 
 	const XPacket& getPacket() const { return packet; }
