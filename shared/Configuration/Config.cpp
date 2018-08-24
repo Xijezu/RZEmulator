@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include <boost/filesystem.hpp>
+#include "Packet/PacketEpics.h"
 
 namespace bpt = boost::property_tree;
 
@@ -67,6 +68,8 @@ bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> ar
             error = e.message() + " (" + e.filename() + ":" + std::to_string(e.line()) + ")";
         return false;
     }
+
+    cachedConfig.packetVersion = GetIntDefault("Network.PacketVersion", EPIC_4_1_1);
 
     return true;
 }

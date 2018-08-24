@@ -1,7 +1,8 @@
 #include "MessageSerializerBuffer.h"
 #include <algorithm>
+#include "Config.h"
 
-MessageSerializerBuffer::MessageSerializerBuffer(int version) : StructSerializer(version) {
+MessageSerializerBuffer::MessageSerializerBuffer() : StructSerializer(sConfigMgr->getCachedConfig().packetVersion) {
 }
 
 MessageSerializerBuffer::~MessageSerializerBuffer() {

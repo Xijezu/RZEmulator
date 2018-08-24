@@ -300,7 +300,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         {
             if (m_session == nullptr)
                 return;
-            MessageSerializerBuffer serializer(sWorld.getIntConfig(CONFIG_PACKET_VERSION));
+            MessageSerializerBuffer serializer;
             packet.serialize(&serializer);
             SendPacket(serializer.getFinalizedPacket());
         }
