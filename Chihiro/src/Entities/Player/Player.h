@@ -21,6 +21,7 @@
 #include "QuestManager.h"
 #include "Inventory.h"
 #include "XPacket.h"
+#include "Packet/MessageSerializerBuffer.h"
 
 class WorldSession;
 class Item;
@@ -293,6 +294,16 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
 
         void SendPacket(XPacket pPacket);
+
+        template<class TS_SERIALIZABLE_PACKET>
+        void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
+        {
+            if (m_session == nullptr)
+                return;
+            MessageSerializerBuffer serializer(sWorld.getIntConfig(CONFIG_PACKET_VERSION));
+            packet.serialize(&serializer);
+            SendPacket(serializer.getFinalizedPacket());
+        }
 
         WorldSession &GetSession() const { return *m_session; }
 

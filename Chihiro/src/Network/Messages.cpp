@@ -22,17 +22,18 @@
 #include "MemPool.h"
 #include "RegionContainer.h"
 #include "GroupManager.h"
+#include "GameClient/TS_SC_EXP_UPDATE.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    XPacket resultPct(NGemity::Packets::TS_SC_EXP_UPDATE);
-    resultPct << (uint32_t)pUnit->GetHandle();
-    resultPct << (int64)pUnit->GetEXP();
-    resultPct << (uint32_t)pUnit->GetJP();
-    pPlayer->SendPacket(resultPct);
+    PKT_TS_SC_EXP_UPDATE packet;
+    packet.handle = pUnit->GetHandle();
+    packet.exp = pUnit->GetEXP();
+    packet.jp = pUnit->GetJP();
+    pPlayer->SendPacket(packet);
 }
 
 void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
