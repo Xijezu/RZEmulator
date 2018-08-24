@@ -28,6 +28,11 @@ class ConfigMgr
         ~ConfigMgr() = default;
 
     public:
+        struct CachedConfig {
+            int packetVersion;
+        };
+
+    public:
         /// Method used only for loading main configuration files (bnetserver.conf and worldserver.conf)
         bool LoadInitial(std::string const &file, std::vector<std::string> args, std::string &error);
 
@@ -45,9 +50,16 @@ class ConfigMgr
         std::vector<std::string> GetKeysByString(std::string const &name);
         std::string GetCorrectPath(std::string path);
 
+        const CachedConfig& getCachedConfig() { return cachedConfig; }
+
     private:
         template<class T>
         T GetValueDefault(std::string const &name, T def) const;
+
+
+        CachedConfig cachedConfig;
+
+
 };
 
 #define sConfigMgr ConfigMgr::instance()
