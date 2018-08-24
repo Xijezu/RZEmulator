@@ -28,6 +28,7 @@
 #include "GroupManager.h"
 #include "ItemCollector.h"
 #include "GameContent.h"
+#include "Packet/PacketEpics.h"
 
 std::atomic<bool>   World::m_stopEvent{false};
 std::atomic<uint32> World::m_worldLoopCounter{0};
