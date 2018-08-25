@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "SharedMutex.h"
+#include "ClientPackets.h"
 #include "Configuration/Config.h"
 #include "IoContext.h"
 #include "XSocket.h"
@@ -53,7 +54,7 @@ class AuthNetwork
             if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
             {
                 m_nLastPingTime = sWorld.GetArTime();
-                XPacket _packet(TS_CA_PING);
+                XPacket _packet(NGemity::Packets::TS_CS_PING);
                 m_pSocket->SendPacket(_packet);
             }
 

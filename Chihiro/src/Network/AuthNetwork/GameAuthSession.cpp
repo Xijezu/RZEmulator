@@ -39,16 +39,16 @@ GameAuthSession::~GameAuthSession()
 
 typedef struct AuthHandler
 {
-    uint16_t cmd;
+    NGemity::Packets cmd;
     void (GameAuthSession::*handler)(XPacket *);
 } AuthHandler;
 
 constexpr AuthHandler packetHandler[] =
                               {
-                                      {TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
-                                      {TS_AG_KICK_CLIENT,  &GameAuthSession::HandleClientKick},
-                                      {TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
-                                      {TS_CA_PING,         &GameAuthSession::HandleNullPacket}
+                                      {NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
+                                      {NGemity::Packets::TS_AG_KICK_CLIENT,  &GameAuthSession::HandleClientKick},
+                                      {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
+                                      {NGemity::Packets::TS_CS_PING,         &GameAuthSession::HandleNullPacket}
                               };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(AuthHandler));
@@ -102,7 +102,7 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey)
 {
     m_queue[szLoginName] = pSession;
-    XPacket packet(TS_GA_CLIENT_LOGIN);
+    XPacket packet(NGemity::Packets::TS_GA_CLIENT_LOGIN);
     packet.fill(szLoginName, 61);
     packet << (uint64)nOneTimeKey;
     m_pSocket->SendPacket(packet);
@@ -135,7 +135,7 @@ void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 
 void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
 {
-    XPacket packet(TS_GA_CLIENT_LOGOUT);
+    XPacket packet(NGemity::Packets::TS_GA_CLIENT_LOGOUT);
     packet.fill(szAccount, 61);
     packet << (uint32)0;
     m_pSocket->SendPacket(packet);
@@ -143,7 +143,7 @@ void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
 
 void GameAuthSession::SendGameLogin()
 {
-    XPacket loginPct(TS_GA_LOGIN);
+    XPacket loginPct(NGemity::Packets::TS_GA_LOGIN);
     loginPct << (uint16)m_nGameIDX;
     loginPct.fill(m_szGameName, 21);
     loginPct.fill(m_szGameSSU, 256);
