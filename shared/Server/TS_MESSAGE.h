@@ -91,32 +91,8 @@ enum TS_ResultCode
     TS_RESULT_ALREADY_TAMING                        = 0x46,
     TS_RESULT_GAMETIME_LIMITED                      = 0x47,
     TS_RESULT_ERROR_MAX                             = 0x48,
-
     //Client side errors
-            TS_RESULT_CLIENT_SIDE_ERROR = 0xFFFF
-};
-
-enum TS_AG_GA_PACKETS
-{
-    TS_GA_LOGIN              = 20001,
-    TS_AG_LOGIN_RESULT       = 20002,
-    TS_GA_CLIENT_LOGIN       = 20010,
-    TS_AG_CLIENT_LOGIN       = 20011,
-    TS_GA_CLIENT_LOGOUT      = 20012,
-    TS_AG_KICK_CLIENT        = 20013,
-    TS_GA_CLIENT_KICK_FAILED = 20014
-};
-
-enum TS_AC_CA_PACKETS
-{
-    TS_CA_PING          = 9999,
-    TS_AC_RESULT        = 10000,
-    TS_CA_VERSION       = 10001,
-    TS_CA_ACCOUNT       = 10010,
-    TS_CA_SERVER_LIST   = 10021,
-    TS_AC_SERVER_LIST   = 10022,
-    TS_CA_SELECT_SERVER = 10023,
-    TS_AC_SELECT_SERVER = 10024
+    TS_RESULT_CLIENT_SIDE_ERROR                     = 0xFFFF
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform

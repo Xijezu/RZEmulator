@@ -297,15 +297,23 @@ namespace NGemity
             TS_CS_SECURITY_NO                               = 9005,
             TS_CS_PING                                      = 9999,
             TS_CS_OPEN_ITEM_SHOP                            = 10000,
-            TS_SC_OPEN_ITEM_SHOP                            = 10001,
+            TS_SC_OPEN_ITEM_SHOP     = 10001,
             // Between Game & Auth
-            TS_GA_LOGIN                                     = 20001,
-            TS_AG_LOGIN_RESULT                              = 20002,
-            TS_GA_CLIENT_LOGIN                              = 20010,
-            TS_AG_CLIENT_LOGIN                              = 20011,
-            TS_GA_CLIENT_LOGOUT                             = 20012,
-            TS_AG_KICK_CLIENT                               = 20013,
-            TS_GA_CLIENT_KICK_FAILED                        = 20014
+            TS_GA_LOGIN              = 20001,
+            TS_AG_LOGIN_RESULT       = 20002,
+            TS_GA_CLIENT_LOGIN       = 20010,
+            TS_AG_CLIENT_LOGIN       = 20011,
+            TS_GA_CLIENT_LOGOUT      = 20012,
+            TS_AG_KICK_CLIENT        = 20013,
+            TS_GA_CLIENT_KICK_FAILED = 20014,
+            // Between Auth & Client
+            TS_AC_RESULT             = 10000,
+            TS_CA_VERSION            = 10001,
+            TS_CA_ACCOUNT            = 10010,
+            TS_CA_SERVER_LIST        = 10021,
+            TS_AC_SERVER_LIST        = 10022,
+            TS_CA_SELECT_SERVER      = 10023,
+            TS_AC_SELECT_SERVER      = 10024
     };
 }
 
