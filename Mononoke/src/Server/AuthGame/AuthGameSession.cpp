@@ -80,19 +80,19 @@ enum eStatus
 
 typedef struct GameHandler
 {
-    uint16_t cmd;
-    uint8_t  status;
+    NGemity::Packets cmd;
+    uint8_t          status;
 
     void (AuthGameSession::*handler)(XPacket *);
 } AuthHandler;
 
 constexpr AuthHandler packetHandler[] =
                               {
-                                      {TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
-                                      {TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
-                                      {TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
-                                      {TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed},
-                                      {TS_CA_PING,               STATUS_CONNECTED, &AuthGameSession::HandlePingPacket}
+                                      {NGemity::Packets::TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
+                                      {NGemity::Packets::TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
+                                      {NGemity::Packets::TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
+                                      {NGemity::Packets::TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed},
+                                      {NGemity::Packets::TS_CS_PING,               STATUS_CONNECTED, &AuthGameSession::HandlePingPacket}
                               };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -141,7 +141,7 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
         m_bIsAuthed = true;
         sGameMapList.AddGame(m_pGame);
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
-        XPacket resultPct(TS_AG_LOGIN_RESULT);
+        XPacket resultPct(NGemity::Packets::TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_SUCCESS;
         m_pSocket->SendPacket(resultPct);
     }
@@ -149,7 +149,7 @@ void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
     {
         m_bIsAuthed = false;
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
-        XPacket resultPct(TS_AG_LOGIN_RESULT);
+        XPacket resultPct(NGemity::Packets::TS_AG_LOGIN_RESULT);
         resultPct << TS_RESULT_ACCESS_DENIED;
         m_pSocket->SendPacket(resultPct);
         m_pSocket->CloseSocket();
@@ -177,7 +177,7 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
         }
     }
 
-    XPacket resultPct(TS_AG_CLIENT_LOGIN);
+    XPacket resultPct(NGemity::Packets::TS_AG_CLIENT_LOGIN);
     resultPct.fill((p != nullptr ? p->szLoginName : ""), 61);
     resultPct << (p != nullptr ? p->nAccountID : 0);
     resultPct << result;
@@ -218,13 +218,13 @@ void AuthGameSession::KickPlayer(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    XPacket kickPct(TS_AG_KICK_CLIENT);
+    XPacket kickPct(NGemity::Packets::TS_AG_KICK_CLIENT);
     kickPct.fill(pPlayer->szLoginName, 61);
     m_pSocket->SendPacket(kickPct);
 }
 
 void AuthGameSession::HandlePingPacket(XPacket *)
 {
-    XPacket _packet(TS_CA_PING);
+    XPacket _packet(NGemity::Packets::TS_CS_PING);
     m_pSocket->SendPacket(_packet);
 }
