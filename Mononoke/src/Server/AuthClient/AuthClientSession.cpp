@@ -104,7 +104,7 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
         }
     }
     // Report unknown packets in the error log
-    if (i == tableSize)
+    if (i == tableSize && _cmd != static_cast<int>(NGemity::Packets::TS_CS_PING))
     {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_v4().to_string().c_str());
         return ReadDataHandlerResult::Error;

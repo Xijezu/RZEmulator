@@ -96,6 +96,7 @@
 #include "GameClient/TS_CS_MOVE_REQUEST.h"
 #include "GameClient/TS_CS_NURSE_CREATURE.h"
 #include "GameClient/TS_CS_OPEN_ITEM_SHOP.h"
+#include "GameClient/TS_CS_PING.h"
 #include "GameClient/TS_CS_PUTOFF_CARD.h"
 #include "GameClient/TS_CS_PUTOFF_ITEM.h"
 #include "GameClient/TS_CS_PUTON_CARD.h"

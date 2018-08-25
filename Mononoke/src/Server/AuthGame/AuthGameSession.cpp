@@ -80,19 +80,34 @@ enum eStatus
 
 typedef struct GameHandler
 {
-    NGemity::Packets cmd;
-    uint8_t          status;
+    int                                               cmd;
+    eStatus                                           status;
+    std::function<void(AuthGameSession *, XPacket *)> handler;
+} GameHandler;
 
-    void (AuthGameSession::*handler)(XPacket *);
-} AuthHandler;
+template<typename T>
+GameHandler declareHandler(eStatus status, void (AuthGameSession::*handler)(const T *packet))
+{
+    GameHandler handlerData{ };
+    handlerData.cmd     = T::getId(EPIC_4_1_1);
+    handlerData.status  = status;
+    handlerData.handler = [handler](AuthGameSession *instance, XPacket *packet) -> void {
+        T                       deserializedPacket;
+        MessageSerializerBuffer buffer(packet);
+        deserializedPacket.deserialize(&buffer);
+        (instance->*handler)(&deserializedPacket);
+    };
 
-constexpr AuthHandler packetHandler[] =
+    return handlerData;
+}
+
+const GameHandler packetHandler[] =
                               {
-                                      {NGemity::Packets::TS_GA_LOGIN,              STATUS_CONNECTED, &AuthGameSession::HandleGameLogin},
-                                      {NGemity::Packets::TS_GA_CLIENT_LOGIN,       STATUS_AUTHED,    &AuthGameSession::HandleClientLogin},
-                                      {NGemity::Packets::TS_GA_CLIENT_LOGOUT,      STATUS_AUTHED,    &AuthGameSession::HandleClientLogout},
-                                      {NGemity::Packets::TS_GA_CLIENT_KICK_FAILED, STATUS_AUTHED,    &AuthGameSession::HandleClientKickFailed},
-                                      {NGemity::Packets::TS_CS_PING,               STATUS_CONNECTED, &AuthGameSession::HandlePingPacket}
+                                      declareHandler(STATUS_CONNECTED, &AuthGameSession::HandleGameLogin),
+                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogin),
+                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout),
+                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
+                                      declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)
                               };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
@@ -109,8 +124,7 @@ ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            //pGamePct->read_skip(7); // ignoring header
-            (*this.*packetHandler[i].handler)(pGamePct);
+            packetHandler[i].handler(this, pGamePct);
             break;
         }
     }
@@ -124,49 +138,45 @@ ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     return ReadDataHandlerResult::Ok;
 }
 
-void AuthGameSession::HandleGameLogin(XPacket *pGamePct)
+void AuthGameSession::HandleGameLogin(const TS_GA_LOGIN *pGamePct)
 {
-    m_pGame->nIDX           = pGamePct->read<uint16>();
-    m_pGame->szName         = pGamePct->ReadString(21);
-    m_pGame->szSSU          = pGamePct->ReadString(256);
-    m_pGame->bIsAdultServer = pGamePct->read<bool>() != 0;
-    m_pGame->szIP           = pGamePct->ReadString(16);
-    m_pGame->nPort          = pGamePct->read<int>();
+    m_pGame->nIDX           = pGamePct->server_idx;
+    m_pGame->szName         = pGamePct->server_name;
+    m_pGame->szSSU          = pGamePct->server_screenshot_url;
+    m_pGame->bIsAdultServer = pGamePct->is_adult_server != 0;
+    m_pGame->szIP           = pGamePct->server_ip;
+    m_pGame->nPort          = pGamePct->server_port;
     m_pGame->m_pSession     = this;
 
-    auto pGame = sGameMapList.GetGame(m_pGame->nIDX);
+    auto               pGame = sGameMapList.GetGame(m_pGame->nIDX);
+    TS_AG_LOGIN_RESULT resultPct;
 
     if (pGame == nullptr)
     {
         m_bIsAuthed = true;
         sGameMapList.AddGame(m_pGame);
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
-        XPacket resultPct(NGemity::Packets::TS_AG_LOGIN_RESULT);
-        resultPct << TS_RESULT_SUCCESS;
+        resultPct.result = TS_RESULT_SUCCESS;
         m_pSocket->SendPacket(resultPct);
     }
     else
     {
         m_bIsAuthed = false;
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
-        XPacket resultPct(NGemity::Packets::TS_AG_LOGIN_RESULT);
-        resultPct << TS_RESULT_ACCESS_DENIED;
+        resultPct.result = TS_RESULT_ACCESS_DENIED;
         m_pSocket->SendPacket(resultPct);
         m_pSocket->CloseSocket();
     }
 }
 
-void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
+void AuthGameSession::HandleClientLogin(const TS_GA_CLIENT_LOGIN *pGamePct)
 {
-    auto szAccount   = pGamePct->ReadString(61);
-    auto nOneTimeKey = pGamePct->read<uint64>();
-
-    auto   p      = sPlayerMapList.GetPlayer(szAccount);
+    auto   p      = sPlayerMapList.GetPlayer(pGamePct->account);
     uint16 result = TS_RESULT_ACCESS_DENIED;
 
     if (p != nullptr)
     {
-        if (nOneTimeKey == p->nOneTimeKey)
+        if (pGamePct->one_time_key == p->nOneTimeKey)
         {
             p->bIsInGame = true;
             result = TS_RESULT_SUCCESS;
@@ -177,38 +187,38 @@ void AuthGameSession::HandleClientLogin(XPacket *pGamePct)
         }
     }
 
-    XPacket resultPct(NGemity::Packets::TS_AG_CLIENT_LOGIN);
-    resultPct.fill((p != nullptr ? p->szLoginName : ""), 61);
-    resultPct << (p != nullptr ? p->nAccountID : 0);
-    resultPct << result;
-    resultPct << (uint)(p != nullptr ? p->nPermission : 0);
+    TS_AG_CLIENT_LOGIN resultPct{ };
+    resultPct.account    = (p != nullptr ? p->szLoginName : "");
+    resultPct.nAccountID = (p != nullptr ? p->nAccountID : 0);
+    resultPct.result     = result;
+    resultPct.permission = (p != nullptr ? p->nPermission : 0);
+    /*
     resultPct << (uint8)0;  // PC Bang Mode
     resultPct << (uint32)0; // Age
     resultPct << (uint32)0; // Event Code
     resultPct << (uint32)0; // Continuous Playtime
     resultPct << (uint32)0; // Continuous Logouttime
+    */
 
     m_pSocket->SendPacket(resultPct);
 }
 
-void AuthGameSession::HandleClientLogout(XPacket *pGamePct)
+void AuthGameSession::HandleClientLogout(const TS_GA_CLIENT_LOGOUT *pGamePct)
 {
-    auto szPlayer = pGamePct->ReadString(61);
-    auto p        = sPlayerMapList.GetPlayer(szPlayer);
+    auto p = sPlayerMapList.GetPlayer(pGamePct->account);
     if (p != nullptr)
     {
-        sPlayerMapList.RemovePlayer(szPlayer);
+        sPlayerMapList.RemovePlayer(pGamePct->account);
         delete p;
     }
 }
 
-void AuthGameSession::HandleClientKickFailed(XPacket *pGamePct)
+void AuthGameSession::HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *pGamePct)
 {
-    auto szPlayer = pGamePct->ReadString(61);
-    auto p        = sPlayerMapList.GetPlayer(szPlayer);
+    auto p = sPlayerMapList.GetPlayer(pGamePct->account);
     if (p != nullptr)
     {
-        sPlayerMapList.RemovePlayer(szPlayer);
+        sPlayerMapList.RemovePlayer(pGamePct->account);
         delete p;
     }
 }
@@ -218,13 +228,13 @@ void AuthGameSession::KickPlayer(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    XPacket kickPct(NGemity::Packets::TS_AG_KICK_CLIENT);
-    kickPct.fill(pPlayer->szLoginName, 61);
+    TS_AG_KICK_CLIENT kickPct{ };
+    kickPct.account = pPlayer->szLoginName;
     m_pSocket->SendPacket(kickPct);
 }
 
-void AuthGameSession::HandlePingPacket(XPacket *)
+void AuthGameSession::HandlePingPacket(const TS_CS_PING *)
 {
-    XPacket _packet(NGemity::Packets::TS_CS_PING);
-    m_pSocket->SendPacket(_packet);
+    TS_CS_PING pingPct{ };
+    m_pSocket->SendPacket(pingPct);
 }
