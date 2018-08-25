@@ -36,15 +36,15 @@ class AuthGameSession : public XSession
         bool IsEncrypted() const override { return false; }
 
         /// \brief Handles game login (packet contains servername, ...)
-        void HandleGameLogin(XPacket *);
+        void HandleGameLogin(const TS_GA_LOGIN *);
         /// \brief Handles client login on server - checks one-time-key
-        void HandleClientLogin(XPacket *);
+        void HandleClientLogin(const TS_GA_CLIENT_LOGIN *);
         /// \brief Handles client logout on server - removes player from our list
-        void HandleClientLogout(XPacket *);
+        void HandleClientLogout(const TS_GA_CLIENT_LOGOUT *);
         /// \brief Handles client kick failed - not used yet
-        void HandleClientKickFailed(XPacket *);
+        void HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *);
         /// \brief Receives and sends a Ping packet from/to the Gameserver
-        void HandlePingPacket(XPacket *);
+        void HandlePingPacket(const TS_CS_PING *);
         /// \brief Kicks a player from the gameserver
         /// \param pPlayer The player to be kicked
         void KickPlayer(Player *pPlayer);

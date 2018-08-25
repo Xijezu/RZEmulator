@@ -7,6 +7,7 @@
     _(string)(account, 61) \
     _(simple)(uint32_t, nAccountID) \
     _(simple)(uint16_t, result) \
+    _(simple)(uint32_t, permission) \
     _(simple)(uint8_t, nPCBangUser) \
     _(simple)(uint32_t, nEventCode) \
     _(simple)(uint32_t, nAge) \
