@@ -99,7 +99,6 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            //(*this.*packetHandler[i].handler)(pRecvPct);
             packetHandler[i].handler(this, pRecvPct);
             break;
         }
@@ -115,7 +114,7 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 
 void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
 {
-    std::string szPassword((char *)(pRecvPct->passwordDes.password));
+    std::string szPassword((char *)(pRecvPct->passwordDes.password), sConfigMgr->getCachedConfig().packetVersion >= EPIC_5_1 ? 61 : 32);
     _desCipther.Decrypt(&szPassword[0], (int)szPassword.length());
     szPassword.erase(std::remove(szPassword.begin(), szPassword.end(), '\0'), szPassword.end());
     szPassword.insert(0, "2011"); // @todo: md5 key

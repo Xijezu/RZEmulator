@@ -15,7 +15,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Server/GameClient/TS_SC_LEVEL_UPDATE.h>
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Skill.h"
@@ -23,7 +22,6 @@
 #include "MemPool.h"
 #include "RegionContainer.h"
 #include "GroupManager.h"
-#include "GameClient/TS_SC_EXP_UPDATE.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
