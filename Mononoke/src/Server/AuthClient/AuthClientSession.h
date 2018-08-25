@@ -35,16 +35,13 @@ class AuthClientSession : public XSession
 
         /// \brief Handler for the Login packet - checks accountname and password
         /// \param packet received packet
-        void HandleLoginPacket(XPacket *packet);
+        void HandleLoginPacket(const TS_CA_ACCOUNT *);
         /// \brief Handler for the Version packet, not used yet
-        void HandleVersion(XPacket *);
+        void HandleVersion(const TS_CA_VERSION *);
         /// \brief Handler for the server list packet - sends the client the currently connected gameserver(s)
-        void HandleServerList(XPacket *);
+        void HandleServerList(const TS_CA_SERVER_LIST *);
         /// \brief Handler for the select server packet - generates one time key for gameserver login
-        void HandleSelectServer(XPacket *);
-
-        /// \brief Just a function to ignore packets
-        void HandleNullPacket(XPacket *) {}
+        void HandleSelectServer(const TS_CA_SELECT_SERVER *);
 
         /// \brief Sends a result message to the client
         /// \param pctID Response to received pctID

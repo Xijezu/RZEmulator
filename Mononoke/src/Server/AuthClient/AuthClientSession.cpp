@@ -57,19 +57,33 @@ enum eStatus
 
 typedef struct AuthHandler
 {
-    NGemity::Packets cmd;
-    uint8_t          status;
-    void (AuthClientSession::*handler)(XPacket *);
+    int                                                 cmd;
+    eStatus                                             status;
+    std::function<void(AuthClientSession *, XPacket *)> handler;
 } AuthHandler;
 
-constexpr AuthHandler packetHandler[] =
-                              {
-                                      {NGemity::Packets::TS_CA_VERSION,       STATUS_CONNECTED, &AuthClientSession::HandleVersion},
-                                      {NGemity::Packets::TS_CS_PING,          STATUS_CONNECTED, &AuthClientSession::HandleNullPacket},
-                                      {NGemity::Packets::TS_CA_ACCOUNT,       STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket},
-                                      {NGemity::Packets::TS_CA_SERVER_LIST,   STATUS_AUTHED,    &AuthClientSession::HandleServerList},
-                                      {NGemity::Packets::TS_CA_SELECT_SERVER, STATUS_AUTHED,    &AuthClientSession::HandleSelectServer}
-                              };
+template<typename T>
+AuthHandler declareHandler(eStatus status, void (AuthClientSession::*handler)(const T *packet))
+{
+    AuthHandler handlerData{ };
+    handlerData.cmd     = T::getId(EPIC_4_1_1);
+    handlerData.status  = status;
+    handlerData.handler = [handler](AuthClientSession *instance, XPacket *packet) -> void {
+        T                       deserializedPacket;
+        MessageSerializerBuffer buffer(packet);
+        deserializedPacket.deserialize(&buffer);
+        (instance->*handler)(&deserializedPacket);
+    };
+
+    return handlerData;
+}
+
+const AuthHandler packetHandler[] = {
+        declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleVersion),
+        declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket),
+        declareHandler(STATUS_AUTHED, &AuthClientSession::HandleServerList),
+        declareHandler(STATUS_AUTHED, &AuthClientSession::HandleSelectServer),
+};
 
 constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
 
@@ -85,8 +99,8 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
         {
-            //pRecvPct->read_skip(7);
-            (*this.*packetHandler[i].handler)(pRecvPct);
+            //(*this.*packetHandler[i].handler)(pRecvPct);
+            packetHandler[i].handler(this, pRecvPct);
             break;
         }
     }
@@ -99,14 +113,9 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     return ReadDataHandlerResult::Ok;
 }
 
-void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
+void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
 {
-#if EPIC > 5
-    std::string szUsername = pRecvPct->ReadString(61);
-#else
-    std::string szUsername = pRecvPct->ReadString(19);
-#endif
-    std::string szPassword = pRecvPct->ReadString(32);
+    std::string szPassword((char *)(pRecvPct->passwordDes.password));
     _desCipther.Decrypt(&szPassword[0], (int)szPassword.length());
     szPassword.erase(std::remove(szPassword.begin(), szPassword.end(), '\0'), szPassword.end());
     szPassword.insert(0, "2011"); // @todo: md5 key
@@ -114,7 +123,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
 
     // SQL part
     PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCOUNT);
-    stmt->setString(0, szUsername);
+    stmt->setString(0, pRecvPct->account);
     stmt->setString(1, szPassword);
     if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt))
     {
@@ -130,7 +139,7 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
 
         if (m_pPlayer->bIsBlocked)
         {
-            SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ACCESS_DENIED, 0);
+            SendResultMsg(pRecvPct->id, TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
 
@@ -143,26 +152,25 @@ void AuthClientSession::HandleLoginPacket(XPacket *pRecvPct)
                 if (game != nullptr && game->m_pSession != nullptr)
                     game->m_pSession->KickPlayer(pOldPlayer);
             }
-            SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_ALREADY_EXIST, 0);
+            SendResultMsg(pRecvPct->id, TS_RESULT_ALREADY_EXIST, 0);
             sPlayerMapList.RemovePlayer(pOldPlayer->szLoginName);
             delete pOldPlayer;
         }
 
         _isAuthed = true;
         sPlayerMapList.AddPlayer(m_pPlayer);
-        SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_SUCCESS, 1);
+        SendResultMsg(pRecvPct->id, TS_RESULT_SUCCESS, 1);
         return;
     }
-    SendResultMsg(pRecvPct->GetPacketID(), TS_RESULT_NOT_EXIST, 0);
+    SendResultMsg(pRecvPct->id, TS_RESULT_NOT_EXIST, 0);
 }
 
-void AuthClientSession::HandleVersion(XPacket *pRecvPct)
+void AuthClientSession::HandleVersion(const TS_CA_VERSION *pRecvPct)
 {
-    auto version = pRecvPct->read<std::string>();
-    NG_LOG_TRACE("network", "[Version] Client version is %s", version.c_str());
+    NG_LOG_TRACE("network", "[Version] Client version is %s", pRecvPct->szVersion.c_str());
 }
 
-void AuthClientSession::HandleServerList(XPacket *)
+void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
 {
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
     auto            map = sGameMapList.GetMap();
@@ -182,25 +190,25 @@ void AuthClientSession::HandleServerList(XPacket *)
     _socket->SendPacket(packet);
 }
 
-void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
+void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
 {
-    m_pPlayer->nGameIDX    = pRecvPct->read<uint16>();
+    m_pPlayer->nGameIDX    = pRecvPct->server_idx;
     m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
     m_pPlayer->bIsInGame   = true;
     bool    bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
-    XPacket packet(NGemity::Packets::TS_AC_SELECT_SERVER);
-    packet << (uint16)(bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
-    packet << (int64)(bExist ? m_pPlayer->nOneTimeKey : 0);
-    packet << (uint32)0;
-    _socket->SendPacket(packet);
+
+    TS_AC_SELECT_SERVER resultPct{ };
+    resultPct.result       = (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
+    resultPct.one_time_key = (bExist ? m_pPlayer->nOneTimeKey : 0);
+    resultPct.pending_time = 0;
+    _socket->SendPacket(resultPct);
 }
 
 void AuthClientSession::SendResultMsg(uint16 pctID, uint16 result, uint value)
 {
-    XPacket resultPct(NGemity::Packets::TS_AC_RESULT);
-    resultPct << pctID;
-    resultPct << result;
-    resultPct << value;
-
-    _socket->SendPacket(resultPct);
+    TS_AC_RESULT resultMsg{ };
+    resultMsg.request_msg_id = pctID;
+    resultMsg.result         = result;
+    resultMsg.login_flag     = value;
+    _socket->SendPacket(resultMsg);
 }

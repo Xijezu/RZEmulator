@@ -21,7 +21,7 @@
 #include "QuestManager.h"
 #include "Inventory.h"
 #include "XPacket.h"
-#include "Packet/MessageSerializerBuffer.h"
+#include "Packets/MessageSerializerBuffer.h"
 
 class WorldSession;
 class Item;

@@ -24,7 +24,7 @@
 #include <memory>
 #include <mutex>
 #include <boost/filesystem.hpp>
-#include "Packet/PacketEpics.h"
+#include "PacketEpics.h"
 
 namespace bpt = boost::property_tree;
 

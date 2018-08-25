@@ -14,7 +14,10 @@ set(SHARED_INCLUDE_DIR
         ${CMAKE_SOURCE_DIR}/shared/Logging
         ${CMAKE_SOURCE_DIR}/shared/utf8
         ${CMAKE_SOURCE_DIR}/shared/Server
-        ${CMAKE_SOURCE_DIR}/shared/Server/GameClient
+        ${CMAKE_SOURCE_DIR}/shared/Server/Packets
+        ${CMAKE_SOURCE_DIR}/shared/Server/Packets/GameClient
+        ${CMAKE_SOURCE_DIR}/shared/Server/Packets/AuthClient
+        ${CMAKE_SOURCE_DIR}/shared/Server/Packets/AuthGame
         ${CMAKE_SOURCE_DIR}/shared/Server/ASIO
         ${CMAKE_SOURCE_DIR}/shared/Utilities
         ${CMAKE_SOURCE_DIR}/shared/Updater
