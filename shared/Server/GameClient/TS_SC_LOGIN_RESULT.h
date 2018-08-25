@@ -2,7 +2,7 @@
 #define PACKETS_TS_SC_LOGIN_RESULT_H
 
 #include "Packet/PacketDeclaration.h"
-#include "PacketEnums.h"
+#include "TS_MESSAGE.h"
 
 #define TS_SC_LOGIN_RESULT_DEF(_) \
 	_(def)(simple)(uint16_t, result) \

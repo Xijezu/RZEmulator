@@ -153,9 +153,13 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 /// TODO: The whole stuff needs a rework, it is working as intended but it's just a dirty hack
 void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
-    s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *)(pGamePct)->contents());
-    std::transform(std::begin(result->account), std::end(result->account), std::begin(result->account), ::tolower);
-    sAuthNetwork.SendAccountToAuth(*this, result->account, result->one_time_key);
+    TS_CS_ACCOUNT_WITH_AUTH resultPct = *reinterpret_cast<TS_CS_ACCOUNT_WITH_AUTH *>(pGamePct->contents());
+    MessageSerializerBuffer buffer;
+    resultPct.deserialize(&buffer);
+    //s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *)(pGamePct)->contents());
+    //std::transform(std::begin(result->account), std::end(result->account), std::begin(result->account), ::tolower);
+    std::transform(std::begin(resultPct.account), std::end(resultPct.account), std::begin(resultPct.account), ::tolower);
+    sAuthNetwork.SendAccountToAuth(*this, resultPct.account, resultPct.one_time_key);
 }
 
 void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
@@ -276,12 +280,15 @@ void WorldSession::onAuthResult(XPacket *pGamePct)
 
 void WorldSession::onLogin(XPacket *pRecvPct)
 {
-    s_ClientLogin_CS *result = ((s_ClientLogin_CS *)(pRecvPct)->contents());
+    //s_ClientLogin_CS *result = ((s_ClientLogin_CS *)(pRecvPct)->contents());
+    TS_CS_LOGIN             loginPct = *reinterpret_cast<TS_CS_LOGIN *>(pRecvPct->contents());
+    MessageSerializerBuffer buffer;
+    loginPct.deserialize(&buffer);
 
     //m_pPlayer = new Player(this);
     m_pPlayer = sMemoryPool.AllocPlayer();
     m_pPlayer->SetSession(this);
-    if (!m_pPlayer->ReadCharacter(result->szName, _accountId))
+    if (!m_pPlayer->ReadCharacter(loginPct.name, _accountId))
     {
         m_pPlayer->DeleteThis();
         return;
@@ -311,7 +318,7 @@ void WorldSession::onLogin(XPacket *pRecvPct)
     packet << m_pPlayer->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
     packet << m_pPlayer->GetUInt32Value(UNIT_FIELD_MODEL + 1);
     packet << m_pPlayer->GetUInt32Value(UNIT_FIELD_MODEL);
-    packet.fill(result->szName, 19);
+    packet.fill(loginPct.name, 19);
     packet << (uint32)sWorld.getIntConfig(CONFIG_CELL_SIZE);
     packet << m_pPlayer->GetUInt32Value(PLAYER_FIELD_GUILD_ID);
     GetSocket()->SendPacket(packet);
@@ -633,6 +640,7 @@ void WorldSession::onCharacterName(XPacket *pRecvPct)
 
 void WorldSession::onChatRequest(XPacket *_packet)
 {
+    /*
     CS_CHATREQUEST request = { };
 
     _packet->read((uint8 *)&request.szTarget[0], 21);
@@ -695,7 +703,7 @@ void WorldSession::onChatRequest(XPacket *_packet)
             break;
         default:
             break;
-    }
+    }*/
 }
 
 void WorldSession::onLogoutTimerRequest(XPacket *pRecvPct)

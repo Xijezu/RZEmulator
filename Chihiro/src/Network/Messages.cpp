@@ -15,6 +15,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <Server/GameClient/TS_SC_LEVEL_UPDATE.h>
 #include "Messages.h"
 #include "ClientPackets.h"
 #include "Skill.h"
@@ -41,10 +42,10 @@ void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    XPacket resultPct(NGemity::Packets::TS_SC_LEVEL_UPDATE);
-    resultPct << (uint32_t)pUnit->GetHandle();
-    resultPct << (uint32_t)pUnit->GetLevel();
-    resultPct << pUnit->GetCurrentJLv();
+    TS_SC_LEVEL_UPDATE resultPct;
+    resultPct.handle    = pUnit->GetHandle();
+    resultPct.level     = pUnit->GetLevel();
+    resultPct.job_level = pUnit->GetCurrentJLv();
     pPlayer->SendPacket(resultPct);
 }
 
