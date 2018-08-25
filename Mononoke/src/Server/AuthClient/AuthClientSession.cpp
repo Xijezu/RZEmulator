@@ -57,18 +57,18 @@ enum eStatus
 
 typedef struct AuthHandler
 {
-    uint16_t cmd;
-    uint8_t  status;
+    NGemity::Packets cmd;
+    uint8_t          status;
     void (AuthClientSession::*handler)(XPacket *);
 } AuthHandler;
 
 constexpr AuthHandler packetHandler[] =
                               {
-                                      {TS_CA_VERSION,       STATUS_CONNECTED, &AuthClientSession::HandleVersion},
-                                      {TS_CA_PING,          STATUS_CONNECTED, &AuthClientSession::HandleNullPacket},
-                                      {TS_CA_ACCOUNT,       STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket},
-                                      {TS_CA_SERVER_LIST,   STATUS_AUTHED,    &AuthClientSession::HandleServerList},
-                                      {TS_CA_SELECT_SERVER, STATUS_AUTHED,    &AuthClientSession::HandleSelectServer}
+                                      {NGemity::Packets::TS_CA_VERSION,       STATUS_CONNECTED, &AuthClientSession::HandleVersion},
+                                      {NGemity::Packets::TS_CS_PING,          STATUS_CONNECTED, &AuthClientSession::HandleNullPacket},
+                                      {NGemity::Packets::TS_CA_ACCOUNT,       STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket},
+                                      {NGemity::Packets::TS_CA_SERVER_LIST,   STATUS_AUTHED,    &AuthClientSession::HandleServerList},
+                                      {NGemity::Packets::TS_CA_SELECT_SERVER, STATUS_AUTHED,    &AuthClientSession::HandleSelectServer}
                               };
 
 constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
@@ -166,7 +166,7 @@ void AuthClientSession::HandleServerList(XPacket *)
 {
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
     auto            map = sGameMapList.GetMap();
-    XPacket         packet(TS_AC_SERVER_LIST);
+    XPacket         packet(NGemity::Packets::TS_AC_SERVER_LIST);
     packet << (uint16)0;
     packet << (uint16)map->size();
     for (auto &x : *map)
@@ -188,7 +188,7 @@ void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
     m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
     m_pPlayer->bIsInGame   = true;
     bool    bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
-    XPacket packet(TS_AC_SELECT_SERVER);
+    XPacket packet(NGemity::Packets::TS_AC_SELECT_SERVER);
     packet << (uint16)(bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
     packet << (int64)(bExist ? m_pPlayer->nOneTimeKey : 0);
     packet << (uint32)0;
@@ -197,7 +197,7 @@ void AuthClientSession::HandleSelectServer(XPacket *pRecvPct)
 
 void AuthClientSession::SendResultMsg(uint16 pctID, uint16 result, uint value)
 {
-    XPacket resultPct(TS_AC_RESULT);
+    XPacket resultPct(NGemity::Packets::TS_AC_RESULT);
     resultPct << pctID;
     resultPct << result;
     resultPct << value;
