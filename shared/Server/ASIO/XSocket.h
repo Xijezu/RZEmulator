@@ -26,7 +26,7 @@
 #include "MPSCQueue.h"
 #include "XPacket.h"
 #include <mutex>
-#include "Packet/MessageSerializerBuffer.h"
+#include "Packets/MessageSerializerBuffer.h"
 
 class EncryptablePacket : public XPacket
 {

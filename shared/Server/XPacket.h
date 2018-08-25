@@ -294,6 +294,37 @@
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_TRADE.h"
 
+#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_UPDATE_PENDING_TIME.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_OTP_ACCOUNT.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/TS_CA_VERSION.h"
+
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_ITEM_PURCHASED.h"
+#include "AuthGame/TS_AG_ITEM_SUPPLIED.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_PCBANG_EXPIRE.h"
+#include "AuthGame/TS_AG_PCBANG_EXPIRE_WARNING.h"
+#include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
+#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
+
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
+
 class MessageBuffer;
 
 namespace NGemity
@@ -313,6 +344,12 @@ class XPacket : public ByteBuffer
         {
             resize(7);
             put(4, m_nPacketID);
+        }
+
+        template<typename T>
+        T *getStruct()
+        {
+            return nullptr;
         }
 
         explicit XPacket(uint16 packID) : ByteBuffer(0), m_nPacketID(packID)

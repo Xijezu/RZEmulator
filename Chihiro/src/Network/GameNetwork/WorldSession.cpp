@@ -153,8 +153,8 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 /// TODO: The whole stuff needs a rework, it is working as intended but it's just a dirty hack
 void WorldSession::onAccountWithAuth(XPacket *pGamePct)
 {
-    TS_CS_ACCOUNT_WITH_AUTH resultPct = *reinterpret_cast<TS_CS_ACCOUNT_WITH_AUTH *>(pGamePct->contents());
-    MessageSerializerBuffer buffer;
+    TS_CS_ACCOUNT_WITH_AUTH resultPct;
+    MessageSerializerBuffer buffer(pGamePct);
     resultPct.deserialize(&buffer);
     //s_ClientWithAuth_CS *result = ((s_ClientWithAuth_CS *)(pGamePct)->contents());
     //std::transform(std::begin(result->account), std::end(result->account), std::begin(result->account), ::tolower);
@@ -281,8 +281,8 @@ void WorldSession::onAuthResult(XPacket *pGamePct)
 void WorldSession::onLogin(XPacket *pRecvPct)
 {
     //s_ClientLogin_CS *result = ((s_ClientLogin_CS *)(pRecvPct)->contents());
-    TS_CS_LOGIN             loginPct = *reinterpret_cast<TS_CS_LOGIN *>(pRecvPct->contents());
-    MessageSerializerBuffer buffer;
+    TS_CS_LOGIN             loginPct;
+    MessageSerializerBuffer buffer(pRecvPct);
     loginPct.deserialize(&buffer);
 
     //m_pPlayer = new Player(this);
