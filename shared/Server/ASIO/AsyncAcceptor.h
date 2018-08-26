@@ -81,6 +81,9 @@ class AsyncAcceptor
                 return false;
             }
 
+            boost::asio::socket_base::reuse_address option(true);
+            _acceptor.set_option(option);
+
             _acceptor.bind(_endpoint, errorCode);
             if (errorCode)
             {
