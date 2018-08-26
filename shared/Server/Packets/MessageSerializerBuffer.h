@@ -9,25 +9,27 @@
 
 class MessageSerializerBuffer : public StructSerializer {
 private:
-	XPacket packet;
+        XPacket *packet;
 
 public:
-	MessageSerializerBuffer();
+        MessageSerializerBuffer(XPacket *packet);
 	~MessageSerializerBuffer();
 
-	const XPacket& getPacket() const { return packet; }
-	XPacket& getPacket() { return packet; }
+        const XPacket *getPacket() const { return packet; }
 
-	XPacket& getFinalizedPacket() {
-		packet.FinalizePacket();
+        XPacket *getPacket() { return packet; }
+
+        XPacket *getFinalizedPacket()
+        {
+            packet->FinalizePacket();
 		return packet;
 	}
 
 	// Write functions /////////////////////////
 
 	void writeHeader(uint32_t size, uint16_t id) {
-		packet.Initialize(id, size);
-		packet.Reset();
+        packet->Initialize(id, size);
+        packet->Reset();
 	}
 
 	// Write primitives types T
@@ -52,7 +54,7 @@ public:
 	typename std::enable_if<is_primitive<T>::value, void>::type writeArray(const char* fieldName,
 	                                                                       const T* val,
 	                                                                       size_t size) {
-		packet.append<T>(val, size);
+        packet->append<T>(val, size);
 	}
 
 	// Fixed array of primitive with cast from U to T
@@ -80,7 +82,7 @@ public:
 	typename std::enable_if<is_primitive<T>::value, void>::type writeDynArray(const char* fieldName,
 	                                                                          const std::vector<T>& val,
 	                                                                          uint32_t count) {
-		packet.append<T>(val.data(), count);
+        packet->append<T>(val.data(), count);
 	}
 
 	// Dynamic array of primitive with cast
@@ -110,19 +112,19 @@ public:
 	// Padding, write dummy bytes
 	void pad(const char* fieldName, size_t size) {
 		for(size_t i = 0; i < size; i++)
-			packet.append<uint8>(0);
+            packet->append<uint8>(0);
 	}
 
 	// Read functions /////////////////////////
 
 	void readHeader(uint16_t& id) {
-		id = packet.GetPacketID();
+        id = packet->GetPacketID();
 	}
 
 	// Primitives via arg
 	template<typename T, typename U>
 	typename std::enable_if<is_primitive<U>::value, void>::type read(const char* fieldName, U& val) {
-		val = packet.read<T>();
+        val = packet->read<T>();
 	}
 
 	// Objects
@@ -139,7 +141,7 @@ public:
 	// Fixed array of primitive
 	template<typename T>
 	typename std::enable_if<is_primitive<T>::value, void>::type readArray(const char* fieldName, T* val, size_t size) {
-		packet.read(static_cast<uint8*>(val), size * sizeof(T));
+        packet->read(static_cast<uint8 *>(val), size * sizeof(T));
 	}
 
 	// Fixed array of primitive with cast
@@ -167,7 +169,7 @@ public:
 	                                                                         uint32_t sizeToRead) {
 		if(sizeToRead > 0) {
 			val.resize(sizeToRead);
-			packet.read(static_cast<uint8*>(val.data()), val.size() * sizeof(T));
+            packet->read(static_cast<uint8 *>(val.data()), val.size() * sizeof(T));
 		} else {
 			val.clear();
 		}
@@ -182,7 +184,7 @@ public:
 		if(sizeToRead > 0) {
 			val.reserve(sizeToRead);
 			for(size_t i = 0; i < sizeToRead; i++) {
-				val.push_back(packet.read<T>());
+                val.push_back(packet->read<T>());
 			}
 		}
 	}
@@ -204,8 +206,9 @@ public:
 	template<typename T> void readEndArray(const char* fieldName, std::vector<T>& val) {
 		// While there are non parsed bytes and the read actually read something, continue
 		uint32_t lastParsedSize = UINT32_MAX;
-		while(lastParsedSize != packet.rpos() && packet.rpos() < packet.size()) {
-			lastParsedSize = packet.rpos();
+        while (lastParsedSize != packet->rpos() && packet->rpos() < packet->size())
+        {
+            lastParsedSize = packet->rpos();
 			auto it = val.insert(val.end(), T());
 			T& newItem = *it;
 			read<T>(fieldName, newItem);
@@ -219,7 +222,7 @@ public:
 	}
 
 	void discard(const char* fieldName, size_t size) {
-		packet.read_skip(size);
+        packet->read_skip(size);
 	}
 };
 

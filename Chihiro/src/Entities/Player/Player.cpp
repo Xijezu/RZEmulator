@@ -1708,7 +1708,7 @@ void Player::RemoveAllSummonFromWorld()
     }
 }
 
-void Player::SendPacket(XPacket pPacket)
+void Player::SendPacket(const XPacket& pPacket)
 {
 
     if (m_session != nullptr)

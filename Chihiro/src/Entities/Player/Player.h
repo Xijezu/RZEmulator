@@ -293,16 +293,17 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         uint16 IsUseableItem(Item *pItem, Unit *pTarget);
         uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
 
-        void SendPacket(XPacket pPacket);
+        void SendPacket(const XPacket &pPacket);
 
         template<class TS_SERIALIZABLE_PACKET>
         void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
         {
             if (m_session == nullptr)
                 return;
-            MessageSerializerBuffer serializer;
+            XPacket                 output;
+            MessageSerializerBuffer serializer(&output);
             packet.serialize(&serializer);
-            SendPacket(serializer.getFinalizedPacket());
+            SendPacket(*serializer.getFinalizedPacket());
         }
 
         WorldSession &GetSession() const { return *m_session; }
