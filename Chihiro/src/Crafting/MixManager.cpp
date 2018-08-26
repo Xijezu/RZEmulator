@@ -535,6 +535,11 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult)
 
 bool MixManager::CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem)
 {
+	if(pItem == nullptr)
+	{
+		return false;
+	}
+
     if (*nSubMaterialCount == 1)
     {
         if (pItem->m_Instance.Flag % 2 == ITEM_FLAG_CARD)
