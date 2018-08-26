@@ -125,14 +125,15 @@ class XSocket : public Socket<XSocket>
         }
 
         template<class TS_SERIALIZABLE_PACKET>
-        void SendPacket(TS_SERIALIZABLE_PACKET const &packet, int version)
+        void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
         {
             if (!IsOpen())
                 return;
 
-            MessageSerializerBuffer serializer(version);
+            XPacket                 output;
+            MessageSerializerBuffer serializer(&output);
             packet.serialize(&serializer);
-            SendPacket(serializer.getFinalizedPacket());
+            SendPacket(*serializer.getFinalizedPacket());
         }
 
         void SetSession(XSession *session)

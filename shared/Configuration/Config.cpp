@@ -69,7 +69,7 @@ bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> ar
         return false;
     }
 
-    cachedConfig.packetVersion = GetIntDefault("Network.PacketVersion", EPIC_4_1_1);
+    cachedConfig.packetVersion = GetIntDefault("Game.PacketVersion", EPIC_4_1_1);
 
     return true;
 }
