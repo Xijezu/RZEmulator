@@ -21,28 +21,6 @@
 #include "Encryption/XRc4Cipher.h"
 #include "Entities/Player/Player.h"
 
-struct LobbyCharacterInfo
-{
-    int         sex;
-    int         race;
-    int         model_id[5]                = {0};
-    int         wear_info[24]              = {0};
-    int         level;
-    int         job;
-    int         job_level;
-    int         exp;
-    int         hp;
-    int         mp;
-    int         permission;
-    bool        is_banned;
-    std::string name;
-    uint32      skin_color;
-    std::string szCreateTime;
-    std::string szDeleteTime;
-    int         wear_item_enhance_info[24] = {0};
-    int         wear_item_level_info[24]   = {0};
-};
-
 enum STORAGE_MODE : int
 {
     ITEM_INVENTORY_TO_STORAGE = 0x0,
@@ -79,72 +57,72 @@ class WorldSession : public XSession
         void HandleNullPacket(XPacket *) {}
 
         // Client-Auth & Logout
-        void onAuthResult(XPacket *);
-        void onAccountWithAuth(XPacket *);
-        void onCharacterList(XPacket *);
-        void onLogin(XPacket *);
-        void onReturnToLobby(XPacket *);
-        void onLogoutTimerRequest(XPacket *);
+        void onAuthResult(const TS_AG_CLIENT_LOGIN *);
+        void onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *);
+        void onCharacterList(const TS_CS_CHARACTER_LIST *);
+        void onLogin(const TS_CS_LOGIN *);
+        void onReturnToLobby(const TS_CS_RETURN_LOBBY *);
+        void onLogoutTimerRequest(const TS_CS_REQUEST_LOGOUT *);
         // Game itself
-        void onCharacterName(XPacket *);
-        void onCreateCharacter(XPacket *);
-        void onDeleteCharacter(XPacket *);
-        void onChatRequest(XPacket *);
+        void onCharacterName(const TS_CS_CHECK_CHARACTER_NAME *);
+        void onCreateCharacter(const TS_CS_CREATE_CHARACTER *);
+        void onDeleteCharacter(const TS_CS_DELETE_CHARACTER *);
+        void onChatRequest(const TS_CS_CHAT_REQUEST *);
 
-        void onMoveRequest(XPacket *);
-        void onPing(XPacket *);
-        void onRegionUpdate(XPacket *);
-        void onChangeLocation(XPacket *);
-        void onQuery(XPacket *);
-        void onUpdate(XPacket *);
-        void onTimeSync(XPacket *);
-        void onGameTime(XPacket *);
-        void onSetProperty(XPacket *);
+        void onMoveRequest(const TS_CS_MOVE_REQUEST *);
+        void onPing(const TS_CS_PING *);
+        void onRegionUpdate(const TS_CS_REGION_UPDATE *);
+        void onChangeLocation(const TS_CS_CHANGE_LOCATION *);
+        void onQuery(const TS_CS_QUERY *);
+        void onUpdate(const TS_CS_UPDATE *);
+        void onTimeSync(const TS_TIMESYNC *);
+        void onGameTime(const TS_CS_GAME_TIME *);
+        void onSetProperty(const TS_CS_SET_PROPERTY *);
 
-        void onJobLevelUp(XPacket *);
-        void onLearnSkill(XPacket *);
+        void onJobLevelUp(const TS_CS_JOB_LEVEL_UP *);
+        void onLearnSkill(const TS_CS_LEARN_SKILL *);
 
         /* Trade related*/
-        void onTrade(XPacket *); // Main packet
+        void onTrade(const TS_TRADE *); // Main packet
         // Those aren't actually packethandlers, but they get used by onTrade
         void onRequestTrade(uint);
         void onAcceptTrade(uint);
         void onCancelTrade();
         void onRejectTrade(uint);
-        void onAddItem(uint, XPacket *);
-        void onRemoveItem(uint, XPacket *);
-        void onAddGold(uint, XPacket *);
+        void onAddItem(uint, const TS_TRADE *);
+        void onRemoveItem(uint, const TS_TRADE *);
+        void onAddGold(uint, const TS_TRADE *);
         void onFreezeTrade();
         void onConfirmTrade(uint);
 
-        void onPutOnItem(XPacket *);
-        void onPutOffItem(XPacket *);
-        void onBindSkillCard(XPacket *);
-        void onUnBindSkilLCard(XPacket *);
-        void onEquipSummon(XPacket *);
-        void onSoulStoneCraft(XPacket *);
+        void onPutOnItem(const TS_CS_PUTON_ITEM *);
+        void onPutOffItem(const TS_CS_PUTOFF_ITEM *);
+        void onBindSkillCard(const TS_CS_BIND_SKILLCARD *);
+        void onUnBindSkilLCard(const TS_CS_UNBIND_SKILLCARD *);
+        void onEquipSummon(const TS_EQUIP_SUMMON *);
+        void onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *);
 
-        void onContact(XPacket *);
-        void onDialog(XPacket *);
-        void onDropQuest(XPacket *);
+        void onContact(const TS_CS_CONTACT *);
+        void onDialog(const TS_CS_DIALOG *);
+        void onDropQuest(const TS_CS_DROP_QUEST *);
 
-        void onBuyItem(XPacket *);
-        void onSellItem(XPacket *);
-        void onUseItem(XPacket *);
-		void onDropItem(XPacket *);
+        void onBuyItem(const TS_CS_BUY_ITEM *);
+        void onSellItem(const TS_CS_SELL_ITEM *);
+        void onUseItem(const TS_CS_USE_ITEM *);
+        void onDropItem(const TS_CS_DROP_ITEM *);
 
-        void onSkill(XPacket *);
-        void onMixRequest(XPacket *);
-        void onRevive(XPacket *);
-        void onAttackRequest(XPacket *);
-        void onCancelAction(XPacket *);
-        void onTakeItem(XPacket *);
+        void onSkill(const TS_CS_SKILL *);
+        void onMixRequest(const TS_CS_MIX *);
+        void onRevive(const TS_CS_RESURRECTION *);
+        void onAttackRequest(const TS_CS_ATTACK_REQUEST *);
+        void onCancelAction(const TS_CS_CANCEL_ACTION *);
+        void onTakeItem(const TS_CS_TAKE_ITEM *);
 
-        void onGetSummonSetupInfo(XPacket *);
-        void onStorage(XPacket *);
+        void onGetSummonSetupInfo(const TS_CS_GET_SUMMON_SETUP_INFO *);
+        void onStorage(const TS_CS_STORAGE *);
 
         void _SendResultMsg(uint16, uint16, int);
-        std::vector<LobbyCharacterInfo> _PrepareCharacterList(uint32);
+        void _PrepareCharacterList(uint32, std::vector<LOBBY_CHARACTER_INFO> *);
     private:
         bool checkCharacterName(const std::string &);
         bool isValidTradeTarget(Player *);
