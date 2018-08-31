@@ -156,6 +156,13 @@ class World
 
         void Broadcast(uint, uint, uint, uint, uint8, XPacket);
         void Broadcast(uint, uint, uint8, XPacket);
+
+        template<typename T>
+        void Broadcast(uint x , uint y, uint8 layer, T*)
+        {
+
+        }
+
         uint GetArTime();
 
         void Update(uint);
