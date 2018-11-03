@@ -2,7 +2,6 @@
 #define PACKETS_TS_SC_CHARACTER_LIST_H
 
 #include "Server/Packets/PacketDeclaration.h"
-#include "TS_MESSAGE.h"
 
 #define LOBBY_CHARACTER_INFO_DEF(_) \
 	_(simple) (uint32_t, sex) \
