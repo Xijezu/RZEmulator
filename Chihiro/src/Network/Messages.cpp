@@ -162,7 +162,7 @@ void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type,
     dialogPct.npc_handle = npc_handle;
     dialogPct.title      = szTitle;
     dialogPct.text       = szText;
-    dialogPct.text       = szMenu;
+    dialogPct.menu       = szMenu;
     pPlayer->SendPacket(dialogPct);
 }
 
@@ -212,7 +212,7 @@ void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, P
     {
         TS_SC_CHAT chatPct{ };
         chatPct.szSender = szSenderName;
-        chatPct.type     = nChatType;
+        chatPct.type     = static_cast<uint8_t>(nChatType);
         chatPct.message  = szMsg;
         target->SendPacket(chatPct);
     }
@@ -242,7 +242,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
         TS_MARKET_ITEM_INFO item_info{ };
         item_info.code             = info.code;
         item_info.arena_point      = 0; // @ Epic 9
-        item_info.huntaholic_point = static_cast<decltype(item_info.huntaholic_ratio) >(info.huntaholic_ratio);
+        item_info.huntaholic_point = static_cast<decltype(item_info.huntaholic_point) >(info.huntaholic_ratio);
         item_info.price            = static_cast<decltype(item_info.price)>(info.price_ratio);
         marketPct.items.emplace_back(item_info);
     }
@@ -374,9 +374,9 @@ void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 n
         return;
 
     TS_SC_RESULT resultPct{ };
-    resultPct.packetID = nMsg;
-    resultPct.result   = nResult;
-    resultPct.value    = nValue;
+    resultPct.request_msg_id = nMsg;
+    resultPct.result         = nResult;
+    resultPct.value          = nValue;
     pPlayer->SendPacket(resultPct);
 }
 
@@ -386,9 +386,9 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
         return;
 
     TS_SC_RESULT resultPct{ };
-    resultPct.packetID = nMsg;
-    resultPct.result   = nResult;
-    resultPct.value    = nValue;
+    resultPct.request_msg_id = nMsg;
+    resultPct.result         = nResult;
+    resultPct.value          = nValue;
     worldSession->GetSocket()->SendPacket(resultPct);
 }
 
@@ -423,16 +423,17 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
 
     if (pUnit->ends.size() < 2000)
     {
-        XPacket movePct(NGemity::Packets::TS_SC_MOVE);
-        movePct << (uint32_t)pUnit->lastStepTime;
-        movePct << (uint32)pUnit->GetHandle();
-        movePct << (uint8_t)pUnit->GetLayer();
-        movePct << (uint8_t)pUnit->speed;
-        movePct << (uint16)pUnit->ends.size();
-        for (auto &pos : pUnit->ends)
+        TS_SC_MOVE movePct{ };
+        movePct.start_time = pUnit->lastStepTime;
+        movePct.handle     = pUnit->GetHandle();
+        movePct.tlayer     = pUnit->GetLayer();
+        movePct.speed      = pUnit->speed;
+        for (const auto &pos : pUnit->ends)
         {
-            movePct << pos.end.GetPositionX();
-            movePct << pos.end.GetPositionY();
+            MOVE_INFO move_info{ };
+            move_info.tx = pos.end.GetPositionX();
+            move_info.ty = pos.end.GetPositionY();
+            movePct.move_infos.emplace_back(move_info);
         }
         pPlayer->SendPacket(movePct);
     }
@@ -440,9 +441,9 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
 
 void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 {
-    XPacket packet(NGemity::Packets::TS_SC_WEAR_INFO);
-    packet << pUnit->GetHandle();
-    for (int  i = 0; i < MAX_ITEM_WEAR; i++)
+    TS_SC_WEAR_INFO wearPct{ };
+    wearPct.handle = pUnit->GetHandle();
+    for (int i = 0; i < MAX_ITEM_WEAR; i++)
     {
         int wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
@@ -451,18 +452,12 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 3);
         if (i == 5 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 4);
-        packet << wear_info;
+        wearPct.item_code[i]    = static_cast<uint32_t>(wear_info);
+        wearPct.item_enhance[i] = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.nEnhance : 0;
+        wearPct.item_level[i]   = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.nLevel : 0;
+
     }
-    for (auto &i : pUnit->m_anWear)
-    {
-        packet << (i != nullptr ? i->m_Instance.nEnhance : 0);
-    }
-    for (auto &i : pUnit->m_anWear)
-    {
-        packet << (i != nullptr ? i->m_Instance.nLevel : 0);
-    }
-    packet.FinalizePacket();
-    pPlayer->SendPacket(packet);
+    pPlayer->SendPacket(wearPct);
 }
 
 void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool need_to_display)
@@ -500,12 +495,12 @@ void Messages::SendWarpMessage(Player *pPlayer)
 {
     if (pPlayer == nullptr)
         return;
-    XPacket packet(NGemity::Packets::TS_SC_WARP);
-    packet << pPlayer->GetPositionX();
-    packet << pPlayer->GetPositionY();
-    packet << pPlayer->GetPositionZ();
-    packet << (uint8_t)pPlayer->GetLayer();
-    pPlayer->SendPacket(packet);
+    TS_SC_WARP warpPct{ };
+    warpPct.x     = pPlayer->GetPositionX();
+    warpPct.y     = pPlayer->GetPositionY();
+    warpPct.z     = pPlayer->GetPositionZ();
+    warpPct.layer = pPlayer->GetLayer();
+    pPlayer->SendPacket(warpPct);
 }
 
 void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
@@ -513,9 +508,9 @@ void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
     if (pPlayer == nullptr || pItem == nullptr)
         return;
 
-    XPacket itemPct(NGemity::Packets::TS_SC_UPDATE_ITEM_COUNT);
-    itemPct << pItem->m_nHandle;
-    itemPct << (uint64)pItem->m_Instance.nCount;
+    TS_SC_UPDATE_ITEM_COUNT itemPct{ };
+    itemPct.item_handle = pItem->GetHandle();
+    itemPct.count       = pItem->m_Instance.nCount;
     pPlayer->SendPacket(itemPct);
 }
 
@@ -524,9 +519,8 @@ void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
     if (pPlayer == nullptr || pItem == nullptr)
         return;
 
-    XPacket itemPct(NGemity::Packets::TS_SC_DESTROY_ITEM);
-    itemPct << pItem->m_nHandle;
-
+    TS_SC_DESTROY_ITEM itemPct{ };
+    itemPct.item_handle = pItem->GetHandle();
     pPlayer->SendPacket(itemPct);
 }
 
@@ -560,10 +554,10 @@ void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, 
     if (pPlayer == nullptr)
         return;
 
-    XPacket atkPct(NGemity::Packets::TS_SC_CANT_ATTACK);
-    atkPct << handle;
-    atkPct << target;
-    atkPct << reason;
+    TS_SC_CANT_ATTACK atkPct{ };
+    atkPct.attacker_handle = handle;
+    atkPct.target_handle   = target;
+    atkPct.reason          = reason;
     pPlayer->SendPacket(atkPct);
 }
 
@@ -609,7 +603,6 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 
 void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int ttype)
 {
-    //auto npc = dynamic_cast<NPC*>(sMemoryPool.getPtrFromId(pPlayer->GetLastContactLong("npc")));
     std::string strButton{ };
     std::string strTrigger{ };
     int         i    = 0;
@@ -718,33 +711,33 @@ void Messages::SendQuestList(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    XPacket questPct(NGemity::Packets::TS_SC_QUEST_LIST);
-    questPct << (uint16)pPlayer->GetActiveQuestCount();
+    TS_SC_QUEST_LIST questPct{ };
 
     /* FUNCTOR BEGIN*/
     auto functor = [&questPct](Quest *pQuest) -> void {
-        questPct << pQuest->m_Instance.Code;
-        questPct << pQuest->m_Instance.nStartID;
+        TS_QUEST_INFO info{ };
+        info.code    = static_cast<uint32_t >(pQuest->m_Instance.Code);
+        info.startID = static_cast<uint32_t >(pQuest->m_Instance.nStartID);
+
         if (Quest::IsRandomQuest(pQuest->m_Instance.Code))
         {
-            questPct << pQuest->GetRandomKey(0);
-            questPct << pQuest->GetRandomValue(0);
-            questPct << pQuest->GetRandomKey(1);
-            questPct << pQuest->GetRandomValue(1);
-            questPct << pQuest->GetRandomKey(2);
-            questPct << pQuest->GetRandomValue(2);
+            for (int i = 0, j = 0; i < MAX_VALUE_NUMBER / 4; i++)
+            {
+                info.value[j++] = static_cast<uint32_t >(pQuest->GetRandomKey(i));
+                info.value[j++] = static_cast<uint32_t >(pQuest->GetRandomValue(i));
+            }
         }
         else
         {
             for (int i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
             {
-                questPct << pQuest->m_QuestBase->nValue[i];
+                info.value[i] = static_cast<uint32_t >(pQuest->m_QuestBase->nValue[i]);
             }
         }
 
-        for (const auto &nStatu : pQuest->m_Instance.nStatus)
+        for (int i = 0; i < MAX_QUEST_STATUS; i++)
         {
-            questPct << nStatu;
+            info.status[i] = static_cast<uint32_t >(pQuest->m_Instance.nStatus[i]);
         }
     };
     /* FUNCTOR END*/
