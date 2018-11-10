@@ -53,16 +53,16 @@ void CreatureStat::Add(const CreatureStat &v)
     luck += v.luck;
 }
 
-void CreatureStat::WriteToPacket(XPacket &packet)
+void CreatureStat::WriteToPacket(TS_SC_STAT_INFO &packet)
 {
-    packet << (int16_t)stat_id;
-    packet << (int16_t)(strength > 32000 ? 32000 : strength);
-    packet << (int16_t)(vital > 32000 ? 32000 : vital);
-    packet << (int16_t)(dexterity > 32000 ? 32000 : dexterity);
-    packet << (int16_t)(agility > 32000 ? 32000 : agility);
-    packet << (int16_t)(intelligence > 32000 ? 32000 : intelligence);
-    packet << (int16_t)(mentality > 32000 ? 32000 : mentality);
-    packet << (int16_t)(luck > 32000 ? 32000 : luck);
+    packet.stat.stat_id      = stat_id;
+    packet.stat.strength     = (strength > 32000 ? 32000 : strength);
+    packet.stat.vital        = (vital > 32000 ? 32000 : vital);
+    packet.stat.dexterity    = (dexterity > 32000 ? 32000 : dexterity);
+    packet.stat.agility      = (agility > 32000 ? 32000 : agility);
+    packet.stat.intelligence = (intelligence > 32000 ? 32000 : intelligence);
+    packet.stat.mentality    = (mentality > 32000 ? 32000 : mentality);
+    packet.stat.luck         = (luck > 32000 ? 32000 : luck);
 }
 
 void CreatureAtributeServer::Reset(int16_t v)
@@ -143,32 +143,31 @@ void CreatureAtributeServer::Copy(const CreatureAtributeServer &v)
     nMPAddByItem                 = v.nMPAddByItem;
 }
 
-void CreatureAtributeServer::WriteToPacket(XPacket &packet)
+void CreatureAtributeServer::WriteToPacket(TS_SC_STAT_INFO &packet)
 {
-    packet << (int16)(nCritical > 32000 ? 32000 : nCritical);
-    packet << (int16)(nCriticalPower > 32000 ? 32000 : nCriticalPower);
-    packet << (int16)(nAttackPointRight > 32000 ? 32000 : nAttackPointRight);
-    packet << (int16)(nAttackPointLeft > 32000 ? 32000 : nAttackPointLeft);
-    packet << (int16)(nDefence > 32000 ? 32000 : nDefence);
-    packet << (int16)(nBlockDefence > 32000 ? 32000 : nBlockDefence);
-    packet << (int16)(nMagicPoint > 32000 ? 32000 : nMagicPoint);
-    packet << (int16)(nMagicDefence > 32000 ? 32000 : nMagicDefence);
-    packet << (int16)(nAccuracyRight > 32000 ? 32000 : nAccuracyRight);
-    packet << (int16)(nAccuracyLeft > 32000 ? 32000 : nAccuracyLeft);
-    packet << (int16)(nMagicAccuracy > 32000 ? 32000 : nMagicAccuracy);
-    packet << (int16)(nAvoid > 32000 ? 32000 : nAvoid);
-    packet << (int16)(nMagicAvoid > 32000 ? 32000 : nMagicAvoid);
-    packet << (int16)(nBlockChance > 32000 ? 32000 : nBlockChance);
-    packet << (int16)(nMoveSpeed > 32000 ? 32000 : nMoveSpeed);
-    packet << (int16)(nAttackSpeedRight > 32000 ? 32000 : nAttackSpeedRight);
-    packet << (int16)(nAttackRange > 32000 ? 32000 : nAttackRange);
-    packet << (int16_t)nMaxWeight;
-    packet << (int16)(nCastingSpeed > 32000 ? 32000 : nCastingSpeed);
-    packet << (int16)(nCoolTimeSpeed > 32000 ? 32000 : nCoolTimeSpeed);
-    packet << (int16)(nItemChance > 32000 ? 32000 : nItemChance);
-    packet << (int16)(nHPRegenPercentage > 32000 ? 32000 : nHPRegenPercentage);
-    packet << (int16)(nHPRegenPoint > 32000 ? 32000 : nHPRegenPoint);
-    packet << (int16)(nMPRegenPercentage > 32000 ? 32000 : nMPRegenPercentage);
-    packet << (int16)(nMPRegenPoint > 32000 ? 32000 : nMPRegenPoint);
-
+    packet.attribute.nCritical          = static_cast<int16_t>(nCritical > 32000 ? 32000 : nCritical);
+    packet.attribute.nCriticalPower     = static_cast<int16_t>(nCriticalPower > 32000 ? 32000 : nCriticalPower);
+    packet.attribute.nAttackPointRight  = static_cast<int16_t>(nAttackPointRight > 32000 ? 32000 : nAttackPointRight);
+    packet.attribute.nAttackPointLeft   = static_cast<int16_t>(nAttackPointLeft > 32000 ? 32000 : nAttackPointLeft);
+    packet.attribute.nDefence           = static_cast<int16_t>(nDefence > 32000 ? 32000 : nDefence);
+    packet.attribute.nBlockDefence      = static_cast<int16_t>(nBlockDefence > 32000 ? 32000 : nBlockDefence);
+    packet.attribute.nMagicPoint        = static_cast<int16_t>(nMagicPoint > 32000 ? 32000 : nMagicPoint);
+    packet.attribute.nMagicDefence      = static_cast<int16_t>(nMagicDefence > 32000 ? 32000 : nMagicDefence);
+    packet.attribute.nAccuracyRight     = static_cast<int16_t>(nAccuracyRight > 32000 ? 32000 : nAccuracyRight);
+    packet.attribute.nAccuracyLeft      = static_cast<int16_t>(nAccuracyLeft > 32000 ? 32000 : nAccuracyLeft);
+    packet.attribute.nMagicAccuracy     = static_cast<int16_t>(nMagicAccuracy > 32000 ? 32000 : nMagicAccuracy);
+    packet.attribute.nAvoid             = static_cast<int16_t>(nAvoid > 32000 ? 32000 : nAvoid);
+    packet.attribute.nMagicAvoid        = static_cast<int16_t>(nMagicAvoid > 32000 ? 32000 : nMagicAvoid);
+    packet.attribute.nBlockChance       = static_cast<int16_t>(nBlockChance > 32000 ? 32000 : nBlockChance);
+    packet.attribute.nMoveSpeed         = static_cast<int16_t>(nMoveSpeed > 32000 ? 32000 : nMoveSpeed);
+    packet.attribute.nAttackSpeed       = static_cast<int16_t>(nAttackSpeedRight > 32000 ? 32000 : nAttackSpeedRight);
+    packet.attribute.nAttackRange       = static_cast<int16_t>(nAttackRange > 32000 ? 32000 : nAttackRange);
+    packet.attribute.nMaxWeight         = static_cast<int16_t>nMaxWeight;
+    packet.attribute.nCastingSpeed      = static_cast<int16_t>(nCastingSpeed > 32000 ? 32000 : nCastingSpeed);
+    packet.attribute.nCoolTimeSpeed     = static_cast<int16_t>(nCoolTimeSpeed > 32000 ? 32000 : nCoolTimeSpeed);
+    packet.attribute.nItemChance        = static_cast<int16_t>(nItemChance > 32000 ? 32000 : nItemChance);
+    packet.attribute.nHPRegenPercentage = static_cast<int16_t>(nHPRegenPercentage > 32000 ? 32000 : nHPRegenPercentage);
+    packet.attribute.nHPRegenPoint      = static_cast<int16_t>(nHPRegenPoint > 32000 ? 32000 : nHPRegenPoint);
+    packet.attribute.nMPRegenPercentage = static_cast<int16_t>(nMPRegenPercentage > 32000 ? 32000 : nMPRegenPercentage);
+    packet.attribute.nMPRegenPoint      = static_cast<int16_t>(nMPRegenPoint > 32000 ? 32000 : nMPRegenPoint);
 }

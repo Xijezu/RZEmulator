@@ -19,8 +19,9 @@
 */
 #include "CompilerDefs.h"
 #include <boost/detail/endian.hpp>
+#include "PacketEpics.h"
 
-#define EPIC 4
+#define EPIC EPIC_4_1_1
 #define NGEMITY_LITTLEENDIAN 0
 #define NGEMITY_BIGENDIAN    1
 

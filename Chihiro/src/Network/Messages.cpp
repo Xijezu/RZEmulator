@@ -30,8 +30,8 @@ void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 
     TS_SC_EXP_UPDATE packet;
     packet.handle = pUnit->GetHandle();
-    packet.exp = pUnit->GetEXP();
-    packet.jp = pUnit->GetJP();
+    packet.exp    = static_cast<uint64_t>(pUnit->GetEXP());
+    packet.jp     = static_cast<uint64_t>(pUnit->GetJP());
     pPlayer->SendPacket(packet);
 }
 
@@ -52,17 +52,19 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    XPacket statPct(NGemity::Packets::TS_SC_HPMP);
-    statPct << (uint32)pUnit->GetHandle();
+    TS_SC_HPMP statPct{ };
+    statPct.handle = pUnit->GetHandle();
 
-    statPct << (int32)add_hp;
-    statPct << (int32)pUnit->GetHealth();
-    statPct << (int32)pUnit->GetMaxHealth();
+    statPct.add_hp = add_hp;
+    statPct.hp     = pUnit->GetHealth();
+    statPct.max_hp = pUnit->GetMaxHealth();
 
-    statPct << (int32)add_mp;
-    statPct << (int32)pUnit->GetMana();
-    statPct << (int32)pUnit->GetMaxMana();
-    statPct << (uint8)(display ? 1 : 0);
+    statPct.add_mp = static_cast<int32_t >(add_mp);
+    statPct.mp     = pUnit->GetMana();
+    statPct.max_mp = pUnit->GetMaxMana();
+
+    statPct.need_to_display = display;
+
     pPlayer->SendPacket(statPct);
 }
 
@@ -71,19 +73,23 @@ void Messages::SendStatInfo(Player *pPlayer, Unit *pUnit)
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    XPacket statPct(1000);
-    statPct << (uint32_t)pUnit->GetHandle();
-    pUnit->m_cStat.WriteToPacket(statPct);
-    pUnit->m_Attribute.WriteToPacket(statPct);
-    statPct << (uint8_t)0;
-    pPlayer->SendPacket(statPct);
+    {
+        TS_SC_STAT_INFO statPct{ };
+        statPct.handle = pUnit->GetHandle();
+        pUnit->m_cStat.WriteToPacket(statPct);
+        pUnit->m_Attribute.WriteToPacket(statPct);
+        statPct.type = 0;
+        pPlayer->SendPacket(statPct);
+    }
 
-    statPct.Reset();
-    statPct << (uint32_t)pUnit->GetHandle();
-    pUnit->m_cStatByState.WriteToPacket(statPct);
-    pUnit->m_AttributeByState.WriteToPacket(statPct);
-    statPct << (uint8_t)1;
-    pPlayer->SendPacket(statPct);
+    {
+        TS_SC_STAT_INFO statPct{ };
+        statPct.handle = pUnit->GetHandle();
+        pUnit->m_cStatByState.WriteToPacket(statPct);
+        pUnit->m_AttributeByState.WriteToPacket(statPct);
+        statPct.type = 1;
+        pPlayer->SendPacket(statPct);
+    }
 }
 
 void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
@@ -91,13 +97,13 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     if (pPlayer == nullptr || pSummon == nullptr)
         return;
 
-    XPacket summonPct(NGemity::Packets::TS_SC_ADD_SUMMON_INFO);
-    summonPct << (uint32_t)pSummon->GetCardHandle();
-    summonPct << (uint32_t)pSummon->GetHandle();
-    summonPct.fill(pSummon->GetName(), 19);
-    summonPct << (int32_t)pSummon->GetSummonCode();
-    summonPct << (int32_t)pSummon->GetLevel();
-    summonPct << (int32_t)1000; // TODO: SP
+    TS_SC_ADD_SUMMON_INFO summonPct{ };
+    summonPct.card_handle   = pSummon->GetCardHandle();
+    summonPct.summon_handle = pSummon->GetHandle();
+    summonPct.name          = pSummon->GetNameAsString();
+    summonPct.code          = pSummon->GetSummonCode();
+    summonPct.level         = pSummon->GetLevel();
+    summonPct.sp            = 1000; // @todo
     pPlayer->SendPacket(summonPct);
 
     SendStatInfo(pPlayer, pSummon);
@@ -114,43 +120,34 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
     if (pPlayer == nullptr)
         return;
 
-    XPacket summonPct(NGemity::Packets::TS_EQUIP_SUMMON);
-    summonPct << ((uint8_t)(bShowDialog ? 1 : 0));
-    for (auto &i : pPlayer->m_aBindSummonCard)
+    TS_EQUIP_SUMMON summonPct{ };
+    summonPct.open_dialog = bShowDialog;
+    for (int i = 0; i < pPlayer->m_aBindSummonCard; i++)
     {
-        if (i != nullptr)
-        {
-            summonPct << (uint32_t)i->m_nHandle;
-        }
-        else
-        {
-            summonPct << (uint32_t)0;
-        }
+        if (pPlayer->m_aBindSummonCard[i] != nullptr)
+            summonPct.card_handle[i] = pPlayer->m_aBindSummonCard[i]->GetHandle();
     }
     pPlayer->SendPacket(summonPct);
 }
 
 void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string &szKey, int64 nValue)
 {
-    XPacket packet(NGemity::Packets::TS_SC_PROPERTY);
-    packet << (uint32_t)pUnit->GetHandle();
-    packet << (uint8)1;
-    packet.fill(szKey, 16);
-    packet << (int64)nValue;
-    packet.FinalizePacket();
-    pPlayer->SendPacket(packet);
+    TS_SC_PROPERTY propertyPct{ };
+    propertyPct.handle    = pUnit->GetHandle();
+    propertyPct.is_number = true;
+    propertyPct.name      = szKey;
+    propertyPct.value     = nValue;
+    pPlayer->SendPacket(propertyPct);
 }
 
 void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string &pszKey, const std::string &pszValue)
 {
-    XPacket packet(NGemity::Packets::TS_SC_PROPERTY);
-    packet << pUnit->GetHandle();
-    packet << (uint8)0;
-    packet.fill(pszKey, 16);
-    packet << (uint64) 0;
-    packet << pszValue;
-    packet << (uint8)0;
-    pPlayer->SendPacket(packet);
+    TS_SC_PROPERTY propertyPct{ };
+    propertyPct.handle       = pUnit->GetHandle();
+    propertyPct.is_number    = false;
+    propertyPct.name         = szKey;
+    propertyPct.string_value = nValue;
+    pPlayer->SendPacket(propertyPct);
 }
 
 void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string &szTitle, const std::string &szText, const std::string &szMenu)
@@ -179,7 +176,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
         skillPct << (uint16_t)pUnit->m_vSkillList.size();
         skillPct << (uint8_t)0; // reset | modification_type ?
 
-        for (auto& t : pUnit->m_vSkillList)
+        for (auto &t : pUnit->m_vSkillList)
         {
             if (t->m_nSkillUID < 0)
                 continue;
@@ -245,11 +242,11 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
     for (const auto &info : pMarket)
     {
         marketPct << (int32_t)info.code;
-#if EPIC >= 5
+#if EPIC >= EPIC_5_1
         marketPct << (int64_t) info.price_ratio;
         marketPct << (int32_t) 0;//info.huntaholic_ratio;
 #else
-	marketPct << (int64_t)info.price_ratio;
+        marketPct << (int64_t)info.price_ratio;
 #endif // EPIC >= 4
     }
 
@@ -261,65 +258,57 @@ void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
     if (pPlayer == nullptr || pItem == nullptr)
         return;
 
-    XPacket inventoryPct(NGemity::Packets::TS_SC_INVENTORY);
-    inventoryPct << (uint16_t)1;
-    fillItemInfo(inventoryPct, pItem);
+    TS_SC_INVENTORY inventoryPct{ };
+    auto            info = fillItemInfo(pItem);
+    if (info.has_value())
+        inventoryPct.items.emplace_back(info.value());
     pPlayer->SendPacket(inventoryPct);
 }
 
-void Messages::fillItemInfo(XPacket &packet, Item *item)
+std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
 {
     if (item == nullptr || item->m_pItemBase == nullptr)
-        return;
+        return { };
 
-    packet << (uint32_t)item->m_nHandle;
-    packet << (int32_t)item->m_Instance.Code;
-    packet << (int64)item->m_Instance.UID;
-    packet << (int64) item->m_Instance.nCount;
+    TS_ITEM_INFO itemInfo{ };
+    itemInfo.base_info.handle = item->m_nHandle;
+    itemInfo.base_info.code   = item->m_Instance.Code;
+    itemInfo.base_info.uid    = item->m_Instance.UID;
+    itemInfo.base_info.count  = item->m_Instance.nCount;
 
-    packet << (uint32_t)item->m_Instance.nCurrentEndurance;
-    packet << (uint8_t)item->m_Instance.nEnhance;
-    packet << (uint8_t)item->m_Instance.nLevel;
-    packet << (uint32_t)item->m_Instance.Flag;
+    itemInfo.base_info.endurance = static_cast<uint32_t>(item->m_Instance.nCurrentEndurance);
+    itemInfo.base_info.enhance   = static_cast<uint8_t>(item->m_Instance.nEnhance);
+    itemInfo.base_info.level     = static_cast<uint8_t>(item->m_Instance.nLevel);
+    itemInfo.base_info.flag      = static_cast<uint32_t>(item->m_Instance.Flag);
 
-    int socket[4]{0};
-    std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(socket));
+    std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(itemInfo.base_info.socket));
 
     if (item->m_pItemBase->group == GROUP_SUMMONCARD)
     {
         if (item->m_pSummon != nullptr)
         {
-            int slot     = 1;
-            int tl       = item->m_pSummon->m_nTransform;
+            int slot                        = 1;
+            int tl                          = item->m_pSummon->m_nTransform;
             while (slot < tl)
             {
-                socket[slot] = item->m_pSummon->GetPrevJobLv(slot - 1);
+                itemInfo.base_info.socket[slot] = item->m_pSummon->GetPrevJobLv(slot - 1);
                 ++slot;
             }
-            socket[slot] = item->m_pSummon->GetLevel();
+            itemInfo.base_info.socket[slot] = item->m_pSummon->GetLevel();
         }
     }
 
-    packet << (int32_t)socket[0];
-    packet << (int32_t)socket[1];
-    packet << (int32_t)socket[2];
-    packet << (int32_t)socket[3];
-    // Prior to Epic 6 we have to use 2 dummy socket slots.
-    // Can you imagine how much time I wasted on this?
-#if EPIC < 6
-    packet << (int32_t)0;
-    packet << (int32_t)0;
-#endif // EPIC < 6
-    packet << (int32_t)item->m_Instance.tExpire;
+    itemInfo.base_info.remain_time = static_cast<int32_t>(item->m_Instance.tExpire);
 
     if (item->IsInStorage())
-        packet << (int16_t)-2;
+        itemInfo.wear_position = -2;
     else
-        packet << (int16_t)item->m_Instance.nWearInfo;
-    packet << (uint32_t)(item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0);
-#if EPIC >= 4
-    packet << (int32_t) item->m_Instance.nIdx;
-#endif // EPIC >= 5
+        itemInfo.wear_position = item->m_Instance.nWearInfo;
+
+    itemInfo.own_summon_handle = item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0;
+    itemInfo.index             = item->m_Instance.nIdx;
+
+    return itemInfo;
 }
 
 void Messages::SendTimeSynch(Player *pPlayer)
@@ -337,9 +326,9 @@ void Messages::SendGameTime(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    XPacket gtPct(NGemity::Packets::TS_SC_GAME_TIME);
-    gtPct << (uint32)sWorld.GetArTime();
-    gtPct << (int64)time(nullptr);
+    TS_SC_GAME_TIME gtPct{ };
+    gtPct.game_time = static_cast<uint64_t>(time(nullptr));
+    gtPct.t         = sWorld.GetArTime();
     pPlayer->SendPacket(gtPct);
 }
 
@@ -354,13 +343,11 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
         {
             do
             {
-                XPacket packet(NGemity::Packets::TS_SC_INVENTORY);
-                auto    lcnt   = idx;
-                int64   mcount = 200;
+                TS_SC_INVENTORY inventoryPct{ };
+                auto            lcnt   = idx;
+                int64           mcount = 200;
                 if (count - idx <= 200)
                     mcount = count - idx;
-
-                packet << (uint16_t)mcount;
 
                 auto ltotal = idx + mcount;
                 if (idx < ltotal)
@@ -370,12 +357,14 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
                         if (bIsStorage)
                             item = pPlayer->GetStorageItem((uint)lcnt);
                         else
-                            item = pPlayer->GetItem((uint)lcnt);
-                        fillItemInfo(packet, item);
+                            item  = pPlayer->GetItem((uint)lcnt);
+                        auto info = fillItemInfo(item);
+                        if (info.has_value())
+                            inventoryPct.items.emplace_back(info.value());
                         ++lcnt;
                     } while (lcnt < ltotal);
                 }
-                pPlayer->SendPacket(packet);
+                pPlayer->SendPacket(inventoryPct);
                 idx += 200;
             } while (idx < count);
         }
@@ -406,12 +395,12 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
     worldSession->GetSocket()->SendPacket(packet);
 }
 
-void Messages::SendDropResult(Player * pPlayer, uint itemHandle, bool bIsSuccess)
+void Messages::SendDropResult(Player *pPlayer, uint itemHandle, bool bIsSuccess)
 {
     XPacket packet(NGemity::Packets::TS_SC_DROP_RESULT);
-	packet << itemHandle;
-	packet << bIsSuccess;
-	pPlayer->SendPacket(packet);
+    packet << itemHandle;
+    packet << bIsSuccess;
+    pPlayer->SendPacket(packet);
 }
 
 void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool/* bAbsolute*/)
@@ -669,7 +658,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
         }
 
         // /run function get_quest_progress() return 0 end
-#if EPIC >= 5
+#if EPIC >= EPIC_5_1
         pPlayer->SetDialogTitle("Guide Arocel", type);
 #else
         pPlayer->SetDialogTitle("Guide Arocel", 0);
@@ -697,7 +686,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 }
                 else
                 {
-#if EPIC <= 4
+#if EPIC <= EPIC_4_1_1
                     ///- Hack for epic 4, use proper workaround instead
                     pPlayer->AddDialogMenu("Confirm", string_format("end_quest(%u, -1)", code));
                     return;
@@ -841,7 +830,7 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     tamePct << pMonster->GetHandle();
 
     sWorld.Broadcast((uint)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                    (uint)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
+                     (uint)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
 
     std::string chatMsg{ };
     switch (mode)
@@ -1130,18 +1119,13 @@ void Messages::SendTradeCancelMessage(Player *pClient)
 
 void Messages::SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget)
 {
-    XPacket tradePct(NGemity::Packets::TS_TRADE);
-    tradePct << (uint32)pPlayer->GetHandle();
-    tradePct << (uint8)nTradeMode;
-    fillItemInfo(tradePct, pItem);
+    TS_TRADE tradePct{ };
+    tradePct.target_player = pPlayer->GetHandle();
+    tradePct.mode          = static_cast<uint8_t>(nTradeMode);
+    auto info = fillItemInfo(pItem);
+    if (info.has_value())
+        tradePct.item_info = info.value();
 
-    // Change the count of the item to the trade count
-    tradePct.wpos(28);
-#if EPIC >= 5
-    tradePct << (int64)nCount;
-#else
-    tradePct << (int32)nCount;
-#endif
     pPlayer->SendPacket(tradePct);
     pTarget->SendPacket(tradePct);
 }
