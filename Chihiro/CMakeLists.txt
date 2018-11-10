@@ -37,6 +37,9 @@ include_directories(
         ${Boost_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${MYSQL_INCLUDE_DIR})
+if (UNIX)
+    include_directories(${READLINE_INCLUDE_DIR})
+endif ()
 
 add_executable(Chihiro ${SOURCE_FILES})
 target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} boost lualib)
@@ -48,6 +51,7 @@ if(UNIX)
     elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
         set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -ldl -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
     endif()
+    target_link_libraries(Chihiro ${READLINE_LIBRARY})
     set_target_properties(Chihiro PROPERTIES LINK_FLAGS ${EXECUTABLE_LINK_FLAGS})
 endif()
 

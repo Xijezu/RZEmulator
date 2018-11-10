@@ -22,6 +22,7 @@
 #include "Maploader.h"
 #include <boost/asio/signal_set.hpp>
 #include "Stacktrace.h"
+#include "CliThread.h"
 
 #ifndef _CHIHIRO_CORE_CONFIG
 # define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
@@ -30,6 +31,7 @@
 bool StartDB();
 void StopDB();
 void WorldUpdateLoop();
+void ShutdownCLIThread(std::thread *cliThread);
 void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
 
@@ -106,6 +108,13 @@ int main(int argc, char **argv)
         sObjectMgr.UnloadAll();
         sMapContent.UnloadAll();
     });
+
+    // Launch CliRunnable thread
+    std::shared_ptr<std::thread> cliThread;
+    if (sConfigMgr->GetBoolDefault("Console.Enable", true))
+    {
+        cliThread.reset(new std::thread(CliThread), &ShutdownCLIThread);
+    }
 
 
     // Start the Boost based thread pool
@@ -206,5 +215,70 @@ void WorldUpdateLoop()
         // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
         if (executionTimeDiff < WORLD_SLEEP_CONST)
             std::this_thread::sleep_for(std::chrono::milliseconds(WORLD_SLEEP_CONST - executionTimeDiff));
+    }
+}
+
+void ShutdownCLIThread(std::thread *cliThread)
+{
+    if (cliThread != nullptr)
+    {
+#ifdef _WIN32
+        // First try to cancel any I/O in the CLI thread
+        if (!CancelSynchronousIo(cliThread->native_handle()))
+        {
+            // if CancelSynchronousIo() fails, print the error and try with old way
+            DWORD errorCode = GetLastError();
+
+            // if CancelSynchronousIo fails with ERROR_NOT_FOUND then there was nothing to cancel, proceed with shutdown
+            if (errorCode != ERROR_NOT_FOUND)
+            {
+                LPSTR errorBuffer;
+                DWORD numCharsWritten = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    nullptr, errorCode, 0, (LPTSTR)&errorBuffer, 0, nullptr);
+                if (!numCharsWritten)
+                    errorBuffer = "Unknown error";
+
+                TC_LOG_DEBUG("server.worldserver", "Error cancelling I/O of CliThread, error code %u, detail: %s", uint32(errorCode), errorBuffer);
+
+                if (numCharsWritten)
+                    LocalFree(errorBuffer);
+
+                // send keyboard input to safely unblock the CLI thread
+                INPUT_RECORD b[4];
+                HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+                b[0].EventType = KEY_EVENT;
+                b[0].Event.KeyEvent.bKeyDown = TRUE;
+                b[0].Event.KeyEvent.uChar.AsciiChar = 'X';
+                b[0].Event.KeyEvent.wVirtualKeyCode = 'X';
+                b[0].Event.KeyEvent.wRepeatCount = 1;
+
+                b[1].EventType = KEY_EVENT;
+                b[1].Event.KeyEvent.bKeyDown = FALSE;
+                b[1].Event.KeyEvent.uChar.AsciiChar = 'X';
+                b[1].Event.KeyEvent.wVirtualKeyCode = 'X';
+                b[1].Event.KeyEvent.wRepeatCount = 1;
+
+                b[2].EventType = KEY_EVENT;
+                b[2].Event.KeyEvent.bKeyDown = TRUE;
+                b[2].Event.KeyEvent.dwControlKeyState = 0;
+                b[2].Event.KeyEvent.uChar.AsciiChar = '\r';
+                b[2].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+                b[2].Event.KeyEvent.wRepeatCount = 1;
+                b[2].Event.KeyEvent.wVirtualScanCode = 0x1c;
+
+                b[3].EventType = KEY_EVENT;
+                b[3].Event.KeyEvent.bKeyDown = FALSE;
+                b[3].Event.KeyEvent.dwControlKeyState = 0;
+                b[3].Event.KeyEvent.uChar.AsciiChar = '\r';
+                b[3].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+                b[3].Event.KeyEvent.wVirtualScanCode = 0x1c;
+                b[3].Event.KeyEvent.wRepeatCount = 1;
+                DWORD numb;
+                WriteConsoleInput(hStdIn, b, 4, &numb);
+            }
+        }
+#endif
+        cliThread->join();
+        delete cliThread;
     }
 }
