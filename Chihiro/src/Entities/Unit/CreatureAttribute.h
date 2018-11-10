@@ -18,7 +18,8 @@
 
 #include "Common.h"
 
-class XPacket;
+struct TS_SC_STAT_INFO;
+
 struct CreatureElementalResist
 {
     uint16 nResist[7];
@@ -110,7 +111,7 @@ class CreatureStat
 
         void Add(const CreatureStat &);
 
-        void WriteToPacket(XPacket &);
+        void WriteToPacket(TS_SC_STAT_INFO &);
 
         short stat_id;
         float strength;
@@ -274,7 +275,7 @@ class CreatureAtributeServer : public CreatureAtribute
 
         void Copy(const CreatureAtributeServer &);
 
-        void WriteToPacket(XPacket &packet);
+        void WriteToPacket(TS_SC_STAT_INFO &packet);
 
         float nAttackSpeedRight;
         float nAttackSpeedLeft;

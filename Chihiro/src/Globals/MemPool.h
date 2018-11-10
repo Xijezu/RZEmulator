@@ -100,7 +100,7 @@ class MemoryPoolMgr
         uint32_t m_nMonsterTop{0x40000001};
         uint32_t m_nPlayerTop{0x80000001};
         uint32_t m_nSummonTop{0xC0000001};
-#if EPIC >= 5
+#if EPIC >= EPIC_5_1
         uint32_t m_nPetTop{0xE0000001};
 #endif
         uint32_t m_nItemTop{0x00000001};

@@ -1248,7 +1248,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
             AddSummon(pItem->m_pSummon, true);
             Messages::SendSkillList(this, pItem->m_pSummon, -1);
         }
-#if EPIC >= 5
+#if EPIC >= EPIC_5_1
         else if(pItem->m_pItemBase->group == PetCage)
         {
 
@@ -1273,7 +1273,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         {
             AddSummonToStorage(pItem->m_pSummon);
         }
-#if EPIC >= 5
+#if EPIC >= EPIC_5_1
         else if(pItem->m_pItemBase->group == PetCage)
         {
 

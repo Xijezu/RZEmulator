@@ -29,6 +29,7 @@ struct MarketInfo;
 class WorldObject;
 class State;
 class Quest;
+struct TS_ITEM_INFO;
 
 class Messages
 {
@@ -93,5 +94,5 @@ class Messages
         static void SendTradeCancelMessage(Player *);
         static void SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget);
     private:
-        static void fillItemInfo(XPacket &, Item *);
+        static std::optional<TS_ITEM_INFO> fillItemInfo(Item *);
 };
