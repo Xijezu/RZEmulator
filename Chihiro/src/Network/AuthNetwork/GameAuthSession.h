@@ -30,8 +30,8 @@ class GameAuthSession : public XSession
         ~GameAuthSession();
 
         // Network handlers
-        void OnClose();
-        ReadDataHandlerResult ProcessIncoming(XPacket *);
+        void OnClose() override;
+        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
         bool IsEncrypted() const override { return false; }
 
         // Packet handlers

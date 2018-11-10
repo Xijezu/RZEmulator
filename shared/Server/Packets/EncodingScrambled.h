@@ -18,8 +18,13 @@ public:
 		value = decode(deserializedValue);
 	}
 
+        static uint32_t Scramble(uint32_t v)
+        {
+            return encode(v);
+        }
+
 private:
-	EncodingScrambled();
+        EncodingScrambled() = default;
 
 	static void init();
 	static uint32_t encode(uint32_t v);

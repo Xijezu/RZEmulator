@@ -61,7 +61,7 @@ class MemoryPoolMgr
         }
 
         template<class T>
-        void RemoveObject(T *object, bool bNeedToDelete = true)
+        void RemoveObject(T *object)
         {
             HashMapHolder<T>::Remove(object);
         }

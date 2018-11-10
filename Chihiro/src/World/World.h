@@ -158,7 +158,7 @@ class World
         void Broadcast(uint, uint, uint8, XPacket);
 
         template<typename T>
-        void Broadcast(uint x , uint y, uint8 layer, T*)
+        void Broadcast(uint x, uint y, uint8 layer, T *)
         {
 
         }
@@ -194,7 +194,7 @@ class World
         /// Set a float configuration element
         void setFloatConfig(WorldFloatConfigs index, float value)
         {
-            if(index < FLOAT_CONFIG_VALUE_COUNT)
+            if (index < FLOAT_CONFIG_VALUE_COUNT)
                 m_float_configs[index] = value;
         }
 
@@ -218,14 +218,14 @@ class World
         }
 
         /// Set a server configuration element
-        void setIntConfig(WorldIntConfigs index, uint32 value)
+        void setIntConfig(WorldIntConfigs index, int32_t value)
         {
             if (index < INT_CONFIG_VALUE_COUNT)
                 m_int_configs[index] = value;
         }
 
         /// Get a server configuration element
-        uint32 getIntConfig(WorldIntConfigs index) const
+        int32_t getIntConfig(WorldIntConfigs index) const
         {
             return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0;
         }
@@ -254,10 +254,10 @@ class World
         AtomicIndex s_nStateIndex{0};
         AtomicIndex s_nItemIndex{0};
 
-        float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
-        float  rate_values[MAX_RATES];
-        uint32 m_int_configs[INT_CONFIG_VALUE_COUNT];
-        bool   m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
+        float   m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
+        float   rate_values[MAX_RATES];
+        int32_t m_int_configs[INT_CONFIG_VALUE_COUNT];
+        bool    m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
 
         IntervalTimer m_timers[WUPDATE_COUNT];
     protected:

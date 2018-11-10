@@ -30,9 +30,9 @@ DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const /*default
 template<class T>
 DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name)
 {
-    bool constexpr updatesEnabledForThis = false;
+    //bool constexpr updatesEnabledForThis = false;
 
-    _open.push([this, name, updatesEnabledForThis, &pool]() -> bool {
+    _open.push([this, name, &pool]() -> bool {
         std::string const dbString = sConfigMgr->GetStringDefault((name + "Database.CString").c_str(), "");
         if (dbString.empty())
         {

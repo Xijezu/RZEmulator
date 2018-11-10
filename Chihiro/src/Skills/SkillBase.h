@@ -29,9 +29,6 @@ enum SKILL_RESULT_TYPE : int
     SRT_ADD_HP_MP_SP           = 22,
     SRT_REBIRTH                = 23,
     SRT_RUSH                   = 30,
-    SRT_CHAIN_DAMAGE           = 0x28,
-    SRT_CHAIN_MAGIC_DAMAGE     = 0x29,
-    SRT_CHAIN_HEAL             = 0x2A,
     SRT_NOT_USE                = 100,
 };
 

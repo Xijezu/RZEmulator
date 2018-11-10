@@ -38,9 +38,9 @@ Object::Object()
     _changedFields = nullptr;
     _valuesCount   = 0;
 
-    m_inWorld = false;
+    m_inWorld        = false;
     m_bDeleteRequest = false;
-    m_objectUpdated = false;
+    m_objectUpdated  = false;
 }
 
 Object::~Object()
