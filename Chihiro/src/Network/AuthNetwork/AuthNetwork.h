@@ -73,7 +73,8 @@ class AuthNetwork
 
             if(m_pNetworkThread != nullptr)
                 delete m_pNetworkThread;
-            m_pSocket->DeleteSession();
+            if (m_pSocket != nullptr)
+                m_pSocket->DeleteSession();
         }
 
         bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)

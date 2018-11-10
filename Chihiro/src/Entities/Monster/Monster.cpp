@@ -28,6 +28,7 @@
 #include "Skill.h"
 #include "GroupManager.h"
 #include "GameContent.h"
+#include "EncodingScrambled.h"
 
 Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
 {
@@ -73,9 +74,7 @@ Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
 void Monster::EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer)
 {
     Unit::EnterPacket(pEnterPct, monster, pPlayer);
-    //pEnterPct << (uint32_t)0;
-    Messages::GetEncodedInt(pEnterPct, (uint)bits_scramble(monster->m_Base->id));
-    // pEnterPct << (uint32_t)0;
+    Messages::GetEncodedInt(pEnterPct, EncodingScrambled::Scramble(static_cast<uint32_t>(monster->m_Base->id)));
     pEnterPct << (uint8_t)0;
 }
 
@@ -722,7 +721,7 @@ void Monster::comeBackHome(bool bInvincible)
 
 bool Monster::StartAttack(uint target, bool bNeedFastReaction)
 {
-    bool result{false};
+    bool                 result{false};
     if (Unit::StartAttack(target, bNeedFastReaction))
     {
         SetStatus(STATUS_ATTACK);

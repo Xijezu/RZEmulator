@@ -5,7 +5,8 @@ uint8_t EncodingScrambled::encodeMap[32];
 uint8_t EncodingScrambled::decodeMap[32];
 
 void EncodingScrambled::init() {
-	if(mapInitialized == false) {
+    if (!mapInitialized)
+    {
 		mapInitialized = true;
 
 		for(uint8_t i = 0; i < 32; i++)

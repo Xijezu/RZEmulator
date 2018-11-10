@@ -11,7 +11,7 @@ private:
 	};
 
 public:
-	static uint32_t getSize(int version) { return sizeof(uint64_t); }
+        static uint32_t getSize(int /*version*/) { return sizeof(uint64_t); }
 
 	template<class T> static void serialize(T* buffer, uint32_t value) {
 		SerializedValue sv;
