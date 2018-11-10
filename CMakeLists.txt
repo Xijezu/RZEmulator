@@ -33,6 +33,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)
 find_package(MYSQL REQUIRED)
+find_package(Readline REQUIRED)
 
 IF(NOT WITHOUT_GIT)
     find_package(Git)
