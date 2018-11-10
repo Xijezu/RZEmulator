@@ -162,7 +162,7 @@ void CreatureAtributeServer::WriteToPacket(TS_SC_STAT_INFO &packet)
     packet.attribute.nMoveSpeed         = static_cast<int16_t>(nMoveSpeed > 32000 ? 32000 : nMoveSpeed);
     packet.attribute.nAttackSpeed       = static_cast<int16_t>(nAttackSpeedRight > 32000 ? 32000 : nAttackSpeedRight);
     packet.attribute.nAttackRange       = static_cast<int16_t>(nAttackRange > 32000 ? 32000 : nAttackRange);
-    packet.attribute.nMaxWeight         = static_cast<int16_t>nMaxWeight;
+    packet.attribute.nMaxWeight         = static_cast<int16_t>(nMaxWeight);
     packet.attribute.nCastingSpeed      = static_cast<int16_t>(nCastingSpeed > 32000 ? 32000 : nCastingSpeed);
     packet.attribute.nCoolTimeSpeed     = static_cast<int16_t>(nCoolTimeSpeed > 32000 ? 32000 : nCoolTimeSpeed);
     packet.attribute.nItemChance        = static_cast<int16_t>(nItemChance > 32000 ? 32000 : nItemChance);

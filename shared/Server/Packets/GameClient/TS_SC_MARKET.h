@@ -17,8 +17,6 @@ CREATE_STRUCT(TS_MARKET_ITEM_INFO);
 	_(simple)(uint32_t, npc_handle) \
 	_(count)(uint16_t, items) \
 	_(dynarray)(TS_MARKET_ITEM_INFO, items) \
-	_(padmarker)(item_list_marker) \
-	_(pad)(4 * (uint32_t)items.size(), item_list_marker)
 
 CREATE_PACKET(TS_SC_MARKET, 250);
 
