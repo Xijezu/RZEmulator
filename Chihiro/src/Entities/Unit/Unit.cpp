@@ -274,12 +274,12 @@ void Unit::regenHPMP(uint t)
                 this->m_nRegenHP += GetHealth() - prev_hp;
                 if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3)
                 {
-                    XPacket hpmpPct(NGemity::Packets::TS_SC_REGEN_HPMP);
-                    hpmpPct << (uint)GetHandle();
-                    hpmpPct << (int16)m_nRegenHP;
-                    hpmpPct << (int16)m_fRegenMP;
-                    hpmpPct << (int32)GetHealth();
-                    hpmpPct << (int16)GetMana();
+                    TS_SC_REGEN_HPMP hpmpPct{ };
+                    hpmpPct.handle   = GetHandle();
+                    hpmpPct.hp_regen = m_nRegenHP;
+                    hpmpPct.mp_regen = m_fRegenMP;
+                    hpmpPct.hp       = GetHealth();
+                    hpmpPct.mp       = GetMana();
 
                     this->m_nRegenHP = 0;
                     this->m_fRegenMP = 0;
@@ -1172,64 +1172,61 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
             attack_count *= 2;
     }
 
-    XPacket pct(NGemity::Packets::TS_SC_ATTACK_EVENT);
-    pct << GetHandle();
+    TS_SC_ATTACK_EVENT pct{ };
+    pct.attacker_handle   = GetHandle();
     if (pTarget != nullptr)
-        pct << pTarget->GetHandle();
-    else
-        pct << (uint)0;
-    pct << (uint16)tm; // attack_speed
-    pct << (uint16)delay;
+        pct.target_handle = pTarget->GetHandle();
+    pct.attack_speed      = static_cast<uint16_t>(tm);
+    pct.attack_delay      = static_cast<uint16_t >(delay);
 
-    uint8 attack_flag = 0;
+    pct.attack_flag = AEAF_None;
     if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED))
     {
         if (bIsDoubleAttack)
-            attack_flag = ATTACK_FLAG_DOUBLE_ATTACK;
+            pct.attack_flag = AEAF_DoubleAttack;
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-            attack_flag |= ATTACK_FLAG_DOUBLE_WEAPON;
+            pct.attack_flag = AEAF_DoubleWeapon;
         if (IsUsingBow() && IsPlayer())
-            attack_flag |= ATTACK_FLAG_BOW;
+            pct.attack_flag = AEAF_UsingBow;
         if (IsUsingCrossBow() && IsPlayer())
-            attack_flag |= ATTACK_FLAG_CROSS_BOW;
+            pct.attack_flag = AEAF_UsingCrossBow;
     }
 
-    uint8 attack_action = ATTACK_ATTACK;
+    pct.attack_action     = AEAA_Attack;
     if (bIsAiming)
-        attack_action = ATTACK_AIMING;
+        pct.attack_action = AEAA_Aiming;
     else if (bEndAttack)
-        attack_action = ATTACK_END;
+        pct.attack_action = AEAA_EndAttack;
     else if (bCancelAttack)
-        attack_action = ATTACK_CANCEL;
+        pct.attack_action = AEAA_CancelAttack;
 
-    pct << attack_action;
-    pct << attack_flag;
-
-    pct << attack_count;
     for (int i = 0; i < attack_count; ++i)
     {
-        pct << (uint16)arDamage[i].nDamage;
-        pct << (uint16)arDamage[i].mp_damage;
-        uint8 flag = 0;
+        ATTACK_INFO attack_info{ };
+        attack_info.damage    = arDamage[i].nDamage;
+        attack_info.mp_damage = arDamage[i].mp_damage;
+        attack_info.flag      = AIF_None;
         if (arDamage[i].bPerfectBlock)
-            flag = FLAG_PERFECT_BLOCK;
+            attack_info.flag  = AIF_PerfectBlock;
         if (arDamage[i].bBlock)
-            flag |= FLAG_BLOCK;
+            attack_info.flag  = AIF_Block;
         if (arDamage[i].bMiss)
-            flag |= FLAG_MISS;
+            attack_info.flag  = AIF_Miss;
         if (arDamage[i].bCritical)
-            flag |= FLAG_CRITICAL;
-        pct << flag;
-        for (auto &ed : arDamage[i].elemental_damage)
+            attack_info.flag  = AIF_Critical;
+
+        int             j = 0;
+        for (const auto &ed : arDamage[i].elemental_damage)
         {
-            pct << (uint16)ed;
+            attack_info.elemental_damage[j++] = ed;
         }
-        pct << arDamage[i].target_hp;
-        pct << (uint16)arDamage[i].target_mp;
-        pct << (uint16)arDamage[i].attacker_damage;
-        pct << (uint16)arDamage[i].attacker_mp_damage;
-        pct << (int)arDamage[i].attacker_hp;
-        pct << (uint16)arDamage[i].attacker_mp;
+        attack_info.target_hp          = arDamage[i].target_hp;
+        attack_info.target_mp          = arDamage[i].target_mp;
+        attack_info.attacker_damage    = arDamage[i].attacker_damage;
+        attack_info.attacker_mp_damage = arDamage[i].attacker_mp_damage;
+        attack_info.attacker_hp        = arDamage[i].attacker_hp;
+        attack_info.attacker_mp        = arDamage[i].attacker_mp;
+        pct.attack.emplace_back(attack_info);
     }
     sWorld.Broadcast((uint)GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE),
                      (uint)GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), GetLayer(), pct);
@@ -2080,16 +2077,16 @@ void Unit::procStateDamage(uint t)
                 }
             }
 
-            XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
-            statePct << (uint)sd.caster;
-            statePct << GetHandle();
-            statePct << sd.code;
-            statePct << sd.level;
-            statePct << (uint16)1; // STATE_DAMAGE_HP
-            statePct << dmg.nDamage;
-            statePct << GetHealth();
-            statePct << (uint8)(sd.final ? 1 : 0);
-            statePct << total_amount;
+            TS_SC_STATE_RESULT statePct{ };
+            statePct.caster_handle = sd.caster;
+            statePct.target_handle = GetHandle();
+            statePct.code          = sd.code;
+            statePct.level         = sd.level;
+            statePct.result_type   = SRT_Damage;
+            statePct.value         = dmg.nDamage;
+            statePct.target_value  = GetHealth();
+            statePct.final         = (sd.final ? 1 : 0);
+            statePct.total_amount  = total_amount;
 
             sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                              (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
@@ -2144,16 +2141,17 @@ void Unit::procStateDamage(uint t)
             int df = 0;
             if (nHealHP != 0)
             {
-                XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
-                statePct << (uint)sd.caster;
-                statePct << GetHandle();
-                statePct << sd.code;
-                statePct << sd.level;
-                statePct << (uint16)4; // STATE_HEAL
-                statePct << nHealHP;
-                statePct << GetHealth();
-                statePct << (uint8)(sd.final ? 1 : 0);
-                statePct << total_amount;
+
+                TS_SC_STATE_RESULT statePct{ };
+                statePct.caster_handle = sd.caster;
+                statePct.target_handle = GetHandle();
+                statePct.code          = sd.code;
+                statePct.level         = sd.level;
+                statePct.result_type   = SRT_Heal;
+                statePct.value         = nHealHP;
+                statePct.target_value  = GetHealth();
+                statePct.final         = (sd.final ? 1 : 0);
+                statePct.total_amount  = total_amount;
 
                 sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                  (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
@@ -2166,16 +2164,16 @@ void Unit::procStateDamage(uint t)
                 df = df != 0 ? -1 : 0;
                 df = total_amount & df;
 
-                XPacket statePct(NGemity::Packets::TS_SC_STATE_RESULT);
-                statePct << (uint)sd.caster;
-                statePct << GetHandle();
-                statePct << sd.code;
-                statePct << sd.level;
-                statePct << (uint16)5; // STATE_HEAL_MP
-                statePct << nHealMP;
-                statePct << GetMana();
-                statePct << (uint8)(sd.final ? 1 : 0);
-                statePct << df;
+                TS_SC_STATE_RESULT statePct{ };
+                statePct.caster_handle = sd.caster;
+                statePct.target_handle = GetHandle();
+                statePct.code          = sd.code;
+                statePct.level         = sd.level;
+                statePct.result_type   = SRT_MagicHeal;
+                statePct.value         = nHealMP;
+                statePct.target_value  = GetMana();
+                statePct.final         = (sd.final ? 1 : 0);
+                statePct.total_amount  = df;
 
                 sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                  (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),

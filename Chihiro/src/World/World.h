@@ -19,6 +19,7 @@
 #include "RespawnObject.h"
 #include "Timer.h"
 #include "LockedQueue.h"
+#include "RegionContainer.h"
 
 enum ShutdownExitCode
 {
@@ -154,12 +155,29 @@ class World
 
         uint32 GetSessionCount() const { return m_sessions.size(); }
 
-        void Broadcast(uint, uint, uint, uint, uint8, XPacket);
-        void Broadcast(uint, uint, uint8, XPacket);
-
-        template<typename T>
-        void Broadcast(uint x, uint y, uint8 layer, T *)
+        template<typename TS_PACKET>
+        void Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, TS_PACKET packet)
         {
+            BroadcastFunctor<TS_PACKET> broadcastFunctor;
+            broadcastFunctor.packet = packet;
+
+            sRegion.DoEachVisibleRegion(rx1, ry1,
+                                        rx2, ry2,
+                                        layer,
+                                        NG_REGION_FUNCTOR(broadcastFunctor),
+                                        (uint8_t)RegionVisitor::ClientVisitor);
+        }
+
+        template<typename TS_PACKET>
+        void Broadcast(uint rx, uint ry, uint8 layer, TS_PACKET packet)
+        {
+            BroadcastFunctor<TS_PACKET> broadcastFunctor;
+            broadcastFunctor.packet = packet;
+
+            sRegion.DoEachVisibleRegion(rx, ry,
+                                        layer,
+                                        NG_REGION_FUNCTOR(broadcastFunctor),
+                                        (uint8_t)RegionVisitor::ClientVisitor);
 
         }
 

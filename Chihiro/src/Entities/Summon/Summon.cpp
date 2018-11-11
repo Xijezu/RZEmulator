@@ -273,11 +273,11 @@ bool Summon::DoEvolution()
             CalculateStat();
             m_pMaster->Save(false);
 
-            XPacket evoPct(NGemity::Packets::TS_SC_SUMMON_EVOLUTION);
-            evoPct << m_pItem->m_nHandle;
-            evoPct << GetHandle();
-            evoPct.fill(GetName(), 19);
-            evoPct << m_tSummonBase->id;
+            TS_SC_SUMMON_EVOLUTION evoPct{ };
+            evoPct.card_handle   = m_pItem->GetHandle();
+            evoPct.summon_handle = GetHandle();
+            evoPct.name          = GetName();
+            evoPct.code          = m_tSummonBase->id;
             if (IsInWorld())
             {
                 sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);

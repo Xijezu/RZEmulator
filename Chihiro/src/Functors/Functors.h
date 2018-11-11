@@ -23,7 +23,6 @@ class Region;
 class Player;
 class Unit;
 
-#include "XPacket.h"
 
 /*
  * Note: I'm not a fan of this, either
@@ -48,10 +47,21 @@ struct RegionFunctor
     virtual void Run(Region *) {};
 };
 
+template<typename T>
 struct BroadcastFunctor
 {
-    XPacket packet;
-    void Run(RegionType &list);
+    T packet;
+
+    void Run(RegionType &list)
+    {
+        for (const auto &obj : list)
+        {
+            if (obj != nullptr && obj->IsPlayer())
+            {
+                obj->As<Player>()->SendPacket(packet);
+            }
+        }
+    }
 };
 
 struct SendEnterMessageEachOtherFunctor

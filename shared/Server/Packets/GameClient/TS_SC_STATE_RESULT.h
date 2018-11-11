@@ -20,7 +20,7 @@ enum TS_STATE_RESULT_TYPE : uint16_t {
 	_(simple)(TS_STATE_RESULT_TYPE, result_type) \
 	_(simple)(int32_t, value) \
 	_(simple)(int32_t, target_value) \
-	_(simple)(bool, final) \
+	_(simple)(uint8_t, final) \
 	_(simple)(int32_t, total_amount)
 
 CREATE_PACKET(TS_SC_STATE_RESULT, 406);
