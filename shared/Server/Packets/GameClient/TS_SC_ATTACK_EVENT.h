@@ -18,7 +18,7 @@ enum ATTACK_EVENT__ATTACK_ACTION : uint8_t {
     AEAA_CancelAttack = 4
 };
 
-enum ATTACK_INFO__FLAG : int8_t {
+enum ATTACK_INFO__FLAG : uint8_t {
     AIF_None = 0,
     AIF_PerfectBlock = 1,
     AIF_Block = 2,
@@ -33,7 +33,7 @@ enum ATTACK_INFO__FLAG : int8_t {
     _(def)(simple)(int32_t, mp_damage) \
       _(impl)(simple)(int32_t, mp_damage, version >= EPIC_7_3) \
       _(impl)(simple)(int16_t, mp_damage, version < EPIC_7_3) \
-    _(simple) (ATTACK_INFO__FLAG, flag) \
+    _(simple) (uint8_t, flag) \
     _(def)(array)(int32_t, elemental_damage, 7) \
       _(impl)(array)(int32_t, elemental_damage, 7, version >= EPIC_7_3) \
       _(impl)(array)(uint16_t, elemental_damage, 7, version < EPIC_7_3) \
@@ -59,8 +59,8 @@ CREATE_STRUCT(ATTACK_INFO);
     _(simple)   (uint32_t, target_handle) \
     _(simple)   (uint16_t, attack_speed) \
     _(simple)   (uint16_t, attack_delay) \
-    _(simple)   (ATTACK_EVENT__ATTACK_ACTION, attack_action) \
-    _(simple)   (ATTACK_EVENT__ATTACK_FLAG, attack_flag) \
+    _(simple)   (uint8_t, attack_action) \
+    _(simple)   (uint8_t, attack_flag) \
     _(count)    (uint8_t, attack) \
     _(dynarray) (ATTACK_INFO, attack)
 

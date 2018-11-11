@@ -63,7 +63,7 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
     statPct.mp     = pUnit->GetMana();
     statPct.max_mp = pUnit->GetMaxMana();
 
-    statPct.need_to_display = display;
+    statPct.need_to_display = static_cast<uint8_t>(display ? 1 : 0);;
 
     pPlayer->SendPacket(statPct);
 }
@@ -462,24 +462,25 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 
 void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool need_to_display)
 {
-    XPacket hpmpPct(NGemity::Packets::TS_SC_HPMP);
-    hpmpPct << pUnit->GetHandle();
-    hpmpPct << add_hp;
-    hpmpPct << (int)pUnit->GetHealth();
-    hpmpPct << (int)pUnit->GetMaxHealth();
-    hpmpPct << (int)add_mp;
-    hpmpPct << (int)pUnit->GetMana();
-    hpmpPct << (int)pUnit->GetMaxMana();
-    hpmpPct << (uint8_t)(need_to_display ? 1 : 0);
+    TS_SC_HPMP hpmpPct{ };
+    hpmpPct.handle          = pUnit->GetHandle();
+    hpmpPct.add_hp          = add_hp;
+    hpmpPct.hp              = pUnit->GetHealth();
+    hpmpPct.max_hp          = pUnit->GetMaxHealth();
+    hpmpPct.add_mp          = add_mp;
+    hpmpPct.mp              = pUnit->GetMana();
+    hpmpPct.max_mp          = pUnit->GetMaxMana();
+    hpmpPct.need_to_display = static_cast<uint8_t >(need_to_display ? 1 : 0);
+
     sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
 }
 
 void Messages::BroadcastLevelMsg(Unit *pUnit)
 {
-    XPacket levelPct(NGemity::Packets::TS_SC_LEVEL_UPDATE);
-    levelPct << (uint32)pUnit->GetHandle();
-    levelPct << (int)pUnit->GetLevel();
-    levelPct << (int)pUnit->GetCurrentJLv();
+    TS_SC_LEVEL_UPDATE levelPct{ };
+    levelPct.handle    = pUnit->GetHandle();
+    levelPct.level     = pUnit->GetLevel();
+    levelPct.job_level = pUnit->GetCurrentJLv();
     sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
 }
 
@@ -529,23 +530,18 @@ void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint targe
     if (pPlayer == nullptr)
         return;
 
-    XPacket skillPct(NGemity::Packets::TS_SC_SKILL);
-    skillPct << skill_id;
-    skillPct << skill_level;
-    skillPct << caster;
-    skillPct << target;
-    skillPct << pos.GetPositionX();
-    skillPct << pos.GetPositionY();
-    skillPct << pos.GetPositionZ();
-    skillPct << pos.GetLayer();
-    skillPct << (uint8)1; // Type: Casting
-    skillPct << (uint16)0; // costHP
-    skillPct << (uint16)0; // costMP
-    skillPct << (uint)0;  // Target HP
-    skillPct << (uint16)0; // Target MP
-    skillPct << (uint)0; // filler
-    skillPct << (uint16)error_code;
-    skillPct.fill("", 3);
+    TS_SC_SKILL skillPct{ };
+    skillPct.skill_id           = skill_id;
+    skillPct.skill_level        = skill_level;
+    skillPct.caster             = caster;
+    skillPct.target             = target;
+    skillPct.x                  = pos.GetPositionX();
+    skillPct.y                  = pos.GetPositionY();
+    skillPct.z                  = pos.GetPositionZ();
+    skillPct.layer              = pos.GetLayer();
+    skillPct.type               = ST_Casting;
+    skillPct.casting.nErrorCode = static_cast<uint16_t >(error_code);
+
     pPlayer->SendPacket(skillPct);
 }
 
@@ -753,9 +749,9 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
     auto functor = [&obj](RegionType &list) -> void {
         for (auto &pObject : list)
         {
-            XPacket statusMsg(NGemity::Packets::TS_SC_STATUS_CHANGE);
-            statusMsg << obj->GetHandle();
-            statusMsg << Messages::GetStatusCode(obj, pObject->As<Player>());
+            TS_SC_STATUS_CHANGE statusMsg{ };
+            statusMsg.handle = obj->GetHandle();
+            statusMsg.status = Messages::GetStatusCode(obj, pObject->As<Player>());
             pObject->As<Player>()->SendPacket(statusMsg);
         }
     };
@@ -769,41 +765,35 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
 {
-    XPacket statePct(NGemity::Packets::TS_SC_STATE);
-    statePct << pUnit->GetHandle();
-    statePct << (uint16)pState.m_nUID;
-    statePct << (int)pState.m_nCode;
+    TS_SC_STATE statePct{ };
+    statePct.handle     = pUnit->GetHandle();
+    statePct.state_code = pState.m_nCode;
+    statePct.id         = pState.m_nUID;
 
-    if (bIsCancel)
+    if (!bIsCancel)
     {
-        statePct << (uint16)0;
-        statePct << (uint32)0;
-        statePct << (uint32)0;
-    }
-    else
-    {
-        statePct << (uint16)pState.GetLevel();
+        statePct.state_level = pState.GetLevel();
         uint t{ };
         if (!pState.m_bAura)
         {
             t     = pState.m_nEndTime[0];
             if (t <= pState.m_nEndTime[1])
                 t = pState.m_nEndTime[1];
-            statePct << t;
+            statePct.end_time = t;
         }
         else
         {
-            statePct << -1;
+            statePct.end_time = -1;
         }
 
         t     = pState.m_nStartTime[1];
         if (pState.m_nStartTime[0] > t)
             t = pState.m_nStartTime[0];
-        statePct << t;
+        statePct.start_time = t;
     }
 
-    statePct << pState.m_nStateValue;
-    statePct.fill(pState.m_szStateValue, 32);
+    statePct.state_value        = pState.m_nStateValue;
+    statePct.state_string_value = pState.m_szStateValue;
 
     sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), statePct);
@@ -814,11 +804,10 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     if (pPlayer == nullptr || pMonster == nullptr)
         return;
 
-    XPacket tamePct(NGemity::Packets::TS_SC_TAMING_INFO);
-    tamePct << (uint8)mode;
-    tamePct << pPlayer->GetHandle();
-    tamePct << pMonster->GetHandle();
-
+    TS_SC_TAMING_INFO tamePct{ };
+    tamePct.mode          = mode;
+    tamePct.tamer_handle  = pPlayer->GetHandle();
+    tamePct.target_handle = pMonster->GetHandle();
     sWorld.Broadcast((uint)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
 
@@ -845,16 +834,15 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
 
 void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderName, const std::string &szString, uint len)
 {
-    XPacket chatPct(NGemity::Packets::TS_SC_CHAT);
-    chatPct.fill(szSenderName, 21);
-    chatPct << (int16)szString.length();
-    chatPct << (uint8)chatType;
-    chatPct.fill(szString, szString.length() + 1);
+    TS_SC_CHAT chatPct{ };
+    chatPct.szSender  = szSenderName;
+    chatPct.type      = chatType;
+    chatPct.message   = szString;
 
     Player::DoEachPlayer([=](Player *pPlayer) {
         pPlayer->SendPacket(chatPct);
     });
-    auto    sender = Player::FindPlayer(szSenderName);
+    auto       sender = Player::FindPlayer(szSenderName);
     if (sender != nullptr)
         Messages::SendResult(sender, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
 }
@@ -864,14 +852,12 @@ void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::strin
     auto p = sMemoryPool.GetObjectInWorld<Player>(handle);
     if (p != nullptr)
     {
-        XPacket result(NGemity::Packets::TS_SC_CHAT_LOCAL);
-        result << (uint32)handle;
-        result << (uint8)szMessage.length();
-        result << (uint8)nChatType;
-        result.WriteString(szMessage);
-        result << (uint8)0;
+        TS_SC_CHAT_LOCAL chatPct{ };
+        chatPct.handle  = handle;
+        chatPct.message = szMessage;
+        chatPct.type    = static_cast<uint8_t >(nChatType);;
         sWorld.Broadcast((uint)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                         (uint)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), result);
+                         (uint)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), chatPct);
         Messages::SendResult(p, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
     }
 }
@@ -888,9 +874,9 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
         {
             if (obj != nullptr && obj->IsNPC())
             {
-                XPacket statusMsg(NGemity::Packets::TS_SC_STATUS_CHANGE);
-                statusMsg << obj->GetHandle();
-                statusMsg << Messages::GetStatusCode(obj, pPlayer);
+                TS_SC_STATUS_CHANGE statusMsg{ };
+                statusMsg.handle = obj->GetHandle();
+                statusMsg.status = Messages::GetStatusCode(obj, pPlayer);
                 pPlayer->SendPacket(statusMsg);
             }
         }
@@ -905,11 +891,11 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 
 void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {
-    XPacket questPct(NGemity::Packets::TS_SC_QUEST_STATUS);
-    questPct << pQuest->m_Instance.Code;
-    for (int nStatu : pQuest->m_Instance.nStatus)
+    TS_SC_QUEST_STATUS questPct{ };
+    questPct.code = pQuest->m_Instance.Code;
+    for (int i = 0; i < MAX_QUEST_STATUS; i++)
     {
-        questPct << nStatu;
+        questPct.status[i] = pQuest->m_Instance.nStatus[i];
     }
     pPlayer->SendPacket(questPct);
 }
@@ -919,15 +905,15 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    uint    ct = sWorld.GetArTime();
-    XPacket coolTimePct(NGemity::Packets::TS_SC_ITEM_COOL_TIME);
+    uint                 ct = sWorld.GetArTime();
+    TS_SC_ITEM_COOL_TIME coolTimePct{ };
 
-    for (unsigned int coolTime : pPlayer->m_nItemCooltime)
+    for (int i = 0; i < MAX_ITEM_COOLTIME_GROUP; i++)
     {
-        int cool_time = coolTime - ct;
+        int cool_time = pPlayer->m_nItemCooltime[i] - ct;
         if (cool_time < 0)
             cool_time = 0;
-        coolTimePct << cool_time;
+        coolTimePct.cool_time[i] = static_cast<uint32_t >(cool_time);;
     }
     pPlayer->SendPacket(coolTimePct);
 }
@@ -937,13 +923,12 @@ void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
     if (pPlayer == nullptr)
         return;
 
-    XPacket mixPct(NGemity::Packets::TS_SC_MIX_RESULT);
-    mixPct << (uint)(pHandles != nullptr ? pHandles->size() : 0);
+    TS_SC_MIX_RESULT mixPct{ };
     if (pHandles != nullptr && !pHandles->empty())
     {
-        for (unsigned int pHandle : *pHandles)
+        for (const auto &pHandle : *pHandles)
         {
-            mixPct << pHandle;
+            mixPct.handles.emplace_back(pHandle);
         }
     }
 
@@ -952,24 +937,25 @@ void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
 
 void Messages::SendItemWearInfoMessage(Player *pPlayer, Unit *pTarget, Item *pItem)
 {
-    XPacket packet(NGemity::Packets::TS_SC_ITEM_WEAR_INFO);
-    packet << (uint32_t)pItem->GetHandle();
-    packet << (int16_t)pItem->m_Instance.nWearInfo;
-    packet << (uint32_t)(pTarget != nullptr ? pTarget->GetHandle() : 0);
-    packet << (int32_t)pItem->m_Instance.nEnhance;
-    pPlayer->SendPacket(packet);
+    TS_SC_ITEM_WEAR_INFO wearPct{ };
+    wearPct.target_handle = (pTarget != nullptr ? pTarget->GetHandle() : 0);
+    wearPct.item_handle   = pItem->GetHandle();
+    wearPct.wear_position = pItem->m_Instance.nWearInfo;
+    wearPct.enhance       = pItem->m_Instance.nEnhance;
+
+    pPlayer->SendPacket(wearPct);
 }
 
 void Messages::ShowSoulStoneRepairWindow(Player *pPlayer)
 {
-    XPacket soulPct(NGemity::Packets::TS_SC_SHOW_SOULSTONE_REPAIR_WINDOW);
+    TS_SC_SHOW_SOULSTONE_REPAIR_WINDOW soulPct{ };
     pPlayer->SetLastContact("RepairSoulStone", 1);
     pPlayer->SendPacket(soulPct);
 }
 
 void Messages::ShowSoulStoneCraftWindow(Player *pPlayer)
 {
-    XPacket soulPct(NGemity::Packets::TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW);
+    TS_SC_SHOW_SOULSTONE_CRAFT_WINDOW soulPct{ };
     pPlayer->SetLastContact("SoulStoneCraft", 1);
     pPlayer->SendPacket(soulPct);
 }
@@ -1021,15 +1007,15 @@ void Messages::SendRegionAckMessage(Player *pPlayer, uint rx, uint ry)
     if (pPlayer == nullptr)
         return;
 
-    XPacket ackPct(NGemity::Packets::TS_SC_REGION_ACK);
-    ackPct << rx;
-    ackPct << ry;
+    TS_SC_REGION_ACK ackPct{ };
+    ackPct.rx = rx;
+    ackPct.ry = ry;
     pPlayer->SendPacket(ackPct);
 }
 
 void Messages::SendOpenStorageMessage(Player *pPlayer)
 {
-    XPacket storagePct(NGemity::Packets::TS_SC_OPEN_STORAGE);
+    TS_SC_OPEN_STORAGE storagePct{ };
     // Some dirty hacks unknown to mankind to fill
     // this packet with various, godlike and important infos
     // jk, packet is empty
@@ -1038,9 +1024,9 @@ void Messages::SendOpenStorageMessage(Player *pPlayer)
 
 void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
 {
-    XPacket scPct(NGemity::Packets::TS_SC_SKILLCARD_INFO);
-    scPct << pItem->GetHandle();
-    scPct << pItem->m_hBindedTarget;
+    TS_SC_SKILLCARD_INFO scInfo{ };
+    scInfo.item_handle   = pItem->GetHandle();
+    scInfo.target_handle = pItem->m_hBindedTarget;
     pPlayer->SendPacket(scPct);
 }
 
@@ -1056,10 +1042,10 @@ void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
     if (player == nullptr)
         return;
 
-    XPacket auraPct(NGemity::Packets::TS_SC_AURA);
-    auraPct << pUnit->GetHandle();
-    auraPct << (uint16)skill_id;
-    auraPct << (uint8)(status != 0 ? 1 : 0);
+    TS_SC_AURA auraPct{ };
+    auraPct.caster   = pUnit->GetHandle();
+    auraPct.skill_id = static_cast<uint16_t >(skill_id);;
+    auraPct.status = static_cast<uint8_t>(status != 0 ? 1 : 0);
     player->SendPacket(auraPct);
 }
 
@@ -1068,8 +1054,8 @@ void Messages::SendRemoveSummonMessage(Player *pPlayer, Summon *pSummon)
     if (pSummon == nullptr || pPlayer == nullptr)
         return;
 
-    XPacket removePct(NGemity::Packets::TS_SC_REMOVE_SUMMON_INFO);
-    removePct << pSummon->m_pItem->GetHandle();
+    TS_SC_REMOVE_SUMMON_INFO removePct{ };
+    removePct.card_handle = pSummon->m_pItem->GetHandle();
     pPlayer->SendPacket(removePct);
 }
 
@@ -1101,9 +1087,9 @@ void Messages::SendTradeCancelMessage(Player *pClient)
     if (tradeTarget == nullptr)
         return;
 
-    XPacket tradePct(NGemity::Packets::TS_TRADE);
-    tradePct << (uint32)tradeTarget->GetHandle();
-    tradePct << (uint8)TM_CANCEL_TRADE;
+    TS_TRADE tradePct{ };
+    tradePct.target_player = tradeTarget->GetHandle();
+    tradePct.mode          = static_cast<uint8_t>(TM_CANCEL_TRADE);
     pClient->SendPacket(tradePct);
 }
 

@@ -45,7 +45,7 @@ enum TS_CHAT_TYPE : uint8_t
 	_(string)(szTarget, 21) \
 	_(simple)(int8_t, request_id) \
 	_(count)(uint8_t, message) \
-	_(simple)(TS_CHAT_TYPE, type) \
+	_(simple)(uint8_t, type) \
 	_(dynstring)(message, false)
 
 CREATE_PACKET(TS_CS_CHAT_REQUEST, 20);
