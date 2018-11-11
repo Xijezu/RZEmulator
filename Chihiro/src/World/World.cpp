@@ -15,7 +15,6 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "RegionContainer.h"
 #include "Scripting/XLua.h"
 #include "Messages.h"
 #include "ClientPackets.h"
@@ -345,10 +344,10 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
     // Create & set leave packet
-    XPacket leavePct(NGemity::Packets::TS_SC_LEAVE);
-    leavePct << obj->GetHandle();
+    TS_SC_LEAVE leavePct{ };
+    leavePct.handle = obj->GetHandle();
 
-    BroadcastFunctor broadcastFunctor;
+    BroadcastFunctor<TS_SC_LEAVE> broadcastFunctor;
     broadcastFunctor.packet = leavePct;
 
     // Remove the object from the region
@@ -433,30 +432,6 @@ void World::UpdateSessions(uint diff)
             delete pSession;
         }
     }
-}
-
-void World::Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, XPacket packet)
-{
-    BroadcastFunctor broadcastFunctor;
-    broadcastFunctor.packet = packet;
-
-    sRegion.DoEachVisibleRegion(rx1, ry1,
-                                rx2, ry2,
-                                layer,
-                                NG_REGION_FUNCTOR(broadcastFunctor),
-                                (uint8_t)RegionVisitor::ClientVisitor);
-}
-
-void World::Broadcast(uint rx, uint ry, uint8 layer, XPacket packet)
-{
-    BroadcastFunctor broadcastFunctor;
-    broadcastFunctor.packet = packet;
-
-    sRegion.DoEachVisibleRegion(rx, ry,
-                                layer,
-                                NG_REGION_FUNCTOR(broadcastFunctor),
-                                (uint8_t)RegionVisitor::ClientVisitor);
-
 }
 
 void World::AddSummonToWorld(Summon *pSummon)
@@ -587,9 +562,9 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {
     if (pUnit == nullptr || pItem == nullptr)
         return;
-    XPacket itemPct(NGemity::Packets::TS_SC_ITEM_DROP_INFO);
-    itemPct << pUnit->GetHandle();
-    itemPct << pItem->GetHandle();
+    TS_SC_ITEM_DROP_INFO itemPct{ };
+    itemPct.item_handle    = pItem->GetHandle();
+    itemPct.monster_handle = pUnit->GetHandle();
     Broadcast((uint)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
     AddItemToWorld(pItem);
 }
@@ -848,13 +823,13 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
 
         if (chaos > 0.0f)
         {
-            XPacket chaosPct(NGemity::Packets::TS_SC_GET_CHAOS);
-            chaosPct << pPlayer->GetHandle();
-            chaosPct << pCorpse->GetHandle();
-            chaosPct << nChaos;
-            chaosPct << (uint8)0; // bonus type
-            chaosPct << (uint8)0; // bonus percent
-            chaosPct << (uint)0;  // bonus
+            TS_SC_GET_CHAOS chaosPct{ };
+            chaosPct.hPlayer       = pPlayer->GetHandle();
+            chaosPct.hCorpse       = pCorpse->GetHandle();
+            chaosPct.nChaos        = nChaos;
+            chaosPct.nBonus        = 0;
+            chaosPct.nBonusPercent = 0;
+            chaosPct.nBonusType    = 0;
             Broadcast((uint)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }

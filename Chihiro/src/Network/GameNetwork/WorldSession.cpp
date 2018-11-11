@@ -1392,8 +1392,8 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     TS_SC_TAKE_ITEM_RESULT resultPct{ };
     resultPct.item_handle = pRecvPct->item_handle;
     resultPct.item_taker  = m_pPlayer->GetHandle();
-    //sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-    //                 (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
+    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
     if (sWorld.RemoveItemFromWorld(item))
     {
         if (m_pPlayer->GetPartyID() != 0)

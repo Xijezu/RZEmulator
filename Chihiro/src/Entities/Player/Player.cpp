@@ -1750,8 +1750,8 @@ void Player::DoUnSummon(Summon *pSummon)
 
     m_pMainSummon = nullptr;
 
-    XPacket usPct(NGemity::Packets::TS_SC_UNSUMMON);
-    usPct << pSummon->GetHandle();
+    TS_SC_UNSUMMON usPct{ };
+    usPct.summon_handle = pSummon->GetHandle();
     sWorld.Broadcast((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pSummon->GetLayer(), usPct);
     if (sRegion.IsVisibleRegion((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 (uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))) == 0)
@@ -3797,11 +3797,11 @@ void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
 void Player::onEnergyChange()
 {
-    XPacket packet(NGemity::Packets::TS_SC_ENERGY);
-    packet << GetHandle();
-    packet << (int16_t)GetInt32Value(UNIT_FIELD_ENERGY);
+    TS_SC_ENERGY energyPct{ };
+    energyPct.handle = GetHandle();
+    energyPct.energy = static_cast<uint16_t >(GetInt32Value(UNIT_FIELD_ENERGY));
     sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      GetLayer(),
-                     packet);
+                     energyPct);
 }

@@ -19,17 +19,6 @@
 #include "RegionContainer.h"
 #include "Messages.h"
 
-void BroadcastFunctor::Run(RegionType &list)
-{
-    for (const auto &obj : list)
-    {
-        if (obj != nullptr && obj->IsPlayer())
-        {
-            obj->As<Player>()->SendPacket(packet);
-        }
-    }
-}
-
 void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
 {
     for (const auto &client : regionType)
