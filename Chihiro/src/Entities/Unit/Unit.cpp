@@ -1176,6 +1176,8 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
     pct.attacker_handle   = GetHandle();
     if (pTarget != nullptr)
         pct.target_handle = pTarget->GetHandle();
+    else
+        pct.target_handle = 0;
     pct.attack_speed      = static_cast<uint16_t>(tm);
     pct.attack_delay      = static_cast<uint16_t >(delay);
 
@@ -1215,11 +1217,8 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, i
         if (arDamage[i].bCritical)
             attack_info.flag  = AIF_Critical;
 
-        int             j = 0;
-        for (const auto &ed : arDamage[i].elemental_damage)
-        {
-            attack_info.elemental_damage[j++] = ed;
-        }
+        std::copy(std::begin(arDamage->elemental_damage), std::end(arDamage->elemental_damage), std::begin((attack_info.elemental_damage)));
+
         attack_info.target_hp          = arDamage[i].target_hp;
         attack_info.target_mp          = arDamage[i].target_mp;
         attack_info.attacker_damage    = arDamage[i].attacker_damage;
