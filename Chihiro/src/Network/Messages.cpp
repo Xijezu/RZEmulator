@@ -1027,7 +1027,7 @@ void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
     TS_SC_SKILLCARD_INFO scInfo{ };
     scInfo.item_handle   = pItem->GetHandle();
     scInfo.target_handle = pItem->m_hBindedTarget;
-    pPlayer->SendPacket(scPct);
+    pPlayer->SendPacket(scInfo);
 }
 
 void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)

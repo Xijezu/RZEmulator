@@ -54,8 +54,8 @@ class AuthNetwork
             if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
             {
                 m_nLastPingTime = sWorld.GetArTime();
-                XPacket _packet(NGemity::Packets::TS_CS_PING);
-                m_pSocket->SendPacket(_packet);
+                TS_CS_PING ping{};
+                m_pSocket->SendPacket(ping);
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(20));

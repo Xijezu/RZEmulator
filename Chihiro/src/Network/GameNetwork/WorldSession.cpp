@@ -83,7 +83,7 @@ WorldSessionHandler declareHandler(eStatus status, void (WorldSession::*handler)
     return handlerData;
 }
 
-const WorldSessionHandler packetHandler[] =
+const WorldSessionHandler worldPacketHandler[] =
                                   {
                                           declareHandler(STATUS_CONNECTED, &WorldSession::onAuthResult),
                                           declareHandler(STATUS_CONNECTED, &WorldSession::onAccountWithAuth),
@@ -127,7 +127,7 @@ const WorldSessionHandler packetHandler[] =
                                           declareHandler(STATUS_AUTHED, &WorldSession::onBindSkillCard),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onDropQuest),
                                   };
-constexpr int             tableSize       = (sizeof(packetHandler) / sizeof(WorldSessionHandler));
+constexpr int             worldTableSize       = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
 
 constexpr NGemity::Packets ignoredPackets[] =
                                    {
@@ -146,17 +146,17 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
     int  i    = 0;
 
-    for (i = 0; i < tableSize; i++)
+    for (i = 0; i < worldTableSize; i++)
     {
-        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
+        if ((uint16_t)worldPacketHandler[i].cmd == _cmd && (worldPacketHandler[i].status == STATUS_CONNECTED || (_isAuthed && worldPacketHandler[i].status == STATUS_AUTHED)))
         {
-            packetHandler[i].handler(this, pRecvPct);
+            worldPacketHandler[i].handler(this, pRecvPct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == tableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets))
+    if (i == worldTableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets))
     {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;

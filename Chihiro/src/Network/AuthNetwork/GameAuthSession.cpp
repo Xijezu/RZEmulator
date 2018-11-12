@@ -102,10 +102,10 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey)
 {
     m_queue[szLoginName] = pSession;
-    XPacket packet(NGemity::Packets::TS_GA_CLIENT_LOGIN);
-    packet.fill(szLoginName, 61);
-    packet << (uint64)nOneTimeKey;
-    m_pSocket->SendPacket(packet);
+    TS_GA_CLIENT_LOGIN loginPct{ };
+    loginPct.account      = szLoginName;
+    loginPct.one_time_key = nOneTimeKey;
+    m_pSocket->SendPacket(loginPct);
 }
 
 int GameAuthSession::GetAccountId() const
@@ -135,21 +135,20 @@ void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 
 void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
 {
-    XPacket packet(NGemity::Packets::TS_GA_CLIENT_LOGOUT);
-    packet.fill(szAccount, 61);
-    packet << (uint32)0;
-    m_pSocket->SendPacket(packet);
+    TS_GA_CLIENT_LOGOUT logoutPct{ };
+    logoutPct.account = szAccount;
+    m_pSocket->SendPacket(logoutPct);
 }
 
 void GameAuthSession::SendGameLogin()
 {
-    XPacket loginPct(NGemity::Packets::TS_GA_LOGIN);
-    loginPct << (uint16)m_nGameIDX;
-    loginPct.fill(m_szGameName, 21);
-    loginPct.fill(m_szGameSSU, 256);
-    loginPct << (uint8)(m_bGameIsAdultServer ? 1 : 0);
-    loginPct.fill(m_szGameIP, 16);
-    loginPct << (uint)m_nGamePort;
+    TS_GA_LOGIN loginPct{ };
+    loginPct.server_idx            = m_nGameIDX;
+    loginPct.server_name           = m_szGameName;
+    loginPct.server_screenshot_url = m_szGameSSU;
+    loginPct.is_adult_server       = static_cast<uint8_t>(m_bGameIsAdultServer ? 1 : 0);
+    loginPct.server_ip             = m_szGameIP;
+    loginPct.server_port           = m_nGamePort;
     m_pSocket->SendPacket(loginPct);
 }
 
