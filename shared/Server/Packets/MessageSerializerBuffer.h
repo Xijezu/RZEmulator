@@ -33,6 +33,13 @@ class MessageSerializerBuffer : public StructSerializer
             packet->Initialize(id, size);
             packet->Reset();
         }
+        
+        uint32_t getParsedSize()
+        {
+            if(packet->rpos() > packet->wpos())
+                return packet->rpos();
+            return packet->wpos();
+        }
 
         // Write primitives types T
         template<typename T>

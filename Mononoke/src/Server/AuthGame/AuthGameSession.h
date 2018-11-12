@@ -51,11 +51,11 @@ class AuthGameSession : public XSession
 
         /// \brief Gets the GameIDX - used in WorldSocket
         /// \return GameIDX
-        int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->nIDX : 0); }
+        int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->server_idx : 0); }
 
         /// \brief Gets the server name - used in WorldSocket
         /// \return server name
-        std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->szName : "<null>"); }
+        std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->server_name : "<null>"); }
 
     private:
         XSocket *m_pSocket;

@@ -24,8 +24,8 @@
 // Constructor - set the default server name to <null>, also give it a socket
 AuthGameSession::AuthGameSession(XSocket *pSocket) : m_pSocket(pSocket), m_pGame(new Game{ }), m_bIsAuthed(false)
 {
-    m_pGame->nIDX   = 255;
-    m_pGame->szName = "<null>";
+    m_pGame->server_idx  = 255;
+    m_pGame->server_name = "<null>";
 }
 
 AuthGameSession::~AuthGameSession()
@@ -34,10 +34,10 @@ AuthGameSession::~AuthGameSession()
     {
         if (m_bIsAuthed)
         {
-            auto g = sGameMapList.GetGame(m_pGame->nIDX);
+            auto g = sGameMapList.GetGame(m_pGame->server_idx);
             if (g != nullptr)
             {
-                sGameMapList.RemoveGame(g->nIDX);
+                sGameMapList.RemoveGame(g->server_idx);
 
             }
         }
@@ -51,23 +51,23 @@ void AuthGameSession::OnClose()
 {
     if (m_pGame == nullptr)
         return;
-    auto g = sGameMapList.GetGame(m_pGame->nIDX);
-    if (g != nullptr && g->szName == m_pGame->szName)
+    auto g = sGameMapList.GetGame(m_pGame->server_idx);
+    if (g != nullptr && g->server_name == m_pGame->server_name)
     {
         {
             NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
             auto            map = sPlayerMapList.GetMap();
             for (auto       &player : *map)
             {
-                if (player.second->nGameIDX == g->nIDX)
+                if (player.second->nGameIDX == g->server_idx)
                 {
                     map->erase(player.second->szLoginName);
                     delete player.second;
                 }
             }
         }
-        sGameMapList.RemoveGame(g->nIDX);
-        NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->szName.c_str(), m_pGame->nIDX);
+        sGameMapList.RemoveGame(g->server_idx);
+        NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->server_name.c_str(), m_pGame->server_idx);
     }
 
 }
@@ -102,13 +102,13 @@ GameHandler declareHandler(eStatus status, void (AuthGameSession::*handler)(cons
 }
 
 const GameHandler packetHandler[] =
-                              {
-                                      declareHandler(STATUS_CONNECTED, &AuthGameSession::HandleGameLogin),
-                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogin),
-                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout),
-                                      declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
-                                      declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)
-                              };
+                          {
+                                  declareHandler(STATUS_CONNECTED, &AuthGameSession::HandleGameLogin),
+                                  declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogin),
+                                  declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout),
+                                  declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
+                                  declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)
+                          };
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
@@ -140,29 +140,35 @@ ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
 
 void AuthGameSession::HandleGameLogin(const TS_GA_LOGIN *pGamePct)
 {
-    m_pGame->nIDX           = pGamePct->server_idx;
-    m_pGame->szName         = pGamePct->server_name;
-    m_pGame->szSSU          = pGamePct->server_screenshot_url;
-    m_pGame->bIsAdultServer = pGamePct->is_adult_server != 0;
-    m_pGame->szIP           = pGamePct->server_ip;
-    m_pGame->nPort          = pGamePct->server_port;
-    m_pGame->m_pSession     = this;
+    m_pGame->server_idx            = pGamePct->server_idx;
+    m_pGame->server_name           = pGamePct->server_name;
+    m_pGame->server_screenshot_url = pGamePct->server_screenshot_url;
+    m_pGame->is_adult_server       = pGamePct->is_adult_server;
+    m_pGame->server_ip             = pGamePct->server_ip;
+    m_pGame->server_port           = pGamePct->server_port;
+    m_pGame->m_pSession            = this;
 
-    auto               pGame = sGameMapList.GetGame(m_pGame->nIDX);
+    auto               pGame = sGameMapList.GetGame(m_pGame->server_idx);
     TS_AG_LOGIN_RESULT resultPct;
 
     if (pGame == nullptr)
     {
         m_bIsAuthed = true;
         sGameMapList.AddGame(m_pGame);
-        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.",  m_pGame->server_name.c_str(),
+                                                                                            m_pGame->server_idx,
+                                                                                            m_pGame->server_ip.c_str(),
+                                                                                            m_pGame->server_port);
         resultPct.result = TS_RESULT_SUCCESS;
         m_pSocket->SendPacket(resultPct);
     }
     else
     {
         m_bIsAuthed = false;
-        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->szName.c_str(), m_pGame->nIDX, m_pGame->szIP.c_str(), m_pGame->nPort);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->server_name.c_str(),
+                                                                                                m_pGame->server_idx,
+                                                                                                m_pGame->server_ip.c_str(),
+                                                                                                m_pGame->server_port);
         resultPct.result = TS_RESULT_ACCESS_DENIED;
         m_pSocket->SendPacket(resultPct);
         m_pSocket->CloseSocket();

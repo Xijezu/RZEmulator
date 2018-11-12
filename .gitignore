@@ -1,6 +1,7 @@
 /build/
 /cmake-*/
 /.idea/
+/.vscode/
 CMakeLists.txt.user
 .cproject
 .project
@@ -9,3 +10,4 @@ DBErrors.log
 Server.log
 Mononoke.log
 debug/
+shared/Utilities/.directory

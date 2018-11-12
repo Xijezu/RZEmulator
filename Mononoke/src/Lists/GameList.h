@@ -17,23 +17,15 @@
 */
 #include "Common.h"
 #include "SharedMutex.h"
+#include "TS_AC_SERVER_LIST.h"
 
 class AuthGameSession;
-// Storage object for a game
-struct Game
-{
-    Game() : nIDX(0), szName(), szSSU(), bIsAdultServer(false), szIP(), nPort(0), m_pSession(nullptr) {}
 
-    uint16          nIDX;
-    std::string     szName;
-    std::string     szSSU;
-    bool            bIsAdultServer;
-    std::string     szIP;
-    int             nPort;
+struct Game : public TS_SERVER_INFO
+{
     AuthGameSession *m_pSession;
 };
 
-/// Storage object for the list of realms on the server
 class GameList
 {
     public:
@@ -51,7 +43,7 @@ class GameList
             // Adds a game to the list
             {
                 NG_UNIQUE_GUARD writeGuard(*GetGuard());
-                m_games[pNewGame->nIDX] = pNewGame;
+                m_games[pNewGame->server_idx] = pNewGame;
             }
         }
 
@@ -85,7 +77,7 @@ class GameList
 
     private:
         NG_SHARED_MUTEX i_lock{ };
-        GameMap                        m_games;
+        GameMap                                  m_games;
     protected:
         GameList() = default;
 };

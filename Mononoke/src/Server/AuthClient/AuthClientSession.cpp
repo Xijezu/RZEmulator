@@ -173,20 +173,12 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
 {
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
     auto            map = sGameMapList.GetMap();
-    XPacket         packet(NGemity::Packets::TS_AC_SERVER_LIST);
-    packet << (uint16)0;
-    packet << (uint16)map->size();
+    TS_AC_SERVER_LIST serverList{};
     for (auto &x : *map)
     {
-        packet << (uint16)x.second->nIDX;
-        packet.fill(x.second->szName, 21);
-        packet << (uint8)(x.second->bIsAdultServer ? 1 : 0);
-        packet.fill(x.second->szSSU, 256);
-        packet.fill(x.second->szIP, 16);
-        packet << (int32)x.second->nPort;
-        packet << (uint16)0;
+        serverList.servers.emplace_back(*x.second);
     }
-    _socket->SendPacket(packet);
+    _socket->SendPacket(serverList);
 }
 
 void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
