@@ -16,7 +16,7 @@
 */
 
 #include "TerrainPropInfo.h"
-#include "fstream"
+#include <fstream>
 #include <boost/filesystem.hpp>
 
 bool TerrainPropInfo::Initialize(std::string szFileName)
@@ -29,14 +29,14 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
 
     auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/"+szFileName));
 
-    std::ifstream ifstream(configFile.c_str(), std::ios::in);
-    std::string   row;
-    while (std::getline(ifstream, row))
+    std::ifstream      inStream(configFile.c_str(), std::ios::in);
+    std::string        row{ };
+    while (std::getline(inStream, row))
     {
         if (!row.empty() || row[0] == ';')
             TextLines.push_back(row);
     }
-    ifstream.close();
+    inStream.close();
 
     if (TextLines.empty())
         return false;
@@ -143,7 +143,7 @@ bool TerrainPropInfo::CheckPropFileType(std::string rname, std::string szTail)
     return rname.find(szTail) != std::string::npos;
 }
 
-void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16 wPropNum, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
+void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16 /*wPropNum*/, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
 {
     PropInfo p{ };
     p.nLineIndex    = nLineIndex;

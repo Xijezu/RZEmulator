@@ -17,10 +17,10 @@
 */
 #include "Common.h"
 #include "Object.h"
+#include "Player.h"
 
 using RegionType = std::vector<WorldObject *>;
 class Region;
-class Player;
 class Unit;
 
 

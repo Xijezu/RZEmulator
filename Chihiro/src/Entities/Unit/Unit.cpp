@@ -1960,7 +1960,6 @@ void Unit::procStateDamage(uint t)
             }
         }
 
-        bool bNeedToProcLightningForceCongestion{false};
         auto stateBase = sObjectMgr.GetStateInfo((int)st.m_nCode);
         if (stateBase == nullptr)
             continue;
@@ -1968,8 +1967,6 @@ void Unit::procStateDamage(uint t)
         auto nThisFireTime = (uint)(st.m_nLastProcessedTime + 100 * stateBase->fire_interval);
         if (nThisFireTime < t && nThisFireTime <= st.m_nEndTime[0])
         {
-            if (st.m_nCode == StateCode::SC_LIGHTNING_FORCE_CONGESTION)
-                bNeedToProcLightningForceCongestion = true;
             nBaseEffectID                           = stateBase->base_effect_id;
             if (nBaseEffectID <= 0)
                 continue;

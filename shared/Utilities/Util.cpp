@@ -30,7 +30,8 @@
 #endif
 
 std::random_device r;
-std::mt19937       randGenerator(r());
+std::seed_seq      seed{r(), r(), r(), r(), r(), r(), r(), r()};
+std::mt19937       randGenerator{seed};
 
 int32 irand(const int32 min, const int32 max)
 {
