@@ -70,7 +70,7 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
 
 int SkillBase::GetStateSecond(int skill_lv, int enhance_lv)
 {
-    return (int)state_second + (int)enhance_lv * (int)state_second_per_enhance + skill_lv * (int)state_second_per_level;
+    return ((int)state_second + skill_lv * (int)state_second_per_level) + ((int)enhance_lv * (int)state_second_per_enhance);
 }
 
 int SkillBase::GetHitBonus(int enhance, int level_diff) const
@@ -87,12 +87,12 @@ int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
 
 uint SkillBase::GetCastDelay(int skill_lv, int enhance)
 {
-    return (uint)((float)((float)delay_cast + (float)skill_lv * (float)delay_cast_per_skl) * (float)(delay_cast_mode_per * (float)enhance + 1.0f));
+    return static_cast<uint32_t>((delay_cast + delay_cast_per_skl * (skill_lv)) * (delay_cast_mode_per * enhance + 1.0f));
 }
 
 uint SkillBase::GetCoolTime(int enhance) const
 {
-    return sWorld.getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : (uint)((delay_cooltime_mode * (float)enhance + 1.0f) * delay_cooltime);
+    return sWorld.getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : static_cast<uint32_t>(delay_cooltime * (delay_cooltime_mode * enhance + 1.0f));
 }
 
 int SkillBase::GetNeedJobPoint(int skill_lv)
@@ -129,5 +129,100 @@ bool SkillBase::IsUsable(uint8 nUseIndex) const
 
 int SkillBase::GetCostEnergy(uint8 skill_lv) const
 {
-    return (cost_energy_per_skl * skill_lv) + cost_energy;
+    return static_cast<int32_t>((cost_energy_per_skl * skill_lv) + cost_energy);
+}
+
+int SkillBase::GetID() const
+{
+    return id;
+}
+
+int SkillBase::GetNameID() const
+{
+    return text_id;
+}
+
+bool SkillBase::IsPassive() const
+{
+    return is_passive;
+}
+
+bool SkillBase::IsPhysicalSkill() const
+{
+    return is_physical_act;
+}
+
+bool SkillBase::IsMagicalSkill() const
+{
+    return !is_physical_act;
+}
+
+bool SkillBase::IsHarmful() const
+{
+    return is_harmful;
+}
+
+bool SkillBase::IsNeedTarget() const
+{
+    return is_need_target;
+}
+
+bool SkillBase::IsValidToCorpse() const
+{
+    return is_corpse;
+}
+
+bool SkillBase::IsToggle() const
+{
+    return is_toggle;
+}
+
+int SkillBase::GetCastRange() const
+{
+    return cast_range;
+}
+
+int SkillBase::GetValidRange() const
+{
+    return valid_range;
+}
+
+int SkillBase::GetToggleGroup() const
+{
+    return toggle_group;
+}
+
+int SkillBase::GetSkillTargetType() const
+{
+    return target;
+}
+
+int SkillBase::GetSkillEffectType() const
+{
+    return effect_type;
+}
+
+int SkillBase::GetElementalType() const
+{
+    return elemental;
+}
+
+bool SkillBase::IsNeedShield() const
+{
+    return vf_shield_only;
+}
+
+bool SkillBase::IsNeedWeapon() const
+{
+    return !vf_is_not_need_weapon;
+}
+
+bool SkillBase::IsValid() const
+{
+    return is_valid != ST_INVALID;
+}
+
+bool SkillBase::IsSystemSkill() const
+{
+    return is_valid == ST_SYSTEM;
 }

@@ -32,6 +32,13 @@ enum SKILL_RESULT_TYPE : int
     SRT_NOT_USE                = 100,
 };
 
+enum SKILL_TYPE : int16_t
+{
+    ST_INVALID = 0,
+    ST_VALID   = 1,
+    ST_SYSTEM  = 2,
+};
+
 struct SR_DamageType
 {
     int    target_hp;
@@ -534,6 +541,30 @@ struct SkillTreeGroup
 
 struct SkillBase
 {
+
+    int GetID() const;
+    int GetNameID() const;
+    bool IsValid() const;
+    bool IsSystemSkill() const;
+
+    bool IsPassive() const;
+    bool IsPhysicalSkill() const;
+    bool IsMagicalSkill() const;
+    bool IsHarmful() const;
+    bool IsNeedTarget() const;
+    bool IsValidToCorpse() const;
+    bool IsToggle() const;
+
+    int GetCastRange() const;
+    int GetValidRange() const;
+
+    int GetToggleGroup() const;
+    int GetSkillTargetType() const;
+    int GetSkillEffectType() const;
+    int GetElementalType() const;
+
+    bool IsNeedShield() const;
+    bool IsNeedWeapon() const;
 
     int GetNeedJobPoint(int skill_lv);
     bool IsUseableWeapon(ItemClass cl);

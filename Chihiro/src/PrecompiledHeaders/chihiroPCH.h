@@ -8,5 +8,6 @@
 #include "World.h"
 #include "WorldSession.h"
 #include <set>
+#include <string>
 #include <vector>
 #include "XPacket.h"

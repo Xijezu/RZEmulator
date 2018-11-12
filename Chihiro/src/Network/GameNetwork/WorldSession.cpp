@@ -1942,9 +1942,9 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
     else
     {
-        XPacket tradePct(NGemity::Packets::TS_TRADE);
-        tradePct << m_pPlayer->GetHandle();
-        tradePct << (uint8)TM_REQUEST_TRADE; // mode
+        TS_TRADE tradePct{ };
+        tradePct.target_player = m_pPlayer->GetHandle();
+        tradePct.mode          = static_cast<uint8_t>(TM_REQUEST_TRADE);
         tradeTarget->SendPacket(tradePct);
     }
 }
@@ -1964,15 +1964,19 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
         m_pPlayer->StartTrade(tradeTarget->GetHandle());
         tradeTarget->StartTrade(m_pPlayer->GetHandle());
 
-        XPacket tradePlayerPct(NGemity::Packets::TS_TRADE);
-        tradePlayerPct << tradeTarget->GetHandle();
-        tradePlayerPct << (uint8)TM_BEGIN_TRADE; // mode
-        m_pPlayer->SendPacket(tradePlayerPct);
+        {
+            TS_TRADE tradePct{ };
+            tradePct.target_player = tradeTarget->GetHandle();
+            tradePct.mode          = static_cast<uint8_t>(TM_BEGIN_TRADE);
+            m_pPlayer->SendPacket(tradePct);
+        }
 
-        XPacket tradeTargetPct(NGemity::Packets::TS_TRADE);
-        tradeTargetPct << m_pPlayer->GetHandle();
-        tradeTargetPct << (uint8)TM_BEGIN_TRADE; // mode
-        tradeTarget->SendPacket(tradeTargetPct);
+        {
+            TS_TRADE tradePct{ };
+            tradePct.target_player = m_pPlayer->GetHandle();
+            tradePct.mode          = static_cast<uint8_t>(TM_BEGIN_TRADE);
+            tradeTarget->SendPacket(tradePct);
+        }
     }
 }
 
@@ -1994,9 +1998,9 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    XPacket tradePct(NGemity::Packets::TS_TRADE);
-    tradePct << m_pPlayer->GetHandle();
-    tradePct << (uint8)TM_REJECT_TRADE;
+    TS_TRADE tradePct{ };
+    tradePct.target_player = m_pPlayer->GetHandle();
+    tradePct.mode          = static_cast<uint8_t>(TM_REJECT_TRADE);
     tradeTarget->SendPacket(tradePct);
 }
 
@@ -2082,14 +2086,10 @@ void WorldSession::onAddGold(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
 
         m_pPlayer->AddGoldToTradeWindow(gold);
 
-        XPacket tradePct(NGemity::Packets::TS_TRADE);
-        tradePct << m_pPlayer->GetHandle();
-        tradePct << (uint8)TM_ADD_GOLD;
-        tradePct << (uint32)0; // Handle
-        tradePct << (int32)0; // Code
-        tradePct << (int64)0; // ID
-        tradePct << (int32)gold;
-        tradePct.fill("", 44);
+        TS_TRADE tradePct{ };
+        tradePct.target_player             = m_pPlayer->GetHandle();
+        tradePct.mode                      = static_cast<uint8_t>(TM_ADD_GOLD);
+        tradePct.item_info.base_info.count = gold;
         tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
@@ -2106,9 +2106,9 @@ void WorldSession::onFreezeTrade()
     {
         m_pPlayer->FreezeTrade();
 
-        XPacket tradePct(NGemity::Packets::TS_TRADE);
-        tradePct << m_pPlayer->GetHandle();
-        tradePct << (uint8)TM_FREEZE_TRADE;
+        TS_TRADE tradePct{ };
+        tradePct.target_player = m_pPlayer->GetHandle();
+        tradePct.mode          = static_cast<uint8_t>(TM_FREEZE_TRADE);
         tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
@@ -2138,9 +2138,9 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
     m_pPlayer->ConfirmTrade();
 
-    XPacket tradePct(NGemity::Packets::TS_TRADE);
-    tradePct << m_pPlayer->GetHandle();
-    tradePct << (uint8)TM_CONFIRM_TRADE;
+    TS_TRADE tradePct{ };
+    tradePct.target_player = m_pPlayer->GetHandle();
+    tradePct.mode          = static_cast<uint8_t>(TM_CONFIRM_TRADE);
     tradeTarget->SendPacket(tradePct);
     m_pPlayer->SendPacket(tradePct);
 
@@ -2204,9 +2204,9 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
             && tradeTarget->GetTradeTarget() == m_pPlayer
             && m_pPlayer->ProcessTrade())
         {
-            XPacket tradePct(NGemity::Packets::TS_TRADE);
-            tradePct << m_pPlayer->GetHandle();
-            tradePct << (uint8)TM_PROCESS_TRADE;
+            TS_TRADE tradePct{ };
+            tradePct.target_player = m_pPlayer->GetHandle();
+            tradePct.mode          = static_cast<uint8_t>(TM_PROCESS_TRADE);
             tradeTarget->SendPacket(tradePct);
             m_pPlayer->SendPacket(tradePct);
         }

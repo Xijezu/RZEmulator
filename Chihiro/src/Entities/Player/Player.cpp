@@ -1189,7 +1189,7 @@ void Player::AddDialogMenu(const std::string &szKey, const std::string &szValue)
             m_szDialogMenu += "\t";
             m_szDialogMenu += szKey;
             m_szDialogMenu += "\t";
-            m_szDialogMenu += szValue.empty() ? "" : szValue;
+            m_szDialogMenu += (szValue.empty() ? "" : szValue);
             m_szDialogMenu += "\t";
         }
     }

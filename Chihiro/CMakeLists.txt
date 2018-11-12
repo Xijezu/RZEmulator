@@ -45,7 +45,7 @@ add_executable(Chihiro ${SOURCE_FILES})
 target_link_libraries(Chihiro shared fmt ${MYSQL_LIB} boost lualib)
 
 if(UNIX)
-    set(EXECUTABLE_LINK_FLAGS "")
+    set(EXECUTABLE_LINK_FLAGS "-include ${CMAKE_CURRENT_SOURCE_DIR}/src/PrecompiledHeaders/chihiroPCH.h")
     if(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
         set(EXECUTABLE_LINK_FLAGS "-Wl,--no-as-needed -pthread -lrt ${EXECUTABLE_LINK_FLAGS}")
     elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
