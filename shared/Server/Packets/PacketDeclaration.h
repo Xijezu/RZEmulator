@@ -368,13 +368,13 @@ namespace PacketDeclaration
     if(cond) \
         buffer->writeDynString(#name, name, name##_size);
 
-#define SERIALIZATION_F_PADMARKER1(marker) const uint32_t marker = buffer->getParsedSize();
+#define SERIALIZATION_F_PADMARKER1(marker) const uint32_t marker = buffer->getWrittenSize();
 #define SERIALIZATION_F_PAD2(_size, marker) \
-    if(buffer->getParsedSize() < marker + (_size)) \
-        buffer->pad("pad_" #marker, marker + (_size) -buffer->getParsedSize());
+    if(buffer->getWrittenSize() < marker + (_size)) \
+        buffer->pad("pad_" #marker, marker + (_size) -buffer->getWrittenSize());
 #define SERIALIZATION_F_PAD3(_size, marker, cond) \
-    if(cond && buffer->getParsedSize() < marker + (_size)) \
-        buffer->pad("pad_" #marker, marker + (_size) -buffer->getParsedSize());
+    if(cond && buffer->getWrittenSize() < marker + (_size)) \
+        buffer->pad("pad_" #marker, marker + (_size) -buffer->getWrittenSize());
 
 #define SERIALIZATION_F_ENDSTRING2(name, hasNullTerminator) buffer->writeDynString(#name, name, (uint32_t) name.size());
 #define SERIALIZATION_F_ENDSTRING3(name, hasNullTerminator, cond) \
@@ -471,13 +471,13 @@ namespace PacketDeclaration
     else \
         name = defaultval;
 
-#define DESERIALIZATION_F_PADMARKER1(marker) const uint32_t marker = buffer->getParsedSize();
+#define DESERIALIZATION_F_PADMARKER1(marker) const uint32_t marker = buffer->getReadSize();
 #define DESERIALIZATION_F_PAD2(_size, marker) \
-    if(buffer->getParsedSize() < marker + (_size)) \
-        buffer->discard("pad_" #marker, marker + (_size) -buffer->getParsedSize());
+    if(buffer->getReadSize() < marker + (_size)) \
+        buffer->discard("pad_" #marker, marker + (_size) -buffer->getReadSize());
 #define DESERIALIZATION_F_PAD3(_size, marker, cond) \
-    if(cond && buffer->getParsedSize() < marker + (_size)) \
-        buffer->discard("pad_" #marker, marker + (_size) -buffer->getParsedSize());
+    if(cond && buffer->getReadSize() < marker + (_size)) \
+        buffer->discard("pad_" #marker, marker + (_size) -buffer->getReadSize());
 
 #define DESERIALIZATION_F_ENDSTRING2(name, hasNullTerminator) buffer->readEndString(#name, name, hasNullTerminator);
 #define DESERIALIZATION_F_ENDSTRING3(name, hasNullTerminator, cond) \

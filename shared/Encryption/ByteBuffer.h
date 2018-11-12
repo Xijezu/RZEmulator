@@ -156,65 +156,11 @@ class ByteBuffer
             }
         }
 
-        ByteBuffer &operator<<(uint8 value)
+        // Writing start
+        template<typename T>
+        ByteBuffer &operator<<(T value)
         {
-            append<uint8>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(uint16 value)
-        {
-            append<uint16>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(uint32 value)
-        {
-            append<uint32>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(uint64 value)
-        {
-            append<uint64>(value);
-            return *this;
-        }
-
-        // signed as in 2e complement
-        ByteBuffer &operator<<(int8 value)
-        {
-            append<int8>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(int16 value)
-        {
-            append<int16>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(int32 value)
-        {
-            append<int32>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(int64 value)
-        {
-            append<int64>(value);
-            return *this;
-        }
-
-        // floating points
-        ByteBuffer &operator<<(float value)
-        {
-            append<float>(value);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(double value)
-        {
-            append<double>(value);
+            append<T>(value);
             return *this;
         }
 
@@ -229,75 +175,16 @@ class ByteBuffer
         ByteBuffer &operator<<(const char *str)
         {
             if (size_t len = (str ? strlen(str) : 0))
-                append((uint8 const *)str, len);
-            append((uint8)0);
+                append((uint8_t const *)str, len);
+            append((uint8_t)0);
             return *this;
         }
 
-        ByteBuffer &operator>>(bool &value)
+        // Reading start
+        template<typename T>
+        ByteBuffer &operator>>(T &value)
         {
-            value = read < char > () > 0 ? true : false;
-            return *this;
-        }
-
-        ByteBuffer &operator>>(uint8 &value)
-        {
-            value = read < uint8 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(uint16 &value)
-        {
-            value = read < uint16 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(uint32 &value)
-        {
-            value = read < uint32 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(uint64 &value)
-        {
-            value = read < uint64 > ();
-            return *this;
-        }
-
-        //signed as in 2e complement
-        ByteBuffer &operator>>(int8 &value)
-        {
-            value = read < int8 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(int16 &value)
-        {
-            value = read < int16 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(int32 &value)
-        {
-            value = read < int32 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(int64 &value)
-        {
-            value = read < int64 > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(float &value)
-        {
-            value = read < float > ();
-            return *this;
-        }
-
-        ByteBuffer &operator>>(double &value)
-        {
-            value = read < double > ();
+            value = read < T > ();
             return *this;
         }
 
