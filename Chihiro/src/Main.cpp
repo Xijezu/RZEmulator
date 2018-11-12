@@ -238,7 +238,7 @@ void ShutdownCLIThread(std::thread *cliThread)
                 if (!numCharsWritten)
                     errorBuffer = "Unknown error";
 
-                TC_LOG_DEBUG("server.worldserver", "Error cancelling I/O of CliThread, error code %u, detail: %s", uint32(errorCode), errorBuffer);
+                NG_LOG_DEBUG("server.worldserver", "Error cancelling I/O of CliThread, error code %u, detail: %s", uint32(errorCode), errorBuffer);
 
                 if (numCharsWritten)
                     LocalFree(errorBuffer);
