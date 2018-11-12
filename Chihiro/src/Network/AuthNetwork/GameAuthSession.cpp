@@ -43,7 +43,7 @@ typedef struct AuthHandler
     void (GameAuthSession::*handler)(XPacket *);
 } AuthHandler;
 
-constexpr AuthHandler packetHandler[] =
+constexpr AuthHandler authPacketHandler[] =
                               {
                                       {NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
                                       {NGemity::Packets::TS_AG_KICK_CLIENT,  &GameAuthSession::HandleClientKick},
@@ -51,7 +51,7 @@ constexpr AuthHandler packetHandler[] =
                                       {NGemity::Packets::TS_CS_PING,         &GameAuthSession::HandleNullPacket}
                               };
 
-constexpr int tableSize = (sizeof(packetHandler) / sizeof(AuthHandler));
+constexpr int authTableSize = (sizeof(authPacketHandler) / sizeof(AuthHandler));
 
 ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
 {
@@ -60,17 +60,17 @@ ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     auto _cmd = pGamePct->GetPacketID();
     int  i    = 0;
 
-    for (i = 0; i < tableSize; i++)
+    for (i = 0; i < authTableSize; i++)
     {
-        if ((uint16_t)packetHandler[i].cmd == _cmd)
+        if ((uint16_t)authPacketHandler[i].cmd == _cmd)
         {
-            (*this.*packetHandler[i].handler)(pGamePct);
+            (*this.*authPacketHandler[i].handler)(pGamePct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == tableSize)
+    if (i == authTableSize)
     {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;

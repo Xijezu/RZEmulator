@@ -9,3 +9,4 @@
 #include "WorldSession.h"
 #include <set>
 #include <vector>
+#include "XPacket.h"
