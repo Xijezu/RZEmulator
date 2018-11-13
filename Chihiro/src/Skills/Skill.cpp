@@ -332,7 +332,7 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
     pSkillPct.y           = m_targetPosition.GetPositionY();
     pSkillPct.z           = m_targetPosition.GetPositionZ();
     pSkillPct.layer       = m_targetPosition.GetLayer();
-    pSkillPct.type        = nType;
+    pSkillPct.type        = static_cast<TS_SKILL__TYPE >(nType);
     pSkillPct.hp_cost     = static_cast<decltype(pSkillPct.hp_cost)>(cost_hp);
     pSkillPct.mp_cost     = static_cast<decltype(pSkillPct.mp_cost)>(cost_mp);
     pSkillPct.caster_hp   = static_cast<decltype(pSkillPct.caster_hp)>(m_pOwner->GetHealth());
@@ -356,20 +356,20 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
 
     pSkillPct.fire.bMultiple    = m_bMultiple;
     pSkillPct.fire.range        = m_fRange;
-    pSkillPct.fire.target_count = static_cast<int8_t >(m_nTargetCount);;
-    pSkillPct.fire.fire_count = static_cast<int8_t>(m_nFireCount);
+    pSkillPct.fire.target_count = static_cast<int8_t >(m_nTargetCount);
+    pSkillPct.fire.fire_count   = static_cast<int8_t>(m_nFireCount);
 
     for (const auto &skill_result : m_vResultList)
     {
         TS_SC_SKILL__HIT_DETAILS details{ };
-        details.type    = skill_result.type;
+        details.type    = static_cast<TS_SKILL__HIT_TYPE >(skill_result.type);
         details.hTarget = skill_result.hTarget;
         switch (details.type)
         {
             case SHT_DAMAGE:
             case SHT_MAGIC_DAMAGE:
                 details.hitDamage.damage.target_hp   = skill_result.damage.target_hp;
-                details.hitDamage.damage.damage_type = skill_result.damage.damage_type;
+                details.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE >(skill_result.damage.damage_type);
                 details.hitDamage.damage.damage      = skill_result.damage.damage;
                 details.hitDamage.damage.flag        = skill_result.damage.flag;
                 std::copy(std::begin(skill_result.damage.elemental_damage), std::end(skill_result.damage.elemental_damage),
@@ -377,7 +377,7 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
                 break;
             case SHT_DAMAGE_WITH_KNOCK_BACK:
                 details.hitDamageWithKnockBack.damage.target_hp   = skill_result.damage_kb.target_hp;
-                details.hitDamageWithKnockBack.damage.damage_type = skill_result.damage_kb.damage_type;
+                details.hitDamageWithKnockBack.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE >(skill_result.damage_kb.damage_type);
                 details.hitDamageWithKnockBack.damage.damage      = skill_result.damage_kb.damage;
                 details.hitDamageWithKnockBack.damage.flag        = skill_result.damage_kb.flag;
                 std::copy(std::begin(skill_result.damage_kb.elemental_damage), std::end(skill_result.damage_kb.elemental_damage),
@@ -389,7 +389,7 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
                 break;
             case SHT_RESULT:
                 details.hitResult.bResult      = skill_result.result.bResult;
-                details.hitResult.success_type = skill_result.result.success_type;
+                details.hitResult.success_type = static_cast<TS_SKILL_RESULT_SUCESS_TYPE >(skill_result.result.success_type);
                 break;
             case SHT_ADD_HP:
             case SHT_ADD_MP:
@@ -425,6 +425,7 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
 //              SRT_NOT_USE
                 break;
         }
+        pSkillPct.fire.hits.emplace_back(details);
     }
 }
 
