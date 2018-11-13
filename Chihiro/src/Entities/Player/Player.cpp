@@ -889,10 +889,10 @@ void Player::SendLoginProperties()
 
 void Player::SendGoldChaosMessage()
 {
-    XPacket packet(NGemity::Packets::TS_SC_GOLD_UPDATE);
-    packet << GetGold();
-    packet << GetChaos();
-    SendPacket(packet);
+    TS_SC_GOLD_UPDATE goldPct{ };
+    goldPct.gold  = GetGold();
+    goldPct.chaos = GetChaos();
+    SendPacket(goldPct);
 }
 
 void Player::SendJobInfo()
@@ -3022,17 +3022,18 @@ void Player::sendBonusEXPJPMsg()
     if (cnt == 0)
         return;
 
-    XPacket bonusPct(NGemity::Packets::TS_SC_BONUS_EXP_JP);
-    bonusPct << GetHandle();
-    bonusPct << cnt;
+    TS_SC_BONUS_EXP_JP bonusPct{ };
+    bonusPct.handle = GetHandle();
     for (auto &bonus : m_pBonusInfo)
     {
         if (bonus.exp != -1)
         {
-            bonusPct << bonus.type;
-            bonusPct << bonus.rate;
-            bonusPct << (int64)bonus.exp;
-            bonusPct << (int64)bonus.jp;
+            TS_BONUS_INFO bonus_info{ };
+            bonus_info.type = bonus.type;
+            bonus_info.rate = bonus.rate;
+            bonus_info.exp  = bonus.exp;
+            bonus_info.jp   = bonus.jp;
+            bonusPct.bonus.emplace_back(bonus_info);
         }
     }
     SendPacket(bonusPct);

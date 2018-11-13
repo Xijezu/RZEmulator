@@ -322,121 +322,108 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
     return TS_RESULT_SUCCESS;
 }
 
-void Skill::assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp)
+void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp)
 {
-    pct << (uint16)m_SkillBase->id;
-    pct << (uint8)m_nRequestedSkillLevel;
-    pct << (uint32)m_pOwner->GetHandle();
-    pct << (uint32)m_hTarget;
-    pct << m_targetPosition.GetPositionX();
-    pct << m_targetPosition.GetPositionY();
-    pct << m_targetPosition.GetPositionZ();
-    pct << (uint8)m_targetPosition.GetLayer();
-    pct << (uint8)nType;
-    pct << (int16)cost_hp;
-    pct << (int16)cost_mp;
-    pct << m_pOwner->GetHealth();
-    pct << (int16)m_pOwner->GetMana();
+    pSkillPct.id          = static_cast<uint16_t >(m_SkillBase->GetID());
+    pSkillPct.skill_level = m_nRequestedSkillLevel;
+    pSkillPct.caster      = m_pOwner->GetHandle();
+    pSkillPct.target      = m_hTarget;
+    pSkillPct.x           = m_targetPosition.GetPositionX();
+    pSkillPct.y           = m_targetPosition.GetPositionY();
+    pSkillPct.z           = m_targetPosition.GetPositionZ();
+    pSkillPct.layer       = m_targetPosition.GetLayer();
+    pSkillPct.type        = nType;
+    pSkillPct.hp_cost     = static_cast<decltype(pSkillPct.hp_cost)>(cost_hp);
+    pSkillPct.mp_cost     = static_cast<decltype(pSkillPct.mp_cost)>(cost_mp);
+    pSkillPct.caster_hp   = static_cast<decltype(pSkillPct.caster_hp)>(m_pOwner->GetHealth());
+    pSkillPct.caster_mp   = static_cast<decltype(pSkillPct.caster_mp)>(m_pOwner->GetMana());
 
-    if (nType != SKILL_STATUS::ST_FIRE)
+    switch (nType)
     {
-        constexpr int preSkillFillSize = 9;
-        auto          pos              = pct.wpos();
-        pct.fill("", preSkillFillSize);
-        pct.wpos(pos);
-
-        switch (nType)
+        case SKILL_STATUS::ST_CASTING:
+        case SKILL_STATUS::ST_CASTING_UPDATE:
+        case SKILL_STATUS::ST_COMPLETE:
         {
-            case 1:
-            case 2:
-            case 5:
-                pct << (uint32)(m_nFireTime - m_nCastTime);
-                pct << (uint16)m_nErrorCode;
-                return;
-            default:
-                return;
+            pSkillPct.casting.tm         = static_cast<uint32_t>(m_nFireTime - m_nCastTime);
+            pSkillPct.casting.nErrorCode = m_nErrorCode;
+            return;
         }
+        case SKILL_STATUS::ST_CANCEL:
+            return;
+        default:
+            break;
     }
 
-    pct << (uint8)(m_bMultiple ? 1 : 0);
-    pct << m_fRange;
-    pct << (uint8)m_nTargetCount;
-    pct << (uint8)m_nFireCount;
-    pct << (uint16)m_vResultList.size();
+    pSkillPct.fire.bMultiple    = m_bMultiple;
+    pSkillPct.fire.range        = m_fRange;
+    pSkillPct.fire.target_count = static_cast<int8_t >(m_nTargetCount);;
+    pSkillPct.fire.fire_count = static_cast<int8_t>(m_nFireCount);
 
-    // Odd fixed padding for the skill result
-    auto pos = pct.wpos();
-    pct.fill("", 45 * m_vResultList.size());
-    pct.wpos(pos);
-
-    if (!m_vResultList.empty())
+    for (const auto &skill_result : m_vResultList)
     {
-        for (const auto &sr : m_vResultList)
+        TS_SC_SKILL__HIT_DETAILS details{ };
+        details.type    = skill_result.type;
+        details.hTarget = skill_result.hTarget;
+        switch (details.type)
         {
-            pct << (uint8)sr.type;
-            pct << (uint)sr.hTarget;
-
-            switch (sr.type)
-            {
-                case SRT_DAMAGE:
-                case SRT_MAGIC_DAMAGE:
-                    pct << sr.damage.target_hp;
-                    pct << sr.damage.damage_type;
-                    pct << sr.damage.damage;
-                    pct << sr.damage.flag;
-                    for (const uint16 &i : sr.damage.elemental_damage)
-                        pct << i;
-                    break;
-                case SRT_DAMAGE_WITH_KNOCK_BACK:
-                    pct << sr.damage_kb.target_hp;
-                    pct << sr.damage_kb.damage_type;
-                    pct << sr.damage_kb.damage;
-                    pct << sr.damage_kb.flag;
-                    for (const uint16 &i : sr.damage_kb.elemental_damage)
-                        pct << i;
-                    pct << sr.damage_kb.x;
-                    pct << sr.damage_kb.y;
-                    pct << sr.damage_kb.speed;
-                    pct << sr.damage_kb.knock_back_time;
-                    break;
-                case SRT_RESULT:
-                    pct << (uint8)(sr.result.bResult ? 1 : 0);
-                    pct << sr.result.success_type;
-                    break;
-                case SRT_ADD_HP:
-                case SRT_ADD_MP:
-                    pct << sr.add_hp.target_hp;
-                    pct << sr.add_hp.nIncHP;
-                    break;
-                case SRT_ADD_HP_MP_SP:
-                    pct << sr.add_hp_mp_sp.target_hp;
-                    pct << sr.add_hp_mp_sp.nIncHP;
-                    pct << sr.add_hp_mp_sp.nIncMP;
-                    pct << sr.add_hp_mp_sp.nIncSP;
-                    pct << sr.add_hp_mp_sp.target_mp;
-                    break;
-                case SRT_REBIRTH:
-                    pct << sr.rebirth.target_hp;
-                    pct << sr.rebirth.nIncHP;
-                    pct << sr.rebirth.nIncMP;
-                    pct << sr.rebirth.nRecoveryEXP;
-                    pct << sr.rebirth.target_mp;
-                    break;
-                case SRT_RUSH:
-                    pct << (uint8)(sr.rush.bResult ? 1 : 0);
-                    pct << sr.rush.x;
-                    pct << sr.rush.y;
-                    pct << sr.rush.face;
-                    pct << sr.rush.speed;
-                    break;
+            case SHT_DAMAGE:
+            case SHT_MAGIC_DAMAGE:
+                details.hitDamage.damage.target_hp   = skill_result.damage.target_hp;
+                details.hitDamage.damage.damage_type = skill_result.damage.damage_type;
+                details.hitDamage.damage.damage      = skill_result.damage.damage;
+                details.hitDamage.damage.flag        = skill_result.damage.flag;
+                std::copy(std::begin(skill_result.damage.elemental_damage), std::end(skill_result.damage.elemental_damage),
+                          std::begin(details.hitDamage.damage.elemental_damage));
+                break;
+            case SHT_DAMAGE_WITH_KNOCK_BACK:
+                details.hitDamageWithKnockBack.damage.target_hp   = skill_result.damage_kb.target_hp;
+                details.hitDamageWithKnockBack.damage.damage_type = skill_result.damage_kb.damage_type;
+                details.hitDamageWithKnockBack.damage.damage      = skill_result.damage_kb.damage;
+                details.hitDamageWithKnockBack.damage.flag        = skill_result.damage_kb.flag;
+                std::copy(std::begin(skill_result.damage_kb.elemental_damage), std::end(skill_result.damage_kb.elemental_damage),
+                          std::begin(details.hitDamageWithKnockBack.damage.elemental_damage));
+                details.hitDamageWithKnockBack.x               = skill_result.damage_kb.x;
+                details.hitDamageWithKnockBack.y               = skill_result.damage_kb.y;
+                details.hitDamageWithKnockBack.speed           = skill_result.damage_kb.speed;
+                details.hitDamageWithKnockBack.knock_back_time = skill_result.damage_kb.knock_back_time;
+                break;
+            case SHT_RESULT:
+                details.hitResult.bResult      = skill_result.result.bResult;
+                details.hitResult.success_type = skill_result.result.success_type;
+                break;
+            case SHT_ADD_HP:
+            case SHT_ADD_MP:
+                details.hitAddStat.target_stat = skill_result.add_hp.target_hp;
+                details.hitAddStat.nIncStat    = skill_result.add_hp.nIncHP;
+                break;
+            case SHT_ADD_HP_MP_SP:
+                details.hitAddHPMPSP.target_hp = skill_result.add_hp_mp_sp.target_hp;
+                details.hitAddHPMPSP.nIncHP    = skill_result.add_hp_mp_sp.nIncHP;
+                details.hitAddHPMPSP.nIncMP    = skill_result.add_hp_mp_sp.nIncMP;
+                details.hitAddHPMPSP.nIncSP    = skill_result.add_hp_mp_sp.nIncSP;
+                details.hitAddHPMPSP.target_mp = skill_result.add_hp_mp_sp.target_mp;
+                break;
+            case SHT_REBIRTH:
+                details.hitRebirth.target_hp    = skill_result.rebirth.target_hp;
+                details.hitRebirth.nIncHP       = skill_result.rebirth.nIncHP;
+                details.hitRebirth.nIncMP       = skill_result.rebirth.nIncMP;
+                details.hitRebirth.nRecoveryEXP = skill_result.rebirth.nRecoveryEXP;
+                details.hitRebirth.target_mp    = skill_result.rebirth.target_mp;
+                break;
+            case SHT_RUSH:
+                details.hitRush.bResult = skill_result.rush.bResult;
+                details.hitRush.x       = skill_result.rush.x;
+                details.hitRush.y       = skill_result.rush.y;
+                details.hitRush.face    = skill_result.rush.face;
+                details.hitRush.speed   = skill_result.rush.speed;
+                break;
+            default:
 //              @todo: The following are still missing
 //              SRT_CHAIN_DAMAGE
 //              SRT_CHAIN_MAGIC_DAMAGE
 //              SRT_CHAIN_HEAL
 //              SRT_NOT_USE
-                default:
-                    break;
-            }
+                break;
         }
     }
 }
@@ -446,10 +433,10 @@ void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, 
     if (pUnit == nullptr)
         return;
 
-    auto    rx    = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto    ry    = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    uint8   layer = pUnit->GetLayer();
-    XPacket skillPct(NGemity::Packets::TS_SC_SKILL);
+    auto        rx    = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto        ry    = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    uint8       layer = pUnit->GetLayer();
+    TS_SC_SKILL skillPct{ };
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint)rx, (uint)ry, layer, skillPct);
 }
@@ -459,7 +446,7 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
     if (pUnit1 == nullptr || pUnit2 == nullptr)
         return;
 
-    XPacket skillPct(NGemity::Packets::TS_SC_SKILL);
+    TS_SC_SKILL skillPct{ };
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),

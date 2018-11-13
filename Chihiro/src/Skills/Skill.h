@@ -85,7 +85,7 @@ class Skill
 
         SkillStatus m_Status{ };
     protected:
-        void assembleMessage(XPacket &pct, int nType, int cost_hp, int cost_mp);
+        void assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp);
         void Init();
     private:
         int GetCurrentMPCost();
