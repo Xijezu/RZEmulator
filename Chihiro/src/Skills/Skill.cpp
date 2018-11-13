@@ -393,8 +393,7 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
                 break;
             case SHT_ADD_HP:
             case SHT_ADD_MP:
-                details.hitAddStat.target_stat = skill_result.add_hp.target_hp;
-                details.hitAddStat.nIncStat    = skill_result.add_hp.nIncHP;
+                details.hitAddStat = skill_result.hitAddStat;
                 break;
             case SHT_ADD_HP_MP_SP:
                 details.hitAddHPMPSP.target_hp = skill_result.add_hp_mp_sp.target_hp;
@@ -978,18 +977,18 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
     m_pOwner->AddMana(nAddMP);
 
     SkillResult skill_result{ };
-    skill_result.type             = (int)SRT_ADD_HP;
-    skill_result.hTarget          = m_pOwner->GetHandle();
-    skill_result.add_hp.target_hp = m_pOwner->GetHealth();
-    skill_result.add_hp.nIncHP    = nAddHP;
+    skill_result.type                   = (int)SRT_ADD_HP;
+    skill_result.hTarget                = m_pOwner->GetHandle();
+    skill_result.hitAddStat.target_stat = m_pOwner->GetHealth();
+    skill_result.hitAddStat.nIncStat    = nAddHP;
 
     m_vResultList.emplace_back(skill_result);
 
     SkillResult skillResult{ };
-    skillResult.type             = (int)SRT_ADD_MP;
-    skillResult.hTarget          = m_pOwner->GetHandle();
-    skillResult.add_hp.target_hp = m_pOwner->GetMana();
-    skillResult.add_hp.nIncHP    = nAddHP;
+    skillResult.type                   = (int)SRT_ADD_MP;
+    skillResult.hTarget                = m_pOwner->GetHandle();
+    skillResult.hitAddStat.target_stat = m_pOwner->GetMana();
+    skillResult.hitAddStat.nIncStat    = nAddHP;
     m_vResultList.emplace_back(skillResult);
 }
 
@@ -1020,10 +1019,10 @@ void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
     heal = pTarget->Heal((int)heal);
 
     SkillResult skillResult{ };
-    skillResult.type             = SRT_ADD_HP;
-    skillResult.hTarget          = pTarget->GetHandle();
-    skillResult.add_hp.target_hp = pTarget->GetHealth();
-    skillResult.add_hp.nIncHP    = (int)heal;
+    skillResult.type                   = SRT_ADD_HP;
+    skillResult.hTarget                = pTarget->GetHandle();
+    skillResult.hitAddStat.target_stat = pTarget->GetHealth();
+    skillResult.hitAddStat.nIncStat    = (int)heal;
     m_vResultList.emplace_back(skillResult);
     /* @todo: This implementation is wrong. skillResult.type should be 1, not SRT_ADD_HP.
      * Not sure about why I went this way "as some kind of workaround", but it was the wrong
@@ -1104,10 +1103,10 @@ void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
     heal = pTarget->MPHeal((int)heal);
 
     SkillResult skillResult{ };
-    skillResult.type             = SRT_ADD_MP;
-    skillResult.hTarget          = pTarget->GetHandle();
-    skillResult.add_hp.target_hp = pTarget->GetHealth();
-    skillResult.add_hp.nIncHP    = (int)heal;
+    skillResult.type                   = SRT_ADD_MP;
+    skillResult.hTarget                = pTarget->GetHandle();
+    skillResult.hitAddStat.target_stat = pTarget->GetHealth();
+    skillResult.hitAddStat.nIncStat    = (int)heal;
     m_vResultList.emplace_back(skillResult);
 }
 

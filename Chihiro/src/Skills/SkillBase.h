@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "ItemFields.h"
+#include "TS_SC_SKILL.h"
 
 enum SKILL_RESULT_TYPE : int
 {
@@ -67,12 +68,6 @@ struct SR_ResultType
     int  success_type;
 };
 
-struct SR_AddHPType
-{
-    int target_hp;
-    int nIncHP;
-};
-
 struct SR_AddHPMPSPType
 {
     int   target_hp;
@@ -108,7 +103,7 @@ struct SkillResult
     SR_DamageType              damage;
     SR_DamageWithKnockBackType damage_kb;
     SR_ResultType              result;
-    SR_AddHPType               add_hp;
+    TS_SC_SKILL__HIT_ADD_STAT  hitAddStat;
     SR_AddHPMPSPType           add_hp_mp_sp;
     SR_RushType                rush;
     SR_RebirthType             rebirth;
