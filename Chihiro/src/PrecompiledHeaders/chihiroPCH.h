@@ -7,6 +7,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "WorldSession.h"
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
