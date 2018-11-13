@@ -55,6 +55,10 @@ if(WIN32)
 
         endif()
 
+        add_definitions(-D_WIN32_WINNT=0x0601)
+        add_definitions(-DWIN32_LEAN_AND_MEAN)
+        add_definitions(-DNOMINMAX)
+
         if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
             set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4138 /wd4101 /wd4138 /wd4661 /MP")
             set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4267 /wd4138 /wd4661 /wd4101 /MP")
