@@ -14,7 +14,7 @@ function(ADD_CXX_PCH TARGET_NAME_LIST PCH_HEADER)
     # Use the header for every target
     foreach(TARGET_NAME ${TARGET_NAME_LIST})
         # Disable unity builds
-        set_target_properties(${TARGET_NAME} PROPERTIES COTIRE_ADD_UNITY_BUILD ON)
+        set_target_properties(${TARGET_NAME} PROPERTIES COTIRE_ADD_UNITY_BUILD OFF)
 
         set_target_properties(${TARGET_NAME} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER TRUE)
         # Set the prefix header
