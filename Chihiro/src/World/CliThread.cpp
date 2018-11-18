@@ -99,7 +99,7 @@ void commandFinished(void *, bool /*success*/)
     fflush(stdout);
 }
 
-#ifdef PLATFORM_UNIX
+#if PLATFORM ==  PLATFORM_UNIX
 
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
 int kb_hit_return()
