@@ -27,7 +27,6 @@
 #include "XPacket.h"
 #include <mutex>
 #include "Packets/MessageSerializerBuffer.h"
-#include <fstream>
 
 class EncryptablePacket : public XPacket
 {
@@ -118,14 +117,6 @@ class XSocket : public Socket<XSocket>
         {
             if (!IsOpen())
                 return;
-
-            if (packet.GetPacketID() == static_cast<uint16_t>(NGemity::Packets::TS_SC_SKILL))
-            {
-                std::ofstream strm{ };
-                strm.open(string_format("skillold-%u-%u.hex", packet.size(), sWorld.GetArTime()), std::ios::binary | std::ios::out);
-                strm.write(reinterpret_cast<const char *>(packet.contents()), packet.size());
-                strm.close();
-            }
 
             //if (sPacketLog->CanLogPacket())
             //sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
