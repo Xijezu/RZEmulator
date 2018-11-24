@@ -62,6 +62,7 @@ class WorldSession : public XSession
         void onCharacterList(const TS_CS_CHARACTER_LIST *);
         void onLogin(const TS_CS_LOGIN *);
         void onReturnToLobby(const TS_CS_RETURN_LOBBY *);
+        void onRequestReturnToLobby(const TS_CS_REQUEST_RETURN_LOBBY *);
         void onLogoutTimerRequest(const TS_CS_REQUEST_LOGOUT *);
         // Game itself
         void onCharacterName(const TS_CS_CHECK_CHARACTER_NAME *);

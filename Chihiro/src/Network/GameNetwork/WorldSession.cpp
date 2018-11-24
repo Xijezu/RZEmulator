@@ -90,6 +90,7 @@ const WorldSessionHandler worldPacketHandler[] =
                                           declareHandler(STATUS_CONNECTED, &WorldSession::onPing),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onLogoutTimerRequest),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onReturnToLobby),
+                                          declareHandler(STATUS_AUTHED, &WorldSession::onRequestReturnToLobby),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onCharacterList),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onLogin),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onCharacterName),
@@ -465,8 +466,12 @@ void WorldSession::onReturnToLobby(const TS_CS_RETURN_LOBBY *pRecvPct)
         m_pPlayer->DeleteThis();
         m_pPlayer = nullptr;
     }
-    if (pRecvPct != nullptr)
-        _SendResultMsg(pRecvPct->id, 0, 0);
+    _SendResultMsg(pRecvPct->id, 0, 0);
+}
+
+void WorldSession::onRequestReturnToLobby(const TS_CS_REQUEST_RETURN_LOBBY *pRecvPct)
+{
+    _SendResultMsg(pRecvPct->id, 0, 0);
 }
 
 void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
