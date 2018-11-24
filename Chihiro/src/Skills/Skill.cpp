@@ -611,6 +611,13 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         case EF_ADD_MP_BY_ITEM:
             MANA_SKILL_FUNCTOR(pTarget);
             break;
+        case EF_ADD_HP_MP:
+        case EF_ADD_HP_MP_BY_SUMMON_DAMAGE:
+        case EF_ADD_HP_MP_BY_SUMMON_DEAD:
+        case EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP:
+        case EF_ADD_HP_MP_WITH_LIMIT_PERCENT:
+            SKILL_ADD_HP_MP(pTarget);
+            break;
         case EF_RESURRECTION:
             SKILL_RESURRECTION(pTarget);
             break;
@@ -1546,4 +1553,143 @@ LABEL_28:
             NG_LOG_DEBUG("skill", "%s", result.c_str());
             return;
     }
+}
+
+void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nDecHP{0};
+    int nDecMP{0};
+    int nIncHP{0};
+    int nIncMP{0};
+
+    switch (GetSkillBase()->GetSkillEffectType())
+    {
+        case EF_ADD_HP_MP_BY_SUMMON_DEAD:
+        {
+            if (!m_pOwner->IsPlayer())
+                return;
+            auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
+            if (pSummon == nullptr || pSummon->GetHealth() == 0 || pSummon->GetHandle() == pTarget->GetHandle())
+            {
+                sWorld.AddSkillResult(m_vResultList, false, static_cast<int32_t >(SkillResult::SUMMON_DEAD), pTarget->GetHandle());
+                return;
+            }
+            nDecHP = pSummon->GetHealth();
+            pSummon->damage(m_pOwner, nDecHP, false);
+            DamageInfo info{ };
+            info.nDamage   = nDecHP;
+            info.target_hp = pSummon->GetHealth();
+            sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, ElementalType::TYPE_NONE, info, pSummon->GetHandle());
+        }
+            break;
+        case EF_ADD_HP_MP_BY_SUMMON_DAMAGE:
+        {
+            if (!m_pOwner->IsPlayer())
+                return;
+
+            auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
+            if (pSummon == nullptr || pSummon->GetHealth() == 0)
+            {
+                sWorld.AddSkillResult(m_vResultList, false, static_cast<int32_t >(SkillResult::SUMMON_DEAD), pTarget->GetHandle());
+                return;
+            }
+            nDecHP = pSummon->GetMaxHealth() * GetVar(10);
+            pSummon->AddHealth(-nDecHP);
+
+            SkillResult skillResult{ };
+            skillResult.type                   = static_cast<uint8_t>(TS_SKILL__HIT_TYPE::SHT_ADD_HP);
+            skillResult.hTarget                = pSummon->GetHandle();
+            skillResult.hitAddStat.target_stat = pTarget->GetMana();
+            skillResult.hitAddStat.nIncStat    = -nDecHP;
+            m_vResultList.emplace_back(skillResult);
+        }
+            break;
+        case EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP:
+        {
+            if (!m_pOwner->IsPlayer())
+                return;
+
+            auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
+            if (pSummon == nullptr || pSummon->GetHealth() == 0)
+            {
+                sWorld.AddSkillResult(m_vResultList, false, static_cast<int32_t >(SkillResult::SUMMON_DEAD), pTarget->GetHandle());
+                return;
+            }
+
+            nDecHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+            nDecMP = GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+
+            pSummon->AddHealth(-nDecHP);
+            pSummon->AddMana(-nDecMP);
+
+            SkillResult skillResult{ };
+            skillResult.type                   = static_cast<uint8_t >(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
+            skillResult.hTarget                = pSummon->GetHandle();
+            skillResult.add_hp_mp_sp.target_hp = pSummon->GetHealth();
+            skillResult.add_hp_mp_sp.target_mp = pSummon->GetMana();
+            skillResult.add_hp_mp_sp.nIncHP    = -nDecHP;
+            skillResult.add_hp_mp_sp.nIncMP    = -nDecMP;
+            m_vResultList.emplace_back(skillResult);
+        }
+            break;
+        default:
+            break;
+    }
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
+    {
+        nIncHP = nDecHP * GetVar(6) + GetVar(7) * GetSkillEnhance();
+        nIncMP = nDecMP * GetVar(6) + GetVar(7) * GetSkillEnhance();
+    }
+    else if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_WITH_LIMIT_PERCENT)
+    {
+        int nLimitHP = (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * pTarget->GetMaxHealth();
+        int nLimitMP = (GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance()) * pTarget->GetMaxMana();
+
+        if (nLimitHP > pTarget->GetHealth())
+            nIncHP = nLimitHP - pTarget->GetHealth();
+        if (nLimitMP > pTarget->GetMana())
+            nIncMP = nLimitMP - pTarget->GetMana();
+    }
+    else
+    {
+        nIncHP = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel())
+                 + GetVar(2) * GetRequestedSkillLevel()
+                 + pTarget->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel()
+                 + GetVar(4) * GetSkillEnhance();
+
+        nIncMP = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) * (GetVar(5) + GetVar(6) * GetRequestedSkillLevel())
+                 + GetVar(7) * GetRequestedSkillLevel()
+                 + pTarget->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel()
+                 + GetVar(9) * GetSkillEnhance();
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP ||
+            GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD)
+        {
+            nIncHP += GetVar(10);
+            nIncMP += GetVar(11);
+        }
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD)
+        {
+            nIncHP += pTarget->GetMaxHealth() * GetVar(12);
+            nIncMP += pTarget->GetMaxMana() * GetVar(13);
+        }
+    }
+
+    nIncHP = pTarget->Heal(nIncHP);
+    nIncMP = pTarget->MPHeal(nIncMP);
+
+    SkillResult skillResult{ };
+    skillResult.type                   = static_cast<uint8_t >(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
+    skillResult.hTarget                = pTarget->GetHandle();
+    skillResult.add_hp_mp_sp.target_hp = pTarget->GetHealth();
+    skillResult.add_hp_mp_sp.target_mp = pTarget->GetMana();
+    skillResult.add_hp_mp_sp.nIncHP    = nIncHP;
+    skillResult.add_hp_mp_sp.nIncMP    = nIncMP;
+
+    m_vResultList.emplace_back(skillResult);
 }

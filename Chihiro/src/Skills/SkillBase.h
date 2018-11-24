@@ -107,6 +107,34 @@ struct SkillResult
     SR_AddHPMPSPType           add_hp_mp_sp;
     SR_RushType                rush;
     SR_RebirthType             rebirth;
+
+    enum SkillResultType
+    {
+        DAMAGE                 = 0,
+        MAGIC_DAMAGE           = 1,
+        DAMAGE_WITH_KNOCK_BACK = 2,
+        RESULT                 = 10,
+        ADD_HP                 = 20,
+        ADD_MP                 = 21,
+        ADD_HP_MP_SP           = 22,
+        REBIRTH                = 23,
+        RUSH                   = 30,
+        NOT_USE                = 100,
+    };
+
+    enum SkillResultSuccessType
+    {
+        ADD_STATE       = 10,
+        REMOVE_STATE    = 11,
+        ADD_HATE        = 12,
+        TURN_ON         = 21,
+        TURN_OFF        = 22,
+        SUMMON_DEAD     = 30,
+        TARGET_DEAD     = 31,
+        CREATE_ITEM     = 40,
+        RESPAWN_MONSTER = 41,
+    };
+
 };
 
 enum SKILL_STATUS : short

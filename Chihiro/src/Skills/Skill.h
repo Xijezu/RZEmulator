@@ -54,7 +54,7 @@ class Skill
 
         const SkillBase *GetSkillBase() const { return m_SkillBase; }
 
-        const uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
+        uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
         bool CheckCoolTime(uint t) const;
         uint GetSkillCoolTime() const;
         void SetRemainCoolTime(uint time);
@@ -124,6 +124,7 @@ class Skill
         void MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void TOGGLE_AURA(Unit *pTarget);
+        void SKILL_ADD_HP_MP(Unit *pTarget);
 
         void MANA_SKILL_FUNCTOR(Unit *pTarget);
         void SKILL_RESURRECTION(Unit *pTarget);
