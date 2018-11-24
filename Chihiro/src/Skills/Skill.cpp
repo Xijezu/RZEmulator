@@ -816,9 +816,7 @@ uint Skill::GetSkillCoolTime() const
     auto cts = m_pOwner->GetCoolTimeSpeed();
     auto ctm = m_pOwner->GetCoolTimeMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     auto ct  = m_SkillBase->GetCoolTime(l);
-
     return cts * ctm * ct;
-    return (uint)(m_pOwner->GetCoolTimeSpeed() * m_pOwner->GetCoolTimeMod((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0) * m_SkillBase->GetCoolTime(l));
 }
 
 void Skill::SetRemainCoolTime(uint time)
