@@ -180,9 +180,9 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
                 continue;
             TS_SKILL_INFO skill_info{ };
             skill_info.skill_id            = t->m_nSkillID;
-            skill_info.base_skill_level    = static_cast<decltype(skill_info.base_skill_level)>(pUnit->GetBaseSkillLevel(skill_id));
-            skill_info.current_skill_level = static_cast<decltype(skill_info.current_skill_level)>(pUnit->GetCurrentSkillLevel(skill_id));
-            skill_info.total_cool_time     = static_cast<decltype(skill_info.total_cool_time)>(pUnit->GetTotalCoolTime(skill_id));
+            skill_info.base_skill_level    = static_cast<decltype(skill_info.base_skill_level)>(pUnit->GetBaseSkillLevel(t->m_nSkillID));
+            skill_info.current_skill_level = static_cast<decltype(skill_info.current_skill_level)>(pUnit->GetCurrentSkillLevel(t->m_nSkillID));
+            skill_info.total_cool_time     = static_cast<decltype(skill_info.total_cool_time)>(pUnit->GetTotalCoolTime(t->m_nSkillID));
             skill_info.remain_cool_time    = pUnit->GetRemainCoolTime(t->m_nSkillID);
             skillPct.skills.emplace_back(skill_info);
         }
