@@ -2411,3 +2411,72 @@ void Unit::RemoveEnergy(int nEnergy)
         onEnergyChange();
     }
 }
+
+int Unit::GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad)
+{
+    /*float v4; // st7@3
+    float v5; // st6@3
+
+    if (bPhysical)
+    {
+        if (bBad)
+        {
+            v4 = this.m_BadPhysicalElementalSkillStateMod[(int)type].fPhysicalDamage;
+            v5 = this.m_Attribute.nAttackPointRight;
+        }
+        else
+        {
+            v4 = this.m_GoodPhysicalElementalSkillStateMod[(int)type].fPhysicalDamage;
+            v5 = this.m_Attribute.nAttackPointRight;
+        }
+    }
+    else
+    {
+        if (bBad)
+        {
+            v4 = this.m_BadMagicalElementalSkillStateMod[(int)type].fPhysicalDamage;
+            v5 = this.m_Attribute.nAttackPointRight;
+        }
+        else
+        {
+            v4 = this.m_GoodMagicalElementalSkillStateMod[(int)type].fPhysicalDamage;
+            v5 = this.m_Attribute.nAttackPointRight;
+        }
+    }*/
+    return m_Attribute.nAttackPointRight;
+}
+
+int Unit::GetMagicPoint(ElementalType type, bool bPhysical, bool bBad)
+{
+    /*
+    float v4;
+    float v5;
+
+    if (bPhysical)
+    {
+        if (bBad)
+        {
+            v4 = this.m_BadPhysicalElementalSkillStateMod[(int)type].fMagicalDamage;
+            v5 = this.m_Attribute.nMagicPoint;
+        }
+        else
+        {
+            v4 = this.m_GoodPhysicalElementalSkillStateMod[(int)type].fMagicalDamage;
+            v5 = this.m_Attribute.nMagicPoint;
+        }
+    }
+    else
+    {
+        if (bBad)
+        {
+            v4 = this.m_BadMagicalElementalSkillStateMod[(int)type].fMagicalDamage;
+            v5 = this.m_Attribute.nMagicPoint;
+        }
+        else
+        {
+            v4 = this.m_GoodMagicalElementalSkillStateMod[(int)type].fMagicalDamage;
+            v5 = this.m_Attribute.nMagicPoint;
+        }
+    }*/
+    return m_Attribute.nMagicPoint;
+}

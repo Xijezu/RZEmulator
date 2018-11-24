@@ -161,7 +161,7 @@ class XSocket : public Socket<XSocket>
         void DeleteSession()
         {
             std::lock_guard<std::mutex> sessionGuard(_sessionLock);
-            if(_session != nullptr)
+            if (_session != nullptr)
             {
                 delete _session;
                 _session = nullptr;

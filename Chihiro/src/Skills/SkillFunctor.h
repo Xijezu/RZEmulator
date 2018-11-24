@@ -22,14 +22,51 @@
 
 struct SkillTargetFunctor
 {
-    virtual void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) = 0;
+    virtual bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) = 0;
+};
+
+struct HealingSkillFunctor : public SkillTargetFunctor
+{
+        HealingSkillFunctor(std::vector<SkillResult> *pSRList, bool bIsByItem = false) : m_pSRList(pSRList), m_bIsByItem(bIsByItem)
+        {
+        }
+
+        bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+        {
+            auto slv     = pSkill->GetRequestedSkillLevel();
+            int  nResult = pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful())
+                           * (pSkill->GetVar(0) + pSkill->GetVar(1) * slv)
+                           + pSkill->GetVar(2) + pSkill->GetVar(3) * slv
+                           + pSkill->GetVar(6) * pSkill->GetSkillEnhance()
+                           + pTarget->GetMaxHealth() * (pSkill->GetVar(4) + pSkill->GetVar(5) * slv + pSkill->GetVar(7) * pSkill->GetSkillEnhance());
+
+            if (pTarget->GetHealth() == 0)
+                nResult = 0;
+            else if (m_bIsByItem)
+                nResult = pTarget->HealByItem(nResult);
+            else
+                nResult = pTarget->Heal(nResult);
+
+            SkillResult skillResult{ };
+            skillResult.type                   = SRT_ADD_HP;
+            skillResult.hTarget                = pTarget->GetHandle();
+            skillResult.hitAddStat.target_stat = pTarget->GetHealth();
+            skillResult.hitAddStat.nIncStat    = nResult;
+            m_pSRList->emplace_back(skillResult);
+
+            return true;
+        }
+
+    private:
+        std::vector<SkillResult> *m_pSRList{nullptr};
+        bool m_bIsByItem;
 };
 
 struct FireSkillStateSkillFunctor : public SkillTargetFunctor
 {
     std::vector<SkillResult> pvList;
 
-    void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+    bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
     {
         int  chanceRes = 1;
         bool bResult   = true;
@@ -132,6 +169,7 @@ struct FireSkillStateSkillFunctor : public SkillTargetFunctor
             }
         }
         sWorld.AddSkillResult(pvList, bResult, 10, pTarget->GetHandle());
+        return bResult;
     }
 };
 
@@ -139,7 +177,7 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 {
     std::vector<SkillResult> &pvList;
 
-    void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+    bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
     {
         auto nEnhance    = pSkill->GetSkillEnhance();
         auto v13         = pSkill->m_SkillBase->var[9] + (pSkill->m_SkillBase->var[10] * pSkill->m_nRequestedSkillLevel);
@@ -173,13 +211,6 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
                 pTarget->RemoveGoodState(nSkillLevel);
             sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
         }
-    }
-};
-
-struct HealingSkillFunctor : public SkillTargetFunctor
-{
-    void onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
-    {
-
+        return bResult;
     }
 };
