@@ -1233,7 +1233,6 @@ void WorldSession::onSetProperty(const TS_CS_SET_PROPERTY *pRecvPct)
 {
     if (pRecvPct->name != "client_info"s)
         return;
-
     std::string value = pRecvPct->string_value;
     m_pPlayer->SetClientInfo(value);
 }

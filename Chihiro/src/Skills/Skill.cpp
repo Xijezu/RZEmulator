@@ -338,17 +338,17 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
     pSkillPct.caster_hp   = static_cast<decltype(pSkillPct.caster_hp)>(m_pOwner->GetHealth());
     pSkillPct.caster_mp   = static_cast<decltype(pSkillPct.caster_mp)>(m_pOwner->GetMana());
 
-    switch (nType)
+    switch (pSkillPct.type)
     {
-        case SKILL_STATUS::ST_CASTING:
-        case SKILL_STATUS::ST_CASTING_UPDATE:
-        case SKILL_STATUS::ST_COMPLETE:
+        case TS_SKILL__TYPE::ST_Casting:
+        case TS_SKILL__TYPE::ST_CastingUpdate:
+        case TS_SKILL__TYPE::ST_Complete:
         {
             pSkillPct.casting.tm         = static_cast<uint32_t>(m_nFireTime - m_nCastTime);
             pSkillPct.casting.nErrorCode = m_nErrorCode;
             return;
         }
-        case SKILL_STATUS::ST_CANCEL:
+        case TS_SKILL__TYPE::ST_Cancel:
             return;
         default:
             break;
