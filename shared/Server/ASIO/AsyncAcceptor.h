@@ -49,7 +49,7 @@ class AsyncAcceptor
         void AsyncAcceptWithCallback()
         {
             tcp::socket *socket;
-            uint32 threadIndex;
+            uint32      threadIndex;
             std::tie(socket, threadIndex) = _socketFactory();
             _acceptor.async_accept(*socket, [this, socket, threadIndex](boost::system::error_code error) {
                 if (!error)

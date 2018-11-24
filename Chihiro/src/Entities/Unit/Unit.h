@@ -226,6 +226,9 @@ class Unit : public WorldObject
 
         virtual int GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
 
+        int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
+        int GetMagicPoint(ElementalType type, bool bPhysical, bool bBad);
+
         int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
 
         int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }

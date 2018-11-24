@@ -43,10 +43,18 @@ class Skill
         static void DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_level, int cool_time);
 
         int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
+
         void ProcSkill();
+        bool ProcAura();
+
+        inline int GetVar(int idx) const { return GetSkillBase()->var[idx]; }
+
         bool Cancel();
         uint GetSkillEnhance() const;
 
+        const SkillBase *GetSkillBase() const { return m_SkillBase; }
+
+        const uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
         bool CheckCoolTime(uint t) const;
         uint GetSkillCoolTime() const;
         void SetRemainCoolTime(uint time);
@@ -91,6 +99,14 @@ class Skill
         int GetCurrentMPCost();
         int GetCurrentHPCost();
 
+        uint32_t GetTargetHandle() const { return m_hTarget; }
+
+        Position GetTargetPosition() const { return m_targetPosition; }
+
+        uint32_t GetCastingTime() const { return m_nFireTime - m_nCastTime; }
+
+        uint32_t GetOriginalCastingDelay() const { return m_nCastingDelay; }
+
         std::vector<SkillResult> m_vResultList{ };
         void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
@@ -109,7 +125,6 @@ class Skill
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void TOGGLE_AURA(Unit *pTarget);
 
-        void HEALING_SKILL_FUNCTOR(Unit *pTarget);
         void MANA_SKILL_FUNCTOR(Unit *pTarget);
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();

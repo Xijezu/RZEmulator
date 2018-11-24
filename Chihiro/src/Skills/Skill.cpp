@@ -324,7 +324,7 @@ uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint cur
 
 void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp)
 {
-    pSkillPct.id          = static_cast<uint16_t >(m_SkillBase->GetID());
+    pSkillPct.skill_id    = static_cast<uint16_t >(m_SkillBase->GetID());
     pSkillPct.skill_level = m_nRequestedSkillLevel;
     pSkillPct.caster      = m_pOwner->GetHandle();
     pSkillPct.target      = m_hTarget;
@@ -417,11 +417,6 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
                 details.hitRush.speed   = skill_result.rush.speed;
                 break;
             default:
-//              @todo: The following are still missing
-//              SRT_CHAIN_DAMAGE
-//              SRT_CHAIN_MAGIC_DAMAGE
-//              SRT_CHAIN_HEAL
-//              SRT_NOT_USE
                 break;
         }
         pSkillPct.fire.hits.emplace_back(details);
@@ -601,8 +596,16 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             TOGGLE_AURA(pTarget);
             break;
         case EF_ADD_HP:
+        {
+            HealingSkillFunctor functor(&m_vResultList);
+            process_target(sWorld.GetArTime(), functor, pTarget);
+        }
+            break;
         case EF_ADD_HP_BY_ITEM:
-            HEALING_SKILL_FUNCTOR(pTarget);
+        {
+            HealingSkillFunctor functor(&m_vResultList, true);
+            process_target(sWorld.GetArTime(), functor, pTarget);
+        }
             break;
         case EF_ADD_MP:
         case EF_ADD_MP_BY_ITEM:
@@ -941,8 +944,9 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
 
     bool v10         = m_SkillBase->is_physical_act != 0;
     //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
-    auto magic_point = m_pOwner->m_Attribute.nMagicPoint;
-    auto nDamage     = (int)(magic_point
+    auto nMagicPoint = m_pOwner->m_Attribute.nMagicPoint;
+    //int nDamage = nMagicPoint * ()
+    auto nDamage     = (int)(nMagicPoint
                              * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
                              + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
 
@@ -1001,36 +1005,6 @@ void Skill::ACTIVATE_FIELD_PROP()
     }
 }
 
-void Skill::HEALING_SKILL_FUNCTOR(Unit *pTarget)
-{
-    if (pTarget == nullptr || m_pOwner == nullptr)
-        return;
-
-    bool v10           = m_SkillBase->is_physical_act != 0;
-    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
-    auto magic_point   = m_pOwner->m_Attribute.nMagicPoint;
-    auto target_max_hp = pTarget->GetMaxHealth();
-
-    auto heal = magic_point *
-                (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel))
-                + m_SkillBase->var[2] + (m_SkillBase->var[3] * m_nRequestedSkillLevel) + (m_nEnhance * m_SkillBase->var[6])
-                + target_max_hp * (m_SkillBase->var[4] + (m_SkillBase->var[5] * m_nRequestedSkillLevel) + m_SkillBase->var[7] * m_nRequestedSkillLevel);
-
-    heal = pTarget->Heal((int)heal);
-
-    SkillResult skillResult{ };
-    skillResult.type                   = SRT_ADD_HP;
-    skillResult.hTarget                = pTarget->GetHandle();
-    skillResult.hitAddStat.target_stat = pTarget->GetHealth();
-    skillResult.hitAddStat.nIncStat    = (int)heal;
-    m_vResultList.emplace_back(skillResult);
-    /* @todo: This implementation is wrong. skillResult.type should be 1, not SRT_ADD_HP.
-     * Not sure about why I went this way "as some kind of workaround", but it was the wrong
-     * approach. Make sure to fix this later
-   */
-    //sWorld.AddSkillDamageResult(m_vResultList, 1, m_SkillBase->elemental, heal, pTarget->GetHandle());
-}
-
 void Skill::TOWN_PORTAL()
 {
     if (m_pOwner->IsPlayer())
@@ -1051,11 +1025,8 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
 
     bool v10         = m_SkillBase->is_physical_act != 0;
     //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
-    auto magic_point = m_pOwner->m_Attribute.nMagicPoint;
-
-    auto dmg = (int)(magic_point
-                     * (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel)) + (m_SkillBase->var[2] * m_nEnhance)
-                     + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+    auto nMagicPoint = m_pOwner->m_Attribute.nMagicPoint;
+    auto nDamage     = nMagicPoint * (GetVar(0) + GetVar(1) * m_nRequestedSkillLevel + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * m_nRequestedSkillLevel + GetVar(5) * GetSkillEnhance();
 
     if (m_nCurrentFire != 0)
     {
@@ -1067,7 +1038,7 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
         m_nCurrentFire = 1;
     }
 
-    auto Damage = pTarget->DealMagicalSkillDamage(m_pOwner, dmg, (ElementalType)m_SkillBase->elemental,
+    auto Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)m_SkillBase->elemental,
                                                   m_SkillBase->GetHitBonus(m_nEnhance, m_pOwner->GetLevel() - pTarget->GetLevel()),
                                                   (m_SkillBase->critical_bonus + (m_nRequestedSkillLevel * m_SkillBase->critical_bonus_per_skl)), 0);
 
@@ -1078,6 +1049,7 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
 void Skill::TOGGLE_AURA(Unit *pTarget)
 {
     m_pOwner->ToggleAura(this);
+
     if (m_SkillBase->target == 21)
     {
         // TODO: Party functor
@@ -1200,9 +1172,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
     }
 
     auto nMagicPoint = static_cast<int>(m_pOwner->m_Attribute.nMagicPoint); // m_pOwner->GetMagicPoint();
-    auto nDamage     = (int)(nMagicPoint * ((m_SkillBase->var[2] * m_nEnhance)
-                                            + (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel))) + m_SkillBase->var[3]
-                             + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
+    auto nDamage     = (int)(nMagicPoint * (GetVar(0) + GetVar(1) * m_nRequestedSkillLevel + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * m_nRequestedSkillLevel + GetVar(5) * GetSkillEnhance());
 
     float effectLength{ };
     float distributeType{ };
@@ -1210,19 +1180,20 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
 
     if (m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE)
     {
-        effectLength   = m_SkillBase->var[12] * 12;
-        distributeType = m_SkillBase->var[13];
-        targetMax      = static_cast<int>(m_SkillBase->var[14]);
+        effectLength   = GetVar(12) * 12;
+        distributeType = GetVar(13);
+        targetMax      = GetVar(14);
     }
     else
     {
-        effectLength   = m_SkillBase->var[9] * 12;
-        distributeType = m_SkillBase->var[10];
-        targetMax      = static_cast<int>(m_SkillBase->var[11]);
+        effectLength   = GetVar(9) * 12;
+        distributeType = GetVar(10);
+        targetMax      = GetVar(11);
     }
+    m_fRange         = effectLength;
 
-    m_fRange = effectLength;
     uint ct = sWorld.GetArTime();
+
     nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
                                                          m_pOwner->GetLayer(),
                                                          pTarget->GetCurrentPosition(ct),
@@ -1250,12 +1221,8 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
 
 void Skill::ADD_ENERGY()
 {
-    for (int i = 0; i < m_nRequestedSkillLevel; i++)
-    {
-        if (m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) >= m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY))
-            return;
+    for (int i = 0; i < m_nRequestedSkillLevel && m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) < m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY); i++)
         m_pOwner->AddEnergy(1);
-    }
 
     m_vResultList.push_back({ });
 }

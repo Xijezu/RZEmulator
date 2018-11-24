@@ -131,5 +131,5 @@ class SocketMgr
 
         AsyncAcceptor             *_acceptor;
         NetworkThread<SocketType> *_threads;
-        int32 _threadCount;
+        int32                     _threadCount;
 };
