@@ -816,7 +816,7 @@ uint Skill::GetSkillCoolTime() const
     auto cts = m_pOwner->GetCoolTimeSpeed();
     auto ctm = m_pOwner->GetCoolTimeMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     auto ct  = m_SkillBase->GetCoolTime(l);
-    return cts * ctm * ct;
+    return reinterpret_cast<uint32_t >(cts * ctm * ct);
 }
 
 void Skill::SetRemainCoolTime(uint time)
