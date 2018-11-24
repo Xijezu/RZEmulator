@@ -466,7 +466,8 @@ void WorldSession::onReturnToLobby(const TS_CS_RETURN_LOBBY *pRecvPct)
         m_pPlayer->DeleteThis();
         m_pPlayer = nullptr;
     }
-    _SendResultMsg(pRecvPct->id, 0, 0);
+    if (pRecvPct != nullptr)
+        _SendResultMsg(pRecvPct->id, 0, 0);
 }
 
 void WorldSession::onRequestReturnToLobby(const TS_CS_REQUEST_RETURN_LOBBY *pRecvPct)
