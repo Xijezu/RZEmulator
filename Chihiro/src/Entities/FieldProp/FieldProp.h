@@ -53,7 +53,7 @@ class FieldProp : public WorldObject
         bool IsUsable(Player *) const;
         bool Cast();
         bool UseProp(Player *);
-        uint GetCastingDelay() const;
+        int32_t GetCastingDelay() const;
 
         bool IsFieldProp() const override { return true; }
 

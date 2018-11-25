@@ -75,6 +75,12 @@ void Skill::Init()
     m_targetPosition.SetLayer(0);
 }
 
+int Skill::InitError(uint16_t nErrorCode)
+{
+    Init();
+    return nErrorCode;
+}
+
 void Skill::SetRequestedSkillLevel(int nLevel)
 {
     int tl = m_nSkillLevel + m_nSkillLevelAdd;
@@ -113,212 +119,402 @@ int Skill::GetCurrentHPCost()
 
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
 {
+            ASSERT(m_Status == SS_IDLE);
+
     m_vResultList.clear();
     auto current_time = sWorld.GetArTime();
-    uint delay        = 0xffffffff;
+    int  delay        = -1;
+    m_Status = SS_CAST;
 
-    if (m_nSkillLevel + m_nSkillLevelAdd < nSkillLevel)
-        nSkillLevel = m_nSkillLevel + m_nSkillLevelAdd;
-    SetRequestedSkillLevel(nSkillLevel);
+    SetRequestedSkillLevel(std::min(nSkillLevel, GetCurrentSkillLevel()));
+
     if (!CheckCoolTime(current_time))
     {
-        return TS_RESULT_COOL_TIME;
+        return InitError(TS_RESULT_COOL_TIME);
     }
 
-    if (m_SkillBase->vf_is_not_need_weapon == 0)
+    if (GetSkillBase()->IsNeedWeapon())
     {
-        bool bOk{false};
-        if (m_SkillBase->vf_shield_only != 0)
-            bOk = m_pOwner->IsWearShield();
-        else
-            bOk = m_SkillBase->IsUseableWeapon(m_pOwner->GetWeaponClass());
-        if (!bOk)
+        if (GetSkillBase()->IsUsable(ItemClass::CLASS_SHIELD))
         {
-            Init();
-            return TS_RESULT_LIMIT_WEAPON;
+            if (!m_pOwner->IsWearShield())
+                return InitError(TS_RESULT_LIMIT_WEAPON);
+        }
+        else if (!m_SkillBase->IsUseableWeapon(m_pOwner->GetWeaponClass()))
+        {
+            return InitError(TS_RESULT_LIMIT_WEAPON);
         }
     }
 
-    /* ******* SKILL COST CALCULATION ********/
-    int   nHP{m_pOwner->GetHealth()};
-    int   nMP{m_pOwner->GetMana()};
-    int   energy{m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY)};
-    float decHP{0};
-    float decMP{0};
-    int   hp_cost{ };
-    int   mana_cost{ };
-    float fCostSP{ };
-    float fCostMP{ };
-    float fCostEnergy{ };
-
-    if (m_pOwner->GetMaxHealth() != 0)
-        decHP = 100 * nHP / m_pOwner->GetMaxHealth();
-    if (m_pOwner->GetMaxMana() != 0)
-        decMP = 100 * nMP / m_pOwner->GetMaxMana();
-
-    if ((m_SkillBase->effect_type == EF_TOGGLE_AURA || m_SkillBase->effect_type == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
-        mana_cost = 0;
-    else
-        mana_cost = GetCurrentMPCost();
-
-    if (m_SkillBase->need_hp <= 0)
+    // ************* TAMING CHECK ************* //
+    if (GetSkillId() == SKILL_CREATURE_TAMING)
     {
-        if (m_SkillBase->need_hp < 0 && decHP > -m_SkillBase->need_hp)
+        if (auto result = PrepareTaming(handle); result != TS_RESULT_SUCCESS)
+            return result;
+    }
+        // ************* SUMMON CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_SUMMON)
+    {
+        if (auto result = PrepareSummon(handle, pos); result != TS_RESULT_SUCCESS)
+            return result;
+    }
+        // ************* UNSUMMON CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON || GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON_AND_ADD_STATE)
+    {
+        if (!m_pOwner->IsPlayer() || m_pOwner->As<Player>()->GetMainSummon() == nullptr)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+    }
+        // ************* EF_MAGIC_SINGLE_DAMAGE_OR_DEATH CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_OR_DEATH)
+    {
+        auto pMonster = sMemoryPool.GetObjectInWorld<Monster>(handle);
+        if (pMonster == nullptr || !pMonster->IsMonster())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (GetVar(8) != pMonster->GetCreatureGroup())
+            return InitError(TS_RESULT_LIMIT_RACE);
+
+        /* @TODO: Implement GetMonsterType()
+        if(GetVar(9) < pMonster->GetMonsterType())
+            return TS_RESULT_NOT_ACTABLE; */
+    }
+        // ************* EF_ADD_STATE_BY_TARGET_TYPE CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+        if (pUnit == nullptr)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        auto     nTargetCreatureGroup = static_cast<int32_t>(pUnit->GetCreatureGroup());
+        bool     bIsInvalidTarget{true};
+        for (int i                    = -1; i < 5; ++i)
         {
-            Init();
-            return TS_RESULT_NOT_ACTABLE;
-        }
-    }
-    else
-    {
-        if (decHP < m_SkillBase->need_hp || nHP < GetCurrentHPCost())
-        {
-            Init();
-            return TS_RESULT_NOT_ENOUGH_HP;
-        }
-    }
-    if (decMP < m_SkillBase->need_mp || nMP < mana_cost)
-    {
-        Init();
-        return TS_RESULT_NOT_ENOUGH_MP;
-    }
-
-    if (m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) < m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel))
-    {
-        Init();
-        return TS_RESULT_NOT_ENOUGH_ENERGY;
-    }
-
-    if (m_pOwner->GetLevel() < m_SkillBase->need_level)
-    {
-        Init();
-        return TS_RESULT_NOT_ENOUGH_LEVEL;
-    }
-    if (m_pOwner->GetJP() < m_SkillBase->cost_jp + static_cast<int>(m_nEnhance) * m_SkillBase->cost_jp_per_enhance)
-    {
-        Init();
-        return TS_RESULT_NOT_ENOUGH_JP;
-    }
-
-    /* ******* SKILL COST CALCULATION ********/
-
-    m_Status = SkillStatus::SS_CAST;
-    switch (m_SkillBase->effect_type)
-    {
-        case EF_SUMMON:
-            m_nErrorCode = PrepareSummon(nSkillLevel, handle, pos, current_time);
-            break;
-        case EF_ACTIVATE_FIELD_PROP:
-        case EF_REGION_HEAL_BY_FIELD_PROP:
-        case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
-        {
-            m_nErrorCode = TS_RESULT_NOT_ACTABLE;
-            if (m_pOwner->IsPlayer())
+            if (nTargetCreatureGroup == GetVar(i + 7) || true /* @Todo: CREATURE_ALL */)
             {
-                auto pProp = sMemoryPool.GetObjectInWorld<FieldProp>(handle);
-                if (pProp != nullptr && pProp->m_pFieldPropBase->nActivateSkillID == m_SkillBase->id)
-                {
-                    if (pProp->m_nUseCount >= 1 && pProp->IsUsable(m_pOwner->As<Player>()))
-                    {
-                        delay = pProp->GetCastingDelay();
-                        if (sRegion.IsVisibleRegion(m_pOwner, pProp) == 0)
-                            return TS_RESULT_NOT_ACTABLE;
-                        pProp->Cast();
-                        m_nErrorCode = TS_RESULT_SUCCESS;
-                    }
-                }
+                bIsInvalidTarget = false;
+                break;
             }
         }
-            break;
-        default:
-            break;
-    } // END SWITCH
-
-    // Check for Creature Taming since it doesn't have an effect type
-    if (m_SkillBase->id == SKILL_CREATURE_TAMING)
+        if (bIsInvalidTarget)
+            return InitError(TS_RESULT_LIMIT_RACE);
+    }
+        // ************* EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD)
     {
-        m_nErrorCode = PrepareTaming(nSkillLevel, handle, pos, current_time);
+        if (!m_pOwner->IsWearShield())
+            return InitError(TS_RESULT_LIMIT_WEAPON);
+    }
+        // ************* EF_PHYSICAL_SINGLE_DAMAGE CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD ||
+             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
+             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
+             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+        if (pUnit == nullptr)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        auto myPos     = m_pOwner->GetCurrentPosition(current_time);
+        auto targetPos = pUnit->GetCurrentPosition(current_time);
+
+        int32_t nMinDistance{0};
+        switch (GetSkillBase()->GetSkillEffectType())
+        {
+            case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
+            case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
+                nMinDistance = GetVar(3) * 12;
+                break;
+            case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
+            case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
+                nMinDistance = GetVar(4) * 12;
+                break;
+            default:
+                nMinDistance = 0;
+                break;
+        }
+
+        if (myPos.GetExactDist2d(&targetPos) < nMinDistance)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (GameContent::CollisionToLine(myPos.GetPositionX(), myPos.GetPositionY(), targetPos.GetPositionX(), targetPos.GetPositionY()))
+            return InitError(TS_RESULT_NOT_ACTABLE);
+    }
+        // ************* FIELD PROP CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
+             GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
+             GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
+    {
+        if (!m_pOwner->IsPlayer())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        auto pProp = sMemoryPool.GetObjectInWorld<FieldProp>(handle);
+        if (pProp == nullptr || !pProp->IsFieldProp())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (pProp->m_pFieldPropBase->nActivateSkillID != GetSkillId())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (pProp->m_nUseCount < 1)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (!pProp->IsUsable(m_pOwner->As<Player>()))
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        delay = pProp->GetCastingDelay();
+    }
+        // ************* DISPEL CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE ||
+             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+        if (pUnit == nullptr)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        bool     bCastable{false};
+        for (int i = 0; i < 4; ++i)
+        {
+            if (pUnit->GetState(static_cast<StateCode>(GetVar(i))) != nullptr)
+            {
+                bCastable = true;
+                break;
+            }
+        }
+
+        if (!bCastable)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+    }
+        // ************* EF_RESPAWN_MONSTER_NEAR CHECK ************* //
+    else if (GetSkillBase()->GetSkillEffectType() == EF_RESPAWN_MONSTER_NEAR)
+    {
+        if (!m_pOwner->IsMonster())
+            return InitError(TS_RESULT_NOT_ACTABLE);
     }
 
-    auto m_nOriginalDelay = delay;
-    if (delay == 0xffffffff)
+    // ************* SKILL COST CALCULATION ************* //
+    int nHP                  = m_pOwner->GetHealth();
+    int nMP                  = m_pOwner->GetMana();
+    int nEnergy              = m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY);
+    int nCurrentHPPercentage = m_pOwner->GetMaxHealth() > 0 ? nHP * 100 / m_pOwner->GetMaxHealth() : 0;
+    int nCurrentMPPercentage = m_pOwner->GetMaxMana() > 0 ? nMP * 100 / m_pOwner->GetMaxMana() : 0;
+    int mana_cost{0};
+
+    if ((GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_AURA ||
+         GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
+        mana_cost = 0;
+    else
+        mana_cost = static_cast<int>((GetSkillBase()->GetCostMP(GetRequestedSkillLevel(), GetSkillEnhance()) + (GetSkillBase()->GetCostMPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMana() / 100)) * m_pOwner->GetManaCostRatio((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()));
+
+    int nNeedHP = GetSkillBase()->GetNeedHP();
+    if (nNeedHP > 0)
     {
-        delay = m_SkillBase->GetCastDelay(nSkillLevel, 0);
-        if (m_nSkillID > 0 || m_nSkillID < -5)
+        if (nCurrentHPPercentage < nNeedHP)
+            return InitError(TS_RESULT_NOT_ENOUGH_HP);
+    }
+    else if (nNeedHP < 0)
+    {
+        if (nCurrentHPPercentage > -nNeedHP)
+            return InitError(TS_RESULT_NOT_ACTABLE);
+    }
+
+    if (nCurrentMPPercentage < GetSkillBase()->GetNeedMP())
+        return InitError(TS_RESULT_NOT_ENOUGH_MP);
+
+    // @todo: havoc
+
+    if (nHP - 1 < static_cast< int >( GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) + (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxHealth() / 100)))
+        return InitError(TS_RESULT_NOT_ENOUGH_HP);
+    if (nMP < mana_cost)
+        return InitError(TS_RESULT_NOT_ENOUGH_MP);
+
+    // @todo: havoc
+    if (nEnergy < static_cast<int>(GetSkillBase()->GetCostEnergy(GetRequestedSkillLevel())))
+        return InitError(TS_RESULT_NOT_ENOUGH_ENERGY);
+
+    if (m_pOwner->GetLevel() < GetSkillBase()->GetNeedLevel())
+        return InitError(TS_RESULT_NOT_ENOUGH_LEVEL);
+    if (m_pOwner->GetJP() < GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance()))
+        return InitError(TS_RESULT_NOT_ENOUGH_JP);;
+    if (int nCostEXP = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(), GetSkillEnhance()); nCostEXP > 0)
+    {
+        if (m_pOwner->GetEXP() < nCostEXP)
+            return InitError(TS_RESULT_NOT_ENOUGH_EXP);
+        /// @Todo: Gamecontent::GetNeedEXP
+    }
+
+    auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(handle);
+    if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+    {
+        float fCostHP{ };
+        float fCostSP{ };
+        float fCostEnergy{ };
+        float fCostMP{ };
+
+        fCostHP     = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
+        fCostSP     = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+        fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST)
+            fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+        if (pTarget == nullptr || !pTarget->IsSummon())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (fCostHP && pTarget->GetHealth() < fCostHP)
+            return InitError(TS_RESULT_NOT_ENOUGH_HP);
+
+        /// @Todo: SP
+
+        if (fCostEnergy > 0 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
+            return InitError(TS_RESULT_NOT_ENOUGH_ENERGY);
+        else if (fCostEnergy == -1 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) == 0)
+            return InitError(TS_RESULT_NOT_ENOUGH_ENERGY);
+
+        if (fCostMP && pTarget->GetMana() < fCostMP)
+            return InitError(TS_RESULT_NOT_ENOUGH_MP);
+    }
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD ||
+        GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DAMAGE ||
+        GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD ||
+        GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP ||
+        GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+    {
+        if (!m_pOwner->IsPlayer() || m_pOwner->As<Player>()->GetMainSummon() == nullptr)
+            return InitError(TS_RESULT_NOT_ENOUGH_HP); // No idea why it's HP doe
+
+        int decHP{ };
+        int decMP{ };
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
+            decHP = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+            decHP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DAMAGE)
+            decHP = m_pOwner->As<Player>()->GetMainSummon()->GetMaxHealth() * GetVar(10);
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
         {
-            delay = (uint)(delay / (m_pOwner->m_Attribute.nCastingSpeed / 100.0f));
-            delay = (uint)((float)delay * (m_pOwner->GetCastingMod((ElementalType)m_SkillBase->elemental,
-                                                                   m_SkillBase->is_physical_act == 1, m_SkillBase->is_harmful != 0,
-                                                                   m_nOriginalDelay)));
+            decHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+            decMP = GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+        }
+
+        if (m_pOwner->As<Player>()->GetMainSummon()->GetHealth() < decHP + 1)
+            return InitError(TS_RESULT_NOT_ENOUGH_HP);
+
+        if (m_pOwner->As<Player>()->GetMainSummon()->GetMana() < decMP)
+            return InitError(TS_RESULT_NOT_ENOUGH_MP);
+    }
+
+    Player *pPlayer{nullptr};
+    if (m_pOwner->IsPlayer())
+        pPlayer = m_pOwner->As<Player>();
+    else if (m_pOwner->IsSummon())
+        pPlayer = m_pOwner->As<Summon>()->GetMaster();
+
+    if (pPlayer != nullptr)
+    {
+        /// @TODO Cost Item
+    }
+
+    if (GetSkillBase()->GetNeedStateId())
+    {
+        auto pState = m_pOwner->GetState(static_cast<StateCode>(GetSkillBase()->GetNeedStateId()));
+        if (pState == nullptr || pState->GetLevel() < GetSkillBase()->GetNeedStateLevel())
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        if (GetSkillBase()->NeedStateExhaust())
+            m_pOwner->RemoveState(pState->m_nUID);
+    }
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
+        GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
+        GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
+    {
+        auto pProp = sMemoryPool.GetObjectInWorld<FieldProp>(handle);
+        if (pProp == nullptr || !pProp->IsFieldProp() || !sRegion.IsVisibleRegion(m_pOwner, pProp))
+            return InitError(TS_RESULT_NOT_ACTABLE);
+
+        pProp->Cast();
+    }
+
+    m_pOwner->SetMana(nMP - mana_cost);
+
+    auto nOriginalCastingDelay = delay;
+    if (delay == -1)
+    {
+        /// @Todo: based on SkillUID
+        nOriginalCastingDelay = delay = m_SkillBase->GetCastDelay(GetRequestedSkillLevel(), GetSkillEnhance());
+        delay /= (m_pOwner->GetCastingSpeed() / 100.0f);
+        delay *= m_pOwner->GetCastingMod(static_cast<ElementalType>(GetSkillBase()->GetElementalType()), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nOriginalCastingDelay);
+    }
+
+    if (GetSkillBase()->GetSkillEffectType() != EF_SUMMON)
+        m_targetPosition = pos;
+
+    m_hTarget       = handle;
+    m_nCastTime     = current_time;
+    m_nCastingDelay = static_cast<uint32_t>(nOriginalCastingDelay);
+    m_nFireTime     = current_time + delay;
+
+    broadcastSkillMessage(m_pOwner, 0, mana_cost, TS_SKILL__TYPE::ST_Casting);
+    if (GetSkillBase()->IsHarmful() && !GetSkillBase()->IsPhysicalSkill())
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+        if (pUnit != nullptr && pUnit->IsMonster() && pUnit->As<Monster>()->IsCastRevenger())
+        {
+            pUnit->As<Monster>()->AddHate(m_pOwner->GetHandle(), 1, true, true);
         }
     }
-    m_nCastingDelay       = m_nOriginalDelay;
-    m_hTarget             = handle;
-    m_nCastTime           = current_time;
-    m_nFireTime           = current_time + delay;
-
-    auto error_code = m_nErrorCode;
-
-    if (m_nErrorCode == TS_RESULT_SUCCESS)
-    {
-        broadcastSkillMessage(m_pOwner, 0, mana_cost, 1);
-    }
-    else
-    {
-        Init();
-    }
-
-    return error_code;
+    return TS_RESULT_SUCCESS;
 }
 
-uint16 Skill::PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time)
+uint16 Skill::PrepareSummon(uint handle, Position pos)
 {
-    auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
-    if (item == nullptr || item->m_pItemBase == nullptr || item->m_pItemBase->group != GROUP_SUMMONCARD || item->m_Instance.OwnerHandle != m_pOwner->GetHandle())
-    {
-        return TS_RESULT_NOT_ACTABLE;
-    }
-    auto player = m_pOwner->As<Player>();
-    if (player == nullptr)
+    if (!m_pOwner->IsPlayer() /* @todo: subsummon */)
         return TS_RESULT_NOT_ACTABLE;
 
-    bool     is_summoncard_bound{false};
-    for (int j  = 0; j < sizeof(player->m_aBindSummonCard) / sizeof(player->m_aBindSummonCard[0]); j++)
+    // @Todo: IsSummonable
+
+    auto pItem = sMemoryPool.GetObjectInWorld<Item>(handle);
+    if (pItem == nullptr || pItem->m_pItemBase == nullptr || pItem->m_pItemBase->group != GROUP_SUMMONCARD || pItem->m_Instance.OwnerHandle != m_pOwner->GetHandle())
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto pPlayer = m_pOwner->As<Player>();
+    if (pPlayer == nullptr)
+        return TS_RESULT_NOT_ACTABLE;
+
+    bool     bIsSummoncardBound{false};
+    for (int j   = 0; j < 6; j++)
     {
-        if (player->m_aBindSummonCard[j] != nullptr)
+        if (pPlayer->m_aBindSummonCard[j] != nullptr && pItem == pPlayer->m_aBindSummonCard[j])
         {
-            is_summoncard_bound = true;
+            bIsSummoncardBound = true;
             break;
         }
     }
 
-    if (!is_summoncard_bound)
+    if (!bIsSummoncardBound)
+        return TS_RESULT_NOT_ACTABLE;
+
+    auto pSummon = pItem->GetSummon();
+    if (pSummon == nullptr)
         return TS_RESULT_NOT_EXIST;
 
-    int i = 0;
-    while (item->m_nHandle != player->m_aBindSummonCard[i]->m_nHandle)
-    {
-        ++i;
-        if (i >= 6)
-            return TS_RESULT_NOT_ACTABLE;
-    }
-    auto summon = item->m_pSummon;
-    if (summon == nullptr)
-        return TS_RESULT_NOT_EXIST;
-    if (summon->IsInWorld())
+    if (pSummon->IsInWorld())
         return TS_RESULT_NOT_ACTABLE;
-    Position tmpPos = player->GetCurrentPosition(current_time);
-    summon->SetCurrentXY(tmpPos.GetPositionX(), tmpPos.GetPositionY());
-    summon->SetLayer(player->GetLayer());
-    summon->StopMove();
+
+    /// @todo: Limit Dungeon Enterable Level
+
+    Position tmpPos = pPlayer->GetCurrentPosition(sWorld.GetArTime());
+    pSummon->SetCurrentXY(tmpPos.GetPositionX(), tmpPos.GetPositionY());
+    pSummon->SetLayer(pPlayer->GetLayer());
+    pSummon->StopMove();
     do
     {
-        do
-        {
-            summon->AddNoise(rand32(), rand32(), 70);
-            m_targetPosition = summon->GetCurrentPosition(current_time);
-        } while (pos.GetPositionX() == m_targetPosition.GetPositionX() && pos.GetPositionY() == m_targetPosition.GetPositionY());
-    } while (tmpPos.GetExactDist2d(&m_targetPosition) < 24.0f);
+        pSummon->AddNoise(rand32(), rand32(), 70);
+        m_targetPosition = pSummon->GetCurrentPosition(sWorld.GetArTime());
+    } while ((pos.GetPositionX() == m_targetPosition.GetPositionX() && pos.GetPositionY() == m_targetPosition.GetPositionY()) || tmpPos.GetExactDist2d(&m_targetPosition) < 24.0f);
     return TS_RESULT_SUCCESS;
 }
 
@@ -862,33 +1058,32 @@ uint Skill::GetSkillEnhance() const
     return m_nEnhance;
 }
 
-uint16 Skill::PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time)
+uint16 Skill::PrepareTaming(uint handle)
 {
     if (!m_pOwner->IsPlayer())
         return TS_RESULT_NOT_ACTABLE;
 
-    auto player  = m_pOwner->As<Player>();
-    auto monster = sMemoryPool.GetObjectInWorld<Monster>(handle);
-    if (monster == nullptr)
-    {
+    auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+    if (pUnit == nullptr || !pUnit->IsMonster())
         return TS_RESULT_NOT_ACTABLE;
-    }
 
-    auto nTameItemCode = monster->GetTameItemCode();
-    if (nTameItemCode == 0 || monster->GetTamer() != 0)
-    {
+    auto pMonster      = pUnit->As<Monster>();
+    auto nTameItemCode = pMonster->GetTameItemCode();
+    if (nTameItemCode == 0)
         return TS_RESULT_NOT_ACTABLE;
-    }
 
-    auto item = player->FindItem((uint)nTameItemCode, ITEM_FLAG_SUMMON, false);
-    if (item == nullptr)
-    {
+    if (pMonster->GetTamer() != 0)
         return TS_RESULT_NOT_ACTABLE;
-    }
-    if (player->m_hTamingTarget != 0)
-    {
+
+    if (pMonster->GetHealth() != pMonster->GetMaxHealth())
+        return TS_RESULT_NOT_ENOUGH_HP;
+
+    auto pPlayer = m_pOwner->As<Player>();
+    if (pPlayer->FindItem((uint)nTameItemCode, ITEM_FLAG_SUMMON, false) == nullptr)
+        return TS_RESULT_NOT_ACTABLE;
+
+    if (pPlayer->GetTamingTarget() != 0)
         return TS_RESULT_ALREADY_TAMING;
-    }
     return TS_RESULT_SUCCESS;
 }
 

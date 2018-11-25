@@ -44,6 +44,8 @@ class Skill
 
         int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
 
+        int GetSkillId() const { return GetSkillBase()->GetID(); }
+
         void ProcSkill();
         bool ProcAura();
 
@@ -52,9 +54,12 @@ class Skill
         bool Cancel();
         uint GetSkillEnhance() const;
 
+        int GetCurrentSkillLevel() const { return m_nSkillLevel + m_nSkillLevelAdd; }
+
         const SkillBase *GetSkillBase() const { return m_SkillBase; }
 
         uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
+
         bool CheckCoolTime(uint t) const;
         uint GetSkillCoolTime() const;
         void SetRemainCoolTime(uint time);
@@ -96,6 +101,7 @@ class Skill
         void assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp);
         void Init();
     private:
+        int InitError(uint16_t);
         int GetCurrentMPCost();
         int GetCurrentHPCost();
 
@@ -111,9 +117,8 @@ class Skill
         void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
         void PostFireSkill(Unit *pTarget);
-        uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time);
-        uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time);
-
+        uint16 PrepareSummon(uint handle, Position pos);
+        uint16 PrepareTaming(uint handle);
 
         void SINGLE_PHYSICAL_DAMAGE(Unit *pTarget);
         void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);

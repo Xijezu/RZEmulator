@@ -231,3 +231,98 @@ int SkillBase::GetCriticalBonus(int skill_lv) const
 {
     return critical_bonus + critical_bonus_per_skl * skill_lv;
 }
+
+int32_t SkillBase::GetCostEXP(int skill_lv, int enhance) const
+{
+    return cost_exp + cost_exp_per_enhance * enhance;
+}
+
+int32_t SkillBase::GetCostJP(int skill_lv, int enhance) const
+{
+    return cost_jp + cost_jp_per_enhance * enhance;
+}
+
+int32_t SkillBase::GetCostItemCode() const
+{
+    return cost_item;
+}
+
+int64_t SkillBase::GetCostItemCount(int skill_lv) const
+{
+    return cost_item_count + (skill_lv * cost_item_count_per);
+}
+
+int32_t SkillBase::GetCostHP(int skill_lv) const
+{
+    return cost_hp + cost_hp_per_skl * (skill_lv);
+}
+
+float SkillBase::GetCostHPPercent(int skill_lv) const
+{
+    return cost_hp_per + cost_hp_per_skl_per * skill_lv;
+}
+
+int32_t SkillBase::GetCostMP(int skill_lv, int enhance) const
+{
+    return cost_mp + cost_mp_per_skl * (skill_lv) + cost_mp_per_enhance * (enhance);
+}
+
+float SkillBase::GetCostMPPercent(int skill_lv) const
+{
+    return cost_mp_per + cost_mp_per_skl_per * skill_lv;
+}
+
+int32_t SkillBase::GetCostHavoc(int skill_lv) const
+{
+    return cost_havoc + cost_havoc_per_skl * (skill_lv);
+}
+
+int32_t SkillBase::GetCostEnergy(int skill_lv) const
+{
+    return cost_energy + cost_energy_per_skl * (skill_lv);
+}
+
+int32_t SkillBase::GetCostItem() const
+{
+    return cost_item;
+}
+
+int32_t SkillBase::GetNeedLevel() const
+{
+    return need_level;
+}
+
+int32_t SkillBase::GetNeedHP() const
+{
+    return need_hp;
+}
+
+int32_t SkillBase::GetNeedMP() const
+{
+    return need_mp;
+}
+
+int32_t SkillBase::GetNeedHavoc() const
+{
+    return need_havoc;
+}
+
+int32_t SkillBase::GetNeedHavocBurst() const
+{
+    return need_havoc_burst;
+}
+
+int32_t SkillBase::GetNeedStateId() const
+{
+    return need_state_id;
+}
+
+uint8_t SkillBase::GetNeedStateLevel() const
+{
+    return need_state_level;
+}
+
+bool SkillBase::NeedStateExhaust() const
+{
+    return need_state_exhaust;
+}
