@@ -790,91 +790,91 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             PHYSICAL_DIRECTIONAL_DAMAGE(pTarget);
             break;
         }
-            /*
-            case EF_PHYSICAL_SINGLE_DAMAGE_T1:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_T2:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T2(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_T3:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_DAMAGE_T1:
-            {
-                MULTIPLE_PHYSICAL_DAMAGE_T1(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_DAMAGE_T2:
-            {
-                MULTIPLE_PHYSICAL_DAMAGE_T2(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_DAMAGE_T3:
-            {
-                MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
-                break;
-            }*/
+
+        case EF_PHYSICAL_SINGLE_DAMAGE_T1:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_T2:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T2(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_T3:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_DAMAGE_T1:
+        {
+            MULTIPLE_PHYSICAL_DAMAGE_T1(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_DAMAGE_T2:
+        {
+            MULTIPLE_PHYSICAL_DAMAGE_T2(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_DAMAGE_T3:
+        {
+            MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
+            break;
+        }
         case EF_PHYSICAL_ABSORB_DAMAGE:
         {
             SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
             break;
         }/*
-            case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
-            {
-                PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD:
-            {
-                PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_OLD:
-            {
-                PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE_OLD:
-            {
-                PHYSICAL_SPECIAL_REGION_DAMAGE(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY_OLD:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(pTarget);
-            }
-            case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD:
-            {
-                PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
-            {
-                SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
-                break;
-            }
-            case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD:
-            {
-                MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
-                break;
-            }*/
+        case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
+        {
+            PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD:
+        {
+            PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_OLD:
+        {
+            PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE_OLD:
+        {
+            PHYSICAL_SPECIAL_REGION_DAMAGE(pTarget);
+            break;
+        }*/
+        case EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
+            break;
+        }/*
+        case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY_OLD:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(pTarget);
+        }
+        case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD:
+        {
+            PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
+        {
+            SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD:
+        {
+            MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
+            break;
+        }*/
         case EF_REMOVE_BAD_STATE:
         {
             RemoveBadStateSkillFunctor mySkillFunctor{&m_vResultList};
@@ -887,29 +887,29 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             process_target(t, mySkillFunctor, pTarget);
             break;
         }/*
-            case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
-            case EF_AREA_EFFECT_MAGIC_DAMAGE:
-            case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
-            case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2:
-            case EF_AREA_EFFECT_HEAL:
-            {
-                MAKE_AREA_EFFECT_PROP(pTarget, false);
-                break;
-            }
-            case EF_TRAP_PHYSICAL_DAMAGE:
-            case EF_TRAP_MAGICAL_DAMAGE:
-            case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
-            case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
-            {
-                MAKE_AREA_EFFECT_PROP(pTarget, true);
-                break;
-            }
-            case EF_CREATE_ITEM:
-            {
-                CREATE_ITEM(pTarget, bIsSuccess);
-                break;
-            }*/
-
+        case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
+        case EF_AREA_EFFECT_MAGIC_DAMAGE:
+        case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
+        case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2:
+        case EF_AREA_EFFECT_HEAL:
+        {
+            MAKE_AREA_EFFECT_PROP(pTarget, false);
+            break;
+        }
+        case EF_TRAP_PHYSICAL_DAMAGE:
+        case EF_TRAP_MAGICAL_DAMAGE:
+        case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
+        case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
+        {
+            MAKE_AREA_EFFECT_PROP(pTarget, true);
+            break;
+        }
+        case EF_CREATE_ITEM:
+        {
+            CREATE_ITEM(pTarget, bIsSuccess);
+            break;
+        }*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         case EF_ACTIVATE_FIELD_PROP:
         {
             ACTIVATE_FIELD_PROP();
@@ -2930,3 +2930,219 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget)
     skill_result.hitAddStat.target_stat = m_pOwner->GetMana();
     m_vResultList.push_back(skill_result);
 }
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nDamage = 0;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD)
+    {
+        if (m_nCurrentFire == 0)
+        {
+            m_nCurrentFire = 1;
+            m_nTotalFire   = 2;
+
+            if (!PHYSICAL_DAMAGE_RUSH(pTarget, m_nRushDamage))
+                m_nCurrentFire = 2;
+            return;
+        }
+        else
+        {
+            ///@TODO:
+            /// sWorld.MoveObject(m_pOwner, m_RushPos, m_fRushFace);
+            nDamage += m_nRushDamage;
+            ++m_nCurrentFire;
+        }
+    }
+    int elemental_type = GetSkillBase()->GetElementalType();
+    nDamage += nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock
+        && (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD
+            || GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD)
+        && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    {
+        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        fRange *= 12;
+
+        uint32_t knock_back_time = (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100;
+
+        AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
+        sWorld.AddSkillDamageWithKnockBackResult(m_vResultList, SkillResult::DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+    }
+    else
+    {
+        sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, static_cast<ElementalType>(elemental_type), Damage, pTarget->GetHandle());
+    }
+
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
+{
+
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
+{
+
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
+{
+
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
+{
+
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
+{
+
+}
+
+bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
+{
+    SkillResult result{ };
+    result.type    = TS_SKILL__HIT_TYPE::SHT_RUSH;
+    result.hTarget = m_pOwner->GetHandle();
+
+    Position RushPos{ };
+
+    float face{ };
+    float fDistance{ };
+
+    pnAdditionalDamage = 0;
+
+    if (!AFFECT_RUSH_OLD(pTarget, fDistance, RushPos, face))
+    {
+        result.rush.bResult = false;
+        m_vResultList.push_back(result);
+        return false;
+    }
+
+    pnAdditionalDamage = static_cast<int32_t>((fDistance / 12.0f) * GetVar(2));
+
+    result.rush.bResult = true;
+    result.rush.x       = RushPos.GetPositionX();
+    result.rush.y       = RushPos.GetPositionY();
+    result.rush.speed   = -116;
+
+    m_vResultList.push_back(result);
+    return true;
+}
+
+bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface)
+{
+
+    auto     t            = sWorld.GetArTime();
+    Position original_pos = m_pOwner->GetCurrentPosition(t);
+    auto     tmpPos       = pTarget->GetCurrentPosition(t);
+    int      nDelay       = original_pos.GetExactDist2d(&tmpPos) / ((float)-116 / 30);
+    Position target_pos   = pTarget->GetCurrentPosition(t + nDelay);
+
+    float x{ }, y{ }, m{ }, face{ };
+
+    x = target_pos.GetPositionX() - original_pos.GetPositionX();
+    y = target_pos.GetPositionY() - original_pos.GetPositionY();
+
+    face = std::atan2(y, x);
+
+    m = std::sqrt(x * x + y * y);
+
+    if (m <= (m_pOwner->GetUnitSize() + pTarget->GetUnitSize()) / 2)
+        return false;
+
+    x /= m;
+    y /= m;
+
+    m -= (m_pOwner->GetUnitSize() + pTarget->GetUnitSize()) / 2;
+
+    Position pos{ };
+
+    pos.SetCurrentXY(original_pos.GetPositionY() + x * m, original_pos.GetPositionY() + y * m);
+
+    if (GameContent::IsBlocked(pos.GetPositionX(), pos.GetPositionY()))
+        return false;
+
+    m_RushPos   = pos;
+    m_fRushFace = face;
+
+    pfRushDistance = m;
+    pRushPos       = pos;
+    pface          = face;
+
+    m_nFireTime += m / ((float)-116 / 30) + 20;
+
+    return true;
+}
+
+int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time)
+{
+    Position caster_pos  = m_pOwner->GetCurrentPosition(sWorld.GetArTime());
+    Position OriginalPos = pTarget->GetCurrentPosition(sWorld.GetArTime());
+
+    float x{ }, y{ }, m{ };
+
+    x = OriginalPos.GetPositionX() - caster_pos.GetPositionX();
+    y = OriginalPos.GetPositionY() - caster_pos.GetPositionY();
+
+    m = std::sqrt(x * x + y * y);
+
+    if (m > 0.0f)
+    {
+        x /= m;
+        y /= m;
+    }
+    else
+    {
+        x = 1.0f;
+        y = 0.0f;
+    }
+
+    Position pos{ };
+    pos.SetCurrentXY(OriginalPos.GetPositionX() + x * fRange, OriginalPos.GetPositionY() + y * fRange);
+
+    uint32_t next_movable_time = pTarget->GetNextMovableTime();
+
+    if (pTarget->IsKnockbackable())
+    {
+        next_movable_time = std::max(next_movable_time, sWorld.GetArTime() + knock_back_time);
+
+        Position newPos = GetMovableKnockBackPosition(OriginalPos, pos);
+
+        /// @TODO HIGH PRIORITY
+        //sWorld.MoveObject( pTarget, newPos, pTarget->GetFace() );
+        pTarget->SetNextMovableTime(next_movable_time);
+        Player *pTargetPlayer{nullptr};
+
+        if (pTarget->IsPlayer())
+            pTargetPlayer = pTarget->As<Player>();
+        else if (pTarget->IsSummon())
+        {
+            pTargetPlayer = pTarget->As<Summon>()->GetMaster();
+
+            /// @Todo: check Ride object
+        }
+
+        /// @Todo: Remove riding
+    }
+
+    return next_movable_time;
+}
+
+Position Skill::GetMovableKnockBackPosition(Position &OriginalPos, Position &TargetPos)
+{
+    if (GameContent::IsBlocked(TargetPos.GetPositionX(), TargetPos.GetPositionY()))
+        return OriginalPos;
+    return TargetPos;
+}
+

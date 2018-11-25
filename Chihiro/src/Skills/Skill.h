@@ -97,6 +97,9 @@ class Skill
         uint     m_nFireCount;
         uint32_t m_nAuraMPDecTime;
         uint32_t m_nAuraRefreshTime;
+        Position m_RushPos;
+        float    m_fRushFace;
+        int32_t  m_nRushDamage;
 
         SkillStatus m_Status{ };
     protected:
@@ -136,6 +139,7 @@ class Skill
         void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
         void FireSkill(Unit *pTarget, bool &bIsSuccess);
         void PostFireSkill(Unit *pTarget);
+        Position GetMovableKnockBackPosition(Position &OriginalPos, Position &TargetPos);
         uint16 PrepareSummon(uint handle, Position pos);
         uint16 PrepareTaming(uint handle);
 
@@ -163,6 +167,17 @@ class Skill
 
         void TOGGLE_AURA(Unit *pTarget);
         void SKILL_ADD_HP_MP(Unit *pTarget);
+
+        void SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
+        void SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
+        void SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
+
+        bool PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage);
+        bool AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface);
+        int AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time);
 
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();

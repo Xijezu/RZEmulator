@@ -935,3 +935,40 @@ void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vecto
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
     sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
 }
+
+void World::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time)
+{
+    SkillResult skill_result{ };
+
+    skill_result.type                  = type;
+    skill_result.hTarget               = handle;
+    skill_result.damage_kb.damage_type = damage_type;
+
+    skill_result.damage_kb.flag = AIF_None;
+    if (damage_info.bCritical)
+        skill_result.damage_kb.flag |= AIF_Critical;
+    if (damage_info.bBlock)
+        skill_result.damage_kb.flag |= AIF_Block;
+    if (damage_info.bMiss)
+        skill_result.damage_kb.flag |= AIF_Miss;
+    if (damage_info.bPerfectBlock)
+        skill_result.damage_kb.flag |= AIF_PerfectBlock;
+
+    skill_result.damage_kb.damage    = damage_info.nDamage;
+    skill_result.damage_kb.target_hp = damage_info.target_hp;
+
+    skill_result.damage_kb.elemental_damage[0] = damage_info.elemental_damage[0];
+    skill_result.damage_kb.elemental_damage[1] = damage_info.elemental_damage[1];
+    skill_result.damage_kb.elemental_damage[2] = damage_info.elemental_damage[2];
+    skill_result.damage_kb.elemental_damage[3] = damage_info.elemental_damage[3];
+    skill_result.damage_kb.elemental_damage[4] = damage_info.elemental_damage[4];
+    skill_result.damage_kb.elemental_damage[5] = damage_info.elemental_damage[5];
+    skill_result.damage_kb.elemental_damage[6] = damage_info.elemental_damage[6];
+
+    skill_result.damage_kb.x               = x;
+    skill_result.damage_kb.y               = y;
+    skill_result.damage_kb.knock_back_time = knock_back_time;
+    skill_result.damage_kb.speed           = -116; // @todo: Make sure to double check, this seems odd
+
+    pvList.emplace_back(skill_result);
+}
