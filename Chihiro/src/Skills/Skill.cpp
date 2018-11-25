@@ -821,11 +821,11 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
                 MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
                 break;
             }*/
-            case EF_PHYSICAL_ABSORB_DAMAGE:
-            {
-                SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
-                break;
-            }/*
+        case EF_PHYSICAL_ABSORB_DAMAGE:
+        {
+            SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
+            break;
+        }/*
             case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
             {
                 PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
@@ -875,18 +875,18 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
                 MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
                 break;
             }*/
-            case EF_REMOVE_BAD_STATE:
-            {
-                RemoveBadStateSkillFunctor mySkillFunctor{&m_vResultList};
-                process_target(t, mySkillFunctor, pTarget);
-                break;
-            }
-            case EF_REMOVE_GOOD_STATE:
-            {
-                RemoveGoodStateSkillFunctor mySkillFunctor{&m_vResultList};
-                process_target(t, mySkillFunctor, pTarget);
-                break;
-            }/*
+        case EF_REMOVE_BAD_STATE:
+        {
+            RemoveBadStateSkillFunctor mySkillFunctor{&m_vResultList};
+            process_target(t, mySkillFunctor, pTarget);
+            break;
+        }
+        case EF_REMOVE_GOOD_STATE:
+        {
+            RemoveGoodStateSkillFunctor mySkillFunctor{&m_vResultList};
+            process_target(t, mySkillFunctor, pTarget);
+            break;
+        }/*
             case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
             case EF_AREA_EFFECT_MAGIC_DAMAGE:
             case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
@@ -908,51 +908,49 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             {
                 CREATE_ITEM(pTarget, bIsSuccess);
                 break;
-            }
-                * /
-            case EF_ACTIVATE_FIELD_PROP:
-            {
-                ACTIVATE_FIELD_PROP();
-                break;
-            }
-                /*
-                case EF_REGION_HEAL_BY_FIELD_PROP:
-                {
-                    REGION_HEAL_BY_FIELD_PROP();
-                    break;
-                }
-                case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
-                {
-                    MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP( false );
-                    break;
-                }*/
+            }*/
+
+        case EF_ACTIVATE_FIELD_PROP:
+        {
+            ACTIVATE_FIELD_PROP();
+            break;
+        }
+            /*
+             case EF_REGION_HEAL_BY_FIELD_PROP:
+             {
+                 REGION_HEAL_BY_FIELD_PROP();
+                 break;
+             }
+             case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
+             {
+                 MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP( false );
+                 break;
+             }*/
         case EF_ADD_HP:
         {
             HealingSkillFunctor mySkillFunctor(&m_vResultList);
             process_target(t, mySkillFunctor, pTarget);
             break;
         }
-            /*
-            case EF_ADD_MP:
-            {
-                RECOVERY_MP_SKILL_FUNCTOR mySkillFunctor( &m_vResultList );
-                process_target( t, mySkillFunctor, pTarget );
-                break;
-            }*/
+
+        case EF_ADD_MP:
+        {
+            RecoveryMPSkillFunctor mySkillFunctor{&m_vResultList};
+            process_target(t, mySkillFunctor, pTarget);
+            break;
+        }
         case EF_ADD_HP_BY_ITEM:
         {
             HealingSkillFunctor mySkillFunctor(&m_vResultList, true);
             process_target(t, mySkillFunctor, pTarget);
             break;
         }
-            /*
-            case EF_ADD_MP_BY_ITEM:
-            {
-                RECOVERY_MP_SKILL_FUNCTOR mySkillFunctor( &m_vResultList, true );
-                mySkillFunctor.nResult = 0;
-                process_target( t, mySkillFunctor, pTarget );
-                break;
-            }*/
+        case EF_ADD_MP_BY_ITEM:
+        {
+            RecoveryMPSkillFunctor mySkillFunctor{&m_vResultList, true};
+            process_target(t, mySkillFunctor, pTarget);
+            break;
+        }
         case EF_RESURRECTION:
         {
             SKILL_RESURRECTION(pTarget);
@@ -1683,31 +1681,6 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
         // TODO: Party functor
     }
     sWorld.AddSkillResult(m_vResultList, true, 0, m_pOwner->GetHandle());
-}
-
-void Skill::MANA_SKILL_FUNCTOR(Unit *pTarget)
-{
-    if (pTarget == nullptr || m_pOwner == nullptr)
-        return;
-
-    bool v10           = m_SkillBase->is_physical_act != 0;
-    //auto attack_point = m_pOwner->GetMagicPoint((ElementalType)m_SkillBase->effect_type, v10, m_SkillBase->is_harmful != 0);
-    auto magic_point   = m_pOwner->m_Attribute.nMagicPoint;
-    auto target_max_hp = pTarget->GetMaxHealth();
-
-    auto heal = magic_point *
-                (m_SkillBase->var[0] + (m_SkillBase->var[1] * m_nRequestedSkillLevel))
-                + m_SkillBase->var[2] + (m_SkillBase->var[3] * m_nRequestedSkillLevel) + (m_nEnhance * m_SkillBase->var[6])
-                + target_max_hp * (m_SkillBase->var[4] + (m_SkillBase->var[5] * m_nRequestedSkillLevel) + m_SkillBase->var[7] * m_nRequestedSkillLevel);
-
-    heal = pTarget->MPHeal((int)heal);
-
-    SkillResult skillResult{ };
-    skillResult.type                   = SRT_ADD_MP;
-    skillResult.hTarget                = pTarget->GetHandle();
-    skillResult.hitAddStat.target_stat = pTarget->GetHealth();
-    skillResult.hitAddStat.nIncStat    = (int)heal;
-    m_vResultList.emplace_back(skillResult);
 }
 
 void Skill::SKILL_RESURRECTION(Unit *pTarget)
