@@ -143,6 +143,8 @@ class Unit : public WorldObject
 
         float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
+        int32_t GetCastingSpeed() const { return static_cast<int32_t>(m_Attribute.nCastingSpeed); }
+
         uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
 
         void AddEnergy();

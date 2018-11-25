@@ -173,9 +173,9 @@ bool FieldProp::UseProp(Player *pPlayer)
     }
 }
 
-uint FieldProp::GetCastingDelay() const
+int32_t FieldProp::GetCastingDelay() const
 {
-    return m_pFieldPropBase != nullptr ? m_pFieldPropBase->nCastingTime : 0;
+    return m_pFieldPropBase != nullptr ? static_cast<int32_t>(m_pFieldPropBase->nCastingTime) : 0;
 }
 
 FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : WorldObject(true)

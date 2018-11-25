@@ -587,6 +587,26 @@ struct SkillBase
     int GetSkillEffectType() const;
     int GetElementalType() const;
 
+    int32_t GetCostEXP(int skill_lv, int enhance) const;
+    int32_t GetCostJP(int skill_lv, int enhance) const;
+    int32_t GetCostItemCode() const;
+    int64_t GetCostItemCount(int skill_lv) const;
+    int32_t GetCostHP(int skill_lv) const;
+    float GetCostHPPercent(int skill_lv) const;
+    int32_t GetCostMP(int skill_lv, int enhance) const;
+    float GetCostMPPercent(int skill_lv) const;
+    int32_t GetCostHavoc(int skill_lv) const;
+    int32_t GetCostEnergy(int skill_lv) const;
+    int32_t GetCostItem() const;
+    int32_t GetNeedLevel() const;
+    int32_t GetNeedHP() const;
+    int32_t GetNeedMP() const;
+    int32_t GetNeedHavoc() const;
+    int32_t GetNeedHavocBurst() const;
+    int32_t GetNeedStateId() const;
+    uint8_t GetNeedStateLevel() const;
+    bool NeedStateExhaust() const;
+
     bool IsNeedShield() const;
     bool IsNeedWeapon() const;
 

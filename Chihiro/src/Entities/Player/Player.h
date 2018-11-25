@@ -122,6 +122,10 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
 
+        uint32_t GetTamingTarget() const { return m_hTamingTarget; }
+
+        Summon *GetMainSummon() const { return m_pMainSummon; }
+
         int64 GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
 
         int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }

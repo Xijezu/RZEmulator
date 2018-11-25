@@ -69,6 +69,8 @@ class Item : public WorldObject
         void SetCount(int64 count);
 		bool IsDropable();
         bool IsWearable();
+
+        Summon *GetSummon() const { return m_pSummon; }
         bool IsTradable();
         bool IsExpireItem() const;
         bool IsJoinable() const;
