@@ -119,8 +119,6 @@ int Skill::GetCurrentHPCost()
 
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
 {
-            ASSERT(m_Status == SS_IDLE);
-
     m_vResultList.clear();
     auto current_time = sWorld.GetArTime();
     int  delay        = -1;
