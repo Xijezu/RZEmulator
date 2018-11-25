@@ -242,6 +242,8 @@ class Unit : public WorldObject
 
         void SetNextMovableTime(uint32_t t) { m_nMovableTime = t; }
 
+        float GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad);
+
         int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
 
         int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }

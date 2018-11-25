@@ -743,10 +743,14 @@ void Skill::ProcSkill()
 
 void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
 {
-    auto t = sWorld.GetArTime();
-    bool bHandled{true};
+    auto t = m_nFireTime;
     m_vResultList.clear();
-    switch (m_SkillBase->effect_type)
+
+    /// @TODO: IsHiding
+
+    bool bHandled{true};
+
+    switch (GetSkillBase()->GetSkillEffectType())
     {
         case EF_ADD_STATE:
         case EF_ADD_STATE_BY_TARGET_TYPE:
@@ -800,7 +804,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_T2(pTarget);
             break;
-        }
+        }/*
         case EF_PHYSICAL_SINGLE_DAMAGE_T3:
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
@@ -820,7 +824,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }
+        }*/
         case EF_PHYSICAL_ABSORB_DAMAGE:
         {
             SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
@@ -1287,134 +1291,177 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             break;
         }*/
         default:
-            bHandled = false;
+        {
+            switch (GetSkillId())
+            {
+                case SKILL_TOWN_PORTAL:
+                case SKILL_RETURN:
+                    TOWN_PORTAL();
+                    break;
+                    /*case SKILL_RANKED_DEATHMATCH_ENTER:
+                    case SKILL_FREED_DEATHMATCH_ENTER:
+                        INSTANCE_GAME_ENTER();
+                        break;
+                    case SKILL_WARP_TO_HUNTAHOLIC_LOBBY:
+                        WARP_TO_HUNTAHOLIC_LOBBY();
+                        break;
+                    case SKILL_INSTANCE_GAME_EXIT:
+                        INSTANCE_GAME_EXIT();
+                        break;
+                    case SKILL_RETURN_FEATHER:
+                        RETURN_FEATHER();
+                        break;
+                    case SKILL_RETURN_BACK_FEATHER:
+                        RETURN_BACK_FEATHER();
+                        break;*/
+                case SKILL_CREATURE_TAMING:
+                    CREATURE_TAMING();
+                    break;
+                    /*case SKILL_PET_TAMING:
+                        PET_TAMING(pTarget);
+                        break;
+                    case SKILL_SHOVELING:
+                        SHOVELING();
+                        break;*/
+                case SKILL_GAIA_FORCE_SAVING:
+                    ADD_ENERGY();
+                    break;
+                default:
+                    bHandled = false;
+                    break;
+            }
+        }
             break;
     }
+
     if (!bHandled)
     {
-        switch (m_SkillBase->id)
+        auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
+        NG_LOG_INFO("skill", "%s", result.c_str());
+        if (m_pOwner->IsPlayer())
+            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
+        else if (m_pOwner->IsSummon())
         {
-            case SKILL_CREATURE_TAMING:
-                CREATURE_TAMING();
-                bHandled = true;
-                break;
-            case SKILL_RETURN:
-            case SKILL_TOWN_PORTAL:
-                TOWN_PORTAL();
-                bHandled = true;
-                break;
-            case SKILL_GAIA_FORCE_SAVING:
-                ADD_ENERGY();
-                bHandled = true;
-                break;
-            default:
-                auto result = string_format("Unknown skill casted - ID %u, effect_type %u", m_SkillBase->id, m_SkillBase->effect_type);
-                NG_LOG_INFO("skill", "%s", result.c_str());
-                if (m_pOwner->IsPlayer())
-                    Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
-                else if (m_pOwner->IsSummon())
-                {
-                    Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
-                }
-                break;
+            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
         }
     }
-
-    if (bHandled)
-    {
+    else
         PostFireSkill(pTarget);
-    }
-
-    if (m_SkillBase->is_harmful != 0)
-    {
-        auto mob = pTarget->As<Monster>();
-        if (mob != nullptr && mob->IsMonster() && mob->IsCastRevenger())
-        {
-            mob->AddHate(m_pOwner->GetHandle(), 1, true, true);
-        }
-    }
-    bIsSuccess = bHandled;
 }
 
 void Skill::PostFireSkill(Unit *pTarget)
 {
+    auto                t = m_nFireTime;
     std::vector<Unit *> vNeedStateList{ };
+    int                 pt{0};
     for (const auto     &sr : m_vResultList)
     {
-        auto pDealTarget = sMemoryPool.GetObjectInWorld<Unit>(sr.hTarget);
-        if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
+        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK
+            || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP || sr.type == TS_SKILL__HIT_TYPE::SHT_RESULT)
         {
-
-            // Add State Result begin)
-            if (sr.type == 0 || sr.type == 1 || sr.type == 2 || sr.type == 20 || sr.type == 21 || sr.type == 22 || sr.type == 10)
+            auto pDealTarget = sMemoryPool.GetObjectInWorld<Unit>(sr.hTarget);
+            if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
             {
-
-                if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0
-                    && m_SkillBase->effect_type != EF_ADD_STATE
-                    && m_SkillBase->effect_type != EF_ADD_REGION_STATE
-                    && m_SkillBase->effect_type != EF_ADD_STATE_BY_USING_ITEM
-                    && m_SkillBase->effect_type != EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD
-                    && m_SkillBase->effect_type != EF_ADD_STATE_BY_SELF_COST
-                    && m_SkillBase->effect_type != EF_ADD_REGION_STATE_BY_SELF_COST
-                    && m_SkillBase->effect_type != EF_REMOVE_STATE_GROUP
-                    && m_SkillBase->state_id != 0
-                    && (sr.damage.flag ^ 2) != 0)
+                if (GetSkillBase()->GetSkillEffectType() != EF_ADD_STATE &&
+                    GetSkillBase()->GetSkillEffectType() != EF_ADD_REGION_STATE &&
+                    GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD &&
+                    GetSkillBase()->GetSkillEffectType() != EF_ADD_STATE_BY_SELF_COST &&
+                    GetSkillBase()->GetSkillEffectType() != EF_ADD_REGION_STATE_BY_SELF_COST &&
+                    GetSkillBase()->GetSkillEffectType() != EF_REMOVE_STATE_GROUP &&
+                    GetSkillBase()->GetStateId() != 0)
                 {
-                    vNeedStateList.emplace_back(pDealTarget);
-                }
-            }
-            // Add State Result end
-            int nDamage{0};
-            if (!m_pOwner->IsMonster() && m_SkillBase->effect_type != EF_REGION_REMOVE_HATE && m_SkillBase->effect_type != EF_REMOVE_HATE)
-            {
-                if (sr.type != SRT_DAMAGE && sr.type != SRT_MAGIC_DAMAGE && sr.type != SRT_DAMAGE_WITH_KNOCK_BACK)
-                {
-                    if (sr.type == SRT_ADD_HP || sr.type == SRT_ADD_MP)
+                    if (sr.damage.flag ^ AIF_Miss)
                     {
-//                                                 nDamage = sr.*(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.z
-//                                                       + 1);
-                    }
-                    else if (sr.type == SRT_ADD_HP_MP_SP)
-                    {
-//                                                 v54 = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.z
-//                                                       + 1);
-//                                                 v55 = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end.face
-//                                                       + 1)
-//                                                     + v54;
-//                                                 nDamage = *(&std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v3 + 104))->end_time
-//                                                       + 1)
-//                                                     + v55;
+                        vNeedStateList.emplace_back(pDealTarget);
                     }
                 }
-                else
-                {
-                    nDamage = sr.damage.damage;
-                }
 
-                float hm      = 1.0f; // (m_pOwner->GetMagicalHateMod((ElementalType)m_SkillBase.elemental, m_SkillBase.is_spell_act == 0, m_SkillBase.is_harmful != 0)
-                // * (this.m_SkillBase.GetHatePoint(m_nRequestedSkillLevel, nDamage, m_nEnhance) * m_pOwner->m_fHateRatio));
-                auto  HateMod = m_pOwner->GetHateMod(m_SkillBase->is_physical_act == 0 ? 2 : 1, m_SkillBase->is_harmful != 0);
-                nDamage     = (int)((hm + HateMod.second) * HateMod.first);
-                if (nDamage == 0)
-                    nDamage = 1;
-
-                if (pDealTarget->IsMonster())
+                if (!m_pOwner->IsMonster() && GetSkillBase()->GetSkillEffectType() != EF_REMOVE_HATE && GetSkillBase()->GetSkillEffectType() != EF_REGION_REMOVE_HATE)
                 {
-                    pDealTarget->As<Monster>()->AddHate(m_pOwner->GetHandle(), nDamage, true, true);
+                    pt     = 0;
+                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
+                        pt = sr.damage.damage;
+                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP)
+                        pt = sr.hitAddStat.nIncStat;
+                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP)
+                    {
+                        pt = sr.add_hp_mp_sp.nIncHP;
+                        pt += sr.add_hp_mp_sp.nIncMP;
+                        pt += sr.add_hp_mp_sp.nIncSP;
+                    }
+                    /// @Todo: HateRatio
+                    int  nAddHate   = 1 * GetSkillBase()->GetHatePoint(GetRequestedSkillLevel(), pt, GetSkillEnhance()) * (int)m_pOwner->GetMagicalHateMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+                    auto HateMod    = m_pOwner->GetHateMod((GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, GetSkillBase()->IsHarmful());
+
+                    nAddHate += HateMod.second;
+                    nAddHate *= HateMod.first;
+
+                    if (nAddHate == 0)
+                        ++nAddHate;
+
+                    if (pDealTarget->IsMonster())
+                    {
+                        auto pMonster = pDealTarget->As<Monster>();
+                        pMonster->AddHate(GetTargetHandle(), nAddHate, true, true);
+                    }
+                    else if (pDealTarget->IsNPC())
+                    {
+                        /// @Todo: SetAttacker
+                    }
+                    else if (!m_pOwner->IsEnemy(pDealTarget, false))
+                    {
+                        /// @Todo: AddHateToEnemyList
+                    }
+
+                    float fHV{0.0f};
+                    if (nAddHate > 0)
+                    {
+                        fHV = nAddHate * 0.02f;
+                    }
+                    else
+                    {
+                        if (GetSkillBase()->IsPhysicalSkill())
+                            fHV = nAddHate * 0.65f;
+                        else
+                            fHV = nAddHate * 0.25f;
+                    }
+
+                    float fSC{0.0f};
+                    auto  cool_time = GetSkillCoolTime();
+                    if (cool_time <= 1000)
+                        fSC = 1.0f;
+                    else if (cool_time <= 3000)
+                        fSC = 1.2f;
+                    else if (cool_time <= 6000)
+                        fSC = 1.4f;
+                    else if (cool_time <= 15000)
+                        fSC = 1.7f;
+                    else
+                        fSC = 2.0f;
+
+                    /// @Todo: AddHavoc, like seriously, wtf is havoc?!
                 }
             }
         }
+
+        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
+        {
+            /* @TODO
+            if(sr.damage.flag ^ AIF_Critical)
+                m_pOwner->ProcessAddHPMPOnCritical();
+            */
+        }
     }
 
-    if (!vNeedStateList.empty())
+    StateSkillFunctor myStateSkillFunctor{&m_vResultList};
+    for (auto         &target : vNeedStateList)
     {
-        StateSkillFunctor fn{&m_vResultList};
-        auto              t = sWorld.GetArTime();
-        for (auto         &unit : vNeedStateList)
-        {
-            process_target(t, fn, unit);
-        }
+        process_target(t, myStateSkillFunctor, target);
     }
+
+    int nElementalType = GetSkillBase()->GetElementalType();
+    /// @Todo
+    //m_pOwner->RemoveExhaustiveSkillStateMod( GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay() );
 }
 
 void Skill::DO_SUMMON()
@@ -2986,27 +3033,20 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
 
 void Skill::SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
 {
+    if (pTarget == nullptr)
+        return;
 
-}
+    int nDamage      = 0;
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
-{
+    nDamage = nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+    int nMax = nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+    nDamage = std::min(nDamage, nMax);
 
-}
+    int elemental_type = GetSkillBase()->GetElementalType();
 
-void Skill::MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
-{
-
-}
-
-void Skill::MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
-{
-
-}
-
-void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
-{
-
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, (ElementalType)elemental_type, Damage, pTarget->GetHandle());
 }
 
 bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
