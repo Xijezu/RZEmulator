@@ -126,6 +126,7 @@ class Skill
         void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget);
         void TAUNT(Unit *pTarget);
 

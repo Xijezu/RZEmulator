@@ -585,9 +585,14 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         case EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
             MULTIPLE_MAGICAL_DAMAGE(pTarget);
             break;
-        case 30001:// EffectType::PhysicalSingleDamage
+        case EF_PHYSICAL_SINGLE_DAMAGE:// EffectType::PhysicalSingleDamage
             SINGLE_PHYSICAL_DAMAGE(pTarget);
             break;
+        case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE:
+        {
+            PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(pTarget);
+            break;
+        }
         case EF_ACTIVATE_FIELD_PROP:
             ACTIVATE_FIELD_PROP();
             break;
@@ -1764,7 +1769,8 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
             nFireInterval = GetVar(9) * 100;
             break;
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_SELF:
-            bTargetOrigin = false; // No break intended
+            bTargetOrigin = false;
+            [[fallthrough]];
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE:
             nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
             nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
@@ -1847,7 +1853,8 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
             nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
             break;
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF:
-            bTargetOrigin   = false;        // no break intended
+            bTargetOrigin   = false;
+            [[fallthrough]];
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK:
             nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
             nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
@@ -1895,5 +1902,30 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
         {
             sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
+    }
+}
+
+void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+    int nDamage        = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(13) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+    float fEffectLength = GetVar(4) * 12;
+    m_fRange              = fEffectLength;
+
+    std::vector<Unit *> vTargetList{ };
+    auto                t = sWorld.GetArTime();
+
+    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) > 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) > 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
+
+    for (auto &pDealTarget : vTargetList)
+    {
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, static_cast<ElementalType >(elemental_type), Damage, pDealTarget->GetHandle());
     }
 }
