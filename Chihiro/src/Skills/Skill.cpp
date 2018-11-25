@@ -743,21 +743,16 @@ void Skill::ProcSkill()
 
 void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
 {
+    auto t = sWorld.GetArTime();
     bool bHandled{true};
     m_vResultList.clear();
     switch (m_SkillBase->effect_type)
     {
-        case EF_SUMMON:
-            DO_SUMMON();
-            break;
-        case EF_UNSUMMON:
-            DO_UNSUMMON();
-            break;
         case EF_ADD_STATE:
         case EF_ADD_STATE_BY_TARGET_TYPE:
         {
-            StateSkillFunctor fn{&m_vResultList};
-            process_target(sWorld.GetArTime(), fn, pTarget);
+            StateSkillFunctor mySkillFunctor{&m_vResultList};
+            process_target(t, mySkillFunctor, pTarget);
             switch (GetSkillId())
             {
                 case SKILL_ITEM_PIECE_OF_STRENGTH:
@@ -771,71 +766,459 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
                 default:
                     break;
             }
-        }
-            break;
-        case EF_MAGIC_SINGLE_DAMAGE:
-        case EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
-            SINGLE_MAGICAL_DAMAGE(pTarget);
-            break;
-        case EF_MAGIC_SINGLE_REGION_DAMAGE:
-        case EF_MAGIC_SINGLE_REGION_DAMAGE_USING_CORPSE:
-        case EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE:
-            MAGIC_SINGLE_REGION_DAMAGE(pTarget);
-            break;
-        case EF_MAGIC_MULTIPLE_REGION_DAMAGE:
-            MAGIC_MULTIPLE_REGION_DAMAGE(pTarget);
-            break;
-        case EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP:
-            SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(pTarget);
-            break;
-        case EF_MAGIC_MULTIPLE_DAMAGE:
-        case EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
-            MULTIPLE_MAGICAL_DAMAGE(pTarget);
-            break;
-        case EF_PHYSICAL_SINGLE_DAMAGE:// EffectType::PhysicalSingleDamage
-            SINGLE_PHYSICAL_DAMAGE(pTarget);
-            break;
-        case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE:
-        {
-            PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(pTarget);
+
             break;
         }
+            /*
+            case EF_ADD_REGION_STATE:
+            {
+                ADD_REGION_STATE( pTarget );
+                break;
+            }
+            case EF_ADD_STATE_BY_SELF_COST:
+            {
+                ADD_STATE_BY_SELF_COST( pTarget );
+                break;
+            }
+            case EF_ADD_REGION_STATE_BY_SELF_COST:
+            {
+                ADD_REGION_STATE_BY_SELF_COST( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_DIRECTIONAL_DAMAGE:
+            {
+                PHYSICAL_DIRECTIONAL_DAMAGE( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_T1:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_T2:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T2( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_T3:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T3( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_DAMAGE_T1:
+            {
+                MULTIPLE_PHYSICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_DAMAGE_T2:
+            {
+                MULTIPLE_PHYSICAL_DAMAGE_T2( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_DAMAGE_T3:
+            {
+                MULTIPLE_PHYSICAL_DAMAGE_T3( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_ABSORB_DAMAGE:
+            {
+                SINGLE_PHYSICAL_DAMAGE_ABSORB( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
+            {
+                PHYSICAL_SINGLE_REGION_DAMAGE_OLD( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD:
+            {
+                PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_OLD:
+            {
+                PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE_OLD:
+            {
+                PHYSICAL_SPECIAL_REGION_DAMAGE( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY_OLD:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY( pTarget );
+            }
+            case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD:
+            {
+                PHYSICAL_SINGLE_REGION_DAMAGE_OLD( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T3( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
+            {
+                SINGLE_PHYSICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD:
+            {
+                MULTIPLE_PHYSICAL_DAMAGE_T4( pTarget );
+                break;
+            }
+            case EF_REMOVE_BAD_STATE:
+            {
+                REMOVE_BAD_STATE_SKILL_FUNCTOR mySkillFunctor( &m_vResultList );
+                process_target( t, mySkillFunctor, pTarget );
+                break;
+            }
+            case EF_REMOVE_GOOD_STATE:
+            {
+                REMOVE_GOOD_STATE_SKILL_FUNCTOR mySkillFunctor( &m_vResultList );
+                process_target( t, mySkillFunctor, pTarget );
+                break;
+            }
+            case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
+            case EF_AREA_EFFECT_MAGIC_DAMAGE:
+            case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
+            case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2:
+            case EF_AREA_EFFECT_HEAL:
+            {
+                MAKE_AREA_EFFECT_PROP( pTarget, false );
+                break;
+            }
+            case EF_TRAP_PHYSICAL_DAMAGE:
+            case EF_TRAP_MAGICAL_DAMAGE:
+            case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
+            case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
+            {
+                MAKE_AREA_EFFECT_PROP( pTarget, true );
+                break;
+            }
+            case EF_CREATE_ITEM:
+            {
+                CREATE_ITEM( pTarget, bIsSuccess );
+                break;
+            }*/
         case EF_ACTIVATE_FIELD_PROP:
+        {
             ACTIVATE_FIELD_PROP();
             break;
-        case EF_TOGGLE_AURA:
-        case EF_TOGGLE_DIFFERENTIAL_AURA:
-            TOGGLE_AURA(pTarget);
-            break;
-        case EF_TAUNT:
-            TAUNT(pTarget);
-            break;
+        }
+            /*
+            case EF_REGION_HEAL_BY_FIELD_PROP:
+            {
+                REGION_HEAL_BY_FIELD_PROP();
+                break;
+            }
+            case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
+            {
+                MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP( false );
+                break;
+            }*/
         case EF_ADD_HP:
         {
-            HealingSkillFunctor functor(&m_vResultList);
-            process_target(sWorld.GetArTime(), functor, pTarget);
-        }
+            HealingSkillFunctor mySkillFunctor(&m_vResultList);
+            process_target(t, mySkillFunctor, pTarget);
             break;
+        }
+            /*
+            case EF_ADD_MP:
+            {
+                RECOVERY_MP_SKILL_FUNCTOR mySkillFunctor( &m_vResultList );
+                process_target( t, mySkillFunctor, pTarget );
+                break;
+            }*/
         case EF_ADD_HP_BY_ITEM:
         {
-            HealingSkillFunctor functor(&m_vResultList, true);
-            process_target(sWorld.GetArTime(), functor, pTarget);
+            HealingSkillFunctor mySkillFunctor(&m_vResultList, true);
+            process_target(t, mySkillFunctor, pTarget);
+            break;
         }
+            /*
+            case EF_ADD_MP_BY_ITEM:
+            {
+                RECOVERY_MP_SKILL_FUNCTOR mySkillFunctor( &m_vResultList, true );
+                mySkillFunctor.nResult = 0;
+                process_target( t, mySkillFunctor, pTarget );
+                break;
+            }*/
+        case EF_RESURRECTION:
+        {
+            SKILL_RESURRECTION(pTarget);
             break;
-        case EF_ADD_MP:
-        case EF_ADD_MP_BY_ITEM:
-            MANA_SKILL_FUNCTOR(pTarget);
-            break;
+        }
         case EF_ADD_HP_MP:
         case EF_ADD_HP_MP_BY_SUMMON_DAMAGE:
         case EF_ADD_HP_MP_BY_SUMMON_DEAD:
         case EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP:
         case EF_ADD_HP_MP_WITH_LIMIT_PERCENT:
+        {
             SKILL_ADD_HP_MP(pTarget);
             break;
-        case EF_PHYSICAL_MULTIPLE_DAMAGE:
-            PHYSICAL_MULTIPLE_DAMAGE(pTarget);
+        }
+            /*
+            case EF_ADD_REGION_HP_MP:
+            {
+                SKILL_ADD_REGION_HP_MP( pTarget );
+                break;
+            }
+            case EF_ADD_REGION_HP:
+            {
+                SKILL_ADD_REGION_HP( pTarget );
+                break;
+            }
+            case EF_ADD_REGION_MP:
+            {
+                SKILL_ADD_REGION_MP( pTarget );
+                break;
+            }
+            case EF_MAGIC_SINGLE_DAMAGE_T1_OLD:
+            {
+                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
+                    break;
+
+                SINGLE_MAGICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_MAGIC_SINGLE_DAMAGE_T2_OLD:
+            {
+                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
+                    break;
+
+                SINGLE_MAGICAL_DAMAGE_T2( pTarget );
+                break;
+            }*/
+        case EF_MAGIC_SINGLE_DAMAGE:
+        case EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
+        {
+            if (!GetSkillBase()->GetSkillTargetType() == TARGET_TARGET)
+                break;
+
+            SINGLE_MAGICAL_DAMAGE(pTarget);
             break;
+        }
+            /*
+            case EF_MAGIC_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE:
+            {
+                SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE( pTarget );
+                break;
+            }
+
+            case EF_MAGIC_MULTIPLE_DAMAGE_T1_OLD:
+            case EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD:
+            {
+                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
+                    break;
+
+                MULTIPLE_MAGICAL_DAMAGE_T1( pTarget );
+                break;
+            }
+            case EF_MAGIC_MULTIPLE_DAMAGE_AT_ONCE:
+            {
+                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
+                    break;
+
+                MULTIPLE_MAGICAL_DAMAGE_AT_ONCE( pTarget );
+                break;
+            }*/
+        case EF_MAGIC_MULTIPLE_DAMAGE:
+        case EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP:
+        {
+            if (!GetSkillBase()->GetSkillTargetType() == TARGET_TARGET)
+                break;
+
+            MULTIPLE_MAGICAL_DAMAGE(pTarget);
+            break;
+        }/*
+        case EF_MAGIC_SINGLE_DAMAGE_OR_DEATH:
+        {
+            if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
+                break;
+
+            SINGLE_MAGICAL_DAMAGE_OR_DEATH( pTarget );
+            break;
+        }*/
+        case EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP:
+        {
+            SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(pTarget);
+            break;
+        }
+            /*
+        case EF_ADD_HP_MP_BY_ABSORB_HP_MP:
+        {
+            ADD_HP_MP_BY_ABSORB_HP_MP(pTarget);
+            break;
+        }
+
+        case EF_MAGIC_SINGLE_PERCENT_DAMAGE:
+        {
+            SINGLE_MAGICAL_TARGET_HP_PERCENT_DAMAGE(pTarget);
+            break;
+        }
+
+        case EF_MAGIC_SINGLE_PERCENT_MANABURN:
+        case EF_MAGIC_SINGLE_PERCENT_OF_MAX_MP_MANABURN:
+        {
+            SINGLE_MAGICAL_MANABURN(pTarget);
+            break;
+        }
+
+        case EF_MAGIC_MULTIPLE_DAMAGE_T2_OLD:
+        {
+            if (!GetSkillBase()->GetSkillTargetType() == TARGET_TARGET)
+                break;
+
+            MULTIPLE_MAGICAL_DAMAGE_T2(pTarget);
+            break;
+        }
+        case EF_MAGIC_MULTIPLE_DAMAGE_T3_OLD:
+        {
+            MULTIPLE_MAGICAL_DAMAGE_T3(pTarget);
+            break;
+        }
+        case EF_MAGIC_SINGLE_REGION_DAMAGE_OLD:
+        {
+            MAGIC_SINGLE_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }*/
+        case EF_MAGIC_SINGLE_REGION_DAMAGE:
+        case EF_MAGIC_SINGLE_REGION_DAMAGE_USING_CORPSE:
+        case EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE:
+        {
+            MAGIC_SINGLE_REGION_DAMAGE(pTarget);
+            break;
+        }/*
+        case EF_MAGIC_SINGLE_REGION_DAMAGE_BY_SUMMON_DEAD:
+        {
+            MAGIC_SINGLE_REGION_DAMAGE_BY_SUMMON_DEAD(pTarget);
+            break;
+        }
+        case EF_REGION_TAUNT:
+        {
+            REGION_TAUNT(pTarget);
+            break;
+        }*/
+        case EF_TAUNT:
+        {
+            TAUNT(pTarget);
+            break;
+        }/*
+        case EF_REMOVE_HATE:
+        {
+            REMOVE_HATE(pTarget);
+            break;
+        }
+        case EF_REGION_REMOVE_HATE:
+        {
+            REGION_REMOVE_HATE(pTarget);
+            break;
+        }
+        case EF_MAGIC_MULTIPLE_REGION_DAMAGE_AT_ONCE:
+        {
+            MAGIC_MULTIPLE_REGION_DAMAGE_AT_ONCE(pTarget);
+            break;
+        }
+        case EF_MAGIC_MULTIPLE_REGION_DAMAGE_OLD:
+        {
+            MAGIC_MULTIPLE_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }
+        case EF_MAGIC_MULTIPLE_REGION_DAMAGE_T2_OLD:
+        {
+            MAGIC_MULTIPLE_REGION_DAMAGE_T2(pTarget);
+            break;
+        }
+        case EF_MAGIC_SPECIAL_REGION_DAMAGE_OLD:
+        {
+            MAGIC_SPECIAL_REGION_DAMAGE_OLD(pTarget);
+            break;
+        }
+        case EF_MAGIC_SPECIAL_REGION_DAMAGE:
+        {
+            MAGIC_SPECIAL_REGION_DAMAGE(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD:
+        {
+            SINGLE_PHYSICAL_DAMAGE_WITH_SHIELD(pTarget);
+            break;
+        }*/
+        case EF_MAGIC_MULTIPLE_REGION_DAMAGE:
+        {
+            MAGIC_MULTIPLE_REGION_DAMAGE(pTarget);
+            break;
+        }/*
+        case EF_MAGIC_REGION_PERCENT_DAMAGE:
+        {
+            MAGIC_SINGLE_REGION_PERCENT_DAMAGE(pTarget);
+            break;
+        }
+        case EF_MAGIC_ABSORB_DAMAGE_OLD:
+        {
+            MAGIC_ABSORB_DAMAGE(pTarget);
+            break;
+        }*/
+        case EF_TOGGLE_AURA:
+        case EF_TOGGLE_DIFFERENTIAL_AURA:
+        {
+            TOGGLE_AURA(pTarget);
+            break;
+        }
+        case EF_SUMMON:
+        {
+            if (m_pOwner->IsPlayer())
+                DO_SUMMON();
+            break;
+        }
+        case EF_UNSUMMON:
+        {
+            if (m_pOwner->IsPlayer())
+                DO_UNSUMMON();
+            break;
+        }/*
+        case EF_UNSUMMON_AND_ADD_STATE:
+        {
+            if (m_pOwner->IsPlayer())
+                UnSummonAndAddState();
+            break;
+        }
+        case EF_CORPSE_ABSORB:
+        {
+            CORPSE_ABSORB(pTarget);
+            break;
+        }
+        case EF_CORPSE_EXPLOSION:
+        {
+            CORPSE_EXPLOSION(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE:
+        case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
+        case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
+        case EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK:
+        {
+            PHYSICAL_SINGLE_DAMAGE(pTarget);
+            break;
+        }*/
+        case EF_PHYSICAL_SINGLE_DAMAGE_ABSORB:
+        {
+            PHYSICAL_SINGLE_DAMAGE_ABSORB(pTarget);
+            break;
+        }/*
+        case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY:
+        {
+            PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(pTarget);
+            break;
+        }*/
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE:
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK:
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF:
@@ -843,7 +1226,33 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_REGION_DAMAGE(pTarget);
             break;
+        }/*
+        case EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE:
+        case EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK:
+        {
+            PHYSICAL_REALTIME_MULTIPLE_DAMAGE(pTarget);
+            break;
         }
+        case EF_PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE:
+        {
+            PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE:
+        {
+            SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(pTarget);
+            break;
+        }*/
+        case EF_PHYSICAL_MULTIPLE_DAMAGE:
+        {
+            PHYSICAL_MULTIPLE_DAMAGE(pTarget);
+            break;
+        }/*
+        case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK:
+        {
+            PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(pTarget);
+            break;
+        }*/
         case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE:
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE:
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_SELF:
@@ -851,14 +1260,32 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             PHYSICAL_MULTIPLE_REGION_DAMAGE(pTarget);
             break;
         }
-        case EF_PHYSICAL_SINGLE_DAMAGE_ABSORB:
+        case EF_PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE:
         {
-            PHYSICAL_SINGLE_DAMAGE_ABSORB(pTarget);
+            PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(pTarget);
+            break;
+        }/*
+        case EF_RESURRECTION_WITH_RECOVER:
+        {
+            SKILL_RESURRECTION_WITH_RECOVER(pTarget);
             break;
         }
-        case EF_RESURRECTION:
-            SKILL_RESURRECTION(pTarget);
+        case EF_REMOVE_STATE_GROUP:
+        {
+            REMOVE_STATE_GROUP_SKILL_FUNCTOR mySkillFunctor(&m_vResultList, m_pOwner);
+            process_target(t, mySkillFunctor, pTarget);
             break;
+        }
+        case EF_CASTING_CANCEL_WITH_ADD_STATE:
+        {
+            CASTING_CANCEL_WITH_ADD_STATE(pTarget);
+            break;
+        }
+        case EF_RESPAWN_MONSTER_NEAR:
+        {
+            RESPAWN_NEAR_MONSTER();
+            break;
+        }*/
         default:
             bHandled = false;
             break;
@@ -1101,52 +1528,6 @@ uint16 Skill::PrepareTaming(uint handle)
     return TS_RESULT_SUCCESS;
 }
 
-
-
-/************************* SKILL RESULTS *************************/
-// Function       :   protected bool StructSkill::AFFECT_RUSH_OLD(struct StructCreature *, float *, struct ArPosition *, float *)
-// Function       :   protected int StructSkill::AFFECT_KNOCK_BACK(struct StructCreature *, float, unsigned long)
-// Function       :   protected bool StructSkill::PHYSICAL_DAMAGE_RUSH(struct StructCreature *, int *)
-// Function       :   protected void StructSkill::ADD_REGION_STATE(struct StructCreature *)
-// Function       :   protected void StructSkill::ADD_STATE_BY_SELF_COST(struct StructCreature *)
-// Function       :   protected void StructSkill::ADD_REGION_STATE_BY_SELF_COST(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_DIRECTIONAL_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T1(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T2(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T1(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T2(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_T3(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_PHYSICAL_DAMAGE_ABSORB(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SPECIAL_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T3(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_PHYSICAL_DAMAGE_T4(struct StructCreature *)
-// Function       :   protected bool StructSkill::RUSH(struct StructCreature *, float)
-// Function       :   protected bool StructSkill::AFFECT_RUSH(struct StructCreature *, float *, struct ArPosition *, float *, float)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE_ABSORB(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_MULTIPLE_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_MAGICAL_DAMAGE_T1(struct StructCreature *)
-// Function       :   protected void StructSkill::SINGLE_MAGICAL_DAMAGE_T2(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T1(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T2(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_T3(struct StructCreature *)
-// Function       :   protected void StructSkill::MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(struct StructCreature *)
-// Function       :   protected void StructSkill::MAGIC_SINGLE_REGION_DAMAGE_OLD(struct StructCreature *)
-// Function       :   protected void StructSkill::MAGIC_MULTIPLE_REGION_DAMAGE_OLD(struct StructCreature *)
-// Function       :   protected void StructSkill::MAGIC_MULTIPLE_REGION_DAMAGE_T2(struct StructCreature *)
-// Function       :   protected void StructSkill::MAGIC_SPECIAL_REGION_DAMAGE_OLD(struct StructCreature *)
-// Function       :   protected void StructSkill::MAGIC_ABSORB_DAMAGE(struct StructCreature *)
 void Skill::CREATURE_TAMING()
 {
     auto pTarget = sMemoryPool.GetObjectInWorld<Monster>(m_hTarget);
