@@ -289,6 +289,14 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     {
         return return_object(m_pUnit->GetCurrentJob());
     }
+	else if (szKey == "hp" || szKey == "health")
+	{
+		return return_object(m_pUnit->GetHealth());
+	}
+	else if (szKey == "mp" || szKey == "mana")
+	{
+		return return_object(m_pUnit->GetMana());
+	}
     else if (szKey == "max_hp")
     {
         return return_object(m_pUnit->GetMaxHealth());
