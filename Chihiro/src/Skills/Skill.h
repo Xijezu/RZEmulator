@@ -170,10 +170,6 @@ class Skill
 
         void SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
         void SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
-        void SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
-        void MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
-        void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
-        void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
 
         bool PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage);
         bool AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface);

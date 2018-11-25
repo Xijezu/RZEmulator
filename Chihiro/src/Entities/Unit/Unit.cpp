@@ -2498,3 +2498,24 @@ bool Unit::onProcAura(Skill *pSkill, int nRequestedLevel)
     pSkill->SetRequestedSkillLevel(0);
     return res;
 }
+
+float Unit::GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad)
+{
+    float result = 0;
+/*
+        if ( bPhysical )
+        {
+            if ( bBad )
+                result = this.m_BadPhysicalElementalSkillStateMod[(int)type].fHate;
+            else
+                result = this.m_GoodPhysicalElementalSkillStateMod[(int)type].fHate;
+        }
+        else
+        {
+            if ( bBad )
+                result = this.m_BadMagicalElementalSkillStateMod[(int)type].fHate;
+            else
+                result = this.m_GoodMagicalElementalSkillStateMod[(int)type].fHate;
+        }*/
+    return result;
+}

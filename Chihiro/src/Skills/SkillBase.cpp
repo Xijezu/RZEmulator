@@ -361,3 +361,14 @@ bool SkillBase::IsUseableOnAvatar() const
 {
     return tf_avatar;
 }
+
+int SkillBase::GetHatePoint(int lv, int point, int enhance) const
+{
+    if (hate_mod == 0)
+        return 0;
+
+    if (hate_mod < 0)
+        return (int)(hate_basic + lv * hate_per_skl + enhance * hate_per_enhance);
+
+    return (int)(hate_basic + point * hate_mod);
+}

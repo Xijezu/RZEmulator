@@ -612,6 +612,8 @@ struct SkillBase
     bool IsUseableOnMonster() const;
     bool IsUseableOnSummon() const;
 
+    int GetHatePoint(int lv, int point, int enhance) const;
+
     bool IsNeedShield() const;
     bool IsNeedWeapon() const;
 
