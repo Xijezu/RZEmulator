@@ -372,3 +372,8 @@ int SkillBase::GetHatePoint(int lv, int point, int enhance) const
 
     return (int)(hate_basic + point * hate_mod);
 }
+
+uint32_t SkillBase::GetCommonDelay() const
+{
+    return static_cast<uint32_t>(delay_common);
+}

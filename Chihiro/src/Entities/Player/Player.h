@@ -126,6 +126,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
         Summon *GetMainSummon() const { return m_pMainSummon; }
 
+        Summon *GetSubSummon() const { return m_pSubSummon; }
+
         int64 GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
 
         int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
@@ -325,6 +327,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         TimeSynch     m_TS{200, 2, 10};
 
         Summon *m_pMainSummon{nullptr};
+        Summon *m_pSubSummon{nullptr};
         uint   m_hTamingTarget{ };
         int GetChaos() const;
         int GetMaxChaos() const;
