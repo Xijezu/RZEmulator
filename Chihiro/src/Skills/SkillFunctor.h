@@ -285,44 +285,68 @@ struct StateSkillFunctor : public SkillTargetFunctor
         std::vector<SkillResult> *m_vResult{ };
 };
 
+struct RemoveBadStateSkillFunctor : public SkillTargetFunctor
+{
+        RemoveBadStateSkillFunctor(std::vector<SkillResult> *pvList) : m_vList(pvList)
+        {
+        }
+
+        bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+        {
+            int nStateLevel = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetRequestedSkillLevel() + pSkill->GetVar(3) * pSkill->GetSkillEnhance();
+            pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
+            sWorld.AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+
+            for (int nIndex = 4; nIndex < 9 && pSkill->GetVar(nIndex); nIndex++)
+            {
+                pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(nIndex)), nStateLevel);
+                sWorld.AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+            }
+
+            return true;
+        }
+
+    private:
+        std::vector<SkillResult> *m_vList{nullptr};
+};
+
 struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 {
-    std::vector<SkillResult> &pvList;
-
-    bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
-    {
-        auto nEnhance    = pSkill->GetSkillEnhance();
-        auto v13         = pSkill->m_SkillBase->var[9] + (pSkill->m_SkillBase->var[10] * pSkill->m_nRequestedSkillLevel);
-        int  nSkillLevel = ((int)pSkill->m_SkillBase->var[1] * pSkill->m_nRequestedSkillLevel) + ((int)pSkill->m_SkillBase->var[2] * nEnhance);
-
-        bool bResult = (v13 <= (uint)rand32() % 100);
-
-        auto targetHandle = pTarget->GetHandle();
-        if (pSkill->m_SkillBase->var[8] == 0.0f)
+        RemoveGoodStateSkillFunctor(std::vector<SkillResult> *pvList) : m_vList(pvList)
         {
-            if (bResult)
-                pTarget->RemoveState((StateCode)static_cast<int>(pSkill->m_SkillBase->var[0]), nSkillLevel);
+        }
 
-            sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
-            auto counter = 304;
+        bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+        {
+            int nStateLevel = pSkill->GetVar(1) * pSkill->GetRequestedSkillLevel() + pSkill->GetVar(2) * pSkill->GetSkillEnhance();
 
-            for (int i = 0; i < 5; ++i)
+            int bResult        = true;
+            int accuracy_bonus = pSkill->GetVar(9) + pSkill->GetVar(10) * pSkill->GetRequestedSkillLevel();
+            if (accuracy_bonus <= irand(0, 100))
+                bResult = false;
+
+            if (pSkill->GetVar(8))
             {
-                auto val = pSkill->m_SkillBase->var[9 + i];
-                if (val == 0.0f)
-                    break;
-
                 if (bResult)
-                    pTarget->RemoveState((StateCode)static_cast<int>(val), nSkillLevel);
-                sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
+                    pTarget->RemoveGoodState(nStateLevel);
+                sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
             }
+            else
+            {
+                if (bResult)
+                    pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
+                sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+
+                for (int nIndex = 3; nIndex < 8 && pSkill->GetVar(nIndex); nIndex++)
+                {
+                    if (bResult)
+                        pTarget->RemoveState(static_cast<StateCode >(pSkill->GetVar(nIndex)), nStateLevel);
+                    sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                }
+            }
+            return true;
         }
-        else
-        {
-            if (bResult)
-                pTarget->RemoveGoodState(nSkillLevel);
-            sWorld.AddSkillResult(pvList, bResult, 11, targetHandle);
-        }
-        return bResult;
-    }
+
+    private:
+        std::vector<SkillResult> &m_vList;
 };

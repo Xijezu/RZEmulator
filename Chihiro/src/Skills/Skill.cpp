@@ -820,12 +820,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             {
                 MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
                 break;
-            }
+            }*/
             case EF_PHYSICAL_ABSORB_DAMAGE:
             {
                 SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
                 break;
-            }
+            }/*
             case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
             {
                 PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
@@ -874,19 +874,19 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             {
                 MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
                 break;
-            }
+            }*/
             case EF_REMOVE_BAD_STATE:
             {
-                REMOVE_BAD_STATE_SKILL_FUNCTOR mySkillFunctor(&m_vResultList);
+                RemoveBadStateSkillFunctor mySkillFunctor{&m_vResultList};
                 process_target(t, mySkillFunctor, pTarget);
                 break;
             }
             case EF_REMOVE_GOOD_STATE:
             {
-                REMOVE_GOOD_STATE_SKILL_FUNCTOR mySkillFunctor(&m_vResultList);
+                RemoveGoodStateSkillFunctor mySkillFunctor{&m_vResultList};
                 process_target(t, mySkillFunctor, pTarget);
                 break;
-            }
+            }/*
             case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
             case EF_AREA_EFFECT_MAGIC_DAMAGE:
             case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
@@ -2918,4 +2918,42 @@ void Skill::PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget)
     sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, static_cast<ElementalType>(elemental_type), Damage, pTarget->GetHandle());
 
     return;
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nDamage = 0;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+    nDamage = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
+
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+
+    float fHPMod = GetVar(4) * GetSkillEnhance();
+    float fMPMod = GetVar(5) * GetSkillEnhance();
+
+    int nAddHP = Damage.nDamage * GetVar(2) + Damage.nDamage * fHPMod;
+    int nAddMP = Damage.nDamage * GetVar(3) + Damage.nDamage * fMPMod;
+    m_pOwner->AddHealth(nAddHP);
+    m_pOwner->AddMana(nAddMP);
+
+    SkillResult skill_result{ };
+    skill_result.type                   = TS_SKILL__HIT_TYPE::SHT_ADD_HP;
+    skill_result.hTarget                = m_pOwner->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nAddHP;
+    skill_result.hitAddStat.target_stat = m_pOwner->GetHealth();
+    m_vResultList.push_back(skill_result);
+
+    skill_result.type                   = TS_SKILL__HIT_TYPE::SHT_ADD_MP;
+    skill_result.hTarget                = m_pOwner->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nAddMP;
+    skill_result.hitAddStat.target_stat = m_pOwner->GetMana();
+    m_vResultList.push_back(skill_result);
 }
