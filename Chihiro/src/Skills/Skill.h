@@ -139,7 +139,7 @@ class Skill
         uint16 PrepareSummon(uint handle, Position pos);
         uint16 PrepareTaming(uint handle);
 
-        void SINGLE_PHYSICAL_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SINGLE_DAMAGE(Unit *pTarget);
         void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);
 
         void SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget);
