@@ -114,7 +114,7 @@ class Skill
         uint16 PrepareSummon(int nSkillLevel, uint handle, Position pos, uint current_time);
         uint16 PrepareTaming(int nSkillLevel, uint handle, Position pos, uint current_time);
 
-        // I'm sorry, I'm copying retail code here
+
         void SINGLE_PHYSICAL_DAMAGE(Unit *pTarget);
         void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);
 
@@ -122,7 +122,13 @@ class Skill
 
         void MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget);
         void MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
+
+        void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
+        void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget);
+        void TAUNT(Unit *pTarget);
+
         void TOGGLE_AURA(Unit *pTarget);
         void SKILL_ADD_HP_MP(Unit *pTarget);
 
