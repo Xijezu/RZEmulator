@@ -320,8 +320,8 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
         {
             int nStateLevel = pSkill->GetVar(1) * pSkill->GetRequestedSkillLevel() + pSkill->GetVar(2) * pSkill->GetSkillEnhance();
 
-            int bResult        = true;
-            int accuracy_bonus = pSkill->GetVar(9) + pSkill->GetVar(10) * pSkill->GetRequestedSkillLevel();
+            bool bResult        = true;
+            int  accuracy_bonus = pSkill->GetVar(9) + pSkill->GetVar(10) * pSkill->GetRequestedSkillLevel();
             if (accuracy_bonus <= irand(0, 100))
                 bResult = false;
 
