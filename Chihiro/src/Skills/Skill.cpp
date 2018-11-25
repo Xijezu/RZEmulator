@@ -1200,7 +1200,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             CORPSE_EXPLOSION(pTarget);
             break;
-        }
+        }*/
         case EF_PHYSICAL_SINGLE_DAMAGE:
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
@@ -1208,7 +1208,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_DAMAGE(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_ABSORB:
         {
             PHYSICAL_SINGLE_DAMAGE_ABSORB(pTarget);
@@ -1541,7 +1541,7 @@ void Skill::CREATURE_TAMING()
     }
 }
 
-void Skill::SINGLE_PHYSICAL_DAMAGE(Unit *pTarget)
+void Skill::PHYSICAL_SINGLE_DAMAGE(Unit *pTarget)
 {
     if (pTarget == nullptr || m_pOwner == nullptr)
         return;
