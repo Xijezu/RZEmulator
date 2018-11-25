@@ -346,3 +346,18 @@ int SkillBase::GetStateType() const
 {
     return state_type;
 }
+
+bool SkillBase::IsUseableOnSummon() const
+{
+    return tf_summon;
+}
+
+bool SkillBase::IsUseableOnMonster() const
+{
+    return tf_monster;
+}
+
+bool SkillBase::IsUseableOnAvatar() const
+{
+    return tf_avatar;
+}

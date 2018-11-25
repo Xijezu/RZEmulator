@@ -608,6 +608,10 @@ struct SkillBase
     uint8_t GetNeedStateLevel() const;
     bool NeedStateExhaust() const;
 
+    bool IsUseableOnAvatar() const;
+    bool IsUseableOnMonster() const;
+    bool IsUseableOnSummon() const;
+
     bool IsNeedShield() const;
     bool IsNeedWeapon() const;
 
