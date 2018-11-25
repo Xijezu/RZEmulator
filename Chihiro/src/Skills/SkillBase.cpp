@@ -226,3 +226,8 @@ bool SkillBase::IsSystemSkill() const
 {
     return is_valid == ST_SYSTEM;
 }
+
+int SkillBase::GetCriticalBonus(int skill_lv) const
+{
+    return critical_bonus + critical_bonus_per_skl * skill_lv;
+}

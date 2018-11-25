@@ -578,6 +578,7 @@ struct SkillBase
     bool IsValidToCorpse() const;
     bool IsToggle() const;
 
+    int GetCriticalBonus(int skill_lv) const;
     int GetCastRange() const;
     int GetValidRange() const;
 
