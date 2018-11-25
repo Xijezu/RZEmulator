@@ -589,6 +589,7 @@ struct SkillBase
 
     int32_t GetCostEXP(int skill_lv, int enhance) const;
     int32_t GetCostJP(int skill_lv, int enhance) const;
+    int GetProbabilityOnHit(int slv) const;
     int32_t GetCostItemCode() const;
     int64_t GetCostItemCount(int skill_lv) const;
     int32_t GetCostHP(int skill_lv) const;
@@ -613,10 +614,13 @@ struct SkillBase
     int GetNeedJobPoint(int skill_lv);
     bool IsUseableWeapon(ItemClass cl);
     int GetStateSecond(int skill_lv, int enhance_lv);
+    int GetStateType() const;
     int GetHitBonus(int enhance, int level_diff) const;
+    int GetStateId() const;
     int GetStateLevel(int skill_lv, int enhance_lv);
     uint GetCastDelay(int skill_lv, int enhance);
     uint GetCoolTime(int enhance) const;
+    uint32_t GetFireRange() const;
     bool IsUsable(uint8 nUseIndex) const;
     int GetCostEnergy(uint8 skill_lv) const;
 
