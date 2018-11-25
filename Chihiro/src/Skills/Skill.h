@@ -147,6 +147,11 @@ class Skill
         void MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget);
         void MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
 
+        void ADD_REGION_STATE(Unit *pTarget);
+        void ADD_STATE_BY_SELF_COST(Unit *pTarget);
+        void ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget);
+        void PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget);
+
         void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
