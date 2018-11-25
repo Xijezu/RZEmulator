@@ -644,98 +644,207 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
 
 void Skill::ProcSkill()
 {
-    if (sWorld.GetArTime() < m_nFireTime || m_Status == SkillStatus::SS_IDLE)
+    if (m_Status == SS_IDLE)
         return;
 
-    if (m_Status == SkillStatus::SS_CAST)
-        m_Status = SkillStatus::SS_FIRE;
-
-    /*if(pTarget != nullptr && !pTarget->IsInWorld())
-    {
-        m_pOwner->CancelSkill();
-
-
-    }*/
-
-    auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(m_hTarget);
-
-    if (m_pOwner == nullptr || m_pOwner->GetHealth() == 0)
+    if (m_pOwner->GetHealth() == 0)
     {
         m_pOwner->CancelSkill();
         return;
     }
 
-    if (m_Status == SkillStatus::SS_FIRE)
+    auto t = sWorld.GetArTime();
+
+    auto pRawTarget = sMemoryPool.GetObjectInWorld<WorldObject>(m_hTarget);
+    Unit *pTarget{nullptr};
+    if (m_Status != SS_COMPLETE && pRawTarget != nullptr && pRawTarget->IsUnit())
     {
-        // First fire
+        pTarget         = pRawTarget->As<Unit>();
+        if (auto tmpPos = m_pOwner->GetPosition(); pRawTarget->GetPosition().GetExactDist2d(&tmpPos) > 525.0f)
+        {
+            m_pOwner->CancelSkill();
+            return;
+        }
+
+        if (pTarget->GetHealth() == 0 && !GetSkillBase()->IsValidToCorpse())
+        {
+            m_pOwner->CancelSkill();
+            return;
+        }
+
+        if (pTarget->GetHealth() != 0 && GetSkillBase()->IsValidToCorpse())
+        {
+            m_pOwner->CancelSkill();
+            return;
+        }
+    }
+
+    if (m_hTarget != 0 && pRawTarget == nullptr)
+    {
+        m_pOwner->CancelSkill();
+        return;
+    }
+
+    if (t < m_nFireTime)
+        return;
+
+    if (m_Status == SS_CAST)
+    {
+        int nElementalType = GetSkillBase()->GetElementalType();
+        /// @Todo:
+        /// m_pOwner->PrepareRemoveExhaustiveSkillStateMod( GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay() );
+        m_Status = SS_FIRE;
+    }
+    /// Retail locks here, please don't mind this here
+    if (pRawTarget != nullptr && pRawTarget->IsInWorld())
+    {
+        if (!pRawTarget->IsInWorld())
+        {
+            m_pOwner->CancelSkill();
+            m_hTarget = 0;
+            broadcastSkillMessage(m_pOwner, 0, 0, TS_SKILL__TYPE::ST_Cancel);
+            return;
+        }
+    }
+    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON || GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON_AND_ADD_STATE)
+    {
+        if (!m_pOwner->IsPlayer())
+        {
+            m_pOwner->CancelSkill();
+            return;
+        }
+
+        auto pMainSummon = m_pOwner->As<Player>()->GetMainSummon();
+        if (pMainSummon == nullptr || !pMainSummon->IsInWorld())
+        {
+            m_pOwner->CancelSkill();
+            return;
+        }
+        /// More locks here in retail
+    }
+
+    if (pTarget != nullptr && !pTarget->IsInWorld())
+    {
+        m_pOwner->CancelSkill();
+        m_hTarget = 0;
+        broadcastSkillMessage(m_pOwner, 0, 0, TS_SKILL__TYPE::ST_Cancel);
+        return;
+    }
+
+    if ((GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
+         GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
+         GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP) &&
+        (pRawTarget != nullptr || !pRawTarget->IsInWorld()))
+    {
+        m_pOwner->CancelSkill();
+        m_hTarget = 0;
+        broadcastSkillMessage(m_pOwner, 0, 0, TS_SKILL__TYPE::ST_Cancel);
+        return;
+    }
+
+    bool bSuccess{true};
+    if (m_Status == SS_FIRE)
+    {
+        int cost_hp{ };
+        int cost_mp{ };
+        int cost_exp{ };
+        int cost_jp{ };
+
         if (!m_bMultiple || m_nCurrentFire == 0)
         {
-            // Set remaining cooltime of the skill
-            SetRemainCoolTime(GetSkillCoolTime());
+            auto next_cool_time = GetSkillCoolTime();
+            SetRemainCoolTime(next_cool_time);
 
-            // @todo:
-            // Set remaining cooltime for every other skill in the same cool_time_group_id
-            if (m_SkillBase->cool_time_group_id != 0)
-            {
-//                         v85 = v3->m_pOwner;
-//                         *(v1 - 248) = v84->cool_time_group_id;
-//                         *(v1 - 252) = &::::_mySkillFunctor::_vftable_;
-//                         *(v1 - 244) = v83;
-//                         this.m_Owner.EnumActiveSkill((v1 - 252));
-            }
-            // Send skill list with updated skill cooltimes
-            Player *player{nullptr};
+            /// @todo: Set cooltime group
+
+            Player *pClient{nullptr};
             if (m_pOwner->IsPlayer())
-            {
-                player = m_pOwner->As<Player>();
-                if (player != nullptr)
-                    Messages::SendSkillList(player, m_pOwner, m_nSkillID);
-            }
+                pClient = m_pOwner->As<Player>();
             else if (m_pOwner->IsSummon())
+                pClient = m_pOwner->As<Summon>()->GetMaster();
+
+            if (pClient != nullptr)
+                Messages::SendSkillList(pClient, m_pOwner, GetSkillId());
+
+            if ((GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_AURA || GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
+                cost_mp = 0;
+            else
+                cost_mp = static_cast< int >((GetSkillBase()->GetCostMP(GetRequestedSkillLevel(), GetSkillEnhance()) + (GetSkillBase()->GetCostMPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxMana() / 100)) * m_pOwner->GetManaCostRatio((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()));
+
+            cost_hp  = static_cast< int >( GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) + (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxHealth() / 100));
+            cost_exp = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(), GetSkillEnhance());
+            cost_jp  = GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance());
+
+            if (cost_hp > 0)
+                m_pOwner->SetHealth(m_pOwner->GetHealth() - cost_hp);
+            if (cost_mp > 0)
+                m_pOwner->SetMana(m_pOwner->GetMana() - cost_mp);
+            if (cost_exp > 0)
+                m_pOwner->SetEXP(m_pOwner->GetEXP() - cost_exp);
+            if (cost_jp > 0)
+                m_pOwner->SetJP(m_pOwner->GetJP() - cost_jp);
+
+            m_pOwner->RemoveEnergy(GetSkillBase()->GetCostEnergy(GetRequestedSkillLevel()));
+
+            if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
             {
-                auto pSummon = m_pOwner->As<Summon>();
-                if (pSummon != nullptr)
-                    player = pSummon->GetMaster();
-                if (player != nullptr)
-                    Messages::SendSkillList(player, m_pOwner, m_nSkillID);
+                int decHP = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+
+                if (m_pOwner->IsPlayer() ||
+                    m_pOwner->As<Player>()->GetMainSummon() != nullptr)
+                {
+                    auto pSummon = m_pOwner->As<Player>()->GetMainSummon();
+
+                    int nPrevHP = pSummon->GetHealth();
+                    pSummon->AddHealth(0 - std::min(pSummon->GetHealth() - 1, decHP));
+
+                    Messages::BroadcastHPMPMessage(pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
+                }
             }
-            // @todo: Add aura handling here, see Pyrok/Pseudocode
+            else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+            {
+                int decHP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
 
-            // Calculate skill cost
-            if (GetCurrentMPCost() > 0)
-                m_pOwner->SetMana(m_pOwner->GetMana() - GetCurrentMPCost());
-            if (GetCurrentHPCost() > 0)
-                m_pOwner->SetHealth(m_pOwner->GetHealth() - GetCurrentHPCost());
-            if (m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel) > 0)
-                m_pOwner->RemoveEnergy(m_SkillBase->GetCostEnergy(m_nRequestedSkillLevel));
+                if (m_pOwner->IsPlayer() ||
+                    m_pOwner->As<Player>()->GetMainSummon() != nullptr)
+                {
+                    auto pSummon = m_pOwner->As<Player>()->GetMainSummon();
 
+                    int nPrevHP = pSummon->GetHealth();
+                    pSummon->AddHealth(0 - std::min(pSummon->GetHealth() - 1, decHP));
+
+                    Messages::BroadcastHPMPMessage(pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
+                }
+            }
+            /// @Todo: Item Cost
         }
 
-        bool bIsSuccess = false;
+        FireSkill(pTarget, bSuccess);
 
-        FireSkill(pTarget, bIsSuccess);
-        if (pTarget == nullptr)
-        {
-
-        }
-        broadcastSkillMessage(m_pOwner, 0, 0, 0);
+        if (pTarget != nullptr)
+            broadcastSkillMessage(m_pOwner, pTarget, cost_hp, cost_mp, TS_SKILL__TYPE::ST_Fire);
+        else
+            broadcastSkillMessage(m_pOwner, cost_hp, cost_mp, TS_SKILL__TYPE::ST_Fire);
 
         if (!m_bMultiple || m_nCurrentFire == m_nTotalFire)
         {
-            m_nFireTime += m_SkillBase->delay_common;
-            m_Status = SkillStatus::SS_COMPLETE;
-        }
+            m_nFireTime += GetSkillBase()->GetCommonDelay();
+            m_Status = SS_COMPLETE;
 
-        if (bIsSuccess)
-        {
-            Player *pOwner = m_pOwner->IsSummon() ? ((Summon *)m_pOwner)->GetMaster() : (Player *)m_pOwner;
-            Messages::SendSkillList(pOwner, m_pOwner, m_nSkillID);
+            /// @todo: SetCurrentEndurance, gear
         }
     }
 
-    if (m_Status == SkillStatus::SS_COMPLETE && sWorld.GetArTime() >= m_nFireTime)
+    if (m_Status == SS_COMPLETE)
     {
-        broadcastSkillMessage(m_pOwner, 0, 0, 5);
+        if (sWorld.GetArTime() < m_nFireTime)
+            return;
+
+        if (pTarget != nullptr)
+            broadcastSkillMessage(m_pOwner, pTarget, 0, 0, TS_SKILL__TYPE::ST_Complete);
+        else
+            broadcastSkillMessage(m_pOwner, 0, 0, TS_SKILL__TYPE::ST_Complete);
+
         m_pOwner->OnCompleteSkill();
         Init();
     }
@@ -1877,310 +1986,150 @@ void Skill::ADD_ENERGY()
 
 void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
 {
-// .text:004C4967 pos             = ArPosition ptr -90h
-// .text:004C4967 var_80          = ArPosition ptr -80h
-// .text:004C4967 var_70          = dword ptr -70h
-// .text:004C4967 var_5C          = dword ptr -5Ch
-// .text:004C4967 fo              = StructSkill::process_target::__l23::myPartyFunctor ptr -48h
-// .text:004C4967 _fo             = GuildManager::GuildFunctor ptr -34h
-// .text:004C4967 this            = StructSkill::process_target::__l45::myPartyFunctor ptr -20h
-// .text:004C4967 pSummon         = dword ptr -0Ch
-// .text:004C4967 var_4           = dword ptr -4
-// .text:004C4967 t               = dword ptr  8
-// .text:004C4967 functor         = dword ptr  0Ch
-// .text:004C4967 pTargetPlayer   = dword ptr  10h
-//
-// Data           :   enregistered ecx, Object Ptr, Type: struct StructSkill * const, this
-// Data           :   ebp Relative, [00000008], Param, Type: unsigned long, t
-// Data           :   ebp Relative, [0000000C], Param, Type: struct SKILL_TARGET_FUNCTOR &, functor
-// Data           :   ebp Relative, [00000010], Param, Type: struct StructCreature *, pTarget
-// Typedef        :   StructSkill::process_target::__l23::myPartyFunctor, Type: struct StructSkill::process_target::__l23::myPartyFunctor
-// Data           :   ebp Relative, [FFFFFFB8], Local, Type: struct StructSkill::process_target::__l23::myPartyFunctor, fo
-// Typedef        :   StructSkill::process_target::__l34::myGuildFunctor, Type: struct StructSkill::process_target::__l34::myGuildFunctor
-// Data           :   ebp Relative, [FFFFFFCC], Local, Type: struct StructSkill::process_target::__l34::myGuildFunctor, fo
-// Typedef        :   StructSkill::process_target::__l45::myPartyFunctor, Type: struct StructSkill::process_target::__l45::myPartyFunctor
-// Data           :   ebp Relative, [FFFFFFE0], Local, Type: struct StructSkill::process_target::__l45::myPartyFunctor, fo
-// Data           :   ebp Relative, [FFFFFF70], Local, Type: struct ArPosition, pos
-// Data           :   ebp Relative, [FFFFFFF4], Local, Type: struct StructSummon *, pSummon
-// Typedef        :   StructSkill::process_target::__l69::myPartyFunctor, Type: struct StructSkill::process_target::__l69::myPartyFunctor
-// Data           :   ebp Relative, [FFFFFFA4], Local, Type: struct StructSkill::process_target::__l69::myPartyFunctor, fo
-// Data           :   ebp Relative, [FFFFFF80], Local, Type: struct ArPosition, pos
-// Data           :   ebp Relative, [00000010], Local, Type: struct StructPlayer *, pTargetPlayer
-// Typedef        :   StructSkill::process_target::__l106::myPartyFunctor, Type: struct StructSkill::process_target::__l106::myPartyFunctor
-// Data           :   ebp Relative, [FFFFFF90], Local, Type: struct StructSkill::process_target::__l106::myPartyFunctor, fo
-
-//             v4 = this;
-//             v5 = this.m_SkillBase;
-//             v6 = this.m_SkillBase.target;
-
-    switch (m_SkillBase->target)
+    switch (GetSkillBase()->GetSkillTargetType())
     {
-        case TARGET_TYPE::TARGET_TARGET: // 1
-        case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER: // 6
-            if (m_SkillBase->target == TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER && pTarget == m_pOwner)
-                return;
-            if (m_SkillBase->is_need_target != 0)
+        case TARGET_TYPE::TARGET_TARGET:
+        case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER:
+        {
+            if (GetSkillBase()->GetSkillTargetType() == TARGET_TARGET_EXCEPT_CASTER && pTarget == m_pOwner)
+                break;
+
+            if (GetSkillBase()->IsNeedTarget())
             {
-                if (pTarget == nullptr)
-                    return;
-                fn.onCreature(this, t, m_pOwner, pTarget);
+                if (pTarget)
+                    fn.onCreature(this, t, m_pOwner, pTarget);
             }
             else
-            {
                 fn.onCreature(this, t, m_pOwner, m_pOwner);
-            }
-            return;
-
-        case TARGET_TYPE::TARGET_REGION_WITH_TARGET: // 2
-        case TARGET_TYPE::TARGET_REGION_WITHOUT_TARGET: // 3
-        case TARGET_TYPE::TARGET_REGION: // 4
-            if (pTarget == nullptr)
-                return;
-            fn.onCreature(this, t, m_pOwner, pTarget);
-            return;
-        case TARGET_TYPE::TARGET_PARTY: // 21
-            /*
-    if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
-      return;
-    if ( !(unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
-      return;
-    v15 = v4->m_pOwner;
-    if ( v15 != pTarget )
-    {
-      v16 = *((_DWORD *)&v15[1].m_nRefCount + 1);
-      if ( v16 )
-      {
-        if ( v16 != *((_DWORD *)&pTarget[1].m_nRefCount + 1) )
-          return;
-      }
-    }
-    `StructSkill::process_target'::`23'::myPartyFunctor::myPartyFunctor(&fo, v4, t, v15, functor);
-    v18 = *(_DWORD *)(v17 + 4228);
-    if ( !v18 )
-    {
-      (**(void (__thiscall ***)(_DWORD))v17)(v17);
-      v10 = (void (__thiscall **)(_DWORD))fo.vfptr;
-      v11 = &fo;
-      goto LABEL_16;
-    }
-    v19 = (StructSkill::process_target::__l45::myPartyFunctor *)&fo;
-LABEL_26:
-    v48 = v19;
-    v47 = v18;
-    goto LABEL_27;
-             */
-        case TARGET_TYPE::TARGET_GUILD: // 22
-            /*
-    if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
-    {
-      if ( (unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
-      {
-        v7 = v4->m_pOwner;
-        if ( v7 == pTarget || (v8 = v7[1].quadTreeItem.y) == 0 || v8 == pTarget[1].quadTreeItem.y )
-        {
-          `StructSkill::process_target'::`34'::myGuildFunctor::myGuildFunctor(&v53, v4, t, v7, functor);
-          if ( !*(_DWORD *)(v9 + 4240) )
-          {
-            (**(void (__thiscall ***)(_DWORD))v9)(v9);
-            v10 = (void (__thiscall **)(_DWORD))v53.vfptr;
-            v11 = &v53;
-LABEL_16:
-            (*v10)(v11);
-            return;
-          }
-          v12 = *(_DWORD *)(v9 + 4240);
-          v13 = GuildManager::GetInstance();
-          v14 = GuildManager::DoEachMember(v13, v12, (GuildManager::GuildFunctor *)&v53.vfptr);
-          goto LABEL_28;
+            break;
         }
-      }
-    }
-             */
-        case TARGET_TYPE::TARGET_ATTACKTEAM: // 23
-            /*
-    if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
-      return;
-    if ( !(unsigned __int8)((int (__thiscall *)(_DWORD))pTarget->vfptr[1].onProcess)(pTarget) )
-      return;
-    v21 = v4->m_pOwner;
-    if ( v21 != pTarget )
-    {
-      v22 = *((_DWORD *)&v21[1].m_nRefCount + 1);
-      if ( v22 )
-      {
-        if ( v22 != *((_DWORD *)&pTarget[1].m_nRefCount + 1) )
-          return;
-      }
-    }
-    `StructSkill::process_target'::`45'::myPartyFunctor::myPartyFunctor(&v54, v4, t, v21, functor);
-    v23 = *((_DWORD *)&v21[1].m_nRefCount + 1);
-    v24 = *((_DWORD *)&v21[1].m_nRefCount + 1);
-    v25 = PartyManager::GetInstance();
-    v26 = PartyManager::GetAttackTeamLeadPartyID(v25, v24);
-    if ( v26 )
-    {
-      v27 = v26;
-      v28 = PartyManager::GetInstance();
-      v14 = PartyManager::DoEachAttackTeamMember(v28, v27, (PartyManager::PartyFunctor *)&v54.vfptr);
-      goto LABEL_28;
-    }
-    if ( !v23 )
-    {
-      v29 = v21->vfptr->GetHandle((ArSchedulerObject *)v21);
-      v54.vfptr->operator()((PartyManager::PartyFunctor *)&v54, v29);
-      v4->m_nTargetCount = 1;
-      return;
-    }
-    v48 = &v54;
-    v47 = v23;
-LABEL_27:
-    v20 = PartyManager::GetInstance();
-    v14 = PartyManager::DoEachMember(v20, v47, (PartyManager::PartyFunctor *)&v48->vfptr);
-LABEL_28:
-    v4->m_nTargetCount = v14;
-    return;
-             */
-        case TARGET_TYPE::TARGET_SUMMON: // 31
+        case TARGET_TYPE::TARGET_REGION:
+        case TARGET_TYPE::TARGET_REGION_WITH_TARGET:
+        case TARGET_TYPE::TARGET_REGION_WITHOUT_TARGET:
+        {
+            if (!m_pOwner->IsPlayer() || !pTarget->IsPlayer())
+                break;
+
+            auto pPlayer       = m_pOwner->As<Player>();
+            auto pTargetPlayer = m_pOwner->As<Player>();
+            if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 && pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
+                break;
+
+            /// @Partyfunctor
+            break;
+        }
+        case TARGET_TYPE::TARGET_GUILD:
+        {
+            if (!m_pOwner->IsPlayer() || !pTarget->IsPlayer())
+                break;
+
+            auto pPlayer       = m_pOwner->As<Player>();
+            auto pTargetPlayer = m_pOwner->As<Player>();
+            if (pPlayer != pTargetPlayer && pPlayer->GetGuildID() != 0 && pPlayer->GetGuildID() != pTargetPlayer->GetGuildID())
+                break;
+
+            /// @GuildFunctor
+            break;
+        }
+        case TARGET_TYPE::TARGET_ATTACKTEAM:
+        {
+            if (!m_pOwner->IsPlayer() || !pTarget->IsPlayer())
+                break;
+
+            auto pPlayer       = m_pOwner->As<Player>();
+            auto pTargetPlayer = m_pOwner->As<Player>();
+            if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 && pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
+                break;
+
+            /// @AttackPartyfunctor
+            break;
+        }
+        case TARGET_TYPE::TARGET_SUMMON:
         {
             Summon *pSummon{nullptr};
-            if (pTarget != nullptr && pTarget->IsInWorld())
-            {
+            if (pTarget->IsSummon() && pTarget->IsInWorld())
                 pSummon = pTarget->As<Summon>();
-            }
-            else
-            {
-                /*
-                 if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
-                   return;
-                 v44 = pTarget[1].m_anWear[22];
-                 if ( !v44 || !v44->bIsInWorld )
-                   return;
-                 pSummon = (StructSummon *)pTarget[1].m_anWear[22];
-                 */
-            }
-            if (pSummon == nullptr)
-                return;
+            else if (pTarget->IsPlayer() && pTarget->As<Player>()->GetMainSummon() != nullptr && pTarget->As<Player>()->GetMainSummon()->IsInWorld())
+                pSummon = pTarget->As<Player>()->GetMainSummon();
 
-            if (pSummon->GetExactDist2d(pTarget) > 12 * m_SkillBase->valid_range)
-                return;
+            if (pSummon == nullptr)
+                break;
+
+            auto pos = pSummon->GetPosition();
+
+            if (auto tmpPos = pTarget->GetPosition(); GetSkillBase()->GetFireRange() < pos.GetExactDist2d(&tmpPos))
+                break;
 
             fn.onCreature(this, t, m_pOwner, pSummon);
-            return;
+            break;
         }
-        case TARGET_TYPE::TARGET_PARTY_SUMMON: // 32
-            /*
-      if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[1].onProcess)() )
-        return;
-      `StructSkill::process_target'::`69'::myPartyFunctor::myPartyFunctor(&v51, v4, t, v4->m_pOwner, functor);
-      v18 = *(_DWORD *)(v43 + 4228);
-      if ( !v18 )
-      {
-        (**(void (__thiscall ***)(_DWORD))v43)(v43);
-        v10 = (void (__thiscall **)(_DWORD))v51.vfptr;
-        v11 = &v51;
-        goto LABEL_16;
-      }
-      v19 = (StructSkill::process_target::__l45::myPartyFunctor *)&v51;
-      goto LABEL_26;
-    }
-             */
-        case TARGET_TYPE::TARGET_SELF_WITH_SUMMON: // 45
-            /*
-        v37 = pTarget;
-          if ( !(unsigned __int8)((int (__thiscall *)(StructCreature *))pTarget->vfptr[1].onProcess)(pTarget) )
-          {
-            if ( !(unsigned __int8)pTarget->vfptr[2].GetHandle((ArSchedulerObject *)pTarget) )
-              return;
-            v37 = *(StructCreature **)&pTarget[1].bIsRegionChanging;
-            if ( !v37 )
-              return;
-          }
-          pTargetPlayer = (StructPlayer *)v37;
-          if ( !v37 || !v37->bIsInWorld )
-            return;
-          ((void (__stdcall *)(StructSkill *, unsigned int, StructCreature *, StructCreature *))functor->vfptr->onCreature)(
-            v4,
-            t,
-            v4->m_pOwner,
-            v37);
-          v38 = (int)&v4->m_pOwner->mv;
-          v56.x = *(float *)v38;
-          v38 += 4;
-          v56.y = *(float *)v38;
-          v38 += 4;
-          v56.z = *(float *)v38;
-          v56.face = *(float *)(v38 + 4);
-          v39 = (StructCreature *)&pTargetPlayer->m_pMainSummon->vfptr;
-          if ( v39
-            && v39->bIsInWorld
-            && v39->m_nHP
-            && (pSummon = (StructSummon *)(12 * v4->m_pSkillBase->valid_range),
-                *(float *)&pSummon = (double)(signed int)pSummon,
-                v57 = *(float *)&pSummon,
-                v40 = ArPosition::GetDistance(&v56, (ArPosition *)&v39->mv.x),
-                v40 <= v57) )
-          {
-            v34 = functor;
-            functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v39);
-          }
-          else
-          {
-            v34 = functor;
-          }
-          v41 = pTargetPlayer->m_pSubSummon;
-          if ( !v41 )
-            return;
-          if ( !v41->bIsInWorld )
-            return;
-          if ( !v41->m_nHP )
-            return;
-          *(float *)&functora = (double)(12 * v4->m_pSkillBase->valid_range);
-          v57 = *(float *)&functora;
-          v42 = ArPosition::GetDistance(&v56, (ArPosition *)&v41->mv.x);
-          if ( v42 > v57 )
-            return;
-          v50 = pTargetPlayer->m_pSubSummon;
+        case TARGET_TYPE::TARGET_PARTY_SUMMON:
+        {
+            /// @TODO: Party Functor
+            break;
         }
-        v34->vfptr->onCreature(v34, v4, t, v4->m_pOwner, (StructCreature *)v50);
-        return;
-             */
-        case TARGET_TYPE::TARGET_MASTER: // 101
-            /*
-            if ( (unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[2].GetHandle)() )
+        case TARGET_TYPE::TARGET_SELF_WITH_SUMMON:
+        {
+            Player *pTargetPlayer{nullptr};
+            if (pTarget->IsPlayer())
+                pTargetPlayer = pTarget->As<Player>();
+            else if (pTarget->IsSummon() && pTarget->As<Summon>()->GetMaster() != nullptr)
+                pTargetPlayer = pTarget->As<Summon>()->GetMaster();
+
+            if (pTargetPlayer == nullptr || !pTargetPlayer->IsInWorld())
+                break;
+
+            fn.onCreature(this, t, m_pOwner, pTargetPlayer);
+
+            auto pos = m_pOwner->GetPosition();
             {
-              v36 = *(_DWORD *)&v4->m_pOwner[1].bIsRegionChanging;
-              if ( v36 )
-              {
-                if ( *(_BYTE *)(v36 + 68) )
-                  ((void (__stdcall *)(StructSkill *, unsigned int, StructCreature *, _DWORD))functor->vfptr->onCreature)(
-                    v4,
-                    t,
-                    v4->m_pOwner,
-                    *(_DWORD *)&v4->m_pOwner[1].bIsRegionChanging);
-              }
+                Summon *pSummon = pTargetPlayer->GetMainSummon();
+                if (pSummon != nullptr && pSummon->IsInWorld() && pSummon->GetHealth() != 0 && GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
+                    fn.onCreature(this, t, m_pOwner, pSummon);
             }
-            return;
-             */
-        case TARGET_TYPE::TARGET_SELF_WITH_MASTER: // 102
-/*
-          if ( v33 != 1 )
-            return;
-          if ( !(unsigned __int8)((int (*)(void))v4->m_pOwner->vfptr[2].GetHandle)() )
-            return;
-          if ( !v4->m_pOwner->bIsInWorld )
-            return;
-          v34 = functor;
-          functor->vfptr->onCreature(functor, v4, t, v4->m_pOwner, v4->m_pOwner);
-          v35 = *(StructSummon **)&v4->m_pOwner[1].bIsRegionChanging;
-          if ( !v35
-            || !v35->bIsInWorld
-            || ArPosition::GetDistance((ArPosition *)&v35->mv.x, (ArPosition *)&v4->m_pOwner->mv.x) > 525.0 )
-          {
-            return;
-          }
-          v50 = v35;
- */
+            {
+                Summon *pSummon = pTargetPlayer->GetSubSummon();
+                if (pSummon != nullptr && pSummon->IsInWorld() && pSummon->GetHealth() != 0 && GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
+                    fn.onCreature(this, t, m_pOwner, pTargetPlayer->GetSubSummon());
+            }
+            break;
+        }
+        case TARGET_TYPE::TARGET_PARTY_WITH_SUMMON:
+        {
+            /// @Todo PartyFunctor
+            break;
+        }
+        case TARGET_TYPE::TARGET_MASTER:
+        {
+            if (!m_pOwner->IsSummon())
+                break;
+
+            Player *pTargetPlayer = m_pOwner->As<Summon>()->GetMaster();
+            if (pTargetPlayer == nullptr || !pTargetPlayer->IsInWorld())
+                break;
+
+            fn.onCreature(this, t, m_pOwner, pTargetPlayer);
+            break;
+        }
+        case TARGET_TYPE::TARGET_SELF_WITH_MASTER:
+        {
+            if (!m_pOwner->IsSummon() || !m_pOwner->IsInWorld())
+                break;
+
+            fn.onCreature(this, t, m_pOwner, m_pOwner);
+
+            Player *pTargetPlayer = m_pOwner->As<Summon>()->GetMaster();
+            if (pTargetPlayer == nullptr || !pTargetPlayer->IsInWorld())
+                break;
+
+            if (pTargetPlayer->GetExactDist2d(m_pOwner) > 525.0f)
+                break;
+
+            fn.onCreature(this, t, m_pOwner, pTargetPlayer);
+            break;
+        }
         default:
+        {
             auto result = string_format("TARGET_TYPE %d in process_target not handled yet.", m_SkillBase->target);
             if (m_pOwner->IsPlayer())
                 Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
@@ -2189,7 +2138,8 @@ LABEL_28:
                 Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
             }
             NG_LOG_DEBUG("skill", "%s", result.c_str());
-            return;
+            break;
+        }
     }
 }
 

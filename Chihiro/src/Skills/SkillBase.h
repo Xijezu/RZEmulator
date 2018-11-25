@@ -625,6 +625,7 @@ struct SkillBase
     int GetStateId() const;
     int GetStateLevel(int skill_lv, int enhance_lv);
     uint GetCastDelay(int skill_lv, int enhance);
+    uint32_t GetCommonDelay() const;
     uint GetCoolTime(int enhance) const;
     uint32_t GetFireRange() const;
     bool IsUsable(uint8 nUseIndex) const;

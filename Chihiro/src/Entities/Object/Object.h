@@ -320,6 +320,8 @@ class Object
 
         virtual bool IsPlayer() const { return false; }
 
+        virtual bool IsUnit() const { return false; }
+
         virtual bool IsSummon() const { return false; }
 
         virtual bool IsMonster() const { return false; }

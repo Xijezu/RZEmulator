@@ -300,6 +300,8 @@ class Unit : public WorldObject
 
         virtual bool IsUsingCrossBow() const { return false; }
 
+        bool IsUnit() const override { return true; }
+
         bool TurnOnAura(Skill *pSkill);
         bool TurnOffAura(Skill *pSkill);
         void ToggleAura(Skill *pSkill);
