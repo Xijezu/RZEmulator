@@ -348,5 +348,5 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
         }
 
     private:
-        std::vector<SkillResult> &m_vList;
+        std::vector<SkillResult> *m_vList;
 };
