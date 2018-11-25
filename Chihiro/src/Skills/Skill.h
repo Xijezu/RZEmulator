@@ -152,6 +152,8 @@ class Skill
         void ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget);
         void PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget);
 
+        void SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget);
+
         void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
         void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
