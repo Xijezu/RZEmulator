@@ -388,4 +388,4 @@ struct RecoveryMPSkillFunctor : public SkillTargetFunctor
         std::vector<SkillResult> *m_vList{nullptr};
         int                      nResult{0};
         bool                     m_bIsByItem{false};
-}
+};

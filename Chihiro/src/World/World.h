@@ -134,6 +134,7 @@ class World
         // skills
         void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle);
         void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle);
+        void AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time);
 
         // Quest?
         int ShowQuestMenu(Player *pPlayer);

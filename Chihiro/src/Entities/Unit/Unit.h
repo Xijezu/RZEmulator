@@ -235,6 +235,13 @@ class Unit : public WorldObject
 
         int GetMagicAvoid() const { return static_cast<int32_t>(m_Attribute.nMagicAvoid); }
 
+        /// @Todo: Implement correctly
+        bool IsKnockbackable() const { return true; }
+
+        uint32_t GetNextMovableTime() const { return m_nMovableTime; }
+
+        void SetNextMovableTime(uint32_t t) { m_nMovableTime = t; }
+
         int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
 
         int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }
