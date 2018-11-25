@@ -1399,6 +1399,11 @@ void Unit::applyPassiveSkillEffect()
             bool r = s->m_SkillBase->vf_shield_only == 0 ? s->m_SkillBase->IsUseableWeapon(GetWeaponClass()) : IsWearShield();
             if (s->m_SkillBase->vf_is_not_need_weapon != 0 || r)
                 applyPassiveSkillEffect(s);
+
+            if (s->GetSkillBase()->GetID() == SKILL_INCREASE_ENERGY)
+            {
+                SetInt32Value(UNIT_FIELD_MAX_ENERGY, GetCurrentSkillLevel(s->GetSkillBase()->GetID()));
+            }
         }
     }
 }
