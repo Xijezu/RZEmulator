@@ -1253,7 +1253,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
 void Skill::ADD_ENERGY()
 {
     for (int i = 0; i < m_nRequestedSkillLevel && m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) < m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY); i++)
-        m_pOwner->AddEnergy(1);
+        m_pOwner->AddEnergy();
 
     m_vResultList.push_back({ });
 }

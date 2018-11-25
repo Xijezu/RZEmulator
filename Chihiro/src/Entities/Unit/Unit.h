@@ -145,7 +145,7 @@ class Unit : public WorldObject
 
         uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
 
-        void AddEnergy(int nEnergy);
+        void AddEnergy();
         void RemoveEnergy(int nEnergy);
 
         /* FloatCreatureMastery*/

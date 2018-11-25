@@ -2383,7 +2383,7 @@ State *Unit::GetState(StateCode code)
     return nullptr;
 }
 
-void Unit::AddEnergy(int nEnergy)
+void Unit::AddEnergy()
 {
     if (GetInt32Value(UNIT_FIELD_ENERGY) >= GetInt32Value(UNIT_FIELD_MAX_ENERGY))
         return;
