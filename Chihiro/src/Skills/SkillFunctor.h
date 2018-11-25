@@ -348,5 +348,44 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
         }
 
     private:
-        std::vector<SkillResult> *m_vList;
+        std::vector<SkillResult> *m_vList{nullptr};
 };
+
+struct RecoveryMPSkillFunctor : public SkillTargetFunctor
+{
+        RecoveryMPSkillFunctor(std::vector<SkillResult> *pvList, bool bIsByItem = false) : m_vList(pvList), m_bIsByItem(bIsByItem)
+        {
+        }
+
+        bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
+        {
+            int slv     = pSkill->GetRequestedSkillLevel();
+            int enhance = pSkill->GetSkillEnhance();
+            nResult =
+                    pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful()) * (pSkill->GetVar(0) + slv * pSkill->GetVar(1))
+                    + pSkill->GetVar(2) + slv * pSkill->GetVar(3) + enhance * pSkill->GetVar(6) +
+                    +pTarget->GetMaxMana() * (pSkill->GetVar(4) + slv * pSkill->GetVar(5) + enhance * pSkill->GetVar(7));
+
+            if (pTarget->GetHealth() == 0)
+                nResult = 0;
+            else if (m_bIsByItem)
+                nResult = pTarget->MPHealByItem(nResult);
+            else
+                nResult = pTarget->MPHeal(nResult);
+
+            SkillResult skill_result{ };
+            skill_result.type                   = TS_SKILL__HIT_TYPE::SHT_ADD_MP;
+            skill_result.hTarget                = pTarget->GetHandle();
+            skill_result.hitAddStat.nIncStat    = nResult;
+            skill_result.hitAddStat.target_stat = pTarget->GetMana();
+
+            m_vList->push_back(skill_result);
+
+            return true;
+        }
+
+    private:
+        std::vector<SkillResult> *m_vList{nullptr};
+        int                      nResult{0};
+        bool                     m_bIsByItem{false};
+}

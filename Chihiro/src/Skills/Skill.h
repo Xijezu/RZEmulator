@@ -151,7 +151,6 @@ class Skill
         void ADD_STATE_BY_SELF_COST(Unit *pTarget);
         void ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget);
         void PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget);
-
         void SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget);
 
         void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
@@ -165,7 +164,6 @@ class Skill
         void TOGGLE_AURA(Unit *pTarget);
         void SKILL_ADD_HP_MP(Unit *pTarget);
 
-        void MANA_SKILL_FUNCTOR(Unit *pTarget);
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();
         void TOWN_PORTAL();
