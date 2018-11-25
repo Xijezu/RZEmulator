@@ -24,7 +24,7 @@
 #include "RegionContainer.h"
 #include "GameContent.h"
 
-Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0)
+Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0), m_nAuraRefreshTime(0)
 {
     m_nSkillUID   = _uid;
     m_nSkillID    = _id;
@@ -133,7 +133,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
 
     if (GetSkillBase()->IsNeedWeapon())
     {
-        if (GetSkillBase()->IsUsable(ItemClass::CLASS_SHIELD))
+        if (m_SkillBase->IsUseableWeapon(ItemClass::CLASS_SHIELD))
         {
             if (!m_pOwner->IsWearShield())
                 return InitError(TS_RESULT_LIMIT_WEAPON);
@@ -754,10 +754,23 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             DO_UNSUMMON();
             break;
         case EF_ADD_STATE:
+        case EF_ADD_STATE_BY_TARGET_TYPE:
         {
-            FireSkillStateSkillFunctor fn{ };
-            fn.pvList = m_vResultList;
+            StateSkillFunctor fn{&m_vResultList};
             process_target(sWorld.GetArTime(), fn, pTarget);
+            switch (GetSkillId())
+            {
+                case SKILL_ITEM_PIECE_OF_STRENGTH:
+                case SKILL_ITEM_PIECE_OF_VITALITY:
+                case SKILL_ITEM_PIECE_OF_DEXTERITY:
+                case SKILL_ITEM_PIECE_OF_AGILITY:
+                case SKILL_ITEM_PIECE_OF_INTELLIGENCE:
+                case SKILL_ITEM_PIECE_OF_MENTALITY:
+                    if (pTarget != nullptr && pTarget->IsPlayer())
+                        pTarget->As<Player>()->Save(true);
+                default:
+                    break;
+            }
         }
             break;
         case EF_MAGIC_SINGLE_DAMAGE:
@@ -836,6 +849,11 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_SELF:
         {
             PHYSICAL_MULTIPLE_REGION_DAMAGE(pTarget);
+            break;
+        }
+        case EF_PHYSICAL_SINGLE_DAMAGE_ABSORB:
+        {
+            PHYSICAL_SINGLE_DAMAGE_ABSORB(pTarget);
             break;
         }
         case EF_RESURRECTION:
@@ -963,11 +981,9 @@ void Skill::PostFireSkill(Unit *pTarget)
 
     if (!vNeedStateList.empty())
     {
-        FireSkillStateSkillFunctor fn{ };
-        fn.pvList = m_vResultList;
-        auto t = sWorld.GetArTime();
-
-        for (auto &unit : vNeedStateList)
+        StateSkillFunctor fn{&m_vResultList};
+        auto              t = sWorld.GetArTime();
+        for (auto         &unit : vNeedStateList)
         {
             process_target(t, fn, unit);
         }
@@ -2114,11 +2130,236 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
 
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) > 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) > 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
+    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) != 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {
         DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
         sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, static_cast<ElementalType >(elemental_type), Damage, pDealTarget->GetHandle());
     }
+}
+
+bool Skill::ProcAura()
+{
+    auto   t = sWorld.GetArTime();
+    Summon *pSummon{nullptr};
+
+    if (GetAuraMPDecTime() < t + 7500)
+    {
+        float fDecMP    = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
+        int   nDecHavoc = 0;
+
+        /// @Todo: Havoc
+
+        if (m_pOwner->GetMana() < fDecMP /* @TODO: Havoc */ )
+            return false;
+
+        m_pOwner->SetMana(static_cast<int32_t>(m_pOwner->GetMana() - fDecMP ));
+        SetAuraMPDecTime(t);
+
+        if (m_pOwner->IsInWorld())
+            Messages::BroadcastHPMPMessage(m_pOwner, 0, m_pOwner->GetMana() - fDecMP, true);
+
+        if (m_pOwner->IsSummon())
+        {
+            pSummon = m_pOwner->As<Summon>();
+            if (pSummon->GetMaster() && pSummon->IsInWorld())
+                Messages::SendHPMPMessage(pSummon->GetMaster(), m_pOwner, 0, m_pOwner->GetMana() - fDecMP, false);
+        }
+        /// @Todo: Havoc
+    }
+
+    if (!m_pOwner->IsInWorld())
+        return true;
+
+    std::vector<uint32> vList{ };
+    sWorld.EnumMovableObject(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), GetSkillBase()->GetFireRange(), vList, true, true);
+
+    if (vList.empty())
+        return true;
+
+    auto et = t + TOGGLE_LIVE_TIME;
+
+    bool bApplySummon{false};
+
+    for (auto &pTargetHandle : vList)
+    {
+        auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(pTargetHandle);
+        if (pTarget == nullptr /* @TODO: IsPet */)
+            continue;
+        auto nTargetType = GetSkillBase()->GetSkillTargetType();
+
+        if (GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA)
+        {
+            if (pSummon != nullptr)
+                pTarget = pSummon;
+            else if (pTarget->IsSummon())
+            {
+                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                    continue;
+            }
+            else
+                continue;
+
+            if (GetVar(5) != 0)
+                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(5)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            if (GetVar(6) != 0)
+                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(6)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            if (GetVar(7) != 0)
+                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(7)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+            bApplySummon = true;
+            break;
+        }
+        else if (nTargetType == TARGET_TARGET)
+        {
+            if (pTarget != m_pOwner)
+                continue;
+        }
+        else if (pTarget->IsSummon())
+        {
+            if (nTargetType != TARGET_PARTY_SUMMON
+                && nTargetType != TARGET_PARTY_WITH_SUMMON
+                && nTargetType != TARGET_SUMMON
+                && nTargetType != TARGET_CREATURE_TYPE_NONE
+                && nTargetType != TARGET_CREATURE_TYPE_FIRE
+                && nTargetType != TARGET_CREATURE_TYPE_WATER
+                && nTargetType != TARGET_CREATURE_TYPE_WIND
+                && nTargetType != TARGET_CREATURE_TYPE_EARTH
+                && nTargetType != TARGET_CREATURE_TYPE_LIGHT
+                && nTargetType != TARGET_CREATURE_TYPE_DARK
+                && nTargetType != TARGET_SELF_WITH_SUMMON
+                && nTargetType != TARGET_SELF_WITH_MASTER)
+                continue;
+
+            if (nTargetType == TARGET_PARTY_SUMMON || nTargetType == TARGET_PARTY_WITH_SUMMON)
+            {
+                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>()->GetPartyID())
+                {
+                    if (m_pOwner->As<Player>()->GetPartyID() != pTarget->As<Summon>()->GetMaster()->GetPartyID())
+                        continue;
+                }
+                else
+                {
+                    if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                        continue;
+                }
+            }
+            else if (nTargetType == TARGET_SELF_WITH_MASTER)
+            {
+                if (m_pOwner != pTarget)
+                    continue;
+            }
+            else
+            {
+                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                    continue;
+                /// @TODO: SummonElementalType
+            }
+        }
+        else if (pTarget->IsPlayer())
+        {
+            if (nTargetType != TARGET_PARTY &&
+                nTargetType != TARGET_PARTY_WITH_SUMMON &&
+                nTargetType != TARGET_SELF_WITH_SUMMON &&
+                nTargetType != TARGET_MASTER &&
+                nTargetType != TARGET_SELF_WITH_MASTER)
+                continue;
+
+            if (nTargetType == TARGET_PARTY || nTargetType == TARGET_PARTY_WITH_SUMMON)
+            {
+                Player *pOwnPlayer{nullptr};
+
+                if (m_pOwner->IsPlayer())
+                    pOwnPlayer = m_pOwner->As<Player>();
+                if (m_pOwner->IsSummon())
+                    pOwnPlayer = m_pOwner->As<Summon>()->GetMaster();
+
+                if (pOwnPlayer == nullptr)
+                    continue;
+
+                if (pOwnPlayer->GetPartyID() == 0 && pTarget != m_pOwner)
+                    continue;
+                if (pTarget->IsPlayer() && pOwnPlayer->GetPartyID() != pTarget->As<Player>()->GetPartyID())
+                    continue;
+            }
+            else if (nTargetType == TARGET_SELF_WITH_SUMMON)
+            {
+                if (pTarget != m_pOwner)
+                    continue;
+            }
+            else if (nTargetType == TARGET_SELF_WITH_MASTER)
+            {
+                if (m_pOwner->IsSummon() && m_pOwner->As<Summon>()->GetMaster() != pTarget)
+                    continue;
+            }
+        }
+        else
+        {
+            continue;
+        }
+
+        pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetSkillBase()->GetStateId()), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+        if (GetVar(3) != 0)
+            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(3)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+        if (GetVar(4) != 0)
+            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(4)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+    }
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA)
+    {
+        if (!bApplySummon)
+            return false;
+
+        Unit *pTarget{nullptr};
+        if (pSummon)
+            pTarget = pSummon->GetMaster();
+        else
+            pTarget = m_pOwner;
+
+        pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetSkillBase()->GetStateId()), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+        if (GetVar(3) != 0)
+            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(3)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+
+        if (GetVar(4) != 0)
+            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(4)), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+    }
+    return true;
+}
+
+void Skill::PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget)
+{
+    if (!pTarget)
+        return;
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+    int nDamage        = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    sWorld.AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+
+    int nAddHP = Damage.nDamage * GetVar(4);
+    int nAddMP = Damage.nDamage * GetVar(5);
+    m_pOwner->AddHealth(nAddHP);
+    m_pOwner->AddMana(nAddMP);
+
+    SkillResult skill_result{ };
+    skill_result.type                   = TS_SKILL__HIT_TYPE::SHT_ADD_HP;
+    skill_result.hTarget                = m_pOwner->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nAddHP;
+    skill_result.hitAddStat.target_stat = m_pOwner->GetHealth();
+    m_vResultList.push_back(skill_result);
+
+    skill_result.type                   = TS_SKILL__HIT_TYPE::SHT_ADD_MP;
+    skill_result.hTarget                = m_pOwner->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nAddMP;
+    skill_result.hitAddStat.target_stat = m_pOwner->GetMana();
+    m_vResultList.push_back(skill_result);
 }

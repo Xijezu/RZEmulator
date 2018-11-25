@@ -56,7 +56,7 @@ class Skill
 
         int GetCurrentSkillLevel() const { return m_nSkillLevel + m_nSkillLevelAdd; }
 
-        const SkillBase *GetSkillBase() const { return m_SkillBase; }
+        SkillBase *GetSkillBase() const { return m_SkillBase; }
 
         uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
 
@@ -95,15 +95,34 @@ class Skill
         bool     m_bMultiple{false};
         uint     m_nTargetCount;
         uint     m_nFireCount;
+        uint32_t m_nAuraMPDecTime;
+        uint32_t m_nAuraRefreshTime;
 
         SkillStatus m_Status{ };
     protected:
         void assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp);
         void Init();
     private:
+        enum
+        {
+            MAX_SKILL_LEVEL     = 50,
+            MAX_TOGGLE_GROUP    = 20,
+            MAX_SKILL_VALUE     = 20,
+            TOGGLE_REFRESH_TIME = 500,
+            TOGGLE_LIVE_TIME    = 1100,
+        };
+
         int InitError(uint16_t);
         int GetCurrentMPCost();
         int GetCurrentHPCost();
+
+        uint32_t GetAuraMPDecTime() { return m_nAuraMPDecTime; }
+
+        void SetAuraMPDecTime(uint32_t nTime) { m_nAuraMPDecTime = nTime; }
+
+        uint32_t GetAuraRefreshTime() { return m_nAuraRefreshTime; }
+
+        void SetAuraRefreshTime(uint32_t nTime) { m_nAuraRefreshTime = nTime; }
 
         uint32_t GetTargetHandle() const { return m_hTarget; }
 
@@ -133,6 +152,7 @@ class Skill
         void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget);
         void TAUNT(Unit *pTarget);
 
         void TOGGLE_AURA(Unit *pTarget);

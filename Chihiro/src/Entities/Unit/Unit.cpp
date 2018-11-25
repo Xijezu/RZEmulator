@@ -189,6 +189,16 @@ void Unit::OnUpdate()
     }
     this->regenHPMP(ct);
 
+    if (!m_vAura.empty())
+    {
+        for (auto &aura : m_vAura)
+        {
+            auto pSkill = GetSkill(aura.second);
+            if (pSkill != nullptr && pSkill->GetAuraRefreshTime() + 700 <= ct && this->onProcAura(pSkill, aura.first))
+                pSkill->SetAuraRefreshTime(ct);
+        }
+    }
+
     if (IsInWorld())
     {
         if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct)
@@ -2329,7 +2339,7 @@ bool Unit::TurnOnAura(Skill *pSkill)
         return false;
     }
 
-    m_vAura[pSkill->m_SkillBase->toggle_group] = pSkill;
+    m_vAura.emplace(pSkill->GetSkillBase()->GetToggleGroup(), pSkill->GetSkillId());
     AddState(SG_NORMAL, (StateCode)pSkill->m_SkillBase->state_id, GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nSkillLevel, pSkill->GetSkillEnhance()), sWorld.GetArTime(), 0, true, 0, "");
 
     Messages::SendToggleInfo(this, pSkill->m_nSkillID, true);
@@ -2355,8 +2365,8 @@ void Unit::ToggleAura(Skill *pSkill)
     bool bNewAura = m_vAura.count(pSkill->m_SkillBase->toggle_group) == 0;
     if (m_vAura.count(pSkill->m_SkillBase->toggle_group) != 0)
     {
-        bNewAura = m_vAura[pSkill->m_SkillBase->toggle_group] != pSkill;
-        TurnOffAura(m_vAura[pSkill->m_SkillBase->toggle_group]);
+        bNewAura = m_vAura[pSkill->m_SkillBase->toggle_group] != pSkill->GetSkillId();
+        TurnOffAura(GetSkill(m_vAura[pSkill->m_SkillBase->toggle_group]));
     }
     if (bNewAura)
         TurnOnAura(pSkill);
@@ -2479,4 +2489,12 @@ int Unit::GetMagicPoint(ElementalType type, bool bPhysical, bool bBad)
         }
     }*/
     return m_Attribute.nMagicPoint;
+}
+
+bool Unit::onProcAura(Skill *pSkill, int nRequestedLevel)
+{
+    pSkill->SetRequestedSkillLevel(nRequestedLevel);
+    bool res = pSkill->ProcAura();
+    pSkill->SetRequestedSkillLevel(0);
+    return res;
 }

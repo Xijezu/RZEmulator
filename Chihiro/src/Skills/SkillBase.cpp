@@ -326,3 +326,23 @@ bool SkillBase::NeedStateExhaust() const
 {
     return need_state_exhaust;
 }
+
+uint32_t SkillBase::GetFireRange() const
+{
+    return valid_range * 12;
+}
+
+int SkillBase::GetStateId() const
+{
+    return state_id;
+}
+
+int SkillBase::GetProbabilityOnHit(int slv) const
+{
+    return probability_on_hit + slv * probability_inc_by_slv;
+}
+
+int SkillBase::GetStateType() const
+{
+    return state_type;
+}

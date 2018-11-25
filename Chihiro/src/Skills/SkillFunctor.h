@@ -59,118 +59,230 @@ struct HealingSkillFunctor : public SkillTargetFunctor
 
     private:
         std::vector<SkillResult> *m_pSRList{nullptr};
-        bool m_bIsByItem;
+        bool                     m_bIsByItem;
 };
 
-struct FireSkillStateSkillFunctor : public SkillTargetFunctor
+struct StateSkillFunctor : public SkillTargetFunctor
 {
-    std::vector<SkillResult> pvList;
-
-    bool onCreature(Skill *pSkill, uint t, Unit *pCaster, Unit *pTarget) override
-    {
-        int  chanceRes = 1;
-        bool bResult   = true;
-        if (pSkill->m_SkillBase->is_harmful != 0)
+        StateSkillFunctor(std::vector<SkillResult> *pResultList) : m_vResult(pResultList)
         {
-            if (pSkill->m_SkillBase->id >= 6008 && pSkill->m_SkillBase->id <= 6010)
-            {
-                if (GameRule::GetChipLevelLimit(pSkill->m_nRequestedSkillLevel) >= pTarget->GetLevel())
-                {
-                    chanceRes = 1;
-                }
-                else
-                {
-                    chanceRes = (10 * (GameRule::GetChipLevelLimit(pSkill->m_nRequestedSkillLevel) - pTarget->GetLevel() + 10)) - ((uint)rand32() % 100);
-                }
-            }
-            else if (pSkill->m_SkillBase->effect_type >= 301 && pSkill->m_SkillBase->effect_type <= 309)
-            {
-                //chanceRes = (int)((pCaster->m_Attribute.nMagicAccuracy - pCaster->m_Attribute.nMagicAvoid))
-                chanceRes = 1;
-            }
-            else
-            {
-                chanceRes = (pSkill->m_SkillBase->probability_on_hit + pSkill->m_nRequestedSkillLevel * pSkill->m_SkillBase->probability_inc_by_slv);
-            }
         }
-        if (chanceRes <= 0)
-        {
-            bResult = false;
-        }
-        else
-        {
-            int  gss      = pSkill->m_SkillBase->GetStateSecond(pSkill->m_nRequestedSkillLevel, pSkill->GetSkillEnhance());
-            uint end_time = 0;
-            if (gss >= 0)
-                end_time = t + gss * 100;
-            else
-                end_time = t + 6000;
 
-            switch (pSkill->m_SkillBase->effect_type)
+        bool onCreature(Skill *pSkill, uint32_t t, Unit *pCaster, Unit *pTarget) override
+        {
+            bool bResult{true};
+
+            if (pSkill->GetSkillBase()->IsHarmful())
             {
-                case 301:
-                case 302:
-                case 305:
-                case 306:
+                if (pSkill->GetSkillId() == SKILL_FORCE_CHIP || pSkill->GetSkillId() == SKILL_SOUL_CHIP || pSkill->GetSkillId() == SKILL_LUNA_CHIP)
                 {
-                    int count  = 5;
-                    int nLevel = 0;
-                    if (pSkill->m_SkillBase->effect_type == 305 || pSkill->m_SkillBase->effect_type == 306)
-                        count = 0;
-                    nLevel    = pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, pSkill->GetSkillEnhance());
-                    StateCode stateCode{ };
-                    if (count > 0)
+                    if (GameRule::GetChipLevelLimit(pSkill->GetRequestedSkillLevel() - 1) < pTarget->GetLevel())
                     {
+                        int nRatio = 100 - (pTarget->GetLevel() - GameRule::GetChipLevelLimit(pSkill->GetRequestedSkillLevel() - 1)) * 10;
+                        if (nRatio < rand32() % 100)
+                            bResult = false;
+                    }
+                }
+            }
+            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV ||
+                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
+            {
+                int nAccuracyBonus = pSkill->GetSkillBase()->GetHitBonus(pSkill->GetSkillEnhance(), pCaster->GetLevel() - pTarget->GetLevel());
+                if ((50 + pCaster->GetMagicAccuracy() - pTarget->GetMagicAvoid() + nAccuracyBonus) < irand(0, 100))
+                    bResult = false;
+            }
+            else
+            {
+                if (pSkill->GetSkillBase()->GetProbabilityOnHit(pSkill->GetRequestedSkillLevel()) < irand(0, 100))
+                    bResult = false;
+            }
+
+            if (bResult)
+            {
+                int end_time{0};
+                int nEndTime = pSkill->GetSkillBase()->GetStateSecond(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
+
+                if (nEndTime / 100 == -1)
+                    end_time = -1;
+                if (nEndTime < 0)
+                    end_time = t + 6000;
+                else
+                    end_time = t + nEndTime;
+
+                if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
+                    pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
+                    pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
+                    pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+                {
+                    int count = 5;
+
+                    if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
+                        pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+                        count = 0;
+
+                    int nLevel = pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
+
+                    for (int i = -1; i < count; ++i)
+                    {
+                        StateCode code{ };
+                        if (i < 0)
+                            code = static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId());
+                        else
+                            code = static_cast<StateCode >(pSkill->GetVar(i));
+
+                        if (code == 0)
+                            continue;
+
+                        bResult = pTarget->AddState((StateType)pSkill->GetSkillBase()->GetStateType(), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                    }
+                }
+                else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE)
+                {
+                    int count = 5;
+
+                    bResult = false;
+                    for (int i = -1; i < count; ++i)
+                    {
+                        if (pTarget->GetCreatureGroup() == pSkill->GetVar(7 + i))
+                        {
+                            bResult = true;
+                            break;
+                        }
+                    }
+
+                    if (bResult)
+                    {
+                        int nLevel = pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
+
                         for (int i = -1; i < count; ++i)
                         {
-                            if (i >= 0)
-                                stateCode = (StateCode)(int)pSkill->m_SkillBase->var[i];
+                            StateCode code{ };
+                            if (i < 0)
+                                code = static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId());
                             else
-                                stateCode = (StateCode)pSkill->m_SkillBase->state_id;
-                            if (stateCode != StateCode::SC_NONE)
-                            {
-                                bResult = pTarget->AddState((StateType)pSkill->m_SkillBase->state_type, stateCode, pCaster->GetHandle(),
-                                                            nLevel, t, end_time, false, 0, "") == 0;
-                            }
+                                code = static_cast<StateCode>(pSkill->GetVar(i));
+
+                            if (code == 0)
+                                continue;
+
+                            bResult = pTarget->AddState((StateType)pSkill->GetSkillBase()->GetStateType(), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
                         }
                     }
                 }
-                    break;
-                case 314:
+                else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV)
                 {
-                    int  nLevel    = pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, pSkill->GetSkillEnhance());
-                    auto stateCode = (StateCode)pSkill->m_SkillBase->state_id;
-                    if (stateCode != StateCode::SC_NONE)
-                        bResult = pTarget->AddState((StateType)pSkill->m_SkillBase->state_type, stateCode, pCaster->GetHandle(),
-                                                    nLevel, t, end_time, false, 0, "") == 0;
-                }
-                    break;
-                default:
-                    if (pSkill->m_SkillBase->effect_type != 701 && pSkill->m_SkillBase->effect_type != 702)
+                    int count = 3;
+
+                    for (int i = -1; i < count; ++i)
                     {
-                        if ((pCaster->GetHandle() != pTarget->GetHandle()
-                             || (pSkill->m_SkillBase->effect_type != 121
-                                 && pSkill->m_SkillBase->effect_type != 221
-                                 && pSkill->m_SkillBase->effect_type != 235
-                                 && pSkill->m_SkillBase->effect_type != 266
-                                 && pSkill->m_SkillBase->effect_type != 30002)))
-                            bResult = pTarget->AddState((StateType)pSkill->m_SkillBase->state_type, (StateCode)pSkill->m_SkillBase->state_id,
-                                                        pCaster->GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nRequestedSkillLevel, 0),
-                                                        t, end_time, false, 0, "") == 0;
+                        StateCode code{ };
+                        int       nLevel = 0;
+                        if (i < 0)
+                        {
+                            code   = static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId());
+                            nLevel = pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
+                        }
+                        else
+                        {
+                            code   = static_cast<StateCode >(pSkill->GetVar(i));
+                            nLevel = pSkill->GetVar(3 + (i * 3)) + (pSkill->GetVar(3 + (i * 3) + 1) * pSkill->GetRequestedSkillLevel()) + (pSkill->GetVar(3 + (i * 3) + 2) * pSkill->GetSkillEnhance());
+                        }
+
+                        if (code == 0 || nLevel == 0)
+                            continue;
+
+                        bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
                     }
-                    break;
-            }
-            if (pSkill->m_SkillBase->id >= 6008 && pSkill->m_SkillBase->id <= 6010)
-            {
-                if (pTarget->IsMonster())
+                }
+                else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
                 {
-                    dynamic_cast<Monster *>(pTarget)->AddHate(pCaster->GetHandle(), 1, true, true);
+                    for (int i = 0; i < 2; ++i)
+                    {
+                        StateCode code{ };
+                        int       nLevel = 0;
+                        if (i < 0)
+                        {
+                            code   = static_cast<StateCode >(pSkill->GetSkillBase()->GetStateId());
+                            nLevel = pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
+                        }
+                        else
+                        {
+                            code     = static_cast<StateCode >(pSkill->GetVar(0));
+                            nLevel   = pSkill->GetVar(1) + (pSkill->GetVar(2) * pSkill->GetRequestedSkillLevel()) + (pSkill->GetVar(3) * pSkill->GetSkillEnhance());
+                            end_time = t + 100 * (pSkill->GetVar(4) + (pSkill->GetVar(5) * pSkill->GetRequestedSkillLevel()) + (pSkill->GetVar(6) * pSkill->GetSkillEnhance()));
+                        }
+
+                        if (code == 0 || nLevel == 0 || end_time <= t)
+                            continue;
+
+                        bResult = pTarget->AddState(static_cast<StateType >(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                    }
+                }
+                else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE || pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE)
+                {
+                    std::vector<int> vStateID{ };
+                    vStateID.reserve(7);
+                    vStateID.push_back(pSkill->GetSkillBase()->GetStateId());
+                    for (int i = 0; i < 6; ++i)
+                    {
+                        if (pSkill->GetVar(6 + i))
+                            vStateID.push_back(pSkill->GetVar(6 + i));
+                    }
+
+                    if (!vStateID.empty())
+                    {
+                        StateCode code = static_cast< StateCode >( vStateID[irand(0, static_cast< int >( vStateID.size()) - 1)] );
+
+                        bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()), t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                    }
+                }
+                else
+                {
+                    if (pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_AURA &&
+                        pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_DIFFERENTIAL_AURA)
+                    {
+                        if (pTarget != pCaster || (
+                                pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_ABSORB_DAMAGE &&
+                                pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_ABSORB_DAMAGE_OLD &&
+                                pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP &&
+                                pSkill->GetSkillBase()->GetSkillEffectType() != EF_ADD_HP_MP_BY_ABSORB_HP_MP &&
+                                pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_SINGLE_DAMAGE_ABSORB))
+                        {
+                            bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId()),
+                                                        pCaster->GetHandle(), pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()),
+                                                        t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                        }
+                    }
+                }
+
+                if (pSkill->GetSkillId() != SKILL_FORCE_CHIP && pSkill->GetSkillId() != SKILL_SOUL_CHIP && pSkill->GetSkillId() != SKILL_LUNA_CHIP)
+                {
+                    if (pTarget->IsMonster() && pTarget->IsEnemy(pCaster, true))
+                    {
+                        auto pMonster = pTarget->As<Monster>();
+                        pMonster->AddHate(pCaster->GetHandle(), 1, true, true);
+                    }
+                    else if (pTarget->IsNPC() && pTarget->IsEnemy(pCaster, true))
+                    {
+                        //auto pNPC = pTarget->As<NPC>();
+
+                        //pNPC->SetAttacker(pCaster);
+                    }
                 }
             }
+
+            sWorld.AddSkillResult(*m_vResult, bResult, SkillResult::ADD_STATE, pTarget->GetHandle());
+
+            return true;
         }
-        sWorld.AddSkillResult(pvList, bResult, 10, pTarget->GetHandle());
-        return bResult;
-    }
+
+    private:
+        std::vector<SkillResult> *m_vResult{ };
 };
 
 struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor

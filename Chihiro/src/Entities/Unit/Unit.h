@@ -231,6 +231,10 @@ class Unit : public WorldObject
         int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
         int GetMagicPoint(ElementalType type, bool bPhysical, bool bBad);
 
+        int GetMagicAccuracy() const { return static_cast<int32_t>(m_Attribute.nMagicAccuracy); }
+
+        int GetMagicAvoid() const { return static_cast<int32_t>(m_Attribute.nMagicAvoid); }
+
         int GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
 
         int GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }
@@ -296,6 +300,8 @@ class Unit : public WorldObject
     protected:
         uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
         void applyStatByItem();
+
+        virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
         virtual void procStateDamage(uint t);
 
         virtual void applyJobLevelBonus() {};
@@ -384,7 +390,7 @@ class Unit : public WorldObject
         Skill *m_castingSkill{nullptr};
         float m_nRegenHP{ }, m_fRegenMP{ };
     private:
-        std::unordered_map<int, Skill *> m_vAura;
+        std::unordered_map<int, int32_t> m_vAura;
 
         float m_fBowInterval{0};
         bool ClearExpiredState(uint t);
