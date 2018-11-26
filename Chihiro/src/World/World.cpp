@@ -760,42 +760,6 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
     return false;
 }
 
-void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
-{
-    SkillResult sr{ };
-    sr.type                   = TS_SKILL__HIT_TYPE::SHT_RESULT;
-    sr.hTarget                = handle;
-    sr.hitResult.bResult      = bIsSuccess;
-    sr.hitResult.success_type = static_cast<TS_SKILL_RESULT_SUCESS_TYPE>(nSuccessType);
-    pvList.emplace_back(sr);
-}
-
-void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle)
-{
-    SkillResult sr{ };
-    sr.type = type;
-
-    sr.hTarget                      = handle;
-    sr.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damageType);
-
-    sr.hitDamage.damage.flag     = 0;
-    if (damageInfo.bCritical)
-        sr.hitDamage.damage.flag = 1;
-    if (damageInfo.bBlock)
-        sr.hitDamage.damage.flag |= 4;
-    if (damageInfo.bMiss)
-        sr.hitDamage.damage.flag |= 2;
-    if (damageInfo.bPerfectBlock)
-        sr.hitDamage.damage.flag |= 8;
-
-    sr.hitDamage.damage.damage    = damageInfo.nDamage;
-    sr.hitDamage.damage.target_hp = damageInfo.target_hp;
-    for (int i = 0; i < 7; i++)
-        sr.hitDamage.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
-
-    pvList.emplace_back(sr);
-}
-
 void World::AddSession_(WorldSession *s)
 {
             ASSERT(s);
@@ -935,41 +899,4 @@ void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vecto
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
     sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
-}
-
-void World::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time)
-{
-    SkillResult skill_result{ };
-
-    skill_result.type                                      = type;
-    skill_result.hTarget                                   = handle;
-    skill_result.hitDamageWithKnockBack.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damage_type);
-
-    skill_result.hitDamageWithKnockBack.damage.flag = AIF_None;
-    if (damage_info.bCritical)
-        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Critical;
-    if (damage_info.bBlock)
-        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Block;
-    if (damage_info.bMiss)
-        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Miss;
-    if (damage_info.bPerfectBlock)
-        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_PerfectBlock;
-
-    skill_result.hitDamageWithKnockBack.damage.damage    = damage_info.nDamage;
-    skill_result.hitDamageWithKnockBack.damage.target_hp = damage_info.target_hp;
-
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[0] = damage_info.elemental_damage[0];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[1] = damage_info.elemental_damage[1];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[2] = damage_info.elemental_damage[2];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[3] = damage_info.elemental_damage[3];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[4] = damage_info.elemental_damage[4];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[5] = damage_info.elemental_damage[5];
-    skill_result.hitDamageWithKnockBack.damage.elemental_damage[6] = damage_info.elemental_damage[6];
-
-    skill_result.hitDamageWithKnockBack.x               = x;
-    skill_result.hitDamageWithKnockBack.y               = y;
-    skill_result.hitDamageWithKnockBack.knock_back_time = knock_back_time;
-    skill_result.hitDamageWithKnockBack.speed           = -116; // @todo: Make sure to double check, this seems odd
-
-    pvList.emplace_back(skill_result);
 }
