@@ -159,6 +159,8 @@ class Skill
         void ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget);
         void PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget);
         void SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget);
+        void MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP(bool bIsTrap);
+        void MAKE_AREA_EFFECT_PROP(Unit *pTarget, bool bIsTrap);
 
         void PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget);
