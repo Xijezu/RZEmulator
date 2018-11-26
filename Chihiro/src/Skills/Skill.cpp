@@ -1660,7 +1660,7 @@ void Skill::PostFireSkill(Unit *pTarget)
                     if (pDealTarget->IsMonster())
                     {
                         auto pMonster = pDealTarget->As<Monster>();
-                        pMonster->AddHate(GetTargetHandle(), nAddHate, true, true);
+                        pMonster->AddHate(m_pOwner->GetHandle(), nAddHate, true, true);
                     }
                     else if (pDealTarget->IsNPC())
                     {

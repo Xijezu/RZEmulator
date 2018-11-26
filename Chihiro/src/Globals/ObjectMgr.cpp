@@ -642,10 +642,10 @@ void ObjectMgr::LoadSkillResource()
         base.vf_is_not_need_weapon    = field[idx++].GetUInt8();
         base.delay_cast               = field[idx++].GetFloat() * 100;
         base.delay_cast_per_skl       = field[idx++].GetFloat() * 100;
-        base.delay_cast_mode_per      = field[idx++].GetFloat() * 100;
+        base.delay_cast_mode_per      = field[idx++].GetFloat();
         base.delay_common             = field[idx++].GetFloat() * 100;
         base.delay_cooltime           = field[idx++].GetFloat() * 100;
-        base.delay_cooltime_mode      = field[idx++].GetFloat() * 100;
+        base.delay_cooltime_mode      = field[idx++].GetFloat();
         base.cool_time_group_id       = field[idx++].GetInt32();
         base.uf_self                  = field[idx++].GetUInt8();
         base.uf_party                 = field[idx++].GetUInt8();
@@ -662,9 +662,9 @@ void ObjectMgr::LoadSkillResource()
         base.state_level_base         = field[idx++].GetInt32();
         base.state_level_per_skl      = field[idx++].GetFloat();
         base.state_level_per_enhance  = field[idx++].GetFloat();
-        base.state_second             = field[idx++].GetFloat();
-        base.state_second_per_level   = field[idx++].GetFloat();
-        base.state_second_per_enhance = field[idx++].GetFloat();
+        base.state_second             = field[idx++].GetFloat() * 100;
+        base.state_second_per_level   = field[idx++].GetFloat() * 100;
+        base.state_second_per_enhance = field[idx++].GetFloat() * 100;
         base.state_type               = field[idx++].GetUInt8();
         base.probability_on_hit       = field[idx++].GetInt32();
         base.probability_inc_by_slv   = field[idx++].GetInt32();
