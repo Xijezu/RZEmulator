@@ -276,7 +276,7 @@ struct StateSkillFunctor : public SkillTargetFunctor
                 }
             }
 
-            sWorld.AddSkillResult(*m_vResult, bResult, SkillResult::ADD_STATE, pTarget->GetHandle());
+            Skill::AddSkillResult(*m_vResult, bResult, SkillResult::ADD_STATE, pTarget->GetHandle());
 
             return true;
         }
@@ -295,12 +295,12 @@ struct RemoveBadStateSkillFunctor : public SkillTargetFunctor
         {
             int nStateLevel = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetRequestedSkillLevel() + pSkill->GetVar(3) * pSkill->GetSkillEnhance();
             pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
-            sWorld.AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+            Skill::AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
 
             for (int nIndex = 4; nIndex < 9 && pSkill->GetVar(nIndex); nIndex++)
             {
                 pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(nIndex)), nStateLevel);
-                sWorld.AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
             }
 
             return true;
@@ -329,19 +329,19 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
             {
                 if (bResult)
                     pTarget->RemoveGoodState(nStateLevel);
-                sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
             }
             else
             {
                 if (bResult)
                     pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
-                sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
 
                 for (int nIndex = 3; nIndex < 8 && pSkill->GetVar(nIndex); nIndex++)
                 {
                     if (bResult)
                         pTarget->RemoveState(static_cast<StateCode >(pSkill->GetVar(nIndex)), nStateLevel);
-                    sWorld.AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                    Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
                 }
             }
             return true;

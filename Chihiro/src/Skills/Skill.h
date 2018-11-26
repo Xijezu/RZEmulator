@@ -41,6 +41,10 @@ class Skill
         Skill(Unit *pOwner, int64 _uid, int _id);
         // Replace statement - acts as insert and update
         static void DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_level, int cool_time);
+        // skills
+        static void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle);
+        static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle);
+        static void AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time);
 
         int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
 
