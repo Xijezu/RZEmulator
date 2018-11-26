@@ -34,27 +34,29 @@ Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0), m_nAuraRefres
     m_fRange      = 0;
     m_nSkillLevel = 0;
     m_SkillBase   = sObjectMgr.GetSkillBase(m_nSkillID);
-    if (m_SkillBase != nullptr)
+
+    int nEffectType = GetSkillBase() != nullptr ? GetSkillBase()->GetSkillEffectType() : -1;
+
+    if (nEffectType == EF_PHYSICAL_MULTIPLE_DAMAGE_T3 ||
+        nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T1_OLD ||
+        nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T2_OLD ||
+        nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD ||
+        nEffectType == EF_MAGIC_MULTIPLE_REGION_DAMAGE_OLD ||
+        nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
+        nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD ||
+        nEffectType == EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD ||
+        nEffectType == EF_MAGIC_MULTIPLE_DAMAGE ||
+        nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP ||
+        nEffectType == EF_MAGIC_MULTIPLE_REGION_DAMAGE ||
+        nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
+        nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK ||
+        nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE ||
+        nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK ||
+        nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE)
     {
-        short et        = m_SkillBase->effect_type;
-        if (et == 107
-            || et == 202
-            || et == 204
-            || et == 206
-            || et == 212
-            || et == 151
-            || et == 152
-            || et == 108
-            || et == 232
-            || et == 233
-            || et == 263
-            || et == 30004
-            || et == 30005
-            || et == 30009
-            || et == 30017
-            || et == 30018)
-            m_bMultiple = true;
+        m_bMultiple = true;
     }
+
     Init();
 }
 
@@ -100,21 +102,6 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_
     stmt->setInt32(4, skill_level);
     stmt->setInt32(5, cool_time);
     CharacterDatabase.Execute(stmt);
-}
-
-int Skill::GetCurrentMPCost()
-{
-    auto cmp1 = m_SkillBase->cost_mp + (m_nEnhance * m_SkillBase->cost_mp_per_enhance) + (m_nRequestedSkillLevel * m_SkillBase->cost_mp_per_skl);
-    auto cmp2 = (m_SkillBase->cost_mp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_mp_per;
-    return (int)(m_pOwner->GetManaCostRatio((ElementalType)m_SkillBase->elemental, m_SkillBase->is_physical_act != 0, m_SkillBase->is_harmful != 0)
-                 * (m_pOwner->GetMana() * cmp2 / 100.0f + cmp1));
-}
-
-int Skill::GetCurrentHPCost()
-{
-    auto cmp1 = ((m_SkillBase->cost_hp_per_skl_per * m_nRequestedSkillLevel) + m_SkillBase->cost_hp_per) * m_pOwner->GetHealth();
-    auto cmp2 = m_SkillBase->cost_hp + (m_nRequestedSkillLevel * m_SkillBase->cost_hp_per_skl);
-    return (int)(cmp1 / 100.0f + cmp2);
 }
 
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
@@ -562,53 +549,26 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
         {
             case SHT_DAMAGE:
             case SHT_MAGIC_DAMAGE:
-                details.hitDamage.damage.target_hp   = skill_result.damage.target_hp;
-                details.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE >(skill_result.damage.damage_type);
-                details.hitDamage.damage.damage      = skill_result.damage.damage;
-                details.hitDamage.damage.flag        = skill_result.damage.flag;
-                std::copy(std::begin(skill_result.damage.elemental_damage), std::end(skill_result.damage.elemental_damage),
-                          std::begin(details.hitDamage.damage.elemental_damage));
+                details.hitDamage = skill_result.hitDamage;
                 break;
             case SHT_DAMAGE_WITH_KNOCK_BACK:
-                details.hitDamageWithKnockBack.damage.target_hp   = skill_result.damage_kb.target_hp;
-                details.hitDamageWithKnockBack.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE >(skill_result.damage_kb.damage_type);
-                details.hitDamageWithKnockBack.damage.damage      = skill_result.damage_kb.damage;
-                details.hitDamageWithKnockBack.damage.flag        = skill_result.damage_kb.flag;
-                std::copy(std::begin(skill_result.damage_kb.elemental_damage), std::end(skill_result.damage_kb.elemental_damage),
-                          std::begin(details.hitDamageWithKnockBack.damage.elemental_damage));
-                details.hitDamageWithKnockBack.x               = skill_result.damage_kb.x;
-                details.hitDamageWithKnockBack.y               = skill_result.damage_kb.y;
-                details.hitDamageWithKnockBack.speed           = skill_result.damage_kb.speed;
-                details.hitDamageWithKnockBack.knock_back_time = skill_result.damage_kb.knock_back_time;
+                details.hitDamageWithKnockBack = skill_result.hitDamageWithKnockBack;
                 break;
             case SHT_RESULT:
-                details.hitResult.bResult      = skill_result.result.bResult;
-                details.hitResult.success_type = static_cast<TS_SKILL_RESULT_SUCESS_TYPE >(skill_result.result.success_type);
+                details.hitResult = skill_result.hitResult;
                 break;
             case SHT_ADD_HP:
             case SHT_ADD_MP:
                 details.hitAddStat = skill_result.hitAddStat;
                 break;
             case SHT_ADD_HP_MP_SP:
-                details.hitAddHPMPSP.target_hp = skill_result.add_hp_mp_sp.target_hp;
-                details.hitAddHPMPSP.nIncHP    = skill_result.add_hp_mp_sp.nIncHP;
-                details.hitAddHPMPSP.nIncMP    = skill_result.add_hp_mp_sp.nIncMP;
-                details.hitAddHPMPSP.nIncSP    = skill_result.add_hp_mp_sp.nIncSP;
-                details.hitAddHPMPSP.target_mp = skill_result.add_hp_mp_sp.target_mp;
+                details.hitAddHPMPSP = skill_result.hitAddHPMPSP;
                 break;
             case SHT_REBIRTH:
-                details.hitRebirth.target_hp    = skill_result.rebirth.target_hp;
-                details.hitRebirth.nIncHP       = skill_result.rebirth.nIncHP;
-                details.hitRebirth.nIncMP       = skill_result.rebirth.nIncMP;
-                details.hitRebirth.nRecoveryEXP = skill_result.rebirth.nRecoveryEXP;
-                details.hitRebirth.target_mp    = skill_result.rebirth.target_mp;
+                details.hitRebirth = skill_result.hitRebirth;
                 break;
             case SHT_RUSH:
-                details.hitRush.bResult = skill_result.rush.bResult;
-                details.hitRush.x       = skill_result.rush.x;
-                details.hitRush.y       = skill_result.rush.y;
-                details.hitRush.face    = skill_result.rush.face;
-                details.hitRush.speed   = skill_result.rush.speed;
+                details.hitRush = skill_result.hitRush;
                 break;
             default:
                 break;
@@ -1479,7 +1439,7 @@ void Skill::PostFireSkill(Unit *pTarget)
                     GetSkillBase()->GetSkillEffectType() != EF_REMOVE_STATE_GROUP &&
                     GetSkillBase()->GetStateId() != 0)
                 {
-                    if (sr.damage.flag ^ AIF_Miss)
+                    if (sr.hitDamage.damage.flag ^ AIF_Miss)
                     {
                         vNeedStateList.emplace_back(pDealTarget);
                     }
@@ -1489,14 +1449,14 @@ void Skill::PostFireSkill(Unit *pTarget)
                 {
                     pt     = 0;
                     if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
-                        pt = sr.damage.damage;
+                        pt = sr.hitDamage.damage.damage;
                     else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP)
                         pt = sr.hitAddStat.nIncStat;
                     else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP)
                     {
-                        pt = sr.add_hp_mp_sp.nIncHP;
-                        pt += sr.add_hp_mp_sp.nIncMP;
-                        pt += sr.add_hp_mp_sp.nIncSP;
+                        pt = sr.hitAddHPMPSP.nIncHP;
+                        pt += sr.hitAddHPMPSP.nIncMP;
+                        pt += sr.hitAddHPMPSP.nIncSP;
                     }
                     /// @Todo: HateRatio
                     int  nAddHate   = 1 * GetSkillBase()->GetHatePoint(GetRequestedSkillLevel(), pt, GetSkillEnhance()) * (int)m_pOwner->GetMagicalHateMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
@@ -1851,13 +1811,13 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     pTarget->AddMana((int)CalculatePct(pTarget->GetMaxMana(), (m_SkillBase->var[1] * 100)));
 
     SkillResult skillResult{ };
-    skillResult.type                 = SRT_REBIRTH;
-    skillResult.hTarget              = pTarget->GetHandle();
-    skillResult.rebirth.target_hp    = pTarget->GetHealth();
-    skillResult.rebirth.nIncHP       = std::max((int)(pTarget->GetHealth() - prev_hp), 0);
-    skillResult.rebirth.nIncMP       = std::max((int)(pTarget->GetMana() - prev_mp), 0);
-    skillResult.rebirth.nRecoveryEXP = 0;
-    skillResult.rebirth.target_mp    = (int16)pTarget->GetMana();
+    skillResult.type                    = SRT_REBIRTH;
+    skillResult.hTarget                 = pTarget->GetHandle();
+    skillResult.hitRebirth.target_hp    = pTarget->GetHealth();
+    skillResult.hitRebirth.nIncHP       = std::max((int)(pTarget->GetHealth() - prev_hp), 0);
+    skillResult.hitRebirth.nIncMP       = std::max((int)(pTarget->GetMana() - prev_mp), 0);
+    skillResult.hitRebirth.nRecoveryEXP = 0;
+    skillResult.hitRebirth.target_mp    = (int16)pTarget->GetMana();
     m_vResultList.emplace_back(skillResult);
 }
 
@@ -2216,10 +2176,10 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
             SkillResult skillResult{ };
             skillResult.type                   = static_cast<uint8_t >(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
             skillResult.hTarget                = pSummon->GetHandle();
-            skillResult.add_hp_mp_sp.target_hp = pSummon->GetHealth();
-            skillResult.add_hp_mp_sp.target_mp = static_cast<int16_t >(pSummon->GetMana());
-            skillResult.add_hp_mp_sp.nIncHP    = -nDecHP;
-            skillResult.add_hp_mp_sp.nIncMP    = -nDecMP;
+            skillResult.hitAddHPMPSP.target_hp = pSummon->GetHealth();
+            skillResult.hitAddHPMPSP.target_mp = static_cast<int16_t >(pSummon->GetMana());
+            skillResult.hitAddHPMPSP.nIncHP    = -nDecHP;
+            skillResult.hitAddHPMPSP.nIncMP    = -nDecMP;
             m_vResultList.emplace_back(skillResult);
         }
             break;
@@ -2274,10 +2234,10 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
     SkillResult skillResult{ };
     skillResult.type                   = static_cast<uint8_t >(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
     skillResult.hTarget                = pTarget->GetHandle();
-    skillResult.add_hp_mp_sp.target_hp = pTarget->GetHealth();
-    skillResult.add_hp_mp_sp.target_mp = static_cast<int16_t >(pTarget->GetMana());
-    skillResult.add_hp_mp_sp.nIncHP    = nIncHP;
-    skillResult.add_hp_mp_sp.nIncMP    = nIncMP;
+    skillResult.hitAddHPMPSP.target_hp = pTarget->GetHealth();
+    skillResult.hitAddHPMPSP.target_mp = static_cast<int16_t >(pTarget->GetMana());
+    skillResult.hitAddHPMPSP.nIncHP    = nIncHP;
+    skillResult.hitAddHPMPSP.nIncMP    = nIncMP;
 
     m_vResultList.emplace_back(skillResult);
 }
@@ -3014,17 +2974,17 @@ bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
 
     if (!AFFECT_RUSH_OLD(pTarget, fDistance, RushPos, face))
     {
-        result.rush.bResult = false;
+        result.hitRush.bResult = false;
         m_vResultList.push_back(result);
         return false;
     }
 
     pnAdditionalDamage = static_cast<int32_t>((fDistance / 12.0f) * GetVar(2));
 
-    result.rush.bResult = true;
-    result.rush.x       = RushPos.GetPositionX();
-    result.rush.y       = RushPos.GetPositionY();
-    result.rush.speed   = -116;
+    result.hitRush.bResult = true;
+    result.hitRush.x       = RushPos.GetPositionX();
+    result.hitRush.y       = RushPos.GetPositionY();
+    result.hitRush.speed   = -116;
 
     m_vResultList.push_back(result);
     return true;

@@ -763,9 +763,10 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
 void World::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
 {
     SkillResult sr{ };
-    sr.rebirth.nIncHP = 0;
-    sr.type           = (int)SRT_RESULT;
-    sr.hTarget        = handle;
+    sr.type                   = TS_SKILL__HIT_TYPE::SHT_RESULT;
+    sr.hTarget                = handle;
+    sr.hitResult.bResult      = bIsSuccess;
+    sr.hitResult.success_type = static_cast<TS_SKILL_RESULT_SUCESS_TYPE>(nSuccessType);
     pvList.emplace_back(sr);
 }
 
@@ -774,23 +775,23 @@ void World::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, u
     SkillResult sr{ };
     sr.type = type;
 
-    sr.hTarget            = handle;
-    sr.damage.damage_type = damageType;
+    sr.hTarget                      = handle;
+    sr.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damageType);
 
-    sr.damage.flag     = 0;
+    sr.hitDamage.damage.flag     = 0;
     if (damageInfo.bCritical)
-        sr.damage.flag = 1;
+        sr.hitDamage.damage.flag = 1;
     if (damageInfo.bBlock)
-        sr.damage.flag |= 4;
+        sr.hitDamage.damage.flag |= 4;
     if (damageInfo.bMiss)
-        sr.damage.flag |= 2;
+        sr.hitDamage.damage.flag |= 2;
     if (damageInfo.bPerfectBlock)
-        sr.damage.flag |= 8;
+        sr.hitDamage.damage.flag |= 8;
 
-    sr.damage.damage    = damageInfo.nDamage;
-    sr.damage.target_hp = damageInfo.target_hp;
+    sr.hitDamage.damage.damage    = damageInfo.nDamage;
+    sr.hitDamage.damage.target_hp = damageInfo.target_hp;
     for (int i = 0; i < 7; i++)
-        sr.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
+        sr.hitDamage.damage.elemental_damage[i] = damageInfo.elemental_damage[i];
 
     pvList.emplace_back(sr);
 }
@@ -940,35 +941,35 @@ void World::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, 
 {
     SkillResult skill_result{ };
 
-    skill_result.type                  = type;
-    skill_result.hTarget               = handle;
-    skill_result.damage_kb.damage_type = damage_type;
+    skill_result.type                                      = type;
+    skill_result.hTarget                                   = handle;
+    skill_result.hitDamageWithKnockBack.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damage_type);
 
-    skill_result.damage_kb.flag = AIF_None;
+    skill_result.hitDamageWithKnockBack.damage.flag = AIF_None;
     if (damage_info.bCritical)
-        skill_result.damage_kb.flag |= AIF_Critical;
+        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Critical;
     if (damage_info.bBlock)
-        skill_result.damage_kb.flag |= AIF_Block;
+        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Block;
     if (damage_info.bMiss)
-        skill_result.damage_kb.flag |= AIF_Miss;
+        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_Miss;
     if (damage_info.bPerfectBlock)
-        skill_result.damage_kb.flag |= AIF_PerfectBlock;
+        skill_result.hitDamageWithKnockBack.damage.flag |= AIF_PerfectBlock;
 
-    skill_result.damage_kb.damage    = damage_info.nDamage;
-    skill_result.damage_kb.target_hp = damage_info.target_hp;
+    skill_result.hitDamageWithKnockBack.damage.damage    = damage_info.nDamage;
+    skill_result.hitDamageWithKnockBack.damage.target_hp = damage_info.target_hp;
 
-    skill_result.damage_kb.elemental_damage[0] = damage_info.elemental_damage[0];
-    skill_result.damage_kb.elemental_damage[1] = damage_info.elemental_damage[1];
-    skill_result.damage_kb.elemental_damage[2] = damage_info.elemental_damage[2];
-    skill_result.damage_kb.elemental_damage[3] = damage_info.elemental_damage[3];
-    skill_result.damage_kb.elemental_damage[4] = damage_info.elemental_damage[4];
-    skill_result.damage_kb.elemental_damage[5] = damage_info.elemental_damage[5];
-    skill_result.damage_kb.elemental_damage[6] = damage_info.elemental_damage[6];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[0] = damage_info.elemental_damage[0];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[1] = damage_info.elemental_damage[1];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[2] = damage_info.elemental_damage[2];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[3] = damage_info.elemental_damage[3];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[4] = damage_info.elemental_damage[4];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[5] = damage_info.elemental_damage[5];
+    skill_result.hitDamageWithKnockBack.damage.elemental_damage[6] = damage_info.elemental_damage[6];
 
-    skill_result.damage_kb.x               = x;
-    skill_result.damage_kb.y               = y;
-    skill_result.damage_kb.knock_back_time = knock_back_time;
-    skill_result.damage_kb.speed           = -116; // @todo: Make sure to double check, this seems odd
+    skill_result.hitDamageWithKnockBack.x               = x;
+    skill_result.hitDamageWithKnockBack.y               = y;
+    skill_result.hitDamageWithKnockBack.knock_back_time = knock_back_time;
+    skill_result.hitDamageWithKnockBack.speed           = -116; // @todo: Make sure to double check, this seems odd
 
     pvList.emplace_back(skill_result);
 }

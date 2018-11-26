@@ -116,8 +116,6 @@ class Skill
         };
 
         int InitError(uint16_t);
-        int GetCurrentMPCost();
-        int GetCurrentHPCost();
 
         uint32_t GetAuraMPDecTime() { return m_nAuraMPDecTime; }
 
