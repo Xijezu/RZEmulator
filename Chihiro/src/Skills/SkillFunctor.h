@@ -79,7 +79,7 @@ struct StateSkillFunctor : public SkillTargetFunctor
                     if (GameRule::GetChipLevelLimit(pSkill->GetRequestedSkillLevel() - 1) < pTarget->GetLevel())
                     {
                         int nRatio = 100 - (pTarget->GetLevel() - GameRule::GetChipLevelLimit(pSkill->GetRequestedSkillLevel() - 1)) * 10;
-                        if (nRatio < rand32() % 100)
+                        if (nRatio < irand(0, 100))
                             bResult = false;
                     }
                 }

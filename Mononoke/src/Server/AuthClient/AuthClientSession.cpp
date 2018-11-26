@@ -138,7 +138,7 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
 
         if (m_pPlayer->bIsBlocked)
         {
-            SendResultMsg(pRecvPct->id, TS_RESULT_ACCESS_DENIED, 0);
+            SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
 
@@ -151,17 +151,17 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
                 if (game != nullptr && game->m_pSession != nullptr)
                     game->m_pSession->KickPlayer(pOldPlayer);
             }
-            SendResultMsg(pRecvPct->id, TS_RESULT_ALREADY_EXIST, 0);
+            SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_ALREADY_EXIST, 0);
             sPlayerMapList.RemovePlayer(pOldPlayer->szLoginName);
             delete pOldPlayer;
         }
 
         _isAuthed = true;
         sPlayerMapList.AddPlayer(m_pPlayer);
-        SendResultMsg(pRecvPct->id, TS_RESULT_SUCCESS, 1);
+        SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, 1);
         return;
     }
-    SendResultMsg(pRecvPct->id, TS_RESULT_NOT_EXIST, 0);
+    SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
 }
 
 void AuthClientSession::HandleVersion(const TS_CA_VERSION *pRecvPct)
