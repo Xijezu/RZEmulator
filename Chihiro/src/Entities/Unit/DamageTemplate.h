@@ -30,30 +30,6 @@ struct HateModifier
     int   nIncValue;
 };
 
-enum AFlag : int
-{
-    FLAG_PERFECT_BLOCK = 1,
-    FLAG_BLOCK         = 2,
-    FLAG_MISS          = 4,
-    FLAG_CRITICAL      = 8
-};
-
-enum AttackAction : int
-{
-    ATTACK_END    = 1,
-    ATTACK_AIMING = 2,
-    ATTACK_ATTACK = 3,
-    ATTACK_CANCEL = 4
-};
-
-enum AttackFlag : int
-{
-    ATTACK_FLAG_BOW           = 1,
-    ATTACK_FLAG_CROSS_BOW     = 2,
-    ATTACK_FLAG_DOUBLE_WEAPON = 4,
-    ATTACK_FLAG_DOUBLE_ATTACK = 8
-};
-
 struct Damage
 {
     // UserDefinedType:   _DAMAGE

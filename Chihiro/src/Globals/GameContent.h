@@ -29,12 +29,6 @@ struct NPCTemplate;
 class GameContent
 {
     public:
-        static int EnumSkillTargetsAndCalcDamage(
-                Position _OriginalPos, uint8_t layer, Position _TargetPos, bool bTargetOrigin,
-                float fEffectLength, int nRegionType, float fRegionProperty, int nOriginalDamage,
-                bool bIncludeOriginalPos, Unit *pCaster, int nDistributeType, int nTargetMax,
-                std::vector<Unit *> &vTargetList, bool bEnemyOnly);
-
         static Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
         static bool IsInRandomPoolMonster(int group_id, int monster_id);
         static bool LearnAllSkill(Player *pPlayer);

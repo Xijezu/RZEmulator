@@ -71,14 +71,6 @@ enum DamageType : int
     DT_STATE_PHYSICAL_DAMAGE            = 8,
 };
 
-enum DamageFlag : int
-{
-    IGNORE_AVOID    = 2,
-    IGNORE_DEFENCE  = 4,
-    IGNORE_BLOCK    = 8,
-    IGNORE_CRITICAL = 16,
-};
-
 class Unit : public WorldObject
 {
     public:
@@ -140,6 +132,10 @@ class Unit : public WorldObject
         virtual int GetMoveSpeed();
 
         uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
+
+        uint32_t GetTrapHandle() const { return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE); }
+
+        void SetTrapHandle(uint32_t nHandle) { SetUInt32Value(UNIT_FIELD_TRAP_HANDLE, nHandle); }
 
         float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
