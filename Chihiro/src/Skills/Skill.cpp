@@ -24,6 +24,9 @@
 #include "RegionContainer.h"
 #include "GameContent.h"
 #include "RegionTester.h"
+#include "SkillProp/SkillProp.h"
+
+constexpr int PREDICTION_AIMING_TIME = 200;
 
 Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0), m_nAuraRefreshTime(0)
 {
@@ -1145,7 +1148,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             RemoveGoodStateSkillFunctor mySkillFunctor{&m_vResultList};
             process_target(t, mySkillFunctor, pTarget);
             break;
-        }/*
+        }
         case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
         case EF_AREA_EFFECT_MAGIC_DAMAGE:
         case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
@@ -1162,7 +1165,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             MAKE_AREA_EFFECT_PROP(pTarget, true);
             break;
-        }
+        }/*
         case EF_CREATE_ITEM:
         {
             CREATE_ITEM(pTarget, bIsSuccess);
@@ -1179,12 +1182,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
              {
                  REGION_HEAL_BY_FIELD_PROP();
                  break;
-             }
-             case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
-             {
-                 MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP( false );
-                 break;
              }*/
+        case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
+        {
+            MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP(false);
+            break;
+        }
         case EF_ADD_HP:
         {
             HealingSkillFunctor mySkillFunctor(&m_vResultList);
@@ -3280,5 +3283,69 @@ Position Skill::GetMovableKnockBackPosition(Position &OriginalPos, Position &Tar
     if (GameContent::IsBlocked(TargetPos.GetPositionX(), TargetPos.GetPositionY()))
         return OriginalPos;
     return TargetPos;
+}
+
+void Skill::MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP(bool bIsTrap)
+{
+    WorldObject *pObj = sMemoryPool.GetObjectInWorld<WorldObject>(m_hTarget);
+    if (pObj == nullptr || !pObj->IsFieldProp())
+        return;
+
+    auto pProp = pObj->As<FieldProp>();
+
+    auto posTarget = pProp->GetPosition();
+    bool bRet      = pProp->UseProp(m_pOwner->As<Player>());
+
+    AddSkillResult(m_vResultList, bRet, 0, 0);
+
+    if (!bRet)
+        return;
+
+    if (bIsTrap && m_pOwner->GetTrapHandle() != 0)
+    {
+        auto pTrap = sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
+        if (pTrap != nullptr)
+            pTrap->PendRemove();
+    }
+
+    int   nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fHateRatio  = 1; //m_pOwner->GetHateRatio();
+
+    auto pPtr = SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
+
+    if (bIsTrap && pPtr != nullptr)
+        m_pOwner->SetTrapHandle(pPtr->GetHandle());
+
+    pPtr->SetCurrentXY(posTarget.GetPositionX(), posTarget.GetPositionY());
+    pPtr->SetLayer(posTarget.GetLayer());
+
+    sWorld.AddObjectToWorld(pPtr);
+}
+
+void Skill::MAKE_AREA_EFFECT_PROP(Unit *pTarget, bool bIsTrap)
+{
+    if (pTarget == nullptr)
+        return;
+
+    if (bIsTrap && m_pOwner->GetTrapHandle() != 0)
+    {
+        auto pTrap = sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
+        if (pTrap != nullptr)
+            pTrap->PendRemove();
+    }
+
+    Position pos         = pTarget->GetCurrentPosition(sWorld.GetArTime() + PREDICTION_AIMING_TIME);
+    int      nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float    fHateRatio  = 1; //m_pOwner->GetHateRatio();
+
+    auto pPtr = SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
+
+    if (bIsTrap && pPtr != nullptr)
+        m_pOwner->SetTrapHandle(pPtr->GetHandle());
+
+    pPtr->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
+    pPtr->SetLayer(m_pOwner->GetLayer());
+
+    sWorld.AddObjectToWorld(pPtr);
 }
 
