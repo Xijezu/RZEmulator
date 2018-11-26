@@ -23,6 +23,7 @@
 #include "FieldPropManager.h"
 #include "RegionContainer.h"
 #include "GameContent.h"
+#include "RegionTester.h"
 
 Skill::Skill(Unit *pOwner, int64 _uid, int _id) : m_nErrorCode(0), m_nAuraRefreshTime(0)
 {
@@ -172,6 +173,121 @@ void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, 
     skillResult.hitDamageWithKnockBack.speed           = -116; // @todo: Make sure to double check, this seems odd
 
     pvList.emplace_back(skillResult);
+}
+
+struct lessByDistantFromTarget : public std::binary_function<Unit *, Unit *, bool>
+{
+    explicit lessByDistantFromTarget(const Position *_pTarget) : pTarget(_pTarget) {}
+
+    result_type operator()(first_argument_type a, second_argument_type b)
+    {
+        return pTarget->GetExactDist2d(a) < pTarget->GetExactDist2d(b);
+    }
+
+    const Position *pTarget;
+};
+
+int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float fEffectLength, const int nRegionType, const float fRegionProperty, const int nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int nDistributeType, const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList, bool bEnemyOnly)
+{
+    int nResult = nOriginalDamage;
+
+    const Position &OriginalPos = bTargetOrigin ? _TargetPos : _OriginalPos;
+    const Position &TargetPos   = bTargetOrigin ? _OriginalPos : _TargetPos;
+
+    std::vector<uint32_t> vList{ };
+
+    {
+        sWorld.EnumMovableObject(OriginalPos, layer, fEffectLength, vList, false, false);
+    }
+
+    vTargetList.clear();
+
+    RegionTester *pTester{nullptr};
+
+    ArcCircleRegionTester RegionTester_ArcCircle{ };
+    DirectionRegionTester RegionTester_Direction{ };
+    CrossRegionTester     RegionTester_Cross{ };
+    CircleRegionTester    RegionTester_Circle{ };
+
+    if (nRegionType == REGION_TYPE_ARC_CIRCLE)
+        pTester = &RegionTester_ArcCircle;
+    else if (nRegionType == REGION_TYPE_DIRECTION)
+        pTester = &RegionTester_Direction;
+    else if (nRegionType == REGION_TYPE_CROSS)
+        pTester = &RegionTester_Cross;
+    else
+        pTester = &RegionTester_Circle;
+
+    pTester->Init(OriginalPos, TargetPos, fRegionProperty);
+
+    int nTargetCount = 0;
+    int nAllyCount   = 0;
+
+    for (auto &handle : vList)
+    {
+        bool bIsAlly = false;
+        auto *pObj   = sMemoryPool.GetObjectInWorld<WorldObject>(handle);
+
+        if (pObj == nullptr)
+            continue;
+        if (!pObj->IsUnit() /* IsPet() */)
+            continue;
+
+        Unit *pTarget = pObj->As<Unit>();
+
+        if (pTarget->GetHealth() == 0)
+            continue;
+
+        if (!pCaster->IsEnemy(pTarget, true))
+        {
+            if (bEnemyOnly)
+                continue;
+            bIsAlly = true;
+        }
+
+        Position current_pos = pObj->GetCurrentPosition(sWorld.GetArTime());
+        if (!pTester->IsInRegion(current_pos))
+            continue;
+
+        if (!bIncludeOriginalPos && (Position)OriginalPos == current_pos)
+            continue;
+
+        if (bIsAlly)
+        {
+            vTargetList.insert(vTargetList.begin(), pTarget);
+            ++nAllyCount;
+        }
+        else
+        {
+            vTargetList.push_back(pTarget);
+            ++nTargetCount;
+        }
+    }
+
+    if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_TARGET)
+    {
+        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(), lessByDistantFromTarget(&_TargetPos));
+    }
+    else if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_CASTER)
+    {
+        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(), lessByDistantFromTarget(&_OriginalPos));
+    }
+
+    if (nDistributeType == DISTRIBUTION_TYPE_RANDOM ||
+        nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_TARGET ||
+        nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_CASTER)
+    {
+        if (nTargetCount > nTargetMax)
+            vTargetList.resize(nAllyCount + nTargetMax);
+    }
+
+    if (nDistributeType == DISTRIBUTION_TYPE_DISTRIBUTE)
+    {
+        if (nTargetCount > nTargetMax)
+            nResult = nResult * nTargetMax / nTargetCount;
+    }
+
+    return nResult;
 }
 
 int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem)
@@ -1919,20 +2035,20 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{ };
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
-                                                         m_pOwner->GetLayer(),
-                                                         pTarget->GetCurrentPosition(ct),
-                                                         true,
-                                                         fEffectLength,
-                                                         -1,
-                                                         0.0f,
-                                                         nDamage,
-                                                         true,
-                                                         m_pOwner,
-                                                         (int)m_SkillBase->var[10],
-                                                         (int)m_SkillBase->var[11],
-                                                         vTargetList,
-                                                         true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
+                                            m_pOwner->GetLayer(),
+                                            pTarget->GetCurrentPosition(ct),
+                                            true,
+                                            fEffectLength,
+                                            -1,
+                                            0.0f,
+                                            nDamage,
+                                            true,
+                                            m_pOwner,
+                                            (int)m_SkillBase->var[10],
+                                            (int)m_SkillBase->var[11],
+                                            vTargetList,
+                                            true);
 
     m_nTargetCount = (int)vTargetList.size();
     for (auto &target : vTargetList)
@@ -1981,20 +2097,20 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
 
     uint ct = sWorld.GetArTime();
 
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
-                                                         m_pOwner->GetLayer(),
-                                                         pTarget->GetCurrentPosition(ct),
-                                                         true,
-                                                         effectLength,
-                                                         -1,
-                                                         0.0f,
-                                                         nDamage,
-                                                         true,
-                                                         m_pOwner,
-                                                         (int)distributeType,
-                                                         targetMax,
-                                                         vTargetList,
-                                                         true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(ct),
+                                            m_pOwner->GetLayer(),
+                                            pTarget->GetCurrentPosition(ct),
+                                            true,
+                                            effectLength,
+                                            -1,
+                                            0.0f,
+                                            nDamage,
+                                            true,
+                                            m_pOwner,
+                                            (int)distributeType,
+                                            targetMax,
+                                            vTargetList,
+                                            true);
 
     m_nTargetCount = static_cast<int>(vTargetList.size());
     for (const auto &unit : vTargetList)
@@ -2384,7 +2500,7 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
 
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
     for (int i = 0; i < vTargetList.size(); i++)
     {
         for (auto &target : vTargetList)
@@ -2467,7 +2583,7 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
 
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {
@@ -2513,7 +2629,7 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
 
-    nDamage = GameContent::EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) != 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) != 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {

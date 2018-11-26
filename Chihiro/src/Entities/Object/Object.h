@@ -92,7 +92,8 @@ enum EUnitFields
     UNIT_FIELD_MAX_ENERGY          = 0x0033, // Size: 1
     UNIT_FIELD_ARRAY_ENERGY        = 0x0034, // Size: 10
     UNIT_FIELD_ENERGY_STARTING_POS = 0x003E, // Size: 1
-    UNIT_END                       = 0x003F
+    UNIT_FIELD_TRAP_HANDLE         = 0x003F, // Size: 1
+    UNIT_END                       = 0x0040
 };
 
 enum EBattleFields
