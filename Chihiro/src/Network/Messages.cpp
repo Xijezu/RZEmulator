@@ -768,7 +768,7 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
     TS_SC_STATE statePct{ };
     statePct.handle     = pUnit->GetHandle();
     statePct.state_code = pState.m_nCode;
-    statePct.id         = pState.m_nUID;
+    //statePct.state_code = pState.m_nUID;
 
     if (!bIsCancel)
     {

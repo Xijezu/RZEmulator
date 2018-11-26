@@ -195,12 +195,12 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
             flag |= 8;
 
         SkillResult skill_result{ };
-        skill_result.type               = 1;
-        skill_result.hTarget            = pUnit->GetHandle();
-        skill_result.damage.target_hp   = pUnit->GetHealth();
-        skill_result.damage.damage_type = elemental_type;
-        skill_result.damage.damage      = dmg.nDamage;
-        skill_result.damage.flag        = flag;
+        skill_result.type                         = 1;
+        skill_result.hTarget                      = pUnit->GetHandle();
+        skill_result.hitDamage.damage.target_hp   = pUnit->GetHealth();
+        skill_result.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(elemental_type);
+        skill_result.hitDamage.damage.damage      = dmg.nDamage;
+        skill_result.hitDamage.damage.flag        = flag;
         m_pSkill->m_vResultList.emplace_back(skill_result);
         ++m_pSkill->m_nTargetCount;
 

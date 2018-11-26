@@ -521,6 +521,7 @@ namespace PacketDeclaration
         static inline const char* getName() { return #name_; } \
         definition_header_; \
         name_##_DEF(DEFINITION_F); \
+        inline uint16_t getReceivedId() const { return receivedId; }; \
         uint32_t getSize(int version) const { \
             uint32_t size = size_base_; \
             (void) (version); \
@@ -542,6 +543,9 @@ namespace PacketDeclaration
             name_##_DEF(LOCAL_DEFINITION_F); \
             name_##_DEF(DESERIALIZATION_F); \
         } \
+\
+    private: \
+        uint16_t receivedId; \
     }
 
 #define CREATE_STRUCT(name_) CREATE_STRUCT_IMPL(name_, 0, /* empty */, /* empty */, /* empty */)
@@ -551,14 +555,13 @@ namespace PacketDeclaration
     static inline uint16_t getId(int version) { \
         (void) version; \
         return id_; \
-    } \
-    uint16_t id;
+    }
 
 #define CREATE_PACKET_SERIALIZATION_HEADER \
     uint32_t size = getSize(buffer->getVersion()); \
     buffer->writeHeader(size, packetID);
 
-#define CREATE_PACKET_DESERIALIZATION_HEADER buffer->readHeader(id);
+#define CREATE_PACKET_DESERIALIZATION_HEADER buffer->readHeader(receivedId);
 
 #define CREATE_PACKET(name_, id_) \
     CREATE_STRUCT_IMPL(name_, \
@@ -582,15 +585,14 @@ namespace PacketDeclaration
         (void) version; \
         name_##_ID(SERIALISATION_F_ID); \
         return id; \
-    }; \
-    uint16_t id;
+    };
 
 #define CREATE_PACKET_VER_ID_SERIALIZATION_HEADER(name_) \
     uint32_t size = getSize(version); \
     uint16_t id = getId(version); \
     buffer->writeHeader(size, id);
 
-#define CREATE_PACKET_VER_ID_DESERIALIZATION_HEADER buffer->readHeader(id);
+#define CREATE_PACKET_VER_ID_DESERIALIZATION_HEADER buffer->readHeader(receivedId);
 
 #define CREATE_PACKET_VER_ID(name_) \
     CREATE_STRUCT_IMPL(name_, \

@@ -40,73 +40,18 @@ enum SKILL_TYPE : int16_t
     ST_SYSTEM  = 2,
 };
 
-struct SR_DamageType
-{
-    int    target_hp;
-    uint8  damage_type;
-    int    damage;
-    int    flag;
-    uint16 elemental_damage[7];
-};
-
-struct SR_DamageWithKnockBackType
-{
-    int    target_hp;
-    uint8  damage_type;
-    int    damage;
-    int    flag;
-    uint16 elemental_damage[7];
-    float  x;
-    float  y;
-    uint8  speed;
-    uint   knock_back_time;
-};
-
-struct SR_ResultType
-{
-    bool bResult;
-    int  success_type;
-};
-
-struct SR_AddHPMPSPType
-{
-    int   target_hp;
-    int   nIncHP;
-    int   nIncMP;
-    int   nIncSP;
-    int16 target_mp;
-};
-
-struct SR_RushType
-{
-    bool  bResult;
-    float x;
-    float y;
-    float face;
-    uint8 speed;
-};
-
-struct SR_RebirthType
-{
-    int   target_hp;
-    int   nIncHP;
-    int   nIncMP;
-    int   nRecoveryEXP;
-    int16 target_mp;
-};
-
 struct SkillResult
 {
     uint8 type;
     uint  hTarget;
 
-    SR_DamageType              damage;
-    SR_DamageWithKnockBackType damage_kb;
-    SR_ResultType              result;
-    TS_SC_SKILL__HIT_ADD_STAT  hitAddStat;
-    SR_AddHPMPSPType           add_hp_mp_sp;
-    SR_RushType                rush;
-    SR_RebirthType             rebirth;
+    TS_SC_SKILL__HIT_DAMAGE                hitDamage;
+    TS_SC_SKILL__HIT_DAMAGE_WITH_KNOCKBACK hitDamageWithKnockBack;
+    TS_SC_SKILL__HIT_RESULT                hitResult;
+    TS_SC_SKILL__HIT_ADD_STAT              hitAddStat;
+    TS_SC_SKILL__HIT_ADDHPMPSP             hitAddHPMPSP;
+    TS_SC_SKILL__HIT_REBIRTH               hitRebirth;
+    TS_SC_SKILL__HIT_RUSH                  hitRush;
 
     enum SkillResultType
     {
