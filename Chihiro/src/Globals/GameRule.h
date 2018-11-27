@@ -40,7 +40,8 @@ class GameRule
         static int64 GetIntValueByRandomInt64(double fValue);
         static float GetStaminaRatio(int level);
         static float GetStaminaBonus();
-        static int nEnhanceFailType;
+        static int             nEnhanceFailType;
+        constexpr static float DEFAULT_UNIT_SIZE{12.0f};
     private:
         static int   _chipLevelLimit[];
         static int   _modtable[];
