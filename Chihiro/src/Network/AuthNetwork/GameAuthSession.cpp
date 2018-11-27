@@ -95,7 +95,7 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
     auto player   = Player::FindPlayer(szPlayer);
     if (player != nullptr)
     {
-        ((WorldSession)player->GetSession()).KickPlayer();
+        player->GetSession().KickPlayer();
     }
 }
 
