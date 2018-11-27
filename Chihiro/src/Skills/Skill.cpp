@@ -388,11 +388,11 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         {
             case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
             case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
-                nMinDistance = GetVar(3) * 12;
+                nMinDistance = GetVar(3) * GameRule::DEFAULT_UNIT_SIZE;
                 break;
             case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
             case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
-                nMinDistance = GetVar(4) * 12;
+                nMinDistance = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
                 break;
             default:
                 nMinDistance = 0;
@@ -1085,12 +1085,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD:
         {
             PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(pTarget);
             break;
-        }
+        }/*
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_OLD:
         {
             PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(pTarget);
@@ -1119,12 +1119,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }
+        }*/
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
         {
             SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
             break;
-        }
+        }/*
         case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD:
         {
             MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
@@ -2027,7 +2027,7 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
                          + m_SkillBase->var[3] + (m_SkillBase->var[4] * m_nRequestedSkillLevel) + (m_SkillBase->var[5] * m_nEnhance));
 
     auto  ct            = sWorld.GetArTime();
-    float fEffectLength = m_SkillBase->var[9] * 12;
+    float fEffectLength = m_SkillBase->var[9] * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{ };
@@ -2079,13 +2079,13 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
 
     if (m_SkillBase->effect_type == SKILL_EFFECT_TYPE::EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE)
     {
-        effectLength   = GetVar(12) * 12;
+        effectLength   = GetVar(12) * GameRule::DEFAULT_UNIT_SIZE;
         distributeType = GetVar(13);
         targetMax      = GetVar(14);
     }
     else
     {
-        effectLength   = GetVar(9) * 12;
+        effectLength   = GetVar(9) * GameRule::DEFAULT_UNIT_SIZE;
         distributeType = GetVar(10);
         targetMax      = GetVar(11);
     }
@@ -2490,7 +2490,7 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
             return;
     }
 
-    float fEffectLength = GetVar(4) * 12;
+    float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange              = fEffectLength;
 
     std::vector<Unit *> vTargetList{ };
@@ -2564,7 +2564,7 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
             nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
             nRegionType     = static_cast< int >( GetVar(7));
             fRegionProperty = GetVar(8);
-            fKnockbackRange = (GetVar(9) + GetVar(10) * GetRequestedSkillLevel()) * 12;
+            fKnockbackRange = (GetVar(9) + GetVar(10) * GetRequestedSkillLevel()) * GameRule::DEFAULT_UNIT_SIZE;
             nKnockbackTime  = (GetVar(11) + GetVar(12) * GetRequestedSkillLevel()) * 100;
             break;
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL:
@@ -2574,7 +2574,7 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
             return;
     }
 
-    float fEffectLength = GetVar(4) * 12;
+    float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange              = fEffectLength;
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
@@ -2619,7 +2619,7 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(13) * GetSkillEnhance();
     nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
 
-    float fEffectLength = GetVar(4) * 12;
+    float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange              = fEffectLength;
 
     std::vector<Unit *> vTargetList{ };
@@ -2868,7 +2868,7 @@ void Skill::ADD_REGION_STATE(Unit *pTarget)
 
     auto t = sWorld.GetArTime();
 
-    float fEffectLength = GetVar(5) * 12;
+    float fEffectLength = GetVar(5) * GameRule::DEFAULT_UNIT_SIZE;
 
     int nTargetType = GetVar(6);
 
@@ -2956,7 +2956,7 @@ void Skill::ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget)
     float fCostSP     = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
     float fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
 
-    float fEffectLength = GetVar(9) * 12;
+    float fEffectLength = GetVar(9) * GameRule::DEFAULT_UNIT_SIZE;
 
     int nTargetType = GetVar(10);
 
@@ -3111,7 +3111,7 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
         && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
     {
         float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
-        fRange *= 12;
+        fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
         uint32_t knock_back_time = (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100;
 
@@ -3163,7 +3163,7 @@ bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
         return false;
     }
 
-    pnAdditionalDamage = static_cast<int32_t>((fDistance / 12.0f) * GetVar(2));
+    pnAdditionalDamage = static_cast<int32_t>((fDistance / GameRule::DEFAULT_UNIT_SIZE) * GetVar(2));
 
     result.hitRush.bResult = true;
     result.hitRush.x       = RushPos.GetPositionX();
@@ -3354,10 +3354,10 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
     int elemental_type = GetSkillBase()->GetElementalType();
     int nDamage        = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
 
-    float fEffectLength = GetVar(2) * 12.0f;
+    float fEffectLength = GetVar(2) * GameRule::DEFAULT_UNIT_SIZE;
 
     if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD)
-        fEffectLength += GetVar(7) * GetSkillEnhance() * 12.0f;;
+        fEffectLength += GetVar(7) * GetSkillEnhance() * GameRule::DEFAULT_UNIT_SIZE;
 
     m_fRange = fEffectLength;
     std::vector<Unit *> vTargetList{ };
@@ -3373,7 +3373,7 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD)
     {
         fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
-        fRange *= 12.0f;
+        fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
         knock_back_time = (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100;
     }
@@ -3392,4 +3392,34 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
             AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
     }
+}
+
+void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    int   elemental_type = GetSkillBase()->GetElementalType();
+    int   nDamage        = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+    int   nCount         = GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
+    float fEffectLength  = (GetVar(5) + GetVar(9) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    m_fRange              = fEffectLength;
+
+    std::vector<Unit *> vTargetList{ };
+    auto                t = sWorld.GetArTime();
+
+    nDamage        = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(6), GetVar(7), vTargetList);
+    m_nTargetCount = static_cast<int>( vTargetList.size());
+
+    for (int i = 0; i < nCount; ++i)
+    {
+        for (auto &pDealTarget : vTargetList)
+        {
+            DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        }
+    }
+    m_nFireTime += GetVar(4) * nCount * 100;
 }
