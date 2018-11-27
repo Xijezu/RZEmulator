@@ -51,9 +51,8 @@ class State : public Object
         static void DB_ClearState(Unit *pOwner);
         static void DB_InsertState(Unit *pOwner, State *pState);
 
-        State() { NG_LOG_INFO("server.worldserver", "State constructed"); }
-
-        ~State() { NG_LOG_INFO("server.worldserver", "State deconstructed"); }
+        State() = default;
+        ~State() = default;
 
         // Deleting the copy & assignment operators
         // Better safe than sorry
