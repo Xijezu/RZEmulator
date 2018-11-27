@@ -148,7 +148,7 @@ struct StateSkillFunctor : public SkillTargetFunctor
                     bResult = false;
                     for (int i = -1; i < count; ++i)
                     {
-                        if (pTarget->GetCreatureGroup() == pSkill->GetVar(7 + i))
+                        if (static_cast<int>(pTarget->GetCreatureGroup()) == pSkill->GetVar(7 + i))
                         {
                             bResult = true;
                             break;
@@ -217,7 +217,7 @@ struct StateSkillFunctor : public SkillTargetFunctor
                             end_time = t + 100 * (pSkill->GetVar(4) + (pSkill->GetVar(5) * pSkill->GetRequestedSkillLevel()) + (pSkill->GetVar(6) * pSkill->GetSkillEnhance()));
                         }
 
-                        if (code == 0 || nLevel == 0 || end_time <= t)
+                        if (code == 0 || nLevel == 0 || static_cast<uint32_t>(end_time) <= t)
                             continue;
 
                         bResult = pTarget->AddState(static_cast<StateType >(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;

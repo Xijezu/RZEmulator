@@ -194,6 +194,14 @@ class Skill
         void MULTIPLE_MAGICAL_DAMAGE_T1(Unit *pTarget);
         void MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(Unit *pTarget);
 
+        void SINGLE_MAGICAL_DAMAGE_OR_DEATH(Unit *pTarget);
+        void ADD_HP_MP_BY_ABSORB_HP_MP(Unit *pTarget);
+        void SINGLE_MAGICAL_TARGET_HP_PERCENT_DAMAGE(Unit *pTarget);
+        void SINGLE_MAGICAL_MANABURN(Unit *pTarget);
+        void MULTIPLE_MAGICAL_DAMAGE_T2(Unit *pTarget);
+        void MULTIPLE_MAGICAL_DAMAGE_T3(Unit *pTarget);
+        void MAGIC_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget);
+
         void SKILL_ADD_REGION_HP_MP(Unit *pTarget);
         void SKILL_ADD_REGION_HP(Unit *pTarget);
         void SKILL_ADD_REGION_MP(Unit *pTarget);
