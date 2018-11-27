@@ -49,6 +49,11 @@ class ObjectMgr
         friend class GameContent;
         ~ObjectMgr() = default;
 
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        ObjectMgr(const ObjectMgr &) = delete;
+        ObjectMgr &operator=(const ObjectMgr &) = delete;
+
         static ObjectMgr &Instance()
         {
             static ObjectMgr instance;

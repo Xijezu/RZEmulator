@@ -28,6 +28,10 @@ class Region
         friend class RegionBlock;
         Region() = default;
         ~Region() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Region(const Region &) = delete;
+        Region &operator=(const Region &) = delete;
 
         void AddObject(WorldObject *obj);
         void RemoveObject(WorldObject *obj);

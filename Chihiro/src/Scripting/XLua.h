@@ -30,6 +30,10 @@ class XLua
 
         bool InitializeLua();
         ~XLua() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        XLua(const XLua &) = delete;
+        XLua &operator=(const XLua &) = delete;
 
         bool RunString(Unit *, std::string, std::string &);
         bool RunString(Unit *, std::string);

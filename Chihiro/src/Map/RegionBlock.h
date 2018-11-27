@@ -36,6 +36,11 @@ struct RegionBase
         m_Regions.clear();
     }
 
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    RegionBase(const RegionBase &) = delete;
+    RegionBase &operator=(const RegionBase &) = delete;
+
     std::vector<Region *> m_Regions;
 };
 
@@ -55,6 +60,11 @@ class RegionBlock
                 x = nullptr;
             }
         }
+
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        RegionBlock(const RegionBlock &) = delete;
+        RegionBlock &operator=(const RegionBlock &) = delete;
 
         Region *getRegionPtr(uint rx, uint ry, uint8 layer)
         {

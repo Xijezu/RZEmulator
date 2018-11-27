@@ -24,6 +24,10 @@ class QuestManager
         friend class Player;
         QuestManager() = default;
         ~QuestManager() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        QuestManager(const QuestManager &) = delete;
+        QuestManager &operator=(const QuestManager &) = delete;
 
         bool DoEachActiveQuest(const std::function<void(Quest *)> &fn);
         void SetMaxQuestID(int id);

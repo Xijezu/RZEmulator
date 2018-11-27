@@ -96,6 +96,10 @@ class World
         static std::atomic<uint32>  m_worldLoopCounter;
         typedef std::atomic<uint64> AtomicIndex;
         ~World();
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        World(const World &) = delete;
+        World &operator=(const World &) = delete;
 
         static World &Instance()
         {

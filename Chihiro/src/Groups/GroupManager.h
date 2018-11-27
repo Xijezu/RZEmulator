@@ -68,6 +68,10 @@ class GroupManager
 {
     public:
         ~GroupManager() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        GroupManager(const GroupManager &) = delete;
+        GroupManager &operator=(const GroupManager &) = delete;
 
         static GroupManager &Instance()
         {

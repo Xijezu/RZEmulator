@@ -36,8 +36,12 @@ class RegionContainer
             static RegionContainer instance;
             return instance;
         }
-
         ~RegionContainer();
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        RegionContainer(const RegionContainer &) = delete;
+        RegionContainer &operator=(const RegionContainer &) = delete;
+
         void InitRegion(float map_width, float map_height);
         bool IsValidRegion(uint rx, uint ry, uint8 layer);
         Region *GetRegion(WorldObject *pObject);

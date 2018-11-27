@@ -32,6 +32,10 @@ class MemoryPoolMgr
 {
     public:
         ~MemoryPoolMgr() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        MemoryPoolMgr(const MemoryPoolMgr &) = delete;
+        MemoryPoolMgr &operator=(const MemoryPoolMgr &) = delete;
 
         static MemoryPoolMgr &Instance()
         {

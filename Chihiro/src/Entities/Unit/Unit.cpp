@@ -1592,7 +1592,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     return TS_RESULT_SUCCESS;
 }
 
-void Unit::onAfterAddState(State)
+void Unit::onAfterAddState(State &)
 {
     procMoveSpeedChange();
 }
@@ -1621,7 +1621,7 @@ void Unit::procMoveSpeedChange()
     }
 }
 
-void Unit::onUpdateState(State state, bool bIsExpire)
+void Unit::onUpdateState(State &state, bool bIsExpire)
 {
     Messages::BroadcastStateMessage(this, state, bIsExpire);
 }
