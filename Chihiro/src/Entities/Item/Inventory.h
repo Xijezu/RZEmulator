@@ -33,6 +33,10 @@ class Inventory
         friend class Player;
         Inventory();
         ~Inventory() = default;
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Inventory(const Inventory &) = delete;
+        Inventory &operator=(const Inventory &) = delete;
 
         Item *Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB);
         Item *Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB);

@@ -29,6 +29,11 @@ class ItemCollector
             return instance;
         }
 
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        ItemCollector(const ItemCollector &) = delete;
+        ItemCollector &operator=(const ItemCollector &) = delete;
+
         ~ItemCollector();
         void RegisterItem(Item *pItem);
         bool UnregisterItem(Item *pItem);

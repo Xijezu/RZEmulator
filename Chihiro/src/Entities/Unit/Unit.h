@@ -362,8 +362,8 @@ class Unit : public WorldObject
         virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
         void processAttack();
         void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
-        void onAfterAddState(State);
-        void onUpdateState(State state, bool bIsExpire);
+        void onAfterAddState(State &);
+        void onUpdateState(State &state, bool bIsExpire);
         void procMoveSpeedChange();
         void processPendingMove();
         void _InitTimerFieldsAndStatus();

@@ -38,6 +38,11 @@ class RespawnObject : public MonsterDeleteHandler
         explicit RespawnObject(MonsterRespawnInfo rh);
         ~RespawnObject() = default;
 
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        RespawnObject(const RespawnObject &) = delete;
+        RespawnObject &operator=(const RespawnObject &) = delete;
+
         void onMonsterDelete(Monster *mob) override;
         void Update(uint diff);
 

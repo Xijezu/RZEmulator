@@ -43,6 +43,11 @@ class FieldPropManager : public FieldPropDeleteHandler
             return instance;
         }
 
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        FieldPropManager(const FieldPropManager &) = delete;
+        FieldPropManager &operator=(const FieldPropManager &) = delete;
+
         ~FieldPropManager() = default;
         void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime);
         void RegisterFieldProp(FieldPropRespawnInfo prop);

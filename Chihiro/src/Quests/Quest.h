@@ -36,6 +36,11 @@ class Quest
         Quest() = default;
         ~Quest() = default;
 
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        Quest(const Quest &) = delete;
+        Quest &operator=(const Quest &) = delete;
+
         void FreeQuest();
         int GetQuestCode() const;
         QuestInstance *GetQuestInstance();
