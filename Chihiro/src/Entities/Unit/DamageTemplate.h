@@ -18,6 +18,14 @@
 #include "Common.h"
 #include "ItemFields.h"
 
+enum DamageFlag
+{
+    IGNORE_AVOID    = 0x2,
+    IGNORE_DEFENCE  = 0x4,
+    IGNORE_BLOCK    = 0x8,
+    IGNORE_CRITICAL = 0x10,
+};
+
 struct HateModifier
 {
     // Function       :     public void StructCreature::HateModifier::HateModifier(int, int, float, int)
