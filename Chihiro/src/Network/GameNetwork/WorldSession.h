@@ -35,8 +35,9 @@ class WorldSession : public XSession
 {
     public:
         friend class Player;
+        friend class World;
         explicit WorldSession(XSocket *socket);
-        virtual ~WorldSession();
+        WorldSession(const WorldSession &) = delete;
 
         // Accept & Close handler
         //void OnAccept() override;
@@ -124,6 +125,8 @@ class WorldSession : public XSession
 
         void _SendResultMsg(uint16, uint16, int);
         void _PrepareCharacterList(uint32, std::vector<LOBBY_CHARACTER_INFO> *);
+    protected:
+        virtual ~WorldSession();
     private:
         bool checkCharacterName(const std::string &);
         bool isValidTradeTarget(Player *);
