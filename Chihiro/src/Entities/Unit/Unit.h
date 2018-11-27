@@ -320,14 +320,14 @@ class Unit : public WorldObject
         void applyStatByState();
         void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
         void amplifyStatByState();
-        virtual void applyState(State &state);
+        virtual void applyState(State *state);
         void applyStateEffect();
         void applyStateAmplifyEffect();
         void applyPassiveSkillAmplifyEffect();
 
         virtual void applyPassiveSkillAmplifyEffect(Skill *) {}
 
-        void applyStateAmplify(State &state);
+        void applyStateAmplify(State *state);
         void applyDoubeWeaponEffect();
 
         virtual void onApplyAttributeAdjustment() {};
@@ -362,13 +362,13 @@ class Unit : public WorldObject
         virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
         void processAttack();
         void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
-        void onAfterAddState(State &);
-        void onUpdateState(State &state, bool bIsExpire);
+        void onAfterAddState(State *);
+        void onUpdateState(State *state, bool bIsExpire);
         void procMoveSpeedChange();
         void processPendingMove();
         void _InitTimerFieldsAndStatus();
-        std::vector<State> m_vStateList{ };
-        uint32             m_unitTypeMask;
+        std::vector<State *> m_vStateList{ };
+        uint32               m_unitTypeMask;
         //	typedef std::list<GameObject*> GameObjectList;
         //	GameObjectList m_gameObj;
 

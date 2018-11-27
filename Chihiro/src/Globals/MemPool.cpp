@@ -34,7 +34,7 @@ Item *MemoryPoolMgr::AllocItem()
     return p;
 }
 
-void MemoryPoolMgr::AllocMiscHandle(WorldObject *obj)
+void MemoryPoolMgr::AllocMiscHandle(Object *obj)
 {
     obj->SetUInt32Value(UNIT_FIELD_HANDLE, m_nMiscTop++);
     m_nItemTop++;
@@ -113,7 +113,7 @@ void MemoryPoolMgr::Destroy()
 void MemoryPoolMgr::Update(uint diff)
 {
     ///- Add new update objects
-    WorldObject *sess = nullptr;
+    Object *sess = nullptr;
     while (addUpdateQueue.next(sess))
         i_objectsToUpdate[sess->GetHandle()] = sess;
 
@@ -122,7 +122,9 @@ void MemoryPoolMgr::Update(uint diff)
         next = itr;
         ++next;
 
-        itr->second->Update(0);
+        if (itr->second->IsWorldObject())
+            reinterpret_cast<WorldObject *>(itr->second)->Update(0);
+
         if (itr->second->IsDeleteRequested())
         {
             AddToDeleteList(itr->second);
@@ -133,11 +135,11 @@ void MemoryPoolMgr::Update(uint diff)
     // First deleting all things in the remove list
     while (!i_objectsToRemove.empty())
     {
-        auto        itr  = i_objectsToRemove.begin();
-        WorldObject *obj = *itr;
+        auto   itr  = i_objectsToRemove.begin();
+        Object *obj = *itr;
 
-        if (obj->IsInWorld())
-            sWorld.RemoveObjectFromWorld(obj);
+        if (obj->IsWorldObject() && obj->IsInWorld())
+            sWorld.RemoveObjectFromWorld(obj->As<WorldObject>());
 
         switch (obj->GetSubType())
         {
@@ -183,7 +185,7 @@ void MemoryPoolMgr::_unload()
     HashMapHolder<T>::GetContainer().clear();
 }
 
-void MemoryPoolMgr::AddToDeleteList(WorldObject *obj)
+void MemoryPoolMgr::AddToDeleteList(Object *obj)
 {
     i_objectsToRemove.insert(obj);
 }

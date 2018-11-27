@@ -45,13 +45,21 @@ struct StateDamage
 };
 
 class Unit;
-class State
+class State : public Object
 {
     public:
         static void DB_ClearState(Unit *pOwner);
-        static void DB_InsertState(Unit *pOwner, State &pState);
-        State() = default;
-        ~State() = default;
+        static void DB_InsertState(Unit *pOwner, State *pState);
+
+        State() { NG_LOG_INFO("server.worldserver", "State constructed"); }
+
+        ~State() { NG_LOG_INFO("server.worldserver", "State deconstructed"); }
+
+        // Deleting the copy & assignment operators
+        // Better safe than sorry
+        State(const State &) = delete;
+        State &operator=(const State &) = delete;
+
         State(StateType type, StateCode code, int uid, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue);
 
         bool IsHolded();

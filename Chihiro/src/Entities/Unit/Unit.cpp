@@ -52,6 +52,12 @@ Unit::~Unit()
         skill = nullptr;
     }
     m_vSkillList.clear();
+
+    for (auto &pState : m_vStateList)
+    {
+        pState->DeleteThis();
+    }
+    m_vStateList.clear();
 }
 
 void Unit::_InitTimerFieldsAndStatus()
@@ -1505,7 +1511,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
 
     for (auto &s : m_vStateList)
     {
-        if (code == s.m_nCode)
+        if (code == s->m_nCode)
         {
             bAlreadyExist = true;
         }
@@ -1514,7 +1520,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
             bool     bf = false;
             for (int i : stateInfo->duplicate_group)
             {
-                if (s.IsDuplicatedGroup(i))
+                if (s->IsDuplicatedGroup(i))
                 {
                     bf = true;
                     break;
@@ -1523,27 +1529,27 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
             if (!bf)
                 continue;
         }
-        if (bNotErasable != (((s.GetTimeType() >> 4) & 1) != 0))
+        if (bNotErasable != (((s->GetTimeType() >> 4) & 1) != 0))
         {
             if (bNotErasable)
                 return TS_RESULT_ALREADY_EXIST;
-            vDeleteStateUID.emplace_back(s.m_nUID);
+            vDeleteStateUID.emplace_back(s->m_nUID);
         }
         else
         {
-            if (s.GetLevel() > level)
+            if (s->GetLevel() > level)
                 return TS_RESULT_ALREADY_EXIST;
 
-            if (s.GetLevel() == level)
+            if (s->GetLevel() == level)
             {
-                uint et = s.m_nEndTime[1];
-                if (s.m_nEndTime[0] > et)
-                    et = s.m_nEndTime[0];
+                uint et = s->m_nEndTime[1];
+                if (s->m_nEndTime[0] > et)
+                    et = s->m_nEndTime[0];
                 if (et > end_time)
                     return TS_RESULT_ALREADY_EXIST;
             }
-            if (code != s.m_nCode)
-                vDeleteStateUID.emplace_back(s.m_nUID);
+            if (code != s->m_nCode)
+                vDeleteStateUID.emplace_back(s->m_nUID);
         }
     }
 
@@ -1551,10 +1557,11 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     {
         for (int i = (int)m_vStateList.size() - 1; i >= 0; --i)
         {
-            State s = m_vStateList[i];
-            if (id == s.m_nUID)
+            auto s = m_vStateList[i];
+            if (id == s->m_nUID)
             {
                 m_vStateList.erase(m_vStateList.begin() + i);
+                s->DeleteThis();
                 CalculateStat();
                 break;
             }
@@ -1564,9 +1571,9 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     {
         for (auto &s : m_vStateList)
         {
-            if (code == s.m_nCode)
+            if (code == s->m_nCode)
             {
-                s.AddState(type, caster, (uint16)level, start_time, end_time, base_damage, bIsAura);
+                s->AddState(type, caster, (uint16)level, start_time, end_time, base_damage, bIsAura);
                 CalculateStat();
                 onUpdateState(s, false);
                 onAfterAddState(s);
@@ -1577,7 +1584,8 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     else
     {
         m_nCurrentStateUID++;
-        State ns{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, bIsAura, nStateValue, std::move(szStateValue)};
+        auto ns = new State{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, bIsAura, nStateValue, std::move(szStateValue)};
+        sMemoryPool.AllocMiscHandle(ns);
         m_vStateList.emplace_back(ns);
         CalculateStat();
 
@@ -1592,7 +1600,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
     return TS_RESULT_SUCCESS;
 }
 
-void Unit::onAfterAddState(State &)
+void Unit::onAfterAddState(State *)
 {
     procMoveSpeedChange();
 }
@@ -1621,7 +1629,7 @@ void Unit::procMoveSpeedChange()
     }
 }
 
-void Unit::onUpdateState(State &state, bool bIsExpire)
+void Unit::onUpdateState(State *state, bool bIsExpire)
 {
     Messages::BroadcastStateMessage(this, state, bIsExpire);
 }
@@ -1784,9 +1792,9 @@ State *Unit::GetStateByEffectType(int effectType) const
 {
     auto pos = std::find_if(m_vStateList.begin(),
                             m_vStateList.end(),
-                            [effectType](const State &state) { return state.GetEffectType() == effectType; });
+                            [effectType](const State *state) { return state->GetEffectType() == effectType; });
 
-    return pos != m_vStateList.end() ? const_cast<State *>(&*pos) : nullptr;
+    return pos != m_vStateList.end() ? *pos : nullptr;
 }
 
 std::pair<float, int> Unit::GetHateMod(int nHateModType, bool bIsHarmful)
@@ -1821,13 +1829,14 @@ bool Unit::ClearExpiredState(uint t)
     bool     bDeleted{false};
     for (int i = 0; i < static_cast<int>(m_vStateList.size()); i++)
     {
-        uint et = m_vStateList[i].m_nEndTime[1];
-        if (m_vStateList[i].m_nEndTime[0] > et)
-            et = m_vStateList[i].m_nEndTime[0];
-        if (et < t && !m_vStateList[i].m_bAura)
+        uint et = m_vStateList[i]->m_nEndTime[1];
+        if (m_vStateList[i]->m_nEndTime[0] > et)
+            et = m_vStateList[i]->m_nEndTime[0];
+        if (et < t && !m_vStateList[i]->m_bAura)
         {
             //RemoveState(it);
             Messages::BroadcastStateMessage(this, m_vStateList[i], true);
+            m_vStateList[i]->DeleteThis();
             m_vStateList.erase(m_vStateList.begin() + i);
             bDeleted = true;
         }
@@ -1954,28 +1963,28 @@ void Unit::procStateDamage(uint t)
     {
         if (IsPlayer() || IsSummon())
         {
-            auto caster = sMemoryPool.GetObjectInWorld<Unit>(st.m_hCaster[0]);
+            auto caster = sMemoryPool.GetObjectInWorld<Unit>(st->m_hCaster[0]);
             if (caster == nullptr)
             {
-                if (st.m_nCode != StateCode::SC_GAIA_MEMBER_SHIP
-                    && st.m_nCode != StateCode::SC_NEMESIS
-                    && st.m_nCode != StateCode::SC_NEMESIS_FOR_AUTO
-                    && st.m_nCode != StateCode::SC_FALL_FROM_SUMMON
-                    && st.IsHarmful())
+                if (st->m_nCode != StateCode::SC_GAIA_MEMBER_SHIP
+                    && st->m_nCode != StateCode::SC_NEMESIS
+                    && st->m_nCode != StateCode::SC_NEMESIS_FOR_AUTO
+                    && st->m_nCode != StateCode::SC_FALL_FROM_SUMMON
+                    && st->IsHarmful())
                 {
-                    st.AddState(StateType::SG_NORMAL, st.m_hCaster[0], (uint16)st.m_nLevel[0], st.m_nStartTime[0], (uint)(t - 1), st.m_nBaseDamage[0], false);
+                    st->AddState(StateType::SG_NORMAL, st->m_hCaster[0], (uint16)st->m_nLevel[0], st->m_nStartTime[0], (uint)(t - 1), st->m_nBaseDamage[0], false);
                     onUpdateState(st, false);
                     continue;
                 }
             }
         }
 
-        auto stateBase = sObjectMgr.GetStateInfo((int)st.m_nCode);
+        auto stateBase = sObjectMgr.GetStateInfo((int)st->m_nCode);
         if (stateBase == nullptr)
             continue;
         int  nBaseEffectID = 0;
-        auto nThisFireTime = (uint)(st.m_nLastProcessedTime + 100 * stateBase->fire_interval);
-        if (nThisFireTime < t && nThisFireTime <= st.m_nEndTime[0])
+        auto nThisFireTime = (uint)(st->m_nLastProcessedTime + 100 * stateBase->fire_interval);
+        if (nThisFireTime < t && nThisFireTime <= st->m_nEndTime[0])
         {
             nBaseEffectID                           = stateBase->base_effect_id;
             if (nBaseEffectID <= 0)
@@ -1992,32 +2001,32 @@ void Unit::procStateDamage(uint t)
                 case 3:
                 case 4:
                 case 11:
-                    nDamageHP = (int)((stateBase->add_damage_per_skl * st.GetLevel())
-                                      + (st.m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st.GetLevel())))
+                    nDamageHP = (int)((stateBase->add_damage_per_skl * st->GetLevel())
+                                      + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel())))
                                       + stateBase->add_damage_base);
                     break;
                 case 6:
-                    nDamageHP = (int)((st.GetValue(0) + (st.GetValue(1) * st.GetLevel())) * GetMaxHealth());
-                    nDamageMP = (int)((st.GetValue(2) + (st.GetValue(3) * st.GetLevel())) * GetMaxMana());
+                    nDamageHP = (int)((st->GetValue(0) + (st->GetValue(1) * st->GetLevel())) * GetMaxHealth());
+                    nDamageMP = (int)((st->GetValue(2) + (st->GetValue(3) * st->GetLevel())) * GetMaxMana());
                     break;
                 case 12:
-                    nDamageMP = (int)((stateBase->add_damage_per_skl * st.GetLevel())
-                                      + (st.m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st.GetLevel())))
+                    nDamageMP = (int)((stateBase->add_damage_per_skl * st->GetLevel())
+                                      + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel())))
                                       + stateBase->add_damage_base);
                     break;
                 case 21:
-                    nDamageHP = (stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel()));
+                    nDamageHP = (stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel()));
                     break;
                 case 22:
-                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
+                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel());
                     break;
                 case 24:
-                    nDamageHP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
-                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st.GetLevel());
+                    nDamageHP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel());
+                    nDamageMP = stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel());
                     break;
                 case 25:
-                    nDamageHP = (int)((st.GetValue(0) + (st.GetValue(1) * st.GetLevel())) * GetMaxHealth());
-                    nDamageMP = (int)((st.GetValue(3) + (st.GetValue(4) * st.GetLevel())) * GetMaxMana());
+                    nDamageHP = (int)((st->GetValue(0) + (st->GetValue(1) * st->GetLevel())) * GetMaxHealth());
+                    nDamageMP = (int)((st->GetValue(3) + (st->GetValue(4) * st->GetLevel())) * GetMaxMana());
                     break;
                 default:
                     break;
@@ -2025,9 +2034,9 @@ void Unit::procStateDamage(uint t)
 
             if (nDamageHP != 0 || nDamageMP != 0)
             {
-                st.m_nLastProcessedTime = nThisFireTime;
-                StateDamage sd{st.m_hCaster[0], elem, nBaseEffectID, (int)st.m_nCode, st.GetLevel(), nDamageHP, nDamageMP,
-                               nThisFireTime + (100 * stateBase->fire_interval) > st.m_nEndTime[0], st.m_nUID};
+                st->m_nLastProcessedTime = nThisFireTime;
+                StateDamage sd{st->m_hCaster[0], elem, nBaseEffectID, (int)st->m_nCode, st->GetLevel(), nDamageHP, nDamageMP,
+                               nThisFireTime + (100 * stateBase->fire_interval) > st->m_nEndTime[0], st->m_nUID};
                 vDamageList.emplace_back(sd);
             }
         }
@@ -2072,12 +2081,12 @@ void Unit::procStateDamage(uint t)
             int       total_amount = 0;
             for (auto &st : m_vStateList)
             {
-                if (st.m_nUID == sd.uid)
+                if (st->m_nUID == sd.uid)
                 {
-                    auto stateBase = sObjectMgr.GetStateInfo((int)st.m_nCode);
+                    auto stateBase = sObjectMgr.GetStateInfo((int)st->m_nCode);
                     if (stateBase == nullptr)
                         continue;
-                    st.m_nTotalDamage += dmg.nDamage;
+                    st->m_nTotalDamage += dmg.nDamage;
                     total_amount = stateBase->state_id;
                     break;
                 }
@@ -2130,15 +2139,15 @@ void Unit::procStateDamage(uint t)
             int       total_amount = 0;
             for (auto &st : m_vStateList)
             {
-                if (st.m_nUID == sd.uid)
+                if (st->m_nUID == sd.uid)
                 {
                     int ad = nHealHP;
                     if (ad == 0)
                         ad = nHealMP;
                     if (ad != 0)
                     {
-                        st.m_nTotalDamage += ad;
-                        total_amount = st.m_nTotalDamage;
+                        st->m_nTotalDamage += ad;
+                        total_amount = st->m_nTotalDamage;
                     }
                     break;
                 }
@@ -2202,13 +2211,14 @@ Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType el
 
 void Unit::RemoveState(StateCode code, int state_level)
 {
-    auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [code, state_level](State s) { return s.m_nCode == code && s.GetLevel() <= state_level; });
+    auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [code, state_level](State *s) { return s->m_nCode == code && s->GetLevel() <= state_level; });
     if (state != m_vStateList.end())
     {
         onUpdateState(*state, true);
         m_vStateList.erase(state);
         CalculateStat();
         onAfterAddState(*state); // @todo: onafterremovestate
+        (*state)->DeleteThis();
     }
 }
 
@@ -2216,7 +2226,7 @@ void Unit::RemoveState(int uid)
 {
     auto state = std::find_if(m_vStateList.begin(),
                               m_vStateList.end(),
-                              [uid](const State &s) { return s.m_nUID == uid; });
+                              [uid](const State *s) { return s->m_nUID == uid; });
 
     if (state != m_vStateList.end())
     {
@@ -2224,6 +2234,7 @@ void Unit::RemoveState(int uid)
         m_vStateList.erase(state);
         CalculateStat();
         onAfterAddState(*state);
+        (*state)->DeleteThis();
     }
 }
 
@@ -2231,8 +2242,8 @@ void Unit::RemoveGoodState(int state_level)
 {
     for (auto &s : m_vStateList)
     {
-        if (!s.IsHarmful() && s.GetTimeType() != 0)
-            RemoveState(s.m_nCode, state_level);
+        if (!s->IsHarmful() && s->GetTimeType() != 0)
+            RemoveState(s->m_nCode, state_level);
     }
 }
 
@@ -2387,9 +2398,9 @@ int Unit::GetMoveSpeed()
 
 State *Unit::GetState(StateCode code)
 {
-    auto var = std::find_if(m_vStateList.begin(), m_vStateList.end(), [&code](State s) { return s.m_nCode == code; });
+    auto var = std::find_if(m_vStateList.begin(), m_vStateList.end(), [&code](State *s) { return s->m_nCode == code; });
     if (var != m_vStateList.end())
-        return &*var; // iterator to State (*var), State to "pointer" (&var)
+        return *var;
     return nullptr;
 }
 

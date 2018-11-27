@@ -67,7 +67,7 @@ class Messages
         static void BroadcastHPMPMessage(Unit *, int, float, bool);
         static void BroadcastLevelMsg(Unit *);
         static void BroadcastStatusMessage(WorldObject *obj);
-        static void BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel);
+        static void BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel);
         static void BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode);
         static void SendWarpMessage(Player *);
         static void SendCantAttackMessage(Player *, uint, uint, int);
