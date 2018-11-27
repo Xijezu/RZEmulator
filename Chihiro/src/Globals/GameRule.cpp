@@ -18,7 +18,7 @@
 #include "GameRule.h"
 
 int   GameRule::_modtable[8]         = {0, 3, 3, 2, 2, 3, 2, 2};
-int   GameRule::_chipLevelLimit[8]   = {0, 20, 50, 80, 100, 120, 150, 180};
+int   GameRule::_chipLevelLimit[8]   = {20, 50, 80, 100, 120, 150, 180, 200};
 float GameRule::_staminaExpRate[300] = {0};
 int   GameRule::nEnhanceFailType     = 2;
 
