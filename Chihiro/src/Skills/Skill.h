@@ -181,6 +181,8 @@ class Skill
         bool AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface);
         int AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time);
         void PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget);
+        void PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget);
 
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();
