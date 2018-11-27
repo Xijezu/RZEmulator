@@ -25,14 +25,24 @@ SkillProp *SkillProp::Create(uint caster, Skill *pSkill, int nMagicPoint, float 
     return new SkillProp(caster, pSkill, nMagicPoint, fHateRatio);
 }
 
+void SkillProp::EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player */*pPlayer*/)
+{
+    pEnterPct << (uint32_t)pSkillProp->m_hCaster;
+    pEnterPct << (uint32_t)pSkillProp->start_time;
+    pEnterPct << (uint32_t)pSkillProp->m_pSkill->GetSkillId();
+}
+
 SkillProp::SkillProp(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio) : WorldObject(false), m_hCaster(caster),
                                                                                       m_pSkill(pSkill), m_nOwnerMagicPoint(nMagicPoint),
                                                                                       m_fHateRatio(fHateRatio)
 {
-    sMemoryPool.AllocMiscHandle(this);
-
+    _mainType    = MT_StaticObject;
+    _subType     = ST_SkillProp;
+    _objType     = OBJ_STATIC;
     _valuesCount = 1;
     _InitValues();
+
+    sMemoryPool.AllocMiscHandle(this);
 
     _objType          = OBJ_STATIC;
     m_bFired          = false;
