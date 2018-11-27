@@ -1221,38 +1221,38 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             SKILL_ADD_HP_MP(pTarget);
             break;
         }
-            /*
-            case EF_ADD_REGION_HP_MP:
-            {
-                SKILL_ADD_REGION_HP_MP( pTarget );
+        case EF_ADD_REGION_HP_MP:
+        {
+            SKILL_ADD_REGION_HP_MP(pTarget);
+            break;
+        }
+        case EF_ADD_REGION_HP:
+        {
+            SKILL_ADD_REGION_HP(pTarget);
+            break;
+        }
+        case EF_ADD_REGION_MP:
+        {
+            SKILL_ADD_REGION_MP(pTarget);
+            break;
+        }/*
+        case EF_MAGIC_SINGLE_DAMAGE_T1_OLD:
+        {
+            if (!GetSkillBase()->GetSkillTargetType() == TARGET_TARGET)
                 break;
-            }
-            case EF_ADD_REGION_HP:
-            {
-                SKILL_ADD_REGION_HP( pTarget );
-                break;
-            }
-            case EF_ADD_REGION_MP:
-            {
-                SKILL_ADD_REGION_MP( pTarget );
-                break;
-            }
-            case EF_MAGIC_SINGLE_DAMAGE_T1_OLD:
-            {
-                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
-                    break;
 
-                SINGLE_MAGICAL_DAMAGE_T1( pTarget );
+            SINGLE_MAGICAL_DAMAGE_T1(pTarget);
+            break;
+        }
+        case EF_MAGIC_SINGLE_DAMAGE_T2_OLD:
+        {
+            if (!GetSkillBase()->GetSkillTargetType() == TARGET_TARGET)
                 break;
-            }
-            case EF_MAGIC_SINGLE_DAMAGE_T2_OLD:
-            {
-                if( !GetSkillBase()->GetSkillTargetType() == TARGET_TARGET )
-                    break;
 
-                SINGLE_MAGICAL_DAMAGE_T2( pTarget );
-                break;
-            }*/
+            SINGLE_MAGICAL_DAMAGE_T2(pTarget);
+            break;
+        }
+            * /
         case EF_MAGIC_SINGLE_DAMAGE:
         case EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE:
         {
@@ -3570,4 +3570,206 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
 
     AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
     m_nFireTime += GetVar(4) * 100;
+}
+
+void Skill::SKILL_ADD_REGION_HP(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int   nIncHP{0};
+    int   nMagicPoint   = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
+    int   nTargetType   = GetVar(11);
+
+    std::vector<uint32_t> vResult{ };
+    m_fRange = fEffectLength;
+
+    auto t = sWorld.GetArTime();
+
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+
+    for (const auto &handle :vResult)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+
+        if (pUnit == nullptr /*|| pUnit->IsPet()*/ || pUnit->GetHealth() == 0)
+            continue;
+
+        if (nTargetType == TARGET_TARGET)
+        {
+            if (m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITH_TARGET)
+        {
+            if (!m_pOwner->IsAlly(pUnit))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITHOUT_TARGET)
+        {
+            if (!m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+
+        nIncHP = nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel())
+                 + GetVar(2) + GetVar(3) * GetRequestedSkillLevel()
+                 + pUnit->GetMaxHealth() * (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance())
+                 + GetVar(6) * GetSkillEnhance();
+
+        nIncHP = pUnit->Heal(nIncHP);
+
+        SkillResult skill_result{ };
+        skill_result.type                   = SRT_ADD_HP;
+        skill_result.hTarget                = pUnit->GetHandle();
+        skill_result.hitAddStat.target_stat = pUnit->GetHP();
+        skill_result.hitAddStat.nIncStat    = nIncHP;
+        m_vResultList.emplace_back(skill_result);
+    }
+}
+
+void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int   nIncHP{0};
+    int   nIncMP{0};
+    int   nMagicPoint   = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
+    int   nTargetType   = GetVar(11);
+
+    std::vector<uint32_t> vResult{ };
+    m_fRange       = fEffectLength;
+    m_nTargetCount = 0;
+
+    auto
+    t = sWorld.GetArTime()
+
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+
+    for (auto &handle : vResult)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
+
+        if (pUnit == nullptr /*|| pUnit->IsPet()*/ || pUnit->GetHealth() == 0)
+            continue;
+
+        if (nTargetType == TARGET_TARGET)
+        {
+            if (m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITH_TARGET)
+        {
+            if (!m_pOwner->IsAlly(pUnit))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITHOUT_TARGET)
+        {
+            if (!m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+
+        switch (GetVar(12))
+        {
+            case 1:
+                if (!pUnit->IsPlayer())
+                    continue;
+                break;
+            case 2:
+                if (!pUnit->IsSummon())
+                    continue;
+                break;
+            case 3:
+                if (!pUnit->IsPlayer() && !pUnit->IsSummon())
+                    continue;
+                break;
+            default:
+                return;
+        }
+
+        nIncHP = nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel())
+                 + GetVar(2) * GetRequestedSkillLevel()
+                 + pUnit->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel()
+                 + GetVar(4) * GetSkillEnhance();
+
+        nIncMP = nMagicPoint * (GetVar(5) + GetVar(6) * GetRequestedSkillLevel())
+                 + GetVar(7) * GetRequestedSkillLevel()
+                 + pUnit->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel()
+                 + GetVar(9) * GetSkillEnhance();
+
+        nIncHP = pUnit->Heal(nIncHP);
+        nIncMP = pUnit->MPHeal(nIncMP);
+
+        SkillResult skill_result{ };
+        skill_result.type                   = SRT_ADD_HP_MP_SP;
+        skill_result.hTarget                = pUnit->GetHandle();
+        skill_result.hitAddHPMPSP.target_hp = pUnit->GetHealth();
+        skill_result.hitAddHPMPSP.target_mp = pUnit->GetMana();
+        skill_result.hitAddHPMPSP.nIncHP    = nIncHP;
+        skill_result.hitAddHPMPSP.nIncMP    = nIncMP;
+        skill_result.hitAddHPMPSP.nIncSP    = 0;
+
+        m_vResultList.emplace_back(skill_result);
+        ++m_nTargetCount;
+    }
+}
+
+void Skill::SKILL_ADD_REGION_MP(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int   nIncMP{0};
+    int   nMagicPoint   = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
+    int   nTargetType   = GetVar(11);
+
+    std::vector<uint32_t> vResult{ };
+    m_fRange = fEffectLength;
+    auto t = sWorld.GetArTime();
+
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, &vResult);
+    m_nTargetCount = 0;
+
+    for (const auto &handle : vResult)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Unit>();
+
+        if (pUnit == nullptr /*|| pUnit->IsPet()*/ || pUnit->GetHealth() == 0)
+            continue;
+
+        if (nTargetType == TARGET_TARGET)
+        {
+            if (m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITH_TARGET)
+        {
+            if (!m_pOwner->IsAlly(pUnit))
+                continue;
+        }
+        else if (nTargetType == TARGET_REGION_WITHOUT_TARGET)
+        {
+            if (!m_pOwner->IsEnemy(pUnit, true))
+                continue;
+        }
+
+        nIncMP = nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel())
+                 + GetVar(2) + GetVar(3) * GetRequestedSkillLevel()
+                 + pUnit->GetMaxMana() * (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance())
+                 + GetVar(6) * GetSkillEnhance();
+
+        nIncMP = pUnit->MPHeal(nIncMP);
+
+        SkillResult skill_result{ };
+        skill_result.type                   = SRT_ADD_MP;
+        skill_result.hTarget                = pUnit->GetHandle();
+        skill_result.hitAddStat.target_stat = pUnit->GetMana();
+        skill_result.hitAddStat.nIncStat    = nIncMP;
+        m_vResultList.emplace_back(skill_result);
+
+        ++m_nTargetCount;
+    }
 }
