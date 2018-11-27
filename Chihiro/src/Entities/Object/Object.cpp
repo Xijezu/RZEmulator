@@ -25,6 +25,7 @@
 #include "NPC.h"
 #include "Item.h"
 #include "FieldPropManager.h"
+#include "SkillProp/SkillProp.h"
 
 // used for creating values for respawn for example
 #define PAIR64_HIPART(x)   (uint32)((uint64(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
@@ -423,6 +424,9 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
             break;
         case ST_FieldProp:
             FieldProp::EnterPacket(packet, dynamic_cast<FieldProp *>(this), pPlayer);
+            break;
+        case ST_SkillProp:
+            SkillProp::EnterPacket(packet, dynamic_cast<SkillProp *>(this), pPlayer);
             break;
         default:
             break;

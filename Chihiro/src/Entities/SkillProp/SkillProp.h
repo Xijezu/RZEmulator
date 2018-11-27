@@ -23,6 +23,7 @@ class SkillProp : public WorldObject
 {
     public:
         static SkillProp *Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
+        static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
         SkillProp() = delete;
         ~SkillProp() override = default;
         // Deleting the copy & assignment operators
