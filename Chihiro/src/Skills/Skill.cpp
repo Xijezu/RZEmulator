@@ -3352,7 +3352,7 @@ void Skill::MAKE_AREA_EFFECT_PROP(Unit *pTarget, bool bIsTrap)
     sWorld.AddObjectToWorld(pPtr);
 }
 
-void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pUnit)
+void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
 {
 	if( pTarget == nullptr ) 
         return;
@@ -3393,7 +3393,7 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pUnit)
 		if( !Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD && !( pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster() ) )
 		{
 			AFFECT_KNOCK_BACK( pDealTarget, fRange, knock_back_time );
-			AddSkillDamageWithKnockBackResult( m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPos().GetPositionX(), pDealTarget->GetPos().GetPositionY(), knock_back_time );
+			AddSkillDamageWithKnockBackResult( m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPosition().GetPositionX(), pDealTarget->GetPosition().GetPositionY(), knock_back_time );
 		}
 		else
 		{
