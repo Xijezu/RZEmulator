@@ -188,6 +188,12 @@ class Skill
         void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
         void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
 
+        void SINGLE_MAGICAL_DAMAGE_T1(Unit *pTarget);
+        void SINGLE_MAGICAL_DAMAGE_T2(Unit *pTarget);
+        void SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(Unit *pTarget);
+        void MULTIPLE_MAGICAL_DAMAGE_T1(Unit *pTarget);
+        void MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(Unit *pTarget);
+
         void SKILL_ADD_REGION_HP_MP(Unit *pTarget);
         void SKILL_ADD_REGION_HP(Unit *pTarget);
         void SKILL_ADD_REGION_MP(Unit *pTarget);

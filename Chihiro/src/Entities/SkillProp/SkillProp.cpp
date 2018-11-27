@@ -269,7 +269,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
         if (Damage.bPerfectBlock)
             flag |= AIF_PerfectBlock;
 
-        skill_result.type                         = SkillResult::MAGIC_DAMAGE;
+        skill_result.type                         = SHT_MAGIC_DAMAGE;
         skill_result.hTarget                      = pUnit->GetHandle();
         skill_result.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(elemental_type);
         skill_result.hitDamage.damage.damage      = Damage.nDamage;
@@ -799,7 +799,7 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
             StateCode nStateCode = static_cast< StateCode >(m_pSkill->GetSkillBase()->GetStateId());
             pDealTarget->AddState(nStateType, nStateCode, pCaster->GetHandle(), nLevel, t, t + nDuration, false, 0, "");
 
-            Skill::AddSkillResult(m_pSkill->m_vResultList, true, SkillResult::ADD_STATE, pDealTarget->GetHandle());
+            Skill::AddSkillResult(m_pSkill->m_vResultList, true, SRST_AddState, pDealTarget->GetHandle());
             ++m_pSkill->m_nTargetCount;
         }
     }

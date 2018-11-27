@@ -48,7 +48,7 @@ struct HealingSkillFunctor : public SkillTargetFunctor
                 nResult = pTarget->Heal(nResult);
 
             SkillResult skillResult{ };
-            skillResult.type                   = SRT_ADD_HP;
+            skillResult.type                   = SHT_ADD_HP;
             skillResult.hTarget                = pTarget->GetHandle();
             skillResult.hitAddStat.target_stat = pTarget->GetHealth();
             skillResult.hitAddStat.nIncStat    = nResult;
@@ -276,7 +276,7 @@ struct StateSkillFunctor : public SkillTargetFunctor
                 }
             }
 
-            Skill::AddSkillResult(*m_vResult, bResult, SkillResult::ADD_STATE, pTarget->GetHandle());
+            Skill::AddSkillResult(*m_vResult, bResult, SRST_AddState, pTarget->GetHandle());
 
             return true;
         }
@@ -295,12 +295,12 @@ struct RemoveBadStateSkillFunctor : public SkillTargetFunctor
         {
             int nStateLevel = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetRequestedSkillLevel() + pSkill->GetVar(3) * pSkill->GetSkillEnhance();
             pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
-            Skill::AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+            Skill::AddSkillResult(*m_vList, true, SRST_RemoveState, pTarget->GetHandle());
 
             for (int nIndex = 4; nIndex < 9 && pSkill->GetVar(nIndex); nIndex++)
             {
                 pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(nIndex)), nStateLevel);
-                Skill::AddSkillResult(*m_vList, true, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, true, SRST_RemoveState, pTarget->GetHandle());
             }
 
             return true;
@@ -329,19 +329,19 @@ struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
             {
                 if (bResult)
                     pTarget->RemoveGoodState(nStateLevel);
-                Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, bResult, SRST_RemoveState, pTarget->GetHandle());
             }
             else
             {
                 if (bResult)
                     pTarget->RemoveState(static_cast<StateCode>(pSkill->GetVar(0)), nStateLevel);
-                Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                Skill::AddSkillResult(*m_vList, bResult, SRST_RemoveState, pTarget->GetHandle());
 
                 for (int nIndex = 3; nIndex < 8 && pSkill->GetVar(nIndex); nIndex++)
                 {
                     if (bResult)
                         pTarget->RemoveState(static_cast<StateCode >(pSkill->GetVar(nIndex)), nStateLevel);
-                    Skill::AddSkillResult(*m_vList, bResult, SkillResult::REMOVE_STATE, pTarget->GetHandle());
+                    Skill::AddSkillResult(*m_vList, bResult, SRST_RemoveState, pTarget->GetHandle());
                 }
             }
             return true;
