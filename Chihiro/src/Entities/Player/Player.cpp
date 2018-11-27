@@ -517,9 +517,11 @@ bool Player::ReadStateList(Unit *pUnit)
             int   base_damage_2    = fields[idx++].GetInt32();
             int   base_damage_3    = fields[idx++].GetInt32();
             int   remain_fire_time = fields[idx].GetInt32();
-            State state{ };
+            State *state           = new State{ };
             auto  si               = sObjectMgr.GetStateInfo(code);
-            state.SetState(code, 0, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld.GetArTime()), base_damage, 0, "");
+            m_nCurrentStateUID++;
+            state->SetState(code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld.GetArTime()), base_damage, 0, "");
+            sMemoryPool.AllocMiscHandle(state);
             pUnit->m_vStateList.emplace_back(state);
         } while (result->NextRow());
     }
@@ -1708,7 +1710,7 @@ void Player::RemoveAllSummonFromWorld()
     }
 }
 
-void Player::SendPacket(const XPacket& pPacket)
+void Player::SendPacket(const XPacket &pPacket)
 {
 
     if (m_session != nullptr)
@@ -2968,19 +2970,19 @@ CONDITION_INFO Player::GetCondition() const
     return CONDITION_INFO::CONDITION_BAD;
 }
 
-void Player::applyState(State &state)
+void Player::applyState(State *state)
 {
-    int stateType = state.GetEffectType();
+    int stateType = state->GetEffectType();
     if (stateType == 200)
     {
         if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
-            m_Attribute.nMoveSpeed += state.GetValue(0);
-        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state.m_nUID);
+            m_Attribute.nMoveSpeed += state->GetValue(0);
+        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state->m_nUID);
         return;
     }
     if (stateType == 0)
     {
-        switch (state.m_nCode)
+        switch (state->m_nCode)
         {
             case StateCode::SC_STAMINA_SAVE:
                 m_bStaminaActive = true;
@@ -3387,7 +3389,7 @@ bool Player::IsErasable(Item *pItem) const
 bool Player::IsSellable(Item *pItem) const
 {
     bool result;
-    if ( !Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING )
+    if (!Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING)
         result = false;
     else
         result = true; //this is not 100% correct, needs to be reworked
@@ -3774,22 +3776,23 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 
     return true;
 }
+
 Item *Player::DropItem(Player *pTarget, Item *pItem, int64 count)
 {
-	Item *result;
-	Item *origItem = pItem;
-		Item *pNewItem = popItem(origItem, count, false);
-		pNewItem->Relocate(pTarget->GetPosition());
-		sWorld.AddItemToWorld(pNewItem);
-		result = pNewItem;
-		return result;
+    Item *result;
+    Item *origItem = pItem;
+    Item *pNewItem = popItem(origItem, count, false);
+    pNewItem->Relocate(pTarget->GetPosition());
+    sWorld.AddItemToWorld(pNewItem);
+    result = pNewItem;
+    return result;
 }
 
 void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
     Unit::onDead(pFrom, decreaseEXPOnDead);
 
-    if(m_pMainSummon && m_pMainSummon->IsInWorld())
+    if (m_pMainSummon && m_pMainSummon->IsInWorld())
     {
         DoUnSummon(m_pMainSummon);
     }

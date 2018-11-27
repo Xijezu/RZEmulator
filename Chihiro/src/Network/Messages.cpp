@@ -763,22 +763,22 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
                                 (uint8_t)RegionVisitor::ClientVisitor);
 }
 
-void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
+void Messages::BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel)
 {
     TS_SC_STATE statePct{ };
     statePct.handle     = pUnit->GetHandle();
-    statePct.state_code = pState.m_nCode;
-    //statePct.state_code = pState.m_nUID;
+    statePct.state_code = pState->m_nCode;
+    //statePct.state_code = pState->m_nUID;
 
     if (!bIsCancel)
     {
-        statePct.state_level = pState.GetLevel();
+        statePct.state_level = pState->GetLevel();
         uint t{ };
-        if (!pState.m_bAura)
+        if (!pState->m_bAura)
         {
-            t     = pState.m_nEndTime[0];
-            if (t <= pState.m_nEndTime[1])
-                t = pState.m_nEndTime[1];
+            t     = pState->m_nEndTime[0];
+            if (t <= pState->m_nEndTime[1])
+                t = pState->m_nEndTime[1];
             statePct.end_time = t;
         }
         else
@@ -786,14 +786,14 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State &pState, bool bIsCancel)
             statePct.end_time = -1;
         }
 
-        t     = pState.m_nStartTime[1];
-        if (pState.m_nStartTime[0] > t)
-            t = pState.m_nStartTime[0];
+        t     = pState->m_nStartTime[1];
+        if (pState->m_nStartTime[0] > t)
+            t = pState->m_nStartTime[0];
         statePct.start_time = t;
     }
 
-    statePct.state_value        = pState.m_nStateValue;
-    statePct.state_string_value = pState.m_szStateValue;
+    statePct.state_value        = pState->m_nStateValue;
+    statePct.state_string_value = pState->m_szStateValue;
 
     sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), statePct);

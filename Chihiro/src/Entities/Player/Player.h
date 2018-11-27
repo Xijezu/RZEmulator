@@ -349,7 +349,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
         void onCantAttack(uint target, uint t) override;
         void onModifyStatAndAttribute() override;
         void applyPassiveSkillEffect(Skill *skill) override;
-        void applyState(State &state) override;
+        void applyState(State *state) override;
         void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
 
         void onStartQuest(Quest *pQuest);

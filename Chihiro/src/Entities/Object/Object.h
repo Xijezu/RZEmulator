@@ -44,6 +44,7 @@ enum SubType : int
     ST_SkillProp = 5,
     ST_FieldProp = 6,
     ST_Pet       = 7,
+    ST_State     = 8 // Workaround
 };
 
 enum EUnitFields
@@ -147,6 +148,9 @@ class Object
         Object(const Object &) = delete;
         Object &operator=(const Object &) = delete;
         virtual ~Object();
+
+        template<class T>
+        T *As() { return dynamic_cast<T *>(this); }
 
         bool IsInWorld() const { return m_inWorld; }
 
@@ -330,6 +334,8 @@ class Object
         virtual bool IsFieldProp() const { return false; }
 
         virtual bool IsState() const { return false; }
+
+        virtual bool IsWorldObject() const { return false; }
 
         virtual bool IsItem() const { return false; }
 
@@ -593,8 +599,7 @@ class WorldObject : public Object, public ArMoveVector
         WorldObject &operator=(const WorldObject &) = delete;
         ~WorldObject() override;
 
-        template<class T>
-        T *As() { return dynamic_cast<T *>(this); }
+        bool IsWorldObject() const override { return true; }
 
         virtual void Update(uint32 /*time_diff*/) {}
 

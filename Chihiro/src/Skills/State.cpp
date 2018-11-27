@@ -135,13 +135,20 @@ int State::GetTimeType() const
 
 void State::init(int uid, int code)
 {
+    _mainType = MT_StaticObject;
+    _subType  = ST_State;
+    _objType  = OBJ_STATIC;
+
+    _valuesCount = UNIT_FIELD_HANDLE + 1;
+    _InitValues();
+
     m_pTemplate = sObjectMgr.GetStateInfo(code);
     m_nUID      = (uint16)uid;
 }
 
-void State::DB_InsertState(Unit *pOwner, State &pState)
+void State::DB_InsertState(Unit *pOwner, State *pState)
 {
-    if (pState.m_bAura)
+    if (pState->m_bAura)
         return;
     uint              ct    = sWorld.GetArTime();
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STATE);
@@ -149,31 +156,31 @@ void State::DB_InsertState(Unit *pOwner, State &pState)
     auto uid = pOwner->GetUInt32Value(UNIT_FIELD_UID);
     stmt->setInt32(1, pOwner->IsPlayer() ? uid : 0);
     stmt->setInt32(2, pOwner->IsSummon() ? uid : 0);
-    stmt->setInt32(3, pState.m_nCode);
-    stmt->setInt16(4, pState.m_nLevel[0]);
-    stmt->setInt16(5, pState.m_nLevel[1]);
-    stmt->setInt16(6, pState.m_nLevel[2]);
-    if (pState.m_nEndTime[0] <= ct)
+    stmt->setInt32(3, pState->m_nCode);
+    stmt->setInt16(4, pState->m_nLevel[0]);
+    stmt->setInt16(5, pState->m_nLevel[1]);
+    stmt->setInt16(6, pState->m_nLevel[2]);
+    if (pState->m_nEndTime[0] <= ct)
         stmt->setInt32(7, 0);
     else
-        stmt->setInt32(7, (int)(pState.m_nEndTime[0] - pState.m_nStartTime[0]));
-    stmt->setInt32(8, pState.m_nStartTime[1]);
-    stmt->setInt32(9, pState.m_nStartTime[2]);
-    if (pState.m_nEndTime[0] == 0xffffffff)
+        stmt->setInt32(7, (int)(pState->m_nEndTime[0] - pState->m_nStartTime[0]));
+    stmt->setInt32(8, pState->m_nStartTime[1]);
+    stmt->setInt32(9, pState->m_nStartTime[2]);
+    if (pState->m_nEndTime[0] == 0xffffffff)
         stmt->setInt32(10, -1);
     else
-        stmt->setInt32(10, (int)std::max((int)(pState.m_nEndTime[0] - ct), 0));
-    stmt->setInt32(11, pState.m_nEndTime[1]);
-    stmt->setInt32(12, pState.m_nEndTime[2]);
-    stmt->setInt32(13, pState.m_nBaseDamage[0]);
-    stmt->setInt32(14, pState.m_nBaseDamage[1]);
-    stmt->setInt32(15, pState.m_nBaseDamage[2]);
-    auto si = sObjectMgr.GetStateInfo(pState.m_nCode);
+        stmt->setInt32(10, (int)std::max((int)(pState->m_nEndTime[0] - ct), 0));
+    stmt->setInt32(11, pState->m_nEndTime[1]);
+    stmt->setInt32(12, pState->m_nEndTime[2]);
+    stmt->setInt32(13, pState->m_nBaseDamage[0]);
+    stmt->setInt32(14, pState->m_nBaseDamage[1]);
+    stmt->setInt32(15, pState->m_nBaseDamage[2]);
+    auto si = sObjectMgr.GetStateInfo(pState->m_nCode);
     if (si == nullptr)
         return;
-    stmt->setInt32(16, (int)(pState.m_nLastProcessedTime + (100 * (uint)si->fire_interval - ct)));
-    stmt->setInt32(17, pState.m_nStateValue);
-    stmt->setString(18, pState.m_szStateValue);
+    stmt->setInt32(16, (int)(pState->m_nLastProcessedTime + (100 * (uint)si->fire_interval - ct)));
+    stmt->setInt32(17, pState->m_nStateValue);
+    stmt->setString(18, pState->m_szStateValue);
     stmt->setInt32(19, 0);
     CharacterDatabase.Execute(stmt);
 }

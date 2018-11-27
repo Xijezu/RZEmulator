@@ -27,7 +27,7 @@
 #include "Monster.h"
 #include <unordered_map>
 
-typedef std::unordered_map<uint32, WorldObject *> UpdateMap;
+typedef std::unordered_map<uint32, Object *> UpdateMap;
 class MemoryPoolMgr
 {
     public:
@@ -52,7 +52,7 @@ class MemoryPoolMgr
                 case 0x00000000:
                     return dynamic_cast<T *>(HashMapHolder<Item>::Find(handle));
                 case 0x20000000:
-                    return dynamic_cast<T *>(HashMapHolder<WorldObject>::Find(handle));
+                    return dynamic_cast<T *>(HashMapHolder<Object>::Find(handle));
                 case 0x40000000:
                     return dynamic_cast<T *>(HashMapHolder<Monster>::Find(handle));
                 case 0x80000000:
@@ -80,7 +80,7 @@ class MemoryPoolMgr
 
         Item *AllocItem();
         Item *AllocGold(int64 gold, GenerateCode gcode);
-        void AllocMiscHandle(WorldObject *obj);
+        void AllocMiscHandle(Object *obj);
         void AllocItemHandle(Item *item);
         Player *AllocPlayer();
         Summon *AllocSummon(uint);
@@ -94,9 +94,9 @@ class MemoryPoolMgr
     private:
         template<class T>
         void _unload();
-        void AddToDeleteList(WorldObject *obj);
-        std::set<WorldObject *>    i_objectsToRemove{ };
-        LockedQueue<WorldObject *> addUpdateQueue;
+        void AddToDeleteList(Object *obj);
+        std::set<Object *>    i_objectsToRemove{ };
+        LockedQueue<Object *> addUpdateQueue;
 
         UpdateMap i_objectsToUpdate{ };
 

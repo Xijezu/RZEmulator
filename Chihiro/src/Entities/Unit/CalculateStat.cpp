@@ -176,14 +176,14 @@ void Unit::amplifyStatByState()
     std::vector<std::pair<int, int>> vDecreaseList{ };
     for (auto                        &s : m_vStateList)
     {
-        if (s.GetEffectType() == 84)
+        if (s->GetEffectType() == 84)
         {// Strong Spirit?
-            auto     nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            auto     nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
             for (int i              = 2; i < 11; ++i)
             {
-                if (s.GetValue(i) == 0.0f)
+                if (s->GetValue(i) == 0.0f)
                 {
-                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(1), (int)nDecreaseLevel));
                     break;
                 }
             }
@@ -194,10 +194,10 @@ void Unit::amplifyStatByState()
         uint16 nOriginalLevel[3]{0};
 
         for (int  i = 0; i < 3; i++)
-            nOriginalLevel[i] = s.m_nLevel[i];
+            nOriginalLevel[i] = s->m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s.m_nCode)
+            if (rp.first == (int)s->m_nCode)
             {
 //                             *(v1 + 44) = 0;
 //                             *(v1 + 48) = 0;
@@ -223,27 +223,27 @@ void Unit::amplifyStatByState()
             }
         }
 
-        if (s.GetLevel() != 0 && s.GetEffectType() == 2)
+        if (s->GetLevel() != 0 && s->GetEffectType() == 2)
         {
             // format is 0 = bitset, 1 = base, 2 = add per level
-            ampParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) * s.GetLevel())), true);
-            ampParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) * s.GetLevel())), true);
-            ampParameter((uint)s.GetValue(12), (int)(s.GetValue(13) + (s.GetValue(14) * s.GetLevel())), true);
-            ampParameter((uint)s.GetValue(15), (int)(s.GetValue(16) + (s.GetValue(17) * s.GetLevel())), true);
+            ampParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
+            ampParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
+            ampParameter((uint)s->GetValue(12), (int)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
+            ampParameter((uint)s->GetValue(15), (int)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
         }
         for (int i = 0; i < 3; i++)
-            s.m_nLevel[i] = nOriginalLevel[i];
+            s->m_nLevel[i] = nOriginalLevel[i];
     }
 }
 
-void Unit::applyState(State &state)
+void Unit::applyState(State *state)
 {
-    int effectType = state.GetEffectType();
+    int effectType = state->GetEffectType();
 
     switch (effectType)
     {
         case StateBaseEffect::SEF_MISC:
-            switch (state.m_nCode)
+            switch (state->m_nCode)
             {
                 case StateCode::SC_SLEEP:
                 case StateCode::SC_STUN:
@@ -254,15 +254,15 @@ void Unit::applyState(State &state)
             }
             break;
         case StateBaseEffect::SEF_PARAMETER_INC:
-            incParameter((uint)state.GetValue(0), (int)(state.GetValue(1) + (state.GetValue(2) * state.GetLevel())), false);
-            incParameter((uint)state.GetValue(3), (int)(state.GetValue(4) + (state.GetValue(5) * state.GetLevel())), false);
-            incParameter2((uint)state.GetValue(6), (int)(state.GetValue(7) + (state.GetValue(8) * state.GetLevel())));
-            incParameter2((uint)state.GetValue(9), (int)(state.GetValue(10) + (state.GetValue(11) * state.GetLevel())));
-            incParameter((uint)state.GetValue(12), (int)(state.GetValue(13) + (state.GetValue(14) * state.GetLevel())), false);
-            incParameter((uint)state.GetValue(15), (int)(state.GetValue(16) + (state.GetValue(17) * state.GetLevel())), false);
+            incParameter((uint)state->GetValue(0), (int)(state->GetValue(1) + (state->GetValue(2) * state->GetLevel())), false);
+            incParameter((uint)state->GetValue(3), (int)(state->GetValue(4) + (state->GetValue(5) * state->GetLevel())), false);
+            incParameter2((uint)state->GetValue(6), (int)(state->GetValue(7) + (state->GetValue(8) * state->GetLevel())));
+            incParameter2((uint)state->GetValue(9), (int)(state->GetValue(10) + (state->GetValue(11) * state->GetLevel())));
+            incParameter((uint)state->GetValue(12), (int)(state->GetValue(13) + (state->GetValue(14) * state->GetLevel())), false);
+            incParameter((uint)state->GetValue(15), (int)(state->GetValue(16) + (state->GetValue(17) * state->GetLevel())), false);
             break;
         case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
-            ampParameter2((uint)(0x200000 * (std::pow(2, (uint)state.GetValue(8)))), state.GetValue(0) + (state.GetValue(1) * state.GetLevel()));
+            ampParameter2((uint)(0x200000 * (std::pow(2, (uint)state->GetValue(8)))), state->GetValue(0) + (state->GetValue(1) * state->GetLevel()));
             break;
         case StateBaseEffect::SEF_DAMAGE_REFLECT_WHEN_EQUIP_SHIELD:
 /*
@@ -309,14 +309,14 @@ void Unit::applyStateEffect()
     std::vector<std::pair<int, int>> vDecreaseList{ };
     for (auto                        &s : m_vStateList)
     {
-        if (s.GetEffectType() == 84)
+        if (s->GetEffectType() == 84)
         {// Strong Spirit?
-            auto     nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            auto     nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
             for (int i              = 2; i < 11; ++i)
             {
-                if (s.GetValue(i) == 0.0f)
+                if (s->GetValue(i) == 0.0f)
                 {
-                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(1), (int)nDecreaseLevel));
                     break;
                 }
             }
@@ -327,10 +327,10 @@ void Unit::applyStateEffect()
         uint16 nOriginalLevel[3]{0};
 
         for (int  i = 0; i < 3; i++)
-            nOriginalLevel[i] = s.m_nLevel[i];
+            nOriginalLevel[i] = s->m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s.m_nCode)
+            if (rp.first == (int)s->m_nCode)
             {
 //                             *(v1 + 44) = 0;
 //                             *(v1 + 48) = 0;
@@ -356,12 +356,12 @@ void Unit::applyStateEffect()
             }
         }
 
-        if (s.GetLevel() != 0)
+        if (s->GetLevel() != 0)
         {
             applyState(s);
         }
         for (int i = 0; i < 3; i++)
-            s.m_nLevel[i] = nOriginalLevel[i];
+            s->m_nLevel[i] = nOriginalLevel[i];
     }
 }
 
@@ -373,14 +373,14 @@ void Unit::applyStatByState()
     std::vector<std::pair<int, int>> vDecreaseList{ };
     for (auto                        &s : m_vStateList)
     {
-        if (s.GetEffectType() == 84)
+        if (s->GetEffectType() == 84)
         {// Strong Spirit?
-            auto     nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            auto     nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
             for (int i              = 2; i < 11; ++i)
             {
-                if (s.GetValue(i) == 0.0f)
+                if (s->GetValue(i) == 0.0f)
                 {
-                    vDecreaseList.emplace_back(std::pair<int, int>(static_cast<int>(s.GetValue(1)), static_cast<int>(nDecreaseLevel)));
+                    vDecreaseList.emplace_back(std::pair<int, int>(static_cast<int>(s->GetValue(1)), static_cast<int>(nDecreaseLevel)));
                     break;
                 }
             }
@@ -391,10 +391,10 @@ void Unit::applyStatByState()
         uint16 nOriginalLevel[3]{0};
 
         for (int  i = 0; i < 3; i++)
-            nOriginalLevel[i] = s.m_nLevel[i];
+            nOriginalLevel[i] = s->m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s.m_nCode)
+            if (rp.first == (int)s->m_nCode)
             {
 //                             *(v1 + 44) = 0;
 //                             *(v1 + 48) = 0;
@@ -420,24 +420,24 @@ void Unit::applyStatByState()
             }
         }
 
-        if (s.GetLevel() != 0)
+        if (s->GetLevel() != 0)
         {
-            if (s.GetEffectType() == 1)
+            if (s->GetEffectType() == 1)
             {
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) * s.GetLevel())), true);
-                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) * s.GetLevel())), true);
-                incParameter((uint)s.GetValue(12), (int)(s.GetValue(13) + (s.GetValue(14) * s.GetLevel())), true);
-                incParameter((uint)s.GetValue(15), (int)(s.GetValue(16) + (s.GetValue(17) * s.GetLevel())), true);
+                incParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
+                incParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
+                incParameter((uint)s->GetValue(12), (int)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
+                incParameter((uint)s->GetValue(15), (int)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
             }
-            else if (s.GetEffectType() == 3 && IsWearShield())
+            else if (s->GetEffectType() == 3 && IsWearShield())
             {
-                incParameter((uint)s.GetValue(0), (int)(s.GetValue(1) + (s.GetValue(2) + s.GetLevel())), true);
-                incParameter((uint)s.GetValue(3), (int)(s.GetValue(4) + (s.GetValue(5) + s.GetLevel())), true);
+                incParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) + s->GetLevel())), true);
+                incParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) + s->GetLevel())), true);
             }
         }
         for (int i = 0; i < 3; i++)
-            s.m_nLevel[i] = nOriginalLevel[i];
+            s->m_nLevel[i] = nOriginalLevel[i];
     }
 }
 
@@ -930,14 +930,14 @@ void Unit::applyStateAmplifyEffect()
     std::vector<std::pair<int, int>> vDecreaseList{ };
     for (auto                        &s : m_vStateList)
     {
-        if (s.GetEffectType() == 84)
+        if (s->GetEffectType() == 84)
         {// Strong Spirit?
-            auto     nDecreaseLevel = (int)(s.GetValue(0) + (s.GetValue(1) * s.GetLevel()));
+            auto     nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
             for (int i              = 2; i < 11; ++i)
             {
-                if (s.GetValue(i) == 0.0f)
+                if (s->GetValue(i) == 0.0f)
                 {
-                    vDecreaseList.emplace_back(std::pair<int, int>((int)s.GetValue(1), (int)nDecreaseLevel));
+                    vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(1), (int)nDecreaseLevel));
                     break;
                 }
             }
@@ -948,10 +948,10 @@ void Unit::applyStateAmplifyEffect()
         uint16 nOriginalLevel[3]{0};
 
         for (int  i = 0; i < 3; i++)
-            nOriginalLevel[i] = s.m_nLevel[i];
+            nOriginalLevel[i] = s->m_nLevel[i];
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s.m_nCode)
+            if (rp.first == (int)s->m_nCode)
             {
 //                             *(v1 + 44) = 0;
 //                             *(v1 + 48) = 0;
@@ -977,46 +977,46 @@ void Unit::applyStateAmplifyEffect()
             }
         }
 
-        if (s.GetLevel() != 0)
+        if (s->GetLevel() != 0)
         {
             applyStateAmplify(s);
         }
         for (int i = 0; i < 3; i++)
-            s.m_nLevel[i] = nOriginalLevel[i];
+            s->m_nLevel[i] = nOriginalLevel[i];
     }
 }
 
-void Unit::applyStateAmplify(State &state)
+void Unit::applyStateAmplify(State *state)
 {
-    int effectType = state.GetEffectType();
-    int level      = state.GetLevel();
+    int effectType = state->GetEffectType();
+    int level      = state->GetLevel();
     if (effectType != 0)
     {
         if (effectType == StateBaseEffect::SEF_PARAMETER_AMP)
         {
-            ampParameter((uint)state.GetValue(0), (state.GetValue(1) + (state.GetValue(2) * level)), false);
-            ampParameter((uint)state.GetValue(3), (state.GetValue(4) + (state.GetValue(5) * level)), false);
-            ampParameter2((uint)state.GetValue(6), (state.GetValue(7) + (state.GetValue(8) * level)));
-            ampParameter2((uint)state.GetValue(9), (state.GetValue(10) + (state.GetValue(11) * level)));
-            ampParameter((uint)state.GetValue(12), (state.GetValue(13) + (state.GetValue(14) * level)), false);
-            ampParameter((uint)state.GetValue(15), (state.GetValue(16) + (state.GetValue(17) * level)), false);
+            ampParameter((uint)state->GetValue(0), (state->GetValue(1) + (state->GetValue(2) * level)), false);
+            ampParameter((uint)state->GetValue(3), (state->GetValue(4) + (state->GetValue(5) * level)), false);
+            ampParameter2((uint)state->GetValue(6), (state->GetValue(7) + (state->GetValue(8) * level)));
+            ampParameter2((uint)state->GetValue(9), (state->GetValue(10) + (state->GetValue(11) * level)));
+            ampParameter((uint)state->GetValue(12), (state->GetValue(13) + (state->GetValue(14) * level)), false);
+            ampParameter((uint)state->GetValue(15), (state->GetValue(16) + (state->GetValue(17) * level)), false);
         }
     }
     else
     {
-        if (state.m_nCode == StateCode::SC_SQUALL_OF_ARROW)
+        if (state->m_nCode == StateCode::SC_SQUALL_OF_ARROW)
         {
-            if (state.GetValue(1) == 0.0f)
+            if (state->GetValue(1) == 0.0f)
                 SetFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
             else
                 ToggleFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
 
-            if ((int)GetWeaponClass() == (int)state.GetValue(0))
+            if ((int)GetWeaponClass() == (int)state->GetValue(0))
             {
-                m_AttributeAmplifier.fAttackSpeedRight += state.GetValue(2) + (state.GetValue(3) * level);
+                m_AttributeAmplifier.fAttackSpeedRight += state->GetValue(2) + (state->GetValue(3) * level);
                 if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
                 {
-                    m_AttributeAmplifier.fAttackSpeedLeft += state.GetValue(2) + (state.GetValue(3) * level);
+                    m_AttributeAmplifier.fAttackSpeedLeft += state->GetValue(2) + (state->GetValue(3) * level);
                 }
             }
         }
