@@ -188,6 +188,10 @@ class Skill
         void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
         void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
 
+        void SKILL_ADD_REGION_HP_MP(Unit *pTarget);
+        void SKILL_ADD_REGION_HP(Unit *pTarget);
+        void SKILL_ADD_REGION_MP(Unit *pTarget);
+
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();
         void TOWN_PORTAL();
