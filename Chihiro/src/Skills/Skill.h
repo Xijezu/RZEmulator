@@ -22,6 +22,21 @@
 class XPacket;
 class Unit;
 
+#if PLATFORM == PLATFORM_WINDOWS
+
+namespace std
+{
+	template <class _Arg1, class _Arg2, class _Result>
+	struct binary_function
+	{
+		typedef _Arg1 first_argument_type;
+		typedef _Arg2 second_argument_type;
+		typedef _Result result_type;
+	};
+}
+
+#endif
+
 enum SkillStatus : int
 {
     SS_IDLE     = 0,
@@ -167,6 +182,7 @@ class Skill
         void PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget);
         void PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget);
         void TAUNT(Unit *pTarget);
 
