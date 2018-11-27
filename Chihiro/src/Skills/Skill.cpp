@@ -178,18 +178,6 @@ void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, 
     pvList.emplace_back(skillResult);
 }
 
-struct lessByDistantFromTarget : public std::binary_function<Unit *, Unit *, bool>
-{
-    explicit lessByDistantFromTarget(const Position *_pTarget) : pTarget(_pTarget) {}
-
-    result_type operator()(first_argument_type a, second_argument_type b)
-    {
-        return pTarget->GetExactDist2d(a) < pTarget->GetExactDist2d(b);
-    }
-
-    const Position *pTarget;
-};
-
 int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float fEffectLength, const int nRegionType, const float fRegionProperty, const int nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int nDistributeType, const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList, bool bEnemyOnly)
 {
     int nResult = nOriginalDamage;
@@ -269,11 +257,15 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
 
     if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_TARGET)
     {
-        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(), lessByDistantFromTarget(&_TargetPos));
+        std::sort(vTargetList.begin() + nAllyCount,
+                  vTargetList.end(),
+                  [&_TargetPos](const auto &a, const auto &b) -> bool { return _TargetPos.GetExactDist2d(a) < _TargetPos.GetExactDist2d(b); });
     }
     else if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_CASTER)
     {
-        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(), lessByDistantFromTarget(&_OriginalPos));
+        std::sort(vTargetList.begin() + nAllyCount,
+                  vTargetList.end(),
+                  [&_OriginalPos](const auto &a, const auto &b) -> bool { return _OriginalPos.GetExactDist2d(a) < _OriginalPos.GetExactDist2d(b); });
     }
 
     if (nDistributeType == DISTRIBUTION_TYPE_RANDOM ||
@@ -281,7 +273,7 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
         nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_CASTER)
     {
         if (nTargetCount > nTargetMax)
-            vTargetList.resize(nAllyCount + nTargetMax);
+            vTargetList.resize(static_cast<uint32_t>(nAllyCount + nTargetMax));
     }
 
     if (nDistributeType == DISTRIBUTION_TYPE_DISTRIBUTE)
@@ -2635,7 +2627,7 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
 
     nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength, GetVar(7), GetVar(10), nDamage, GetVar(9) != 0, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
 
-	m_nTargetCount = static_cast<int>(vTargetList.size());
+    m_nTargetCount = static_cast<int>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
@@ -3354,50 +3346,50 @@ void Skill::MAKE_AREA_EFFECT_PROP(Unit *pTarget, bool bIsTrap)
 
 void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
 {
-	if( pTarget == nullptr ) 
+    if (pTarget == nullptr)
         return;
 
-	int nAttackPoint = m_pOwner->GetAttackPointRight( (ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful() );
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-	int elemental_type = GetSkillBase()->GetElementalType();
-	int nDamage = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+    int elemental_type = GetSkillBase()->GetElementalType();
+    int nDamage        = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
 
-	float fEffectLength = GetVar(2) * 12.0f;
+    float fEffectLength = GetVar(2) * 12.0f;
 
-	if( GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD )
-		fEffectLength += GetVar(7) * GetSkillEnhance() * 12.0f;;
+    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD)
+        fEffectLength += GetVar(7) * GetSkillEnhance() * 12.0f;;
 
-	m_fRange = fEffectLength;
-	std::vector<Unit *> vTargetList{};
+    m_fRange = fEffectLength;
+    std::vector<Unit *> vTargetList{ };
 
-	auto t = sWorld.GetArTime();
+    auto t = sWorld.GetArTime();
 
-	nDamage = EnumSkillTargetsAndCalcDamage( m_pOwner->GetCurrentPosition( t ), m_pOwner->GetLayer(), pTarget->GetCurrentPosition( t ), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(3), GetVar(11), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(3), GetVar(11), vTargetList, true);
 
-	m_nTargetCount = static_cast<int>( vTargetList.size() );
-	float fRange = 0;
-	uint32_t knock_back_time = 0;
+    m_nTargetCount = static_cast<int>( vTargetList.size());
+    float    fRange          = 0;
+    uint32_t knock_back_time = 0;
 
-	if( GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD )
-	{
-		fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
-		fRange *= 12.0f;
+    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD)
+    {
+        fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        fRange *= 12.0f;
 
-		knock_back_time = ( GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance() ) * 100;
-	}
+        knock_back_time = (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100;
+    }
 
-	for( auto& pDealTarget : vTargetList)
-	{
-		DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage( m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus( GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel() ), GetSkillBase()->GetCriticalBonus( GetRequestedSkillLevel() ), 0 );
+    for (auto &pDealTarget : vTargetList)
+    {
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-		if( !Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD && !( pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster() ) )
-		{
-			AFFECT_KNOCK_BACK( pDealTarget, fRange, knock_back_time );
-			AddSkillDamageWithKnockBackResult( m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPosition().GetPositionX(), pDealTarget->GetPosition().GetPositionY(), knock_back_time );
-		}
-		else
-		{
-			AddSkillDamageResult( m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle() );
-		}
-	}
+        if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD && !(pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster()))
+        {
+            AFFECT_KNOCK_BACK(pDealTarget, fRange, knock_back_time);
+            AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPosition().GetPositionX(), pDealTarget->GetPosition().GetPositionY(), knock_back_time);
+        }
+        else
+        {
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        }
+    }
 }
