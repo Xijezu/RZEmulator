@@ -930,6 +930,7 @@ void Skill::ProcSkill()
                 m_pOwner->SetMana(m_pOwner->GetMana() - cost_mp);
             if (cost_exp > 0)
                 m_pOwner->SetEXP(m_pOwner->GetEXP() - cost_exp);
+
             if (cost_jp > 0)
                 m_pOwner->SetJP(m_pOwner->GetJP() - cost_jp);
 
@@ -1087,12 +1088,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD:
         {
             PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
             break;
-        }
+        }/*
         case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD:
         {
             PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(pTarget);
@@ -1116,12 +1117,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY_OLD:
         {
             SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(pTarget);
-        }
+        }*/
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD:
         {
             PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
             break;
-        }
+        }/*
         case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
