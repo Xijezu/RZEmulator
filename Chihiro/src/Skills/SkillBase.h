@@ -19,20 +19,6 @@
 #include "ItemFields.h"
 #include "TS_SC_SKILL.h"
 
-enum SKILL_RESULT_TYPE : int
-{
-    SRT_DAMAGE                 = 0,
-    SRT_MAGIC_DAMAGE           = 1,
-    SRT_DAMAGE_WITH_KNOCK_BACK = 2,
-    SRT_RESULT                 = 10,
-    SRT_ADD_HP                 = 20,
-    SRT_ADD_MP                 = 21,
-    SRT_ADD_HP_MP_SP           = 22,
-    SRT_REBIRTH                = 23,
-    SRT_RUSH                   = 30,
-    SRT_NOT_USE                = 100,
-};
-
 enum SKILL_TYPE : int16_t
 {
     ST_INVALID = 0,
@@ -76,44 +62,6 @@ struct SkillResult
     TS_SC_SKILL__HIT_ADDHPMPSP             hitAddHPMPSP;
     TS_SC_SKILL__HIT_REBIRTH               hitRebirth;
     TS_SC_SKILL__HIT_RUSH                  hitRush;
-
-    enum SkillResultType
-    {
-        DAMAGE                 = 0,
-        MAGIC_DAMAGE           = 1,
-        DAMAGE_WITH_KNOCK_BACK = 2,
-        RESULT                 = 10,
-        ADD_HP                 = 20,
-        ADD_MP                 = 21,
-        ADD_HP_MP_SP           = 22,
-        REBIRTH                = 23,
-        RUSH                   = 30,
-        NOT_USE                = 100,
-    };
-
-    enum SkillResultSuccessType
-    {
-        ADD_STATE       = 10,
-        REMOVE_STATE    = 11,
-        ADD_HATE        = 12,
-        TURN_ON         = 21,
-        TURN_OFF        = 22,
-        SUMMON_DEAD     = 30,
-        TARGET_DEAD     = 31,
-        CREATE_ITEM     = 40,
-        RESPAWN_MONSTER = 41,
-    };
-
-};
-
-enum SKILL_STATUS : short
-{
-    ST_FIRE           = 0,
-    ST_CASTING        = 1,
-    ST_CASTING_UPDATE = 2,
-    ST_CANCEL         = 3,
-    ST_REGION_FIRE    = 4,
-    ST_COMPLETE       = 5
 };
 
 enum TARGET_TYPE : int
