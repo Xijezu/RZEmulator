@@ -108,7 +108,7 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_
     CharacterDatabase.Execute(stmt);
 }
 
-void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle)
+void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type, int damageType, DamageInfo damageInfo, uint handle)
 {
     SkillResult skillResult{ };
     skillResult.type    = type;
@@ -145,7 +145,7 @@ void Skill::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, in
     pvList.emplace_back(skillResult);
 }
 
-void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time)
+void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, int damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time)
 {
     SkillResult skillResult{ };
 
@@ -1060,7 +1060,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }
+        }*/
         case EF_PHYSICAL_MULTIPLE_DAMAGE_T1:
         {
             MULTIPLE_PHYSICAL_DAMAGE_T1(pTarget);
@@ -1075,7 +1075,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             MULTIPLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_ABSORB_DAMAGE:
         {
             SINGLE_PHYSICAL_DAMAGE_ABSORB(pTarget);
@@ -1105,11 +1105,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY_OLD:
         {
             SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(pTarget);
-        }*/
+            break;
+        }
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD:
         {
             PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
@@ -3478,4 +3479,95 @@ void Skill::PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget)
         DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
         AddSkillDamageResult(m_vResultList, SkillResult::DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
     }
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nDamage{0};
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    nDamage = nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+    int nMax = nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+    nDamage = std::min(nDamage, nMax);
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    for (int i = 0; i < GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance(); ++i)
+        m_pOwner->AddEnergy();
+
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nAttackPoint   = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int nDamage        = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+    int nCount         = GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
+    int elemental_type = GetSkillBase()->GetElementalType();
+
+    for (int i = 0; i < nCount; ++i)
+    {
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    }
+    m_nFireCount = static_cast<uint32_t>(nCount);
+    m_nFireTime += GetVar(4) * nCount * 100;
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    int nDamage = nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int nMax    = nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
+    nDamage = std::min(nDamage, nMax);
+    int nCount = GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
+
+    for (int i = 0; i < nCount; ++i)
+    {
+        int        elemental_type = GetSkillBase()->GetElementalType();
+        DamageInfo Damage         = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, GetSkillBase()->GetElementalType(), Damage, pTarget->GetHandle());
+    }
+
+    m_nFireCount = static_cast<uint32_t>(nCount);
+    m_nFireTime += GetVar(4) * nCount * 100;
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    int nDamage = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+
+    if (m_nCurrentFire == 0)
+    {
+        m_nTotalFire   = GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
+        m_nCurrentFire = 1;
+    }
+    else
+    {
+        ++m_nCurrentFire;
+    }
+
+    int        elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage         = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    m_nFireTime += GetVar(4) * 100;
 }

@@ -43,8 +43,8 @@ class Skill
         static void DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id, int skill_level, int cool_time);
         // skills
         static void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle);
-        static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, uint8 damageType, DamageInfo damageInfo, uint handle);
-        static void AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, uint8_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time);
+        static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type, int damageType, DamageInfo damageInfo, uint handle);
+        static void AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, int damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time);
         static int EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float fEffectLength, const int nRegionType, const float fRegionProperty, const int nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int nDistributeType, const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList, bool bEnemyOnly = true);
 
         int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bIsCastedByItem);
@@ -183,6 +183,10 @@ class Skill
         void PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget);
         void PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
         void PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget);
+        void SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
 
         void SKILL_RESURRECTION(Unit *pTarget);
         void ACTIVATE_FIELD_PROP();
