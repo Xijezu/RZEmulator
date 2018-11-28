@@ -104,6 +104,7 @@ class GroupManager
         bool LeaveParty(int nPartyID, const std::string &szName);
         int CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType);
         void DoEachMemberTag(int nPartyID, std::function<void(PartyMemberTag &)> fn);
+        int DoEachMemberTagNum(int nPartyID, std::function<bool(PartyMemberTag &)> fn);
 
         ///- Events
         void OnChangeCharacterLevel(int nPartyID, const std::string &szName, int nLevel);

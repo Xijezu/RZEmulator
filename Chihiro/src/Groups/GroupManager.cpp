@@ -286,6 +286,25 @@ void GroupManager::DoEachMemberTag(int nPartyID, std::function<void(PartyMemberT
     }
 }
 
+int GroupManager::DoEachMemberTagNum(int nPartyID, std::function<bool(PartyMemberTag &)> fn)
+{
+    {
+        NG_SHARED_GUARD readGuard(i_lock);
+        auto            info = getPartyInfoNC(nPartyID);
+        int             nCnt{0};
+        if (info != nullptr)
+        {
+            for (auto &tag : info->vMemberNameList)
+            {
+                if (fn(tag))
+                    nCnt++;
+            }
+        }
+        return nCnt;
+    }
+}
+
+
 int GroupManager::GetMinLevel(int nPartyID)
 {
     int min = 0xFF;
