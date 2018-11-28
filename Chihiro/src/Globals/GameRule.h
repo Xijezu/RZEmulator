@@ -42,6 +42,7 @@ class GameRule
         static float GetStaminaBonus();
         static int             nEnhanceFailType;
         constexpr static float DEFAULT_UNIT_SIZE{12.0f};
+        constexpr static int   SKILL_CAST_COST{0};
     private:
         static int   _chipLevelLimit[];
         static int   _modtable[];

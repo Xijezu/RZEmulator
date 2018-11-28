@@ -22,6 +22,7 @@
 #include "Messages.h"
 #include "FieldPropManager.h"
 #include "RegionContainer.h"
+#include "GroupManager.h"
 #include "GameContent.h"
 #include "RegionTester.h"
 #include "SkillProp/SkillProp.h"
@@ -604,7 +605,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8 layer, bool bI
         pProp->Cast();
     }
 
-    m_pOwner->SetMana(nMP - mana_cost);
+    m_pOwner->SetMana(nMP - mana_cost * GameRule::SKILL_CAST_COST);
 
     auto nOriginalCastingDelay = delay;
     if (delay == -1)
@@ -1972,10 +1973,51 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
 {
     m_pOwner->ToggleAura(this);
 
-    if (m_SkillBase->target == 21)
+    switch (GetSkillBase()->GetSkillTargetType())
     {
-        // TODO: Party functor
+        case TARGET_TYPE::TARGET_PARTY:
+        {
+            if (!m_pOwner->IsPlayer())
+                break;
+
+            auto pPlayer = m_pOwner->As<Player>();
+            if (pPlayer->GetPartyID() == 0)
+                break;
+
+            auto t = sWorld.GetArTime();
+
+            auto partyFunctor = [&](PartyMemberTag &tag) {
+                if (tag.pPlayer == nullptr || !tag.bIsOnline)
+                    return;
+
+                if (tag.pPlayer == m_pOwner)
+                    return;
+
+                auto pos = tag.pPlayer->GetCurrentPosition(t);
+                if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                    AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetHandle());
+
+                if (tag.pPlayer->GetMainSummon() != nullptr && tag.pPlayer->GetMainSummon()->IsInWorld())
+                {
+                    pos = tag.pPlayer->GetMainSummon()->GetCurrentPosition(t);
+                    if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                        AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetMainSummon()->GetHandle());
+                }
+
+                if (tag.pPlayer->GetSubSummon() != nullptr && tag.pPlayer->GetSubSummon()->IsInWorld())
+                {
+                    pos = tag.pPlayer->GetSubSummon()->GetCurrentPosition(t);
+                    if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                        AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetSubSummon()->GetHandle());
+                }
+            };
+            sGroupManager.DoEachMemberTag(pPlayer->GetPartyID(), partyFunctor);
+            break;
+        }
+        default:
+            break;
     }
+
     AddSkillResult(m_vResultList, true, 0, m_pOwner->GetHandle());
 }
 
@@ -2161,7 +2203,16 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
             if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 && pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
                 break;
 
-            /// @Partyfunctor
+            auto partyFunctor = [&](PartyMemberTag &tag) -> bool {
+                if (tag.pPlayer == nullptr || !tag.bIsOnline || GetSkillBase()->GetFireRange() < tag.pPlayer->GetExactDist2d(m_pOwner))
+                    return false;
+                return fn.onCreature(this, t, m_pOwner, tag.pPlayer);
+            };
+
+            if (pPlayer->GetPartyID() == 0)
+                fn.onCreature(this, t, m_pOwner, pPlayer);
+            else
+                m_nTargetCount = static_cast<uint32_t>(sGroupManager.DoEachMemberTagNum(pPlayer->GetPartyID(), partyFunctor));
             break;
         }
         case TARGET_TYPE::TARGET_GUILD:
