@@ -1519,12 +1519,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(pTarget);
             break;
-        }/*
+        }
         case EF_RESURRECTION_WITH_RECOVER:
         {
             SKILL_RESURRECTION_WITH_RECOVER(pTarget);
             break;
-        }
+        }/*
         case EF_REMOVE_STATE_GROUP:
         {
             REMOVE_STATE_GROUP_SKILL_FUNCTOR mySkillFunctor(&m_vResultList, m_pOwner);
@@ -2026,18 +2026,33 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     if (pTarget == nullptr || pTarget->GetHealth() != 0)
         return;
 
-    auto prev_hp = pTarget->GetHealth();
-    auto prev_mp = pTarget->GetMana();
+    int nIncHP = pTarget->GetMaxHealth() * GetVar(0) * GetRequestedSkillLevel();
+    int nIncMP = pTarget->GetMaxMana() * GetVar(1) * GetRequestedSkillLevel();
 
-    pTarget->AddHealth((int)CalculatePct(pTarget->GetMaxHealth(), (m_SkillBase->var[0] * 100)));
-    pTarget->AddMana((int)CalculatePct(pTarget->GetMaxMana(), (m_SkillBase->var[1] * 100)));
+    /// @todo: EXP
+    pTarget->AddHealth(nIncHP);
+    pTarget->AddMana(nIncMP);
+    /// @Todo
+    /// pTarget->ClearRemovedStateByDead();
+
+    if (pTarget->IsPlayer())
+    {
+        pTarget->As<Player>()->Save(true);
+        ///@todo:
+        /// CompeteDead
+    }
+    else if (pTarget->IsSummon())
+    {
+        auto pSummon = pTarget->As<Summon>();
+        pSummon->DB_UpdateSummon(pSummon->GetMaster(), pSummon);
+    }
 
     SkillResult skillResult{ };
     skillResult.type                    = SHT_REBIRTH;
     skillResult.hTarget                 = pTarget->GetHandle();
     skillResult.hitRebirth.target_hp    = pTarget->GetHealth();
-    skillResult.hitRebirth.nIncHP       = std::max((int)(pTarget->GetHealth() - prev_hp), 0);
-    skillResult.hitRebirth.nIncMP       = std::max((int)(pTarget->GetMana() - prev_mp), 0);
+    skillResult.hitRebirth.nIncHP       = nIncHP;
+    skillResult.hitRebirth.nIncMP       = nIncMP;
     skillResult.hitRebirth.nRecoveryEXP = 0;
     skillResult.hitRebirth.target_mp    = (int16)pTarget->GetMana();
     m_vResultList.emplace_back(skillResult);
@@ -4130,4 +4145,42 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
         DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
         AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
     }
+}
+
+void Skill::SKILL_RESURRECTION_WITH_RECOVER(Unit *pTarget)
+{
+    if (pTarget == nullptr || pTarget->GetHealth() != 0)
+        return;
+
+    int     nIncHP = pTarget->GetMaxHealth() * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+    int     nIncMP = pTarget->GetMaxMana() * (GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance());
+    int64_t nRecoveryEXP{0};
+
+    /// @todo: Last Decreased EXP
+    pTarget->AddHealth(nIncHP);
+    pTarget->AddMana(nIncMP);
+
+    /// @todo: ClearRemovedStateByDead
+
+    if (pTarget->IsPlayer())
+    {
+        pTarget->As<Player>()->Save(true);
+        ///@todo:
+        /// CompeteDead
+    }
+    else if (pTarget->IsSummon())
+    {
+        auto pSummon = pTarget->As<Summon>();
+        pSummon->DB_UpdateSummon(pSummon->GetMaster(), pSummon);
+    }
+
+    SkillResult skillResult{ };
+    skillResult.type                    = SHT_REBIRTH;
+    skillResult.hTarget                 = pTarget->GetHandle();
+    skillResult.hitRebirth.target_hp    = pTarget->GetHealth();
+    skillResult.hitRebirth.nIncHP       = nIncHP;
+    skillResult.hitRebirth.nIncMP       = nIncMP;
+    skillResult.hitRebirth.nRecoveryEXP = 0;
+    skillResult.hitRebirth.target_mp    = (int16)pTarget->GetMana();
+    m_vResultList.emplace_back(skillResult);
 }
