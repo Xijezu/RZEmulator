@@ -83,23 +83,23 @@ struct StateSkillFunctor : public SkillTargetFunctor
                             bResult = false;
                     }
                 }
-            }
-            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
-            {
-                int nAccuracyBonus = pSkill->GetSkillBase()->GetHitBonus(pSkill->GetSkillEnhance(), pCaster->GetLevel() - pTarget->GetLevel());
-                if ((50 + pCaster->GetMagicAccuracy() - pTarget->GetMagicAvoid() + nAccuracyBonus) < irand(0, 100))
-                    bResult = false;
-            }
-            else
-            {
-                if (pSkill->GetSkillBase()->GetProbabilityOnHit(pSkill->GetRequestedSkillLevel()) < irand(0, 100))
-                    bResult = false;
+                else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV ||
+                         pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
+                {
+                    int nAccuracyBonus = pSkill->GetSkillBase()->GetHitBonus(pSkill->GetSkillEnhance(), pCaster->GetLevel() - pTarget->GetLevel());
+                    if (50 + pCaster->GetMagicAccuracy() - pTarget->GetMagicAvoid() + nAccuracyBonus < irand(0, 100))
+                        bResult = false;
+                }
+                else
+                {
+                    if (pSkill->GetSkillBase()->GetProbabilityOnHit(pSkill->GetRequestedSkillLevel()) < irand(0, 100))
+                        bResult = false;
+                }
             }
 
             if (bResult)
