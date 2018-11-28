@@ -2147,6 +2147,12 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         case TARGET_TYPE::TARGET_REGION_WITH_TARGET:
         case TARGET_TYPE::TARGET_REGION_WITHOUT_TARGET:
         {
+            if (pTarget != nullptr)
+                fn.onCreature(this, t, m_pOwner, pTarget);
+            break;
+        }
+        case TARGET_TYPE::TARGET_PARTY:
+        {
             if (!m_pOwner->IsPlayer() || !pTarget->IsPlayer())
                 break;
 
@@ -2160,7 +2166,7 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         }
         case TARGET_TYPE::TARGET_GUILD:
         {
-            if (!m_pOwner->IsPlayer() || !pTarget->IsPlayer())
+            if (!m_pOwner->IsPlayer() || (pTarget == nullptr && !pTarget->IsPlayer()))
                 break;
 
             auto pPlayer       = m_pOwner->As<Player>();
