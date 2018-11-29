@@ -126,17 +126,23 @@ void Unit::SetHealth(int hp)
     auto old_hp = GetHealth();
     SetInt32Value(UNIT_FIELD_HEALTH, hp);
     if (hp > GetMaxHealth())
-        SetInt32Value(UNIT_FIELD_HEALTH, GetMaxHealth());
+        SetHealth(GetMaxHealth());
+    if (hp < 0)
+        SetHealth(0);
+    // @todo
     //if (old_hp != GetHealth())
     //this.onHPChange(old_hp);
 }
 
 void Unit::SetMana(int mp)
 {
-    int old_np = GetMana();
+    auto old_mp = GetMana();
     SetInt32Value(UNIT_FIELD_MANA, mp);
     if (mp > GetMaxMana())
-        SetInt32Value(UNIT_FIELD_MANA, GetMaxMana());
+        SetMana(GetMaxMana());
+    if (mp < 0)
+        SetMana(0);
+    /// @todo: on mana change
 }
 
 void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
