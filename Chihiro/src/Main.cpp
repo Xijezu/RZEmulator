@@ -32,7 +32,7 @@ bool StartDB();
 void StopDB();
 void WorldUpdateLoop();
 void ShutdownCLIThread(std::thread *cliThread);
-void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
+void SignalHandler(boost::system::error_code const &error, int signalNumber);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
 
 constexpr int WORLD_SLEEP_CONST = 50;
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 #if PLATFORM == PLATFORM_WINDOWS
     signals.add(SIGBREAK);
 #endif
-    signals.async_wait(std::bind(&SignalHandler, std::weak_ptr<NGemity::Asio::IoContext>(ioContext), std::placeholders::_1, std::placeholders::_2));
+    signals.async_wait(SignalHandler);
 
     // Enabled a timed callback for handling the database keep alive ping
     int32                                        dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
@@ -133,7 +133,12 @@ int main(int argc, char **argv)
     for (int i = 0; i < numThreads; ++i)
         threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
+    World::StopNow(SHUTDOWN_EXIT_CODE);
     WorldUpdateLoop();
+
+    // Shutdown starts here
+    threadPool.reset();
+    sLog->SetSynchronous();
 
     dbPingTimer->cancel();
     signals.cancel();
@@ -144,12 +149,10 @@ int main(int argc, char **argv)
     return exitCode;
 }
 
-
-void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/)
+void SignalHandler(boost::system::error_code const &error, int /*signalNumber*/)
 {
     if (!error)
-        if (std::shared_ptr<NGemity::Asio::IoContext> ioContext = ioContextRef.lock())
-            ioContext->stop();
+        World::StopNow(SHUTDOWN_EXIT_CODE);
 }
 
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error)
