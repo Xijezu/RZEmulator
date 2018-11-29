@@ -126,6 +126,7 @@ const WorldSessionHandler worldPacketHandler[] =
                                           declareHandler(STATUS_AUTHED, &WorldSession::onSoulStoneCraft),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onStorage),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onBindSkillCard),
+                                          declareHandler(STATUS_AUTHED, &WorldSession::onUnBindSkilLCard),
                                           declareHandler(STATUS_AUTHED, &WorldSession::onDropQuest),
                                   };
 constexpr int             worldTableSize       = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
