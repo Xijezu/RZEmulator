@@ -37,7 +37,7 @@ class AuthNetwork
 
         ~AuthNetwork()
         {
-            if(!m_bClosed)
+            if (!m_bClosed)
             {
                 Stop();
             }
@@ -48,13 +48,13 @@ class AuthNetwork
             if (m_bClosed)
                 return;
 
-            if(!m_pSocket->IsOpen())
+            if (!m_pSocket->IsOpen())
                 m_bClosed = true;
 
             if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
             {
                 m_nLastPingTime = sWorld.GetArTime();
-                TS_CS_PING ping{};
+                TS_CS_PING ping{ };
                 m_pSocket->SendPacket(ping);
             }
 
@@ -68,21 +68,21 @@ class AuthNetwork
             if (m_pThread != nullptr && m_pThread->joinable())
             {
                 m_pThread->join();
-                delete m_pThread;
             }
 
-            if(m_pNetworkThread != nullptr)
-                delete m_pNetworkThread;
             if (m_pSocket != nullptr)
+            {
+                m_pSocket->CloseSocket();
                 m_pSocket->DeleteSession();
+            }
         }
 
         bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
         {
             NG_UNIQUE_GUARD               _guard(_mutex);
             boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
-            boost::asio::ip::tcp::socket socket(ioContext);
-            m_pNetworkThread = new NetworkThread<XSocket>{};
+            boost::asio::ip::tcp::socket  socket(ioContext);
+            m_pNetworkThread = std::make_unique<NetworkThread<XSocket>>();
 
             try
             {
@@ -105,7 +105,7 @@ class AuthNetwork
 
             reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->SendGameLogin();
 
-            m_pThread = new std::thread(&AuthNetwork::Update, this);
+            m_pThread = std::make_unique<std::thread>(&AuthNetwork::Update, this);
             return true;
         }
 
@@ -122,11 +122,11 @@ class AuthNetwork
         }
 
     private:
-        bool                           m_bClosed;
-        std::shared_ptr<XSocket>       m_pSocket;
-        std::thread                    *m_pThread;
-        std::atomic<uint32>            m_nLastPingTime;
-        NetworkThread<XSocket> *m_pNetworkThread;
+        bool                                    m_bClosed;
+        std::shared_ptr<XSocket>                m_pSocket;
+        std::unique_ptr<std::thread>            m_pThread;
+        std::atomic<uint32>                     m_nLastPingTime;
+        std::unique_ptr<NetworkThread<XSocket>> m_pNetworkThread;
         NG_SHARED_MUTEX _mutex;
 
     protected:

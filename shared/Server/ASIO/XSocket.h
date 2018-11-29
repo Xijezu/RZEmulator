@@ -64,8 +64,6 @@ class XSocket : public Socket<XSocket>
             _headerBuffer.Resize(HEADER_SIZE);
         }
 
-        ~XSocket() = default;
-
         XSocket(XSocket const &right) = delete;
         XSocket &operator=(XSocket const &right) = delete;
 
