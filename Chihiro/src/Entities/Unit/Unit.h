@@ -283,7 +283,7 @@ class Unit : public WorldObject
         bool IsWornByCode(int code) const;
         virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
         Item *GetWornItem(ItemWearType);
-        ushort Puton(ItemWearType pos, Item *item);
+        ushort Puton(ItemWearType pos, Item *item, bool bIsTranslated = false);
         ushort Putoff(ItemWearType pos);
         ItemWearType GetAbsoluteWearPos(ItemWearType pos);
         ItemClass GetWeaponClass();

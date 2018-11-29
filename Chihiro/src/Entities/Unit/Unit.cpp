@@ -1367,20 +1367,23 @@ uint16_t Unit::putonItem(ItemWearType pos, Item *item)
     return 0;
 }
 
-ushort Unit::Puton(ItemWearType pos, Item *item)
+ushort Unit::Puton(ItemWearType pos, Item *item, bool bIsTranslated)
 {
     if (item->m_Instance.nWearInfo != WEAR_CANTWEAR)
         return 0;
 
-    std::vector<int> vOverlapItemList{ };
-    if (!TranslateWearPosition(pos, item, vOverlapItemList))
-        return 0;
-
-    for (int &s : vOverlapItemList)
+    if (!bIsTranslated)
     {
-        putoffItem((ItemWearType)s);
-        if (m_anWear[s] != nullptr)
+        std::vector<int> vOverlapItemList{ };
+        if (!TranslateWearPosition(pos, item, vOverlapItemList))
             return 0;
+
+        for (int &s : vOverlapItemList)
+        {
+            putoffItem((ItemWearType)s);
+            if (m_anWear[s] != nullptr)
+                return 0;
+        }
     }
     return putonItem(pos, item);
 }

@@ -707,7 +707,9 @@ bool Player::ReadEquipItem()
                     auto iwt = (ItemWearType)wear_info;
                     if (unit->TranslateWearPosition(iwt, item, indices))
                     {
-                        unit->m_anWear[wear_info] = item;
+                        m_anWear[wear_info] = item;
+                        if (wear_info == WEAR_SHIELD && item->m_pItemBase->group == GROUP_WEAPON)
+                            Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
                         item->m_bIsNeedUpdateToDB  = true;
                         if (unit->IsSummon())
@@ -1053,14 +1055,12 @@ Item *Player::FindItemByHandle(uint32 handle)
 
 uint16_t Player::putonItem(ItemWearType pos, Item *item)
 {
-    uint16_t result;
-
     if (pos == WEAR_SHIELD)
     {
-        if (item->m_pItemBase->group == 1)
+        if (item->m_pItemBase->group == GROUP_WEAPON)
             Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
     }
-    result = Unit::putonItem(pos, item);
+    uint16_t result = Unit::putonItem(pos, item);
     if (result == 0)
     {
         if (m_anWear[pos] != nullptr && m_anWear[pos]->GetHandle() == item->GetHandle())
