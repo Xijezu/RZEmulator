@@ -133,7 +133,6 @@ int main(int argc, char **argv)
     for (int i = 0; i < numThreads; ++i)
         threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
-    World::StopNow(SHUTDOWN_EXIT_CODE);
     WorldUpdateLoop();
 
     // Shutdown starts here
