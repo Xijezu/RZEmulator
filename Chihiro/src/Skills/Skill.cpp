@@ -183,14 +183,11 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
 {
     int nResult = nOriginalDamage;
 
-    const Position &OriginalPos = bTargetOrigin ? _TargetPos : _OriginalPos;
-    const Position &TargetPos   = bTargetOrigin ? _OriginalPos : _TargetPos;
+    auto OriginalPos = bTargetOrigin ? _TargetPos : _OriginalPos;
+    auto TargetPos   = bTargetOrigin ? _OriginalPos : _TargetPos;
 
     std::vector<uint32_t> vList{ };
-
-    {
-        sWorld.EnumMovableObject(OriginalPos, layer, fEffectLength, vList, false, false);
-    }
+    sWorld.EnumMovableObject(OriginalPos, layer, fEffectLength, vList, true, true);
 
     vTargetList.clear();
 
@@ -2527,7 +2524,7 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     int  nDamage        = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
     int32_t  nCount{0};
-    bool     bTargetOrigin{false};
+    bool     bTargetOrigin{true};
     int32_t  nRegionType{-1};
     float    fRegionProperty{0.0f};
     uint32_t nFireInterval{0};
@@ -2566,8 +2563,9 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{ };
     auto                t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList, true);
-    for (int i = 0; i < static_cast<int>(vTargetList.size()); i++)
+    nDamage        = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList);
+    m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
+    for (int i = 0; i < nCount; i++)
     {
         for (auto &target : vTargetList)
         {
