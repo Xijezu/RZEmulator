@@ -735,6 +735,7 @@ void Messages::SendQuestList(Player *pPlayer)
         {
             info.status[i] = static_cast<uint32_t >(pQuest->m_Instance.nStatus[i]);
         }
+        questPct.activeQuests.emplace_back(info);
     };
     /* FUNCTOR END*/
     pPlayer->DoEachActiveQuest(functor);
