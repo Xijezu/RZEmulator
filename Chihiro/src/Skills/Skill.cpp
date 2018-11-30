@@ -3736,7 +3736,7 @@ void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
                 continue;
         }
 
-        switch (GetVar(12))
+        switch (static_cast<int>(GetVar(12)))
         {
             case 1:
                 if (!pUnit->IsPlayer())
@@ -4244,7 +4244,7 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget)
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire   = std::min(((GetRequestedSkillLevel() - 1) / GetVar(2) + 1), 3);
+        m_nTotalFire   = std::min(static_cast<int>(((GetRequestedSkillLevel() - 1) / GetVar(2) + 1)), 3);
         m_nCurrentFire = 1;
     }
     else
@@ -4839,7 +4839,7 @@ void Skill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(Unit *pTarget)
     nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
     nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
 
-    int nStep  = std::min(((GetRequestedSkillLevel() - 1) / GetVar(4) + 1), 3);
+    int nStep  = std::min(static_cast<int>(((GetRequestedSkillLevel() - 1) / GetVar(4) + 1)), 3);
     int nCount = GetVar(nStep + 4);
 
     for (int i = 0; i < nCount; ++i)
