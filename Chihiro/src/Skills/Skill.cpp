@@ -1434,11 +1434,11 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             if (m_pOwner->IsPlayer())
                 DO_UNSUMMON();
             break;
-        }/*
+        }
         case EF_UNSUMMON_AND_ADD_STATE:
         {
             if (m_pOwner->IsPlayer())
-                UnSummonAndAddState();
+                UNSUMMON_AND_ADD_STATE();
             break;
         }
         case EF_CORPSE_ABSORB:
@@ -1450,7 +1450,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             CORPSE_EXPLOSION(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE:
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
@@ -1463,12 +1463,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_DAMAGE_ABSORB(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY:
         {
             PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE:
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK:
         case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF:
@@ -1476,7 +1476,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_REGION_DAMAGE(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE:
         case EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK:
         {
@@ -1492,17 +1492,17 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_MULTIPLE_DAMAGE:
         {
             PHYSICAL_MULTIPLE_DAMAGE(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK:
         {
             PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE:
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE:
         case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE_SELF:
@@ -1525,12 +1525,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
             REMOVE_STATE_GROUP_SKILL_FUNCTOR mySkillFunctor(&m_vResultList, m_pOwner);
             process_target(t, mySkillFunctor, pTarget);
             break;
-        }
+        }*/
         case EF_CASTING_CANCEL_WITH_ADD_STATE:
         {
             CASTING_CANCEL_WITH_ADD_STATE(pTarget);
             break;
-        }
+        }/*
         case EF_RESPAWN_MONSTER_NEAR:
         {
             RESPAWN_NEAR_MONSTER();
@@ -4717,4 +4717,282 @@ void Skill::MAGIC_ABSORB_DAMAGE(Unit *pTarget)
     skill_result.hitAddStat.nIncStat    = nMPAbsorb;
     skill_result.hitAddStat.target_stat = m_pOwner->GetMana();
     m_vResultList.emplace_back(skill_result);
+}
+
+void Skill::PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+    int nDamage        = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+    DamageInfo Damage       = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    int        nEnergyCount = GetVar(4) + GetVar(5) * GetRequestedSkillLevel();
+
+    for (int i = 0; i < nEnergyCount; ++i)
+        m_pOwner->AddEnergy();
+
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+}
+
+void Skill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget)
+{
+    if (!pTarget)
+        return;
+
+    int nEffectType = GetSkillBase()->GetSkillEffectType();
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+
+    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE) ? (GetVar(10) * GetSkillEnhance()) : 0);
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE) ? (GetVar(11) * GetSkillEnhance()) : 0);
+
+    if (m_nCurrentFire == 0)
+    {
+        m_nTotalFire   = GetVar(4) + GetVar(5) * GetRequestedSkillLevel();
+        m_nCurrentFire = 1;
+    }
+    else
+    {
+        ++m_nCurrentFire;
+    }
+
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    if (m_nCurrentFire == m_nTotalFire && nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK
+        && !Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock
+        && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    {
+        float fRange = GetVar(8) + GetVar(9) * GetRequestedSkillLevel();
+        fRange *= GameRule::DEFAULT_UNIT_SIZE;
+        uint32_t knock_back_time = static_cast<uint32_t>((GetVar(10) + GetVar(11) * GetRequestedSkillLevel()) * 100);
+
+        AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
+        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+    }
+    else
+    {
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    }
+    m_nFireTime += GetVar(6) * 100;
+}
+
+void Skill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nEffectType    = GetSkillBase()->GetSkillEffectType();
+    int elemental_type = GetSkillBase()->GetElementalType();
+
+    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+    if (m_nCurrentFire == 0)
+    {
+        m_nTotalFire   = GetVar(7) + GetVar(8) * GetRequestedSkillLevel();
+        m_nCurrentFire = 1;
+    }
+    else
+    {
+        ++m_nCurrentFire;
+    }
+
+    bool  bTargetOrigin   = true;
+    int   nRegionType     = -1;
+    float fRegionProperty = 0.0f;
+
+    float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
+    m_fRange              = fEffectLength;
+
+    std::vector<Unit *> vTargetList{ };
+    auto                t = sWorld.GetArTime();
+
+    nDamage        = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, GetVar(5), GetVar(6), vTargetList);
+    m_nTargetCount = static_cast< uint32_t >( vTargetList.size());
+
+    for (auto &pDealTarget : vTargetList)
+    {
+        if (pDealTarget->GetHealth() == 0)
+            continue;
+
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+    }
+
+    m_nFireTime += GetVar(9) * 100;
+}
+
+void Skill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+
+    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+
+    int nStep  = std::min(((GetRequestedSkillLevel() - 1) / GetVar(4) + 1), 3);
+    int nCount = GetVar(nStep + 4);
+
+    for (int i = 0; i < nCount; ++i)
+    {
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    }
+    m_nFireCount = static_cast<uint32_t>(nCount);
+    m_nFireTime += GetVar(8) * nCount * 100;
+}
+
+void Skill::CASTING_CANCEL_WITH_ADD_STATE(Unit *pTarget)
+{
+    int  nCastingCancelRate = GetVar(1) + GetVar(2) * GetRequestedSkillLevel() + GetVar(3) * GetSkillEnhance();
+    bool bSuccess           = false;
+
+    Skill *pCancelSkill = pTarget->GetCastSkill();
+    if (pCancelSkill && pCancelSkill->m_Status == SS_CAST)
+    {
+        switch (static_cast< int >( GetVar(0)))
+        {
+            case SC_PHYSICAL:
+                if (pCancelSkill->GetSkillBase()->IsPhysicalSkill())
+                    bSuccess = true;
+                break;
+            case SC_MAGICAL:
+                if (pCancelSkill->GetSkillBase()->IsMagicalSkill())
+                    bSuccess = true;
+                break;
+            case SC_EVERY:
+                bSuccess = true;
+                break;
+            default:
+                bSuccess = false;
+                break;
+        }
+
+        if (bSuccess && irand(0, 99) < nCastingCancelRate)
+        {
+            pTarget->CancelSkill();
+
+            if (irand(0, 99) < GetVar(11) + GetVar(12) * GetRequestedSkillLevel() + GetVar(13) * GetSkillEnhance())
+            {
+                auto t = sWorld.GetArTime();
+                pTarget->AddState(SG_NORMAL, static_cast< StateCode >( static_cast< int >( GetVar(4))), m_pOwner->GetHandle(), GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance(), t, t + GetVar(8) + GetVar(9) * GetSkillEnhance());
+            }
+        }
+    }
+
+    AddSkillResult(m_vResultList, bSuccess, 0, pTarget->GetHandle());
+}
+
+void Skill::CORPSE_ABSORB(Unit *pTarget)
+{
+    if (pTarget == nullptr || !pTarget->IsMonster() || pTarget->GetHealth() != 0)
+        return;
+
+    pTarget->As<Monster>()->RemoveFromWorld();
+
+    int nHP = GetVar(0) + GetRequestedSkillLevel() * GetVar(1) + GetSkillEnhance() * GetVar(4);
+    int nMP = GetVar(2) + GetRequestedSkillLevel() * GetVar(3) + GetSkillEnhance() * GetVar(5);
+
+    Unit *pHealTarget = m_pOwner;
+
+    if (GetVar(6) && m_pOwner->IsPlayer())
+        pHealTarget = m_pOwner->As<Player>()->GetMainSummon();
+
+    nHP = pHealTarget->Heal(nHP);
+    nMP = pHealTarget->MPHeal(nMP);
+
+    SkillResult skill_result{ };
+    skill_result.type                   = SHT_ADD_HP;
+    skill_result.hTarget                = pHealTarget->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nHP;
+    skill_result.hitAddStat.target_stat = pHealTarget->GetHealth();
+    m_vResultList.emplace_back(skill_result);
+
+    skill_result.type                   = SHT_ADD_MP;
+    skill_result.hTarget                = pHealTarget->GetHandle();
+    skill_result.hitAddStat.nIncStat    = nMP;
+    skill_result.hitAddStat.target_stat = pHealTarget->GetMana();
+    m_vResultList.emplace_back(skill_result);
+}
+
+void Skill::CORPSE_EXPLOSION(Unit *pTarget)
+{
+    if (pTarget == nullptr || !pTarget->IsMonster() || pTarget->GetHealth() != 0)
+        return;
+
+    int   elemental_type = GetVar(6);
+    int   nDamage        = GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
+    float fEffectLength  = (GetVar(2) + GetVar(5) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+
+    m_fRange              = fEffectLength;
+
+    std::vector<Unit *> vTargetList{ };
+    auto                t = sWorld.GetArTime();
+
+    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(3), GetVar(4), vTargetList);
+
+    pTarget->As<Monster>()->RemoveFromWorld();
+    m_nTargetCount = 0;
+
+    for (auto &pDealTarget : vTargetList)
+    {
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        ++m_nTargetCount;
+    }
+}
+
+void Skill::UNSUMMON_AND_ADD_STATE()
+{
+    if (!m_pOwner->IsPlayer())
+        return;
+
+    auto pMainSummon = m_pOwner->As<Player>()->GetMainSummon();
+    if (pMainSummon == nullptr)
+        return;
+
+    int         nMainSummonCode  = pMainSummon->GetSummonCode();
+    std::string szMainSummonName = pMainSummon->GetName();
+    auto        pSubSummon       = m_pOwner->As<Player>()->GetSubSummon();
+
+    if (GetVar(6) == 0)
+    {
+        if (pSubSummon != nullptr)
+            m_pOwner->As<Player>()->DoUnSummon(pSubSummon);
+
+        m_pOwner->As<Player>()->DoUnSummon(pMainSummon);
+    }
+
+    auto     t = sWorld.GetArTime();
+    uint32_t end_time{0};
+
+    int nEndTime = GetSkillBase()->GetStateSecond(GetRequestedSkillLevel(), GetSkillEnhance());
+
+    if (nEndTime < 0)
+        end_time = t + 6000;
+    else
+        end_time = t + nEndTime;
+
+    for (int i = 0; i < 6; ++i)
+    {
+        if (GetVar(i) == 0)
+            break;
+
+        const auto pStateInfo = sObjectMgr.GetStateInfo(GetVar(i));
+        // @todo
+        /*if (pStateInfo && pStateInfo->effect_type == EF_CHANGING_FORM)
+            m_pOwner->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(i)), m_pOwner->GetHandle(), GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, end_time, false, nMainSummonCode, szMainSummonName.c_str());
+        else */
+        m_pOwner->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(i)), m_pOwner->GetHandle(), GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, end_time, false);
+    }
 }
