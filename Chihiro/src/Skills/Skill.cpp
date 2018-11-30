@@ -4455,7 +4455,7 @@ void Skill::REMOVE_HATE(Unit *pTarget)
     {
         auto pMonster = pTarget->As<Monster>();
         int  nHate    = pMonster->GetHate(m_pOwner->GetHandle());
-        pMonster->RemoveHate(m_pOwner->GetHandle(), nHate * fHateRemoveRate / 100.0f);
+        pMonster->RemoveHate(m_pOwner->GetHandle(), static_cast<int32_t>(nHate * fHateRemoveRate / 100.0f));
     }
 
     AddSkillResult(m_vResultList, bSuccess, SRST_AddHate, pTarget->GetHandle());
@@ -4477,12 +4477,12 @@ void Skill::REGION_REMOVE_HATE(Unit *pTarget)
 
     m_nTargetCount = static_cast<uint32_t>( vTargetList.size());
 
-    for (auto &pTarget : vTargetList)
+    for (auto &pListTarget : vTargetList)
     {
-        if (!pTarget->IsMonster())
+        if (!pListTarget->IsMonster())
             continue;
 
-        auto pMonster = pTarget->As<Monster>();
+        auto pMonster = pListTarget->As<Monster>();
         bool bSuccess = irand(0, 99) < nSuccessRate;
         if (bSuccess && m_pOwner->IsEnemy(pMonster, true))
         {
@@ -4537,7 +4537,6 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint   = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     int elemental_type = GetSkillBase()->GetElementalType();
     int nDamage        = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
 
