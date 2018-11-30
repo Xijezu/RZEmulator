@@ -1498,3 +1498,33 @@ const std::string &Monster::GetNameAsString()
 {
     return sObjectMgr.GetValueFromNameID(m_Base->name_id);
 }
+
+int Monster::RemoveHate(uint32_t handle, int pt)
+{
+    auto t  = sWorld.GetArTime();
+    auto ht = getHateTag(handle, t);
+    if (ht == nullptr)
+        return -1;
+
+    if (ht->nHate < pt)
+    {
+        removeFromHateList(handle);
+        if (handle == m_hEnemy)
+        {
+            m_hEnemy = 0;
+            findNextEnemy();
+        }
+        return 0;
+    }
+    ht->nHate -= pt;
+    if (handle == m_hEnemy && GetHealth() != 0)
+        findNextEnemy();
+    return ht->nHate;
+}
+
+int Monster::GetHate(uint32_t handle)
+{
+    if (auto ht = getHateTag(handle, 0); ht != nullptr)
+        return ht->nHate;
+    return 0;
+}
