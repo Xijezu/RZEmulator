@@ -56,8 +56,8 @@ class Item : public WorldObject
 {
     public:
         static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-        static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
-                int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time);
+        static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info = BY_BASIC, int level = -1, int enhance = -1,
+                int flag = -1, int socket_0 = 0, int socket_1 = 0, int socket_2 = 0, int socket_3 = 0, int remain_time = 0);
         static void PendFreeItem(Item *pItem);
 
         Item();
@@ -67,10 +67,11 @@ class Item : public WorldObject
         Item &operator=(const Item &) = delete;
 
         void SetCount(int64 count);
-		bool IsDropable();
+        bool IsDropable();
         bool IsWearable();
 
         Summon *GetSummon() const { return m_pSummon; }
+
         bool IsTradable();
         bool IsExpireItem() const;
         bool IsJoinable() const;

@@ -1053,12 +1053,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             SINGLE_PHYSICAL_DAMAGE_T2(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_T3:
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_MULTIPLE_DAMAGE_T1:
         {
             MULTIPLE_PHYSICAL_DAMAGE_T1(pTarget);
@@ -1113,22 +1113,22 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             PHYSICAL_SINGLE_REGION_DAMAGE_OLD(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
         {
             SINGLE_PHYSICAL_DAMAGE_T3(pTarget);
             break;
-        }*/
+        }
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
         {
             SINGLE_PHYSICAL_DAMAGE_T1(pTarget);
             break;
-        }/*
+        }
         case EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD:
         {
             MULTIPLE_PHYSICAL_DAMAGE_T4(pTarget);
             break;
-        }*/
+        }
         case EF_REMOVE_BAD_STATE:
         {
             RemoveBadStateSkillFunctor mySkillFunctor{&m_vResultList};
@@ -1157,13 +1157,12 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         {
             MAKE_AREA_EFFECT_PROP(pTarget, true);
             break;
-        }/*
+        }
         case EF_CREATE_ITEM:
         {
             CREATE_ITEM(pTarget, bIsSuccess);
             break;
-        }*/
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        }
         case EF_ACTIVATE_FIELD_PROP:
         {
             ACTIVATE_FIELD_PROP();
@@ -4181,4 +4180,117 @@ void Skill::SKILL_RESURRECTION_WITH_RECOVER(Unit *pTarget)
     skillResult.hitRebirth.nRecoveryEXP = 0;
     skillResult.hitRebirth.target_mp    = (int16)pTarget->GetMana();
     m_vResultList.emplace_back(skillResult);
+}
+
+void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
+{
+    /// @TODO
+    if (pTarget == nullptr)
+        return;
+
+    int nDamage{0};
+
+    //int nAttackPoint = m_pOwner->GetAttackPointRightWithoutWeapon((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK)
+    {
+        if (m_nCurrentFire == 0)
+        {
+            m_nCurrentFire = 1;
+            m_nTotalFire   = 2;
+
+            if (!PHYSICAL_DAMAGE_RUSH(pTarget, m_nRushDamage))
+            {
+                m_nCurrentFire = 2;
+            }
+            return;
+        }
+        else
+        {
+            //sWorld.MoveObject( m_pOwner, m_RushPos, m_fRushFace );
+            nDamage += m_nRushDamage;
+            ++m_nCurrentFire;
+        }
+    }
+
+    nDamage += nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+    int        elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage         = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+
+    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    {
+        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        fRange *= GameRule::DEFAULT_UNIT_SIZE;
+
+        auto knock_back_time = (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100;
+
+        AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
+        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+    }
+    else
+    {
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    }
+}
+
+void Skill::MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget)
+{
+    if (pTarget == nullptr)
+        return;
+
+    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+
+    int nDamage = nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+
+    if (m_nCurrentFire == 0)
+    {
+        m_nTotalFire   = std::min(((GetRequestedSkillLevel() - 1) / GetVar(2) + 1), 3);
+        m_nCurrentFire = 1;
+    }
+    else
+    {
+        ++m_nCurrentFire;
+    }
+
+    int elemental_type = GetSkillBase()->GetElementalType();
+    int nCount         = GetVar(m_nCurrentFire + 5);
+
+    for (int i = 0; i < nCount; ++i)
+    {
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    }
+
+    m_nFireCount = static_cast<uint32_t>(nCount);
+    m_nFireTime += GetVar(9) + m_nCurrentFire - 1;
+}
+
+void Skill::CREATE_ITEM(Unit */*pTarget*/, bool &pbIsSuccess)
+{
+    if (pbIsSuccess)
+    {
+        Player *pInvenPlayer{nullptr};
+        if (m_pOwner->IsPlayer())
+            pInvenPlayer = m_pOwner->As<Player>();
+        if (m_pOwner->IsSummon())
+            pInvenPlayer = m_pOwner->As<Summon>()->GetMaster();
+
+        for (int i = 0; i < 3; ++i)
+        {
+            int  nItemCode  = GetVar(4 * i) + GetVar(4 * i + 1) * GetRequestedSkillLevel();
+            auto nItemCount = static_cast<int64_t>(GetVar(4 * i + 2) + GetVar(4 * i + 3) * GetRequestedSkillLevel());
+
+            if (nItemCode != 0)
+            {
+                Item *pItem = Item::AllocItem(0, nItemCode, nItemCount);
+                pInvenPlayer->PushItem(pItem, pItem->m_Instance.nCount, false);
+            }
+        }
+    }
+
+    SkillResult skill_result{ };
+    skill_result.hitResult.success_type = SRST_CreateItem;
+    skill_result.hitResult.bResult      = pbIsSuccess;
+    m_vResultList.emplace_back(skill_result);
 }

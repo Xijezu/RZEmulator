@@ -15,12 +15,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Item/Item.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "DatabaseEnv.h"
 #include "Messages.h"
 #include "GameRule.h"
+#include "Item.h"
 
 Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
         int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
@@ -117,7 +117,7 @@ void Item::DBUpdate()
     stmt->setInt32(i++, m_Instance.Socket[2]);
     stmt->setInt32(i++, m_Instance.Socket[3]);
     stmt->setInt32(i++, m_Instance.tExpire);
-    stmt->setInt32(i++, m_Instance.UID);
+    stmt->setInt32(i, m_Instance.UID);
 
     CharacterDatabase.Execute(stmt);
 
@@ -161,7 +161,7 @@ void Item::DBInsert()
     stmt->setInt32(idx++, 0); // elemental effect type
     stmt->setInt32(idx++, 0); // elemental effect expire_time
     stmt->setInt32(idx++, 0); // elemental effect attack point
-    stmt->setInt32(idx++, 0); // elemental effect magic point
+    stmt->setInt32(idx, 0); // elemental effect magic point
 
     CharacterDatabase.Execute(stmt);
 

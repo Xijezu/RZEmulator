@@ -199,6 +199,10 @@ class Skill
         void MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(Unit *pTarget);
         void SKILL_RESURRECTION_WITH_RECOVER(Unit *pTarget);
 
+        void SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
+        void MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget);
+        void CREATE_ITEM(Unit *pTarget, bool &pbIsSuccess);
+
 
         void SINGLE_MAGICAL_DAMAGE_OR_DEATH(Unit *pTarget);
         void ADD_HP_MP_BY_ABSORB_HP_MP(Unit *pTarget);
