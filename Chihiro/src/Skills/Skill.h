@@ -58,7 +58,7 @@ class Skill
         void ProcSkill();
         bool ProcAura();
 
-        inline int GetVar(int idx) const { return GetSkillBase()->var[idx]; }
+        inline float GetVar(int idx) const { return GetSkillBase()->var[idx]; }
 
         bool Cancel();
         uint GetSkillEnhance() const;
