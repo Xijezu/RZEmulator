@@ -202,7 +202,18 @@ class Skill
         void SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
         void MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget);
         void CREATE_ITEM(Unit *pTarget, bool &pbIsSuccess);
-
+        void REGION_HEAL_BY_FIELD_PROP();
+        void MAGIC_SINGLE_REGION_DAMAGE_BY_SUMMON_DEAD(Unit *pTarget);
+        void REGION_TAUNT(Unit *pTarget);
+        void REMOVE_HATE(Unit *pTarget);
+        void REGION_REMOVE_HATE(Unit *pTarget);
+        void MAGIC_MULTIPLE_REGION_DAMAGE_AT_ONCE(Unit *pTarget);
+        void MAGIC_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget);
+        void MAGIC_MULTIPLE_REGION_DAMAGE_T2(Unit *pTarget);
+        void MAGIC_SPECIAL_REGION_DAMAGE_OLD(Unit *pTarget);
+        void MAGIC_SPECIAL_REGION_DAMAGE(Unit *pTarget);
+        void MAGIC_SINGLE_REGION_PERCENT_DAMAGE(Unit *pTarget);
+        void MAGIC_ABSORB_DAMAGE(Unit *pTarget);
 
         void SINGLE_MAGICAL_DAMAGE_OR_DEATH(Unit *pTarget);
         void ADD_HP_MP_BY_ABSORB_HP_MP(Unit *pTarget);

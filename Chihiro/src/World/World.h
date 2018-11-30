@@ -112,7 +112,7 @@ class World
 
         bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
         bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
-        void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC);
+        void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
         void addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp);
         void addEXP(Unit *pCorpse, int nPartyID, float exp, float jp);

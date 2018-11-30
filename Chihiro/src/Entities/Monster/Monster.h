@@ -138,6 +138,9 @@ class Monster : public Unit
         CreatureStat *GetBaseStat() const override;
         int GetRace() const override;
 
+        int GetHate(uint32_t handle);
+        int RemoveHate(uint32_t handle, int pt);
+
         int AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMonster);
         bool IsAlly(const Unit *pTarget) override;
         void TriggerForceKill(Player *pPlayer);
