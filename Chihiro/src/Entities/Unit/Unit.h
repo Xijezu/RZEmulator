@@ -290,6 +290,8 @@ class Unit : public WorldObject
         bool IsWearShield();
         std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
 
+        Skill *GetCastSkill() const { return m_castingSkill; }
+
         virtual CreatureStat *GetBaseStat() const { return nullptr; }
 
         virtual bool IsUsingBow() const { return false; }
@@ -303,7 +305,7 @@ class Unit : public WorldObject
         void ToggleAura(Skill *pSkill);
         bool IsActiveAura(Skill *pSkill) const;
 
-        uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue);
+        uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura = false, int nStateValue = 0, std::string szStateValue = "");
     protected:
         uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
         void applyStatByItem();

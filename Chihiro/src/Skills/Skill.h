@@ -192,6 +192,16 @@ class Skill
         void MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
         void MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget);
 
+        void PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(Unit *pTarget);
+        void PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget);
+        void PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget);
+        void PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(Unit *pTarget);
+        void CASTING_CANCEL_WITH_ADD_STATE(Unit *pTarget);
+        void CORPSE_ABSORB(Unit *pTarget);
+        void CORPSE_EXPLOSION(Unit *pTarget);
+
+        void UNSUMMON_AND_ADD_STATE();
+
         void SINGLE_MAGICAL_DAMAGE_T1(Unit *pTarget);
         void SINGLE_MAGICAL_DAMAGE_T2(Unit *pTarget);
         void SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(Unit *pTarget);

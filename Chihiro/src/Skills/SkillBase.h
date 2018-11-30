@@ -433,6 +433,14 @@ enum SKILL_EFFECT_TYPE : int
     EF_AMPLIFY_EXP_FOR_SUMMON = 32001,
 };
 
+enum SKILL_CATEGORY
+{
+    SC_PHYSICAL = 1,
+    SC_MAGICAL  = 2,
+    SC_EVERY    = 99,
+};
+
+
 struct SkillTreeBase
 {
     int   job_id{ };
