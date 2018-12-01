@@ -4898,7 +4898,7 @@ void Skill::CORPSE_ABSORB(Unit *pTarget)
     if (pTarget == nullptr || !pTarget->IsMonster() || pTarget->GetHealth() != 0)
         return;
 
-    pTarget->As<Monster>()->RemoveFromWorld();
+    sWorld.RemoveObjectFromWorld(pTarget);
 
     int nHP = GetVar(0) + GetRequestedSkillLevel() * GetVar(1) + GetSkillEnhance() * GetVar(4);
     int nMP = GetVar(2) + GetRequestedSkillLevel() * GetVar(3) + GetSkillEnhance() * GetVar(5);
@@ -4941,7 +4941,7 @@ void Skill::CORPSE_EXPLOSION(Unit *pTarget)
 
     nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(3), GetVar(4), vTargetList);
 
-    pTarget->As<Monster>()->RemoveFromWorld();
+    sWorld.RemoveObjectFromWorld(pTarget);
     m_nTargetCount = 0;
 
     for (auto &pDealTarget : vTargetList)
