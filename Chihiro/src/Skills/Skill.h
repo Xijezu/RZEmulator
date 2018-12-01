@@ -174,6 +174,8 @@ class Skill
         void PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget);
         void PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget);
         void TAUNT(Unit *pTarget);
+        bool RUSH(Unit *pTarget, float fSpeed);
+        bool AFFECT_RUSH(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface, float fSpeed);
 
         void TOGGLE_AURA(Unit *pTarget);
         void SKILL_ADD_HP_MP(Unit *pTarget);
