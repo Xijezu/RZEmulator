@@ -3779,13 +3779,16 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 
 Item *Player::DropItem(Player *pTarget, Item *pItem, int64 count)
 {
-    Item *result;
+    if (pTarget == nullptr || pItem == nullptr)
+        return nullptr;
+
     Item *origItem = pItem;
     Item *pNewItem = popItem(origItem, count, false);
+    if (pNewItem == nullptr)
+        return nullptr;
     pNewItem->Relocate(pTarget->GetPosition());
     sWorld.AddItemToWorld(pNewItem);
-    result = pNewItem;
-    return result;
+    return pNewItem;
 }
 
 void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
