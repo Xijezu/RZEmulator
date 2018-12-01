@@ -1595,7 +1595,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
         PostFireSkill(pTarget);
 }
 
-void Skill::PostFireSkill(Unit *pTarget)
+void Skill::PostFireSkill(Unit */*pTarget*/)
 {
     auto                t = m_nFireTime;
     std::vector<Unit *> vNeedStateList{ };
