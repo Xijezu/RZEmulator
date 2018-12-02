@@ -2376,7 +2376,11 @@ bool Unit::TurnOffAura(Skill *pSkill)
 
     Messages::SendToggleInfo(this, pSkill->m_nSkillID, false);
     m_vAura.erase(pSkill->m_SkillBase->toggle_group);
-    RemoveState((StateCode)pSkill->m_SkillBase->state_id, 255); // fuck this shit
+    RemoveState(static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId()), 255);
+    if (pSkill->GetVar(3) != 0)
+        RemoveState(static_cast<StateCode>(pSkill->GetVar(3)), 255);
+    if (pSkill->GetVar(4) != 0)
+        RemoveState(static_cast<StateCode>(pSkill->GetVar(4)), 255);
     return true;
 }
 
