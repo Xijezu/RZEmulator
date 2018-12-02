@@ -2021,20 +2021,20 @@ void Skill::TOGGLE_AURA(Unit *pTarget)
                     return;
 
                 auto pos = tag.pPlayer->GetCurrentPosition(t);
-                if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
                     AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetHandle());
 
                 if (tag.pPlayer->GetMainSummon() != nullptr && tag.pPlayer->GetMainSummon()->IsInWorld())
                 {
                     pos = tag.pPlayer->GetMainSummon()->GetCurrentPosition(t);
-                    if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                    if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
                         AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetMainSummon()->GetHandle());
                 }
 
                 if (tag.pPlayer->GetSubSummon() != nullptr && tag.pPlayer->GetSubSummon()->IsInWorld())
                 {
                     pos = tag.pPlayer->GetSubSummon()->GetCurrentPosition(t);
-                    if (m_pOwner->GetExactDist2d(&pos) > GetSkillBase()->GetValidRange())
+                    if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
                         AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetSubSummon()->GetHandle());
                 }
             };
@@ -2732,16 +2732,16 @@ bool Skill::ProcAura()
     if (vList.empty())
         return true;
 
-    auto et = t + TOGGLE_LIVE_TIME;
+    auto et          = t + TOGGLE_LIVE_TIME;
 
     bool bApplySummon{false};
+    auto nTargetType = GetSkillBase()->GetSkillTargetType();
 
     for (auto &pTargetHandle : vList)
     {
         auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(pTargetHandle);
         if (pTarget == nullptr /* @TODO: IsPet */)
             continue;
-        auto nTargetType = GetSkillBase()->GetSkillTargetType();
 
         if (GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA)
         {
