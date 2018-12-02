@@ -1996,7 +1996,7 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
     m_nFireTime += GetVar(8) * 100;
 }
 
-void Skill::TOGGLE_AURA(Unit *pTarget)
+void Skill::TOGGLE_AURA(Unit */*pTarget*/)
 {
     m_pOwner->ToggleAura(this);
 
