@@ -260,7 +260,7 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
     }
 
     Messages::SendTimeSynch(m_pPlayer);
-    sScriptingMgr.RunString(m_pPlayer, string_format("on_login('%s')", m_pPlayer->GetName()));
+    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("on_login('%s')", m_pPlayer->GetName()));
 
     TS_SC_LOGIN_RESULT resultPct{ };
     resultPct.result         = 1;
@@ -1085,7 +1085,7 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
                     Messages::SendItemMessage(m_pPlayer, pItem);
 
                     Summon::DB_InsertSummon(m_pPlayer, summon);
-                    sScriptingMgr.RunString(m_pPlayer, string_format("on_first_summon( %d, %d)", summon->GetSummonCode(), summon->GetHandle()));
+                    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("on_first_summon( %d, %d)", summon->GetSummonCode(), summon->GetHandle()));
                     summon->SetCurrentJLv(summon->GetLevel());
                     summon->CalculateStat();
                 }
@@ -1531,7 +1531,7 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *)
     if (m_pPlayer->GetHealth() != 0)
         return;
 
-    sScriptingMgr.RunString(m_pPlayer, string_format("revive_in_town(%d)", 0));
+    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("revive_in_town(%d)", 0));
 }
 
 void WorldSession::onDropItem(const TS_CS_DROP_ITEM *pRecvPct)

@@ -280,7 +280,7 @@ void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
         szTop    = std::to_string(sr.top);
         szLeft   = std::to_string(sr.left);
         szBottom = std::to_string(sr.bottom);
-        szBox    = string_format("%s,%s,%s,%s", szLeft.c_str(), szTop.c_str(), szRight.c_str(), szBottom.c_str());
+        szBox    = NGemity::StringFormat("%s,%s,%s,%s", szLeft, szTop, szRight, szBottom);
         auto     nFunctionCount = buffer.read<int>();
         for (int x              = 0; x < nFunctionCount; ++x)
         {
