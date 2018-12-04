@@ -165,15 +165,16 @@ void Monster::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
         int cl;
         if (!vPartyContribute.empty())
-            cl = vPartyContribute[0].nLevel;
+            cl = vPartyContribute.front().nLevel;
         else
-            cl = 0;
+            cl = pFrom->GetLevel();
+        /// @todo: temporary workaround, should get highest level from party
 
         auto fDropRatePenalty = 1.0f;
         cl -= GetLevel();
         if (cl >= 5)
         {
-            fDropRatePenalty     = 1.0f - (float)pow(cl - 3, 2.0f) * 0.02f;
+            fDropRatePenalty     = 1.0f - (float)std::pow(cl - 3, 2.0f) * 0.02f;
             if (fDropRatePenalty < 0.0f)
                 fDropRatePenalty = 0.0f;
         }

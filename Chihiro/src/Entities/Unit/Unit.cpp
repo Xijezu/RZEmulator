@@ -1866,7 +1866,7 @@ int Unit::GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad) con
 DamageInfo Unit::DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
 {
     DamageInfo result{ };
-    auto       d = DealMagicalDamage(pFrom, (float)nDamage, elemental_type, 0, critical_bonus, nFlag, nullptr, nullptr);
+    auto       d = DealMagicalDamage(pFrom, (float)nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     result.SetDamage(d);
     result.target_hp = GetHealth();
     return result;
@@ -1875,7 +1875,7 @@ DamageInfo Unit::DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType 
 DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
 {
     DamageInfo result{ };
-    auto       d = DealPhysicalDamage(pFrom, (float)nDamage, elemental_type, 0, critical_bonus, nFlag, nullptr, nullptr);
+    auto       d = DealPhysicalDamage(pFrom, (float)nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     result.SetDamage(d);
     result.target_hp = GetHealth();
     return result;
