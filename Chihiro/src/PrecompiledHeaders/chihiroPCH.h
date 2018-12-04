@@ -12,3 +12,4 @@
 #include <string>
 #include <vector>
 #include "XPacket.h"
+#include "StringFormat.h"

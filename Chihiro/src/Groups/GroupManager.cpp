@@ -48,7 +48,7 @@ bool GroupManager::DestroyParty(int nPartyID)
         if (tag.bIsOnline && tag.pPlayer != nullptr)
         {
             tag.pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
-            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, string_format("DESTROY|%s|", name.c_str()));
+            Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, NGemity::StringFormat("DESTROY|%s|", name));
         }
     });
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_DEL_PARTY);
@@ -107,7 +107,7 @@ std::string GroupManager::GetLeaderName(int nPartyID)
 bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
 {
     PartyInfo *info{nullptr};
-    Messages::SendPartyChatMessage(100, "@PARTY", nPartyID, string_format("LEAVE|%s|", szName.c_str()));
+    Messages::SendPartyChatMessage(100, "@PARTY", nPartyID, NGemity::StringFormat("LEAVE|%s|", szName));
     {
         NG_UNIQUE_GUARD writeLock(i_lock);
         info = getPartyInfoNC(nPartyID);
@@ -384,7 +384,7 @@ void GroupManager::AddGroupToDatabase(const PartyInfo &info)
 
 void GroupManager::LoadPartyInfo(PartyInfo &info)
 {
-    QueryResult result = CharacterDatabase.Query(string_format("SELECT sid, name, job, lv FROM `Character` WHERE party_id = %d;", info.nPartyID).c_str());
+    QueryResult result = CharacterDatabase.Query(NGemity::StringFormat("SELECT sid, name, job, lv FROM `Character` WHERE party_id = %d;", info.nPartyID).c_str());
     if (!result)
     {
         NG_LOG_INFO("server.worldserver", "Invalid party ID %d!", info.nPartyID);

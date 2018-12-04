@@ -52,9 +52,7 @@ constexpr int tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
 void AllowedCommandInfo::onCheatPosition(Player *pClient, const std::string &/* tokens*/)
 {
-    auto pos     = pClient->GetCurrentPosition(sWorld.GetArTime());
-    auto message = string_format("<BR>X: %u, Y: %u, Layer: %u<BR>", (int)pos.GetPositionX(), (int)pos.GetPositionY(), (int)pos.GetLayer());
-    Messages::SendChatMessage(30, "@SYSTEM", pClient, message);
+    Messages::SendChatMessage(30, "@SYSTEM", pClient, pClient->ToString());
 }
 
 void AllowedCommandInfo::onRunScript(Player *pClient, const std::string &pScript)
@@ -140,7 +138,7 @@ void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string &str)
     if (tokens.size() == 2)
         cnt = std::stoi(tokens[1]);
     auto pos = pClient->GetCurrentPosition(sWorld.GetArTime());
-    auto res = string_format("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
+    auto res = NGemity::StringFormat("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
     sScriptingMgr.RunString(pClient, res);
 }
 
@@ -156,7 +154,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
         return;
     }
     pClient->SetInt32Value(PLAYER_FIELD_PARTY_ID, partyID);
-    Messages::SendChatMessage(100, "@PARTY", pClient, string_format("CREATE|%s|%s|", partyName.c_str(), pClient->GetName()));
+    Messages::SendChatMessage(100, "@PARTY", pClient, NGemity::StringFormat("CREATE|%s|%s|", partyName, pClient->GetName()));
     Messages::SendPartyInfo(pClient);
 }
 
@@ -175,7 +173,7 @@ void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPla
 
     auto nPW = sGroupManager.GetPassword(pClient->GetPartyID());
 
-    Messages::SendChatMessage(100, "@PARTY", player, string_format("INVITE|%s|%s|%d|%d", pClient->GetName(), partyname.c_str(), pClient->GetPartyID(), nPW));
+    Messages::SendChatMessage(100, "@PARTY", player, NGemity::StringFormat("INVITE|%s|%s|%d|%d", pClient->GetName(), partyname, pClient->GetPartyID(), nPW));
 }
 
 void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
@@ -203,7 +201,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    Messages::SendPartyChatMessage(100, "@PARTY", partyID, string_format("JOIN|%s|", sGroupManager.GetPartyName(pClient->GetPartyID()).c_str()));
+    Messages::SendPartyChatMessage(100, "@PARTY", partyID, NGemity::StringFormat("JOIN|%s|", sGroupManager.GetPartyName(pClient->GetPartyID())));
     Messages::SendPartyInfo(pClient);
     Messages::BroadcastPartyMemberInfo(pClient);
 }

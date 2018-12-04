@@ -641,8 +641,8 @@ int World::ShowQuestMenu(Player *pPlayer)
                     qpid = linkInfo->nInProgressTextID;
                 else if (m_QuestProgress == 2)
                     qpid     = linkInfo->nEndTextID;
-                szBuf        = string_format("quest_info( %u, %u )", linkInfo->code, qpid);
-                szButtonName = string_format("QUEST|%u|%u", qbs->nQuestTextID, m_QuestProgress);
+                szBuf        = NGemity::StringFormat("quest_info( %u, %u )", linkInfo->code, qpid);
+                szButtonName = NGemity::StringFormat("QUEST|%u|%u", qbs->nQuestTextID, m_QuestProgress);
                 pPlayer->AddDialogMenu(szButtonName, szBuf);
             }
         };

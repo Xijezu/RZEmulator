@@ -905,8 +905,8 @@ void Player::SendJobInfo()
     Messages::SendPropertyMessage(this, this, "jlv", GetCurrentJLv());
     for (int i = 0; i < 3; ++i)
     {
-        Messages::SendPropertyMessage(this, this, string_format("job_%d", i), GetPrevJobId(i));
-        Messages::SendPropertyMessage(this, this, string_format("jlv_%d", i), GetPrevJobLv(i));
+        Messages::SendPropertyMessage(this, this, NGemity::StringFormat("job_%d", i), GetPrevJobId(i));
+        Messages::SendPropertyMessage(this, this, NGemity::StringFormat("jlv_%d", i), GetPrevJobLv(i));
     }
 }
 
@@ -974,7 +974,7 @@ void Player::Save(bool bOnlyPlayer)
     stmt->setString(i++, m_szClientInfo);
     std::string flaglist{ };
     for (auto   &flag : m_lFlagList)
-        flaglist.append(string_format("%s:%s\n", flag.first.c_str(), flag.second.c_str()));
+        flaglist.append(NGemity::StringFormat("%s:%s\n", flag.first, flag.second));
     stmt->setString(i++, flaglist);
     stmt->setInt32(i, GetInt32Value(UNIT_FIELD_UID));
     CharacterDatabase.Execute(stmt);
@@ -2395,14 +2395,14 @@ void Player::StartQuest(int code, int nStartQuestID, bool bForce)
 
     if (m_QuestManager.m_vActiveQuest.size() >= 20)
     {
-        auto str = string_format("START|FAIL|QUEST_NUMBER_EXCEED|%d", rQuestBase->nQuestTextID);
+        auto str = NGemity::StringFormat("START|FAIL|QUEST_NUMBER_EXCEED|%d", rQuestBase->nQuestTextID);
         Messages::SendQuestMessage(120, this, str);
         return;
     }
 
     if (!bForce && !IsStartableQuest(code, false))
     {
-        auto str = string_format("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
+        auto str = NGemity::StringFormat("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
         Messages::SendQuestMessage(120, this, str);
         return;
     }
@@ -2423,7 +2423,7 @@ void Player::StartQuest(int code, int nStartQuestID, bool bForce)
 
         if (!Quest::IsRandomQuest(q->m_Instance.Code))
         {
-            auto str = string_format("START|SUCCESS|%d", rQuestBase->nCode);
+            auto str = NGemity::StringFormat("START|SUCCESS|%d", rQuestBase->nCode);
             Messages::SendQuestMessage(120, this, str);
             Messages::SendQuestList(this);
             if (!q->m_QuestBase->strAcceptScript.empty())
@@ -2434,7 +2434,7 @@ void Player::StartQuest(int code, int nStartQuestID, bool bForce)
         }
     }
 
-    auto str = string_format("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
+    auto str = NGemity::StringFormat("START|FAIL|NOT_STARTABLE|%d", rQuestBase->nQuestTextID);
     Messages::SendQuestMessage(120, this, str);
 }
 
@@ -2538,12 +2538,12 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     auto  res       = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
-        Messages::SendQuestMessage(120, this, string_format("END|TOO_MUCH_MONEY|%d", res));
+        Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|TOO_MUCH_MONEY|%d", res));
         return;
     }
     if (m_QuestManager.EndQuest(q))
     {
-        auto str = string_format("END|EXP|%d|%ld|%d|%d", q->m_Instance.Code, q->m_QuestBase->nEXP, q->m_QuestBase->nJP, q->m_QuestBase->nGold);
+        auto str = NGemity::StringFormat("END|EXP|%d|%ld|%d|%d", q->m_Instance.Code, q->m_QuestBase->nEXP, q->m_QuestBase->nJP, q->m_QuestBase->nGold);
         Messages::SendQuestMessage(120, this, str);
 
         auto nRewardEXP = q->m_QuestBase->nEXP;
@@ -2593,7 +2593,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
 
             PushItem(pItem, pItem->m_Instance.nCount, false);
 
-            Messages::SendQuestMessage(120, this, string_format("END|REWARD|%d", pItem->m_Instance.Code));
+            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|%d", pItem->m_Instance.Code));
         }
         if (nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
         {
@@ -2602,7 +2602,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
                                           reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->m_Instance.nCount, false);
-            Messages::SendQuestMessage(120, this, string_format("END|REWARD|%d", pItem->m_Instance.Code));
+            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|%d", pItem->m_Instance.Code));
         }
         //if(q->m_QuestBase->nIsMagicPointQuest != 0)
         //UpdateQuestByQuestEnd(q);
