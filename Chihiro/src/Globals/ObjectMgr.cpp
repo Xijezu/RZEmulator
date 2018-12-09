@@ -15,12 +15,15 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "ObjectMgr.h"
 #include <fstream>
-
 #include "DungeonManager.h"
 #include "MixManager.h"
 #include "GameRule.h"
 #include "WorldLocation.h"
+#include "World.h"
+#include "DatabaseEnv.h"
+#include "Log.h"
 
 ObjectMgr::ObjectMgr() : g_qtBlockInfo(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
 {

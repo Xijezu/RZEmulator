@@ -15,6 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Pointf.h"
+
 X2D::Pointf::Pointf(float _x, float _y)
 {
     x = _x;

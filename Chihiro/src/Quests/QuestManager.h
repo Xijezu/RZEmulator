@@ -17,6 +17,8 @@
 */
 #include "Common.h"
 #include "Quest.h"
+#include <functional>
+#include <map>
 
 class QuestManager
 {

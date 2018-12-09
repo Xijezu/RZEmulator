@@ -16,34 +16,29 @@
 */
 
 #include "Common.h"
-#include "DatabaseEnv.h"
-#include "DatabaseLoader.h"
-#include "MySQLThreading.h"
+#include "SystemConfigs.h"
 #include "AuthGameSession.h"
 #include "AuthClientSession.h"
 #include "XSocketMgr.h"
-#include "SystemConfigs.h"
 #include <boost/asio/signal_set.hpp>
-#include <boost/filesystem/operations.hpp>
 #include "Stacktrace.h"
+#include "DatabaseEnv.h"
+#include "DatabaseLoader.h"
+#include "MySQLThreading.h"
 
 bool StartDB();
 void StopDB();
 
 # define _MONONOKE_CORE_CONFIG  "mononoke.conf"
 
-namespace fs = boost::filesystem;
-
 void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
 
-extern int main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     Stacktrace::enableStacktracing();
 
-    auto        configFile = fs::absolute((std::string)_MONONOKE_CORE_CONFIG);
     std::string configError;
-
     if (!sConfigMgr->LoadInitial(_MONONOKE_CORE_CONFIG,
                                  std::vector<std::string>(argv, argv + argc),
                                  configError))

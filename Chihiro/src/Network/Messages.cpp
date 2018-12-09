@@ -22,6 +22,9 @@
 #include "MemPool.h"
 #include "RegionContainer.h"
 #include "GroupManager.h"
+#include "World.h"
+#include "WorldSession.h"
+#include "ObjectMgr.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {

@@ -533,7 +533,7 @@ struct Position
 
     std::string ToString() const
     {
-        return NGemity::StringFormat("Position: X: %u, Y: %u, Layer: %u", GetPositionX(), GetPositionY(), GetLayer());
+        return NGemity::StringFormat("<BR>X: {}, Y: {}, Layer: {}<BR>", GetPositionX(), GetPositionY(), GetLayer());
     }
 };
 

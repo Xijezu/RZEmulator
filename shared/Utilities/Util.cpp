@@ -24,6 +24,8 @@
 #include "Errors.h" // for ASSERT
 #include <float.h>
 #include <cstdarg>
+#include <sstream>
+#include <cstring>
 
 #if PLATFORM == PLATFORM_WINDOWS
 # include <Windows.h>

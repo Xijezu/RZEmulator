@@ -19,6 +19,8 @@
 #include "Skill.h"
 #include "World.h"
 #include "MemPool.h"
+#include "Log.h"
+#include "XPacket.h"
 
 SkillProp *SkillProp::Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio)
 {

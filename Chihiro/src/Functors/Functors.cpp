@@ -18,6 +18,8 @@
 #include "Functors.h"
 #include "RegionContainer.h"
 #include "Messages.h"
+#include "Monster.h"
+#include "World.h"
 
 void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
 {

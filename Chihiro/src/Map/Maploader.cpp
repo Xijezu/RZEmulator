@@ -19,6 +19,8 @@
 #include "Scripting/XLua.h"
 #include <fstream>
 #include "FieldPropManager.h"
+#include "Log.h"
+#include "ObjectMgr.h"
 
 bool Maploader::LoadMapContent()
 {

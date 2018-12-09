@@ -21,6 +21,9 @@
 #include "MemPool.h"
 #include "GroupManager.h"
 #include "RegionContainer.h"
+#include "World.h"
+#include "Player.h"
+#include "Log.h"
 
 typedef struct AllowedCommands
 {

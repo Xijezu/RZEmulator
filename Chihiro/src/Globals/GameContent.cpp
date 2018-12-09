@@ -22,6 +22,9 @@
 #include "Skill.h"
 #include "Maploader.h"
 #include "NPC.h"
+#include "World.h"
+#include "ObjectMgr.h"
+#include "Player.h"
 
 bool GameContent::IsBlocked(float x, float y)
 {

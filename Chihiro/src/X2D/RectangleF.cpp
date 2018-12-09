@@ -15,6 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "RectangleF.h"
+
 bool X2D::Rectf::IsInclude(float x, float y)
 {
     float x1 = size.x + pos.x;

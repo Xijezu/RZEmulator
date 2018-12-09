@@ -60,7 +60,6 @@ class AuthClientSession : public XSession
         /// \brief Gets the Socket
         /// \return AuthSocket
         XSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
-
     private:
         XSocket *_socket{nullptr};
         XDes    _desCipther{ };

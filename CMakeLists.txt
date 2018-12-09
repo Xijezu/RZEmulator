@@ -1,17 +1,8 @@
 project(NGemity)
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.10)
 
 # set macro-directory
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Set RPATH-handing (CMake parameters)
-
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH "${LIBS_DIR}")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
     add_definitions(-fno-delete-null-pointer-checks)
@@ -26,18 +17,25 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
 endif()
 
 option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
-
-#Include platform/compiler-specific definitions
-include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
+option(WITH_PCH               "Use Precompiled Headers"                       1)
 
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)
 find_package(MYSQL REQUIRED)
 find_package(Readline REQUIRED)
 
+#Include platform/compiler-specific definitions
+include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
+
 IF(NOT WITHOUT_GIT)
     find_package(Git)
 ENDIF()
+
+if(WITH_PCH)
+    message("Compiling with PrecompiledHeaders")
+else()
+    message("Compiling without PrecompiledHeaders")
+endif()
 
 # Find revision ID and hash of the sourcetree
 include(cmake/genrev.cmake)

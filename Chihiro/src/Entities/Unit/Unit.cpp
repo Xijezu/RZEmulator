@@ -24,6 +24,9 @@
 #include "MemPool.h"
 #include "RegionContainer.h"
 #include "GameContent.h"
+#include "Log.h"
+#include "Player.h"
+
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER

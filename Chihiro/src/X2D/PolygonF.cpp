@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+#include "PolygonF.h"
 
 bool X2D::Polygonf::Set(X2D::Pointf _begin, X2D::Pointf _end)
 {

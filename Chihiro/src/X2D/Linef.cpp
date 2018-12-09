@@ -15,6 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Linef.h"
+
 X2D::Linef::Linef(X2D::Pointf p1, X2D::Pointf p2)
 {
     begin = Pointf(p1.x, p1.y);

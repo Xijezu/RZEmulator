@@ -17,7 +17,7 @@
 #
 
 # Set build-directive (used in core to tell which buildtype we used)
-add_definitions(-D_BUILD_DIRECTIVE="'${CMAKE_BUILD_TYPE}'")
+# add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 
 #Set config install path correctly from given path
 string(FIND "${CONF_DIR}" ":" CONF_DIR_ABSOLUTE)
@@ -91,6 +91,7 @@ elseif(UNIX)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 
     if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
         if(NOT DEBUG)
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --no-warnings")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --no-warnings -Wno-narrowing -Wno-deprecated-register")
@@ -115,6 +116,6 @@ elseif(UNIX)
 
         # -Wno-narrowing needed to suppress a warning in g3d
         # -Wno-deprecated-register is needed to suppress 185 gsoap warnings on Unix systems.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wno-deprecated-register -Wno-ignored-attributes -Wno-deprecated-declarations")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wno-narrowing -Wno-deprecated-register -Wno-ignored-attributes -Wno-deprecated-declarations")
     endif()
 endif()

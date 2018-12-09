@@ -18,6 +18,7 @@
 #include "Unit.h"
 #include "NPCBase.h"
 #include "Quest.h"
+#include <functional>
 
 class NPC : public Unit
 {

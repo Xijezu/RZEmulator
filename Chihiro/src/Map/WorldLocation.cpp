@@ -17,6 +17,7 @@
 
 #include "WorldLocation.h"
 #include "ClientPackets.h"
+#include "Player.h"
 
 WorldLocation::WorldLocation(const WorldLocation &src)
 {

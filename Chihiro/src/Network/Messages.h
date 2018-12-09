@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "Object.h"
+#include "XPacket.h"
 
 class Unit;
 class Player;

@@ -18,6 +18,8 @@
 #include "MemPool.h"
 #include "FieldPropManager.h"
 #include "ItemCollector.h"
+#include "World.h"
+#include "ObjectMgr.h"
 
 template class HashMapHolder<Player>;
 template class HashMapHolder<WorldObject>;
