@@ -15,6 +15,11 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "State.h"
+#include "World.h"
+#include "DatabaseEnv.h"
+#include "ObjectMgr.h"
+
 State::State(StateType type, StateCode code, int uid, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue)
 {
     init(uid, (int)code);

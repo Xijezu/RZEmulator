@@ -20,6 +20,7 @@
 #include "Timer.h"
 #include "LockedQueue.h"
 #include "RegionContainer.h"
+#include <atomic>
 
 enum ShutdownExitCode
 {

@@ -25,6 +25,7 @@
 #include "Encryption/ByteBuffer.h"
 #include <boost/asio/deadline_timer.hpp>
 #include "NetworkThread.h"
+#include "World.h"
 
 class AuthNetwork
 {

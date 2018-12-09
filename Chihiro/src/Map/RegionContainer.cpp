@@ -16,6 +16,7 @@
 */
 
 #include "RegionContainer.h"
+#include "World.h"
 
 #define REGION_BLOCK_COUNT 100
 

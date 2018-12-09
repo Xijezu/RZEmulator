@@ -24,6 +24,7 @@
 #include "DungeonManager.h"
 #include "GameContent.h"
 #include "Config.h"
+#include "Log.h"
 
 namespace fs = boost::filesystem;
 

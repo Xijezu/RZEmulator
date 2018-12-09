@@ -19,6 +19,7 @@
 #include <fstream>
 #include <boost/filesystem.hpp>
 #include "Config.h"
+#include "Util.h"
 
 namespace fs = boost::filesystem;
 

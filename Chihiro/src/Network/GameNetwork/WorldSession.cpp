@@ -34,6 +34,7 @@
 #include "MixManager.h"
 #include "GroupManager.h"
 #include "GameContent.h"
+#include "DatabaseEnv.h"
 
 // Constructo - give it a socket
 WorldSession::WorldSession(XSocket *socket) : _socket(socket), m_nLastPing(sWorld.GetArTime())

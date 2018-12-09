@@ -17,6 +17,8 @@
 */
 #include "Common.h"
 #include "SharedMutex.h"
+#include <functional>
+#include <map>
 
 enum PARTY_TYPE : int
 {

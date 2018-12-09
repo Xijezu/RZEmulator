@@ -15,7 +15,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "QuestManager.h"
 #include "GameContent.h"
+#include "QuestBase.h"
+#include "Quest.h"
+#include "Log.h"
+#include "ObjectMgr.h"
 
 bool QuestManager::DoEachActiveQuest(const std::function<void(Quest *)> &fn)
 {

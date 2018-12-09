@@ -29,6 +29,7 @@
 #include "GroupManager.h"
 #include "GameContent.h"
 #include "EncodingScrambled.h"
+#include "Log.h"
 
 Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
 {

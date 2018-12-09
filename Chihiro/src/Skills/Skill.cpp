@@ -26,6 +26,10 @@
 #include "GameContent.h"
 #include "RegionTester.h"
 #include "SkillProp/SkillProp.h"
+#include "ObjectMgr.h"
+#include "DatabaseEnv.h"
+#include "Log.h"
+#include "World.h"
 
 constexpr int PREDICTION_AIMING_TIME = 200;
 

@@ -17,6 +17,9 @@
 
 #include "GroupManager.h"
 #include "Messages.h"
+#include "DatabaseEnv.h"
+#include "Player.h"
+#include "Log.h"
 
 int GroupManager::GetAttackTeamLeadPartyID(int nPartyID)
 {

@@ -18,9 +18,9 @@
 #include "Common.h"
 #include "SharedMutex.h"
 #include "TS_AC_SERVER_LIST.h"
+#include <map>
 
 class AuthGameSession;
-
 struct Game : public TS_SERVER_INFO
 {
     AuthGameSession *m_pSession;

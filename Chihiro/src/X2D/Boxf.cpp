@@ -15,6 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Boxf.h"
+
 bool X2D::Boxf::IsInclude(float x, float y)
 {
     return x >= begin.x

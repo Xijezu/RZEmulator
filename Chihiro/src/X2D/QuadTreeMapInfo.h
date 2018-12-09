@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "MapLocationInfo.h"
+#include <map>
 
 namespace X2D
 {

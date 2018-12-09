@@ -10,7 +10,7 @@
 #include <iostream>
 #include <signal.h>
 #include <boost/stacktrace.hpp>
-
+#include <sstream>
 
 void Stacktrace::enableStacktracing()
 {

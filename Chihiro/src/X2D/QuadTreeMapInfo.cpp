@@ -15,6 +15,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "QuadTreeMapInfo.h"
+
 X2D::QuadTreeMapInfo::Node::Node(X2D::Pointf p1, X2D::Pointf p2, ushort depth)
 {
     this->m_Area = RectangleF(p1, p2);

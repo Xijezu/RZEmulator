@@ -23,6 +23,12 @@
 #include <string>
 #include <cmath>
 #include <utility>
+#include <optional>
+#include <set>
+#include <unordered_map>
+#include <vector>
+#include "StringFormat.h"
+#include "Timer.h"
 
 #if PLATFORM == PLATFORM_WINDOWS
 #  if COMPILER == COMPILER_INTEL

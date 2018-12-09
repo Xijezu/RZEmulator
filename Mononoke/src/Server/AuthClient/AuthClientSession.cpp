@@ -24,6 +24,7 @@
 #include "Encryption/MD5.h"
 #include "AuthGameSession.h"
 #include "Util.h"
+#include "Config.h"
 
 // Constructo - give it a socket
 AuthClientSession::AuthClientSession(XSocket *socket) : _socket(socket), m_pPlayer(nullptr)

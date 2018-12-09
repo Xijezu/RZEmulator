@@ -18,6 +18,8 @@
 #include "TerrainPropInfo.h"
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include "Config.h"
+#include "Util.h"
 
 bool TerrainPropInfo::Initialize(std::string szFileName)
 {

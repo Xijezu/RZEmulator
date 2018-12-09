@@ -15,6 +15,13 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Quest.h"
+#include "QuestBase.h"
+#include "Log.h"
+#include "ObjectMgr.h"
+#include "DatabaseEnv.h"
+#include "Player.h"
+
 Quest *Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const int *status, QuestProgress progress, int nStartID)
 {
     auto result = new Quest{ };

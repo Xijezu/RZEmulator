@@ -21,6 +21,8 @@
 #include "ObjectMgr.h"
 #include "Messages.h"
 #include "Scripting/XLua.h"
+#include "Log.h"
+#include "Player.h"
 
 void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player */*pPlayer*/)
 {
