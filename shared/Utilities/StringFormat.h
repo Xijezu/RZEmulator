@@ -20,13 +20,20 @@
 
 namespace NGemity
 {
-    /// Default TC string format function.
+    /// Default NG string format function.
     template<typename Format, typename... Args>
     inline std::string StringFormat(Format &&fmt, Args &&... args)
     {
-        return fmt::sprintf(std::forward<Format>(fmt), std::forward<Args>(args)...);
+        return fmt::format(std::forward<Format>(fmt), std::forward<Args>(args)...);
     }
 
+
+    /// Default TC string format function.
+    template<typename Format, typename... Args>
+    inline std::string StringFormatTC(Format&& fmt, Args&&... args)
+    {
+        return fmt::sprintf(std::forward<Format>(fmt), std::forward<Args>(args)...);
+    }
     /// Returns true if the given char pointer is null.
     inline bool IsFormatEmptyOrNull(const char *fmt)
     {

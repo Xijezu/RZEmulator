@@ -652,7 +652,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
 #else
         pPlayer->SetDialogTitle("Guide Arocel", 0);
 #endif
-        pPlayer->SetDialogText(NGemity::StringFormat("QUEST|%u|%u", code, textID));
+        pPlayer->SetDialogText(NGemity::StringFormat("QUEST|{}|{}", code, textID));
 
         auto rQuestBase = sObjectMgr.GetQuestBase(code);
 
@@ -665,7 +665,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                     if (rQuestBase->OptionalReward[i].nItemCode == 0)
                         break;
 
-                    strTrigger = NGemity::StringFormat("end_quest( %u, %u )", code, i);
+                    strTrigger = NGemity::StringFormat("end_quest( {}, {} )", code, i);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
                 }
                 if (i != 0)
@@ -677,10 +677,10 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 {
 #if EPIC <= EPIC_4_1_1
                     ///- Hack for epic 4, use proper workaround instead
-                    pPlayer->AddDialogMenu("Confirm", NGemity::StringFormat("end_quest(%u, -1)", code));
+                    pPlayer->AddDialogMenu("Confirm", NGemity::StringFormat("end_quest({}, -1)", code));
                     return;
 #else
-                    strTrigger = NGemity::StringFormat("end_quest( %u, -1 )", code);
+                    strTrigger = NGemity::StringFormat("end_quest( {}, -1 )", code);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
                     strButton  = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
@@ -696,7 +696,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
         else
         {
             // /run function get_quest_progress() return 0 end
-            strTrigger = NGemity::StringFormat("start_quest( %u, %u )", code, textID);
+            strTrigger = NGemity::StringFormat("start_quest( {}, {} )", code, textID);
             pPlayer->AddDialogMenu("START", strTrigger);
             strTrigger = "";
             strButton  = "REJECT";
@@ -819,15 +819,15 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     switch (mode)
     {
         case 0:
-            chatMsg = NGemity::StringFormat("TAMING_START|%s|", pMonster->GetNameAsString());
+            chatMsg = NGemity::StringFormat("TAMING_START|{}|", pMonster->GetNameAsString());
             break;
 
         case 1:
         case 3:
-            chatMsg = NGemity::StringFormat("TAMING_FAILED|%s|", pMonster->GetNameAsString());
+            chatMsg = NGemity::StringFormat("TAMING_FAILED|{}|", pMonster->GetNameAsString());
             break;
         case 2:
-            chatMsg = NGemity::StringFormat("TAMING_SUCCESS|%s|", pMonster->GetNameAsString());
+            chatMsg = NGemity::StringFormat("TAMING_SUCCESS|{}|", pMonster->GetNameAsString());
             break;
         default:
             return;
@@ -975,7 +975,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
     int  max_lvl    = sGroupManager.GetMaxLevel(pPlayer->GetPartyID());
     int  share_mode = sGroupManager.GetShareMode(pPlayer->GetPartyID());
 
-    std::string msg = NGemity::StringFormat("PINFO|%s|%s|%d|%d|%d|", name, leader, share_mode, min_lvl, max_lvl);
+    std::string msg = NGemity::StringFormat("PINFO|{}|{}|{}|{}|{}|", name, leader, share_mode, min_lvl, max_lvl);
 
     struct PInfo
     {
@@ -1001,7 +1001,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
             info.race     = player->GetRace();
             info.isOnline = 2;
         }
-        msg.append(NGemity::StringFormat("%d|%s|%d|%d|%d|%d|%d|%d|%d|", info.handle, tag.strName, info.race, tag.nJobID, info.hp, info.mp, info.x, info.y, info.isOnline));
+        msg.append(NGemity::StringFormat("{}|{}|{}|{}|{}|{}|{}|{}|{}|", info.handle, tag.strName, info.race, tag.nJobID, info.hp, info.mp, info.x, info.y, info.isOnline));
     });
     SendChatMessage(100, "@PARTY", pPlayer, msg);
 }
@@ -1072,7 +1072,7 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
     auto hp      = (int)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
     auto mp      = (int)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
 
-    auto buf = NGemity::StringFormat("MINFO|%d|%s|%d|%d|%d|%d|%d|%d|%d|",
+    auto buf = NGemity::StringFormat("MINFO|{}|{}|{}|{}|{}|{}|{}|{}|{}|",
                                      pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
 
     SendPartyChatMessage(100, "@PARTY", partyID, buf);
@@ -1081,7 +1081,7 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
 void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName)
 {
     auto partyName = sGroupManager.GetPartyName(nPartyID);
-    auto szMsg     = bIsOnline ? NGemity::StringFormat("LOGIN|%s|%s|", partyName, szName) : NGemity::StringFormat("LOGOUT|%s|", szName);
+    auto szMsg     = bIsOnline ? NGemity::StringFormat("LOGIN|{}|{}|", partyName, szName) : NGemity::StringFormat("LOGOUT|{}|", szName);
     SendPartyChatMessage(100, "@PARTY", nPartyID, szMsg);
 }
 

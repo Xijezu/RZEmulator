@@ -1791,7 +1791,7 @@ uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, f
         }
             break;
         default:
-            error = NGemity::StringFormat("Unit::onItemUseEffect [%d]: Unknown type %d !", pItem->m_Instance.Code, type);
+            error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->m_Instance.Code, type);
             NG_LOG_ERROR("entites.unit", "%s", error.c_str());
             Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
             result = TS_RESULT_UNKNOWN;

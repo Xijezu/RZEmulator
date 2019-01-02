@@ -75,7 +75,7 @@ class DatabaseWorkerPool
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return;
 
-            Execute(NGemity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+            Execute(NGemity::StringFormatTC(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
 
         //! Enqueues a one-way SQL operation in prepared statement format that will be executed asynchronously.
@@ -98,7 +98,7 @@ class DatabaseWorkerPool
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return;
 
-            DirectExecute(NGemity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+            DirectExecute(NGemity::StringFormatTC(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
 
         //! Directly executes a one-way SQL operation in prepared statement format, that will block the calling thread until finished.
@@ -121,7 +121,7 @@ class DatabaseWorkerPool
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return QueryResult(nullptr);
 
-            return Query(NGemity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str(), conn);
+            return Query(NGemity::StringFormatTC(std::forward<Format>(sql), std::forward<Args>(args)...).c_str(), conn);
         }
 
         //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
@@ -132,7 +132,7 @@ class DatabaseWorkerPool
             if (NGemity::IsFormatEmptyOrNull(sql))
                 return QueryResult(nullptr);
 
-            return Query(NGemity::StringFormat(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
+            return Query(NGemity::StringFormatTC(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
         }
 
         //! Directly executes an SQL query in prepared format that will block the calling thread until finished.

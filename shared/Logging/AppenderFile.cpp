@@ -29,7 +29,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const &name, LogLevel level, Ap
         _fileSize(0)
 {
     if (extraArgs.empty())
-        throw InvalidAppenderArgsException(NGemity::StringFormat("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));
+        throw InvalidAppenderArgsException(NGemity::StringFormatTC("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));
 
     _fileName = extraArgs[0];
 

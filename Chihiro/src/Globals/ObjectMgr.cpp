@@ -1653,6 +1653,6 @@ std::string ObjectMgr::GetSummonName()
 {
     int pre  = irand(0, (int)_summonPrefixStore.size() - 1);
     int post = irand(0, (int)_summonPostfixStore.size() - 1);
-    return NGemity::StringFormat("%s%s", GetValueFromNameID(_summonPrefixStore[pre]), GetValueFromNameID(_summonPostfixStore[post]));
+    return NGemity::StringFormat("{}{}", GetValueFromNameID(_summonPrefixStore[pre]), GetValueFromNameID(_summonPostfixStore[post]));
 }
 
