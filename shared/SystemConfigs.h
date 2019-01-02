@@ -1,6 +1,6 @@
 #pragma once
 /*
- * Copyright (C) 2017-2018 NGemity <https://ngemity.org/>
+ * Copyright (C) 2017-2019 NGemity <https://ngemity.org/>
  * Copyright (C) 2011-2018 Project SkyFire <http://www.projectskyfire.org/>
  * Copyright (C) 2008-2018 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2018 MaNGOS <https://getmangos.com/>
