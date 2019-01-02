@@ -63,7 +63,7 @@ WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
 bool WorldLocationManager::RemoveFromLocation(Player *player)
 {
     if(player == nullptr || player->m_WorldLocation == nullptr)
-        return;
+        return false;
 
     NG_UNIQUE_GUARD writeLock(i_lock);
 
