@@ -269,7 +269,7 @@ std::string Log::GetTimestampStr()
     //       SS     seconds (2 digits 00-59)
     try
     {
-        return NGemity::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
+        return NGemity::StringFormatTC("%04d-%02d-%02d_%02d-%02d-%02d",
                                      aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     }
     catch (std::exception const &ex)

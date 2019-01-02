@@ -141,7 +141,7 @@ void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string &str)
     if (tokens.size() == 2)
         cnt = std::stoi(tokens[1]);
     auto pos = pClient->GetCurrentPosition(sWorld.GetArTime());
-    auto res = NGemity::StringFormat("add_npc(%d, %d, %d, %d)", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
+    auto res = NGemity::StringFormat("add_npc({}, {}, {}, {})", (int)pos.GetPositionX(), (int)pos.GetPositionY(), i, cnt);
     sScriptingMgr.RunString(pClient, res);
 }
 
@@ -153,11 +153,11 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
     auto partyID = sGroupManager.CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
     if (partyID == -1)
     {
-        NG_LOG_ERROR("group", "Player wasn't able to create party - %d, %s", pClient->GetPartyID(), pClient->GetName());
+        NG_LOG_ERROR("group", "Player wasn't able to create party - %u, %s", pClient->GetPartyID(), pClient->GetName());
         return;
     }
     pClient->SetInt32Value(PLAYER_FIELD_PARTY_ID, partyID);
-    Messages::SendChatMessage(100, "@PARTY", pClient, NGemity::StringFormat("CREATE|%s|%s|", partyName, pClient->GetName()));
+    Messages::SendChatMessage(100, "@PARTY", pClient, NGemity::StringFormat("CREATE|{}|{}|", partyName, pClient->GetName()));
     Messages::SendPartyInfo(pClient);
 }
 
@@ -176,7 +176,7 @@ void AllowedCommandInfo::onInviteParty(Player *pClient, const std::string &szPla
 
     auto nPW = sGroupManager.GetPassword(pClient->GetPartyID());
 
-    Messages::SendChatMessage(100, "@PARTY", player, NGemity::StringFormat("INVITE|%s|%s|%d|%d", pClient->GetName(), partyname, pClient->GetPartyID(), nPW));
+    Messages::SendChatMessage(100, "@PARTY", player, NGemity::StringFormat("INVITE|{}|{}|{}|{}", pClient->GetName(), partyname, pClient->GetPartyID(), nPW));
 }
 
 void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
@@ -204,7 +204,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
-    Messages::SendPartyChatMessage(100, "@PARTY", partyID, NGemity::StringFormat("JOIN|%s|", sGroupManager.GetPartyName(pClient->GetPartyID())));
+    Messages::SendPartyChatMessage(100, "@PARTY", partyID, NGemity::StringFormat("JOIN|{}|", sGroupManager.GetPartyName(pClient->GetPartyID())));
     Messages::SendPartyInfo(pClient);
     Messages::BroadcastPartyMemberInfo(pClient);
 }

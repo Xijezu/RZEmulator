@@ -17,68 +17,72 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Define.h"
-#include <memory>
-#include <string>
-#include <cmath>
-#include <utility>
-#include <optional>
-#include <set>
-#include <unordered_map>
-#include <vector>
 #include "StringFormat.h"
 #include "Timer.h"
+#include <cmath>
+#include <memory>
+#include <optional>
+#include <set>
+#include <stdint.h>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  if COMPILER == COMPILER_INTEL
-#    if !defined(BOOST_ASIO_HAS_MOVE)
-#      define BOOST_ASIO_HAS_MOVE
-#    endif // !defined(BOOST_ASIO_HAS_MOVE)
-#  endif // if NGEMITY_COMPILER == NGEMITY_COMPILER_INTEL
+#if COMPILER == COMPILER_INTEL
+#if !defined(BOOST_ASIO_HAS_MOVE)
+#define BOOST_ASIO_HAS_MOVE
+#endif // !defined(BOOST_ASIO_HAS_MOVE)
+#endif // if NGEMITY_COMPILER == NGEMITY_COMPILER_INTEL
 #else
 
-#  include <sys/types.h>
-#  include <sys/ioctl.h>
-#  include <sys/socket.h>
-#  include <netinet/in.h>
-#  include <unistd.h>
-#  include <netdb.h>
-#  include <cstdlib>
+#include <cstdlib>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
-#  define snprintf _snprintf
-#  define atoll _atoi64
-#  define vsnprintf _vsnprintf
-#  define llabs _abs64
+#define snprintf _snprintf
+#define atoll _atoi64
+#define vsnprintf _vsnprintf
+#define llabs _abs64
 #else
-#  define stricmp strcasecmp
-#  define strnicmp strncasecmp
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
 #endif
 
-inline unsigned long atoul(char const *str) { return strtoul(str, nullptr, 10); }
+inline unsigned long atoul(char const *str) {
+  return strtoul(str, nullptr, 10);
+}
 
-inline unsigned long long atoull(char const *str) { return strtoull(str, nullptr, 10); }
+inline unsigned long long atoull(char const *str) {
+  return strtoull(str, nullptr, 10);
+}
 
 #define STRINGIZE(a) #a
 
-enum TimeConstants
-{
-    MINUTE          = 60,
-    HOUR            = MINUTE * 60,
-    DAY             = HOUR * 24,
-    WEEK            = DAY * 7,
-    MONTH           = DAY * 30,
-    YEAR            = MONTH * 12,
-    IN_MILLISECONDS = 1000
+enum TimeConstants {
+  MINUTE = 60,
+  HOUR = MINUTE * 60,
+  DAY = HOUR * 24,
+  WEEK = DAY * 7,
+  MONTH = DAY * 30,
+  YEAR = MONTH * 12,
+  IN_MILLISECONDS = 1000
 };
 
 using namespace std::literals::string_literals;
 
-
-// we always use stdlib std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
+// we always use stdlib std::max/std::min, undefine some not C++ standard
+// defines (Win API and some other platforms)
 #ifdef max
 #undef max
 #endif
@@ -88,12 +92,11 @@ using namespace std::literals::string_literals;
 #endif
 
 #ifndef M_PI
-#define M_PI            3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
-#define MAX_QUERY_LEN 32*1024
+#define MAX_QUERY_LEN 32 * 1024
 
-namespace NGemity
-{
-    using std::make_unique;
+namespace NGemity {
+using std::make_unique;
 }

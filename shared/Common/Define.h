@@ -16,59 +16,59 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "CompilerDefs.h"
-#include <boost/detail/endian.hpp>
 #include "PacketEpics.h"
+#include <boost/detail/endian.hpp>
 
 #define EPIC EPIC_4_1_1
 #define NGEMITY_LITTLEENDIAN 0
-#define NGEMITY_BIGENDIAN    1
+#define NGEMITY_BIGENDIAN 1
 
 #if !defined(NGEMITY_ENDIAN)
-#  if defined (BOOST_BIG_ENDIAN)
-#    define NGEMITY_ENDIAN NGEMITY_BIGENDIAN
-#  else
-#    define NGEMITY_ENDIAN NGEMITY_LITTLEENDIAN
-#  endif
+#if defined(BOOST_BIG_ENDIAN)
+#define NGEMITY_ENDIAN NGEMITY_BIGENDIAN
+#else
+#define NGEMITY_ENDIAN NGEMITY_LITTLEENDIAN
+#endif
 #endif
 
-#include <cstddef>
 #include <cinttypes>
 #include <climits>
+#include <cstddef>
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  define NGEMITY_PATH_MAX 260
-#  ifndef DECLSPEC_NORETURN
-#    define DECLSPEC_NORETURN __declspec(noreturn)
-#  endif //DECLSPEC_NORETURN
-#  ifndef DECLSPEC_DEPRECATED
-#    define DECLSPEC_DEPRECATED __declspec(deprecated)
-#  endif //DECLSPEC_DEPRECATED
-#else //PLATFORM != PLATFORM_WINDOWS
-#  define NGEMITY_PATH_MAX PATH_MAX
-#  define DECLSPEC_NORETURN
-#  define DECLSPEC_DEPRECATED
-#endif //PLATFORM
+#define NGEMITY_PATH_MAX 260
+#ifndef DECLSPEC_NORETURN
+#define DECLSPEC_NORETURN __declspec(noreturn)
+#endif // DECLSPEC_NORETURN
+#ifndef DECLSPEC_DEPRECATED
+#define DECLSPEC_DEPRECATED __declspec(deprecated)
+#endif // DECLSPEC_DEPRECATED
+#else  // PLATFORM != PLATFORM_WINDOWS
+#define NGEMITY_PATH_MAX PATH_MAX
+#define DECLSPEC_NORETURN
+#define DECLSPEC_DEPRECATED
+#endif // PLATFORM
 
 #if COMPILER == COMPILER_GNU
-#  define ATTR_NORETURN __attribute__((noreturn))
-#  define ATTR_PRINTF(F, V) __attribute__ ((format (printf, F, V)))
-#  define ATTR_DEPRECATED __attribute__((deprecated))
-#else //COMPILER != COMPILER_GNU
-#  define ATTR_NORETURN
-#  define ATTR_PRINTF(F, V)
-#  define ATTR_DEPRECATED
-#endif //COMPILER == COMPILER_GNU
+#define ATTR_NORETURN __attribute__((noreturn))
+#define ATTR_PRINTF(F, V) __attribute__((format(printf, F, V)))
+#define ATTR_DEPRECATED __attribute__((deprecated))
+#else // COMPILER != COMPILER_GNU
+#define ATTR_NORETURN
+#define ATTR_PRINTF(F, V)
+#define ATTR_DEPRECATED
+#endif // COMPILER == COMPILER_GNU
 
-typedef unsigned long  DWORD;
+typedef unsigned long DWORD;
 typedef unsigned short WORD;
 
 #if PLATFORM != PLATFORM_WINDOWS && !defined(LOWORD)
-# define LOWORD(a) ((WORD)(a))
+#define LOWORD(a) ((WORD)(a))
 #endif // #ifndef LOWORD
 #if PLATFORM != PLATFORM_WINDOWS && !defined(HIWORD)
-# define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
 #endif // #ifndef HIWORD
 
 #define UI64FMTD "%" PRIu64
@@ -79,14 +79,14 @@ typedef unsigned short WORD;
 
 #define SZFMTD "%" PRIuPTR
 
-typedef int64_t  int64;
-typedef int32_t  int32;
-typedef int16_t  int16;
-typedef int8_t   int8;
+typedef int64_t int64;
+typedef int32_t int32;
+typedef int16_t int16;
+typedef int8_t int8;
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint16_t uint16;
-typedef uint8_t  uint8;
+typedef uint8_t uint8;
 
 typedef uint32 uint;
 typedef uint16 ushort;

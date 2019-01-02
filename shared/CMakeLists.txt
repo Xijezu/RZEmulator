@@ -83,6 +83,7 @@ include_directories(
 )
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
+target_include_directories(${LIBRARY_NAME} SYSTEM PRIVATE $ENV{INCLUDE})
 target_link_libraries(${LIBRARY_NAME} ${MYSQL_LIB} fmt boost)
 if(WITH_PCH)
         add_cxx_pch(${LIBRARY_NAME} ${sharedPCH})

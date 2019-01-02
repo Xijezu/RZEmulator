@@ -69,7 +69,7 @@ class Log
         template<typename Format, typename... Args>
         inline void outMessage(std::string const &filter, LogLevel const level, Format &&fmt, Args &&... args)
         {
-            outMessage(filter, level, NGemity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+            outMessage(filter, level, NGemity::StringFormatTC(std::forward<Format>(fmt), std::forward<Args>(args)...));
         }
 
         template<typename Format, typename... Args>
@@ -78,7 +78,7 @@ class Log
             if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
                 return;
 
-            outCommand(NGemity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
+            outCommand(NGemity::StringFormatTC(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
         }
 
         void outCharDump(char const *str, uint32 account_id, uint64 guid, char const *name);
