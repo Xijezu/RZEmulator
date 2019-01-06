@@ -69,6 +69,11 @@ class Item : public WorldObject
         void SetCount(int64 count);
         bool IsDropable();
         bool IsWearable();
+        int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
+        bool IsWeapon() const { return GetItemGroup() == GROUP_WEAPON; }
+        ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
+        ItemTemplate *GetItemBase() const { return m_pItemBase; }
+        int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
 
         Summon *GetSummon() const { return m_pSummon; }
 

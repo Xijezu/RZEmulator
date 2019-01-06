@@ -36,17 +36,17 @@
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
-#pragma warning(disable:4355)
+#pragma warning(disable : 4355)
 #endif
 
 Player::Player(uint32 handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_session(nullptr)
 {
 #ifdef _MSC_VER
-#   pragma warning(default:4355)
+#pragma warning(default : 4355)
 #endif
-    _mainType    = MT_Player;
-    _subType     = ST_Player;
-    _objType     = OBJ_CLIENT;
+    _mainType = MT_Player;
+    _subType = ST_Player;
+    _objType = OBJ_CLIENT;
     _valuesCount = PLAYER_END;
 
     _InitValues();
@@ -56,9 +56,9 @@ Player::Player(uint32 handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_sessi
     SetUInt32Value(UNIT_FIELD_HANDLE, handle);
     clearPendingBonusMsg();
 
-    m_QuestManager.m_pHandler    = this;
+    m_QuestManager.m_pHandler = this;
     m_Inventory.m_pEventReceiver = this;
-    m_Storage.m_pEventReceiver   = this;
+    m_Storage.m_pEventReceiver = this;
 }
 
 Player::~Player()
@@ -195,8 +195,8 @@ bool Player::ReadCharacter(const std::string &_name, int _race)
         SetUInt64Value(PLAYER_FIELD_GOLD, (*result)[47].GetUInt64());
         SetInt32Value(PLAYER_FIELD_CHAOS, (*result)[48].GetInt32());
         std::string flag_list = (*result)[50].GetString();
-        Tokenizer   token(flag_list, '\n');
-        for (auto   iter : token)
+        Tokenizer token(flag_list, '\n');
+        for (auto iter : token)
         {
             Tokenizer flag(iter, ':');
             if (flag.size() == 2)
@@ -205,7 +205,7 @@ bool Player::ReadCharacter(const std::string &_name, int _race)
             }
         }
         mainSummon = (*result)[51].GetInt32();
-        subSummon  = (*result)[52].GetInt32();
+        subSummon = (*result)[52].GetInt32();
         SetInt32Value(PLAYER_FIELD_REMAIN_SUMMON_TIME, (*result)[53].GetInt32());
         SetInt32Value(PLAYER_FIELD_PET, (*result)[54].GetInt32());
         SetUInt64Value(PLAYER_FIELD_CHAT_BLOCK_TIME, (*result)[55].GetUInt64());
@@ -225,8 +225,7 @@ bool Player::ReadCharacter(const std::string &_name, int _race)
         {
             return false;
         }*/
-        if (!ReadItemList(GetInt32Value(UNIT_FIELD_UID)) || !ReadItemCoolTimeList(GetInt32Value(UNIT_FIELD_UID))
-            || !ReadSummonList(GetInt32Value(UNIT_FIELD_UID)))
+        if (!ReadItemList(GetInt32Value(UNIT_FIELD_UID)) || !ReadItemCoolTimeList(GetInt32Value(UNIT_FIELD_UID)) || !ReadSummonList(GetInt32Value(UNIT_FIELD_UID)))
         {
             return false;
         }
@@ -265,7 +264,6 @@ bool Player::ReadCharacter(const std::string &_name, int _race)
         CalculateStat();
         Messages::SendHPMPMessage(this, this, GetHealth(), GetMana(), true);
         //Messages::sendEnterMessage(this, this, false);
-
     }
     else
     {
@@ -279,30 +277,30 @@ void Player::DB_ReadStorage()
     //"SELECT sid, idx code, cnt, level, enhance, endurance, flag, gcode, socket_0, socket_1, socket_2, socket_3, remain_time FROM Item WHERE account_id = ? AND owner_id = 0 AND auction_id = 0 AND keeping_id = 0"
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STORAGE);
     stmt->setInt32(0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
-    int                   nItemIndex = 0;
-    std::vector<Summon *> vList{ };
+    int nItemIndex = 0;
+    std::vector<Summon *> vList{};
     ReadStorageSummonList(vList);
-    bool                    bIsGoldExist{false};
-    if (PreparedQueryResult result   = CharacterDatabase.Query(stmt))
+    bool bIsGoldExist{false};
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         do
         {
-            int   fidx        = 0;
-            Field *field      = result->Fetch();
-            int64 sid         = field[fidx++].GetInt64();
-            int   idx         = field[fidx++].GetInt32();
-            int   code        = field[fidx++].GetInt32();
-            int64 cnt         = field[fidx++].GetInt64();
-            int   level       = field[fidx++].GetInt32();
-            int   enhance     = field[fidx++].GetInt32();
-            int   endurance   = field[fidx++].GetInt32();
-            int   flag        = field[fidx++].GetInt32();
-            auto  genCode     = (GenerateCode)field[fidx++].GetInt32();
-            int   socket_0    = field[fidx++].GetInt32();
-            int   socket_1    = field[fidx++].GetInt32();
-            int   socket_2    = field[fidx++].GetInt32();
-            int   socket_3    = field[fidx++].GetInt32();
-            int   remain_time = field[fidx].GetInt32();
+            int fidx = 0;
+            Field *field = result->Fetch();
+            int64 sid = field[fidx++].GetInt64();
+            int idx = field[fidx++].GetInt32();
+            int code = field[fidx++].GetInt32();
+            int64 cnt = field[fidx++].GetInt64();
+            int level = field[fidx++].GetInt32();
+            int enhance = field[fidx++].GetInt32();
+            int endurance = field[fidx++].GetInt32();
+            int flag = field[fidx++].GetInt32();
+            auto genCode = (GenerateCode)field[fidx++].GetInt32();
+            int socket_0 = field[fidx++].GetInt32();
+            int socket_1 = field[fidx++].GetInt32();
+            int socket_2 = field[fidx++].GetInt32();
+            int socket_3 = field[fidx++].GetInt32();
+            int remain_time = field[fidx].GetInt32();
 
             Item *curItem = m_Storage.FindBySID(sid);
             if (curItem == nullptr)
@@ -322,8 +320,8 @@ void Player::DB_ReadStorage()
                 if (code != 0)
                 {
                     nItemIndex++;
-                    newItem->m_Instance.nIdx         = nItemIndex;
-                    newItem->m_bIsNeedUpdateToDB     = true;
+                    newItem->m_Instance.nIdx = nItemIndex;
+                    newItem->m_bIsNeedUpdateToDB = true;
                     if (newItem->m_Instance.nIdx == idx)
                         newItem->m_bIsNeedUpdateToDB = false;
 
@@ -349,7 +347,7 @@ void Player::DB_ReadStorage()
                                 if (sm->GetUInt32Value(UNIT_FIELD_UID) == (uint)newItem->m_Instance.Socket[0])
                                 {
                                     vList.erase(vList.begin() + i);
-                                    sm->m_pItem        = newItem;
+                                    sm->m_pItem = newItem;
                                     newItem->m_pSummon = sm;
                                     newItem->m_Instance.Socket[0] = sm->GetUInt32Value(UNIT_FIELD_UID);
                                     newItem->m_bIsNeedUpdateToDB = true;
@@ -361,7 +359,7 @@ void Player::DB_ReadStorage()
                         // Do pet here
                         if (newItem->m_Instance.nIdx == 0)
                         {
-                            newItem->m_Instance.nIdx     = ++m_Storage.m_nIndex;
+                            newItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
                             newItem->m_bIsNeedUpdateToDB = true;
                         }
                         m_Storage.Push(newItem, newItem->m_Instance.nCount, false);
@@ -395,8 +393,8 @@ void Player::DB_ReadStorage()
             else
             {
                 nItemIndex++;
-                curItem->m_Instance.nIdx         = nItemIndex;
-                curItem->m_bIsNeedUpdateToDB     = true;
+                curItem->m_Instance.nIdx = nItemIndex;
+                curItem->m_bIsNeedUpdateToDB = true;
                 if (curItem->m_Instance.nIdx == idx)
                     curItem->m_bIsNeedUpdateToDB = false;
                 Messages::SendItemMessage(this, curItem);
@@ -425,26 +423,26 @@ bool Player::ReadItemList(int sid)
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         int unInv = 0;
-        int Inv   = 0;
+        int Inv = 0;
         do
         {
             Field *fields = result->Fetch();
-            int   i       = 0, invIdx = 0;
+            int i = 0, invIdx = 0;
 
-            uint64 uid         = fields[i++].GetUInt64();
-            int    idx         = fields[i++].GetInt32();
-            int    code        = fields[i++].GetInt32();
-            uint64 cnt         = fields[i++].GetUInt64();
-            int    gcode       = fields[i++].GetInt32();
-            int    level       = fields[i++].GetInt32();
-            int    enhance     = fields[i++].GetInt32();
-            int    flag        = fields[i++].GetInt32();
-            int    summon_id   = fields[i++].GetInt32();
-            int    socket_0    = fields[i++].GetInt32();
-            int    socket_1    = fields[i++].GetInt32();
-            int    socket_2    = fields[i++].GetInt32();
-            int    socket_3    = fields[i++].GetInt32();
-            int    remain_time = fields[i++].GetInt32();
+            uint64 uid = fields[i++].GetUInt64();
+            int idx = fields[i++].GetInt32();
+            int code = fields[i++].GetInt32();
+            uint64 cnt = fields[i++].GetUInt64();
+            int gcode = fields[i++].GetInt32();
+            int level = fields[i++].GetInt32();
+            int enhance = fields[i++].GetInt32();
+            int flag = fields[i++].GetInt32();
+            int summon_id = fields[i++].GetInt32();
+            int socket_0 = fields[i++].GetInt32();
+            int socket_1 = fields[i++].GetInt32();
+            int socket_2 = fields[i++].GetInt32();
+            int socket_3 = fields[i++].GetInt32();
+            int remain_time = fields[i++].GetInt32();
 
             auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag,
                                         socket_0, socket_1, socket_2, socket_3, remain_time);
@@ -459,10 +457,10 @@ bool Player::ReadItemList(int sid)
             if (code != 0)
             {
                 item->m_Instance.nWearInfo = (ItemWearType)fields[i].GetInt32();
-                item->m_unInventoryIndex   = (uint)unInv;
+                item->m_unInventoryIndex = (uint)unInv;
                 unInv++;
                 Inv++;
-                item->m_Instance.nIdx     = Inv;
+                item->m_Instance.nIdx = Inv;
                 item->m_bIsNeedUpdateToDB = idx != Inv;
                 Item *citem = PushItem(item, item->m_Instance.nCount, false);
                 if (item->IsJoinable() && citem->GetHandle() != item->GetHandle())
@@ -488,21 +486,21 @@ bool Player::ReadItemList(int sid)
 bool Player::ReadStateList(Unit *pUnit)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STATE);
-    auto              uid   = pUnit->GetUInt32Value(UNIT_FIELD_UID);
+    auto uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
     stmt->setInt32(0, pUnit->IsPlayer() ? uid : 0);
     stmt->setInt32(1, pUnit->IsSummon() ? uid : 0);
-    uint                    ct     = sWorld.GetArTime();
+    uint ct = sWorld.GetArTime();
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         do
         {
             Field *fields = result->Fetch();
-            int   idx     = 3;
+            int idx = 3;
 
-            uint   duration[3]     = {0};
-            uint16 levels[3]       = {0};
-            int    base_damage[3]  = {0};
-            int    remain_times[3] = {0};
+            uint duration[3] = {0};
+            uint16 levels[3] = {0};
+            int base_damage[3] = {0};
+            int remain_times[3] = {0};
 
             int code = fields[idx++].GetInt32();
             levels[0] = fields[idx++].GetUInt16();
@@ -515,11 +513,11 @@ bool Player::ReadStateList(Unit *pUnit)
             int remain_time_2 = fields[idx++].GetInt32();
             int remain_time_3 = fields[idx++].GetInt32();
             base_damage[0] = fields[idx++].GetInt32();
-            int   base_damage_2    = fields[idx++].GetInt32();
-            int   base_damage_3    = fields[idx++].GetInt32();
-            int   remain_fire_time = fields[idx].GetInt32();
-            State *state           = new State{ };
-            auto  si               = sObjectMgr.GetStateInfo(code);
+            int base_damage_2 = fields[idx++].GetInt32();
+            int base_damage_3 = fields[idx++].GetInt32();
+            int remain_fire_time = fields[idx].GetInt32();
+            State *state = new State{};
+            auto si = sObjectMgr.GetStateInfo(code);
             m_nCurrentStateUID++;
             state->SetState(code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld.GetArTime()), base_damage, 0, "");
             sMemoryPool.AllocMiscHandle(state);
@@ -533,13 +531,13 @@ bool Player::ReadItemCoolTimeList(int uid)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_ITEMCOOLTIME);
     stmt->setInt32(0, uid);
-    uint                    ct     = sWorld.GetArTime();
+    uint ct = sWorld.GetArTime();
     if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
         do
         {
-            Field     *fields = result->Fetch();
-            int       idx     = 1;
+            Field *fields = result->Fetch();
+            int idx = 1;
             for (auto &cd : m_nItemCooltime)
             {
                 cd = fields[idx++].GetInt32() + ct;
@@ -558,18 +556,18 @@ bool Player::ReadQuestList()
         {
             do
             {
-                Field *fields                   = result->Fetch();
-                int   idx                       = 0;
-                int   nID                       = fields[idx++].GetInt32();
-                int   Code                      = fields[idx++].GetInt32();
-                int   nStartID                  = fields[idx++].GetInt32();
-                int   nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
+                Field *fields = result->Fetch();
+                int idx = 0;
+                int nID = fields[idx++].GetInt32();
+                int Code = fields[idx++].GetInt32();
+                int nStartID = fields[idx++].GetInt32();
+                int nStatus[MAX_QUEST_STATUS] = {0, 0, 0};
 
                 for (int &nStatu : nStatus)
                     nStatu = fields[idx++].GetInt32();
 
                 auto progress = (QuestProgress)fields[idx].GetInt32();
-                auto q        = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
+                auto q = Quest::AllocQuest(this, nID, Code, nStatus, progress, nStartID);
                 if (!m_QuestManager.AddQuest(q))
                 {
                     delete q;
@@ -604,12 +602,12 @@ bool Player::ReadSkillList(Unit *pUnit)
     {
         do
         {
-            Field *fields     = result->Fetch();
-            auto  sid         = fields[0].GetInt32();
+            Field *fields = result->Fetch();
+            auto sid = fields[0].GetInt32();
             // idx 1 = owner_id, idx 2 = summon_id
-            auto  skill_id    = fields[3].GetInt32();
-            auto  skill_level = fields[4].GetInt32();
-            auto  cool_time   = fields[5].GetInt32();
+            auto skill_id = fields[3].GetInt32();
+            auto skill_level = fields[4].GetInt32();
+            auto cool_time = fields[5].GetInt32();
             pUnit->SetSkill(sid, skill_id, skill_level, cool_time);
         } while (result->NextRow());
     }
@@ -688,19 +686,19 @@ bool Player::ReadEquipItem()
     {
         do
         {
-            Field    *fields   = result->Fetch();
-            uint32_t sid       = fields[0].GetUInt32();
-            int      summon_id = fields[1].GetInt32();
-            int      idx       = fields[2].GetInt32();
-            int      wear_info = idx;
+            Field *fields = result->Fetch();
+            uint32_t sid = fields[0].GetUInt32();
+            int summon_id = fields[1].GetInt32();
+            int idx = fields[2].GetInt32();
+            int wear_info = idx;
 
             Unit *unit = nullptr;
             if (summon_id == 0)
                 unit = this;
             else
                 unit = GetSummon(summon_id);
-            Item             *item = FindItemBySID(sid);
-            std::vector<int> indices{ };
+            Item *item = FindItemBySID(sid);
+            std::vector<int> indices{};
             if (item != nullptr && unit != nullptr)
             {
                 if (unit->m_anWear[wear_info] == nullptr)
@@ -712,11 +710,11 @@ bool Player::ReadEquipItem()
                         if (wear_info == WEAR_SHIELD && item->m_pItemBase->group == GROUP_WEAPON)
                             Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
                         item->m_Instance.nWearInfo = (ItemWearType)wear_info;
-                        item->m_bIsNeedUpdateToDB  = true;
+                        item->m_bIsNeedUpdateToDB = true;
                         if (unit->IsSummon())
                         {
                             item->m_Instance.OwnSummonHandle = unit->GetHandle();
-                            item->m_Instance.nOwnSummonUID   = (int)unit->GetInt32Value(UNIT_FIELD_UID);
+                            item->m_Instance.nOwnSummonUID = (int)unit->GetInt32Value(UNIT_FIELD_UID);
                         }
                     }
                 }
@@ -735,36 +733,36 @@ bool Player::ReadSummonList(int UID)
     {
         do
         {
-            Field       *fields            = result->Fetch();
-            int         i                  = 0;
+            Field *fields = result->Fetch();
+            int i = 0;
             //PrepareStatement(CHARACTER_GET_SUMMONLIST, "SELECT sid, account_id, code, card_uid, exp, jp,
             // last_decreased_exp, name, transform, lv, jlv, max_level, fp, prev_level_01, prev_level_02,
             // prev_id_01, prev_id_02, sp, hp, mp FROM Summon WHERE owner_id = ?", CONNECTION_SYNCH);
-            uint        sid                = fields[i++].GetUInt32();
-            int         account_id         = fields[i++].GetInt32();
-            int         code               = fields[i++].GetInt32();
-            uint        card_uid           = fields[i++].GetUInt32();
-            uint        exp                = fields[i++].GetUInt32();
-            int         jp                 = fields[i++].GetInt32();
-            uint        last_decreased_exp = fields[i++].GetUInt32();
-            std::string name               = fields[i++].GetString();
-            int         transform          = fields[i++].GetInt32();
-            int         lv                 = fields[i++].GetInt32();
-            int         jlv                = fields[i++].GetInt32();
-            int         max_level          = fields[i++].GetInt32();
-            int         fp                 = fields[i++].GetInt32();
-            int         prev_level_01      = fields[i++].GetInt32();
-            int         prev_level_02      = fields[i++].GetInt32();
-            int         prev_id_01         = fields[i++].GetInt32();
-            int         prev_id_02         = fields[i++].GetInt32();
-            int         sp                 = fields[i++].GetInt32();
-            int         hp                 = fields[i++].GetInt32();
-            int         mp                 = fields[i++].GetInt32();
+            uint sid = fields[i++].GetUInt32();
+            int account_id = fields[i++].GetInt32();
+            int code = fields[i++].GetInt32();
+            uint card_uid = fields[i++].GetUInt32();
+            uint exp = fields[i++].GetUInt32();
+            int jp = fields[i++].GetInt32();
+            uint last_decreased_exp = fields[i++].GetUInt32();
+            std::string name = fields[i++].GetString();
+            int transform = fields[i++].GetInt32();
+            int lv = fields[i++].GetInt32();
+            int jlv = fields[i++].GetInt32();
+            int max_level = fields[i++].GetInt32();
+            int fp = fields[i++].GetInt32();
+            int prev_level_01 = fields[i++].GetInt32();
+            int prev_level_02 = fields[i++].GetInt32();
+            int prev_id_01 = fields[i++].GetInt32();
+            int prev_id_02 = fields[i++].GetInt32();
+            int sp = fields[i++].GetInt32();
+            int hp = fields[i++].GetInt32();
+            int mp = fields[i++].GetInt32();
 
             auto summon = Summon::AllocSummon(this, code);
             summon->SetUInt32Value(UNIT_FIELD_UID, sid);
             summon->m_nSummonInfo = code;
-            summon->m_nCardUID    = card_uid;
+            summon->m_nCardUID = card_uid;
             summon->SetUInt64Value(UNIT_FIELD_EXP, exp);
             summon->SetJP(jp);
             summon->SetName(name);
@@ -789,9 +787,9 @@ bool Player::ReadSummonList(int UID)
             {
                 card->m_pSummon = summon;
                 card->m_Instance.Socket[0] = sid;
-                card->m_bIsNeedUpdateToDB        = true;
+                card->m_bIsNeedUpdateToDB = true;
                 card->m_Instance.OwnSummonHandle = summon->GetHandle();
-                summon->m_pItem                  = card;
+                summon->m_pItem = card;
                 AddSummon(summon, false);
                 /*m_player.AddSummon(summon, false);
                 readCreatureSkillList(summon);
@@ -822,7 +820,7 @@ void Player::SendLoginProperties()
         sGroupManager.onLogin(GetPartyID(), this);
 
     Messages::SendQuestList(this);
-    for (auto &summon: m_vSummonList)
+    for (auto &summon : m_vSummonList)
     {
         summon->CalculateStat();
         Messages::SendAddSummonMessage(this, summon);
@@ -894,8 +892,8 @@ void Player::SendLoginProperties()
 
 void Player::SendGoldChaosMessage()
 {
-    TS_SC_GOLD_UPDATE goldPct{ };
-    goldPct.gold  = GetGold();
+    TS_SC_GOLD_UPDATE goldPct{};
+    goldPct.gold = GetGold();
     goldPct.chaos = GetChaos();
     SendPacket(goldPct);
 }
@@ -915,7 +913,7 @@ void Player::SendWearInfo()
 {
     XPacket packet(NGemity::Packets::TS_SC_WEAR_INFO);
     packet << GetHandle();
-    for (int  i = 0; i < MAX_ITEM_WEAR; i++)
+    for (int i = 0; i < MAX_ITEM_WEAR; i++)
     {
         int wear_info = (m_anWear[i] != nullptr ? m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
@@ -942,7 +940,7 @@ void Player::Save(bool bOnlyPlayer)
     // "UPDATE `Character` SET x = ?, y = ?, z = ?, layer = ?, exp = ?, lv = ?, hp = ?, mp = ?, stamina = ?, jlv = ?, jp = ?, total_jp = ?, job_0 = ?, job_1 = ?, job_2 = ?,
     // jlv_0 = ?, jlv_1 = ?, jlv_2 = ?, permission = ?, job = ?, gold = ?, party_id = ?, guild_id = ? WHERE sid = ?"
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_CHARACTER);
-    uint8_t           i     = 0;
+    uint8_t i = 0;
     stmt->setFloat(i++, GetPositionX());
     stmt->setFloat(i++, GetPositionY());
     stmt->setFloat(i++, GetPositionZ());
@@ -969,12 +967,12 @@ void Player::Save(bool bOnlyPlayer)
     for (auto summon : m_aBindSummonCard)
         stmt->setInt32(i++, summon != nullptr && summon->m_pSummon != nullptr ? summon->m_pSummon->GetInt32Value(UNIT_FIELD_UID) : 0);
     stmt->setInt32(i++, m_pMainSummon != nullptr ? m_pMainSummon->GetInt32Value(UNIT_FIELD_UID) : 0);
-    stmt->setInt32(i++, 0);// Sub Summon
+    stmt->setInt32(i++, 0); // Sub Summon
     stmt->setInt32(i++, 0); // Pet
     stmt->setInt32(i++, GetInt32Value(PLAYER_FIELD_CHAOS));
     stmt->setString(i++, m_szClientInfo);
-    std::string flaglist{ };
-    for (auto   &flag : m_lFlagList)
+    std::string flaglist{};
+    for (auto &flag : m_lFlagList)
         flaglist.append(NGemity::StringFormat("{}:{}\n", flag.first, flag.second));
     stmt->setString(i++, flaglist);
     stmt->setInt32(i, GetInt32Value(UNIT_FIELD_UID));
@@ -1017,22 +1015,22 @@ int Player::GetJobDepth()
 
 void Player::applyJobLevelBonus()
 {
-    int          levels[4]{ };
-    int          jobs[4]{ };
-    int          i = 0;
-    CreatureStat stat{ };
+    int levels[4]{};
+    int jobs[4]{};
+    int i = 0;
+    CreatureStat stat{};
 
     if (GetCurrentJob() != 0)
     {
         int jobDepth = GetJobDepth();
         for (i = 0; i < jobDepth; i++)
         {
-            jobs[i]   = GetPrevJobId(i);
+            jobs[i] = GetPrevJobId(i);
             levels[i] = GetPrevJobLv(i);
         }
         //i++;
 
-        jobs[i]   = GetCurrentJob();
+        jobs[i] = GetCurrentJob();
         levels[i] = GetCurrentJLv();
         stat = sObjectMgr.GetJobLevelBonus(jobDepth, jobs, levels);
         m_cStat.Add(stat);
@@ -1083,27 +1081,27 @@ uint16_t Player::putoffItem(ItemWearType pos)
 
     switch (pos)
     {
-        case WEAR_ARMULET:
-            if (GetChaos() != 0)
-                return TS_RESULT_ACCESS_DENIED;
-            break;
-        case WEAR_SHIELD:
-            if (m_anWear[1]->m_pItemBase->group == 1)
-                RemoveFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
-            if (m_anWear[15] != nullptr)
-                putoffItem(WEAR_DECO_SHIELD);
-            break;
-        case WEAR_WEAPON:
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-                putoffItem(WEAR_SHIELD);
+    case WEAR_ARMULET:
+        if (GetChaos() != 0)
+            return TS_RESULT_ACCESS_DENIED;
+        break;
+    case WEAR_SHIELD:
+        if (m_anWear[1]->m_pItemBase->group == 1)
+            RemoveFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
+        if (m_anWear[15] != nullptr)
             putoffItem(WEAR_DECO_SHIELD);
-            break;
-        case WEAR_DECO_WEAPON:
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON) && m_anWear[15] != nullptr)
-                putoffItem(WEAR_DECO_SHIELD);
-            break;
-        default:
-            break;
+        break;
+    case WEAR_WEAPON:
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
+            putoffItem(WEAR_SHIELD);
+        putoffItem(WEAR_DECO_SHIELD);
+        break;
+    case WEAR_DECO_WEAPON:
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON) && m_anWear[15] != nullptr)
+            putoffItem(WEAR_DECO_SHIELD);
+        break;
+    default:
+        break;
     }
     auto result = Unit::putoffItem(pos);
     if (item != nullptr)
@@ -1146,7 +1144,7 @@ void Player::SetLastContact(const std::string &szKey, uint32_t nValue)
 
 std::string Player::GetLastContactStr(const std::string &szKey)
 {
-    std::string res{ };
+    std::string res{};
     if (m_hsContact.count(szKey) == 1)
         return m_hsContact[szKey];
     return res;
@@ -1167,8 +1165,8 @@ void Player::SetDialogTitle(const std::string &szTitle, int type)
         if (type != 0)
             m_bNonNPCDialog = true;
 
-        m_szDialogTitle       = szTitle;
-        m_szDialogMenu        = "";
+        m_szDialogTitle = szTitle;
+        m_szDialogMenu = "";
         m_szSpecialDialogMenu = "";
     }
 }
@@ -1177,8 +1175,8 @@ void Player::SetDialogText(const std::string &szText)
 {
     if (!szText.empty())
     {
-        m_szDialogText        = szText;
-        m_szDialogMenu        = "";
+        m_szDialogText = szText;
+        m_szDialogMenu = "";
         m_szSpecialDialogMenu = "";
     }
 }
@@ -1204,15 +1202,15 @@ void Player::ShowDialog()
     {
         uint npc = GetLastContactLong("npc");
         Messages::SendDialogMessage(this, npc, m_nDialogType, m_szDialogTitle, m_szDialogText, m_szDialogMenu);
-        m_nDialogType   = 0;
+        m_nDialogType = 0;
         m_szDialogTitle = "";
-        m_szDialogText  = "";
+        m_szDialogText = "";
     }
 }
 
 bool Player::IsValidTrigger(const std::string &szTrigger)
 {
-    Tokenizer       tokenizer(m_szDialogMenu, '\t');
+    Tokenizer tokenizer(m_szDialogMenu, '\t');
     for (const auto &s : tokenizer)
     {
         if (s == szTrigger)
@@ -1239,9 +1237,9 @@ ushort Player::ChangeGold(int64 nGold)
 
 void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
 {
-    int  oldOwner   = pItem->m_Instance.nOwnerUID;
-    int  oldAccount = pItem->m_nAccountID;
-    bool is_inv     = pInventory == &m_Inventory;
+    int oldOwner = pItem->m_Instance.nOwnerUID;
+    int oldAccount = pItem->m_nAccountID;
+    bool is_inv = pInventory == &m_Inventory;
 
     if (is_inv)
     {
@@ -1252,9 +1250,8 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
             Messages::SendSkillList(this, pItem->m_pSummon, -1);
         }
 #if EPIC >= EPIC_5_1
-        else if(pItem->m_pItemBase->group == PetCage)
+        else if (pItem->m_pItemBase->group == PetCage)
         {
-
         }
 #endif
         if (pItem->GetWearType() == WEAR_RIDE_ITEM && HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE) && m_anWear[22] == nullptr)
@@ -1277,9 +1274,8 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
             AddSummonToStorage(pItem->m_pSummon);
         }
 #if EPIC >= EPIC_5_1
-        else if(pItem->m_pItemBase->group == PetCage)
+        else if (pItem->m_pItemBase->group == PetCage)
         {
-
         }
 #endif
     }
@@ -1352,7 +1348,7 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
     UpdateWeightWithInventory();
 }
 
-void Player::onChangeCount(Inventory */*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
+void Player::onChangeCount(Inventory * /*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
 {
     Messages::SendItemCountMessage(this, pItem);
     if (!bSkipUpdateItemToDB && pItem->IsInStorage())
@@ -1373,7 +1369,7 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
     if (pItem->m_Instance.Code == 0)
     {
         int64 nPrevGoldAmount = GetGold();
-        int64 gold            = GetGold() + pItem->m_Instance.nCount;
+        int64 gold = GetGold() + pItem->m_Instance.nCount;
         if (ChangeGold(gold) != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
@@ -1385,7 +1381,7 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
     if (pItem->m_Instance.nIdx == 0)
     {
         m_Inventory.m_nIndex++;
-        pItem->m_Instance.nIdx     = m_Inventory.m_nIndex;
+        pItem->m_Instance.nIdx = m_Inventory.m_nIndex;
         pItem->m_bIsNeedUpdateToDB = true;
     }
 
@@ -1396,14 +1392,12 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
 
 Item *Player::PopItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB)
 {
-    if (pItem != nullptr && cnt != 0 && pItem->m_Instance.nCount >= cnt
-        && pItem->m_Instance.OwnerHandle == GetHandle()
-        && pItem->IsInInventory())
+    if (pItem != nullptr && cnt != 0 && pItem->m_Instance.nCount >= cnt && pItem->m_Instance.OwnerHandle == GetHandle() && pItem->IsInInventory())
     {
         Item *nc = popItem(pItem, cnt, bSkipUpdateToDB);
         if (nc != nullptr)
         {
-            nc->m_Instance.nIdx     = 0;
+            nc->m_Instance.nIdx = 0;
             nc->m_bIsNeedUpdateToDB = true;
             if (nc->GetHandle() != pItem->GetHandle())
                 nc->SetOwnerInfo(0, 0, 0);
@@ -1452,18 +1446,18 @@ Item *Player::GetStorageItem(uint idx)
 
 void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
 {
-    Position client_pos{ };
+    Position client_pos{};
     client_pos.Relocate(x, y, 0, 0);
-    uint     ct  = sWorld.GetArTime();
+    uint ct = sWorld.GetArTime();
     Position pos = this->GetCurrentPosition(ct);
     if (client_pos.GetExactDist2d(&pos) < 120.0f)
     {
-        pos.m_positionX  = client_pos.m_positionX;
-        pos.m_positionY  = client_pos.m_positionY;
-        pos.m_positionZ  = client_pos.m_positionZ;
+        pos.m_positionX = client_pos.m_positionX;
+        pos.m_positionY = client_pos.m_positionY;
+        pos.m_positionZ = client_pos.m_positionZ;
         pos._orientation = client_pos._orientation;
     }
-    int     nl = GameContent::GetLocationID(x, y);
+    int nl = GameContent::GetLocationID(x, y);
     XPacket locPct(NGemity::Packets::TS_SC_CHANGE_LOCATION);
     locPct << m_nWorldLocationId;
     locPct << nl;
@@ -1543,8 +1537,8 @@ void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int s
 
 void Player::onExpChange()
 {
-    int  level = 1;
-    auto exp   = GetEXP();
+    int level = 1;
+    auto exp = GetEXP();
     if (sObjectMgr.GetNeedExp(1) <= exp)
     {
         do
@@ -1673,7 +1667,7 @@ void Player::PendWarp(int x, int y, uint8_t layer)
     {
         if (IsInWorld())
         {
-            Position pos{ };
+            Position pos{};
             pos.Relocate(x, y, 0);
 
             sWorld.WarpBegin(this);
@@ -1753,7 +1747,7 @@ void Player::DoUnSummon(Summon *pSummon)
 
     m_pMainSummon = nullptr;
 
-    TS_SC_UNSUMMON usPct{ };
+    TS_SC_UNSUMMON usPct{};
     usPct.summon_handle = pSummon->GetHandle();
     sWorld.Broadcast((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pSummon->GetLayer(), usPct);
     if (sRegion.IsVisibleRegion((uint)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
@@ -1784,18 +1778,15 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         return false;
     bool ok{false};
     if (pItem->m_pItemBase->limit_hunter != 0 && IsHunter())
-        ok  = true;
+        ok = true;
     if (pItem->m_pItemBase->limit_fighter != 0 && IsFighter())
-        ok  = true;
+        ok = true;
     if (pItem->m_pItemBase->limit_magician != 0 && IsMagician())
-        ok  = true;
+        ok = true;
     if (pItem->m_pItemBase->limit_summoner != 0 && IsSummoner())
-        ok  = true;
+        ok = true;
 
-    if (!ok
-        || (GetRace() == 3 && pItem->m_pItemBase->limit_gaia == 0)
-        || (GetRace() == 4 && pItem->m_pItemBase->limit_deva == 0)
-        || (GetRace() == 5 && pItem->m_pItemBase->limit_asura == 0))
+    if (!ok || (GetRace() == 3 && pItem->m_pItemBase->limit_gaia == 0) || (GetRace() == 4 && pItem->m_pItemBase->limit_deva == 0) || (GetRace() == 5 && pItem->m_pItemBase->limit_asura == 0))
         return false;
 
     Item *item1{nullptr}, *item2{nullptr};
@@ -1804,10 +1795,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         if (pItem->m_pItemBase->group == GROUP_BULLET)
         {
             item1 = m_anWear[0];
-            if (item1 == nullptr
-                || (item1->m_pItemBase->iclass != CLASS_CROSSBOW
-                    && item1->m_pItemBase->iclass != CLASS_LIGHT_BOW
-                    && item1->m_pItemBase->iclass != CLASS_HEAVY_BOW))
+            if (item1 == nullptr || (item1->m_pItemBase->iclass != CLASS_CROSSBOW && item1->m_pItemBase->iclass != CLASS_LIGHT_BOW && item1->m_pItemBase->iclass != CLASS_HEAVY_BOW))
                 return false;
         }
         if (pItem->m_pItemBase->group == GROUP_WEAPON)
@@ -1835,34 +1823,11 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     }
     if (pos == WEAR_DECO_SHIELD)
     {
-        if (pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_SWORD
-            || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SWORD
-            || pItem->m_pItemBase->iclass == CLASS_DECO_DAGGER
-            || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SPEAR
-            || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_AXE
-            || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_MACE
-            || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_MACE
-            || pItem->m_pItemBase->iclass == CLASS_DECO_HEAVY_BOW
-            || pItem->m_pItemBase->iclass == CLASS_DECO_LIGHT_BOW
-            || pItem->m_pItemBase->iclass == CLASS_DECO_CROSSBOW
-            || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_STAFF
-            || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_STAFF
-            || pItem->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
+        if (pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_SWORD || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SWORD || pItem->m_pItemBase->iclass == CLASS_DECO_DAGGER || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SPEAR || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_AXE || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_MACE || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_MACE || pItem->m_pItemBase->iclass == CLASS_DECO_HEAVY_BOW || pItem->m_pItemBase->iclass == CLASS_DECO_LIGHT_BOW || pItem->m_pItemBase->iclass == CLASS_DECO_CROSSBOW || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_STAFF || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_STAFF || pItem->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
         {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
-            if ((item1 != nullptr
-                 && item1->m_pItemBase->iclass != CLASS_ONEHAND_SWORD
-                 && item1->m_pItemBase->iclass != CLASS_DAGGER
-                 && item1->m_pItemBase->iclass != CLASS_ONEHAND_AXE)
-                || (item2 != nullptr
-                    || item2->m_pItemBase->iclass != CLASS_ONEHAND_SWORD
-                    || item2->m_pItemBase->iclass != CLASS_DAGGER
-                    || item2->m_pItemBase->iclass != CLASS_ONEHAND_AXE)
-                || m_anWear[14] == nullptr
-                || (GetCurrentSkillLevel(1181) < 1
-                    && GetCurrentSkillLevel(61010) < 1
-                    && GetCurrentSkillLevel(61015) < 1))
+            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_ONEHAND_SWORD && item1->m_pItemBase->iclass != CLASS_DAGGER && item1->m_pItemBase->iclass != CLASS_ONEHAND_AXE) || (item2 != nullptr || item2->m_pItemBase->iclass != CLASS_ONEHAND_SWORD || item2->m_pItemBase->iclass != CLASS_DAGGER || item2->m_pItemBase->iclass != CLASS_ONEHAND_AXE) || m_anWear[14] == nullptr || (GetCurrentSkillLevel(1181) < 1 && GetCurrentSkillLevel(61010) < 1 && GetCurrentSkillLevel(61015) < 1))
             {
                 pos = WEAR_DECO_WEAPON;
             }
@@ -1871,8 +1836,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         {
             item1 = m_anWear[1];
             item2 = m_anWear[0];
-            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_SHIELD)
-                || (item2 != nullptr && item2->m_pItemBase->wear_type == WEAR_TWOHAND))
+            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_SHIELD) || (item2 != nullptr && item2->m_pItemBase->wear_type == WEAR_TWOHAND))
             {
                 return false;
             }
@@ -1882,7 +1846,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         pos = WEAR_WEAPON;
     if (pos == WEAR_TWOFINGER_RING)
         pos = WEAR_RING;
-    item1   = m_anWear[9];
+    item1 = m_anWear[9];
     if (item1 != nullptr)
     {
         if (item1->GetWearType() != WEAR_TWOFINGER_RING && pItem->GetWearType() == WEAR_RING)
@@ -1897,7 +1861,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             {
                 int nCurrentVarIdx = -1;
 
-                for (int i               = 0; i < 4; ++i)
+                for (int i = 0; i < 4; ++i)
                 {
                     if (item1->m_pItemBase->opt_type[i] == 20)
                     {
@@ -1905,7 +1869,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                         break;
                     }
                 }
-                int      nCurrentVarIdx2 = -1;
+                int nCurrentVarIdx2 = -1;
 
                 for (int i = 0; i < 4; ++i)
                 {
@@ -1922,12 +1886,8 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                     return false;
 
                 auto curr_capacity = item1->m_pItemBase->opt_var[nCurrentVarIdx][0];
-                auto new_capacity  = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
-                if (curr_capacity != new_capacity
-                    && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight
-                    && (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity
-                        || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight
-                            && curr_capacity > new_capacity)))
+                auto new_capacity = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
+                if (curr_capacity != new_capacity && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight && (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight && curr_capacity > new_capacity)))
                 {
                     return false;
                 }
@@ -1936,7 +1896,6 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     }
     if (pos != WEAR_DECO_WEAPON && pos != WEAR_DECO_SHIELD)
     {
-
     }
     else
     {
@@ -1945,64 +1904,64 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             return false;
         switch (item1->m_pItemBase->iclass)
         {
-            case CLASS_SHIELD:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_SHIELD)
-                    return false;
-                break;
-            case CLASS_ONEHAND_SWORD:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_SWORD)
-                    return false;
-                break;
-            case CLASS_TWOHAND_SWORD:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SWORD)
-                    return false;
-                break;
-            case CLASS_DAGGER:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_DAGGER)
-                    return false;
-                break;
-            case CLASS_TWOHAND_SPEAR:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SPEAR)
-                    return false;
-                break;
-            case CLASS_TWOHAND_AXE:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_AXE)
-                    return false;
-                break;
-            case CLASS_ONEHAND_MACE:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_MACE)
-                    return false;
-                break;
-            case CLASS_TWOHAND_MACE:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_MACE)
-                    return false;
-                break;
-            case CLASS_HEAVY_BOW:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_HEAVY_BOW)
-                    return false;
-                break;
-            case CLASS_LIGHT_BOW:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_LIGHT_BOW)
-                    return false;
-                break;
-            case CLASS_CROSSBOW:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_CROSSBOW)
-                    return false;
-                break;
-            case CLASS_ONEHAND_STAFF:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_STAFF)
-                    return false;
-                break;
-            case CLASS_TWOHAND_STAFF:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_STAFF)
-                    return false;
-                break;
-            case CLASS_ONEHAND_AXE:
-                if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_AXE)
-                    return false;
-                break;
-            default:
+        case CLASS_SHIELD:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_SHIELD)
                 return false;
+            break;
+        case CLASS_ONEHAND_SWORD:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_SWORD)
+                return false;
+            break;
+        case CLASS_TWOHAND_SWORD:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SWORD)
+                return false;
+            break;
+        case CLASS_DAGGER:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_DAGGER)
+                return false;
+            break;
+        case CLASS_TWOHAND_SPEAR:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SPEAR)
+                return false;
+            break;
+        case CLASS_TWOHAND_AXE:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_AXE)
+                return false;
+            break;
+        case CLASS_ONEHAND_MACE:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_MACE)
+                return false;
+            break;
+        case CLASS_TWOHAND_MACE:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_MACE)
+                return false;
+            break;
+        case CLASS_HEAVY_BOW:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_HEAVY_BOW)
+                return false;
+            break;
+        case CLASS_LIGHT_BOW:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_LIGHT_BOW)
+                return false;
+            break;
+        case CLASS_CROSSBOW:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_CROSSBOW)
+                return false;
+            break;
+        case CLASS_ONEHAND_STAFF:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_STAFF)
+                return false;
+            break;
+        case CLASS_TWOHAND_STAFF:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_STAFF)
+                return false;
+            break;
+        case CLASS_ONEHAND_AXE:
+            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_AXE)
+                return false;
+            break;
+        default:
+            return false;
         }
     }
     if (pos >= 24 || pos < 0)
@@ -2035,15 +1994,14 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
                 vpOverlappItemList.emplace_back(15);
         }
     }
-    item1   = m_anWear[0];
+    item1 = m_anWear[0];
     if (item1 != nullptr)
     {
         if (item1->m_pItemBase->wear_type == WEAR_TWOHAND)
         {
             if (pos == WEAR_SHIELD)
             {
-                if ((!item1->IsBow() && !item1->IsCrossBow())
-                    || pItem->m_pItemBase->group != GROUP_BULLET)
+                if ((!item1->IsBow() && !item1->IsCrossBow()) || pItem->m_pItemBase->group != GROUP_BULLET)
                 {
                     vpOverlappItemList.emplace_back(0);
                 }
@@ -2073,17 +2031,17 @@ bool Player::IsHunter()
     {
         switch (GetRace())
         {
-            case 3:
-                job_id = 100;
-                break;
-            case 4:
-                job_id = 200;
-                break;
-            case 5:
-                job_id = 300;
-                break;
-            default:
-                break;
+        case 3:
+            job_id = 100;
+            break;
+        case 4:
+            job_id = 200;
+            break;
+        case 5:
+            job_id = 300;
+            break;
+        default:
+            break;
         }
     }
     auto info = sObjectMgr.GetJobInfo((uint)job_id);
@@ -2100,17 +2058,17 @@ bool Player::IsFighter()
     {
         switch (GetRace())
         {
-            case 3:
-                job_id = 100;
-                break;
-            case 4:
-                job_id = 200;
-                break;
-            case 5:
-                job_id = 300;
-                break;
-            default:
-                break;
+        case 3:
+            job_id = 100;
+            break;
+        case 4:
+            job_id = 200;
+            break;
+        case 5:
+            job_id = 300;
+            break;
+        default:
+            break;
         }
     }
     auto info = sObjectMgr.GetJobInfo((uint)job_id);
@@ -2127,17 +2085,17 @@ bool Player::IsMagician()
     {
         switch (GetRace())
         {
-            case 3:
-                job_id = 100;
-                break;
-            case 4:
-                job_id = 200;
-                break;
-            case 5:
-                job_id = 300;
-                break;
-            default:
-                break;
+        case 3:
+            job_id = 100;
+            break;
+        case 4:
+            job_id = 200;
+            break;
+        case 5:
+            job_id = 300;
+            break;
+        default:
+            break;
         }
     }
     auto info = sObjectMgr.GetJobInfo((uint)job_id);
@@ -2154,17 +2112,17 @@ bool Player::IsSummoner()
     {
         switch (GetRace())
         {
-            case 3:
-                job_id = 100;
-                break;
-            case 4:
-                job_id = 200;
-                break;
-            case 5:
-                job_id = 300;
-                break;
-            default:
-                break;
+        case 3:
+            job_id = 100;
+            break;
+        case 4:
+            job_id = 200;
+            break;
+        case 5:
+            job_id = 300;
+            break;
+        default:
+            break;
         }
     }
     auto info = sObjectMgr.GetJobInfo((uint)job_id);
@@ -2202,15 +2160,10 @@ bool Player::IsStartableQuest(int code, bool bForQuestMark)
     }
     else
     {
-        if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0)
-            && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0)
-            && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0)
-            && (!IsSummoner() || (qbs->LimitFlag & 0x80) == 0))
+        if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0) && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0) && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0) && (!IsSummoner() || (qbs->LimitFlag & 0x80) == 0))
             return false;
     }
-    if ((GetRace() != 3 || (qbs->LimitFlag & 8) == 0)
-        && (GetRace() != 4 || (qbs->LimitFlag & 2) == 0)
-        && (GetRace() != 5 || (qbs->LimitFlag & 4) == 0))
+    if ((GetRace() != 3 || (qbs->LimitFlag & 8) == 0) && (GetRace() != 4 || (qbs->LimitFlag & 2) == 0) && (GetRace() != 5 || (qbs->LimitFlag & 4) == 0))
         return false;
     int fgid = qbs->nLimitFavorGroupID;
     if (fgid == 999)
@@ -2253,7 +2206,6 @@ void Player::onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus)
 
 void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress)
 {
-
 }
 
 Quest *Player::FindQuest(int code)
@@ -2285,10 +2237,7 @@ void Player::onModifyStatAndAttribute()
 uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint ct = sWorld.GetArTime();
-    if (pItem->m_pItemBase->cool_time_group < 0
-        || pItem->m_pItemBase->cool_time_group > 40
-        || (pItem->m_pItemBase->cool_time_group != 0
-            && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
+    if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || (pItem->m_pItemBase->cool_time_group != 0 && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
         return TS_RESULT_COOL_TIME;
     // Ride IDX
     if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
@@ -2313,8 +2262,8 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
     if (pItem->m_Instance.nCount < 1)
         return TS_RESULT_ACCESS_DENIED;
 
-    uint16   result{TS_RESULT_SUCCESS};
-    for (int i  = 0; i < MAX_OPTION_NUMBER; ++i)
+    uint16 result{TS_RESULT_SUCCESS};
+    for (int i = 0; i < MAX_OPTION_NUMBER; ++i)
     {
         if (pItem->m_pItemBase->base_type[i] != 0)
         {
@@ -2354,7 +2303,7 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 CreatureStat *Player::GetBaseStat() const
 {
     uint stat_id = 0;
-    auto job     = sObjectMgr.GetJobInfo(GetCurrentJob());
+    auto job = sObjectMgr.GetJobInfo(GetCurrentJob());
     if (job != nullptr)
         stat_id = job->stat_id;
     return sObjectMgr.GetStatInfo(stat_id);
@@ -2368,8 +2317,8 @@ Item *Player::FindItem(uint code, uint flag, bool bFlag)
 void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 {
     NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
-    auto const      &m = sMemoryPool.GetPlayers();
-    for (auto       &itr : m)
+    auto const &m = sMemoryPool.GetPlayers();
+    for (auto &itr : m)
     {
         if (itr.second != nullptr)
             fn(itr.second);
@@ -2379,7 +2328,7 @@ void Player::DoEachPlayer(const std::function<void(Player *)> &fn)
 Player *Player::FindPlayer(const std::string &szName)
 {
     NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
-    auto const      &m = sMemoryPool.GetPlayers();
+    auto const &m = sMemoryPool.GetPlayers();
 
     auto pos = std::find_if(m.begin(),
                             m.end(),
@@ -2454,22 +2403,22 @@ void Player::onEndQuest(Quest *pQuest)
 void Player::updateQuestStatus(Quest *pQuest)
 {
     int nMaxItemCollectTypeCount = 0;
-    int nItemCode                = 0;
+    int nItemCode = 0;
 
     QuestType qt = pQuest->m_QuestBase->nType;
     if (qt == QuestType::QUEST_COLLECT || qt == QuestType::QUEST_HUNT_ITEM || qt == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
     {
         switch (qt)
         {
-            case QuestType::QUEST_COLLECT:
-                nMaxItemCollectTypeCount = 2;
-                break;
-            case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
-            case QuestType::QUEST_HUNT_ITEM:
-                nMaxItemCollectTypeCount = 3;
-                break;
-            default:
-                break;
+        case QuestType::QUEST_COLLECT:
+            nMaxItemCollectTypeCount = 2;
+            break;
+        case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
+        case QuestType::QUEST_HUNT_ITEM:
+            nMaxItemCollectTypeCount = 3;
+            break;
+        default:
+            break;
         }
 
         for (int i = 0; i < nMaxItemCollectTypeCount; ++i)
@@ -2520,11 +2469,11 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         Messages::SendQuestMessage(120, this, "END|FAIL|0");
         return;
     }
-    auto  nPrevGold = GetGold();
+    auto nPrevGold = GetGold();
     float fMod{0.0f};
     if (Quest::IsRandomQuest(q->m_Instance.Code))
     {
-        int i                        = 0;
+        int i = 0;
         int nMaxItemCollectTypeCount = 3;
         do
         {
@@ -2536,7 +2485,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         fMod = 1.0f;
     }
-    auto  res       = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
+    auto res = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
         Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|TOO_MUCH_MONEY|{}", res));
@@ -2574,7 +2523,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
 
         if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
         {
-            int      nItemCode{0};
+            int nItemCode{0};
             for (int i = 0; i < ((q->m_QuestBase->nType == QuestType::QUEST_COLLECT) ? 6 : 3); ++i)
             {
                 nItemCode = q->GetValue(2 * i);
@@ -2599,8 +2548,8 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         if (nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
         {
             auto reward = q->m_QuestBase->OptionalReward[nRewardID];
-            auto pItem  = Item::AllocItem(0, reward.nItemCode, (uint64)(reward.nQuantity * fMod), BY_QUEST,
-                                          reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
+            auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64)(reward.nQuantity * fMod), BY_QUEST,
+                                         reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->m_Instance.nCount, false);
             Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->m_Instance.Code));
@@ -2671,16 +2620,16 @@ void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1
 {
     switch (type)
     {
-        case 26:
-            // @todo: set max beltslot
-            break;
-        case 27:
-            if ((pItem->m_Instance.Flag & ITEM_FLAG_NON_CHAOS_STONE) == 0)
-                SetInt32Value(PLAYER_FIELD_MAX_CHAOS, (int)(var1 + pItem->m_pItemBase->level * var2));
-            break;
-        default:
-            Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
-            break;
+    case 26:
+        // @todo: set max beltslot
+        break;
+    case 27:
+        if ((pItem->m_Instance.Flag & ITEM_FLAG_NON_CHAOS_STONE) == 0)
+            SetInt32Value(PLAYER_FIELD_MAX_CHAOS, (int)(var1 + pItem->m_pItemBase->level * var2));
+        break;
+    default:
+        Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
+        break;
     }
 }
 
@@ -2707,7 +2656,7 @@ int Player::GetChaos() const
 
 void Player::UpdateQuestStatusByItemUpgrade()
 {
-    std::vector<Quest *> vQuestList{ };
+    std::vector<Quest *> vQuestList{};
     m_QuestManager.GetRelatedQuest(vQuestList, 64);
     for (auto &q : vQuestList)
     {
@@ -2739,24 +2688,24 @@ void Player::UpdateQuestStatusByItemUpgrade()
 
 Position Player::GetLastTownPosition()
 {
-    Position pos{ };
+    Position pos{};
     pos.m_positionX = std::stof(GetCharacterFlag("rx"));
     pos.m_positionY = std::stof(GetCharacterFlag("ry"));
     if (pos.GetPositionX() == 0 || pos.GetPositionY() == 0)
     {
         switch (GetRace())
         {
-            case 0:
-                pos.Relocate(irand(0, 100) + 6625, irand(0, 100) + 6980);
-                break;
-            case 1:
-                pos.Relocate(irand(0, 100) + 116799, irand(0, 100) + 58205);
-                break;
-            case 2:
-                pos.Relocate(irand(0, 100) + 153513, irand(0, 100) + 77203);
-                break;
-            default:
-                break;
+        case 0:
+            pos.Relocate(irand(0, 100) + 6625, irand(0, 100) + 6980);
+            break;
+        case 1:
+            pos.Relocate(irand(0, 100) + 116799, irand(0, 100) + 58205);
+            break;
+        case 2:
+            pos.Relocate(irand(0, 100) + 153513, irand(0, 100) + 77203);
+            break;
+        default:
+            break;
         }
     }
     return pos;
@@ -2772,14 +2721,14 @@ void Player::DB_ItemCoolTime(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    uint8             idx       = 0;
-    int               cool_down = 0;
-    uint              ct        = sWorld.GetArTime();
-    PreparedStatement *stmt     = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_ITEMCOOLTIME);
+    uint8 idx = 0;
+    int cool_down = 0;
+    uint ct = sWorld.GetArTime();
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_ITEMCOOLTIME);
     stmt->setInt32(idx++, pPlayer->GetUInt32Value(UNIT_FIELD_UID));
     for (auto &cd : pPlayer->m_nItemCooltime)
     {
-        cool_down     = cd - ct;
+        cool_down = cd - ct;
         if (cool_down < 0)
             cool_down = 0;
         stmt->setInt32(idx++, cool_down);
@@ -2818,19 +2767,19 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
 
     // @todo summon level exp
 
-    int64 gain_exp  = exp;
+    int64 gain_exp = exp;
     int64 bonus_exp = 0;
-    int   bonus_jp  = 0;
+    int bonus_jp = 0;
     if (exp != 0)
     {
         if (bApplyStamina)
         {
             gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
-            auto s   = GetStamina();
+            auto s = GetStamina();
             if (s >= gain_exp || m_bStaminaActive)
             {
                 bonus_exp = (int64)((float)exp * GameRule::GetStaminaBonus());
-                bonus_jp  = (int)((float)jp * GameRule::GetStaminaBonus());
+                bonus_jp = (int)((float)jp * GameRule::GetStaminaBonus());
                 if (bonus_exp != 0 || bonus_jp != 0)
                 {
                     setBonusMsg(BONUS_TYPE::BONUS_STAMINA, (int)(GameRule::GetStaminaBonus() * 100.0f), bonus_exp, bonus_jp);
@@ -2844,7 +2793,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
 
         uint ct = sWorld.GetArTime();
 
-        std::vector<Summon *> vDeActiveSummonList{ }, vActiveSummonList{ };
+        std::vector<Summon *> vDeActiveSummonList{}, vActiveSummonList{};
 
         for (auto currSummon : m_aBindSummonCard)
         {
@@ -2865,7 +2814,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
             }
         }
 
-        int64     nActiveSummonEXP = GameRule::GetIntValueByRandomInt64(m_fActiveSummonExpAmp + m_fDistEXPMod * (double)exp);
+        int64 nActiveSummonEXP = GameRule::GetIntValueByRandomInt64(m_fActiveSummonExpAmp + m_fDistEXPMod * (double)exp);
         for (auto &sum1 : vActiveSummonList)
         {
             if (nActiveSummonEXP != 0 && sum1->GetLevel() < GetLevel())
@@ -2874,7 +2823,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
             }
         }
 
-        int64     nDeactiveSummonEXP = GameRule::GetIntValueByRandomInt64((m_fDistEXPMod - 1.0f + m_fDeactiveSummonExpAmp) * (double)exp);
+        int64 nDeactiveSummonEXP = GameRule::GetIntValueByRandomInt64((m_fDistEXPMod - 1.0f + m_fDeactiveSummonExpAmp) * (double)exp);
         for (auto &sum2 : vDeActiveSummonList)
         {
             if (nDeactiveSummonEXP != 0 && sum2->GetLevel() < GetLevel())
@@ -2892,27 +2841,26 @@ void Player::applyPassiveSkillEffect(Skill *skill)
     {
         switch (skill->m_SkillBase->effect_type)
         {
-            case SKILL_EFFECT_TYPE::EF_INCREASE_SUMMON_HP_MP_SP:
-                m_vApplySummonPassive.emplace_back(skill);
-                return;
+        case SKILL_EFFECT_TYPE::EF_INCREASE_SUMMON_HP_MP_SP:
+            m_vApplySummonPassive.emplace_back(skill);
+            return;
 
-            case SKILL_EFFECT_TYPE::EF_AMPLIFY_SUMMON_HP_MP_SP:
-                m_vApmlifySummonPassive.emplace_back(skill);
-                return;
+        case SKILL_EFFECT_TYPE::EF_AMPLIFY_SUMMON_HP_MP_SP:
+            m_vApmlifySummonPassive.emplace_back(skill);
+            return;
 
-            case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
-                m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-                return;
-            case SKILL_EFFECT_TYPE::EF_AMPLIFY_EXP_FOR_SUMMON:
-                m_fActiveSummonExpAmp += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-                m_fDeactiveSummonExpAmp += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-                return;
-            default:
-                break;
+        case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
+            m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+            return;
+        case SKILL_EFFECT_TYPE::EF_AMPLIFY_EXP_FOR_SUMMON:
+            m_fActiveSummonExpAmp += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+            m_fDeactiveSummonExpAmp += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+            return;
+        default:
+            break;
         }
     }
     Unit::applyPassiveSkillEffect(skill);
-
 }
 
 int Player::AddStamina(int nStamina)
@@ -2971,26 +2919,26 @@ CONDITION_INFO Player::GetCondition() const
     return CONDITION_INFO::CONDITION_BAD;
 }
 
-void Player::applyState(State *state)
+void Player::applyState(State &state)
 {
-    int stateType = state->GetEffectType();
+    int stateType = state.GetEffectType();
     if (stateType == 200)
     {
         if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
-            m_Attribute.nMoveSpeed += state->GetValue(0);
-        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state->m_nUID);
+            m_Attribute.nMoveSpeed += state.GetValue(0);
+        SetUInt32Value(PLAYER_FIELD_RIDING_UID, state.m_nUID);
         return;
     }
     if (stateType == 0)
     {
-        switch (state->m_nCode)
+        switch (state.m_nCode)
         {
-            case StateCode::SC_STAMINA_SAVE:
-                m_bStaminaActive = true;
-                return;
-            default:
-                Unit::applyState(state);
-                return;
+        case StateCode::SC_STAMINA_SAVE:
+            m_bStaminaActive = true;
+            return;
+        default:
+            Unit::applyState(state);
+            return;
         }
     }
     Unit::applyState(state);
@@ -3000,23 +2948,23 @@ void Player::setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int n
 {
     m_pBonusInfo[type].type = type;
     m_pBonusInfo[type].rate = nBonusPerc;
-    m_pBonusInfo[type].exp  = nBonusEXP;
-    m_pBonusInfo[type].jp   = nBonusJP;
+    m_pBonusInfo[type].exp = nBonusEXP;
+    m_pBonusInfo[type].jp = nBonusJP;
 }
 
 void Player::clearPendingBonusMsg()
 {
     for (auto &bonus : m_pBonusInfo)
     {
-        bonus.exp  = -1;
+        bonus.exp = -1;
         bonus.rate = -1;
-        bonus.jp   = -1;
+        bonus.jp = -1;
     }
 }
 
 void Player::sendBonusEXPJPMsg()
 {
-    uint16    cnt{0};
+    uint16 cnt{0};
     for (auto &bonus : m_pBonusInfo)
     {
         if (bonus.exp != -1)
@@ -3025,17 +2973,17 @@ void Player::sendBonusEXPJPMsg()
     if (cnt == 0)
         return;
 
-    TS_SC_BONUS_EXP_JP bonusPct{ };
+    TS_SC_BONUS_EXP_JP bonusPct{};
     bonusPct.handle = GetHandle();
     for (auto &bonus : m_pBonusInfo)
     {
         if (bonus.exp != -1)
         {
-            TS_BONUS_INFO bonus_info{ };
+            TS_BONUS_INFO bonus_info{};
             bonus_info.type = bonus.type;
             bonus_info.rate = bonus.rate;
-            bonus_info.exp  = bonus.exp;
-            bonus_info.jp   = bonus.jp;
+            bonus_info.exp = bonus.exp;
+            bonus_info.jp = bonus.jp;
             bonusPct.bonus.emplace_back(bonus_info);
         }
     }
@@ -3096,25 +3044,25 @@ void Player::applyCharm(Item *pItem)
     {
         switch (pItem->m_pItemBase->opt_type[i])
         {
-            case 81:
-                if (pItem->m_pItemBase->opt_var[i][0] > GetInt32Value(PLAYER_FIELD_MAX_STAMINA))
-                    SetInt32Value(PLAYER_FIELD_MAX_STAMINA, (int)pItem->m_pItemBase->opt_var[i][0]);
-                break;
-            case 82:
-                m_bUsingTent = true;
-                break;
-            case 85:
-                SetInt32Value(PLAYER_FIELD_STAMINA_REGEN_BONUS, (int)pItem->m_pItemBase->opt_var[i][0]);
-                break;
-            default:
-                break;
+        case 81:
+            if (pItem->m_pItemBase->opt_var[i][0] > GetInt32Value(PLAYER_FIELD_MAX_STAMINA))
+                SetInt32Value(PLAYER_FIELD_MAX_STAMINA, (int)pItem->m_pItemBase->opt_var[i][0]);
+            break;
+        case 82:
+            m_bUsingTent = true;
+            break;
+        case 85:
+            SetInt32Value(PLAYER_FIELD_STAMINA_REGEN_BONUS, (int)pItem->m_pItemBase->opt_var[i][0]);
+            break;
+        default:
+            break;
         }
     }
 }
 
 void Player::onBeforeCalculateStat()
 {
-    m_fDistEXPMod    = 1.0f;
+    m_fDistEXPMod = 1.0f;
     m_bStaminaActive = false;
     SetInt32Value(PLAYER_FIELD_MAX_STAMINA, 500000);
     m_bUsingTent = false;
@@ -3207,18 +3155,13 @@ Item *Player::FindStorageItem(int code)
 
 void Player::MoveStorageToInventory(Item *pItem, int64 count)
 {
-    if (m_bIsUsingStorage
-        && pItem->IsInStorage()
-        && m_Storage.check(pItem)
-        && pItem->m_nAccountID == GetInt32Value(PLAYER_FIELD_ACCOUNT_ID)
-        && pItem->m_Instance.nCount >= count
-        && (pItem->IsJoinable() || pItem->m_Instance.nCount == count)
+    if (m_bIsUsingStorage && pItem->IsInStorage() && m_Storage.check(pItem) && pItem->m_nAccountID == GetInt32Value(PLAYER_FIELD_ACCOUNT_ID) && pItem->m_Instance.nCount >= count && (pItem->IsJoinable() || pItem->m_Instance.nCount == count)
         /* && IsTakeable(pItem->GetHandle, count)*/)
     {
         if (pItem->IsJoinable())
         {
             Item *pNewItem = m_Storage.Pop(pItem, count, false);
-            pNewItem->m_Instance.nIdx     = ++m_Inventory.m_nIndex;
+            pNewItem->m_Instance.nIdx = ++m_Inventory.m_nIndex;
             pNewItem->m_bIsNeedUpdateToDB = true;
             auto pDividedItem = m_Inventory.Push(pNewItem, count, false);
             m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, pDividedItem->m_Instance.nCount);
@@ -3230,7 +3173,7 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
         else
         {
             m_Storage.Pop(pItem, count, false);
-            pItem->m_Instance.nIdx     = ++m_Inventory.m_nIndex;
+            pItem->m_Instance.nIdx = ++m_Inventory.m_nIndex;
             pItem->m_bIsNeedUpdateToDB = true;
             m_Inventory.Push(pItem, count, false);
         }
@@ -3240,7 +3183,7 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
 void Player::MoveInventoryToStorage(Item *pItem, int64 count)
 {
     int64 nResultCnt = 0;
-    Item  *pNewItem{nullptr};
+    Item *pNewItem{nullptr};
 
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
     {
@@ -3251,7 +3194,6 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
                 summon->Putoff(pItem->m_Instance.nWearInfo);
             else
                 return;
-
         }
         else
         {
@@ -3260,17 +3202,14 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
     }
 
     if (IsErasable(pItem) &&
-        (pItem->m_Instance.Flag & 0x20000000) == 0
-        && m_bIsUsingStorage
-        && pItem->m_Instance.nCount >= count
-        && (pItem->IsJoinable() || pItem->m_Instance.nCount == count))
+        (pItem->m_Instance.Flag & 0x20000000) == 0 && m_bIsUsingStorage && pItem->m_Instance.nCount >= count && (pItem->IsJoinable() || pItem->m_Instance.nCount == count))
     {
         if (pItem->IsJoinable())
         {
             nResultCnt = pItem->m_Instance.nCount - count;
             m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, nResultCnt);
             auto pDividedItem = m_Inventory.Pop(pItem, count, false);
-            pDividedItem->m_Instance.nIdx     = ++m_Storage.m_nIndex;
+            pDividedItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
             pDividedItem->m_bIsNeedUpdateToDB = true;
             pNewItem = m_Storage.Push(pDividedItem, count, false);
             if (pItem->GetHandle() != pDividedItem->GetHandle())
@@ -3281,7 +3220,7 @@ void Player::MoveInventoryToStorage(Item *pItem, int64 count)
         else
         {
             m_Inventory.Pop(pItem, count, false);
-            pItem->m_Instance.nIdx     = ++m_Storage.m_nIndex;
+            pItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
             pItem->m_bIsNeedUpdateToDB = true;
             m_Storage.Push(pItem, count, false);
         }
@@ -3303,28 +3242,28 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
         do
         {
             Field *fields = result->Fetch();
-            int   i       = 0;
+            int i = 0;
 
-            uint        sid                = fields[i++].GetUInt32();
-            int         account_id         = fields[i++].GetInt32();
-            int         code               = fields[i++].GetInt32();
-            uint        card_uid           = fields[i++].GetUInt32();
-            uint        exp                = fields[i++].GetUInt32();
-            int         jp                 = fields[i++].GetInt32();
-            uint        last_decreased_exp = fields[i++].GetUInt32();
-            std::string name               = fields[i++].GetString();
-            int         transform          = fields[i++].GetInt32();
-            int         lv                 = fields[i++].GetInt32();
-            int         jlv                = fields[i++].GetInt32();
-            int         max_level          = fields[i++].GetInt32();
-            int         fp                 = fields[i++].GetInt32();
-            int         prev_level_01      = fields[i++].GetInt32();
-            int         prev_level_02      = fields[i++].GetInt32();
-            int         prev_id_01         = fields[i++].GetInt32();
-            int         prev_id_02         = fields[i++].GetInt32();
-            int         sp                 = fields[i++].GetInt32();
-            int         hp                 = fields[i++].GetInt32();
-            int         mp                 = fields[i].GetInt32();
+            uint sid = fields[i++].GetUInt32();
+            int account_id = fields[i++].GetInt32();
+            int code = fields[i++].GetInt32();
+            uint card_uid = fields[i++].GetUInt32();
+            uint exp = fields[i++].GetUInt32();
+            int jp = fields[i++].GetInt32();
+            uint last_decreased_exp = fields[i++].GetUInt32();
+            std::string name = fields[i++].GetString();
+            int transform = fields[i++].GetInt32();
+            int lv = fields[i++].GetInt32();
+            int jlv = fields[i++].GetInt32();
+            int max_level = fields[i++].GetInt32();
+            int fp = fields[i++].GetInt32();
+            int prev_level_01 = fields[i++].GetInt32();
+            int prev_level_02 = fields[i++].GetInt32();
+            int prev_id_01 = fields[i++].GetInt32();
+            int prev_id_02 = fields[i++].GetInt32();
+            int sp = fields[i++].GetInt32();
+            int hp = fields[i++].GetInt32();
+            int mp = fields[i].GetInt32();
 
             auto pos = std::find_if(m_vStorageSummonList.begin(), m_vStorageSummonList.end(), [sid](const Summon *s) { return s->GetUInt32Value(UNIT_FIELD_UID) == sid; });
             if (pos != m_vStorageSummonList.end())
@@ -3336,7 +3275,7 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
             auto summon = Summon::AllocSummon(nullptr, code);
             summon->SetUInt32Value(UNIT_FIELD_UID, sid);
             summon->m_nSummonInfo = code;
-            summon->m_nCardUID    = card_uid;
+            summon->m_nCardUID = card_uid;
             summon->SetUInt64Value(UNIT_FIELD_EXP, exp);
             summon->SetJP(jp);
             summon->SetName(name);
@@ -3358,9 +3297,11 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
     return true;
 }
 
-bool Player::IsSitdownable() const
+bool Player::IsSitdownable()
 {
-    return IsActable() && !IsSitdown() && m_castingSkill == nullptr;
+    if (!IsActable() || IsSitDown() || IsUsingSkill() /*|| IsRiding() || HasRidingState()*/)
+        return false;
+    return true;
 }
 
 bool Player::IsErasable(Item *pItem) const
@@ -3460,8 +3401,8 @@ void Player::FreezeTrade()
 void Player::ClearTradeInfo()
 {
     m_bTradeAccepted = false;
-    m_bTradeFreezed  = false;
-    m_bTrading       = false;
+    m_bTradeFreezed = false;
+    m_bTrading = false;
     SetUInt32Value(PLAYER_FIELD_TRADE_TARGET, 0);
     SetUInt64Value(PLAYER_FIELD_TRADE_GOLD, 0);
     m_vTradeItemList.clear();
@@ -3551,7 +3492,6 @@ void Player::AddGoldToTradeWindow(int64 nGold)
 bool Player::IsTradable(Item *pItem)
 {
     return IsErasable(pItem) && pItem->IsTradable();
-
 }
 
 bool Player::AddItemToTradeWindow(Item *item, int32 count)
@@ -3592,7 +3532,7 @@ bool Player::ProcessTrade()
         if (tradeTarget == nullptr)
             return false;
 
-        int64 nTradeTargetResult   = GetGold();
+        int64 nTradeTargetResult = GetGold();
         int64 nPrevTradeTargetGold = tradeTarget->GetGold();
 
         uint16 resultGold = processTradeGold();
@@ -3604,8 +3544,7 @@ bool Player::ProcessTrade()
                 Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
-            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
-                || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
                 NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
@@ -3622,8 +3561,7 @@ bool Player::ProcessTrade()
                 Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, GetHandle());
             }
 
-            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS
-                || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
+            if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS)
             {
                 NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s], Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
@@ -3631,8 +3569,7 @@ bool Player::ProcessTrade()
             return false;
         }
 
-        if (processTradeItem() != TS_RESULT_SUCCESS
-            || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
+        if (processTradeItem() != TS_RESULT_SUCCESS || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount.c_str(), tradeTarget->m_szAccount.c_str());
             return false;
@@ -3659,7 +3596,7 @@ uint16 Player::processTradeGold()
     if (IsInWorld())
     {
         int64 tradeGold = GetTradeGold();
-        int64 prevGold  = GetGold();
+        int64 prevGold = GetGold();
 
         if (tradeGold == 0)
             return TS_RESULT_SUCCESS;
@@ -3671,8 +3608,7 @@ uint16 Player::processTradeGold()
             return TS_RESULT_ACCESS_DENIED;
         }
 
-        if (ChangeGold(prevGold - tradeGold) == TS_RESULT_SUCCESS
-            && tradeTarget->ChangeGold(tradeTarget->GetGold() + tradeGold) == TS_RESULT_SUCCESS)
+        if (ChangeGold(prevGold - tradeGold) == TS_RESULT_SUCCESS && tradeTarget->ChangeGold(tradeTarget->GetGold() + tradeGold) == TS_RESULT_SUCCESS)
         {
             return TS_RESULT_SUCCESS;
         }
@@ -3726,7 +3662,7 @@ bool Player::CheckTradeWeight()
     if (tradeTarget == nullptr)
         return false;
 
-    float weight       = 0;
+    float weight = 0;
     float targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
 
     for (auto &it : m_vTradeItemList)
@@ -3767,7 +3703,7 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
 
     Item *item = popItem(origItem, count, false);
 
-    item->m_Instance.nIdx     = 0;
+    item->m_Instance.nIdx = 0;
     item->m_bIsNeedUpdateToDB = true;
 
     Item *target_item = pTarget->PushItem(item, count, false);
@@ -3805,9 +3741,9 @@ void Player::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 
 void Player::onEnergyChange()
 {
-    TS_SC_ENERGY energyPct{ };
+    TS_SC_ENERGY energyPct{};
     energyPct.handle = GetHandle();
-    energyPct.energy = static_cast<uint16_t >(GetInt32Value(UNIT_FIELD_ENERGY));
+    energyPct.energy = static_cast<uint16_t>(GetInt32Value(UNIT_FIELD_ENERGY));
     sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      GetLayer(),

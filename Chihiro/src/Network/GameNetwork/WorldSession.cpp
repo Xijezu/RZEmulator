@@ -64,19 +64,19 @@ enum eStatus
 
 typedef struct WorldSessionHandler
 {
-    int                                            cmd;
-    eStatus                                        status;
+    int cmd;
+    eStatus status;
     std::function<void(WorldSession *, XPacket *)> handler;
 } WorldSessionHandler;
 
-template<typename T>
+template <typename T>
 WorldSessionHandler declareHandler(eStatus status, void (WorldSession::*handler)(const T *packet))
 {
-    WorldSessionHandler handlerData{ };
-    handlerData.cmd     = T::getId(EPIC_4_1_1);
-    handlerData.status  = status;
+    WorldSessionHandler handlerData{};
+    handlerData.cmd = T::getId(EPIC_4_1_1);
+    handlerData.status = status;
     handlerData.handler = [handler](WorldSession *instance, XPacket *packet) -> void {
-        T                       deserializedPacket;
+        T deserializedPacket;
         MessageSerializerBuffer buffer(packet);
         deserializedPacket.deserialize(&buffer);
         (instance->*handler)(&deserializedPacket);
@@ -85,69 +85,69 @@ WorldSessionHandler declareHandler(eStatus status, void (WorldSession::*handler)
 }
 
 const WorldSessionHandler worldPacketHandler[] =
-                                  {
-                                          declareHandler(STATUS_CONNECTED, &WorldSession::onAuthResult),
-                                          declareHandler(STATUS_CONNECTED, &WorldSession::onAccountWithAuth),
-                                          declareHandler(STATUS_CONNECTED, &WorldSession::onPing),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onLogoutTimerRequest),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onReturnToLobby),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onRequestReturnToLobby),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onCharacterList),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onLogin),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onCharacterName),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onCreateCharacter),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onDeleteCharacter),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onMoveRequest),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onRegionUpdate),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onChatRequest),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onPutOnItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onPutOffItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onGetSummonSetupInfo),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onContact),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onDialog),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onBuyItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onChangeLocation),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onTimeSync),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onGameTime),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onQuery),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onMixRequest),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onTrade),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onUpdate),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onJobLevelUp),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onLearnSkill),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onEquipSummon),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onSellItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onSkill),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onSetProperty),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onAttackRequest),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onTakeItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onUseItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onDropItem),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onRevive),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onSoulStoneCraft),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onStorage),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onBindSkillCard),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onUnBindSkilLCard),
-                                          declareHandler(STATUS_AUTHED, &WorldSession::onDropQuest),
-                                  };
-constexpr int             worldTableSize       = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
+    {
+        declareHandler(STATUS_CONNECTED, &WorldSession::onAuthResult),
+        declareHandler(STATUS_CONNECTED, &WorldSession::onAccountWithAuth),
+        declareHandler(STATUS_CONNECTED, &WorldSession::onPing),
+        declareHandler(STATUS_AUTHED, &WorldSession::onLogoutTimerRequest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onReturnToLobby),
+        declareHandler(STATUS_AUTHED, &WorldSession::onRequestReturnToLobby),
+        declareHandler(STATUS_AUTHED, &WorldSession::onCharacterList),
+        declareHandler(STATUS_AUTHED, &WorldSession::onLogin),
+        declareHandler(STATUS_AUTHED, &WorldSession::onCharacterName),
+        declareHandler(STATUS_AUTHED, &WorldSession::onCreateCharacter),
+        declareHandler(STATUS_AUTHED, &WorldSession::onDeleteCharacter),
+        declareHandler(STATUS_AUTHED, &WorldSession::onMoveRequest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onRegionUpdate),
+        declareHandler(STATUS_AUTHED, &WorldSession::onChatRequest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onPutOnItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onPutOffItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onGetSummonSetupInfo),
+        declareHandler(STATUS_AUTHED, &WorldSession::onContact),
+        declareHandler(STATUS_AUTHED, &WorldSession::onDialog),
+        declareHandler(STATUS_AUTHED, &WorldSession::onBuyItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onChangeLocation),
+        declareHandler(STATUS_AUTHED, &WorldSession::onTimeSync),
+        declareHandler(STATUS_AUTHED, &WorldSession::onGameTime),
+        declareHandler(STATUS_AUTHED, &WorldSession::onQuery),
+        declareHandler(STATUS_AUTHED, &WorldSession::onMixRequest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onTrade),
+        declareHandler(STATUS_AUTHED, &WorldSession::onUpdate),
+        declareHandler(STATUS_AUTHED, &WorldSession::onJobLevelUp),
+        declareHandler(STATUS_AUTHED, &WorldSession::onLearnSkill),
+        declareHandler(STATUS_AUTHED, &WorldSession::onEquipSummon),
+        declareHandler(STATUS_AUTHED, &WorldSession::onSellItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onSkill),
+        declareHandler(STATUS_AUTHED, &WorldSession::onSetProperty),
+        declareHandler(STATUS_AUTHED, &WorldSession::onAttackRequest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onTakeItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onUseItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onDropItem),
+        declareHandler(STATUS_AUTHED, &WorldSession::onRevive),
+        declareHandler(STATUS_AUTHED, &WorldSession::onSoulStoneCraft),
+        declareHandler(STATUS_AUTHED, &WorldSession::onStorage),
+        declareHandler(STATUS_AUTHED, &WorldSession::onBindSkillCard),
+        declareHandler(STATUS_AUTHED, &WorldSession::onUnBindSkilLCard),
+        declareHandler(STATUS_AUTHED, &WorldSession::onDropQuest),
+        declareHandler(STATUS_AUTHED, &WorldSession::onCancelAction),
+};
+constexpr int worldTableSize = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
 
 constexpr NGemity::Packets ignoredPackets[] =
-                                   {
-                                           NGemity::Packets::TS_CS_VERSION,
-                                           NGemity::Packets::TS_CS_VERSION2,
-                                           NGemity::Packets::TS_CS_UNKN,
-                                           NGemity::Packets::TS_CS_REPORT,
-                                           NGemity::Packets::TS_CS_TARGETING
-                                   };
+    {
+        NGemity::Packets::TS_CS_VERSION,
+        NGemity::Packets::TS_CS_VERSION2,
+        NGemity::Packets::TS_CS_UNKN,
+        NGemity::Packets::TS_CS_REPORT,
+        NGemity::Packets::TS_CS_TARGETING};
 
 /// Handler for incoming packets
 ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 {
-            ASSERT(pRecvPct);
+    ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
-    int  i    = 0;
+    int i = 0;
 
     for (i = 0; i < worldTableSize; i++)
     {
@@ -177,18 +177,18 @@ void WorldSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *pGamePct)
 
 void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
 {
-    TS_SC_RESULT resultPct{ };
+    TS_SC_RESULT resultPct{};
     resultPct.request_msg_id = _msg;
-    resultPct.result         = _result;
-    resultPct.value          = _value;
+    resultPct.result = _result;
+    resultPct.value = _value;
     _socket->SendPacket(resultPct);
 }
 
-void WorldSession::onCharacterList(const TS_CS_CHARACTER_LIST */*pGamePct*/)
+void WorldSession::onCharacterList(const TS_CS_CHARACTER_LIST * /*pGamePct*/)
 {
-    TS_SC_CHARACTER_LIST characterPct{ };
+    TS_SC_CHARACTER_LIST characterPct{};
     characterPct.current_server_time = sWorld.GetArTime();
-    characterPct.last_character_idx  = 0;
+    characterPct.last_character_idx = 0;
     _PrepareCharacterList(_accountId, &characterPct.characters);
     _socket->SendPacket(characterPct);
 }
@@ -202,19 +202,19 @@ void WorldSession::_PrepareCharacterList(uint32 account_id, std::vector<LOBBY_CH
     {
         do
         {
-            LOBBY_CHARACTER_INFO info{ };
-            int                  sid = (*result)[0].GetInt32();
-            info.name           = (*result)[1].GetString();
-            info.race           = (*result)[2].GetInt32();
-            info.sex            = (*result)[3].GetInt32();
-            info.level          = (*result)[4].GetInt32();
-            info.job_level      = (*result)[5].GetInt32();
+            LOBBY_CHARACTER_INFO info{};
+            int sid = (*result)[0].GetInt32();
+            info.name = (*result)[1].GetString();
+            info.race = (*result)[2].GetInt32();
+            info.sex = (*result)[3].GetInt32();
+            info.level = (*result)[4].GetInt32();
+            info.job_level = (*result)[5].GetInt32();
             info.exp_percentage = (*result)[6].GetInt32();
-            info.hp             = (*result)[7].GetInt32();
-            info.mp             = (*result)[8].GetInt32();
-            info.job            = (*result)[9].GetInt32();
-            info.permission     = (*result)[10].GetInt32();
-            info.skin_color     = (*result)[11].GetUInt32();
+            info.hp = (*result)[7].GetInt32();
+            info.mp = (*result)[8].GetInt32();
+            info.job = (*result)[9].GetInt32();
+            info.permission = (*result)[10].GetInt32();
+            info.skin_color = (*result)[11].GetUInt32();
             for (int i = 0; i < 5; i++)
             {
                 info.model_id[i] = (*result)[12 + i].GetInt32();
@@ -228,9 +228,9 @@ void WorldSession::_PrepareCharacterList(uint32 account_id, std::vector<LOBBY_CH
                 do
                 {
                     int wear_info = (*wresult)[0].GetInt32();
-                    info.wear_info[wear_info]              = (*wresult)[1].GetInt32();
+                    info.wear_info[wear_info] = (*wresult)[1].GetInt32();
                     info.wear_item_enhance_info[wear_info] = (*wresult)[2].GetInt32();
-                    info.wear_item_level_info[wear_info]   = (*wresult)[3].GetInt32();
+                    info.wear_item_level_info[wear_info] = (*wresult)[3].GetInt32();
                 } while (wresult->NextRow());
             }
             _info->emplace_back(info);
@@ -242,9 +242,9 @@ void WorldSession::onAuthResult(const TS_AG_CLIENT_LOGIN *pRecvPct)
 {
     if (pRecvPct->result == TS_RESULT_SUCCESS)
     {
-        _isAuthed     = true;
-        _accountId    = pRecvPct->nAccountID;
-        _accountName  = pRecvPct->account;
+        _isAuthed = true;
+        _accountId = pRecvPct->nAccountID;
+        _accountName = pRecvPct->account;
         m_nPermission = pRecvPct->permission;
     }
     Messages::SendResult(this, NGemity::Packets::TS_CS_ACCOUNT_WITH_AUTH, pRecvPct->result, 0);
@@ -263,29 +263,29 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
     Messages::SendTimeSynch(m_pPlayer);
     sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("on_login('{}')", m_pPlayer->GetName()));
 
-    TS_SC_LOGIN_RESULT resultPct{ };
-    resultPct.result         = 1;
-    resultPct.handle         = m_pPlayer->GetHandle();
-    resultPct.x              = m_pPlayer->GetPositionX();
-    resultPct.y              = m_pPlayer->GetPositionY();
-    resultPct.z              = m_pPlayer->GetPositionZ();
-    resultPct.layer          = m_pPlayer->GetLayer();
+    TS_SC_LOGIN_RESULT resultPct{};
+    resultPct.result = 1;
+    resultPct.handle = m_pPlayer->GetHandle();
+    resultPct.x = m_pPlayer->GetPositionX();
+    resultPct.y = m_pPlayer->GetPositionY();
+    resultPct.z = m_pPlayer->GetPositionZ();
+    resultPct.layer = m_pPlayer->GetLayer();
     resultPct.face_direction = m_pPlayer->GetOrientation();
-    resultPct.region_size    = sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
-    resultPct.hp             = m_pPlayer->GetHealth();
-    resultPct.mp             = m_pPlayer->GetMana();
-    resultPct.max_hp         = m_pPlayer->GetMaxHealth();
-    resultPct.max_mp         = m_pPlayer->GetMaxMana();
-    resultPct.havoc          = m_pPlayer->GetInt32Value(UNIT_FIELD_HAVOC);
-    resultPct.max_havoc      = m_pPlayer->GetInt32Value(UNIT_FIELD_HAVOC);
-    resultPct.sex            = m_pPlayer->GetInt32Value(UNIT_FIELD_SEX);
-    resultPct.race           = m_pPlayer->GetRace();
-    resultPct.skin_color     = m_pPlayer->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    resultPct.faceId         = m_pPlayer->GetInt32Value(UNIT_FIELD_MODEL + 1);
-    resultPct.hairId         = m_pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
-    resultPct.name           = pRecvPct->name;
-    resultPct.cell_size      = sWorld.getIntConfig(CONFIG_CELL_SIZE);
-    resultPct.guild_id       = m_pPlayer->GetGuildID();
+    resultPct.region_size = sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
+    resultPct.hp = m_pPlayer->GetHealth();
+    resultPct.mp = m_pPlayer->GetMana();
+    resultPct.max_hp = m_pPlayer->GetMaxHealth();
+    resultPct.max_mp = m_pPlayer->GetMaxMana();
+    resultPct.havoc = m_pPlayer->GetInt32Value(UNIT_FIELD_HAVOC);
+    resultPct.max_havoc = m_pPlayer->GetInt32Value(UNIT_FIELD_HAVOC);
+    resultPct.sex = m_pPlayer->GetInt32Value(UNIT_FIELD_SEX);
+    resultPct.race = m_pPlayer->GetRace();
+    resultPct.skin_color = m_pPlayer->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
+    resultPct.faceId = m_pPlayer->GetInt32Value(UNIT_FIELD_MODEL + 1);
+    resultPct.hairId = m_pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
+    resultPct.name = pRecvPct->name;
+    resultPct.cell_size = sWorld.getIntConfig(CONFIG_CELL_SIZE);
+    resultPct.guild_id = m_pPlayer->GetGuildID();
 
     GetSocket()->SendPacket(resultPct);
     m_pPlayer->SendLoginProperties();
@@ -294,23 +294,23 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
 void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 {
 
-    std::vector<Position> vPctInfo{ }, vMoveInfo{ };
+    std::vector<Position> vPctInfo{}, vMoveInfo{};
 
     if (m_pPlayer == nullptr || m_pPlayer->GetHealth() == 0 || !m_pPlayer->IsInWorld() || pRecvPct->move_infos.size() == 0)
         return;
 
     for (const auto &mi : pRecvPct->move_infos)
     {
-        Position pos{ };
+        Position pos{};
         pos.SetCurrentXY(mi.tx, mi.ty);
         vPctInfo.push_back(pos);
     }
 
-    int      speed;
-    float    distance;
-    Position npos{ };
-    Position curPosFromClient{ };
-    Position wayPoint{ };
+    int speed;
+    float distance;
+    Position npos{};
+    Position curPosFromClient{};
+    Position wayPoint{};
 
     uint ct = sWorld.GetArTime();
     speed = m_pPlayer->GetMoveSpeed() / 7;
@@ -357,9 +357,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     npos.m_positionY = pRecvPct->y;
     npos.m_positionZ = 0.0f;
 
-    if (pRecvPct->x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < pRecvPct->x
-        || pRecvPct->y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < pRecvPct->y
-        || mover->GetExactDist2d(&npos) > 525.0f)
+    if (pRecvPct->x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < pRecvPct->x || pRecvPct->y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < pRecvPct->y || mover->GetExactDist2d(&npos) > 525.0f)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
         return;
@@ -367,9 +365,9 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     if (speed < 1)
         speed = 1;
 
-    wayPoint.m_positionX  = pRecvPct->x;
-    wayPoint.m_positionY  = pRecvPct->y;
-    wayPoint.m_positionZ  = 0.0f;
+    wayPoint.m_positionX = pRecvPct->x;
+    wayPoint.m_positionY = pRecvPct->y;
+    wayPoint.m_positionZ = 0.0f;
     wayPoint._orientation = 0.0f;
 
     for (auto &mi : vPctInfo)
@@ -382,10 +380,10 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
         curPosFromClient.m_positionX = mi.m_positionX;
         curPosFromClient.m_positionY = mi.m_positionY;
         curPosFromClient.m_positionZ = 0.0f;
-        wayPoint.m_positionX         = curPosFromClient.m_positionX;
-        wayPoint.m_positionY         = curPosFromClient.m_positionY;
-        wayPoint.m_positionZ         = curPosFromClient.m_positionZ;
-        wayPoint._orientation        = curPosFromClient._orientation;
+        wayPoint.m_positionX = curPosFromClient.m_positionX;
+        wayPoint.m_positionY = curPosFromClient.m_positionY;
+        wayPoint.m_positionZ = curPosFromClient.m_positionZ;
+        wayPoint._orientation = curPosFromClient._orientation;
         if (mi.m_positionX < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < mi.m_positionX ||
             mi.m_positionY < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < mi.m_positionY)
         {
@@ -417,20 +415,19 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
                 if (!vMoveInfo.empty())
                 {
                     cp = vMoveInfo.back();
-                    npos.m_positionX  = cp.GetPositionX();
-                    npos.m_positionY  = cp.GetPositionY();
-                    npos.m_positionZ  = cp.GetPositionZ();
+                    npos.m_positionX = cp.GetPositionX();
+                    npos.m_positionY = cp.GetPositionY();
+                    npos.m_positionZ = cp.GetPositionZ();
                     npos._orientation = cp.GetOrientation();
                 }
                 else
                 {
-                    npos.m_positionX  = 0.0f;
-                    npos.m_positionY  = 0.0f;
-                    npos.m_positionZ  = 0.0f;
+                    npos.m_positionX = 0.0f;
+                    npos.m_positionY = 0.0f;
+                    npos.m_positionZ = 0.0f;
                     npos._orientation = 0.0f;
                 }
-                if (mover->GetHandle() != m_pPlayer->GetHandle()
-                    || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5.0 >= tpos2.GetExactDist2d(&cp)
+                if (mover->GetHandle() != m_pPlayer->GetHandle() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5.0 >= tpos2.GetExactDist2d(&cp)
                     /*|| !m_pPlayer.m_bAutoUsed*/
                     || m_pPlayer->m_nWorldLocationId != 110900)
                 {
@@ -481,8 +478,8 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
 {
     if (checkCharacterName(pRecvPct->character.name))
     {
-        uint8_t           j       = 0;
-        PreparedStatement *stmt   = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_CHARACTER);
+        uint8_t j = 0;
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_CHARACTER);
         stmt->setString(j++, pRecvPct->character.name);
         stmt->setString(j++, _accountName);
         stmt->setInt32(j++, _accountId);
@@ -504,12 +501,12 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
         {
             stmt->setUInt32(j++, i);
         }
-        auto            playerUID = sWorld.GetPlayerIndex();
+        auto playerUID = sWorld.GetPlayerIndex();
         stmt->setUInt32(j, playerUID);
         CharacterDatabase.Query(stmt);
 
-        int m_wear_item       = pRecvPct->character.wear_info[2];
-        int nDefaultBagCode   = 490001;
+        int m_wear_item = pRecvPct->character.wear_info[2];
+        int nDefaultBagCode = 490001;
         int nDefaultArmorCode = 220100;
         if (m_wear_item == 602)
             nDefaultArmorCode = 220109;
@@ -517,19 +514,19 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
         int nDefaultWeaponCode = 106100;
         if (pRecvPct->character.race == 3)
         {
-            nDefaultArmorCode     = 240100;
+            nDefaultArmorCode = 240100;
             if (m_wear_item == 602)
                 nDefaultArmorCode = 240109;
-            nDefaultWeaponCode    = 112100;
+            nDefaultWeaponCode = 112100;
         }
         else
         {
             if (pRecvPct->character.race == 5)
             {
-                nDefaultArmorCode     = 230100;
+                nDefaultArmorCode = 230100;
                 if (m_wear_item == 602)
                     nDefaultArmorCode = 230109;
-                nDefaultWeaponCode    = 103100;
+                nDefaultWeaponCode = 103100;
             }
         }
 
@@ -591,52 +588,52 @@ void WorldSession::onChatRequest(const TS_CS_CHAT_REQUEST *pRectPct)
 
     switch (pRectPct->type)
     {
-        // local chat message: msg
-        case CHAT_NORMAL:
-            Messages::SendLocalChatMessage(0, m_pPlayer->GetHandle(), pRectPct->message, 0);
-            break;
-            // Ad chat message: $msg
-        case CHAT_ADV:
-            Messages::SendGlobalChatMessage(2, m_pPlayer->GetName(), pRectPct->message, 0);
-            break;
+    // local chat message: msg
+    case CHAT_NORMAL:
+        Messages::SendLocalChatMessage(0, m_pPlayer->GetHandle(), pRectPct->message, 0);
+        break;
+        // Ad chat message: $msg
+    case CHAT_ADV:
+        Messages::SendGlobalChatMessage(2, m_pPlayer->GetName(), pRectPct->message, 0);
+        break;
 
-            // Whisper chat message: "player msg
-        case CHAT_WHISPER:
+        // Whisper chat message: "player msg
+    case CHAT_WHISPER:
+    {
+        auto target = Player::FindPlayer(pRectPct->szTarget);
+        if (target != nullptr)
         {
-            auto target = Player::FindPlayer(pRectPct->szTarget);
-            if (target != nullptr)
-            {
-                // Todo: Denal check
-                Messages::SendChatMessage((m_pPlayer->GetPermission() > 0 ? 7 : 3), m_pPlayer->GetName(), target, pRectPct->message);
-                Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_SUCCESS, 0);
-                return;
-            }
-            Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
+            // Todo: Denal check
+            Messages::SendChatMessage((m_pPlayer->GetPermission() > 0 ? 7 : 3), m_pPlayer->GetName(), target, pRectPct->message);
+            Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_SUCCESS, 0);
+            return;
         }
-            break;
-            // Global chat message: !msg
-        case CHAT_GLOBAL:
-            Messages::SendGlobalChatMessage(m_pPlayer->GetPermission() > 0 ? 6 : 4, m_pPlayer->GetName(), pRectPct->message, 0);
-            break;
-        case CHAT_PARTY:
+        Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
+    }
+    break;
+        // Global chat message: !msg
+    case CHAT_GLOBAL:
+        Messages::SendGlobalChatMessage(m_pPlayer->GetPermission() > 0 ? 6 : 4, m_pPlayer->GetName(), pRectPct->message, 0);
+        break;
+    case CHAT_PARTY:
+    {
+        if (m_pPlayer->GetPartyID() != 0)
         {
-            if (m_pPlayer->GetPartyID() != 0)
-            {
-                sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &pRectPct](PartyMemberTag &tag) {
-                    if (tag.bIsOnline)
+            sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &pRectPct](PartyMemberTag &tag) {
+                if (tag.bIsOnline)
+                {
+                    auto player = Player::FindPlayer(tag.strName);
+                    if (player != nullptr)
                     {
-                        auto player = Player::FindPlayer(tag.strName);
-                        if (player != nullptr)
-                        {
-                            Messages::SendChatMessage(0xA, m_pPlayer->GetName(), player, pRectPct->message);
-                        }
+                        Messages::SendChatMessage(0xA, m_pPlayer->GetName(), player, pRectPct->message);
                     }
-                });
-            }
+                }
+            });
         }
-            break;
-        default:
-            break;
+    }
+    break;
+    default:
+        break;
     }
 }
 
@@ -782,7 +779,7 @@ void WorldSession::onDialog(const TS_CS_DIALOG *pRecvPct)
 void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
 {
     auto szMarketName = m_pPlayer->GetLastContactStr("market");
-    auto buy_count    = pRecvPct->buy_count;
+    auto buy_count = pRecvPct->buy_count;
     if (buy_count == 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_UNKNOWN, 0);
@@ -812,7 +809,7 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
             }
             else
             {
-                bJoinable     = false;
+                bJoinable = false;
                 if (buy_count != 1)
                     buy_count = 1;
             }
@@ -867,17 +864,16 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
                 }
             }
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, pRecvPct->item_code);
-            TS_SC_NPC_TRADE_INFO resultPct{ };
-            resultPct.is_sell          = false;
-            resultPct.code             = pRecvPct->item_code;
-            resultPct.count            = buy_count;
-            resultPct.price            = nTotalPrice;
+            TS_SC_NPC_TRADE_INFO resultPct{};
+            resultPct.is_sell = false;
+            resultPct.code = pRecvPct->item_code;
+            resultPct.count = buy_count;
+            resultPct.price = nTotalPrice;
             resultPct.huntaholic_point = mt.huntaholic_ratio;
-            resultPct.target           = m_pPlayer->GetLastContactLong("npc");
+            resultPct.target = m_pPlayer->GetLastContactLong("npc");
             GetSocket()->SendPacket(resultPct);
         }
     }
-
 }
 
 void WorldSession::onDeleteCharacter(const TS_CS_DELETE_CHARACTER *pRecvPct)
@@ -901,7 +897,7 @@ void WorldSession::onTimeSync(const TS_TIMESYNC *pRecvPct)
     m_pPlayer->m_TS.onEcho(ct - pRecvPct->time);
     if (m_pPlayer->m_TS.m_vT.size() >= 4)
     {
-        TS_SC_SET_TIME timePct{ };
+        TS_SC_SET_TIME timePct{};
         timePct.gap = m_pPlayer->m_TS.GetInterval();
         GetSocket()->SendPacket(timePct);
     }
@@ -911,7 +907,7 @@ void WorldSession::onTimeSync(const TS_TIMESYNC *pRecvPct)
     }
 }
 
-void WorldSession::onGameTime(const TS_CS_GAME_TIME */*pRecvPct*/)
+void WorldSession::onGameTime(const TS_CS_GAME_TIME * /*pRecvPct*/)
 {
     Messages::SendGameTime(m_pPlayer);
 }
@@ -985,10 +981,10 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    auto   target       = m_pPlayer->As<Unit>();
-    ushort result{ };
-    int    jobID{ };
-    int    value{ };
+    auto target = m_pPlayer->As<Unit>();
+    ushort result{};
+    int jobID{};
+    int value{};
 
     if (m_pPlayer->GetHandle() != pRecvPct->target)
     {
@@ -1000,7 +996,7 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
         }
         target = summon;
     }
-    int    currentLevel = target->GetBaseSkillLevel(pRecvPct->skill_id) + 1;
+    int currentLevel = target->GetBaseSkillLevel(pRecvPct->skill_id) + 1;
     //if(skill_level == currentLevel)
     //{
     result = GameContent::IsLearnableSkill(target, pRecvPct->skill_id, currentLevel, jobID);
@@ -1028,9 +1024,9 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
     if (nCFL > 6)
         nCFL = 6;
 
-    Item     *pItem  = nullptr;
-    Summon   *summon = nullptr;
-    for (int i       = 0; i < nCFL; ++i)
+    Item *pItem = nullptr;
+    Summon *summon = nullptr;
+    for (int i = 0; i < nCFL; ++i)
     {
         bool bFound = false;
         pItem = nullptr;
@@ -1134,8 +1130,8 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
     }
     //if(!m_pPlayer.IsSelllable) @todo
 
-    auto nPrice        = GameContent::GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
-    auto nResultCount  = item->m_Instance.nCount - pRecvPct->sell_count;
+    auto nPrice = GameContent::GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
+    auto nResultCount = item->m_Instance.nCount - pRecvPct->sell_count;
     auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
 
     if (!m_pPlayer->IsSellable(item) || nResultCount < 0)
@@ -1166,12 +1162,12 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
     }
 
     Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, item->GetHandle());
-    TS_SC_NPC_TRADE_INFO tradePct{ };
+    TS_SC_NPC_TRADE_INFO tradePct{};
     tradePct.is_sell = true;
-    tradePct.code    = code;
-    tradePct.code    = pRecvPct->sell_count;
-    tradePct.price   = pRecvPct->sell_count * nPrice;
-    tradePct.target  = m_pPlayer->GetLastContactLong("npc");
+    tradePct.code = code;
+    tradePct.code = pRecvPct->sell_count;
+    tradePct.price = pRecvPct->sell_count * nPrice;
+    tradePct.target = m_pPlayer->GetLastContactLong("npc");
     m_pPlayer->SendPacket(tradePct);
 }
 
@@ -1184,7 +1180,7 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
         return;
 
     WorldObject *pTarget{nullptr};
-    Position    pos{ };
+    Position pos{};
     pos.Relocate(pRecvPct->x, pRecvPct->y, pRecvPct->z);
 
     auto pCaster = m_pPlayer->As<Unit>();
@@ -1363,7 +1359,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     }
 
     auto drop_duration = ct - item->m_nDropTime;
-    uint ry            = 3000;
+    uint ry = 3000;
 
     for (int i = 0; i < 3; i++)
     {
@@ -1396,9 +1392,9 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
         }
     }
 
-    TS_SC_TAKE_ITEM_RESULT resultPct{ };
+    TS_SC_TAKE_ITEM_RESULT resultPct{};
     resultPct.item_handle = pRecvPct->item_handle;
-    resultPct.item_taker  = m_pPlayer->GetHandle();
+    resultPct.item_taker = m_pPlayer->GetHandle();
     sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
     if (sWorld.RemoveItemFromWorld(item))
@@ -1413,7 +1409,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
             else
             {
                 ///- Gold
-                std::vector<Player *> vList{ };
+                std::vector<Player *> vList{};
                 sGroupManager.GetNearMember(m_pPlayer, 400.0f, vList);
                 auto incGold = (int64)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
 
@@ -1504,8 +1500,8 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
         }
     }
 
-    TS_SC_USE_ITEM_RESULT resultPct{ };
-    resultPct.item_handle   = pRecvPct->item_handle;
+    TS_SC_USE_ITEM_RESULT resultPct{};
+    resultPct.item_handle = pRecvPct->item_handle;
     resultPct.target_handle = pRecvPct->target_handle;
     m_pPlayer->SendPacket(resultPct);
 }
@@ -1561,8 +1557,8 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
     if (pRecvPct->main_item.handle != 0 && pMainItem == nullptr)
         return;
 
-    std::vector<Item *> pSubItem{ };
-    std::vector<uint16> pCountList{ };
+    std::vector<Item *> pSubItem{};
+    std::vector<uint16> pCountList{};
     if (pRecvPct->sub_items.size() != 0)
     {
         for (auto &mixInfo : pRecvPct->sub_items)
@@ -1584,25 +1580,25 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
 
     switch (mb->type)
     {
-        case 0:
-            break;
-        case MIX_ENHANCE: //EnchantItem without E-Protect Powder
-            sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
-            return;
-        case MIX_ENHANCE_SKILL_CARD:
-            sMixManager.EnhanceSkillCard(mb, m_pPlayer, pRecvPct->sub_items.size(), pSubItem);
-            return;
-        case MIX_ENHANCE_WITHOUT_FAIL: //EnchantItem WITH E-Protect Powder
-            sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
-            return;
-        case MIX_ADD_LEVEL_SET_FLAG:
-            sMixManager.MixItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
-            return;
-        case MIX_RESTORE_ENHANCE_SET_FLAG:
-            sMixManager.RepairItem(m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
-            return;
-        default:
-            break;
+    case 0:
+        break;
+    case MIX_ENHANCE: //EnchantItem without E-Protect Powder
+        sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
+        return;
+    case MIX_ENHANCE_SKILL_CARD:
+        sMixManager.EnhanceSkillCard(mb, m_pPlayer, pRecvPct->sub_items.size(), pSubItem);
+        return;
+    case MIX_ENHANCE_WITHOUT_FAIL: //EnchantItem WITH E-Protect Powder
+        sMixManager.EnhanceItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
+        return;
+    case MIX_ADD_LEVEL_SET_FLAG:
+        sMixManager.MixItem(mb, m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
+        return;
+    case MIX_RESTORE_ENHANCE_SET_FLAG:
+        sMixManager.RepairItem(m_pPlayer, pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
+        return;
+    default:
+        break;
     }
 }
 
@@ -1613,7 +1609,7 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
 
     auto nPrevGold = m_pPlayer->GetGold();
-    auto pItem     = m_pPlayer->FindItemByHandle(pRecvPct->craft_item_handle);
+    auto pItem = m_pPlayer->FindItemByHandle(pRecvPct->craft_item_handle);
     if (pItem == nullptr)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->craft_item_handle);
@@ -1627,9 +1623,9 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
     }
 
-    int  nMaxReplicatableCount = nSocketCount == 4 ? 2 : 1;
-    int  nCraftCost            = 0;
-    bool bIsValid              = false;
+    int nMaxReplicatableCount = nSocketCount == 4 ? 2 : 1;
+    int nCraftCost = 0;
+    bool bIsValid = false;
     Item *pSoulStoneList[sizeof(pRecvPct->soulstone_handle)]{nullptr};
 
     for (int i = 0; i < nSocketCount; ++i)
@@ -1642,36 +1638,19 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->soulstone_handle[i]);
                 return;
             }
-            if (pSoulStoneList[i]->m_pItemBase->type != TYPE_SOULSTONE
-                || pSoulStoneList[i]->m_pItemBase->group != GROUP_SOULSTONE
-                || pSoulStoneList[i]->m_pItemBase->iclass != CLASS_SOULSTONE)
+            if (pSoulStoneList[i]->m_pItemBase->type != TYPE_SOULSTONE || pSoulStoneList[i]->m_pItemBase->group != GROUP_SOULSTONE || pSoulStoneList[i]->m_pItemBase->iclass != CLASS_SOULSTONE)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->soulstone_handle[i]);
                 return;
             }
 
-            int      nReplicatedCount = 0;
-            for (int k                = 0; k < pItem->m_pItemBase->socket; ++k)
+            int nReplicatedCount = 0;
+            for (int k = 0; k < pItem->m_pItemBase->socket; ++k)
             {
                 if (pItem->m_Instance.Socket[k] != 0 && k != i)
                 {
                     auto ibs = sObjectMgr.GetItemBase(pItem->m_Instance.Socket[k]);
-                    if (ibs->base_type[0] == pSoulStoneList[i]->m_pItemBase->base_type[0]
-                        && ibs->base_type[1] == pSoulStoneList[i]->m_pItemBase->base_type[1]
-                        && ibs->base_type[2] == pSoulStoneList[i]->m_pItemBase->base_type[2]
-                        && ibs->base_type[3] == pSoulStoneList[i]->m_pItemBase->base_type[3]
-                        && ibs->base_var[0][0] == pSoulStoneList[i]->m_pItemBase->base_var[0][0]
-                        && ibs->base_var[1][0] == pSoulStoneList[i]->m_pItemBase->base_var[1][0]
-                        && ibs->base_var[2][0] == pSoulStoneList[i]->m_pItemBase->base_var[2][0]
-                        && ibs->base_var[3][0] == pSoulStoneList[i]->m_pItemBase->base_var[3][0]
-                        && ibs->opt_type[0] == pSoulStoneList[i]->m_pItemBase->opt_type[0]
-                        && ibs->opt_type[1] == pSoulStoneList[i]->m_pItemBase->opt_type[1]
-                        && ibs->opt_type[2] == pSoulStoneList[i]->m_pItemBase->opt_type[2]
-                        && ibs->opt_type[3] == pSoulStoneList[i]->m_pItemBase->opt_type[3]
-                        && ibs->opt_var[0][0] == pSoulStoneList[i]->m_pItemBase->opt_var[0][0]
-                        && ibs->opt_var[1][0] == pSoulStoneList[i]->m_pItemBase->opt_var[1][0]
-                        && ibs->opt_var[2][0] == pSoulStoneList[i]->m_pItemBase->opt_var[2][0]
-                        && ibs->opt_var[3][0] == pSoulStoneList[i]->m_pItemBase->opt_var[3][0])
+                    if (ibs->base_type[0] == pSoulStoneList[i]->m_pItemBase->base_type[0] && ibs->base_type[1] == pSoulStoneList[i]->m_pItemBase->base_type[1] && ibs->base_type[2] == pSoulStoneList[i]->m_pItemBase->base_type[2] && ibs->base_type[3] == pSoulStoneList[i]->m_pItemBase->base_type[3] && ibs->base_var[0][0] == pSoulStoneList[i]->m_pItemBase->base_var[0][0] && ibs->base_var[1][0] == pSoulStoneList[i]->m_pItemBase->base_var[1][0] && ibs->base_var[2][0] == pSoulStoneList[i]->m_pItemBase->base_var[2][0] && ibs->base_var[3][0] == pSoulStoneList[i]->m_pItemBase->base_var[3][0] && ibs->opt_type[0] == pSoulStoneList[i]->m_pItemBase->opt_type[0] && ibs->opt_type[1] == pSoulStoneList[i]->m_pItemBase->opt_type[1] && ibs->opt_type[2] == pSoulStoneList[i]->m_pItemBase->opt_type[2] && ibs->opt_type[3] == pSoulStoneList[i]->m_pItemBase->opt_type[3] && ibs->opt_var[0][0] == pSoulStoneList[i]->m_pItemBase->opt_var[0][0] && ibs->opt_var[1][0] == pSoulStoneList[i]->m_pItemBase->opt_var[1][0] && ibs->opt_var[2][0] == pSoulStoneList[i]->m_pItemBase->opt_var[2][0] && ibs->opt_var[3][0] == pSoulStoneList[i]->m_pItemBase->opt_var[3][0])
                     {
                         nReplicatedCount++;
                         if (nReplicatedCount >= nMaxReplicatableCount)
@@ -1683,7 +1662,7 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                 }
             }
             nCraftCost += pSoulStoneList[i]->m_pItemBase->price / 10;
-            bIsValid                  = true;
+            bIsValid = true;
         }
     }
     if (!bIsValid)
@@ -1698,8 +1677,8 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
     }
 
-    int      nEndurance = 0;
-    for (int i          = 0; i < 4; ++i)
+    int nEndurance = 0;
+    for (int i = 0; i < 4; ++i)
     {
         if (pItem->m_Instance.Socket[i] != 0 || pSoulStoneList[i] != nullptr)
         {
@@ -1738,92 +1717,92 @@ void WorldSession::onStorage(const TS_CS_STORAGE *pRecvPct)
 
     switch ((STORAGE_MODE)pRecvPct->mode)
     {
-        case ITEM_INVENTORY_TO_STORAGE:
-        case ITEM_STORAGE_TO_INVENTORY:
+    case ITEM_INVENTORY_TO_STORAGE:
+    case ITEM_STORAGE_TO_INVENTORY:
+    {
+        if (pRecvPct->count <= 0)
         {
-            if (pRecvPct->count <= 0)
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, pRecvPct->item_handle);
-                return;
-            }
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, pRecvPct->item_handle);
+            return;
+        }
 
-            auto *pItem = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-            if (pItem == nullptr)
+        auto *pItem = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
+        if (pItem == nullptr)
+        {
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
+            return;
+        }
+        if (pItem->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
+        {
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
+            return;
+        }
+        if (pItem->IsInInventory() && pRecvPct->mode == ITEM_INVENTORY_TO_STORAGE)
+        {
+            if (pItem->m_pSummon != nullptr)
             {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
-                return;
-            }
-            if (pItem->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
-                return;
-            }
-            if (pItem->IsInInventory() && pRecvPct->mode == ITEM_INVENTORY_TO_STORAGE)
-            {
-                if (pItem->m_pSummon != nullptr)
+                for (const auto &v : m_pPlayer->m_aBindSummonCard)
                 {
-                    for (const auto &v : m_pPlayer->m_aBindSummonCard)
+                    if (v == pItem)
                     {
-                        if (v == pItem)
-                        {
-                            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
-                            return;
-                        }
+                        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
+                        return;
                     }
                 }
-                /*if((pItem->m_Instance.Flag & 0x40) == 0 || m_pPlayer->FindStorageItem(pItem->m_Instance.Code) == nullptr)
+            }
+            /*if((pItem->m_Instance.Flag & 0x40) == 0 || m_pPlayer->FindStorageItem(pItem->m_Instance.Code) == nullptr)
                 {
                     Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, handle); // too heavy??
                     return;
                 }*/
-                m_pPlayer->MoveInventoryToStorage(pItem, pRecvPct->count);
-            }
-            else if (pItem->IsInStorage() && pRecvPct->mode == ITEM_STORAGE_TO_INVENTORY)
-            {
-                m_pPlayer->MoveStorageToInventory(pItem, pRecvPct->count);
-            }
+            m_pPlayer->MoveInventoryToStorage(pItem, pRecvPct->count);
+        }
+        else if (pItem->IsInStorage() && pRecvPct->mode == ITEM_STORAGE_TO_INVENTORY)
+        {
+            m_pPlayer->MoveStorageToInventory(pItem, pRecvPct->count);
+        }
+        m_pPlayer->Save(true);
+        return;
+    }
+    case GOLD_INVENTORY_TO_STORAGE: // 2
+    {
+        if (m_pPlayer->GetGold() < pRecvPct->count)
+            return;
+        if (m_pPlayer->GetStorageGold() + pRecvPct->count > MAX_GOLD_FOR_STORAGE)
+        {
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
+            return;
+        }
+        auto nGold = m_pPlayer->GetGold();
+        if (m_pPlayer->ChangeGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeStorageGold(m_pPlayer->GetStorageGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
+        {
             m_pPlayer->Save(true);
             return;
         }
-        case GOLD_INVENTORY_TO_STORAGE: // 2
-        {
-            if (m_pPlayer->GetGold() < pRecvPct->count)
-                return;
-            if (m_pPlayer->GetStorageGold() + pRecvPct->count > MAX_GOLD_FOR_STORAGE)
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
-                return;
-            }
-            auto nGold = m_pPlayer->GetGold();
-            if (m_pPlayer->ChangeGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeStorageGold(m_pPlayer->GetStorageGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
-            {
-                m_pPlayer->Save(true);
-                return;
-            }
-        }
+    }
+        return;
+    case GOLD_STORAGE_TO_INVENTORY:
+    {
+        if (m_pPlayer->GetStorageGold() < pRecvPct->count)
             return;
-        case GOLD_STORAGE_TO_INVENTORY:
+        if (m_pPlayer->GetGold() + pRecvPct->count > MAX_GOLD_FOR_INVENTORY)
         {
-            if (m_pPlayer->GetStorageGold() < pRecvPct->count)
-                return;
-            if (m_pPlayer->GetGold() + pRecvPct->count > MAX_GOLD_FOR_INVENTORY)
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
-                return;
-            }
-            auto nGold = m_pPlayer->GetStorageGold();
-            if (m_pPlayer->ChangeStorageGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
-            {
-                m_pPlayer->Save(true);
-                return;
-            }
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
             return;
         }
-        case STORAGE_CLOSE:
-            m_pPlayer->m_bIsUsingStorage = false;
+        auto nGold = m_pPlayer->GetStorageGold();
+        if (m_pPlayer->ChangeStorageGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
+        {
+            m_pPlayer->Save(true);
             return;
-        default:
-            break;
+        }
+        return;
+    }
+    case STORAGE_CLOSE:
+        m_pPlayer->m_bIsUsingStorage = false;
+        return;
+    default:
+        break;
     }
 }
 
@@ -1905,35 +1884,35 @@ void WorldSession::onTrade(const TS_TRADE *pRecvPct)
 
     switch (pRecvPct->mode)
     {
-        case TM_REQUEST_TRADE:
-            onRequestTrade(pRecvPct->target_player);
-            break;
-        case TM_ACCEPT_TRADE:
-            onAcceptTrade(pRecvPct->target_player);
-            break;
-        case TM_CANCEL_TRADE:
-            onCancelTrade();
-            break;
-        case TM_REJECT_TRADE:
-            onRejectTrade(pRecvPct->target_player);
-            break;
-        case TM_ADD_ITEM:
-            onAddItem(pRecvPct->target_player, pRecvPct);
-            break;
-        case TM_REMOVE_ITEM:
-            onRemoveItem(pRecvPct->target_player, pRecvPct);
-            break;
-        case TM_ADD_GOLD:
-            onAddGold(pRecvPct->target_player, pRecvPct);
-            break;
-        case TM_FREEZE_TRADE:
-            onFreezeTrade();
-            break;
-        case TM_CONFIRM_TRADE:
-            onConfirmTrade(pRecvPct->target_player);
-            break;
-        default:
-            return;
+    case TM_REQUEST_TRADE:
+        onRequestTrade(pRecvPct->target_player);
+        break;
+    case TM_ACCEPT_TRADE:
+        onAcceptTrade(pRecvPct->target_player);
+        break;
+    case TM_CANCEL_TRADE:
+        onCancelTrade();
+        break;
+    case TM_REJECT_TRADE:
+        onRejectTrade(pRecvPct->target_player);
+        break;
+    case TM_ADD_ITEM:
+        onAddItem(pRecvPct->target_player, pRecvPct);
+        break;
+    case TM_REMOVE_ITEM:
+        onRemoveItem(pRecvPct->target_player, pRecvPct);
+        break;
+    case TM_ADD_GOLD:
+        onAddGold(pRecvPct->target_player, pRecvPct);
+        break;
+    case TM_FREEZE_TRADE:
+        onFreezeTrade();
+        break;
+    case TM_CONFIRM_TRADE:
+        onConfirmTrade(pRecvPct->target_player);
+        break;
+    default:
+        return;
     }
 }
 
@@ -1949,9 +1928,9 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
     else
     {
-        TS_TRADE tradePct{ };
+        TS_TRADE tradePct{};
         tradePct.target_player = m_pPlayer->GetHandle();
-        tradePct.mode          = static_cast<uint8_t>(TM_REQUEST_TRADE);
+        tradePct.mode = static_cast<uint8_t>(TM_REQUEST_TRADE);
         tradeTarget->SendPacket(tradePct);
     }
 }
@@ -1972,16 +1951,16 @@ void WorldSession::onAcceptTrade(uint32 hTradeTarget)
         tradeTarget->StartTrade(m_pPlayer->GetHandle());
 
         {
-            TS_TRADE tradePct{ };
+            TS_TRADE tradePct{};
             tradePct.target_player = tradeTarget->GetHandle();
-            tradePct.mode          = static_cast<uint8_t>(TM_BEGIN_TRADE);
+            tradePct.mode = static_cast<uint8_t>(TM_BEGIN_TRADE);
             m_pPlayer->SendPacket(tradePct);
         }
 
         {
-            TS_TRADE tradePct{ };
+            TS_TRADE tradePct{};
             tradePct.target_player = m_pPlayer->GetHandle();
-            tradePct.mode          = static_cast<uint8_t>(TM_BEGIN_TRADE);
+            tradePct.mode = static_cast<uint8_t>(TM_BEGIN_TRADE);
             tradeTarget->SendPacket(tradePct);
         }
     }
@@ -2005,9 +1984,9 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    TS_TRADE tradePct{ };
+    TS_TRADE tradePct{};
     tradePct.target_player = m_pPlayer->GetHandle();
-    tradePct.mode          = static_cast<uint8_t>(TM_REJECT_TRADE);
+    tradePct.mode = static_cast<uint8_t>(TM_REJECT_TRADE);
     tradeTarget->SendPacket(tradePct);
 }
 
@@ -2019,7 +1998,7 @@ void WorldSession::onAddItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
 
     if (!m_pPlayer->m_bTradeFreezed)
     {
-        auto item  = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
+        auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
         if (item == nullptr || item->m_pItemBase == nullptr)
@@ -2057,7 +2036,7 @@ void WorldSession::onRemoveItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
 
     if (!m_pPlayer->m_bTradeFreezed)
     {
-        auto item  = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
+        auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
         if (item == nullptr || item->m_pItemBase == nullptr)
@@ -2093,9 +2072,9 @@ void WorldSession::onAddGold(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
 
         m_pPlayer->AddGoldToTradeWindow(gold);
 
-        TS_TRADE tradePct{ };
-        tradePct.target_player             = m_pPlayer->GetHandle();
-        tradePct.mode                      = static_cast<uint8_t>(TM_ADD_GOLD);
+        TS_TRADE tradePct{};
+        tradePct.target_player = m_pPlayer->GetHandle();
+        tradePct.mode = static_cast<uint8_t>(TM_ADD_GOLD);
         tradePct.item_info.base_info.count = gold;
         tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
@@ -2113,9 +2092,9 @@ void WorldSession::onFreezeTrade()
     {
         m_pPlayer->FreezeTrade();
 
-        TS_TRADE tradePct{ };
+        TS_TRADE tradePct{};
         tradePct.target_player = m_pPlayer->GetHandle();
-        tradePct.mode          = static_cast<uint8_t>(TM_FREEZE_TRADE);
+        tradePct.mode = static_cast<uint8_t>(TM_FREEZE_TRADE);
         tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
@@ -2129,11 +2108,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    if (!m_pPlayer->m_bTrading
-        || !tradeTarget->m_bTrading
-        || !m_pPlayer->m_bTradeFreezed
-        || !tradeTarget->m_bTradeFreezed
-        || tradeTarget->GetTradeTarget() != m_pPlayer)
+    if (!m_pPlayer->m_bTrading || !tradeTarget->m_bTrading || !m_pPlayer->m_bTradeFreezed || !tradeTarget->m_bTradeFreezed || tradeTarget->GetTradeTarget() != m_pPlayer)
     {
         m_pPlayer->CancelTrade(true);
         tradeTarget->CancelTrade(true);
@@ -2145,17 +2120,16 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
 
     m_pPlayer->ConfirmTrade();
 
-    TS_TRADE tradePct{ };
+    TS_TRADE tradePct{};
     tradePct.target_player = m_pPlayer->GetHandle();
-    tradePct.mode          = static_cast<uint8_t>(TM_CONFIRM_TRADE);
+    tradePct.mode = static_cast<uint8_t>(TM_CONFIRM_TRADE);
     tradeTarget->SendPacket(tradePct);
     m_pPlayer->SendPacket(tradePct);
 
     if (!tradeTarget->m_bTradeAccepted)
         return;
 
-    if (!m_pPlayer->CheckTradeWeight()
-        || !tradeTarget->CheckTradeWeight())
+    if (!m_pPlayer->CheckTradeWeight() || !tradeTarget->CheckTradeWeight())
     {
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
@@ -2166,8 +2140,7 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
         return;
     }
 
-    if (!m_pPlayer->CheckTradeItem()
-        || !tradeTarget->CheckTradeItem())
+    if (!m_pPlayer->CheckTradeItem() || !tradeTarget->CheckTradeItem())
     {
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
@@ -2178,10 +2151,10 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
         return;
     }
 
-    int64 tradeGold       = m_pPlayer->GetGold() + tradeTarget->GetTradeGold();
+    int64 tradeGold = m_pPlayer->GetGold() + tradeTarget->GetTradeGold();
     int64 tradeTargetGold = tradeTarget->GetGold() + m_pPlayer->GetTradeGold();
 
-    bool bExceedGold            = tradeGold > MAX_GOLD_FOR_INVENTORY;
+    bool bExceedGold = tradeGold > MAX_GOLD_FOR_INVENTORY;
     bool bExceedGoldTradeTarget = tradeTargetGold > MAX_GOLD_FOR_INVENTORY;
 
     if (bExceedGold || bExceedGoldTradeTarget)
@@ -2203,17 +2176,11 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
     }
     else
     {
-        if (m_pPlayer->m_bTrading
-            && tradeTarget->m_bTrading
-            && m_pPlayer->m_bTradeFreezed
-            && tradeTarget->m_bTradeFreezed
-            && m_pPlayer->GetTradeTarget() == tradeTarget
-            && tradeTarget->GetTradeTarget() == m_pPlayer
-            && m_pPlayer->ProcessTrade())
+        if (m_pPlayer->m_bTrading && tradeTarget->m_bTrading && m_pPlayer->m_bTradeFreezed && tradeTarget->m_bTradeFreezed && m_pPlayer->GetTradeTarget() == tradeTarget && tradeTarget->GetTradeTarget() == m_pPlayer && m_pPlayer->ProcessTrade())
         {
-            TS_TRADE tradePct{ };
+            TS_TRADE tradePct{};
             tradePct.target_player = m_pPlayer->GetHandle();
-            tradePct.mode          = static_cast<uint8_t>(TM_PROCESS_TRADE);
+            tradePct.mode = static_cast<uint8_t>(TM_PROCESS_TRADE);
             tradeTarget->SendPacket(tradePct);
             m_pPlayer->SendPacket(tradePct);
         }

@@ -266,3 +266,33 @@ enum ItemCode : int
     E_REPAIR_POWDER          = 950021,
     FEATHER_OF_RETURN_EVENT  = 2902104
 };
+enum 
+{
+    IEP_NONE					= 0,
+    IEP_ATTACK_POINT			= 11,
+    IEP_MAGIC_POINT				= 12,
+    IEP_ACCURACY				= 13,
+    IEP_ATTACK_SPEED			= 14,
+    IEP_DEFENCE					= 15,
+    IEP_MAGIC_DEFENCE			= 16,
+    IEP_AVOID					= 17,
+    IEP_MOVE_SPEED				= 18,
+    IEP_BLOCK_CHANCE			= 19,
+    IEP_CARRY_WEIGHT			= 20,
+    IEP_BLOCK_DEFENCE			= 21,	
+    IEP_CASTING_SPEED			= 22,
+    IEP_MAGIC_ACCURACY			= 23,
+    IEP_MAGIC_AVOID				= 24,
+    IEP_COOLTIME_SPEED			= 25,
+    IEP_BELT_SLOT				= 26,
+    IEP_MAX_CHAOS				= 27,
+    IEP_MAX_HP					= 30,
+    IEP_MAX_MP					= 31,
+    IEP_BOW_INTERVAL			= 34,
+    IEP_MP_REGEN_POINT			= 33,
+    IEP_TAMED_ITEM				= 95,
+    IEP_INC_PARAMETER_A			= 96,
+    IEP_INC_PARAMETER_B			= 97,
+    IEP_AMP_PARAMETER_A			= 98,
+    IEP_AMP_PARAMETER_B			= 99,
+};
