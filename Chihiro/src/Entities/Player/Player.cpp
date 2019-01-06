@@ -2259,10 +2259,12 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
 {
     if (pTarget == nullptr)
         pTarget = this;
+
     if (pItem->m_Instance.nCount < 1)
         return TS_RESULT_ACCESS_DENIED;
 
-    uint16 result{TS_RESULT_SUCCESS};
+    uint16_t result{TS_RESULT_SUCCESS};
+
     for (int i = 0; i < MAX_OPTION_NUMBER; ++i)
     {
         if (pItem->m_pItemBase->base_type[i] != 0)
@@ -2280,23 +2282,66 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
         }
     }
 
-    if (result == TS_RESULT_SUCCESS)
+    if (!pItem->m_pItemBase->script_text.empty() && m_Item->m_pItemBase->script_text != "0")
+    {
+        std::string szOnUseItem = pItem->m_pItemBase->script_text;
+
+        if (szOnUseItem.find("on_use_item") != std::string::npos)
+        {
+            auto targetType = Item::TARGET_TYPE_UNKNOWN;
+            int nCode{0};
+            if (pTarget->IsPlayer())
+            {
+                targetType = Item::TARGET_TYPE_PLAYER;
+            }
+            else if (pTarget->IsSummon())
+            {
+                targetType = Item::TARGET_TYPE_SUMMON;
+                nCode = pTarget->As<Summon>()->GetSummonCode();
+            }
+            else if (pTarget->IsMonster())
+            {
+                targetType = Item::TARGET_TYPE_MONSTER;
+                nCode = pTarget->As<Monster>()->GetMonsterID();
+            }
+            else if (pTarget->IsNPC())
+            {
+                targetType = Item::TARGET_TYPE_NPC;
+                nCode = pTarget->As<NPC>()->GetNPCID();
+            }
+
+            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->m_Instance.Code, GetHandle(), targetType,
+                                                (pTarget != nullptr ? pTarget->GetHandle() : 0), nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
+        }
+
+        auto nNPCHandle = GetLastContactLong("npc");
+        SetLastContact("npc", 0);
+        sScriptingMgr.RunString(szOnUseItem);
+        SetLastContact("npc", nNPCHandle);
+    }
+
+    if (pItem->m_pItemBase->cool_time_group != 0)
     {
         m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld.GetArTime() + (pItem->m_pItemBase->cool_time * 100);
         Messages::SendItemCoolTimeInfo(this);
-
-        auto itemCode = pItem->m_Instance.Code;
-        if (itemCode != FEATHER_OF_RETURN &&
-            itemCode != FEATHER_OF_REINSTATEMENT &&
-            itemCode != FEATHER_OF_RETURN_EVENT)
-        {
-            if (pItem->m_pItemBase->type != 6)
-                EraseItem(pItem, 1);
-
-            if (pItem->IsCashItem())
-                this->Save(false);
-        }
     }
+
+    switch (pItem->m_Instance.Code)
+    {
+    case FEATHER_OF_RETURN:
+    case FEATHER_OF_REINSTATEMENT:
+    case FEATHER_OF_RETURN_EVENT:
+        return TS_RESULT_SUCCESS;
+    default:
+        break;
+    }
+
+    if (pItem->m_pItemBase->type != TYPE_USE)
+        EraseItem(pItem, 1);
+
+    if (pItem->IsCashItem())
+        Save(false);
+
     return result;
 }
 

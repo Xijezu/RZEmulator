@@ -208,14 +208,13 @@ void Unit::OnUpdate()
     {
         for (auto it = m_vAura.begin(); it != m_vAura.end();)
         {
-            auto pSkill = GetSkill((*it).second);
-            if (pSkill != nullptr && pSkill->GetAuraRefreshTime() + 500 <= ct)
+            if ((*it).first->GetAuraRefreshTime() + 500 <= ct)
             {
-                if (!onProcAura(pSkill, (*it).first))
+                if (!onProcAura((*it).first, (*it).second))
                 {
                     TS_SC_AURA auraMsg{};
                     auraMsg.caster = GetHandle();
-                    auraMsg.skill_id = pSkill->GetSkillId();
+                    auraMsg.skill_id = (*it).first->GetSkillId();
                     auraMsg.status = false;
 
                     if (IsPlayer())
@@ -226,7 +225,7 @@ void Unit::OnUpdate()
                     it = m_vAura.erase(it);
                     continue;
                 }
-                pSkill->SetAuraRefreshTime(ct);
+                (*it).first->SetAuraRefreshTime(ct);
             }
             ++it;
         }
@@ -1903,154 +1902,163 @@ void Unit::onUpdateState(State *state, bool bIsExpire)
 
 uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter)
 {
-    uint16 result{TS_RESULT_ACCESS_DENIED};
-    uint target_handle{0};
-    Position pos{};
-    std::string error{};
-    uint ct = sWorld.GetArTime();
-    uint prev_hp;
-    uint prev_mp;
+    uint16_t result{TS_RESULT_SUCCESS};
 
-    auto pPlayer = this->As<Player>();
-
-    switch (type)
+    switch (static_cast<ITEM_EFFECT_INSTANT>(type))
     {
-    case 1:
-        prev_hp = GetHealth();
+    case ITEM_EFFECT_INSTANT::INC_HP:
+    {
+        int prev_hp = GetHealth();
         HealByItem((int)var1);
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
-        return TS_RESULT_SUCCESS;
-    case 2:
-        prev_mp = GetMana();
-        MPHealByItem((int)var1);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::INC_MP:
+    {
+        int prev_mp = GetMana();
+        MPHealByItem(static_cast<int32_t>(var1));
         Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
-        return TS_RESULT_SUCCESS;
-    case 5: // Skillcast (e.g. Force/Soul Chips)
-        target_handle = GetHandle();
-        if (var1 == 6020.0f || var1 == 6021.0f)
-            target_handle = pItem->GetHandle();
-        pos.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
-        return (uint16)pCaster->CastSkill((int)var1, (int)var2, target_handle, pos, GetLayer(), true);
-    case 6:
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::INC_HP_PERCENT:
+    {
+        int prev_hp = GetHealth();
+        HealByItem(static_cast<int32_t>(var1 * GetMaxHealth()));
+        Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::INC_MP_PERCENT:
+    {
+        int prev_mp = GetMana();
+        MPHealByItem(static_cast<int32_t>(var1 * GetMaxMana()));
+        Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::INC_STAMINA:
     {
         if (!IsPlayer())
         {
-            AddState(StateType::SG_NORMAL, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
-                     pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");
-            return TS_RESULT_SUCCESS;
+            result = TS_RESULT_ACCESS_DENIED;
+            break;
         }
-        auto state = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
-        if (state == nullptr)
-            return TS_RESULT_NOT_ACTABLE;
-        if (state->effect_type != StateEffect::SEF_RIDING)
-        {
-            if (pItem->m_pItemBase->state_id == 4003)
-            {
-                // @todo: stanima saver
-            }
-            AddState(StateType::SG_NORMAL, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
-                     pItem->m_pItemBase->state_level, ct, ct + (uint)(100 * pItem->m_pItemBase->state_time), false, 0, "");
-            return TS_RESULT_SUCCESS;
-        }
-        result = TS_RESULT_ACCESS_DENIED;
-    }
-    break;
-    case 7:
-        RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+        this->As<Player>()->AddStamina(static_cast<int32_t>(var1));
         break;
-    case 8:
-    {
-        auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
-        if (GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem->GetHandle() == pWornItem->GetHandle())
-        {
-            RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
-            pPlayer->SetUInt32Value(PLAYER_FIELD_RIDING_UID, 0);
-            return TS_RESULT_SUCCESS;
-        }
-        if (pPlayer != nullptr)
-        {
-            if (pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_IDX) != 0 || pPlayer->GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0 || pPlayer->IsInDungeon())
-            {
-                auto si = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
-                if (si != nullptr && si->effect_type == StateEffect::SEF_RIDING)
-                    return TS_RESULT_ACCESS_DENIED;
-            }
-            if (pWornItem != nullptr)
-            {
-                if (pItem->GetHandle() != pWornItem->GetHandle())
-                {
-                    if (pPlayer->Putoff(ItemWearType::WEAR_RIDE_ITEM) != 0)
-                        return TS_RESULT_ACCESS_DENIED;
-                    if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != 0)
-                        return TS_RESULT_ACCESS_DENIED;
-                }
-            }
-            else
-            {
-                if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != 0)
-                    return TS_RESULT_ACCESS_DENIED;
-            }
-            uint endTime = std::numeric_limits<unsigned int>::max();
-            pPlayer->AddState((StateType)0, (StateCode)pItem->m_pItemBase->state_id, pItem->m_Instance.OwnerHandle,
-                              pItem->m_pItemBase->state_level, ct, endTime, true, 0, "");
-            return TS_RESULT_SUCCESS;
-        }
     }
-    break;
-    case 80:
+    case ITEM_EFFECT_INSTANT::RESURECTION:
+    {
+        // @todo
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::WARP:
+    {
+        // Nothing to do apparentely
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::SKILL:
+    {
+        auto target_handle = GetHandle();
+        if (var1 == SKILL_RETURN_FEATHER || var1 == SKILL_RETURN_BACK_FEATHER)
+            target_handle = pItem->GetHandle();
+        result = pCaster->CastSkill((int)var1, (int)var2, target_handle, Position(), GetLayer(), true);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::ADD_STATE:
+    case ITEM_EFFECT_INSTANT::ADD_STATE_EX:
+    {
+        auto eCode = static_cast<StateCode>((static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->m_pItemBase->state_id : var1);
+
         if (IsPlayer())
         {
-            dynamic_cast<Player *>(this)->AddStamina((int)var1);
-            return TS_RESULT_SUCCESS;
-        }
-        return TS_RESULT_ACCESS_DENIED;
-    case 94:
-    {
-        if (!pCaster->IsPlayer())
-            return TS_RESULT_ACCESS_DENIED;
-        if (var1 != 0.0f)
-        {
-            int total = 1;
-            if (var1 < 0.0f)
-                total = (int)var2;
+            auto pPlayer = this->As<Player>();
+            const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(static_cast<int32_t>(eCode));
 
-            for (int i = 0; i < total; ++i)
+            if (pStateInfo == nullptr)
             {
-                auto nItemID = (int)var1;
-                auto nItemCount = (int64)var2;
-                while (nItemID < 0)
-                    GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
-                if (nItemID != 0)
+                result = TS_RESULT_NOT_ACTABLE;
+                break;
+            }
+
+            if (pStateInfo->effect_type == SEF_RIDING)
+            {
+                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon())
                 {
-                    auto pCItem = Item::AllocItem(0, nItemID, nItemCount, BY_ITEM, -1, -1, -1, -1, 0, 0, 0, 0);
-                    if (pCItem == nullptr)
-                    {
-                        NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", nItemID);
-                        return TS_RESULT_NOT_ACTABLE;
-                    }
-                    Item *pNewItem = pPlayer->PushItem(pCItem, pCItem->m_Instance.nCount, false);
-                    if (pNewItem != nullptr)
-                        Messages::SendResult(pPlayer, 204, TS_RESULT_SUCCESS, pCItem->GetHandle());
-                    if (pNewItem != nullptr && pNewItem->GetHandle() != pCItem->GetHandle())
-                        Item::PendFreeItem(pCItem);
+                    result = TS_RESULT_ACCESS_DENIED;
+                    break;
                 }
             }
+
+            if (static_cast<int32_t>(eCode) == SC_STAMINA_SAVE)
+            {
+                if (pPlayer->GetState(SC_STAMINA_SAVE))
+                {
+                    result = TS_RESULT_ALREADY_STAMINA_SAVED;
+                    break;
+                }
+            }
+        }
+
+        auto t = sWorld.GetArTime();
+        int nLevel = (static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->m_pItemBase->state_level : static_cast<int32_t>(var2);
+        AddState(SG_NORMAL, eCode, pItem->m_Instance.OwnerHandle, nLevel, t, t + pItem->m_pItemBase->state_time * 100);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::REMOVE_STATE:
+    {
+        RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+        break;
+    }
+    case ITEM_EFFECT_INSTANT::TOGGLE_STATE:
+    {
+        auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
+        if (GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem == pWornItem)
+        {
+            RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+            return TS_RESULT_SUCCESS;
         }
         else
         {
-            auto gold = pPlayer->GetGold() + (int64)var2;
-            if (pPlayer->ChangeGold(gold) != TS_RESULT_SUCCESS)
-                return 53;
+            if (IsPlayer())
+            {
+                auto pPlayer = this->As<Player>();
+                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon())
+                {
+                    const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
+                    if (pStateInfo->effect_type == SEF_RIDING)
+                    {
+                        result = TS_RESULT_ACCESS_DENIED;
+                        break;
+                    }
+                }
+
+                if (pWornItem != nullptr)
+                {
+                    if (pWornItem != pItem && (pPlayer->Putoff(WEAR_RIDE_ITEM) != TS_RESULT_SUCCESS || pPlayer->Puton(WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS))
+                    {
+                        result = TS_RESULT_ACCESS_DENIED;
+                        break;
+                    }
+                }
+                else if (pPlayer->Puton(WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS)
+                {
+                    result = TS_RESULT_ACCESS_DENIED;
+                    break;
+                }
+            }
+
+            auto t = sWorld.GetArTime();
+            AddState(SG_NORMAL, static_cast<StateCode>(pItem->m_pItemBase->state_id), pItem->m_Instance.OwnerHandle, pItem->m_pItemBase->state_level, t, -1, true);
+            break;
         }
-        return TS_RESULT_SUCCESS;
     }
     break;
     default:
-        error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->m_Instance.Code, type);
+    {
+        std::string error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->m_Instance.Code, type);
         NG_LOG_ERROR("entites.unit", "%s", error.c_str());
         Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
         result = TS_RESULT_UNKNOWN;
         break;
+    }
     }
     return result;
 }
@@ -2612,10 +2620,8 @@ bool Unit::IsActiveAura(Skill *pSkill) const
 {
     for (const auto &aura : m_vAura)
     {
-        if (aura.first == pSkill->m_SkillBase->toggle_group)
-        {
+        if (aura.first == pSkill)
             return true;
-        }
     }
     return false;
 }
@@ -2625,15 +2631,49 @@ bool Unit::TurnOnAura(Skill *pSkill)
     if (pSkill == nullptr)
         return false;
 
-    if (m_vAura.count(pSkill->m_SkillBase->toggle_group) != 0)
+    int nToggleGroup = pSkill->GetSkillBase()->GetToggleGroup();
+    if (nToggleGroup > Skill::MAX_TOGGLE_GROUP || nToggleGroup < 0)
     {
+        ASSERT(0, "toggle group invalid!");
         return false;
     }
 
-    m_vAura.emplace(pSkill->GetSkillBase()->GetToggleGroup(), pSkill->GetSkillId());
-    AddState(SG_NORMAL, (StateCode)pSkill->m_SkillBase->state_id, GetHandle(), pSkill->m_SkillBase->GetStateLevel(pSkill->m_nSkillLevel, pSkill->GetSkillEnhance()), sWorld.GetArTime(), 0, true, 0, "");
+    TS_SC_AURA msg{};
+    bool bExistSameGroup{false};
+    for (auto &it : m_vAura)
+    {
+        if (it.first->GetSkillBase()->GetToggleGroup() != 0 && it.first->GetSkillBase()->GetToggleGroup() == nToggleGroup)
+        {
+            msg.caster = GetHandle();
+            msg.skill_id = it.first->GetSkillId();
 
-    Messages::SendToggleInfo(this, pSkill->m_nSkillID, true);
+            msg.status = false;
+
+            if (IsPlayer())
+                this->As<Player>()->SendPacket(msg);
+            else if (IsSummon())
+                this->As<Summon>()->GetMaster()->SendPacket(msg);
+
+            it.first = pSkill;
+            it.second = pSkill->GetRequestedSkillLevel();
+            bExistSameGroup = true;
+            break;
+        }
+    }
+
+    if (!bExistSameGroup)
+        m_vAura.emplace_back(std::pair<Skill *, int32_t>(pSkill, static_cast<int32_t>(pSkill->GetRequestedSkillLevel())));
+
+    msg.caster = GetHandle();
+    msg.skill_id = pSkill->GetSkillId();
+
+    msg.status = true;
+
+    if (IsPlayer())
+        this->As<Player>()->SendPacket(msg);
+    else if (IsSummon())
+        this->As<Summon>()->GetMaster()->SendPacket(msg);
+
     return true;
 }
 
@@ -2642,28 +2682,31 @@ bool Unit::TurnOffAura(Skill *pSkill)
     if (pSkill == nullptr)
         return false;
 
-    if (m_vAura.count(pSkill->m_SkillBase->toggle_group) == 0)
-        return false;
+    for (auto it = m_vAura.begin(); it != m_vAura.end(); ++it)
+    {
+        if ((*it).first == pSkill)
+        {
+            TS_SC_AURA msg{};
+            msg.caster = GetHandle();
+            msg.skill_id = (*it).first->GetSkillId();
 
-    Messages::SendToggleInfo(this, pSkill->m_nSkillID, false);
-    m_vAura.erase(pSkill->m_SkillBase->toggle_group);
-    RemoveState(static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId()), 255);
-    if (pSkill->GetVar(3) != 0)
-        RemoveState(static_cast<StateCode>(pSkill->GetVar(3)), 255);
-    if (pSkill->GetVar(4) != 0)
-        RemoveState(static_cast<StateCode>(pSkill->GetVar(4)), 255);
-    return true;
+            msg.status = false;
+
+            if (IsPlayer())
+                this->As<Player>()->SendPacket(msg);
+            else if (IsSummon())
+                this->As<Summon>()->GetMaster()->SendPacket(msg);
+
+            m_vAura.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 void Unit::ToggleAura(Skill *pSkill)
 {
-    bool bNewAura = m_vAura.count(pSkill->m_SkillBase->toggle_group) == 0;
-    if (m_vAura.count(pSkill->m_SkillBase->toggle_group) != 0)
-    {
-        bNewAura = m_vAura[pSkill->m_SkillBase->toggle_group] != pSkill->GetSkillId();
-        TurnOffAura(GetSkill(m_vAura[pSkill->m_SkillBase->toggle_group]));
-    }
-    if (bNewAura)
+    if (!TurnOffAura(pSkill))
         TurnOnAura(pSkill);
 }
 
