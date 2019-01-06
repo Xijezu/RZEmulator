@@ -25,8 +25,8 @@
 enum ShutdownExitCode
 {
     SHUTDOWN_EXIT_CODE = 0,
-    ERROR_EXIT_CODE    = 1,
-    RESTART_EXIT_CODE  = 2
+    ERROR_EXIT_CODE = 1,
+    RESTART_EXIT_CODE = 2
 };
 
 enum WorldTimers : int
@@ -93,194 +93,195 @@ typedef std::unordered_map<uint32, WorldSession *> SessionMap;
 
 class World
 {
-    public:
-        static std::atomic<uint32>  m_worldLoopCounter;
-        typedef std::atomic<uint64> AtomicIndex;
-        ~World();
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        World(const World &) = delete;
-        World &operator=(const World &) = delete;
+  public:
+    static std::atomic<uint32> m_worldLoopCounter;
+    typedef std::atomic<uint64> AtomicIndex;
+    ~World();
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    World(const World &) = delete;
+    World &operator=(const World &) = delete;
 
-        static World &Instance()
-        {
-            static World instance;
-            return instance;
-        }
+    static World &Instance()
+    {
+        static World instance;
+        return instance;
+    }
 
-        void InitWorld();
-        void LoadConfigSettings(bool reload);
+    void InitWorld();
+    void LoadConfigSettings(bool reload);
 
-        bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
-        bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
-        void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
+    bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
+    bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
+    void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
-        void addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp);
-        void addEXP(Unit *pCorpse, int nPartyID, float exp, float jp);
+    void addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp);
+    void addEXP(Unit *pCorpse, int nPartyID, float exp, float jp);
 
-        WorldSession *FindSession(uint32 id) const;
-        void AddSession(WorldSession *s);
-        bool RemoveSession(uint32 id);
-        void UpdateSessions(uint diff);
-        void KickAll();
+    WorldSession *FindSession(uint32 id) const;
+    void AddSession(WorldSession *s);
+    bool RemoveSession(uint32 id);
+    void UpdateSessions(uint diff);
+    void KickAll();
 
-        void AddObjectToWorld(WorldObject *obj);
-        void AddSummonToWorld(Summon *pSummon);
-        void AddMonsterToWorld(Monster *pMonster);
-        void AddItemToWorld(Item *pItem);
-        bool RemoveItemFromWorld(Item *pItem);
-        void RemoveObjectFromWorld(WorldObject *obj);
-        void MonsterDropItemToWorld(Unit *pUnit, Item *pItem);
-        bool checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
-        bool ProcTame(Monster *pMonster);
-        void ClearTamer(Monster *pMonster, bool bBroadcastMsg);
-        bool SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel);
+    void AddObjectToWorld(WorldObject *obj);
+    void AddSummonToWorld(Summon *pSummon);
+    void AddMonsterToWorld(Monster *pMonster);
+    void AddItemToWorld(Item *pItem);
+    bool RemoveItemFromWorld(Item *pItem);
+    void RemoveObjectFromWorld(WorldObject *obj);
+    void MonsterDropItemToWorld(Unit *pUnit, Item *pItem);
+    bool checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
+    bool ProcTame(Monster *pMonster);
+    void ClearTamer(Monster *pMonster, bool bBroadcastMsg);
+    bool SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel);
 
-        // Quest?
-        int ShowQuestMenu(Player *pPlayer);
+    // Quest?
+    int ShowQuestMenu(Player *pPlayer);
 
-        // Item
-        uint procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess);
-        void procPartyShare(Player *pClient, Item *pItem);
-        void addChaos(Unit *pCorpse, Player *pPlayer, float chaos);
+    // Item
+    uint procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess);
+    void procPartyShare(Player *pClient, Item *pItem);
+    void addChaos(Unit *pCorpse, Player *pPlayer, float chaos);
 
-        // Warping
-        void WarpBegin(Player *);
-        void WarpEnd(Player *, Position, uint8_t);
-        void WarpEndSummon(Player *, Position, uint8_t, Summon *, bool);
+    // Warping
+    void WarpBegin(Player *);
+    void WarpEnd(Player *, Position, uint8_t);
+    void WarpEndSummon(Player *, Position, uint8_t, Summon *, bool);
 
-        void onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage);
+    void onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage);
 
-        /// Get the number of current active sessions
-        const SessionMap &GetAllSessions() const { return m_sessions; }
+    /// Get the number of current active sessions
+    const SessionMap &GetAllSessions() const { return m_sessions; }
 
-        uint32 GetSessionCount() const { return m_sessions.size(); }
+    uint32 GetSessionCount() const { return m_sessions.size(); }
 
-        template<typename TS_PACKET>
-        void Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, TS_PACKET packet)
-        {
-            BroadcastFunctor<TS_PACKET> broadcastFunctor;
-            broadcastFunctor.packet = packet;
+    template <typename TS_PACKET>
+    void Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, TS_PACKET packet)
+    {
+        BroadcastFunctor<TS_PACKET> broadcastFunctor;
+        broadcastFunctor.packet = packet;
 
-            sRegion.DoEachVisibleRegion(rx1, ry1,
-                                        rx2, ry2,
-                                        layer,
-                                        NG_REGION_FUNCTOR(broadcastFunctor),
-                                        (uint8_t)RegionVisitor::ClientVisitor);
-        }
+        sRegion.DoEachVisibleRegion(rx1, ry1,
+                                    rx2, ry2,
+                                    layer,
+                                    NG_REGION_FUNCTOR(broadcastFunctor),
+                                    (uint8_t)RegionVisitor::ClientVisitor);
+    }
 
-        template<typename TS_PACKET>
-        void Broadcast(uint rx, uint ry, uint8 layer, TS_PACKET packet)
-        {
-            BroadcastFunctor<TS_PACKET> broadcastFunctor;
-            broadcastFunctor.packet = packet;
+    template <typename TS_PACKET>
+    void Broadcast(uint rx, uint ry, uint8 layer, TS_PACKET packet)
+    {
+        BroadcastFunctor<TS_PACKET> broadcastFunctor;
+        broadcastFunctor.packet = packet;
 
-            sRegion.DoEachVisibleRegion(rx, ry,
-                                        layer,
-                                        NG_REGION_FUNCTOR(broadcastFunctor),
-                                        (uint8_t)RegionVisitor::ClientVisitor);
+        sRegion.DoEachVisibleRegion(rx, ry,
+                                    layer,
+                                    NG_REGION_FUNCTOR(broadcastFunctor),
+                                    (uint8_t)RegionVisitor::ClientVisitor);
+    }
 
-        }
+    uint GetArTime();
 
-        uint GetArTime();
+    void Update(uint);
 
-        void Update(uint);
+    static uint8 GetExitCode() { return m_ExitCode; }
 
-        static uint8 GetExitCode() { return m_ExitCode; }
+    static void StopNow(uint8 exitcode)
+    {
+        m_stopEvent = true;
+        m_ExitCode = exitcode;
+    }
 
-        static void StopNow(uint8 exitcode)
-        {
-            m_stopEvent = true;
-            m_ExitCode  = exitcode;
-        }
+    static bool IsStopped() { return m_stopEvent; }
 
-        static bool IsStopped() { return m_stopEvent; }
+    /// Gets and increments the identifier for DB insert statements
+    uint64 GetItemIndex();
+    uint64 GetPlayerIndex();
+    uint64 GetPetIndex();
+    uint64 GetStateIndex();
+    uint64 GetSummonIndex();
+    uint64 GetSkillIndex();
 
-        /// Gets and increments the identifier for DB insert statements
-        uint64 GetItemIndex();
-        uint64 GetPlayerIndex();
-        uint64 GetPetIndex();
-        uint64 GetStateIndex();
-        uint64 GetSummonIndex();
-        uint64 GetSkillIndex();
+    /// Set a server rate
+    void setRate(Rates rate, float value) { rate_values[rate] = value; }
 
-        /// Set a server rate
-        void setRate(Rates rate, float value) { rate_values[rate] = value; }
+    /// Get a server rate
+    float getRate(Rates rate) const { return rate_values[rate]; }
 
-        /// Get a server rate
-        float getRate(Rates rate) const { return rate_values[rate]; }
+    /// Set a float configuration element
+    void setFloatConfig(WorldFloatConfigs index, float value)
+    {
+        if (index < FLOAT_CONFIG_VALUE_COUNT)
+            m_float_configs[index] = value;
+    }
 
-        /// Set a float configuration element
-        void setFloatConfig(WorldFloatConfigs index, float value)
-        {
-            if (index < FLOAT_CONFIG_VALUE_COUNT)
-                m_float_configs[index] = value;
-        }
+    /// Get a float configuration element
+    float getFloatConfig(WorldFloatConfigs index)
+    {
+        return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f;
+    }
 
-        /// Get a float configuration element
-        float getFloatConfig(WorldFloatConfigs index)
-        {
-            return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f;
-        }
+    /// Set a server configuration element
+    void setBoolConfig(WorldBoolConfigs index, bool value)
+    {
+        if (index < BOOL_CONFIG_VALUE_COUNT)
+            m_bool_configs[index] = value;
+    }
 
-        /// Set a server configuration element
-        void setBoolConfig(WorldBoolConfigs index, bool value)
-        {
-            if (index < BOOL_CONFIG_VALUE_COUNT)
-                m_bool_configs[index] = value;
-        }
+    /// Get a server configuration element
+    bool getBoolConfig(WorldBoolConfigs index) const
+    {
+        return index < BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[index] : false;
+    }
 
-        /// Get a server configuration element
-        bool getBoolConfig(WorldBoolConfigs index) const
-        {
-            return index < BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[index] : false;
-        }
+    /// Set a server configuration element
+    void setIntConfig(WorldIntConfigs index, int32_t value)
+    {
+        if (index < INT_CONFIG_VALUE_COUNT)
+            m_int_configs[index] = value;
+    }
 
-        /// Set a server configuration element
-        void setIntConfig(WorldIntConfigs index, int32_t value)
-        {
-            if (index < INT_CONFIG_VALUE_COUNT)
-                m_int_configs[index] = value;
-        }
+    /// Get a server configuration element
+    int32_t getIntConfig(WorldIntConfigs index) const
+    {
+        return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0;
+    }
 
-        /// Get a server configuration element
-        int32_t getIntConfig(WorldIntConfigs index) const
-        {
-            return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0;
-        }
+    std::vector<RespawnObject *> m_vRespawnList{};
 
-        std::vector<RespawnObject *> m_vRespawnList{ };
-    private:
-        static std::atomic<bool> m_stopEvent;
+  private:
+    static std::atomic<bool> m_stopEvent;
 
-        static uint8 m_ExitCode;
+    static uint8 m_ExitCode;
 
-        SessionMap                  m_sessions;
-        const uint                  startTime;
+    SessionMap m_sessions;
+    const uint startTime;
 
-        void AddSession_(WorldSession *s);
-        LockedQueue<WorldSession *> addSessQueue;
+    void AddSession_(WorldSession *s);
+    LockedQueue<WorldSession *> addSessQueue;
 
-        void onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos);
-        bool onSetMove(WorldObject *pObject, Position curPos, Position lastpos);
-        void enterProc(WorldObject *pUint, uint prx, uint pry);
-        void step(WorldObject *obj, uint tm);
+    void onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos);
+    bool onSetMove(WorldObject *pObject, Position curPos, Position lastpos);
+    void enterProc(WorldObject *pUint, uint prx, uint pry);
+    void step(WorldObject *obj, uint tm);
 
-        AtomicIndex s_nPlayerIndex{0};
-        AtomicIndex s_nPetIndex{0};
-        AtomicIndex s_nSummonIndex{0};
-        AtomicIndex s_nSkillIndex{0};
-        AtomicIndex s_nStateIndex{0};
-        AtomicIndex s_nItemIndex{0};
+    AtomicIndex s_nPlayerIndex{0};
+    AtomicIndex s_nPetIndex{0};
+    AtomicIndex s_nSummonIndex{0};
+    AtomicIndex s_nSkillIndex{0};
+    AtomicIndex s_nStateIndex{0};
+    AtomicIndex s_nItemIndex{0};
 
-        float   m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
-        float   rate_values[MAX_RATES];
-        int32_t m_int_configs[INT_CONFIG_VALUE_COUNT];
-        bool    m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
+    float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
+    float rate_values[MAX_RATES];
+    int32_t m_int_configs[INT_CONFIG_VALUE_COUNT];
+    bool m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
 
-        IntervalTimer m_timers[WUPDATE_COUNT];
-    protected:
-        World();
+    IntervalTimer m_timers[WUPDATE_COUNT];
+
+  protected:
+    World();
 };
 
 #define sWorld World::Instance()

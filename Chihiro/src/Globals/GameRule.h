@@ -19,32 +19,38 @@
 
 class GameRule
 {
-    public:
-        static float GetItemLevelPenalty(int creature_level, int item_rank, int item_level);
-        static int GetItemRecommendedLevel(int item_rank, int item_level);
-        static int GetItemLevelLimit(int item_rank);
-        static int GetItemRecommendModTable(int item_rank);
-        static int GetRankLevel(int rank);
-        static int GetLocalFlag();
-        static float GetItemDropRate();
-        static float GetGoldDropRate();
-        static float GetChaosDropRate();
-        static float GetEXPRate();
-        static float GetItemValue(float, int, int, int, int);
-        static float GetPickableRange();
-        static int GetChipLevelLimit(int idx);
+public:
+  static float GetItemLevelPenalty(int creature_level, int item_rank, int item_level);
+  static int GetItemRecommendedLevel(int item_rank, int item_level);
+  static int GetItemLevelLimit(int item_rank);
+  static int GetItemRecommendModTable(int item_rank);
+  static int GetRankLevel(int rank);
+  static int GetLocalFlag();
+  static float GetItemDropRate();
+  static float GetGoldDropRate();
+  static float GetChaosDropRate();
+  static float GetEXPRate();
+  static float GetItemValue(float, int, int, int, int);
+  static float GetPickableRange();
+  static int GetChipLevelLimit(int idx);
 
-        static int GetMaxLevel() { return 150; }
+  static int GetMaxLevel() { return 150; }
 
-        static int GetIntValueByRandomInt(double fValue);
-        static int64 GetIntValueByRandomInt64(double fValue);
-        static float GetStaminaRatio(int level);
-        static float GetStaminaBonus();
-        static int             nEnhanceFailType;
-        constexpr static float DEFAULT_UNIT_SIZE{12.0f};
-        constexpr static int   SKILL_CAST_COST{0};
-    private:
-        static int   _chipLevelLimit[];
-        static int   _modtable[];
-        static float _staminaExpRate[];
+  static int GetIntValueByRandomInt(double fValue);
+  static int64 GetIntValueByRandomInt64(double fValue);
+  static float GetStaminaRatio(int level);
+  static float GetStaminaBonus();
+  static int nEnhanceFailType;
+  constexpr static float DEFAULT_UNIT_SIZE{12.0f};
+  constexpr static int SKILL_CAST_COST{0};
+  constexpr static int ATTACK_RANGE_UNIT{100};
+  constexpr static float REFLECT_RANGE{4.0f * DEFAULT_UNIT_SIZE};
+  constexpr static int MAX_STATE_LEVEL = 65535;
+  constexpr static float fPVPDamageRateForPlayer{0.2f};
+  constexpr static float fPVPDamageRateForSummon{0.13f};
+
+private:
+  static int _chipLevelLimit[];
+  static int _modtable[];
+  static float _staminaExpRate[];
 };

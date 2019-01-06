@@ -36,9 +36,9 @@
 #include "Player.h"
 #include "WorldSession.h"
 
-std::atomic<bool>   World::m_stopEvent{false};
+std::atomic<bool> World::m_stopEvent{false};
 std::atomic<uint32> World::m_worldLoopCounter{0};
-uint8  World::m_ExitCode{SHUTDOWN_EXIT_CODE};
+uint8 World::m_ExitCode{SHUTDOWN_EXIT_CODE};
 
 World::World() : startTime(getMSTime())
 {
@@ -47,7 +47,6 @@ World::World() : startTime(getMSTime())
 
 World::~World()
 {
-
 }
 
 uint World::GetArTime()
@@ -68,11 +67,11 @@ void World::InitWorld()
     NG_LOG_INFO("server.worldserver", "Initializing game content...");
 
     // Dörti häckz, plz ihgnoar
-    s_nItemIndex   = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();
+    s_nItemIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM Item;").get()->Fetch()->GetUInt64();
     s_nPlayerIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Character`;").get()->Fetch()->GetUInt64();
-    s_nSkillIndex  = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
+    s_nSkillIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Skill`;").get()->Fetch()->GetUInt64();
     s_nSummonIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `Summon`;").get()->Fetch()->GetUInt64();
-    s_nStateIndex  = CharacterDatabase.Query("SELECT MAX(sid) FROM `State`;").get()->Fetch()->GetUInt64();
+    s_nStateIndex = CharacterDatabase.Query("SELECT MAX(sid) FROM `State`;").get()->Fetch()->GetUInt64();
     sGroupManager.InitGroupSystem();
 
     sObjectMgr.InitGameContent();
@@ -88,9 +87,9 @@ void World::InitWorld()
     for (auto &ri : sObjectMgr.g_vRespawnInfo)
     {
         MonsterRespawnInfo nri(ri);
-        float              cx = (nri.right - nri.left) * 0.5f + nri.left;
-        float              cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
-        auto               ro = new RespawnObject{nri};
+        float cx = (nri.right - nri.left) * 0.5f + nri.left;
+        float cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
+        auto ro = new RespawnObject{nri};
         m_vRespawnList.emplace_back(ro);
     }
     GameContent::AddNPCToWorld();
@@ -112,39 +111,39 @@ void World::LoadConfigSettings(bool reload)
     }
 
     // Bool configs
-    m_bool_configs[CONFIG_PK_SERVER]            = sConfigMgr->GetBoolDefault("Game.PKServer", true);
-    m_bool_configs[CONFIG_SERVICE_SERVER]       = sConfigMgr->GetBoolDefault("Game.ServiceServer", false);
-    m_bool_configs[CONFIG_DISABLE_TRADE]        = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
-    m_bool_configs[CONFIG_MONSTER_WANDERING]    = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
-    m_bool_configs[CONFIG_MONSTER_COLLISION]    = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
+    m_bool_configs[CONFIG_PK_SERVER] = sConfigMgr->GetBoolDefault("Game.PKServer", true);
+    m_bool_configs[CONFIG_SERVICE_SERVER] = sConfigMgr->GetBoolDefault("Game.ServiceServer", false);
+    m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
+    m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
+    m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
     m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
-    m_bool_configs[CONFIG_NO_COLLISION_CHECK]   = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
-    m_bool_configs[CONFIG_NO_SKILL_COOLTIME]    = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
+    m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
+    m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
 
     // Int configs
-    m_int_configs[CONFIG_CELL_SIZE]       = (uint)sConfigMgr->GetIntDefault("Game.CellSize", 6);
+    m_int_configs[CONFIG_CELL_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.CellSize", 6);
     m_int_configs[CONFIG_MAP_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_MAP_WIDTH]       = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
-    m_int_configs[CONFIG_MAP_HEIGHT]      = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
-    m_int_configs[CONFIG_REGION_SIZE]     = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_TILE_SIZE]       = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
-    m_int_configs[CONFIG_ITEM_HOLD_TIME]  = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
-    m_int_configs[CONFIG_LOCAL_FLAG]      = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
-    m_int_configs[CONFIG_MAX_LEVEL]       = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
-    m_int_configs[CONFIG_SERVER_INDEX]    = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
+    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
+    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
+    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_SERVER_INDEX] = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
 
     // Float Configs
     setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));
 
     // Rates
-    rate_values[RATES_EXP]                   = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
-    rate_values[RATES_ITEM_DROP]             = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
-    rate_values[RATES_CREATURE_DROP]         = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
-    rate_values[RATES_CHAOS_DROP]            = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
-    rate_values[RATES_GOLD_DROP]             = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
+    rate_values[RATES_EXP] = sConfigMgr->GetFloatDefault("Game.EXPRate", 1.0f);
+    rate_values[RATES_ITEM_DROP] = sConfigMgr->GetFloatDefault("Game.ItemDropRate", 1.0f);
+    rate_values[RATES_CREATURE_DROP] = sConfigMgr->GetFloatDefault("Game.CreatureCardDropRate", 1.0f);
+    rate_values[RATES_CHAOS_DROP] = sConfigMgr->GetFloatDefault("Game.ChaosDropRate", 1.0f);
+    rate_values[RATES_GOLD_DROP] = sConfigMgr->GetFloatDefault("Game.GoldDropRate", 1.0f);
     rate_values[RATES_PVP_DAMAGE_FOR_PLAYER] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForPlayer", 1.0f);
     rate_values[RATES_PVP_DAMAGE_FOR_SUMMON] = sConfigMgr->GetFloatDefault("Game.PVPDamageRateForSummon", 1.0f);
-    rate_values[RATES_STAMINA_BONUS]         = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
+    rate_values[RATES_STAMINA_BONUS] = sConfigMgr->GetFloatDefault("Game.StaminaBonusRate", 1.0f);
 }
 
 /// Find a session by its id
@@ -153,7 +152,7 @@ WorldSession *World::FindSession(uint32 id) const
     SessionMap::const_iterator itr = m_sessions.find(id);
 
     if (itr != m_sessions.end())
-        return itr->second;                                 // also can return NULL for kicked session
+        return itr->second; // also can return NULL for kicked session
     else
         return nullptr;
 }
@@ -209,13 +208,13 @@ uint64 World::GetSkillIndex()
 
 bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
 {
-    Position oldPos{ };
-    bool     result{false};
-    if (bAbsoluteMove || true/* onSetMove Quadtreepotato*/)
+    Position oldPos{};
+    bool result{false};
+    if (bAbsoluteMove || true /* onSetMove Quadtreepotato*/)
     {
-        oldPos.m_positionX  = pUnit->GetPositionX();
-        oldPos.m_positionY  = pUnit->GetPositionY();
-        oldPos.m_positionZ  = pUnit->GetPositionZ();
+        oldPos.m_positionX = pUnit->GetPositionX();
+        oldPos.m_positionY = pUnit->GetPositionY();
+        oldPos.m_positionZ = pUnit->GetPositionZ();
         oldPos._orientation = pUnit->GetOrientation();
 
         pUnit->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
@@ -248,8 +247,8 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
 
 bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
 {
-    Position oldPos{ };
-    Position curPos2{ };
+    Position oldPos{};
+    Position curPos2{};
 
     if (bAbsoluteMove)
     {
@@ -279,7 +278,6 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bo
             {
                 obj->As<Monster>()->m_bNearClient = fn.nCnt != 0;
             }
-
         }
         return true;
     }
@@ -351,7 +349,7 @@ void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessa
 void World::RemoveObjectFromWorld(WorldObject *obj)
 {
     // Create & set leave packet
-    TS_SC_LEAVE leavePct{ };
+    TS_SC_LEAVE leavePct{};
     leavePct.handle = obj->GetHandle();
 
     BroadcastFunctor<TS_SC_LEAVE> broadcastFunctor;
@@ -432,7 +430,7 @@ void World::UpdateSessions(uint diff)
         ///- and remove not active sessions from the list
         WorldSession *pSession = itr->second;
 
-        if (!pSession->Update(diff))    // As interval = 0
+        if (!pSession->Update(diff)) // As interval = 0
         {
             pSession->KickPlayer();
             m_sessions.erase(itr);
@@ -541,7 +539,7 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
         fJP = (1.0f - (float)levelDiff * 0.05f) * jp;
     }
 
-    uint     ct        = GetArTime();
+    uint ct = GetArTime();
     Position posPlayer = pPlayer->GetCurrentPosition(ct);
     Position posCorpse = pCorpse->GetCurrentPosition(ct);
     if (posCorpse.GetExactDist2d(&posPlayer) <= 500.0f)
@@ -569,8 +567,8 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
 {
     if (pUnit == nullptr || pItem == nullptr)
         return;
-    TS_SC_ITEM_DROP_INFO itemPct{ };
-    itemPct.item_handle    = pItem->GetHandle();
+    TS_SC_ITEM_DROP_INFO itemPct{};
+    itemPct.item_handle = pItem->GetHandle();
     itemPct.monster_handle = pUnit->GetHandle();
     Broadcast((uint)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
     AddItemToWorld(pItem);
@@ -597,16 +595,16 @@ bool World::RemoveItemFromWorld(Item *pItem)
 uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 {
     uint item_handle = 0;
-    int  code        = pItem->m_Instance.Code;
+    int code = pItem->m_Instance.Code;
     Item *pNewItem{nullptr};
     if (code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY)
     {
-        pItem->m_Instance.nIdx     = 0;
+        pItem->m_Instance.nIdx = 0;
         pItem->m_bIsNeedUpdateToDB = true;
         pNewItem = pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
     }
     if (pNewItem != nullptr && pItem->m_Instance.Code != 0)
-        item_handle  = pNewItem->GetHandle();
+        item_handle = pNewItem->GetHandle();
     else
         item_handle = pItem->GetHandle();
 
@@ -620,7 +618,7 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
 {
     float fCreatureCardMod = 1.0f;
-    float fMod             = pKiller->GetItemChance() * 0.01f + 1.0f;
+    float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0)
     {
         if (sObjectMgr.GetItemBase(code)->group == 13)
@@ -636,19 +634,19 @@ int World::ShowQuestMenu(Player *pPlayer)
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr)
     {
-        int  m_QuestProgress{0};
+        int m_QuestProgress{0};
         auto functor = [=, &m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
-            std::string szBuf{ };
-            std::string szButtonName{ };
-            auto        qbs = sObjectMgr.GetQuestBase(linkInfo->code);
+            std::string szBuf{};
+            std::string szButtonName{};
+            auto qbs = sObjectMgr.GetQuestBase(linkInfo->code);
             if ((qbs->nType != QuestType::QUEST_RANDOM_KILL_INDIVIDUAL && qbs->nType != QuestType::QUEST_RANDOM_COLLECT) || (m_QuestProgress != 0))
             {
                 int qpid = linkInfo->nStartTextID;
                 if (m_QuestProgress == 1)
                     qpid = linkInfo->nInProgressTextID;
                 else if (m_QuestProgress == 2)
-                    qpid     = linkInfo->nEndTextID;
-                szBuf        = NGemity::StringFormat("quest_info( {}, {} )", linkInfo->code, qpid);
+                    qpid = linkInfo->nEndTextID;
+                szBuf = NGemity::StringFormat("quest_info( {}, {} )", linkInfo->code, qpid);
                 szButtonName = NGemity::StringFormat("QUEST|{}|{}", qbs->nQuestTextID, m_QuestProgress);
                 pPlayer->AddDialogMenu(szButtonName, szBuf);
             }
@@ -700,7 +698,7 @@ bool World::ProcTame(Monster *pMonster)
      * lPenalty is multiplied with the TamePercentage here
    */
     float fTameProbability = pMonster->GetTamePercentage();
-    auto  pSkill           = player->GetSkill(SKILL_CREATURE_TAMING);
+    auto pSkill = player->GetSkill(SKILL_CREATURE_TAMING);
     if (pSkill == nullptr)
     {
         // really, you shouldn't get here. If you do, you fucked up somewhere.
@@ -750,9 +748,7 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
         return false;
 
     int tameCode = pMonster->GetTameItemCode();
-    if (pMonster->GetHealth() == pMonster->GetMaxHealth()
-        && pMonster->GetTamer() == 0
-        && tameCode != 0)
+    if (pMonster->GetHealth() == pMonster->GetMaxHealth() && pMonster->GetTamer() == 0 && tameCode != 0)
     {
         auto card = pPlayer->FindItem(tameCode, ITEM_FLAG_SUMMON, false);
         if (card != nullptr)
@@ -769,7 +765,7 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
 
 void World::AddSession_(WorldSession *s)
 {
-            ASSERT(s);
+    ASSERT(s);
 
     if (!RemoveSession(s->GetAccountId()))
     {
@@ -786,7 +782,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
     if (pPlayer == nullptr || pCorpse == nullptr || pPlayer->GetChaos() >= pPlayer->GetMaxChaos())
         return;
 
-    uint     ct        = GetArTime();
+    uint ct = GetArTime();
     Position playerPos = pPlayer->GetCurrentPosition(ct);
     Position corpsePos = pCorpse->GetCurrentPosition(ct);
     if (corpsePos.GetExactDist2d(&playerPos) <= 500.0f)
@@ -795,13 +791,13 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
 
         if (chaos > 0.0f)
         {
-            TS_SC_GET_CHAOS chaosPct{ };
-            chaosPct.hPlayer       = pPlayer->GetHandle();
-            chaosPct.hCorpse       = pCorpse->GetHandle();
-            chaosPct.nChaos        = nChaos;
-            chaosPct.nBonus        = 0;
+            TS_SC_GET_CHAOS chaosPct{};
+            chaosPct.hPlayer = pPlayer->GetHandle();
+            chaosPct.hCorpse = pCorpse->GetHandle();
+            chaosPct.nChaos = nChaos;
+            chaosPct.nBonus = 0;
             chaosPct.nBonusPercent = 0;
-            chaosPct.nBonusType    = 0;
+            chaosPct.nBonusType = 0;
             Broadcast((uint)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
@@ -810,12 +806,12 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
 
 void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
 {
-    int    nMinLevel     = 255;
-    int    nMaxLevel     = 0;
-    int    nTotalLevel   = 0;
-    int    nCount        = 0;
-    int    nTotalCount   = 0;
-    float  fLevelPenalty = 0;
+    int nMinLevel = 255;
+    int nMaxLevel = 0;
+    int nTotalLevel = 0;
+    int nCount = 0;
+    int nTotalCount = 0;
+    float fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
     sGroupManager.DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr)
@@ -824,7 +820,7 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
             if (tag.pPlayer->IsInWorld() && pCorpse->GetLayer() == tag.pPlayer->GetLayer() && pCorpse->GetExactDist2d(tag.pPlayer) <= 500.0f)
             {
                 pOneManPlayer = tag.pPlayer;
-                int l         = tag.pPlayer->GetLevel();
+                int l = tag.pPlayer->GetLevel();
                 if (nMaxLevel < l)
                     nMaxLevel = l;
                 if (nMinLevel > l)
@@ -850,28 +846,28 @@ void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
             {
                 fLevelPenalty = levelDiff - nCount - 5;
                 fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
-                exp           = (int)(exp * fLevelPenalty);
-                jp            = (int)(jp * fLevelPenalty);
+                exp = (int)(exp * fLevelPenalty);
+                jp = (int)(jp * fLevelPenalty);
             }
         }
         else
         {
             exp = 0;
-            jp  = 0;
+            jp = 0;
         }
-        float lp         = fLevelPenalty * 0.01f + 1.0f;
-        auto  nSharedEXP = (int)(exp * lp);
-        auto  nSharedJP  = (int)(jp * lp);
+        float lp = fLevelPenalty * 0.01f + 1.0f;
+        auto nSharedEXP = (int)(exp * lp);
+        auto nSharedJP = (int)(jp * lp);
         sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
             if (tag.bIsOnline && tag.pPlayer != nullptr)
             {
-                float ratio   = (float)tag.pPlayer->GetLevel() / nTotalLevel;
-                float fEXP    = nSharedEXP * ratio;
-                float fJP     = nSharedJP * ratio;
+                float ratio = (float)tag.pPlayer->GetLevel() / nTotalLevel;
+                float fEXP = nSharedEXP * ratio;
+                float fJP = nSharedJP * ratio;
                 float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - tag.pPlayer->GetLevel()) * 0.1f);
-                penalty  = std::max(0.0f, penalty >= 1.0f ? 1.0f : penalty);
-                fEXP     = (penalty * fEXP) * 1.0f; // @todo: partyexprate
-                fJP      = (penalty * fJP) * 1.0f;
+                penalty = std::max(0.0f, penalty >= 1.0f ? 1.0f : penalty);
+                fEXP = (penalty * fEXP) * 1.0f; // @todo: partyexprate
+                fJP = (penalty * fJP) * 1.0f;
                 if (fEXP < 1.0f)
                     fEXP = 1.0f;
                 addEXP(pCorpse, tag.pPlayer, fEXP, fJP);
@@ -895,7 +891,7 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     }
     else if (mode == ITEM_SHARE_MODE::ITEM_SHARE_RANDOM)
     {
-        std::vector<Player *> vList{ };
+        std::vector<Player *> vList{};
         sGroupManager.GetNearMember(pClient, 500.0f, vList);
         auto idx = irand(0, (int)vList.size() - 1);
         procAddItem(vList[idx], pItem, true);
