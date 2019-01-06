@@ -496,8 +496,7 @@ class Unit : public WorldObject
     void applyStateEffect();
     void applyStateAmplifyEffect();
     void applyPassiveSkillAmplifyEffect();
-
-    virtual void applyPassiveSkillAmplifyEffect(Skill *) {}
+    virtual void applyPassiveSkillAmplifyEffect(Skill *);
 
     void applyStateAmplify(State *state);
     void applyDoubeWeaponEffect();
@@ -538,7 +537,8 @@ class Unit : public WorldObject
     void processAttack();
     void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
     void onAfterAddState(State *);
-    void onUpdateState(State *state, bool bIsExpire);
+    virtual void onAfterRemoveState(State *state);
+    virtual void onUpdateState(State *state, bool bIsExpire);
     void procMoveSpeedChange();
     void processPendingMove();
     void _InitTimerFieldsAndStatus();

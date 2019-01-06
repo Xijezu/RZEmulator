@@ -3749,3 +3749,75 @@ void Player::onEnergyChange()
                      GetLayer(),
                      energyPct);
 }
+
+Summon *Player::GetRideObject() const
+{
+    switch (GetInt32Value(PLAYER_FIELD_RIDING_IDX))
+    {
+    case MOUNT_ON_MAIN:
+        return m_pMainSummon;
+    case MOUNT_ON_SUB:
+        return m_pSubSummon;
+    case MOUNT_NOTHING:
+    default:
+        return nullptr;
+    }
+}
+
+uint32_t Player::GetRideHandle() const
+{
+    switch (GetInt32Value(PLAYER_FIELD_RIDING_IDX))
+    {
+    case MOUNT_ON_MAIN:
+        return m_pMainSummon->GetHandle();
+    case MOUNT_ON_SUB:
+        return m_pSubSummon->GetHandle();
+    case MOUNT_NOTHING:
+    default:
+        return 0;
+    }
+}
+
+void Player::UnMount(const uint8_t flag, Unit *pCauser)
+{
+    if (GetUInt32Value(PLAYER_FIELD_RIDING_UID) == 0)
+    {
+        RemoveState(GetUInt32Value(PLAYER_FIELD_RIDING_UID));
+    }
+    else
+    {
+        if (GetInt32Value(PLAYER_FIELD_RIDING_IDX) == 0)
+            return;
+
+        auto pSummon = GetRideObject();
+        if (bIsMoving)
+        {
+            auto t = sWorld.GetArTime();
+            auto pos = GetCurrentPosition(t);
+            sWorld.SetMove(this, pos, pos, 0, true, t, true);
+            sWorld.SetMove(GetRideObject(), pos, pos, 0, true, t, false);
+        }
+
+        TS_SC_UNMOUNT_SUMMON unmountMsg{};
+        unmountMsg.handle = GetHandle();
+        unmountMsg.summon_handle = GetRideHandle();
+        unmountMsg.flag = flag;
+
+        sWorld.Broadcast(GetRX(), GetRY(), GetLayer(), unmountMsg);
+        SetInt32Value(PLAYER_FIELD_RIDING_IDX, MOUNT_NOTHING);
+        if (pSummon != nullptr)
+            pSummon->CalculateStat();
+    }
+
+    if (flag == UNMOUNT_FALL && !IsDead())
+    {
+        auto t = sWorld.GetArTime();
+        AddState(SG_NORMAL, SC_FALL_FROM_SUMMON, 0, 1, t, t + 300);
+        if (pCauser != nullptr)
+        {
+            int prev_hp = GetHealth();
+            damage(pCauser, GetMaxHealth() * GameRule::UNMOUNT_PENALTY);
+            Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, true);
+        }
+    }
+}

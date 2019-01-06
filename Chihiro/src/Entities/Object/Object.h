@@ -441,10 +441,11 @@ struct Position
     }
 
     float GetPositionX() const { return m_positionX; }
-
     float GetPositionY() const { return m_positionY; }
-
     float GetPositionZ() const { return m_positionZ; }
+
+    float GetRX() const;
+    float GetRY() const;
 
     float GetOrientation() const { return _orientation; }
 

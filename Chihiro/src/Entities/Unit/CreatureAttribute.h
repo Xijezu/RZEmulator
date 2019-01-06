@@ -74,29 +74,16 @@ struct StateMod
 {
     StateMod()
     {
+        Init();
+    }
+
+    void Init()
+    {
         fDamage = 1.0f;
         nDamage = 0;
         fCritical = 1.0f;
         nCritical = 0;
         fHate = 1.0f;
-    }
-
-    StateMod(const StateMod &src)
-    {
-        fDamage = src.fDamage;
-        nDamage = src.nDamage;
-        fCritical = src.fCritical;
-        nCritical = src.nCritical;
-        fHate = src.fHate;
-    }
-
-    void Copy(const StateMod &src)
-    {
-        fDamage = src.fDamage;
-        nDamage = src.nDamage;
-        fCritical = src.fCritical;
-        nCritical = src.nCritical;
-        fHate = src.fHate;
     }
 
     float fDamage;

@@ -1122,3 +1122,27 @@ void Messages::SendResult(WorldSession *pPlayer, NGemity::Packets pPacketID, uin
 {
     Messages::SendResult(pPlayer, static_cast<uint16>(pPacketID), result, handle);
 }
+
+void Messages::SendStateMessage(Player *pPlayer, uint32_t handle, State *pState, bool bIsCancel)
+{
+    TS_SC_STATE stateMsg{};
+    stateMsg.handle = handle;
+    stateMsg.state_handle = pState->GetUID();
+    stateMsg.state_code = pState->GetCode();
+
+    stateMsg.state_value = pState->m_nStateValue;
+    stateMsg.state_string_value = pState->m_szStateValue;
+
+    if (!bIsCancel)
+    {
+        stateMsg.state_level = pState->GetLevel();
+        if (pState->IsAura())
+            stateMsg.end_time = -1;
+        else
+            stateMsg.end_time = pState->GetEndTime();
+
+        stateMsg.start_time = pState->GetStartTime();
+    }
+
+    pPlayer->SendPacket(stateMsg);
+}

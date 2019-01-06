@@ -64,19 +64,32 @@ class State : public Object
 
     State(StateType type, StateCode code, int uid, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue);
 
+    bool IsValid(uint32_t t) const;
     bool IsHolded();
     void ReleaseRemainDuration();
+    void HoldRemainDuration();
     bool AddState(StateType type, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura);
-    StateCode GetCode() const { return m_nCode; }
-    uint16_t GetLevel() const { return (m_nLevel[0] || m_nLevel[1]) ? m_nLevel[0] + m_nLevel[1] + m_nLevel[2] : 0; }
-    uint16_t GetLevel(int idx) const { return m_nLevel[idx]; }
     void SetLevel(int idx, uint16_t level) { m_nLevel[idx] = level; }
     int GetEffectType() const;
     float GetValue(int idx) const;
     bool IsHarmful();
+    bool IsAura() const { return m_bAura; }
     bool IsDuplicatedGroup(int nGroupID);
     void SetState(int code, int uid, uint caster, const uint16 levels[], const uint durations[], const int remain_times[], uint last_fire_time, const int base_damage[], int state_value, std::string szStateValue);
     int GetTimeType() const;
+
+    bool ClearExpiredState(uint32_t t);
+
+    inline StateCode GetCode() const { return m_nCode; }
+    inline uint16_t GetUID() const { return m_nUID; }
+    inline uint16_t GetLevel() const { return (m_nLevel[0] || m_nLevel[1]) ? m_nLevel[0] + m_nLevel[1] + m_nLevel[2] : 0; }
+    inline uint16_t GetLevel(int idx) const { return m_nLevel[idx]; }
+    inline uint32_t GetStartTime() const { return (m_nStartTime[0] > m_nStartTime[1]) ? m_nStartTime[0] : m_nStartTime[1]; }
+    inline uint32_t GetStartTime(int type) const { return m_nStartTime[type]; }
+    inline uint32_t GetEndTime() const { return (m_nEndTime[0] > m_nEndTime[1]) ? m_nEndTime[0] : m_nEndTime[1]; }
+    inline uint32_t GetEndTime(int type) const { return m_nEndTime[type]; }
+    inline uint32_t GetRemainDuration() const { return (m_nRemainDuration[0] > m_nRemainDuration[1]) ? m_nRemainDuration[0] : m_nRemainDuration[1]; }
+    inline uint32_t GetRemainDuration(int type) const { return m_nRemainDuration[type]; }
 
     uint16 m_nUID;
     StateCode m_nCode;

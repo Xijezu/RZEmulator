@@ -37,11 +37,11 @@ void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player *pPlayer)
 Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
 {
 #ifdef _MSC_VER
-#   pragma warning(default:4355)
+#pragma warning(default : 4355)
 #endif
-    _mainType    = MT_NPC; // dont question it :^)
-    _subType     = ST_Summon;
-    _objType     = OBJ_MOVABLE;
+    _mainType = MT_NPC; // dont question it :^)
+    _subType = ST_Summon;
+    _objType = OBJ_MOVABLE;
     _valuesCount = BATTLE_FIELD_END;
 
     _InitValues();
@@ -61,7 +61,7 @@ void Summon::SetSummonInfo(int idx)
 {
     m_tSummonBase = sObjectMgr.GetSummonBase(idx);
     if (m_tSummonBase == nullptr)
-                ASSERT (false);
+        ASSERT(false);
     SetCurrentJob(idx);
     this->m_nTransform = m_tSummonBase->form;
 }
@@ -79,7 +79,7 @@ uint32_t Summon::GetCardHandle()
         return 0;
 }
 
-void Summon::DB_UpdateSummon(Player */*pMaster*/, Summon *pSummon)
+void Summon::DB_UpdateSummon(Player * /*pMaster*/, Summon *pSummon)
 {
     // PrepareStatement(CHARACTER_UPD_SUMMON, "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?,
     // exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?,
@@ -111,25 +111,25 @@ void Summon::DB_UpdateSummon(Player */*pMaster*/, Summon *pSummon)
 void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_SUMMON);
-    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID));         // handle
-    stmt->setInt32(1, 0);                                               // account_id
-    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID));         // owner_id
-    stmt->setInt64(3, pSummon->GetSummonCode());                        // summon_id
-    stmt->setInt64(4, pSummon->m_pItem->m_Instance.UID);                // card_uid
+    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID)); // handle
+    stmt->setInt32(1, 0);                                       // account_id
+    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID)); // owner_id
+    stmt->setInt64(3, pSummon->GetSummonCode());                // summon_id
+    stmt->setInt64(4, pSummon->m_pItem->m_Instance.UID);        // card_uid
     stmt->setUInt64(5, pSummon->GetEXP());
     stmt->setInt32(6, pSummon->GetJP());
-    stmt->setUInt64(7, 0);                                              // Last Decreased EXP
+    stmt->setUInt64(7, 0); // Last Decreased EXP
     stmt->setString(8, pSummon->GetName());
-    stmt->setInt32(9, pSummon->m_nTransform);                           // transform
+    stmt->setInt32(9, pSummon->m_nTransform); // transform
     stmt->setInt32(10, pSummon->GetLevel());
     stmt->setInt32(11, pSummon->GetCurrentJLv());
-    stmt->setInt32(12, 1);                                              // max lvl
-    stmt->setInt32(13, 0);                                              // fp
+    stmt->setInt32(12, 1); // max lvl
+    stmt->setInt32(13, 0); // fp
     stmt->setInt32(14, 0);
     stmt->setInt32(15, 0);
     stmt->setInt32(16, 0);
-    stmt->setInt32(17, 0);                                              // prev_...stuff
-    stmt->setInt32(18, 0);                                              // sp
+    stmt->setInt32(17, 0); // prev_...stuff
+    stmt->setInt32(18, 0); // sp
     stmt->setInt32(19, pSummon->GetMaxHealth());
     stmt->setInt32(20, pSummon->GetMaxMana());
     CharacterDatabase.Execute(stmt);
@@ -153,31 +153,30 @@ void Summon::processWalk(uint t)
 
 void Summon::OnAfterReadSummon()
 {
-
 }
 
 void Summon::onExpChange()
 {
     int level = 1;
-    int lvl   = 0;
-    int oblv  = 0;
-    int jp    = 0;
+    int lvl = 0;
+    int oblv = 0;
+    int jp = 0;
     switch (m_tSummonBase->form)
     {
-        case 1:
-            lvl  = 50;
-            oblv = 60;
-            break;
-        case 2:
-            lvl  = 100;
-            oblv = 115;
-            break;
-        case 3:
-            lvl  = 170;
-            oblv = 170;
-            break;
-        default:
-            return;
+    case 1:
+        lvl = 50;
+        oblv = 60;
+        break;
+    case 2:
+        lvl = 100;
+        oblv = 115;
+        break;
+    case 3:
+        lvl = 170;
+        oblv = 170;
+        break;
+    default:
+        return;
     }
     if (lvl > 1)
     {
@@ -190,7 +189,7 @@ void Summon::onExpChange()
             if (GetLevel() < level)
             {
                 ++jp;
-                if (level > oblv)  /// @todo add max level reached
+                if (level > oblv) /// @todo add max level reached
                     ++jp;
             }
         } while (level < oblv);
@@ -273,11 +272,11 @@ bool Summon::DoEvolution()
             CalculateStat();
             m_pMaster->Save(false);
 
-            TS_SC_SUMMON_EVOLUTION evoPct{ };
-            evoPct.card_handle   = m_pItem->GetHandle();
+            TS_SC_SUMMON_EVOLUTION evoPct{};
+            evoPct.card_handle = m_pItem->GetHandle();
             evoPct.summon_handle = GetHandle();
-            evoPct.name          = GetName();
-            evoPct.code          = m_tSummonBase->id;
+            evoPct.name = GetName();
+            evoPct.code = m_tSummonBase->id;
             if (IsInWorld())
             {
                 sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
@@ -323,14 +322,14 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<in
 
     switch (item->m_pItemBase->group)
     {
-        case GROUP_WEAPON:
-            pos = WEAR_WEAPON;
-            break;
-        case GROUP_ARMOR:
-            pos = WEAR_SHIELD;
-            break;
-        default:
-            return false;
+    case GROUP_WEAPON:
+        pos = WEAR_WEAPON;
+        break;
+    case GROUP_ARMOR:
+        pos = WEAR_SHIELD;
+        break;
+    default:
+        return false;
     }
 
     if (pos > 24 || pos < 0)
@@ -402,7 +401,7 @@ uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
         if (result == TS_RESULT_SUCCESS)
         {
             pItem->m_Instance.OwnSummonHandle = GetHandle();
-            pItem->m_Instance.nOwnSummonUID   = GetUInt32Value(UNIT_FIELD_UID);
+            pItem->m_Instance.nOwnSummonUID = GetUInt32Value(UNIT_FIELD_UID);
 
             GetMaster()->UpdateQuestStatusByItemUpgrade();
         }
@@ -422,7 +421,7 @@ uint16 Summon::putoffItem(ItemWearType pos)
         if (m_anWear[pos] != nullptr)
         {
             m_anWear[pos]->m_Instance.OwnSummonHandle = 0;
-            m_anWear[pos]->m_Instance.nOwnSummonUID   = 0;
+            m_anWear[pos]->m_Instance.nOwnSummonUID = 0;
 
             result = Unit::putoffItem(pos);
         }
@@ -446,7 +445,7 @@ void Summon::onModifyStatAndAttribute()
 
 void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
 {
-/*
+    /*
    StructSummon *v7; // esi@1
   c_fixed<10000> *v8; // eax@6
   double v9; // st7@6
@@ -565,6 +564,20 @@ bool Summon::IsAlly(const Unit *pTarget)
     return GetMaster()->IsAlly(pTarget);
 }
 
+void Summon::onAfterRemoveState(State *state)
+{
+    SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
+    Unit::onAfterRemoveState(state);
+}
+
+void Summon::onUpdateState(State *state, bool bIsExpire)
+{
+    if (GetMaster() != nullptr && GetMaster()->IsInWorld())
+        Messages::SendStateMessage(GetMaster(), GetHandle(), state, bIsExpire);
+
+    Unit::onUpdateState(state, bIsExpire);
+}
+
 void Summon::applyPassiveSkillEffect()
 {
     if (GetMaster() == nullptr)
@@ -586,24 +599,19 @@ void Summon::applyPassiveSkillAmplifyEffect(Skill *pSkill)
 {
     switch (pSkill->m_SkillBase->effect_type)
     {
-        case EF_AMPLIFY_SUMMON_HP_MP_SP:
-        {
-            auto test = (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd)));
-            auto t2   = GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER);
-            auto res  = test + t2;
-            SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER)
-                                                          + (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-            SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER)
-                                                        + (pSkill->m_SkillBase->var[2] + (pSkill->m_SkillBase->var[3] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-            // MAX SP var[4] var[5]
-            SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, GetFloatValue(UNIT_FIELD_HP_REGEN_MOD)
-                                                   + (pSkill->m_SkillBase->var[6] + (pSkill->m_SkillBase->var[7] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-            SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, GetFloatValue(UNIT_FIELD_MP_REGEN_MOD)
-                                                   + (pSkill->m_SkillBase->var[8] + (pSkill->m_SkillBase->var[9] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-        }
-            return;
-        default:
-            return;
+    case EF_AMPLIFY_SUMMON_HP_MP_SP:
+    {
+        auto test = (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd)));
+        auto t2 = GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER);
+        auto res = test + t2;
+        SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+        SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + (pSkill->m_SkillBase->var[2] + (pSkill->m_SkillBase->var[3] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+        // MAX SP var[4] var[5]
+        SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, GetFloatValue(UNIT_FIELD_HP_REGEN_MOD) + (pSkill->m_SkillBase->var[6] + (pSkill->m_SkillBase->var[7] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+        SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, GetFloatValue(UNIT_FIELD_MP_REGEN_MOD) + (pSkill->m_SkillBase->var[8] + (pSkill->m_SkillBase->var[9] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+    }
+        return;
+    default:
+        return;
     }
 }
-

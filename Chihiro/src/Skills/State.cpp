@@ -24,45 +24,77 @@ State::State(StateType type, StateCode code, int uid, uint caster, uint16 level,
 {
     init(uid, (int)code);
     m_nCode = code;
-    m_nLevel[(int)type] = level;
-    m_hCaster[(int)type] = caster;
-    m_nBaseDamage[(int)type] = base_damage;
-    m_nStartTime[(int)type] = start_time;
-    m_nEndTime[(int)type] = end_time;
+
+    m_nLevel[0] = m_nLevel[1] = m_nLevel[2] = 0;
+    m_hCaster[0] = m_hCaster[1] = m_hCaster[2] = 0;
+    m_nStartTime[0] = m_nStartTime[1] = m_nStartTime[2] = 0;
+    m_nEndTime[0] = m_nEndTime[1] = m_nEndTime[2] = 0;
+    m_nRemainDuration[0] = m_nRemainDuration[1] = m_nRemainDuration[2] = 0;
+
+    m_nLevel[type] = level;
+    m_hCaster[type] = caster;
+    m_nBaseDamage[type] = base_damage;
+    m_nStartTime[type] = start_time;
+    m_nEndTime[type] = end_time;
     m_bAura = bIsAura;
+
+    m_nTotalDamage = 0;
     m_nLastProcessedTime = sWorld.GetArTime();
+
     m_nStateValue = nStateValue;
     m_szStateValue = std::move(szStateValue);
 }
 
 bool State::IsHolded()
 {
-    auto v1 = m_nRemainDuration[0];
-    auto v2 = m_nRemainDuration[1];
-    if (v1 <= v2)
-        v1 = v2;
-    return v1 != 0;
+    return GetRemainDuration() != 0;
 }
 
 void State::ReleaseRemainDuration()
 {
+    if (!IsHolded())
+        return;
+
+    auto t = sWorld.GetArTime();
+
+    m_nEndTime[0] = t + m_nRemainDuration[0];
+    m_nEndTime[1] = t + m_nRemainDuration[1];
+    m_nEndTime[2] = t + m_nRemainDuration[2];
+
+    m_nRemainDuration[0] = m_nRemainDuration[1] = m_nRemainDuration[2] = 0;
+
+    m_bAura = false;
+}
+
+void State::HoldRemainDuration()
+{
+    if (IsHolded() || IsAura())
+        return;
+
+    auto t = sWorld.GetArTime();
+
+    m_nRemainDuration[0] = m_nEndTime[0] - t;
+    m_nRemainDuration[1] = m_nEndTime[1] - t;
+    m_nRemainDuration[2] = m_nEndTime[2] - t;
+
+    m_nEndTime[0] = m_nEndTime[1] = m_nEndTime[2] = -1;
+    m_bAura = true;
 }
 
 bool State::AddState(StateType type, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura)
 {
-    if (m_nLevel[(int)type] <= level)
-    {
-        m_nLevel[(int)type] = level;
-        m_nEndTime[(int)type] = end_time;
-        m_nBaseDamage[(int)type] = base_damage;
-        m_hCaster[(int)type] = caster;
-        m_nStartTime[(int)type] = start_time;
-        m_nEndTime[(int)type] = end_time;
-        m_bAura = bIsAura;
-        m_nLastProcessedTime = start_time;
-        return true;
-    }
-    return false;
+    if (m_nLevel[type] > level)
+        return false;
+
+    m_nLevel[type] = level;
+    m_nBaseDamage[type] = base_damage;
+    m_nStartTime[type] = start_time;
+    m_nEndTime[type] = end_time;
+    m_hCaster[type] = caster;
+    m_nLastProcessedTime = start_time;
+    m_bAura = bIsAura;
+
+    return true;
 }
 
 int State::GetEffectType() const
@@ -84,13 +116,14 @@ bool State::IsDuplicatedGroup(int nGroupID)
 {
     if (m_pTemplate == nullptr)
         return false;
-    return (m_pTemplate->duplicate_group[0] != 0 && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] != 0 && m_pTemplate->duplicate_group[1] == nGroupID) || (m_pTemplate->duplicate_group[2] != 0 && m_pTemplate->duplicate_group[2] == nGroupID);
+    return ((m_pTemplate->duplicate_group[0] && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] && m_pTemplate->duplicate_group[1] == nGroupID) || (m_pTemplate->duplicate_group[2] && m_pTemplate->duplicate_group[2] == nGroupID));
 }
 
 void State::SetState(int code, int uid, uint caster, const uint16 *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)
 {
     uint t = sWorld.GetArTime();
     init(uid, code);
+    m_nCode = (StateCode)code;
 
     for (int i = 0; i < 3; i++)
     {
@@ -98,33 +131,58 @@ void State::SetState(int code, int uid, uint caster, const uint16 *levels, const
         m_hCaster[i] = caster;
         m_nBaseDamage[i] = base_damage[i];
 
-        if (durations[i] != 0)
+        if (durations[i])
         {
-            uint v = 0;
-            if (t <= durations[i] - remain_times[i])
-                v = 0;
-            else
-                v = (t + remain_times[i] - durations[i]);
-            m_nStartTime[i] = v;
-            m_nEndTime[i] = (uint)remain_times[i];
-            if (m_nEndTime[i] != 0xffffffff)
-                m_nEndTime[i] += t;
+            m_nStartTime[i] = t > (durations[i] - remain_times[i]) ? t - (durations[i] - remain_times[i]) : 0;
+            m_nEndTime[i] = remain_times[i] == -1 ? -1 : t + remain_times[i];
         }
         else
         {
-            m_nEndTime[i] = 0;
-            m_nStartTime[i] = 0;
+            m_nStartTime[i] = m_nEndTime[i] = 0;
         }
     }
+
     m_nLastProcessedTime = last_fire_time;
     m_nStateValue = state_value;
     m_szStateValue = std::move(szStateValue);
-    m_nCode = (StateCode)code;
 }
 
 int State::GetTimeType() const
 {
     return m_pTemplate != nullptr ? m_pTemplate->state_time_type : 0;
+}
+
+bool State::ClearExpiredState(uint32_t t)
+{
+    bool bFlag = false;
+
+    if (m_nLevel[0] && m_nEndTime[0] < t)
+    {
+        m_nLevel[0] = 0;
+        bFlag = true;
+    }
+    if (m_nLevel[1] && m_nEndTime[1] < t)
+    {
+        m_nLevel[1] = 0;
+        bFlag = true;
+    }
+    if ((m_nLevel[2] && m_nEndTime[2] < t) ||
+        (!m_nLevel[0] && !m_nLevel[1]))
+    {
+        m_nLevel[2] = 0;
+        bFlag = true;
+    }
+
+    return bFlag;
+}
+
+bool State::IsValid(uint32_t t) const
+{
+    if (m_nLevel[0] && m_nEndTime[0] > t)
+        return true;
+    if (m_nLevel[1] && m_nEndTime[1] > t)
+        return true;
+    return false;
 }
 
 void State::init(int uid, int code)
