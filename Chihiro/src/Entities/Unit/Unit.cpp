@@ -901,57 +901,70 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
 
 DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag)
 {
-    DamageInfo result{};
+    DamageInfo damage_info{};
+
     int nTargetGroup = pFrom->GetCreatureGroup();
-    bool bRange;
-    int damage{};
     StateMod damageReduceByState{};
 
-    if ((pFrom->IsUsingBow() || pFrom->IsUsingCrossBow()) && pFrom->IsPlayer())
-    {
-        bRange = true;
-        // @todo: Damage reduce by state
-    }
+    bool bRange = (pFrom->IsUsingBow() || pFrom->IsUsingCrossBow()) && pFrom->IsPlayer();
+
+    if (bRange)
+        damageReduceByState = m_RangeStatePenalty;
     else
+        damageReduceByState = m_NormalStatePenalty;
+
+    for (auto &dit : m_vDamageReduceValueInfo)
     {
-        bRange = false;
-        // @todo: Damage reduce by state
+        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
+            damageReduceByState.nDamage -= dit.physical_reduce;
     }
 
-    // Do damage reduce
+    float fReduce{0.0f};
+    for (auto &dit : m_vDamageReducePercentInfo)
+    {
+        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
+        {
+            damageReduceByState.fDamage -= dit.physical_reduce;
+            if (damageReduceByState.fDamage < 0.0f)
+                damageReduceByState.fDamage = 0.0f;
+        }
+    }
 
     if (nDamage < 0)
         nDamage = 0;
 
-    Damage d{};
     if (bRange)
-    {
-        d = DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
-    }
+        damage_info.SetDamage(DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, &damageReduceByState, &(pFrom->m_RangeStateAdvantage)));
     else
+        damage_info.SetDamage(DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, &damageReduceByState, &(pFrom->m_NormalStateAdvantage)));
+
+    if (!damage_info.bMiss && !damage_info.bPerfectBlock)
     {
-        d = DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
-    }
-    result.SetDamage(d);
-    if (!result.bMiss && !result.bPerfectBlock)
-    {
-        std::vector<AdditionalDamageInfo> v_add = bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage;
-        for (auto &addi : v_add)
+        std::vector<AdditionalDamageInfo> AdditionalDamage{};
+        if (bRange)
+            AdditionalDamage = (pFrom->m_vRangeAdditionalDamage);
+        else
+            AdditionalDamage = (pFrom->m_vNormalAdditionalDamage);
+
+        for (auto &it : AdditionalDamage)
         {
-            if (addi.ratio > (uint8)((uint)rand32() % 100))
+            if (it.ratio > irand(1, 100))
             {
-                if (addi.nDamage != 0)
-                    damage = addi.nDamage;
+                int damage{0};
+                if (it.nDamage != 0)
+                    damage = it.nDamage;
                 else
-                    damage = (int)(addi.fDamage * (float)result.nDamage);
-                Damage dd = DealDamage(pFrom, damage, addi.type, DT_ADDITIONAL_DAMAGE, 0, 0, 0, nullptr, nullptr);
-                result.nDamage += dd.nDamage;
+                    damage = it.fDamage * damage_info.nDamage;
+
+                damage = DealAdditionalDamage(pFrom, damage, it.type).nDamage;
+                damage_info.elemental_damage[it.type] += damage;
+                damage_info.nDamage += damage;
             }
         }
     }
 
-    result.target_hp = GetHealth();
-    return result;
+    damage_info.target_hp = GetHealth();
+    return damage_info;
 }
 
 Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, DamageType damageType, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
@@ -1121,6 +1134,11 @@ Damage Unit::DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType elemen
 Damage Unit::DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
+}
+
+Damage Unit::DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+{
+    return DealDamage(pFrom, nDamage, elemental_type, DT_ADDITIONAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage)

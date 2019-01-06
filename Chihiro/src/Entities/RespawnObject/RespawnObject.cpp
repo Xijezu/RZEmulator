@@ -24,7 +24,7 @@
 RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo(rh))
 {
     m_nMaxRespawnNum = info.prespawn_count;
-    lastDeadTime     = 0;
+    lastDeadTime = 0;
 }
 
 void RespawnObject::Update(uint diff)
@@ -43,7 +43,7 @@ void RespawnObject::Update(uint diff)
 
     if (lastDeadTime == 0)
     {
-        lastDeadTime  = ct;
+        lastDeadTime = ct;
         respawn_count = m_nMaxRespawnNum;
     }
 
