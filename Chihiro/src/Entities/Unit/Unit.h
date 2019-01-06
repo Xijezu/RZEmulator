@@ -612,7 +612,7 @@ class Unit : public WorldObject
     float m_nRegenHP{}, m_fRegenMP{};
 
   private:
-    std::unordered_map<int, int32_t> m_vAura{};
+    std::vector<std::pair<Skill *, int32_t>> m_vAura{};
     std::vector<Skill *> m_vSkillList{};
     std::vector<Skill *> m_vActiveSkillList{};
     std::vector<Skill *> m_vPassiveSkillList{};

@@ -23,7 +23,8 @@
 class XPacket;
 class Unit;
 
-enum SkillStatus : int {
+enum SkillStatus : int
+{
   SS_IDLE = 0,
   SS_CAST = 1,
   SS_FIRE = 2,
@@ -31,11 +32,21 @@ enum SkillStatus : int {
 };
 
 struct SkillTargetFunctor;
-class Skill {
+class Skill
+{
   friend class SkillProp;
   friend class Unit;
 
 public:
+  enum
+  {
+    MAX_SKILL_LEVEL = 50,
+    MAX_TOGGLE_GROUP = 20,
+    MAX_SKILL_VALUE = 20,
+    TOGGLE_REFRESH_TIME = 500,
+    TOGGLE_LIVE_TIME = 1100,
+  };
+
   friend struct SkillTargetFunctor;
   Skill() = delete;
   Skill(Unit *pOwner, int64 _uid, int _id);
@@ -135,32 +146,15 @@ protected:
   void Init();
 
 private:
-  enum {
-    MAX_SKILL_LEVEL = 50,
-    MAX_TOGGLE_GROUP = 20,
-    MAX_SKILL_VALUE = 20,
-    TOGGLE_REFRESH_TIME = 500,
-    TOGGLE_LIVE_TIME = 1100,
-  };
-
   int InitError(uint16_t);
-
   uint32_t GetAuraMPDecTime() { return m_nAuraMPDecTime; }
-
   void SetAuraMPDecTime(uint32_t nTime) { m_nAuraMPDecTime = nTime; }
-
   uint32_t GetAuraRefreshTime() { return m_nAuraRefreshTime; }
-
   void SetAuraRefreshTime(uint32_t nTime) { m_nAuraRefreshTime = nTime; }
-
   uint32_t GetTargetHandle() const { return m_hTarget; }
-
   Position GetTargetPosition() const { return m_targetPosition; }
-
   uint32_t GetCastingTime() const { return m_nFireTime - m_nCastTime; }
-
   uint32_t GetOriginalCastingDelay() const { return m_nCastingDelay; }
-
   std::vector<SkillResult> m_vResultList{};
   void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
   void FireSkill(Unit *pTarget, bool &bIsSuccess);

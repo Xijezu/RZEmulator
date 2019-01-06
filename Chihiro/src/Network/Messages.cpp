@@ -771,36 +771,28 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel)
 {
     TS_SC_STATE statePct{};
     statePct.handle = pUnit->GetHandle();
-    statePct.state_code = pState->m_nCode;
-    //statePct.state_code = pState->m_nUID;
+    statePct.state_handle = pState->GetUID();
+    statePct.state_code = pState->GetCode();
 
     if (!bIsCancel)
     {
         statePct.state_level = pState->GetLevel();
-        uint t{};
-        if (!pState->m_bAura)
-        {
-            t = pState->m_nEndTime[0];
-            if (t <= pState->m_nEndTime[1])
-                t = pState->m_nEndTime[1];
-            statePct.end_time = t;
-        }
-        else
+
+        if (pState->IsAura())
         {
             statePct.end_time = -1;
         }
-
-        t = pState->m_nStartTime[1];
-        if (pState->m_nStartTime[0] > t)
-            t = pState->m_nStartTime[0];
-        statePct.start_time = t;
+        else
+        {
+            statePct.end_time = pState->GetEndTime();
+        }
+        statePct.start_time = pState->GetStartTime();
     }
 
     statePct.state_value = pState->m_nStateValue;
     statePct.state_string_value = pState->m_szStateValue;
 
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), statePct);
+    sWorld.Broadcast(pUnit->GetRX(), pUnit->GetRY(), pUnit->GetLayer(), statePct);
 }
 
 void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode)
