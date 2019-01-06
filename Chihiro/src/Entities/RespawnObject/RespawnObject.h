@@ -17,15 +17,14 @@
 */
 #include "Common.h"
 #include "Monster.h"
+#include "GameRule.h"
 
 struct RespawnInfo : public MonsterRespawnInfo
 {
     explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info)
     {
-        count              = 0;
-        prespawn_count     = info.max_num / 2;
-        if (prespawn_count < 1 || dungeon_id != 0 || way_point_id != 0)
-            prespawn_count = info.max_num;
+        prespawn_count = (!info.dungeon_id && !info.way_point_id && (info.max_num * GameRule::MONSTER_PRESPAWN_RATE >= 1.0f)) ? (info.max_num * GameRule::MONSTER_PRESPAWN_RATE) : info.max_num;
+        way_point_id = info.way_point_id;
     }
 
     uint count;
@@ -34,21 +33,21 @@ struct RespawnInfo : public MonsterRespawnInfo
 
 class RespawnObject : public MonsterDeleteHandler
 {
-    public:
-        explicit RespawnObject(MonsterRespawnInfo rh);
-        ~RespawnObject() = default;
+  public:
+    explicit RespawnObject(MonsterRespawnInfo rh);
+    ~RespawnObject() = default;
 
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        RespawnObject(const RespawnObject &) = delete;
-        RespawnObject &operator=(const RespawnObject &) = delete;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    RespawnObject(const RespawnObject &) = delete;
+    RespawnObject &operator=(const RespawnObject &) = delete;
 
-        void onMonsterDelete(Monster *mob) override;
-        void Update(uint diff);
+    void onMonsterDelete(Monster *mob) override;
+    void Update(uint diff);
 
-    private:
-        RespawnInfo       info;
-        uint              m_nMaxRespawnNum;
-        std::vector<uint> m_vRespawnedMonster;
-        uint              lastDeadTime;
+  private:
+    RespawnInfo info;
+    uint m_nMaxRespawnNum;
+    std::vector<uint> m_vRespawnedMonster;
+    uint lastDeadTime;
 };

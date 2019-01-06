@@ -48,6 +48,7 @@ public:
   constexpr static int MAX_STATE_LEVEL = 65535;
   constexpr static float fPVPDamageRateForPlayer{0.2f};
   constexpr static float fPVPDamageRateForSummon{0.13f};
+  constexpr static float MONSTER_PRESPAWN_RATE{0.5f};
 
 private:
   static int _chipLevelLimit[];
