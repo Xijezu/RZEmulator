@@ -44,8 +44,10 @@ public:
   constexpr static float DEFAULT_UNIT_SIZE{12.0f};
   constexpr static int SKILL_CAST_COST{0};
   constexpr static int ATTACK_RANGE_UNIT{100};
+  constexpr static float MAX_ATTACK_RANGE{0.84f};
   constexpr static float REFLECT_RANGE{4.0f * DEFAULT_UNIT_SIZE};
-  constexpr static int MAX_STATE_LEVEL = 65535;
+  constexpr static int MAX_STATE_LEVEL{65535};
+  constexpr static float UNMOUNT_PENALTY{0.05f};
   constexpr static float fPVPDamageRateForPlayer{0.2f};
   constexpr static float fPVPDamageRateForSummon{0.13f};
   constexpr static float MONSTER_PRESPAWN_RATE{0.5f};

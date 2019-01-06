@@ -38,6 +38,20 @@ enum BONUS_TYPE : int
     MAX_BONUS_TYPE = 0x3,
 };
 
+enum MOUNT_MODE : uint8_t
+{
+    MOUNT_NOTHING = 0,
+    MOUNT_ON_MAIN = 1,
+    MOUNT_ON_SUB = 2,
+};
+
+enum UNMOUNT_TYPE : uint8_t
+{
+    UNMOUNT_NORMAL = 0,
+    UNMOUNT_FALL = 1,
+    UNMOUNT_UNSUMMON = 2,
+};
+
 enum TRADE_MODE : int
 {
     TM_REQUEST_TRADE = 0,
@@ -116,25 +130,22 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     Quest *FindQuest(int code);
     bool DropQuest(int code);
 
+    Summon *GetRideObject() const;
+    uint32_t GetRideHandle() const;
+
     /* ****************** QUEST END *******************/
 
     int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
-
     int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
-
     uint32_t GetTamingTarget() const { return m_hTamingTarget; }
-
     Summon *GetMainSummon() const { return m_pMainSummon; }
-
     Summon *GetSubSummon() const { return m_pSubSummon; }
-
     int64 GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
-
     int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
-
     int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
-
     int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
+    bool HasRidingState() { return GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0; }
+    bool IsRiding() { return GetInt32Value(PLAYER_FIELD_RIDING_IDX) != MOUNT_NOTHING; }
 
     int AddStamina(int nStamina);
     int GetStaminaRegenRate();
@@ -178,6 +189,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     Summon *GetSummon(int);
     Summon *GetSummonByHandle(uint);
     void AddSummon(Summon *, bool);
+    void UnMount(const uint8_t flag = UNMOUNT_NORMAL, Unit *pCauser = nullptr);
 
     // Database
     void Update(uint diff) override;

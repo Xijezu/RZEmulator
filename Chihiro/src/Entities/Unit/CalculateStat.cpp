@@ -36,30 +36,77 @@ void Unit::CalculateStat()
     auto prev_hp = GetHealth();
     auto prev_mp = GetMana();
 
-    SetInt32Value(UNIT_FIELD_MAX_ENERGY, 5);
     SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, 1.0f);
+    SetInt32Value(UNIT_FIELD_MAX_HEALTH, 1);
+    SetInt32Value(UNIT_FIELD_MAX_MANA, 1);
+
+    SetFloatValue(UNIT_FIELD_HEAL_RATIO, 1.0f);
+    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO, 1.0f);
+    SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM, 1.0f);
+    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM, 1.0f);
+    SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_REST, 1.0f);
+    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_REST, 2.0f);
 
     SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, 1.0f);
     SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, 1.0f);
 
-    SetFloatValue(UNIT_FIELD_HEAL_RATIO, 1.0f);
-    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO, 1.0f);
-
-    SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM, 1.0f);
-    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM, 1.0f);
-
-    SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_REST, 1.0f);
-    SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_REST, 2.0f);
-
-    SetInt32Value(UNIT_FIELD_MAX_HEALTH, 1);
-    SetInt32Value(UNIT_FIELD_MAX_MANA, 1);
-
     SetInt32Value(UNIT_FIELD_ADDITIONAL_HEAL, 0);
     SetInt32Value(UNIT_FIELD_ADDITIONAL_MP_HEAL, 0);
 
+    SetFloatValue(UNIT_FIELD_PHYSICAL_MANASHIELD_ABSORB_RATIO, 0.0f);
+    SetFloatValue(UNIT_FIELD_MAGICAL_MANASHIELD_ABSORB_RATIO, 0.0f);
+
+    m_vStateByNormalAttack.clear();
+    m_vStateByHelpfulPhysicalSkill.clear();
+    m_vStateByHelpfulMagicalSkill.clear();
+    m_vStateByHarmfulPhysicalSkill.clear();
+    m_vStateByHarmfulMagicalSkill.clear();
+
+    m_vStateByBeingNormalAttacked.clear();
+    m_vStateByBeingHelpfulPhysicalSkilled.clear();
+    m_vStateByBeingHelpfulMagicalSkilled.clear();
+    m_vStateByBeingHarmfulPhysicalSkilled.clear();
+    m_vStateByBeingHarmfulMagicalSkilled.clear();
+
+    m_vAmplifyPassiveSkillList.clear();
+    m_vAbsorbByNormalAttack.clear();
+    m_vHealOnAttack.clear();
+
+    m_vInterruptedSkill.clear();
+    m_vAllowedSkill.clear();
+
+    m_vAddHPMPOnCritical.clear();
+
+    m_vDamageReducePercentInfo.clear();
+    m_vDamageReduceValueInfo.clear();
+
+    m_NormalStateAdvantage.Init();
+    m_RangeStateAdvantage.Init();
+    m_NormalStatePenalty.Init();
+    m_RangeStatePenalty.Init();
+    m_PhysicalSkillStatePenalty.Init();
+    m_MagicalSkillStatePenalty.Init();
+    m_StateStatePenalty.Init();
+
+    for (int i = 0; i < ElementalType::TYPE_COUNT; ++i)
+    {
+        m_GoodPhysicalElementalSkillStateMod[i].Init();
+        m_BadPhysicalElementalSkillStateMod[i].Init();
+        m_GoodMagicalElementalSkillStateMod[i].Init();
+        m_BadMagicalElementalSkillStateMod[i].Init();
+    }
+
     SetFlag(UNIT_FIELD_STATUS, (STATUS_ATTACKABLE | STATUS_SKILL_CASTABLE | STATUS_MOVABLE | STATUS_MAGIC_CASTABLE | STATUS_ITEM_USABLE | STATUS_MORTAL));
     RemoveFlag(UNIT_FIELD_STATUS, (STATUS_HIDING | STATUS_HAVOC_BURST | STATUS_FEARED | STATUS_FORM_CHANGED | STATUS_MOVE_SPEED_FIXED | STATUS_HP_REGEN_STOPPED | STATUS_MP_REGEN_STOPPED));
+    SetInt32Value(UNIT_FIELD_HIDE_DETECTION_RANGE, 0);
+
+    if (IsSummon())
+        SetInt32Value(UNIT_FIELD_MAX_ENERGY, 5);
+    else
+        SetInt32Value(UNIT_FIELD_MAX_ENERGY, 0);
+
+    m_nDoubleWeaponMasteryLevel = 0;
 
     m_cStatByState.Reset(0);
     m_StatAmplifier.Reset(0.0f);
@@ -68,10 +115,15 @@ void Unit::CalculateStat()
     m_Attribute.Reset(0);
     m_Resist.Reset(0);
     m_ResistAmplifier.Reset(0.0f);
+
     m_vNormalAdditionalDamage.clear();
     m_vRangeAdditionalDamage.clear();
-    m_vMagicalSkillAdditionalDamage.clear();
     m_vPhysicalSkillAdditionalDamage.clear();
+    m_vMagicalSkillAdditionalDamage.clear();
+    m_vDamageReflectInfo.clear();
+    m_vStateReflectInfo.clear();
+    m_vHateMod.clear();
+    m_vStealOnAttack.clear();
 
     auto statptr = GetBaseStat();
     CreatureStat basestat{};
@@ -79,10 +131,12 @@ void Unit::CalculateStat()
         basestat.Copy(*statptr);
     m_cStat.Copy(basestat);
     onBeforeCalculateStat();
+
     // checkAdditionalItemEffect(); -> Nonexistant in epic 4
+
     applyStatByItem();
     applyJobLevelBonus();
-    stateStat.Copy(m_cStat);
+    stateStat = m_cStat;
     applyStatByState();
     m_cStatByState.strength += (m_cStat.strength - stateStat.strength);
     m_cStatByState.vital += (m_cStat.vital - stateStat.vital);
@@ -92,8 +146,8 @@ void Unit::CalculateStat()
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
     // TODO onApplyStat -> Beltslots, Summonstatamplify?
-    // TODO amplifyStatByItem -> Nonexistant atm, used for set effects?
-    stateStat.Copy(m_cStat);
+    // TODO amplifyStatByItem -> Nonexistant atm, used for set effects?  //@ TODO
+    stateStat = m_cStat;
     getAmplifiedStatByAmplifier(stateStat);
     amplifyStatByState();
     getAmplifiedStatByAmplifier(m_cStat);
@@ -167,6 +221,59 @@ void Unit::CalculateStat()
             if (s != nullptr)
                 Messages::SendHPMPMessage(s->GetMaster(), this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
         }
+    }
+}
+
+void Unit::applyPassiveSkillAmplifyEffect()
+{
+    if (m_vAmplifyPassiveSkillList.empty())
+        return;
+
+    for (auto &it : m_vAmplifyPassiveSkillList)
+    {
+        applyPassiveSkillAmplifyEffect(it);
+    }
+}
+
+void Unit::applyPassiveSkillAmplifyEffect(Skill *pSkill)
+{
+    bool bFighterArmor = false;
+    bool bHunterArmor = false;
+    bool bMagicianArmor = false;
+    bool bSummonerArmor = false;
+
+    auto armor_class = GetArmorClass();
+
+    if (armor_class == CLASS_FIGHTER_ARMOR)
+        bFighterArmor = true;
+    else if (armor_class == CLASS_HUNTER_ARMOR)
+        bHunterArmor = true;
+    else if (armor_class == CLASS_MAGICIAN_ARMOR)
+        bMagicianArmor = true;
+    else if (armor_class == CLASS_SUMMONER_ARMOR)
+        bSummonerArmor = true;
+
+    if (pSkill->GetSkillId() == SKILL_AMORY_UNIT && bFighterArmor)
+        m_AttributeAmplifier.fDefence += pSkill->GetVar(0);
+
+    switch (pSkill->GetSkillBase()->GetSkillEffectType())
+    {
+    case EF_AMPLIFY_HP_MP:
+    {
+        float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float fMaxMPInc = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float fHPRegenInc = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
+        float fMPRegenInc = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
+
+        /*m_fMaxHPAmplifier += fMaxHPInc;
+        m_fMaxMPAmplifier += fMaxMPInc;*/
+        m_AttributeAmplifier.fHPRegenPercentage += fHPRegenInc;
+        m_AttributeAmplifier.fMPRegenPercentage += fMPRegenInc;
+    }
+    break;
+
+    default:
+        break;
     }
 }
 
@@ -1476,209 +1583,183 @@ void Unit::applyItemEffect()
 
 void Unit::ampParameter2(uint nBitset, float fValue)
 {
+    if (nBitset & FLAG_ET_NONE_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_NONE] += fValue;
 
-    if ((nBitset & 1) != 0)
+    if (nBitset & FLAG_ET_FIRE_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_FIRE] += fValue;
+
+    if (nBitset & FLAG_ET_WATER_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_WATER] += fValue;
+
+    if (nBitset & FLAG_ET_WIND_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_WIND] += fValue;
+
+    if (nBitset & FLAG_ET_EARTH_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_EARTH] += fValue;
+
+    if (nBitset & FLAG_ET_LIGHT_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_LIGHT] += fValue;
+
+    if (nBitset & FLAG_ET_DARK_RESIST)
+        m_ResistAmplifier.fResist[ElementalType::TYPE_DARK] += fValue;
+
+    if (nBitset & FLAG_ET_NONE_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[0] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_NONE, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_NONE, 0, fValue));
     }
-    if ((nBitset & 2) != 0)
+
+    if (nBitset & FLAG_ET_FIRE_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[1] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_FIRE, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_FIRE, 0, fValue));
     }
-    if ((nBitset & 4) != 0)
+
+    if (nBitset & FLAG_ET_WATER_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[2] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WATER, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WATER, 0, fValue));
     }
-    if ((nBitset & 8) != 0)
+
+    if (nBitset & FLAG_ET_WIND_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[3] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WIND, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WIND, 0, fValue));
     }
-    if ((nBitset & 0x10) != 0)
+
+    if (nBitset & FLAG_ET_EARTH_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[4] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_EARTH, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_EARTH, 0, fValue));
     }
-    if ((nBitset & 0x20) != 0)
+
+    if (nBitset & FLAG_ET_LIGHT_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[5] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_LIGHT, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_LIGHT, 0, fValue));
     }
-    if ((nBitset & 0x40) != 0)
+
+    if (nBitset & FLAG_ET_DARK_ADDITIONAL_DAMAGE)
     {
-        m_ResistAmplifier.fResist[6] += fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_DARK, 0, fValue));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_DARK, 0, fValue));
     }
-    if ((nBitset & 0x200000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
-    }
-    if ((nBitset & 0x400000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
-    }
-    if ((nBitset & 0x800000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
-    }
-    if ((nBitset & 0x1000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
-    }
-    if ((nBitset & 0x2000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
-    }
-    if ((nBitset & 0x4000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
-    }
-    if ((nBitset & 0x8000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
-    }
-    if ((nBitset & 0x10000000) != 0)
-    {
+
+    if (nBitset & FLAG_CRITICAL_DAMAGE)
         m_AttributeAmplifier.fCriticalPower += fValue;
-    }
-    if ((nBitset & 0x20000000) != 0)
+
+    if (nBitset & FLAG_HP_REGEN_STOP)
         SetFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED);
-    if ((nBitset & 0x40000000) != 0)
+
+    if (nBitset & FLAG_MP_REGEN_STOP)
         SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
 void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
 {
-
     if (bStat)
     {
-        if ((nBitset & 1) != 0)
-        {
+        if (nBitset & FLAG_STR)
             m_StatAmplifier.strength += fValue;
-        }
-        if ((nBitset & 2) != 0)
-        {
+        if (nBitset & FLAG_VIT)
             m_StatAmplifier.vital += fValue;
-        }
-        if ((nBitset & 4) != 0)
-        {
+        if (nBitset & FLAG_AGI)
             m_StatAmplifier.agility += fValue;
-        }
-        if ((nBitset & 8) != 0)
-        {
+        if (nBitset & FLAG_DEX)
             m_StatAmplifier.dexterity += fValue;
-        }
-        if ((nBitset & 0x10) != 0)
-        {
+        if (nBitset & FLAG_INT)
             m_StatAmplifier.intelligence += fValue;
-        }
-        if ((nBitset & 0x20) != 0)
-        {
+        if (nBitset & FLAG_MEN)
             m_StatAmplifier.mentality += fValue;
-        }
-        if ((nBitset & 0x40) != 0)
-        {
+        if (nBitset & FLAG_LUK)
             m_StatAmplifier.luck += fValue;
-        }
     }
     else
     {
-        auto p = dynamic_cast<Player *>(this);
-        if ((nBitset & 0x80) != 0)
+        if (nBitset & FLAG_ATTACK_POINT)
         {
             m_AttributeAmplifier.fAttackPointRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-            {
+            if (IsUsingDoubleWeapon())
                 m_AttributeAmplifier.fAttackPointLeft += fValue;
-            }
         }
-        if ((nBitset & 0x100) != 0)
-        {
+        if (nBitset & FLAG_MAGIC_POINT)
             m_AttributeAmplifier.fMagicPoint += fValue;
-        }
-        if ((nBitset & 0x200) != 0)
-        {
+        if (nBitset & FLAG_DEFENCE)
             m_AttributeAmplifier.fDefence += fValue;
-        }
-        if ((nBitset & 0x400) != 0)
-        {
+        if (nBitset & FLAG_MAGIC_DEFENCE)
             m_AttributeAmplifier.fMagicDefence += fValue;
-        }
-        if ((nBitset & 0x800) != 0)
+        if (nBitset & FLAG_ATTACK_SPEED)
         {
             m_AttributeAmplifier.fAttackSpeedRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-            {
+            if (IsUsingDoubleWeapon())
                 m_AttributeAmplifier.fAttackSpeedLeft += fValue;
-            }
         }
-        if ((nBitset & 0x1000) != 0)
-        {
+
+        if (nBitset & FLAG_CAST_SPEED)
             m_AttributeAmplifier.fCastingSpeed += fValue;
-        }
-        if ((nBitset & 0x2000) != 0)
+
+        if (nBitset & FLAG_MOVE_SPEED)
         {
-            if (p == nullptr || true /*|| p->m_nRidingStateUid == 0*/)
-            {
+            if (!IsPlayer() || false /* !static_cast<StructPlayer *>(this)->HasRidingState()*/)
                 m_AttributeAmplifier.fMoveSpeed += fValue;
-            }
         }
-        if ((nBitset & 0x4000) != 0)
+
+        if (nBitset & FLAG_ACCURACY)
         {
             m_AttributeAmplifier.fAccuracyRight += fValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-            {
-                m_AttributeAmplifier.fAccuracyLeft += fValue;
-            }
-        }
-        if ((nBitset & 0x8000) != 0)
-        {
-            m_AttributeAmplifier.fMagicAccuracy += fValue;
-        }
-        if ((nBitset & 0x10000) != 0)
-        {
-            m_AttributeAmplifier.fCritical += fValue;
-        }
-        if ((nBitset & 0x20000) != 0)
-        {
-            m_AttributeAmplifier.fBlockChance += fValue;
-        }
-        if ((nBitset & 0x40000) != 0)
-        {
-            m_AttributeAmplifier.fBlockDefence += fValue;
-        }
-        if ((nBitset & 0x100000) != 0)
-        {
-            m_AttributeAmplifier.fMagicAvoid += fValue;
-        }
-        /*if ((nBitset & 0x200000) != 0)
-            m_fMaxHPAmplifier += fValue;
 
-        if ((nBitset & 0x400000) != 0)
-            m_fMaxMPAmplifier += fValue;*/
-        if ((nBitset & 0x1000000) != 0)
+            if (IsUsingDoubleWeapon())
+                m_AttributeAmplifier.fAccuracyLeft += fValue;
+        }
+        if (nBitset & FLAG_MAGIC_ACCURACY)
+            m_AttributeAmplifier.fMagicAccuracy += fValue;
+
+        if (nBitset & FLAG_CRITICAL)
+            m_AttributeAmplifier.fCritical += fValue;
+
+        if (nBitset & FLAG_BLOCK)
+            m_AttributeAmplifier.fBlockChance += fValue;
+
+        if (nBitset & FLAG_BLOCK_DEFENCE)
+            m_AttributeAmplifier.fBlockDefence += fValue;
+
+        if (nBitset & FLAG_MAGIC_RESISTANCE)
+            m_AttributeAmplifier.fMagicAvoid += fValue;
+
+        //if (nBitset & FLAG_MAX_HP)
+        //m_fMaxHPAmplifier += fValue;
+
+        //if (nBitset & FLAG_MAX_MP)
+        //m_fMaxMPAmplifier += fValue;
+
+        if (nBitset & FLAG_MAX_SP)
         {
+            //
+        }
+
+        if (nBitset & FLAG_HP_REGEN_ADD)
             m_AttributeAmplifier.fHPRegenPoint += fValue;
-        }
-        if ((nBitset & 0x2000000) != 0)
-        {
+
+        if (nBitset & FLAG_MP_REGEN_ADD)
             m_AttributeAmplifier.fMPRegenPoint += fValue;
-        }
-        if ((nBitset & 0x8000000) != 0)
+
+        if (nBitset & FLAG_SP_REGEN_ADD)
         {
+            //
+        }
+
+        if (nBitset & FLAG_HP_REGEN_RATIO)
             m_AttributeAmplifier.fHPRegenPercentage += fValue;
-        }
-        if ((nBitset & 0x10000000) != 0)
-        {
+
+        if (nBitset & FLAG_MP_REGEN_RATIO)
             m_AttributeAmplifier.fMPRegenPercentage += fValue;
-        }
-        if ((nBitset & 0x40000000) != 0)
-        {
+
+        if (nBitset & FLAG_MAX_WEIGHT)
             m_AttributeAmplifier.fMaxWeight += fValue;
-        }
+
+        if (nBitset & FLAG_AVOID)
+            m_AttributeAmplifier.fAvoid += fValue;
     }
 }
 
@@ -1889,18 +1970,15 @@ void Unit::applyStateAmplifyEffect()
         return;
 
     std::vector<std::pair<int, int>> vDecreaseList{};
+
     for (auto &s : m_vStateList)
     {
-        if (s->GetEffectType() == 84)
-        { // Strong Spirit?
-            auto nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
-            for (int i = 2; i < 11; ++i)
+        if (s->GetEffectType() == SEF_DECREASE_STATE_EFFECT)
+        {
+            auto nDecreaseLevel = static_cast<int32_t>(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
+            for (int i = 2; i < 11 && s->GetValue(i) != 0; ++i)
             {
-                if (s->GetValue(i) == 0.0f)
-                {
-                    vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(1), (int)nDecreaseLevel));
-                    break;
-                }
+                vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(i), (int)nDecreaseLevel));
             }
         }
     }
@@ -1910,40 +1988,36 @@ void Unit::applyStateAmplifyEffect()
 
         for (int i = 0; i < 3; i++)
             nOriginalLevel[i] = s->m_nLevel[i];
+
         for (auto &rp : vDecreaseList)
         {
             if (rp.first == (int)s->m_nCode)
             {
-                //                             *(v1 + 44) = 0;
-                //                             *(v1 + 48) = 0;
-                //                             *(v1 + 52) = 0;
-                //                             *(v1 + 100) = 0;
-                //                             do
-                //                             {
-                //                                 v17 = *(v1 + *(v1 + 100) + 40)
-                //                                     - LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y);
-                //                                 *(v1 + *(v1 + 100) + 52) = v17;
-                //                                 if ( v17 < 0 )
-                //                                 {
-                //                                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 80))->end.y) = -v17;
-                //                                     *(v1 + *(v1 + 100) + 52) = 0;
-                //                                 }
-                //                                 *(v1 + 100) -= 4;
-                //                             }
-                //                             while ( *(v1 + 100) >= -8 );
-                //                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 44);
-                //                             HIWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end.face) = *(v1 + 48);
-                //                             LOWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((v1 + 104))->end_time) = *(v1 + 52);
-                //                             break;
+                int nLevel[3] = {0, 0, 0};
+                for (int i = 2; i >= 0; --i)
+                {
+                    nLevel[i] = nOriginalLevel[i] - rp.second;
+                    if (nLevel[i] < 0)
+                    {
+                        rp.second = -1 * nLevel[i];
+                        nLevel[i] = 0;
+                    }
+                }
+
+                s->SetLevel(SG_NORMAL, nLevel[0]);
+                s->SetLevel(SG_DUPLICATE, nLevel[1]);
+                s->SetLevel(SG_DEPENDENCE, nLevel[2]);
+
+                break;
             }
         }
 
-        if (s->GetLevel() != 0)
-        {
+        if (s->GetLevel() > 0)
             applyStateAmplify(s);
-        }
-        for (int i = 0; i < 3; i++)
-            s->m_nLevel[i] = nOriginalLevel[i];
+
+        s->SetLevel(SG_NORMAL, nOriginalLevel[0]);
+        s->SetLevel(SG_DUPLICATE, nOriginalLevel[1]);
+        s->SetLevel(SG_DEPENDENCE, nOriginalLevel[2]);
     }
 }
 
@@ -2546,7 +2620,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_AMPLIFY_HP_MP:
     {
-        //m_vAmplifyPassiveSkillList.push_back( pSkill );
+        m_vAmplifyPassiveSkillList.emplace_back(pSkill);
     }
     break;
 

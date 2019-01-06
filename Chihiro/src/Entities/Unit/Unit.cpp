@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "Player.h"
 #include "NPC.h"
+#include "WorldSession.h"
 #include "GameRule.h"
 
 // we can disable this warning for this since it only
@@ -205,11 +206,29 @@ void Unit::OnUpdate()
 
     if (!m_vAura.empty())
     {
-        for (auto &aura : m_vAura)
+        for (auto it = m_vAura.begin(); it != m_vAura.end();)
         {
-            auto pSkill = GetSkill(aura.second);
-            if (pSkill != nullptr && pSkill->GetAuraRefreshTime() + 700 <= ct && this->onProcAura(pSkill, aura.first))
+            auto pSkill = GetSkill((*it).second);
+            if (pSkill != nullptr && pSkill->GetAuraRefreshTime() + 500 <= ct)
+            {
+                if (!onProcAura(pSkill, (*it).first))
+                {
+                    TS_SC_AURA auraMsg{};
+                    auraMsg.caster = GetHandle();
+                    auraMsg.skill_id = pSkill->GetSkillId();
+                    auraMsg.status = false;
+
+                    if (IsPlayer())
+                        this->As<Player>()->SendPacket(auraMsg);
+                    else if (IsSummon())
+                        this->As<Summon>()->GetMaster()->SendPacket(auraMsg);
+
+                    it = m_vAura.erase(it);
+                    continue;
+                }
                 pSkill->SetAuraRefreshTime(ct);
+            }
+            ++it;
         }
     }
 
@@ -1665,126 +1684,188 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
 {
     SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_UPDATE_STATE);
     auto stateInfo = sObjectMgr.GetStateInfo(code);
+
     if (stateInfo == nullptr)
-    {
         return TS_RESULT_NOT_EXIST;
-    }
-    if (GetHealth() == 0 && (stateInfo->state_time_type & 0x81) != 0)
+
+    if (IsDead() && (stateInfo->state_time_type & AF_ERASE_ON_DEAD || stateInfo->state_time_type & AF_ERASE_ON_RESURRECT))
         return TS_RESULT_NOT_ACTABLE;
 
-    if ((stateInfo->state_time_type & 8) != 0 && IsMonster() && false /* Connector/AutoTrap*/)
+    if (IsMonster())
     {
-        return TS_RESULT_LIMIT_TARGET;
-    } /*else if (code != StateCode::SC_SLEEP && code != StateCode::SC_NIGHTMARE && code != StateCode::SC_SEAL
-               && code != StateCode::SC_SHINE_WALL && code != StateCode::SC_STUN && stateInfo->effect_type != SEF_TRANSFORMATION) {
-        if (stateInfo->effect_type != SEF_MEZZ || stateInfo->value[0] == 0.0f && stateInfo->value[1] == 0.0f
-                                            && stateInfo->value[2] == 0.0f && stateInfo->value[3] == 0.0f)
+        auto pMonster = this->As<Monster>();
+        if ((stateInfo->state_time_type & AF_NOT_ACTABLE_TO_BOSS) != 0 && pMonster->IsBossMonster())
+            return TS_RESULT_LIMIT_TARGET;
 
-    }*/
-
-    if (code == StateCode::SC_FEAR)
-        ToggleFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
-
-    //auto pCaster = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(caster));
-    auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(caster);
-    int base_damage = 0;
-    if (pCaster != nullptr && stateInfo->base_effect_id > 0)
-    {
-        // DAMAGES WOHOOOOOOOO
+        if (code == SC_FEAR && (pMonster->IsDungeonConnector() || pMonster->IsAutoTrap()))
+            return TS_RESULT_LIMIT_TARGET;
     }
 
-    bool bNotErasable = ((stateInfo->state_time_type >> 4) & 1) != 0;
-    std::vector<uint16> vDeleteStateUID{};
+    if (code == SC_SLEEP || code == SC_NIGHTMARE || code == SC_SEAL || code == SC_SHINE_WALL || code == SC_FEAR || code == SC_STUN || stateInfo->effect_type == SEF_TRANSFORMATION || (stateInfo->effect_type == SEF_MEZZ && (stateInfo->value[0] != 0 || stateInfo->value[1] != 0 || stateInfo->value[2] != 0 || stateInfo->value[3] != 0)))
+    {
+        if (IsUsingSkill())
+            CancelSkill();
+
+        Player *pThisPlayer{nullptr};
+        if (IsPlayer())
+            pThisPlayer = this->As<Player>();
+        else if (IsSummon())
+        {
+            pThisPlayer = this->As<Summon>()->GetMaster();
+            if (pThisPlayer != nullptr && pThisPlayer->GetRideObject() != this)
+                pThisPlayer = nullptr;
+        }
+
+        if (pThisPlayer != nullptr && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState()))
+        {
+            auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(caster);
+            if (pUnit != nullptr)
+            {
+                if (pThisPlayer && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState()))
+                {
+                    pThisPlayer->UnMount(UNMOUNT_FALL, pUnit);
+
+                    if (IsDead() && (stateInfo->state_time_type & AF_ERASE_ON_DEAD || stateInfo->state_time_type & AF_ERASE_ON_RESURRECT))
+                        return TS_RESULT_NOT_ACTABLE;
+                }
+            }
+        }
+    }
+
+    if (stateInfo->effect_type == SEF_RIDING && IsHiding())
+    {
+        RemoveState(SC_HIDE, GameRule::MAX_STATE_LEVEL);
+        RemoveState(SC_TRACE_OF_FUGITIVE, GameRule::MAX_STATE_LEVEL);
+    }
+
+    if (code == SC_FEAR)
+        RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
+
+    int base_damage{0};
+    auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(caster);
+    if (pCaster != nullptr)
+    {
+        switch (stateInfo->base_effect_id)
+        {
+        case BEF_PHYSICAL_STATE_DAMAGE:
+        case BEF_PHYSICAL_IGNORE_DEFENCE_STATE_DAMAGE:
+        case BEF_PHYSICAL_IGNORE_DEFENCE_PER_STATE_DAMAGE:
+            base_damage = pCaster->GetAttackPointRight(static_cast<ElementalType>(stateInfo->elemental_type), true, true);
+            break;
+        case BEF_MAGICAL_STATE_DAMAGE:
+        case BEF_MAGICAL_IGNORE_RESIST_STATE_DAMAGE:
+        case BEF_HEAL_HP_BY_MAGIC:
+        case BEF_HEAL_MP_BY_MAGIC:
+            base_damage = pCaster->GetMagicPoint(static_cast<ElementalType>(stateInfo->elemental_type), false, true);
+            break;
+        default:
+            break;
+        }
+    }
+
+    bool bNotErasable = stateInfo->state_time_type & AF_AF_NOT_ERASABLE;
+    std::vector<uint16_t> vDeleteStateUID{};
     bool bAlreadyExist{false};
 
-    for (auto &s : m_vStateList)
+    for (auto &it : m_vStateList)
     {
-        if (code == s->m_nCode)
+        bool bIsDuplicatedGroup{false};
+        if (code == it->GetCode())
         {
             bAlreadyExist = true;
+            bIsDuplicatedGroup = true;
         }
         else
         {
-            bool bf = false;
-            for (int i : stateInfo->duplicate_group)
+            for (int i = 0; i < 3; ++i)
             {
-                if (s->IsDuplicatedGroup(i))
+                if (it->IsDuplicatedGroup(stateInfo->duplicate_group[i]))
                 {
-                    bf = true;
+                    bIsDuplicatedGroup = true;
                     break;
                 }
             }
-            if (!bf)
-                continue;
         }
-        if (bNotErasable != (((s->GetTimeType() >> 4) & 1) != 0))
-        {
-            if (bNotErasable)
-                return TS_RESULT_ALREADY_EXIST;
-            vDeleteStateUID.emplace_back(s->m_nUID);
-        }
-        else
-        {
-            if (s->GetLevel() > level)
-                return TS_RESULT_ALREADY_EXIST;
 
-            if (s->GetLevel() == level)
+        if (bIsDuplicatedGroup)
+        {
+            bool bNotErasableCur = it->GetTimeType() & AF_AF_NOT_ERASABLE;
+            if (bNotErasable == bNotErasableCur)
             {
-                uint et = s->m_nEndTime[1];
-                if (s->m_nEndTime[0] > et)
-                    et = s->m_nEndTime[0];
-                if (et > end_time)
+                if (it->GetLevel() > level || it->GetLevel() == level && it->GetEndTime() > end_time)
                     return TS_RESULT_ALREADY_EXIST;
+
+                if (code == it->GetCode())
+                    continue;
+
+                vDeleteStateUID.emplace_back(it->GetUID());
             }
-            if (code != s->m_nCode)
-                vDeleteStateUID.emplace_back(s->m_nUID);
+            else if (bNotErasable)
+            {
+                vDeleteStateUID.emplace_back(it->GetUID());
+                continue;
+            }
+            else
+            {
+                return TS_RESULT_ALREADY_EXIST;
+            }
         }
     }
 
-    for (auto &id : vDeleteStateUID)
+    for (auto dit = vDeleteStateUID.begin(); dit != vDeleteStateUID.end(); ++dit)
     {
-        for (int i = (int)m_vStateList.size() - 1; i >= 0; --i)
+        for (auto it = m_vStateList.begin(); it != m_vStateList.end(); ++it)
         {
-            auto s = m_vStateList[i];
-            if (id == s->m_nUID)
+            if ((*it)->GetUID() == (*dit))
             {
-                m_vStateList.erase(m_vStateList.begin() + i);
-                s->DeleteThis();
+                auto state = (*it);
+
+                onUpdateState((*it), true);
+                m_vStateList.erase(it);
                 CalculateStat();
+
+                onAfterRemoveState(state);
+                state->DeleteThis();
                 break;
             }
         }
     }
+
     if (bAlreadyExist)
     {
-        for (auto &s : m_vStateList)
+        for (auto &it : m_vStateList)
         {
-            if (code == s->m_nCode)
+            if (code == it->GetCode())
             {
-                s->AddState(type, caster, (uint16)level, start_time, end_time, base_damage, bIsAura);
+                it->AddState(type, caster, level, start_time, end_time, base_damage, bIsAura);
                 CalculateStat();
-                onUpdateState(s, false);
-                onAfterAddState(s);
+                onUpdateState(it, false);
+
+                onAfterAddState(it);
                 break;
             }
         }
+
+        return TS_RESULT_SUCCESS;
     }
-    else
+
     {
-        m_nCurrentStateUID++;
-        auto ns = new State{type, code, (int)m_nCurrentStateUID, caster, (uint16)level, start_time, end_time, base_damage, bIsAura, nStateValue, std::move(szStateValue)};
+        auto ns = new State(type, code, ++m_nCurrentStateUID, caster, level, start_time, end_time, base_damage, bIsAura, nStateValue, szStateValue);
         sMemoryPool.AllocMiscHandle(ns);
         m_vStateList.emplace_back(ns);
-        CalculateStat();
-
-        onUpdateState(ns, false);
-        if (IsMonster() && !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE))
-        {
-            if (m_Attribute.nAttackRange < 84)
-                m_Attribute.nAttackRange = 83;
-        }
-        onAfterAddState(ns);
     }
+
+    CalculateStat();
+    onUpdateState(m_vStateList.back(), false);
+
+    if (IsMonster() && !IsMovable())
+    {
+        if (m_Attribute.nAttackRange < GameRule::MAX_ATTACK_RANGE * GameRule::ATTACK_RANGE_UNIT)
+            m_Attribute.nAttackRange = GameRule::MAX_ATTACK_RANGE * GameRule::ATTACK_RANGE_UNIT;
+    }
+
+    onAfterAddState(m_vStateList.back());
+
     return TS_RESULT_SUCCESS;
 }
 
@@ -1795,25 +1876,23 @@ void Unit::onAfterAddState(State *)
 
 void Unit::procMoveSpeedChange()
 {
-    std::vector<Position> vMovePos{};
+    if (bIsMoving)
+        return;
 
-    if (bIsMoving && IsInWorld())
+    auto pos = GetCurrentPosition(sWorld.GetArTime());
+    if (!IsMovable())
     {
-        uint ct = sWorld.GetArTime();
-        auto pos = GetCurrentPosition(ct);
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE))
-        {
-            if (speed != m_Attribute.nMoveSpeed / 7)
-            {
-                for (const auto &mi : ends)
-                    vMovePos.emplace_back(mi.end);
-                sWorld.SetMultipleMove(this, pos, vMovePos, (uint8)(m_Attribute.nMoveSpeed / 7), true, ct, true);
-            }
-        }
-        else
-        {
-            sWorld.SetMove(this, pos, pos, 0, true, ct, true);
-        }
+        sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
+    }
+    else if (GetMoveSpeed() != speed)
+    {
+        const std::vector<ArMoveVector::MoveInfo> &vMoveVector(ends);
+        std::vector<Position> vMovePos{};
+
+        for (auto it = vMoveVector.begin(); it != vMoveVector.end(); ++it)
+            vMovePos.emplace_back((*it).end);
+
+        sWorld.SetMultipleMove(this, pos, vMovePos, GetMoveSpeed(), true, sWorld.GetArTime(), true);
     }
 }
 
@@ -2014,22 +2093,58 @@ std::pair<float, int> Unit::GetHateMod(int nHateModType, bool bIsHarmful)
 
 bool Unit::ClearExpiredState(uint t)
 {
-    bool bDeleted{false};
-    for (int i = 0; i < static_cast<int>(m_vStateList.size()); i++)
+    bool bRtn{false};
+    bool bErase{false};
+    bool bModified{false};
+
+    if (t == 0)
+        t = sWorld.GetArTime();
+
+    for (auto it = m_vStateList.begin(); it != m_vStateList.end();)
     {
-        uint et = m_vStateList[i]->m_nEndTime[1];
-        if (m_vStateList[i]->m_nEndTime[0] > et)
-            et = m_vStateList[i]->m_nEndTime[0];
-        if (et < t && !m_vStateList[i]->m_bAura)
+        bErase = false;
+        bModified = false;
+
+        if ((*it)->GetCode() == SC_HAVOC_BURST && GetInt32Value(UNIT_FIELD_HAVOC) < 1)
+            bErase = true;
+
+        if ((*it)->ClearExpiredState(t))
         {
-            //RemoveState(it);
-            Messages::BroadcastStateMessage(this, m_vStateList[i], true);
-            m_vStateList[i]->DeleteThis();
-            m_vStateList.erase(m_vStateList.begin() + i);
-            bDeleted = true;
+            bRtn = true;
+            if (!(*it)->IsValid(t))
+                bErase = true;
+            else
+                onUpdateState((*it), false);
         }
+
+        if (bErase)
+        {
+            if ((*it)->GetCode() == SC_ADD_ENERGY)
+            {
+                AddEnergy();
+            }
+            else if ((*it)->GetCode() == SC_HAVOC_BURST)
+            {
+                bRtn = true;
+            }
+            else if ((*it)->GetEffectType() == SEF_PROVOKE && IsMonster())
+            {
+                //
+            }
+
+            auto state = (*it);
+            onUpdateState((*it), true);
+            it = m_vStateList.erase(it);
+
+            CalculateStat();
+            onAfterRemoveState(state);
+
+            continue;
+        }
+        ++it;
     }
-    return bDeleted;
+
+    return bRtn;
 }
 
 int Unit::GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad)
@@ -2132,10 +2247,6 @@ int64 Unit::GetBulletCount() const
     {
         return 0;
     }
-}
-
-void Unit::applyPassiveSkillAmplifyEffect()
-{
 }
 
 int Unit::GetArmorClass() const
@@ -2862,4 +2973,9 @@ int Unit::GetCriticalDamage(int damage, float critical_amp, int critical_bonus)
     if (irand(0, 99) <= (critical_amp * GetCritical() + critical_bonus))
         return (damage * (GetCriticalPower() / 100.0f));
     return 0;
+}
+
+void Unit::onAfterRemoveState(State *pState)
+{
+    procMoveSpeedChange();
 }
