@@ -51,6 +51,8 @@ public:
   constexpr static float fPVPDamageRateForPlayer{0.2f};
   constexpr static float fPVPDamageRateForSummon{0.13f};
   constexpr static float MONSTER_PRESPAWN_RATE{0.5f};
+  constexpr static float MONSTER_TRACKING_RANGE_BY_TIME{30 * DEFAULT_UNIT_SIZE};
+  constexpr static int MONSTER_FIND_ATTACK_POS_RATIO{5};
 
 private:
   static int _chipLevelLimit[];

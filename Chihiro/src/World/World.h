@@ -46,6 +46,7 @@ enum WorldBoolConfigs : int
     CONFIG_NO_COLLISION_CHECK,
     CONFIG_NO_SKILL_COOLTIME,
     CONFIG_SERVICE_SERVER,
+    CONFIG_MONSTER_PATHFINDING,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -112,7 +113,7 @@ class World
     void LoadConfigSettings(bool reload);
 
     bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
-    bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
+    bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove = true);
     void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
     void addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp);

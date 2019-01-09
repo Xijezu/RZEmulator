@@ -94,6 +94,11 @@ class Unit : public WorldObject
     void CleanupsBeforeDelete(bool finalCleanup = true);
     void Update(uint32 time) override;
     virtual void OnUpdate();
+
+    bool AddToEnemyList(uint32_t handle);
+    bool RemoveFromEnemyList(uint32_t handle);
+    uint32_t GetEnemyCount() { return static_cast<uint32_t>(m_vEnemyList.size()); }
+
     /// SKILLS
     int GetCurrentSkillLevel(int skill_id) const;
     int GetBaseSkillLevel(int skill_id) const;
@@ -225,7 +230,7 @@ class Unit : public WorldObject
 
     void BindSkillCard(Item *pItem);
     void UnBindSkillCard(Item *pItem);
-    virtual bool IsEnemy(const Unit *pTarget, bool bIncludeHiding);
+    virtual bool IsEnemy(const Unit *pTarget, bool bIncludeHiding = false);
     virtual bool IsAlly(const Unit *pTarget);
     bool IsVisible(const Unit *pTarget);
 
@@ -535,7 +540,7 @@ class Unit : public WorldObject
 
     virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
     void processAttack();
-    void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack);
+    void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming = false, bool bEndAttack = false, bool bCancelAttack = false);
     void onAfterAddState(State *);
     virtual void onAfterRemoveState(State *state);
     virtual void onUpdateState(State *state, bool bIsExpire);
@@ -618,6 +623,7 @@ class Unit : public WorldObject
     std::vector<Skill *> m_vPassiveSkillList{};
     std::vector<int> m_vInterruptedSkill{};
     std::vector<std::set<int>> m_vAllowedSkill{};
+    std::vector<uint32_t> m_vEnemyList{};
 
     std::vector<Skill *> m_vAmplifyPassiveSkillList{};
 

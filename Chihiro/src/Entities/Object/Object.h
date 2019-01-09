@@ -554,6 +554,7 @@ class ArMoveVector : public Position
     void SetDirection(Position pos);
     Position GetTargetPos();
     bool IsMoving(uint t);
+    bool IsMoving() const { return bIsMoving; };
 
     void StopMove()
     {

@@ -3022,3 +3022,26 @@ void Unit::onAfterRemoveState(State *pState)
 {
     procMoveSpeedChange();
 }
+
+bool Unit::AddToEnemyList(uint32_t handle)
+{
+    if (std::find(m_vEnemyList.begin(), m_vEnemyList.end(), handle) != m_vEnemyList.end())
+    {
+        m_vEnemyList.emplace_back(handle);
+        return true;
+    }
+    return false;
+}
+
+bool Unit::RemoveFromEnemyList(uint32_t handle)
+{
+    for (auto it = m_vEnemyList.begin(); it != m_vEnemyList.end(); ++it)
+    {
+        if ((*it) == handle)
+        {
+            m_vEnemyList.erase(it);
+            return true;
+        }
+    }
+    return false;
+}

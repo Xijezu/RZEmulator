@@ -2282,7 +2282,7 @@ uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParamete
         }
     }
 
-    if (!pItem->m_pItemBase->script_text.empty() && m_Item->m_pItemBase->script_text != "0")
+    if (!pItem->m_pItemBase->script_text.empty() && pItem->m_pItemBase->script_text != "0")
     {
         std::string szOnUseItem = pItem->m_pItemBase->script_text;
 
