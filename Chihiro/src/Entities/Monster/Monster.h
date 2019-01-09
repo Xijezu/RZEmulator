@@ -201,7 +201,6 @@ class Monster : public Unit
     uint m_nFirstAttackTime;
     uint m_nTotalDamage;
     int m_nMaxHate;
-    uint m_hEnemy;
     // Taming related
     int m_nTamingSkillLevel;
     uint m_hTamer;

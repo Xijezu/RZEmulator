@@ -116,6 +116,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_DISABLE_TRADE] = sConfigMgr->GetBoolDefault("Game.DisableTrade", false);
     m_bool_configs[CONFIG_MONSTER_WANDERING] = sConfigMgr->GetBoolDefault("Game.MonsterWandering", true);
     m_bool_configs[CONFIG_MONSTER_COLLISION] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", true);
+    m_bool_configs[CONFIG_MONSTER_PATHFINDING] = sConfigMgr->GetBoolDefault("Game.MonsterCollision", false);
     m_bool_configs[CONFIG_IGNORE_RANDOM_DAMAGE] = sConfigMgr->GetBoolDefault("Game.IgnoreRandomDamage", false);
     m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
     m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
@@ -621,12 +622,11 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0)
     {
-        if (sObjectMgr.GetItemBase(code)->group == 13)
+        if (sObjectMgr.GetItemBase(code)->group == GROUP_SUMMONCARD)
             fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway?*/
     }
-    auto perc = percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus * fCreatureCardMod;
-    auto rand = irand(1, 0x5F5E100u);
-    return perc >= rand;
+
+    return (irand(1, 100000000) > (percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus) * fCreatureCardMod) ? false : true;
 }
 
 int World::ShowQuestMenu(Player *pPlayer)
