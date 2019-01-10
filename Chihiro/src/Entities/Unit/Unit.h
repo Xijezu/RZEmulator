@@ -136,6 +136,7 @@ class Unit : public WorldObject
     uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
     virtual int GetMoveSpeed();
+    inline int GetRealMoveSpeed() const { return GetMoveSpeed() / 7; }
 
     inline int GetStrength() const { return m_cStat.strength; }
     inline int GetVital() const { return m_cStat.vital; }

@@ -52,7 +52,8 @@ public:
   constexpr static float fPVPDamageRateForSummon{0.13f};
   constexpr static float MONSTER_PRESPAWN_RATE{0.5f};
   constexpr static float MONSTER_TRACKING_RANGE_BY_TIME{30 * DEFAULT_UNIT_SIZE};
-  constexpr static int MONSTER_FIND_ATTACK_POS_RATIO{5};
+  constexpr static int32_t MONSTER_FIND_ATTACK_POS_RATIO{5};
+  constexpr static int32_t MAX_FIRST_ATTACK_BONUS_TIME{6000};
 
 private:
   static int _chipLevelLimit[];

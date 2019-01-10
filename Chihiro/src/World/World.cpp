@@ -517,7 +517,7 @@ void World::KickAll()
     }
 }
 
-void World::addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp)
+void World::addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp)
 {
     float fJP = 0;
     if (pPlayer->GetHealth() != 0)
@@ -804,7 +804,7 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
     }
 }
 
-void World::addEXP(Unit *pCorpse, int nPartyID, float exp, float jp)
+void World::addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp)
 {
     int nMinLevel = 255;
     int nMaxLevel = 0;
