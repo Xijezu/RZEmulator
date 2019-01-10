@@ -104,6 +104,7 @@ class Unit : public WorldObject
     int GetBaseSkillLevel(int skill_id) const;
     Skill *GetSkill(int skill_id) const;
     Skill *RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
+    void EnumPassiveSkill(struct SkillFunctor &fn);
     /// END SKILLS
 
     virtual bool StartAttack(uint target, bool bNeedFastReaction);
@@ -136,7 +137,7 @@ class Unit : public WorldObject
     uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
     virtual int GetMoveSpeed();
-    inline int GetRealMoveSpeed() const { return GetMoveSpeed() / 7; }
+    inline int GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
 
     inline int GetStrength() const { return m_cStat.strength; }
     inline int GetVital() const { return m_cStat.vital; }
@@ -164,6 +165,11 @@ class Unit : public WorldObject
     inline int GetAttackSpeed() const { return m_Attribute.nAttackSpeed; }
     inline int GetMaxWeight() const { return m_Attribute.nMaxWeight; }
     inline int GetCastingSpeed() const { return m_Attribute.nCastingSpeed; }
+
+    inline CreatureAtributeServer &GetAttribute() { return m_Attribute; }
+    inline CreatureAttributeAmplifier &GetAttributeAmplifier() { return m_AttributeAmplifier; }
+    inline CreatureStat &GetCreatureStat() { return m_cStat; }
+    inline CreatureStatAmplifier &GetCreatureStatAmplifier() { return m_StatAmplifier; }
 
     uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
@@ -495,13 +501,13 @@ class Unit : public WorldObject
 
     virtual void onBeforeCalculateStat(){};
     virtual void applyPassiveSkillEffect();
-    void applyStatByState();
+    virtual void applyStatByState();
     void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
     void amplifyStatByState();
     virtual void applyState(State &state);
     void applyStateEffect();
     void applyStateAmplifyEffect();
-    void applyPassiveSkillAmplifyEffect();
+    virtual void applyPassiveSkillAmplifyEffect();
     virtual void applyPassiveSkillAmplifyEffect(Skill *);
 
     void applyStateAmplify(State *state);
@@ -509,6 +515,7 @@ class Unit : public WorldObject
 
     virtual void onApplyAttributeAdjustment(){};
     virtual void applyPassiveSkillEffect(Skill *skill);
+    virtual void onApplyStat(){};
     void getAmplifiedStatByAmplifier(CreatureStat &);
     void finalizeStat();
     void calcAttribute(CreatureAtributeServer &attribute);

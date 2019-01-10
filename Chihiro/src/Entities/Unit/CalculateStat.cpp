@@ -145,7 +145,7 @@ void Unit::CalculateStat()
     m_cStatByState.intelligence += (m_cStat.intelligence - stateStat.intelligence);
     m_cStatByState.mentality += (m_cStat.mentality - stateStat.mentality);
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
-    // TODO onApplyStat -> Beltslots, Summonstatamplify?
+    onApplyStat();
     // TODO amplifyStatByItem -> Nonexistant atm, used for set effects?  //@ TODO
     stateStat = m_cStat;
     getAmplifiedStatByAmplifier(stateStat);
@@ -331,10 +331,10 @@ void Unit::amplifyStatByState()
             {
             case SEF_PARAMETER_AMP:
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                ampParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(12), (int)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(15), (int)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
+                ampParameter((uint)s->GetValue(0), (float)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
+                ampParameter((uint)s->GetValue(3), (float)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
+                ampParameter((uint)s->GetValue(12), (float)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
+                ampParameter((uint)s->GetValue(15), (float)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
                 break;
             default:
                 break;

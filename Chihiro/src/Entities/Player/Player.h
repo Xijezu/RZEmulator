@@ -180,6 +180,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     // Summon
     void LogoutNow(int callerIdx);
     void RemoveAllSummonFromWorld();
+    void EnumSummonPassiveSkill(struct SkillFunctor &fn) const;
+    void EnumSummonAmplifySkill(struct SkillFunctor &fn) const;
 
     void SendLoginProperties();
     void SendGoldChaosMessage();

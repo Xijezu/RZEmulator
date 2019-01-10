@@ -22,7 +22,7 @@
 using RegionType = std::vector<WorldObject *>;
 class Region;
 class Unit;
-
+class Skill;
 
 /*
  * Note: I'm not a fan of this, either
@@ -36,18 +36,22 @@ class Unit;
  * But it is annoying.
 */
 
-
 struct WorldObjectFunctor
 {
-    virtual void Run(WorldObject *obj) {};
+    virtual void Run(WorldObject *obj){};
 };
 
 struct RegionFunctor
 {
-    virtual void Run(Region *) {};
+    virtual void Run(Region *){};
 };
 
-template<typename T>
+struct SkillFunctor
+{
+    virtual void onSkill(const Skill *pSkill) {}
+};
+
+template <typename T>
 struct BroadcastFunctor
 {
     T packet;
@@ -67,7 +71,7 @@ struct BroadcastFunctor
 struct SendEnterMessageEachOtherFunctor
 {
     WorldObject *obj{nullptr};
-    bool        bSent{false};
+    bool bSent{false};
     void Run(RegionType &client);
 };
 
@@ -80,21 +84,21 @@ struct SendEnterMessageFunctor
 struct AddObjectFunctor
 {
     explicit AddObjectFunctor(uint _x, uint _y, uint8_t _layer, WorldObject *obj)
-            : newObj(obj), bSend(false), x(_x), y(_y), x2(0), y2(0), layer(_layer) {}
+        : newObj(obj), bSend(false), x(_x), y(_y), x2(0), y2(0), layer(_layer) {}
 
     explicit AddObjectFunctor(uint _x, uint _y, uint _x2, uint _y2, uint8_t _layer, WorldObject *obj)
-            : newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
+        : newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
 
     void Run();
     void Run2();
 
     WorldObject *newObj;
 
-    bool    bSend;
-    uint    x;
-    uint    y;
-    uint    x2;
-    uint    y2;
+    bool bSend;
+    uint x;
+    uint y;
+    uint x2;
+    uint y2;
     uint8_t layer;
 };
 
@@ -114,15 +118,15 @@ struct SetMoveFunctor : public RegionFunctor
 struct EnumMovableObjectRegionFunctor : public RegionFunctor
 {
     std::vector<uint> &pvResult;
-    uint              t;
-    Position          pos;
-    float             left;
-    float             right;
-    float             top;
-    float             bottom;
-    float             range;
-    bool              bIncludeClient;
-    bool              bIncludeNPC;
+    uint t;
+    Position pos;
+    float left;
+    float right;
+    float top;
+    float bottom;
+    float range;
+    bool bIncludeClient;
+    bool bIncludeNPC;
 
     struct SubFunctor : public WorldObjectFunctor
     {

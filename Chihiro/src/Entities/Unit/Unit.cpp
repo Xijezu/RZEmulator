@@ -3045,3 +3045,9 @@ bool Unit::RemoveFromEnemyList(uint32_t handle)
     }
     return false;
 }
+
+void Unit::EnumPassiveSkill(SkillFunctor &fn)
+{
+    for (const auto &pSkill : m_vPassiveSkillList)
+        fn.onSkill(pSkill);
+}
