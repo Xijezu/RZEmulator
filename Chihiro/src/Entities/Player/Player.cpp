@@ -3866,3 +3866,15 @@ void Player::UnMount(const uint8_t flag, Unit *pCauser)
         }
     }
 }
+
+void Player::EnumSummonPassiveSkill(SkillFunctor &fn) const
+{
+    for (const auto &pSkill : m_vApplySummonPassive)
+        fn.onSkill(pSkill);
+}
+
+void Player::EnumSummonAmplifySkill(SkillFunctor &fn) const
+{
+    for (const auto &pSkill : m_vApmlifySummonPassive)
+        fn.onSkill(pSkill);
+}

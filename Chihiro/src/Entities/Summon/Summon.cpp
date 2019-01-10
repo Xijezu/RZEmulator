@@ -578,40 +578,145 @@ void Summon::onUpdateState(State *state, bool bIsExpire)
     Unit::onUpdateState(state, bIsExpire);
 }
 
+struct applyPassiveSkillEffectFunctor : SkillFunctor
+{
+    applyPassiveSkillEffectFunctor(Summon *pSummon) : m_pSummon(pSummon)
+    {
+    }
+
+    void onSkill(const Skill *pSkill) override
+    {
+        switch (pSkill->GetSkillBase()->GetSkillEffectType())
+        {
+        case EF_INCREASE_SUMMON_HP_MP_SP:
+        {
+            int nMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
+            int nMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
+            //int nMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            int nHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
+            int nMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
+            //int nSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+
+            m_pSummon->SetMaxHealth(m_pSummon->GetMaxHealth() + nMaxHPInc);
+            m_pSummon->SetMaxMana(m_pSummon->GetMaxMana() + nMaxMPInc);
+            m_pSummon->GetAttribute().nHPRegenPoint += nHPRegenInc;
+            m_pSummon->GetAttribute().nMPRegenPoint += nMPRegenInc;
+        }
+        break;
+        default:
+            break;
+        }
+    }
+
+    Summon *m_pSummon{nullptr};
+};
+
 void Summon::applyPassiveSkillEffect()
 {
-    if (GetMaster() == nullptr)
-        return;
-
-    for (const auto &x : GetMaster()->m_vApplySummonPassive)
-    {
-        applyPassiveSkillAmplifyEffect(x);
-    }
-
-    for (const auto &x : GetMaster()->m_vApmlifySummonPassive)
-    {
-        applyPassiveSkillAmplifyEffect(x);
-    }
     Unit::applyPassiveSkillEffect();
+
+    if (GetMaster() != nullptr)
+    {
+        applyPassiveSkillEffectFunctor fn(this);
+        GetMaster()->EnumSummonPassiveSkill(fn);
+    }
 }
 
-void Summon::applyPassiveSkillAmplifyEffect(Skill *pSkill)
+struct applyPassiveSkillAmplifyEffectFunctor : SkillFunctor
 {
-    switch (pSkill->m_SkillBase->effect_type)
+    applyPassiveSkillAmplifyEffectFunctor(Summon *pSummon) : m_pSummon(pSummon)
     {
-    case EF_AMPLIFY_SUMMON_HP_MP_SP:
+    }
+
+    void onSkill(const Skill *pSkill) override
     {
-        auto test = (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd)));
-        auto t2 = GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER);
-        auto res = test + t2;
-        SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + (pSkill->m_SkillBase->var[0] + (pSkill->m_SkillBase->var[1] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-        SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + (pSkill->m_SkillBase->var[2] + (pSkill->m_SkillBase->var[3] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-        // MAX SP var[4] var[5]
-        SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, GetFloatValue(UNIT_FIELD_HP_REGEN_MOD) + (pSkill->m_SkillBase->var[6] + (pSkill->m_SkillBase->var[7] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
-        SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, GetFloatValue(UNIT_FIELD_MP_REGEN_MOD) + (pSkill->m_SkillBase->var[8] + (pSkill->m_SkillBase->var[9] * (pSkill->m_nSkillLevel + pSkill->m_nSkillLevelAdd))));
+        switch (pSkill->GetSkillBase()->GetSkillEffectType())
+        {
+        case EF_AMPLIFY_SUMMON_HP_MP_SP:
+        {
+            float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
+            float fMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
+            //float fMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            float fHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
+            float fMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
+            //float fSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+
+            m_pSummon->SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + fMaxHPInc);
+            m_pSummon->SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + fMaxMPInc);
+            m_pSummon->SetFloatValue(UNIT_FIELD_HP_REGEN_MOD, m_pSummon->GetFloatValue(UNIT_FIELD_HP_REGEN_MOD) + fHPRegenInc);
+            m_pSummon->SetFloatValue(UNIT_FIELD_MP_REGEN_MOD, m_pSummon->GetFloatValue(UNIT_FIELD_MP_REGEN_MOD) + fMPRegenInc);
+        }
+        break;
+        default:
+            break;
+        }
     }
-        return;
-    default:
-        return;
+
+    Summon *m_pSummon{nullptr};
+};
+
+void Summon::applyPassiveSkillAmplifyEffect()
+{
+    Unit::applyPassiveSkillAmplifyEffect();
+
+    if (GetMaster() != nullptr)
+    {
+        applyPassiveSkillAmplifyEffectFunctor fn(this);
+        GetMaster()->EnumSummonAmplifySkill(fn);
     }
+}
+
+void Summon::applyState(State &state)
+{
+    //@Todo: SP
+}
+
+void Summon::applyStatByState()
+{
+    Unit::applyStatByState();
+    if (GetMaster() == nullptr)
+        return;
+}
+
+struct onApplyStatFunctor : SkillFunctor
+{
+    onApplyStatFunctor(Summon *pSummon) : m_pSummon(pSummon)
+    {
+    }
+
+    void onSkill(const Skill *pSkill) override
+    {
+        if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_INCREASE_STAT)
+        {
+            int nSkillLevel = pSkill->GetCurrentSkillLevel();
+
+            m_pSummon->GetCreatureStat().strength += pSkill->GetVar(0) + pSkill->GetVar(1) * nSkillLevel;
+            m_pSummon->GetCreatureStat().vital += pSkill->GetVar(2) + pSkill->GetVar(3) * nSkillLevel;
+            m_pSummon->GetCreatureStat().agility += pSkill->GetVar(4) + pSkill->GetVar(5) * nSkillLevel;
+            m_pSummon->GetCreatureStat().dexterity += pSkill->GetVar(6) + pSkill->GetVar(7) * nSkillLevel;
+            m_pSummon->GetCreatureStat().intelligence += pSkill->GetVar(8) + pSkill->GetVar(9) * nSkillLevel;
+            m_pSummon->GetCreatureStat().mentality += pSkill->GetVar(10) + pSkill->GetVar(11) * nSkillLevel;
+            m_pSummon->GetCreatureStat().luck += pSkill->GetVar(12) + pSkill->GetVar(13) * nSkillLevel;
+        }
+        else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_AMPLIFY_STAT)
+        {
+            int nSkillLevel = pSkill->GetCurrentSkillLevel();
+
+            m_pSummon->GetCreatureStatAmplifier().strength += pSkill->GetVar(0) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().vital += pSkill->GetVar(1) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().agility += pSkill->GetVar(2) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().dexterity += pSkill->GetVar(3) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().intelligence += pSkill->GetVar(4) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().mentality += pSkill->GetVar(5) * nSkillLevel;
+            m_pSummon->GetCreatureStatAmplifier().luck += pSkill->GetVar(6) * nSkillLevel;
+        }
+    }
+
+    Summon *m_pSummon{nullptr};
+};
+
+void Summon::onApplyStat()
+{
+    onApplyStatFunctor fn(this);
+    EnumPassiveSkill(fn);
 }
