@@ -443,7 +443,6 @@ class Unit : public WorldObject
     bool OnCompleteSkill();
     void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time);
     void SetMove(Position _to, uint8 _speed, uint _start_time);
-    void CalculateStat();
     int GetArmorClass() const;
     // Event handler
     bool IsWornByCode(int code) const;
@@ -456,15 +455,9 @@ class Unit : public WorldObject
     bool IsWearShield();
     std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
 
-    Skill *GetCastSkill() const
-    {
-        return m_castingSkill;
-    }
+    Skill *GetCastSkill() const { return m_castingSkill; }
 
-    virtual CreatureStat *GetBaseStat() const
-    {
-        return nullptr;
-    }
+    virtual CreatureStat *GetBaseStat() const { return nullptr;    }
 
     virtual bool IsUsingBow() const
     {
@@ -486,45 +479,17 @@ class Unit : public WorldObject
     void ToggleAura(Skill *pSkill);
     bool IsActiveAura(Skill *pSkill) const;
 
+    void CalculateStat();
+
     uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura = false, int nStateValue = 0, std::string szStateValue = "");
 
   protected:
     uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
-    void applyStatByItem();
 
     virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
     virtual void procStateDamage(uint t);
 
-    virtual void applyJobLevelBonus(){};
-
-    virtual void onModifyStatAndAttribute(){};
-
-    virtual void onBeforeCalculateStat(){};
-    virtual void applyPassiveSkillEffect();
-    virtual void applyStatByState();
-    void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
-    void amplifyStatByState();
-    virtual void applyState(State &state);
-    void applyStateEffect();
-    void applyStateAmplifyEffect();
-    virtual void applyPassiveSkillAmplifyEffect();
-    virtual void applyPassiveSkillAmplifyEffect(Skill *);
-
-    void applyStateAmplify(State *state);
-    void applyDoubeWeaponEffect();
-
-    virtual void onApplyAttributeAdjustment(){};
-    virtual void applyPassiveSkillEffect(Skill *skill);
-    virtual void onApplyStat(){};
-    void getAmplifiedStatByAmplifier(CreatureStat &);
-    void finalizeStat();
-    void calcAttribute(CreatureAtributeServer &attribute);
-    void applyItemEffect();
-
-    virtual void onCompleteCalculateStat(){}; /* overwritten in player class*/
     int64 GetBulletCount() const;
-    ///- Gets overwritten in player for Beltslots and Max Chaos
-    virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
     State *GetStateByEffectType(int effectType) const;
 
     virtual void onRegisterSkill(int64, int, int, int){};
@@ -554,6 +519,39 @@ class Unit : public WorldObject
     virtual void onUpdateState(State *state, bool bIsExpire);
     void procMoveSpeedChange();
     void processPendingMove();
+
+    ///-CalculateStat functions
+    virtual void incParameter(uint nBitset, float nValue, bool bStat);
+    virtual void incParameter2(uint nBitset, float fValue);
+    virtual void ampParameter2(uint nBitset, float fValue);
+    virtual void ampParameter(uint nBitset, float fValue, bool bStat);
+    virtual void applyPassiveSkillAmplifyEffect();
+    virtual void applyPassiveSkillAmplifyEffect(Skill *);
+    virtual void onApplyAttributeAdjustment(){};
+    virtual void applyPassiveSkillEffect(Skill *skill);
+    virtual void onApplyStat(){};
+    virtual void applyState(State &state);
+    virtual void applyStatByState();
+    virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
+    virtual void applyJobLevelBonus(){};
+    virtual void onModifyStatAndAttribute(){};
+    virtual void onBeforeCalculateStat(){};
+    virtual void applyPassiveSkillEffect();
+    virtual void onCompleteCalculateStat(){}; /* overwritten in player class*/
+
+    void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
+    void applyStateAmplify(State *state);
+    void applyDoubeWeaponEffect();
+    void applyStatByItem();
+    void getAmplifiedStatByAmplifier(CreatureStat &);
+    void finalizeStat();
+    void calcAttribute(CreatureAtributeServer &attribute);
+    void applyItemEffect();
+    void applyStateEffect();
+    void applyStateAmplifyEffect();
+    void amplifyStatByState();
+    ///-END CalculateStat functions
+
     void _InitTimerFieldsAndStatus();
     std::vector<State *> m_vStateList{};
     uint32 m_unitTypeMask;
@@ -639,10 +637,6 @@ class Unit : public WorldObject
     bool ClearExpiredState(uint t);
     uint m_nCurrentStateUID{0};
     int m_nDoubleWeaponMasteryLevel{0};
-    void incParameter(uint nBitset, float nValue, bool bStat);
-    void incParameter2(uint nBitset, float fValue);
-    void ampParameter2(uint nBitset, float fValue);
-    void ampParameter(uint nBitset, float fValue, bool bStat);
 
     void ProcessAddHPMPOnCritical();
     void AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, bool bIsPhysicalSkill, bool bIsHarmful);
