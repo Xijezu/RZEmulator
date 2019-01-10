@@ -331,10 +331,10 @@ void Unit::amplifyStatByState()
             {
             case SEF_PARAMETER_AMP:
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                ampParameter((uint)s->GetValue(0), (float)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(3), (float)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(12), (float)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
-                ampParameter((uint)s->GetValue(15), (float)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
+                ampParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
+                ampParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
+                ampParameter((uint)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
+                ampParameter((uint)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
                 break;
             default:
                 break;
@@ -1493,15 +1493,15 @@ void Unit::applyStatByState()
             if (s->GetEffectType() == SEF_PARAMETER_INC)
             {
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                incParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) * s->GetLevel())), true);
-                incParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) * s->GetLevel())), true);
-                incParameter((uint)s->GetValue(12), (int)(s->GetValue(13) + (s->GetValue(14) * s->GetLevel())), true);
-                incParameter((uint)s->GetValue(15), (int)(s->GetValue(16) + (s->GetValue(17) * s->GetLevel())), true);
+                incParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
+                incParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
+                incParameter((uint)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
+                incParameter((uint)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
             }
             else if (s->GetEffectType() == SEF_PARAMETER_INC_WHEN_EQUIP_SHIELD && IsWearShield())
             {
-                incParameter((uint)s->GetValue(0), (int)(s->GetValue(1) + (s->GetValue(2) + s->GetLevel())), true);
-                incParameter((uint)s->GetValue(3), (int)(s->GetValue(4) + (s->GetValue(5) + s->GetLevel())), true);
+                incParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) + s->GetLevel()), true);
+                incParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) + s->GetLevel()), true);
             }
         }
         for (int i = 0; i < 3; i++)
