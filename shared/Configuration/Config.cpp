@@ -30,19 +30,19 @@ namespace bpt = boost::property_tree;
 
 namespace
 {
-    std::string              _filename;
-    std::vector<std::string> _args;
-    bpt::ptree               _config;
-    std::mutex               _configLock;
-}
+std::string _filename;
+std::vector<std::string> _args;
+bpt::ptree _config;
+std::mutex _configLock;
+} // namespace
 
 bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> args,
-        std::string &error)
+                            std::string &error)
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
     _filename = file;
-    _args     = args;
+    _args = args;
 
     auto configFile = this->GetCorrectPath(file);
 
@@ -85,7 +85,7 @@ bool ConfigMgr::Reload(std::string &error)
     return LoadInitial(_filename, std::move(_args), error);
 }
 
-template<class T>
+template <class T>
 T ConfigMgr::GetValueDefault(std::string const &name, T def) const
 {
     try
@@ -106,7 +106,7 @@ T ConfigMgr::GetValueDefault(std::string const &name, T def) const
     return def;
 }
 
-template<>
+template <>
 std::string ConfigMgr::GetValueDefault<std::string>(std::string const &name, std::string def) const
 {
     try
@@ -180,11 +180,11 @@ std::string ConfigMgr::GetCorrectPath(std::string path)
     auto args = this->GetArguments();
     bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
 
-	auto exePath = boost::filesystem::system_complete(args[0]).parent_path();
-	auto destPath = boost::filesystem::path(path);
+    auto exePath = boost::filesystem::system_complete(args[0]).parent_path();
+    auto destPath = boost::filesystem::path(path);
 
-	if(!bIsRunningDir)
-		destPath = (exePath /= destPath);
+    if (!bIsRunningDir)
+        destPath = (exePath /= destPath);
 
-	return destPath.string();
+    return destPath.string();
 }
