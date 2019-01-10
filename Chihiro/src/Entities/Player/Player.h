@@ -342,6 +342,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     uint m_hTamingTarget{};
     int GetChaos() const;
     int GetMaxChaos() const;
+    inline bool IsInParty() const { return GetPartyID() != 0; }
     void AddChaos(int chaos);
     bool m_bSitdown{false};
     bool m_bTrading{false};

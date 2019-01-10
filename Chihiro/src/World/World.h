@@ -116,8 +116,8 @@ class World
     bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove = true);
     void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
-    void addEXP(Unit *pCorpse, Player *pPlayer, float exp, float jp);
-    void addEXP(Unit *pCorpse, int nPartyID, float exp, float jp);
+    void addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp);
+    void addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp);
 
     WorldSession *FindSession(uint32 id) const;
     void AddSession(WorldSession *s);
