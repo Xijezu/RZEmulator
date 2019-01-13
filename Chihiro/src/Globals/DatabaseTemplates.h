@@ -16,78 +16,100 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "ItemFields.h"
+
 constexpr int MAX_DROP_GROUP = 10;
 
 struct DropGroup
 {
-    int   uid;
-    int   drop_item_id[MAX_DROP_GROUP];
+    int uid;
+    int drop_item_id[MAX_DROP_GROUP];
     float drop_percentage[MAX_DROP_GROUP];
 };
 
 struct LevelResourceTemplate
 {
-    int   level;
+    int level;
     int64 normal_exp;
-    int   jlv[4];
+    int jlv[4];
 };
 
 struct ItemTemplate
 {
-    int32       id;
-    int32       name_id;
-    int32       type;
-    int32       group;
-    int32       iclass;
-    int32       wear_type;
-    int32       set_id;
-    int32       set_part_flag;
-    int32       rank;
-    int32       level;
-    int32       enhance;
-    int32       socket;
-    int32       status_flag;
-    int32       limit_deva;
-    int32       limit_asura;
-    int32       limit_gaia;
-    int32       limit_fighter;
-    int32       limit_hunter;
-    int32       limit_magician;
-    int32       limit_summoner;
-    int32       use_min_level;
-    int32       use_max_level;
-    int32       target_min_level;
-    int32       target_max_level;
-    float       range;
-    float       weight;
-    uint32      price;
-    int32       endurance;
-    int32       material;
-    int32       summon_id;
-    int8_t      flaglist[19];
-    int32       available_period;
-    int16       decrease_type;
-    float       throw_range;
-    int8_t      distribute_type;
-    int16       base_type[4];
-    float       base_var[4][2];
-    int16       opt_type[4];
-    float       opt_var[4][2];
-    int16       enhance_id[2];
-    float       _enhance[2][4];
-    int32       skill_id;
-    int32       state_id;
-    int32       state_level;
-    int32       state_time;
-    int32       state_type;
-    int32       cool_time;
-    int16       cool_time_group;
+    int32_t id;
+    int32_t name_id;
+    int32_t type;
+    int32_t group;
+    int32_t iclass;
+    int32_t wear_type;
+    int32_t set_id;
+    int32_t set_part_flag;
+    int32_t rank;
+    int32_t level;
+    int32_t enhance;
+    int32_t socket;
+    int32_t status_flag;
+    int32_t limit_deva;
+    int32_t limit_asura;
+    int32_t limit_gaia;
+    int32_t limit_fighter;
+    int32_t limit_hunter;
+    int32_t limit_magician;
+    int32_t limit_summoner;
+    int32_t nLimit;
+    int32_t use_min_level;
+    int32_t use_max_level;
+    int32_t target_min_level;
+    int32_t target_max_level;
+    float range;
+    float weight;
+    int32_t price;
+    int32_t endurance;
+    int32_t material;
+    int32_t summon_id;
+    int8_t flaglist[19];
+    int32_t available_period;
+    int16_t decrease_type;
+    float throw_range;
+    int8_t distribute_type;
+    int16_t base_type[4];
+    float base_var[4][2];
+    int16_t opt_type[4];
+    float opt_var[4][2];
+    int16_t enhance_id[2];
+    float _enhance[2][4];
+    int32_t skill_id;
+    int32_t state_id;
+    int32_t state_level;
+    int32_t state_time;
+    int32_t state_type;
+    int32_t cool_time;
+    int16_t cool_time_group;
     std::string script_text;
+
+    void SetCombinedFlags()
+    {
+        if (limit_asura != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_ASURA);
+        if (limit_gaia != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_GAIA);
+        if (limit_deva != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_DEVA);
+
+        if (limit_hunter != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_HUNTER);
+        if (limit_fighter != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_FIGHTER);
+        if (limit_magician != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_MAGICIAN);
+        if (limit_summoner != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_SUMMONER);
+    }
 };
 
 struct JobLevelBonusTemplate
 {
-    int   job_id;
+    int job_id;
     float strength[4];
     float vital[4];
     float dexterity[4];
@@ -110,9 +132,9 @@ struct JobResourceTemplate
 
 struct MarketInfo
 {
-    int         sort_id;
+    int sort_id;
     std::string name;
-    uint        code;
-    float       price_ratio;
-    float       huntaholic_ratio;
+    uint code;
+    float price_ratio;
+    float huntaholic_ratio;
 };

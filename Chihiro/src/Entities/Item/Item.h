@@ -78,14 +78,28 @@ public:
   void SetCount(int64 count);
   bool IsDropable();
   bool IsWearable();
+  int32_t GetItemCode() const { return m_Instance.Code; }
   int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
-  bool IsWeapon() const { return GetItemGroup() == GROUP_WEAPON; }
+  ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
   ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
   ItemTemplate *GetItemBase() const { return m_pItemBase; }
   int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
   int GetItemEnhance() const { return m_Instance.nEnhance; }
 
+  inline void SetWearInfo(ItemWearType wear_info)
+  {
+    m_Instance.nWearInfo = wear_info;
+    m_bIsNeedUpdateToDB = true;
+  }
+
+  inline void SetOwnSummonInfo(uint32_t handle, int UID)
+  {
+    m_Instance.OwnSummonHandle = handle;
+    m_Instance.nOwnSummonUID = UID;
+  }
+  inline int GetOwnSummonUID() const { return m_Instance.nOwnSummonUID; }
   Summon *GetSummon() const { return m_pSummon; }
+  void SetBindedCreatureHandle(uint32_t target) { m_hBindedTarget = target; }
 
   bool IsTradable();
   bool IsExpireItem() const;
@@ -93,6 +107,21 @@ public:
   bool IsQuestItem() const;
   float GetWeight() const;
   void CopyFrom(const Item *pFrom);
+
+  inline bool IsBullet() const { return GetItemGroup() == ItemGroup::GROUP_BULLET; }
+  inline bool IsBelt() const { return GetItemGroup() == ItemGroup::GROUP_BELT; }
+  inline bool IsWeapon() const { return GetItemGroup() == ItemGroup::GROUP_WEAPON; }
+  inline bool IsAccessory() const { return GetItemGroup() == ItemGroup::GROUP_ACCESSORY; }
+  inline bool IsItemCard() const { return GetItemGroup() == ItemGroup::GROUP_ITEMCARD; }
+  inline bool IsSummonCard() const { return GetItemGroup() == ItemGroup::GROUP_SUMMONCARD; }
+  inline bool IsSkillCard() const { return GetItemGroup() == ItemGroup::GROUP_SKILLCARD; }
+  inline bool IsSpellCard() const { return GetItemGroup() == ItemGroup::GROUP_SPELLCARD; }
+  inline bool IsStrikeCube() const { return GetItemGroup() == ItemGroup::GROUP_STRIKE_CUBE; }
+  inline bool IsDefenceCube() const { return GetItemGroup() == ItemGroup::GROUP_DEFENCE_CUBE; }
+  inline bool IsSkillCube() const { return GetItemGroup() == ItemGroup::GROUP_SKILL_CUBE; }
+  inline bool IsArtifact() const { return GetItemGroup() == ItemGroup::GROUP_ARTIFACT; }
+
+  inline bool IsTwoHandItem() const { return GetItemBase()->wear_type == ItemWearType::WEAR_TWOHAND; }
 
   bool IsInInventory() const;
   bool IsInStorage() const;

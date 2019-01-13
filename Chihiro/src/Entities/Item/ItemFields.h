@@ -23,6 +23,7 @@ constexpr int MAX_ITEM_WEAR = 24;
 constexpr int MAX_COOLTIME_GROUP = 40;
 constexpr int MAX_SOCKET_NUMBER = 4;
 constexpr int MAX_ITEM_NAME_LENGTH = 32;
+constexpr int MAX_SPARE_ITEM_WEAR{28};
 
 struct ItemPickupOrder
 {
@@ -40,6 +41,38 @@ enum ElementalType
     TYPE_LIGHT = 5,
     TYPE_DARK = 6,
     TYPE_COUNT = 7
+};
+
+enum class ITEM_EFFECT_PASSIVE
+{
+    NONE = 0,
+
+    ATTACK_POINT = 11,
+    MAGIC_POINT = 12,
+    ACCURACY = 13,
+    ATTACK_SPEED = 14,
+    DEFENCE = 15,
+    MAGIC_DEFENCE = 16,
+    AVOID = 17,
+    MOVE_SPEED = 18,
+    BLOCK_CHANGE = 19,
+    CARRY_WEIGHT = 20,
+    BLOCK_DEFENCE = 21,
+    CASTING_SPEED = 22,
+    MAGIC_ACCURACY = 23,
+    MAGIC_AVOID = 24,
+    COOLTIME_SPEED = 25,
+    BELT_SLOT = 26,
+    MAX_CHAOS = 27,
+    MAX_HP = 30,
+    MAX_MP = 31,
+    BOW_INTERVAL = 34,
+    MP_REGEN_POINT = 33,
+    TAMED_ITEM = 95,
+    INC_PARAMETER_A = 96,
+    INC_PARAMETER_B = 97,
+    AMP_PARAMETER_A = 98,
+    AMP_PARAMETER_B = 99,
 };
 
 enum FlagBits : uint
@@ -233,28 +266,30 @@ enum ItemGroup : int
     GROUP_FACE = 15,
     GROUP_UNDERWEAR = 16,
     GROUP_BAG = 17,
-    GROUP_PET_CAGE = 18,
+    GROUP_PETCAGE = 18,
     GROUP_STRIKE_CUBE = 21,
     GROUP_DEFENCE_CUBE = 22,
     GROUP_SKILL_CUBE = 23,
-    GROUP_RESTORATION_CUBE = 24,
+    GROUP_CASH_ITEM = 80,
     GROUP_SOULSTONE = 93,
     GROUP_BULLET = 98,
-    GROUP_CONSUMABLE = 99,
-    GROUP_NPC_FACE = 100,
+    GROUP_USEABLE = 99,
     GROUP_DECO = 110,
     GROUP_RIDING = 120,
+    GROUP_ARTIFACT = 130,
+    GROUP_BOSSCARD = 140,
 };
 
-enum LIMIT_FLAG : int
+enum class LIMIT_FLAG : int32_t
 {
-    LIMIT_DEVA = 0x4,
-    LIMIT_ASURA = 0x8,
-    LIMIT_GAIA = 0x10,
-    LIMIT_FIGHTER = 0x400,
-    LIMIT_HUNTER = 0x800,
-    LIMIT_MAGICIAN = 0x1000,
-    LIMIT_SUMMONER = 0x2000
+    LIMIT_DEVA = (1 << 2),
+    LIMIT_ASURA = (1 << 3),
+    LIMIT_GAIA = (1 << 4),
+
+    LIMIT_FIGHTER = (1 << 10),
+    LIMIT_HUNTER = (1 << 11),
+    LIMIT_MAGICIAN = (1 << 12),
+    LIMIT_SUMMONER = (1 << 13),
 };
 
 enum ItemCode : int

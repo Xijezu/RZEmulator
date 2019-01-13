@@ -312,31 +312,49 @@ bool Summon::DoEvolution()
     return false;
 };
 
-bool Summon::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
+bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *ItemList)
 {
-    if (!Unit::TranslateWearPosition(pos, item, ItemList))
+    if (!Unit::TranslateWearPosition(pos, pItem, ItemList))
         return false;
 
-    if ((item->m_Instance.Flag & 1) == 0)
+    if ((pItem->m_Instance.Flag & 1) == 0)
         return false;
 
-    switch (item->m_pItemBase->group)
+    if (pos > static_cast<ItemWearType>(MAX_ITEM_WEAR) || pos < 0)
+        return false;
+
+    if (pos == static_cast<ItemWearType>(MAX_ITEM_WEAR))
     {
-    case GROUP_WEAPON:
-        pos = WEAR_WEAPON;
-        break;
-    case GROUP_ARMOR:
-        pos = WEAR_SHIELD;
-        break;
-    default:
+        int32_t startPos{0};
+        int32_t endPos{static_cast<int32_t>(SUMMON_DEFAULTS::SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR)};
+
+        ///- Later epics: Accessory + Artifact slots, ain't gonna implement that yet
+
+        for (int i = startPos; i < endPos; ++i)
+        {
+            auto pWornItem = m_anWear[i];
+            if (!pItem->IsArtifact() && pWornItem != nullptr && pWornItem->GetItemGroup() == pItem->GetItemGroup())
+                return false;
+
+            if (pWornItem == pItem)
+                return false;
+
+            if (pWornItem != nullptr && pos == MAX_ITEM_WEAR)
+                pos = static_cast<ItemWearType>(i);
+        }
+
+        if (pos == MAX_ITEM_WEAR)
+            return false;
+    }
+    else if (pos >= static_cast<int32_t>(SUMMON_DEFAULTS::SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR)) ///- Replace with m_nMaxItemWear w/ staged pets
+    {
         return false;
     }
-
-    if (pos > 24 || pos < 0)
-        return false;
-
-    if (m_anWear[pos] != nullptr)
-        ItemList.emplace_back(pos);
+    else if (ItemList != nullptr)
+    {
+        if (m_anWear[pos] != nullptr)
+            ItemList->emplace_back(pos);
+    }
 
     return true;
 }
@@ -394,39 +412,45 @@ void Summon::Update(uint /*diff*/)
 
 uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
 {
-    uint16 result = TS_RESULT_ACCESS_DENIED;
-    if (GetMaster() != nullptr && GetMaster()->HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE) && (pItem->m_Instance.Flag & 1) != 0)
-    {
-        result = Unit::putonItem(pos, pItem);
-        if (result == TS_RESULT_SUCCESS)
-        {
-            pItem->m_Instance.OwnSummonHandle = GetHandle();
-            pItem->m_Instance.nOwnSummonUID = GetUInt32Value(UNIT_FIELD_UID);
+    auto pMaster = GetMaster();
+    if (pMaster == nullptr || !pMaster->IsInWorld() || (pItem->m_Instance.Flag & 1) == 0)
+        return TS_RESULT_ACCESS_DENIED;
 
-            GetMaster()->UpdateQuestStatusByItemUpgrade();
-        }
-    }
-    return result;
+    if (auto nRet = Unit::putonItem(pos, pItem); nRet != TS_RESULT_SUCCESS)
+        return nRet;
+
+    pItem->SetOwnSummonInfo(GetHandle(), GetUInt32Value(UNIT_FIELD_UID));
+
+    ///- @todo: Item on_equip_item
+    if (m_anWear[pos] == pItem)
+        pMaster->GetInventory()->AddWeightModifier(-pItem->GetWeight());
+
+    pMaster->UpdateWeightWithInventory();
+    pMaster->UpdateQuestStatusByItemUpgrade();
+
+    return TS_RESULT_SUCCESS;
 }
 
 uint16 Summon::putoffItem(ItemWearType pos)
 {
-    uint16 result = TS_RESULT_ACCESS_DENIED;
+    auto pMaster = GetMaster();
+    if (pMaster == nullptr || !pMaster->IsInWorld())
+        return TS_RESULT_ACCESS_DENIED;
 
-    if (GetMaster() != nullptr && GetMaster()->IsInWorld() && GetMaster()->HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
-    {
-        if (pos < 0 || pos > 24)
-            return TS_RESULT_ACCESS_DENIED;
+    if (m_anWear[pos] == nullptr)
+        return TS_RESULT_NOT_EXIST;
 
-        if (m_anWear[pos] != nullptr)
-        {
-            m_anWear[pos]->m_Instance.OwnSummonHandle = 0;
-            m_anWear[pos]->m_Instance.nOwnSummonUID = 0;
+    auto pItem = m_anWear[pos];
+    pItem->SetOwnSummonInfo(0, 0);
+    auto nRet = Unit::putoffItem(pos);
 
-            result = Unit::putoffItem(pos);
-        }
-    }
-    return result;
+    if (m_anWear[pos] == nullptr)
+        pMaster->GetInventory()->AddWeightModifier(pItem->GetWeight());
+
+    pMaster->UpdateWeightWithInventory();
+    pMaster->UpdateQuestStatusByItemUpgrade();
+
+    return nRet;
 }
 
 void Summon::onCompleteCalculateStat()

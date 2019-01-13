@@ -1533,104 +1533,123 @@ void Unit::CancelAttack()
     SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
 }
 
-bool Unit::TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList)
+bool Unit::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *ItemList)
 {
-    bool result;
-    if (item->GetWearType() != WEAR_CANTWEAR && item->IsWearable())
-    {
-        int elevel = m_nUnitExpertLevel;
-        int level = GetLevel();
-        if (m_nUnitExpertLevel <= level)
-            elevel = level;
-        result = (item->GetLevelLimit() <= elevel) && ((item->m_pItemBase->use_min_level == 0 || level >= item->m_pItemBase->use_min_level) && (item->m_pItemBase->use_max_level == 0 || level <= item->m_pItemBase->use_max_level));
-    }
-    else
-    {
-        result = false;
-    }
-    return result;
+    if (pItem->GetWearType() == ItemWearType::WEAR_CANTWEAR)
+        return false;
+
+    if (!pItem->IsWearable())
+        return false;
+
+    int nLevel = m_nUnitExpertLevel > GetLevel() ? m_nUnitExpertLevel : GetLevel();
+    if (pItem->GetLevelLimit() > nLevel)
+        return false;
+
+    if (pItem->GetItemBase()->use_min_level != 0 && GetLevel() < pItem->GetItemBase()->use_min_level)
+        return false;
+
+    if (pItem->GetItemBase()->use_max_level != 0 && GetLevel() > pItem->GetItemBase()->use_max_level)
+        return false;
+
+    return true;
 }
 
-uint16_t Unit::putonItem(ItemWearType pos, Item *item)
+ushort Unit::Puton(ItemWearType pos, Item *pItem, bool bIsTranslated)
 {
-    m_anWear[pos] = item;
-    item->m_Instance.nWearInfo = pos;
-    item->m_bIsNeedUpdateToDB = true;
-    // Binded target
-    if (IsPlayer())
-    {
-        auto p = dynamic_cast<Player *>(this);
-        p->SendItemWearInfoMessage(item, this);
-    }
-    else if (IsSummon())
-    {
-        auto p = dynamic_cast<Summon *>(this);
-        Messages::SendItemWearInfoMessage(p->GetMaster(), this, item);
-    }
-    return 0;
-}
-
-ushort Unit::Puton(ItemWearType pos, Item *item, bool bIsTranslated)
-{
-    if (item->m_Instance.nWearInfo != WEAR_CANTWEAR)
-        return 0;
-
-    if (!bIsTranslated)
-    {
-        std::vector<int> vOverlapItemList{};
-        if (!TranslateWearPosition(pos, item, vOverlapItemList))
-            return 0;
-
-        for (int &s : vOverlapItemList)
-        {
-            putoffItem((ItemWearType)s);
-            if (m_anWear[s] != nullptr)
-                return 0;
-        }
-    }
-    return putonItem(pos, item);
-}
-
-uint16_t Unit::putoffItem(ItemWearType pos)
-{
-    auto item = m_anWear[pos];
-    if (item == nullptr)
+    if (!pItem->IsInInventory())
         return TS_RESULT_ACCESS_DENIED;
 
-    item->m_Instance.nWearInfo = WEAR_NONE;
-    item->m_bIsNeedUpdateToDB = true;
-    // Binded Target
-    m_anWear[pos] = nullptr;
+    if (pItem->GetWearInfo() != WEAR_NONE)
+        return TS_RESULT_NOT_ACTABLE;
+
+    std::vector<int32_t> vOverlappedItemList{};
+
+    if (!TranslateWearPosition(pos, pItem, &vOverlappedItemList))
+        return TS_RESULT_NOT_ACTABLE;
+
+    for (auto &it : vOverlappedItemList)
+    {
+        putoffItem(static_cast<ItemWearType>(it));
+        if (m_anWear[it] != nullptr)
+            return TS_RESULT_NOT_ACTABLE;
+    }
+
+    return putonItem(pos, pItem);
+}
+
+uint16_t Unit::putonItem(ItemWearType pos, Item *pItem)
+{
+    ASSERT(pos < MAX_SPARE_ITEM_WEAR, "putonItem: Position invalid!!");
+    ASSERT(m_anWear[pos] == nullptr, "putonItem: m_anWear[pos] is empty!!");
+
+    m_anWear[pos] = pItem;
+
+    pItem->SetWearInfo(pos);
+    pItem->SetBindedCreatureHandle(GetHandle());
+    pItem->m_bIsNeedUpdateToDB = true;
+
+    if ((pItem->IsBow() || pItem->IsCrossBow()) && pos < MAX_ITEM_WEAR)
+        m_nNextAttackMode = static_cast<int32_t>(NEXT_ATTACK_MODE::AM_AIMING);
+
     if (IsPlayer())
-    {
-        auto p = dynamic_cast<Player *>(this);
-        p->SendItemWearInfoMessage(item, this);
-    }
+        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[pos]);
     else if (IsSummon())
-    {
-        auto p = dynamic_cast<Summon *>(this);
-        Messages::SendItemWearInfoMessage(p->GetMaster(), this, item);
-    }
-    return 0;
+        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[pos]);
+
+    return TS_RESULT_SUCCESS;
 }
 
 ushort Unit::Putoff(ItemWearType pos)
 {
-    if (pos == WEAR_TWOHAND)
-        pos = WEAR_WEAPON;
-    if (pos == WEAR_TWOFINGER_RING)
-        pos = WEAR_RING;
-    if (pos >= MAX_ITEM_WEAR || pos < 0)
-        return TS_RESULT_NOT_ACTABLE;
-    ItemWearType abspos = GetAbsoluteWearPos(pos);
-    if (abspos == WEAR_CANTWEAR)
-        return TS_RESULT_NOT_ACTABLE;
-    if (pos != WEAR_BAG_SLOT)
-        return putoffItem(abspos);
+    if (pos == ItemWearType::WEAR_TWOHAND)
+        pos = ItemWearType::WEAR_WEAPON;
 
-    // Todo: Bag
+    if (pos == ItemWearType::WEAR_TWOFINGER_RING)
+        pos = ItemWearType::WEAR_RING;
 
-    return TS_RESULT_NOT_ACTABLE;
+    if ((pos >= MAX_SPARE_ITEM_WEAR && pos != ItemWearType::WEAR_TWOHAND) || pos < 0)
+        return TS_RESULT_NOT_ACTABLE;
+
+    ItemWearType absolute_pos = GetAbsoluteWearPos(pos);
+    if (absolute_pos == WEAR_CANTWEAR)
+        return TS_RESULT_NOT_ACTABLE;
+
+    if (pos == ItemWearType::WEAR_BAG_SLOT)
+    {
+        if (GetMaxWeight() < GetFloatValue(PLAYER_FIELD_WEIGHT))
+            return TS_RESULT_TOO_HEAVY;
+
+        const auto &current_bag_base = m_anWear[absolute_pos]->GetItemBase();
+        float current_bag_capacity{0};
+        for (int i = 0; i < MAX_OPTION_NUMBER; ++i)
+        {
+            if (current_bag_base->opt_type[i] != static_cast<int32_t>(ITEM_EFFECT_PASSIVE::CARRY_WEIGHT))
+                continue;
+
+            current_bag_capacity += current_bag_base->opt_var[i][0];
+        }
+
+        if (GetMaxWeight() - current_bag_capacity < GetFloatValue(PLAYER_FIELD_WEIGHT))
+            return TS_RESULT_TOO_HEAVY;
+    }
+
+    return putoffItem(absolute_pos);
+}
+
+uint16_t Unit::putoffItem(ItemWearType pos)
+{
+    ASSERT(pos < MAX_SPARE_ITEM_WEAR, "ItemWearType position is invald!!");
+
+    m_anWear[pos]->SetWearInfo(WEAR_NONE);
+    m_anWear[pos]->SetBindTarget(nullptr);
+
+    if (IsPlayer())
+        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[pos]);
+    else if (IsSummon())
+        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[pos]);
+
+    m_anWear[pos] = nullptr;
+    return TS_RESULT_SUCCESS;
 }
 
 ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
@@ -1791,7 +1810,7 @@ uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, ui
             bool bNotErasableCur = it->GetTimeType() & AF_AF_NOT_ERASABLE;
             if (bNotErasable == bNotErasableCur)
             {
-                if (it->GetLevel() > level || it->GetLevel() == level && it->GetEndTime() > end_time)
+                if (it->GetLevel() > level || (it->GetLevel() == level && it->GetEndTime() > end_time))
                     return TS_RESULT_ALREADY_EXIST;
 
                 if (code == it->GetCode())
