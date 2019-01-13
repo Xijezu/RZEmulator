@@ -4,9 +4,8 @@
 #include "Server/Packets/PacketDeclaration.h"
 
 #define TS_CS_REQUEST_DEF(_) \
-    _(simple)                \
-    (uint8_t, command_type)  \
-        _(string)(command, 75)
+    _(simple)(uint8_t, t) \
+    _(endstring)(command, true)
 
 CREATE_PACKET(TS_CS_REQUEST, 60);
 

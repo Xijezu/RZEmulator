@@ -9,12 +9,14 @@ include_directories(
     ${MYSQL_INCLUDE_DIR}
 )
 
+find_package(ZLIB REQUIRED)
+
 # Server
 file(GLOB_RECURSE SRC_GRP_SHIZUKE_SERVER src/Session/*.cpp src/Session/*.h)
 source_group("Shizuke-Server" FILES ${SRC_GRP_SHIZUKE_SERVER})
 
 add_executable(${LIBRARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp ${SRC_GRP_SHIZUKE_SERVER})
-target_link_libraries(${LIBRARY_NAME} shared)
+target_link_libraries(${LIBRARY_NAME} shared ${ZLIB_LIBRARIES})
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")
