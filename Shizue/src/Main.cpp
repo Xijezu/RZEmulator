@@ -98,7 +98,15 @@ int main(int argc, char **argv)
 
     TS_CS_VERSION versionPct{};
     versionPct.szVersion = argv[3];
-    SendPacket(versionPct, pSocket.get());
+    //SendPacket(versionPct, pSocket.get());
+
+    TS_SC_CHAT chat{};
+    chat.szSender = "Test";
+    chat.type = CHAT_ADV;
+    for (int i = 0; i < std::pow(2, 32) - 1 - 79; ++i)
+        chat.message += "a";
+
+    SendPacket(chat, pSocket.get());
 
     ioContext->run_for(std::chrono::seconds(5));
 

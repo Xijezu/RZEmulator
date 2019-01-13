@@ -106,11 +106,8 @@ struct takePriority
 
 struct HateTag
 {
-    HateTag(uint _uid, uint _time, int _hate)
+    HateTag(uint _uid, uint _time, int _hate) : nTime(_time), uid(_uid), nHate(_hate), bIsActive(true), nBadAttackCount(0), nLastMaxHate(0)
     {
-        uid = _uid;
-        nTime = _time;
-        nHate = _hate;
     }
 
     uint uid;
