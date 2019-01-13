@@ -707,29 +707,26 @@ void Monster::findNextEnemy()
 
     for (auto &ht : m_vHateList)
     {
-        if (ht.bIsActive)
+        if (!ht.bIsActive)
+            continue;
+
+        int nHate = ht.nHate;
+        for (const auto &mit : m_vHateModifierByState)
         {
-            int nHate = ht.nHate;
-
-            for (auto &hmt : m_vHateModifierByState)
+            if (mit.uid == ht.uid)
             {
-                if (hmt.uid == ht.uid)
-                {
-                    nMaxHate += hmt.nHate;
-                    break;
-                }
+                nHate += mit.nHate;
+                break;
             }
+        }
 
-            if (nHate > nMaxHate)
+        if (nHate > nMaxHate)
+        {
+            auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(ht.uid);
+            if (pTarget != nullptr && sRegion.IsVisibleRegion(pTarget, this) && IsVisible(pTarget))
             {
-                auto *unit = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
-                if (unit != nullptr && sRegion.IsVisibleRegion((uint)(unit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(unit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                                               (uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))) != 0
-                    /*&&  IsVisible(unit)*/)
-                {
-                    nMaxHate = nHate;
-                    target = ht.uid;
-                }
+                nMaxHate = nHate;
+                target = ht.uid;
             }
         }
     }
