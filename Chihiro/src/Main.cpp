@@ -33,7 +33,7 @@
 #include "WorldSession.h"
 
 #ifndef _CHIHIRO_CORE_CONFIG
-# define _CHIHIRO_CORE_CONFIG  "chihiro.conf"
+#define _CHIHIRO_CORE_CONFIG "chihiro.conf"
 #endif //_CHIHIRO_CORE_CONFIG
 
 bool StartDB();
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
         NG_LOG_ERROR("server.worldserver", "Cannot connect to database.");
         return 1;
     }
-    std::shared_ptr<void>                     sDBHandle(nullptr, [](void *) { StopDB(); });
+    std::shared_ptr<void> sDBHandle(nullptr, [](void *) { StopDB(); });
     // Set signal handlers
     boost::asio::signal_set signals(*ioContext, SIGINT, SIGTERM);
 #if PLATFORM == PLATFORM_WINDOWS
@@ -87,8 +87,8 @@ int main(int argc, char **argv)
     signals.async_wait(SignalHandler);
 
     // Enabled a timed callback for handling the database keep alive ping
-    int32                                        dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
-    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer    = std::make_shared<boost::asio::deadline_timer>(*ioContext);
+    int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = std::make_shared<boost::asio::deadline_timer>(*ioContext);
     dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
     dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
@@ -100,9 +100,11 @@ int main(int argc, char **argv)
     }
 
     std::shared_ptr<void> sAuthHandle(nullptr, [](void *) { sAuthNetwork.Stop(); });
-    auto                  worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
-    std::string           bindIp    = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
-    if (!XSocketMgr<WorldSession>::Instance().StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2))
+    auto worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+    std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
+
+    auto pWorldNetwork = std::make_unique<XSocketMgr<WorldSession>>();
+    if (!pWorldNetwork->StartWorldNetwork(*ioContext, bindIp.c_str(), worldPort, 2))
     {
         NG_LOG_ERROR("server.worldserver", "Failed to start network");
         return -1;
@@ -110,7 +112,6 @@ int main(int argc, char **argv)
     }
     std::shared_ptr<void> sWorldHandle(nullptr, [](void *) {
         sWorld.KickAll();
-        XSocketMgr<WorldSession>::Instance().StopNetwork();
         sMemoryPool.Destroy();
 
         sObjectMgr.UnloadAll();
@@ -124,9 +125,8 @@ int main(int argc, char **argv)
         cliThread.reset(new std::thread(CliThread), &ShutdownCLIThread);
     }
 
-
     // Start the Boost based thread pool
-    int                                       numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
     std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
         ioContext->stop();
         for (std::thread &thr : *del)
@@ -147,6 +147,7 @@ int main(int argc, char **argv)
     threadPool.reset();
     sLog->SetSynchronous();
 
+    pWorldNetwork->StopNetwork();
     dbPingTimer->cancel();
     signals.cancel();
 
@@ -185,7 +186,7 @@ bool StartDB()
 
     DatabaseLoader loader("server.worldserver", DatabaseLoader::DATABASE_NONE);
     loader.AddDatabase(GameDatabase, "Game")
-          .AddDatabase(CharacterDatabase, "Character");
+        .AddDatabase(CharacterDatabase, "Character");
 
     if (!loader.Load())
     {
@@ -244,7 +245,7 @@ void ShutdownCLIThread(std::thread *cliThread)
             {
                 LPSTR errorBuffer;
                 DWORD numCharsWritten = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
-                    nullptr, errorCode, 0, (LPTSTR)&errorBuffer, 0, nullptr);
+                                                      nullptr, errorCode, 0, (LPTSTR)&errorBuffer, 0, nullptr);
                 if (!numCharsWritten)
                     errorBuffer = "Unknown error";
 

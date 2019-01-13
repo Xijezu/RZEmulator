@@ -13,6 +13,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Item
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/NPC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/RespawnObject
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Roamer
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Object
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Player
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Entities/Unit

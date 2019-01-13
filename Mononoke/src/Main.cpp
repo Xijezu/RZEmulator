@@ -29,7 +29,7 @@
 bool StartDB();
 void StopDB();
 
-# define _MONONOKE_CORE_CONFIG  "mononoke.conf"
+#define _MONONOKE_CORE_CONFIG "mononoke.conf"
 
 void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
@@ -63,21 +63,23 @@ int main(int argc, char **argv)
     NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
     NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
-    auto                  authPort   = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
-    std::string           authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
-    if (!XSocketMgr<AuthClientSession>::Instance().StartWorldNetwork(*ioContext, authBindIp, authPort, 1))
+    auto authPort = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
+    std::string authBindIp = sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
+
+    auto pAuthNetwork = std::make_unique<XSocketMgr<AuthClientSession>>();
+    if (!pAuthNetwork->StartWorldNetwork(*ioContext, authBindIp, authPort, 1))
     {
         NG_LOG_ERROR("server.authserver", "Authnetwork startup failed: %s:%d", authBindIp.c_str(), authPort);
     }
-    std::shared_ptr<void> sACNetwork(nullptr, [](void *) { XSocketMgr<AuthClientSession>::Instance().StopNetwork(); });
 
-    auto                  gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
-    std::string           bindIp   = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
-    if (!XSocketMgr<AuthGameSession>::Instance().StartWorldNetwork(*ioContext, bindIp, gamePort, 1))
+    auto gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
+    std::string bindIp = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
+
+    auto pGameNetwork = std::make_unique<XSocketMgr<AuthGameSession>>();
+    if (!pGameNetwork->StartWorldNetwork(*ioContext, bindIp, gamePort, 1))
     {
         NG_LOG_ERROR("server.authserver", "Gamenetwork startup failed: %s:%d", bindIp.c_str(), gamePort);
     }
-    std::shared_ptr<void> sAGNetwork(nullptr, [](void *) { XSocketMgr<AuthGameSession>::Instance().StopNetwork(); });
 
     // Initialize the database connection
     if (!StartDB())
@@ -92,14 +94,16 @@ int main(int argc, char **argv)
     signals.async_wait(std::bind(&SignalHandler, std::weak_ptr<NGemity::Asio::IoContext>(ioContext), std::placeholders::_1, std::placeholders::_2));
 
     // Enabled a timed callback for handling the database keep alive ping
-    int32                                        dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
-    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer    = std::make_shared<boost::asio::deadline_timer>(*ioContext);
+    int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = std::make_shared<boost::asio::deadline_timer>(*ioContext);
     dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
     dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
 
     // Start the io service worker loop
     ioContext->run();
 
+    pGameNetwork->StopNetwork();
+    pAuthNetwork->StopNetwork();
     dbPingTimer->cancel();
     signals.cancel();
 

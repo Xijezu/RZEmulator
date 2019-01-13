@@ -36,7 +36,7 @@ XLua::XLua()
 bool XLua::InitializeLua()
 {
 
-	auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
 
     // Monster relevant
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
@@ -44,6 +44,8 @@ bool XLua::InitializeLua()
     m_pState.set_function("respawn_rare_mob", &XLua::SCRIPT_RespawnRareMob, this);
     m_pState.set_function("respawn_roaming_mob", &XLua::SCRIPT_RespawnRoamingMob, this);
     m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian, this);
+    m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
+    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
     // NPC relevant
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);
@@ -83,9 +85,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
     m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
     m_pState.set_function("insert_item", &XLua::SCRIPT_InsertItem, this);
-    m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
     m_pState.set_function("cprint", &XLua::SCRIPT_CPrint, this);
-    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
     m_pState.set_function("add_npc", &XLua::SCRIPT_AddMonster, this);
     m_pState.set_function("get_creature_value", &XLua::SCRIPT_GetCreatureValue, this);
     m_pState.set_function("set_creature_value", &XLua::SCRIPT_SetCreatureValue, this);
@@ -125,7 +125,8 @@ bool XLua::InitializeLua()
     try
     {
         m_pState.script("on_server_init()");
-    } catch (sol::error &ex)
+    }
+    catch (sol::error &ex)
     {
         NG_LOG_ERROR("scripting", "%s", ex.what());
         return false;
@@ -136,7 +137,7 @@ bool XLua::InitializeLua()
 
 bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
 {
-    m_pUnit  = pObject;
+    m_pUnit = pObject;
     szResult = "";
     if (szLua == "0")
         return true;
@@ -155,7 +156,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
 
 bool XLua::RunString(Unit *pObject, std::string pScript)
 {
-    std::string buf{ };
+    std::string buf{};
     return RunString(pObject, pScript, buf);
 }
 
@@ -164,7 +165,8 @@ bool XLua::RunString(std::string szScript)
     try
     {
         m_pState.script(szScript);
-    } catch (sol::error &err)
+    }
+    catch (sol::error &err)
     {
         NG_LOG_ERROR("scripting", "%s", err.what());
         return false;
@@ -187,29 +189,35 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
     if (args.size() < 7)
         return;
 
-    uint  id         = args[0].get<uint>();
-    uint  interval   = args[1].get<uint>();
-    float left       = args[3].get<float>();
-    float top        = args[4].get<float>();
-    float right      = left + 1;
-    float bottom     = top + 1;
-    uint  monster_id = args[5].get<uint>();
-    uint  max_num    = args[6].get<uint>();
-    bool  is_wander  = args[7].get<bool>();
-    int   wander_id  = args.size() > 7 ? args[8].get<uint>() : 0;
+    uint id = args[0].get<uint>();
+    uint interval = args[1].get<uint>();
+    float left = args[3].get<float>();
+    float top = args[4].get<float>();
+    float right = left + 1;
+    float bottom = top + 1;
+    uint monster_id = args[5].get<uint>();
+    uint max_num = args[6].get<uint>();
+    bool is_wander = args[7].get<bool>();
+    int wander_id = args.size() > 7 ? args[8].get<uint>() : 0;
 
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
-void XLua::SCRIPT_RespawnRoamingMob(int, int, int, int, int)
+void XLua::SCRIPT_RespawnRoamingMob(sol::variadic_args args)
 {
+    if (args.size() < 4)
+        return;
 
+    auto nRoamingID = args[0].get<int32_t>();
+    auto nMonsterID = args[1].get<int32_t>();
+    auto nAngle = args[2].get<int32_t>();
+    auto nDistance = args[3].get<float>() * GameRule::DEFAULT_UNIT_SIZE;
+    uint32_t nRespawnInterval = (args.size() >= 5) ? args[4].get<uint32_t>() * 100 : 0;
 }
 
 void XLua::SCRIPT_RespawnGuardian(int, int, int, int, int, int, int, int)
 {
-
 }
 
 int XLua::SCRIPT_GetNPCID()
@@ -290,14 +298,14 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     {
         return return_object(m_pUnit->GetCurrentJob());
     }
-	else if (szKey == "hp" || szKey == "health")
-	{
-		return return_object(m_pUnit->GetHealth());
-	}
-	else if (szKey == "mp" || szKey == "mana")
-	{
-		return return_object(m_pUnit->GetMana());
-	}
+    else if (szKey == "hp" || szKey == "health")
+    {
+        return return_object(m_pUnit->GetHealth());
+    }
+    else if (szKey == "mp" || szKey == "mana")
+    {
+        return return_object(m_pUnit->GetMana());
+    }
     else if (szKey == "max_hp")
     {
         return return_object(m_pUnit->GetMaxHealth());
@@ -404,7 +412,7 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
     if (args.size() != 2)
         return;
 
-    auto key   = args[0].get<std::string>();
+    auto key = args[0].get<std::string>();
     auto value = args[1].get<std::string>();
 
     player->SetCharacterFlag(key, value);
@@ -523,7 +531,7 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
 
 std::string XLua::SCRIPT_Conv(sol::variadic_args args)
 {
-    std::string result{ };
+    std::string result{};
     if (args.size() >= 1 && args.size() % 2 == 1)
     {
         std::size_t count = 0;
@@ -614,7 +622,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
-    item->m_Instance.nLevel   = level;
+    item->m_Instance.nLevel = level;
     item->m_bIsNeedUpdateToDB = true;
     Messages::SendItemMessage(dynamic_cast<Player *>(m_pUnit), item);
     dynamic_cast<Player *>(m_pUnit)->UpdateQuestStatusByItemUpgrade();
@@ -689,12 +697,12 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
     if (args.size() < 2)
         return 0;
 
-    int  nCode    = args[0].get<int>();
-    int  nCount   = args[1].get<int>();
-    int  nEnhance = args.size() >= 3 ? args[2].get<int>() : 0;
-    int  nLevel   = args.size() >= 4 ? args[3].get<int>() : 0;
-    int  nFlag    = args.size() >= 5 ? args[4].get<int>() : 0;
-    auto pName    = args.size() >= 6 ? args[5].get<std::string>() : m_pUnit->GetNameAsString();
+    int nCode = args[0].get<int>();
+    int nCount = args[1].get<int>();
+    int nEnhance = args.size() >= 3 ? args[2].get<int>() : 0;
+    int nLevel = args.size() >= 4 ? args[3].get<int>() : 0;
+    int nFlag = args.size() >= 5 ? args[4].get<int>() : 0;
+    auto pName = args.size() >= 6 ? args[5].get<std::string>() : m_pUnit->GetNameAsString();
 
     auto player = Player::FindPlayer(pName);
     uint handle = 0;
@@ -718,23 +726,22 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
 {
     if (args.size() < 9)
         return;
-    auto               id         = args[0].get<uint>();
-    auto               interval   = args[1].get<uint>();
-    auto               left       = args[2].get<float>();
-    auto               top        = args[3].get<float>();
-    auto               right      = args[4].get<float>();
-    auto               bottom     = args[5].get<float>();
-    auto               monster_id = args[6].get<uint>();
-    auto               max_num    = args[7].get<uint>();
-    auto               inc        = args[8].get<uint>();
-    auto               wander_id  = args.size() > 9 ? args[9].get<int>() : 0;
+    auto id = args[0].get<uint>();
+    auto interval = args[1].get<uint>();
+    auto left = args[2].get<float>();
+    auto top = args[3].get<float>();
+    auto right = args[4].get<float>();
+    auto bottom = args[5].get<float>();
+    auto monster_id = args[6].get<uint>();
+    auto max_num = args[7].get<uint>();
+    auto inc = args[8].get<uint>();
+    auto wander_id = args.size() > 9 ? args[9].get<int>() : 0;
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
 void XLua::SCRIPT_CPrint(sol::variadic_args)
 {
-
 }
 
 void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
@@ -921,8 +928,8 @@ void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
         if (player == nullptr)
             return;
 
-        bool bForce   = false;
-        int  nStartID = args[0].get<int>();
+        bool bForce = false;
+        int nStartID = args[0].get<int>();
         if (args.size() == 2)
             bForce = args[1].get<bool>();
 
@@ -1003,10 +1010,10 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
         return;
     }
 
-    int    nStateCode  = args[0].get<int>();
-    int    nStateLevel = args[1].get<uint8>();
-    uint   nStateTime  = args[2].get<uint>();
-    Player *player     = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
+    int nStateCode = args[0].get<int>();
+    int nStateLevel = args[1].get<uint8>();
+    uint nStateTime = args[2].get<uint>();
+    Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr)
     {
         NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
@@ -1024,10 +1031,10 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
         return;
     }
 
-    int    nStateCode  = args[0].get<int>();
-    int    nStateLevel = args[1].get<uint8>();
-    uint   nStateTime  = args[2].get<uint>();
-    Player *player     = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
+    int nStateCode = args[0].get<int>();
+    int nStateLevel = args[1].get<uint8>();
+    uint nStateTime = args[2].get<uint>();
+    Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     Summon *summon = player->m_pMainSummon;
 
     if (summon == nullptr || !summon->IsInWorld())
