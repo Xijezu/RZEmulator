@@ -9,6 +9,7 @@
 #include "ShizukeSession.h"
 #include "Stacktrace.h"
 #include "Config.h"
+#include "cipher/XStrZlibWithSimpleCipherUtil.h"
 
 template <class TS_SERIALIZABLE_PACKET>
 void SendPacket(TS_SERIALIZABLE_PACKET const &packet, XSocket *Socket)
@@ -96,17 +97,12 @@ int main(int argc, char **argv)
     for (int i = 0; i < numThreads; ++i)
         threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
-    TS_CS_VERSION versionPct{};
-    versionPct.szVersion = argv[3];
-    //SendPacket(versionPct, pSocket.get());
+    //ConfigMgr::instance()->SetPacketVersion(EPIC_9_1);
 
-    TS_SC_CHAT chat{};
-    chat.szSender = "Test";
-    chat.type = CHAT_ADV;
-    for (int i = 0; i < std::pow(2, 32) - 1 - 79; ++i)
-        chat.message += "a";
-
-    SendPacket(chat, pSocket.get());
+    TS_CS_REQUEST requestTest{};
+    requestTest.t = 'u';
+    requestTest.command = XStrZlibWithSimpleCipherUtil::Encrypt("SELECT count(*) FROM Character;");
+    SendPacket(requestTest, pSocket.get());
 
     ioContext->run_for(std::chrono::seconds(5));
 
