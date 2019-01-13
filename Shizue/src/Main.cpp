@@ -100,8 +100,8 @@ int main(int argc, char **argv)
     //ConfigMgr::instance()->SetPacketVersion(EPIC_9_1);
 
     TS_CS_REQUEST requestTest{};
-    requestTest.t = 'u';
-    requestTest.command = XStrZlibWithSimpleCipherUtil::Encrypt("SELECT count(*) FROM Character;");
+    requestTest.t = 's';
+    requestTest.command = XStrZlibWithSimpleCipherUtil::Encrypt("cprint('Hello glandu!')");
     SendPacket(requestTest, pSocket.get());
 
     ioContext->run_for(std::chrono::seconds(5));
