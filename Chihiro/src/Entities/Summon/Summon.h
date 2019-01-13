@@ -54,7 +54,7 @@ public:
 
   void Update(uint /*diff*/) override;
 
-  bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList) override;
+  bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList) override;
 
   float GetSize() const override;
   float GetScale() const override;

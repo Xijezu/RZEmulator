@@ -1524,7 +1524,7 @@ void Unit::applyItemEffect()
         if (curItem != nullptr && curItem->m_pItemBase != nullptr)
         {
             auto iwt = (ItemWearType)i;
-            if (TranslateWearPosition(iwt, curItem, ref_list))
+            if (TranslateWearPosition(iwt, curItem, &ref_list))
             {
                 float fItemRatio = 1.0f;
                 if (curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
@@ -2321,7 +2321,7 @@ void Unit::applyStatByItem()
             continue;
 
         auto iwt = (ItemWearType)i;
-        if (!TranslateWearPosition(iwt, m_anWear[i], ref_list))
+        if (!TranslateWearPosition(iwt, m_anWear[i], &ref_list))
             continue;
 
         const auto base = m_anWear[i]->GetItemBase();

@@ -68,6 +68,13 @@ enum TRADE_MODE : int
     TM_MODIFY_COUNT
 };
 
+enum struct JOB_RACE : int32_t
+{
+    GAIA = 3,
+    DEVA = 4,
+    ASURA = 5,
+};
+
 struct BonusInfo
 {
     int type;
@@ -146,6 +153,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
     bool HasRidingState() { return GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0; }
     bool IsRiding() { return GetInt32Value(PLAYER_FIELD_RIDING_IDX) != MOUNT_NOTHING; }
+    float GetWeight() const { return GetFloatValue(PLAYER_FIELD_WEIGHT); }
 
     int AddStamina(int nStamina);
     int GetStaminaRegenRate();
@@ -300,9 +308,10 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     int GetMoveSpeed() override;
 
-    bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList) override;
+    bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList) override;
 
     CreatureStat *GetBaseStat() const override;
+    Inventory *GetInventory() { return &m_Inventory; }
 
     uint GetCreatureGroup() const override { return 9; }
 

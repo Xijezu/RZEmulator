@@ -704,7 +704,7 @@ bool Player::ReadEquipItem()
                 if (unit->m_anWear[wear_info] == nullptr)
                 {
                     auto iwt = (ItemWearType)wear_info;
-                    if (unit->TranslateWearPosition(iwt, item, indices))
+                    if (unit->TranslateWearPosition(iwt, item, &indices))
                     {
                         m_anWear[wear_info] = item;
                         if (wear_info == WEAR_SHIELD && item->m_pItemBase->group == GROUP_WEAPON)
@@ -1770,255 +1770,318 @@ void Player::onCantAttack(uint target, uint t)
     }
 }
 
-bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> &vpOverlappItemList)
+bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *vpOverlappItemList)
 {
+    if (pos >= MAX_ITEM_WEAR && pos < MAX_SPARE_ITEM_WEAR)
+        return true;
+
     if (!Unit::TranslateWearPosition(pos, pItem, vpOverlappItemList))
         return false;
+
     if ((pItem->m_Instance.Flag & 1) != 0)
         return false;
-    bool ok{false};
-    if (pItem->m_pItemBase->limit_hunter != 0 && IsHunter())
-        ok = true;
-    if (pItem->m_pItemBase->limit_fighter != 0 && IsFighter())
-        ok = true;
-    if (pItem->m_pItemBase->limit_magician != 0 && IsMagician())
-        ok = true;
-    if (pItem->m_pItemBase->limit_summoner != 0 && IsSummoner())
-        ok = true;
 
-    if (!ok || (GetRace() == 3 && pItem->m_pItemBase->limit_gaia == 0) || (GetRace() == 4 && pItem->m_pItemBase->limit_deva == 0) || (GetRace() == 5 && pItem->m_pItemBase->limit_asura == 0))
+    bool bWearable = false;
+
+    if (pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_HUNTER) && IsHunter())
+        bWearable = true;
+    if (pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_FIGHTER) && IsFighter())
+        bWearable = true;
+    if (pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_MAGICIAN) && IsMagician())
+        bWearable = true;
+    if (pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_SUMMONER) && IsSummoner())
+        bWearable = true;
+
+    if (!bWearable)
         return false;
 
-    Item *item1{nullptr}, *item2{nullptr};
-    if (pos == WEAR_SHIELD)
-    {
-        if (pItem->m_pItemBase->group == GROUP_BULLET)
-        {
-            item1 = m_anWear[0];
-            if (item1 == nullptr || (item1->m_pItemBase->iclass != CLASS_CROSSBOW && item1->m_pItemBase->iclass != CLASS_LIGHT_BOW && item1->m_pItemBase->iclass != CLASS_HEAVY_BOW))
-                return false;
-        }
-        if (pItem->m_pItemBase->group == GROUP_WEAPON)
-        {
-            item1 = m_anWear[0];
-            if (item1 == nullptr)
-                return false;
+    if (GetRace() == static_cast<int32_t>(JOB_RACE::GAIA))
+        if (!(pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_GAIA)))
+            return false;
+    if (GetRace() == static_cast<int32_t>(JOB_RACE::DEVA))
+        if (!(pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_DEVA)))
+            return false;
+    if (GetRace() == static_cast<int32_t>(JOB_RACE::ASURA))
+        if (!(pItem->GetItemBase()->nLimit & static_cast<int32_t>(LIMIT_FLAG::LIMIT_ASURA)))
+            return false;
 
-            if (item1->m_pItemBase->iclass == CLASS_ONEHAND_SWORD && pItem->m_pItemBase->iclass == CLASS_ONEHAND_SWORD)
-            {
-                if (GetCurrentSkillLevel(1181) < 1 && GetCurrentSkillLevel(61010) < 1)
-                    pos = WEAR_WEAPON;
-            }
-            else if (item1->m_pItemBase->iclass == CLASS_DAGGER && pItem->m_pItemBase->iclass == CLASS_DAGGER)
-            {
-                if (GetCurrentSkillLevel(61010) < 1)
-                    pos = WEAR_WEAPON;
-            }
-            else if (item1->m_pItemBase->iclass == CLASS_ONEHAND_AXE && pItem->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
-            {
-                if (GetCurrentSkillLevel(61015) < 1)
-                    pos = WEAR_WEAPON;
-            }
+    if (pos == ItemWearType::WEAR_LEFTHAND && pItem->IsBullet())
+    {
+        if (m_anWear[ItemWearType::WEAR_RIGHTHAND] == nullptr)
+            return false;
+
+        if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_CROSSBOW &&
+            m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_LIGHT_BOW &&
+            m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_HEAVY_BOW)
+        {
+            return false;
         }
     }
-    if (pos == WEAR_DECO_SHIELD)
+
+    if (pos == ItemWearType::WEAR_LEFTHAND && pItem->IsWeapon())
     {
-        if (pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_SWORD || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SWORD || pItem->m_pItemBase->iclass == CLASS_DECO_DAGGER || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_SPEAR || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_AXE || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_MACE || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_MACE || pItem->m_pItemBase->iclass == CLASS_DECO_HEAVY_BOW || pItem->m_pItemBase->iclass == CLASS_DECO_LIGHT_BOW || pItem->m_pItemBase->iclass == CLASS_DECO_CROSSBOW || pItem->m_pItemBase->iclass == CLASS_DECO_ONEHAND_STAFF || pItem->m_pItemBase->iclass == CLASS_DECO_TWOHAND_STAFF || pItem->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
+        if (m_anWear[ItemWearType::WEAR_RIGHTHAND] == nullptr)
+            return false;
+
+        if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() == ItemClass::CLASS_ONEHAND_SWORD)
         {
-            item1 = m_anWear[1];
-            item2 = m_anWear[0];
-            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_ONEHAND_SWORD && item1->m_pItemBase->iclass != CLASS_DAGGER && item1->m_pItemBase->iclass != CLASS_ONEHAND_AXE) || (item2 != nullptr || item2->m_pItemBase->iclass != CLASS_ONEHAND_SWORD || item2->m_pItemBase->iclass != CLASS_DAGGER || item2->m_pItemBase->iclass != CLASS_ONEHAND_AXE) || m_anWear[14] == nullptr || (GetCurrentSkillLevel(1181) < 1 && GetCurrentSkillLevel(61010) < 1 && GetCurrentSkillLevel(61015) < 1))
+            if (pItem->GetItemClass() == ItemClass::CLASS_ONEHAND_SWORD)
             {
-                pos = WEAR_DECO_WEAPON;
+                int expert_level = GetCurrentSkillLevel(SKILL_DUAL_SWORD_EXPERT);
+
+                if (expert_level < 1)
+                    expert_level = GetCurrentSkillLevel(SKILL_TWIN_BLADE_EXPERT);
+
+                if (expert_level < 1)
+                    pos = ItemWearType::WEAR_WEAPON;
+            }
+            else
+            {
+                pos = ItemWearType::WEAR_WEAPON;
+            }
+        }
+        else if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() == ItemClass::CLASS_DAGGER)
+        {
+            if (pItem->GetItemClass() == ItemClass::CLASS_DAGGER)
+            {
+                int expert_level = GetCurrentSkillLevel(SKILL_TWIN_BLADE_EXPERT);
+
+                if (expert_level < 1)
+                    pos = ItemWearType::WEAR_WEAPON;
+            }
+            else
+            {
+                pos = ItemWearType::WEAR_WEAPON;
+            }
+        }
+        else if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() == ItemClass::CLASS_ONEHAND_AXE)
+        {
+            if (pItem->GetItemClass() == ItemClass::CLASS_ONEHAND_AXE)
+            {
+                int expert_level = GetCurrentSkillLevel(SKILL_TWIN_AXE_EXPERT);
+
+                if (expert_level < 1)
+                    pos = ItemWearType::WEAR_WEAPON;
+            }
+            else
+            {
+                pos = ItemWearType::WEAR_WEAPON;
             }
         }
         else
         {
-            item1 = m_anWear[1];
-            item2 = m_anWear[0];
-            if ((item1 != nullptr && item1->m_pItemBase->iclass != CLASS_SHIELD) || (item2 != nullptr && item2->m_pItemBase->wear_type == WEAR_TWOHAND))
+            pos = ItemWearType::WEAR_WEAPON;
+        }
+    }
+
+    if (pos == ItemWearType::WEAR_DECO_SHIELD)
+    {
+        if (pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_SWORD ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SWORD ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_DAGGER ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SPEAR ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_AXE ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_MACE ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_MACE ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_HEAVY_BOW ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_LIGHT_BOW ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_CROSSBOW ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_STAFF ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_STAFF ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_AXE)
+        {
+            if (m_anWear[ItemWearType::WEAR_LEFTHAND] != nullptr &&
+                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD &&
+                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER &&
+                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE)
+            {
+                pos = ItemWearType::WEAR_DECO_WEAPON;
+            }
+            else if (m_anWear[ItemWearType::WEAR_RIGHTHAND] == nullptr ||
+                     (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD &&
+                      m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER &&
+                      m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE))
+            {
+                pos = ItemWearType::WEAR_DECO_WEAPON;
+            }
+            else if (m_anWear[ItemWearType::WEAR_DECO_WEAPON] == nullptr)
+            {
+                pos = ItemWearType::WEAR_DECO_WEAPON;
+            }
+            else
+            {
+                int expert_level = GetCurrentSkillLevel(SKILL_DUAL_SWORD_EXPERT);
+
+                if (expert_level < 1)
+                    expert_level = GetCurrentSkillLevel(SKILL_TWIN_BLADE_EXPERT);
+                if (expert_level < 1)
+                    expert_level = GetCurrentSkillLevel(SKILL_TWIN_AXE_EXPERT);
+
+                if (expert_level < 1)
+                    pos = ItemWearType::WEAR_DECO_WEAPON;
+            }
+        }
+        else
+        {
+            if ((m_anWear[ItemWearType::WEAR_LEFTHAND] != nullptr && m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_SHIELD) ||
+                (m_anWear[ItemWearType::WEAR_RIGHTHAND] != nullptr && m_anWear[ItemWearType::WEAR_RIGHTHAND]->IsTwoHandItem()))
             {
                 return false;
             }
         }
     }
-    if (pItem->GetWearType() == WEAR_TWOHAND)
-        pos = WEAR_WEAPON;
-    if (pos == WEAR_TWOFINGER_RING)
-        pos = WEAR_RING;
-    item1 = m_anWear[9];
-    if (item1 != nullptr)
+
+    if (pItem->GetWearType() == ItemWearType::WEAR_TWOHAND)
+        pos = ItemWearType::WEAR_WEAPON;
+
+    if (pos == ItemWearType::WEAR_TWOFINGER_RING)
+        pos = ItemWearType::WEAR_RING;
+    if (m_anWear[ItemWearType::WEAR_RING] != nullptr && m_anWear[ItemWearType::WEAR_RING]->GetWearType() != ItemWearType::WEAR_TWOFINGER_RING && pItem->GetWearType() == ItemWearType::WEAR_RING)
+        pos = ItemWearType::WEAR_SECOND_RING;
+
+    if (pos == ItemWearType::WEAR_BAG_SLOT && m_anWear[ItemWearType::WEAR_BAG_SLOT] != nullptr)
     {
-        if (item1->GetWearType() != WEAR_TWOFINGER_RING && pItem->GetWearType() == WEAR_RING)
-            pos = WEAR_SECOND_RING;
-    }
-    if (pos == WEAR_BAG_SLOT)
-    {
-        item1 = m_anWear[23];
-        if (item1 != nullptr)
+        if (m_anWear[ItemWearType::WEAR_BAG_SLOT]->GetItemCode() != pItem->GetItemCode())
         {
-            if (item1->m_Instance.Code != pItem->m_Instance.Code)
+            auto current_bag_base = m_anWear[ItemWearType::WEAR_BAG_SLOT]->GetItemBase();
+            int32_t current_bag_capacity{0};
+            auto new_bag_base = pItem->GetItemBase();
+            int32_t new_bag_capacity{0};
+
+            for (int i = 0; i < MAX_OPTION_NUMBER; ++i)
             {
-                int nCurrentVarIdx = -1;
+                if (current_bag_base->opt_type[i] == static_cast<int16_t>(ITEM_EFFECT_PASSIVE::CARRY_WEIGHT))
+                    current_bag_capacity += current_bag_base->opt_var[i][0];
+                if (new_bag_base->opt_type[i] == static_cast<int16_t>(ITEM_EFFECT_PASSIVE::CARRY_WEIGHT))
+                    new_bag_capacity += new_bag_base->opt_var[i][0];
+            }
 
-                for (int i = 0; i < 4; ++i)
-                {
-                    if (item1->m_pItemBase->opt_type[i] == 20)
-                    {
-                        nCurrentVarIdx = i;
-                        break;
-                    }
-                }
-                int nCurrentVarIdx2 = -1;
-
-                for (int i = 0; i < 4; ++i)
-                {
-                    if (pItem->m_pItemBase->opt_type[i] == 20)
-                    {
-                        nCurrentVarIdx2 = i;
-                        break;
-                    }
-                }
-
-                if (nCurrentVarIdx == -1)
-                    return false;
-                if (nCurrentVarIdx2 == -1)
-                    return false;
-
-                auto curr_capacity = item1->m_pItemBase->opt_var[nCurrentVarIdx][0];
-                auto new_capacity = pItem->m_pItemBase->opt_var[nCurrentVarIdx2][0];
-                if (curr_capacity != new_capacity && GetFloatValue(PLAYER_FIELD_WEIGHT) <= m_Attribute.nMaxWeight && (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight - curr_capacity + new_capacity || (GetFloatValue(PLAYER_FIELD_WEIGHT) > m_Attribute.nMaxWeight && curr_capacity > new_capacity)))
+            if (current_bag_capacity != new_bag_capacity)
+            {
+                if (((GetMaxWeight() >= GetWeight()) && (GetMaxWeight() - current_bag_capacity + new_bag_capacity < GetWeight())) ||
+                    ((GetMaxWeight() < GetWeight()) && current_bag_capacity > new_bag_capacity))
                 {
                     return false;
                 }
             }
         }
     }
-    if (pos != WEAR_DECO_WEAPON && pos != WEAR_DECO_SHIELD)
+
+    if (pos == ItemWearType::WEAR_DECO_WEAPON || pos == ItemWearType::WEAR_DECO_SHIELD)
     {
-    }
-    else
-    {
-        item1 = m_anWear[pos != WEAR_DECO_WEAPON ? 1 : 0];
-        if (item1 == nullptr || (int)item1->m_pItemBase->iclass > (int)CLASS_SHIELD)
+        ItemWearType nRelativePos = (pos == ItemWearType::WEAR_DECO_WEAPON) ? ItemWearType::WEAR_WEAPON : ItemWearType::WEAR_LEFTHAND;
+
+        if (!m_anWear[nRelativePos])
             return false;
-        switch (item1->m_pItemBase->iclass)
+
+        switch (m_anWear[nRelativePos]->GetItemClass())
         {
-        case CLASS_SHIELD:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_SHIELD)
+        case ItemClass::CLASS_ONEHAND_SWORD:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_ONEHAND_SWORD)
                 return false;
             break;
-        case CLASS_ONEHAND_SWORD:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_SWORD)
+        case ItemClass::CLASS_TWOHAND_SWORD:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_TWOHAND_SWORD)
                 return false;
             break;
-        case CLASS_TWOHAND_SWORD:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SWORD)
+        case ItemClass::CLASS_DAGGER:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_DAGGER)
                 return false;
             break;
-        case CLASS_DAGGER:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_DAGGER)
+        case ItemClass::CLASS_TWOHAND_SPEAR:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_TWOHAND_SPEAR)
                 return false;
             break;
-        case CLASS_TWOHAND_SPEAR:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_SPEAR)
+        case ItemClass::CLASS_TWOHAND_AXE:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_TWOHAND_AXE)
                 return false;
             break;
-        case CLASS_TWOHAND_AXE:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_AXE)
+        case ItemClass::CLASS_ONEHAND_MACE:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_ONEHAND_MACE)
                 return false;
             break;
-        case CLASS_ONEHAND_MACE:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_MACE)
+        case ItemClass::CLASS_TWOHAND_MACE:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_TWOHAND_MACE)
                 return false;
             break;
-        case CLASS_TWOHAND_MACE:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_MACE)
+        case ItemClass::CLASS_HEAVY_BOW:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_HEAVY_BOW)
                 return false;
             break;
-        case CLASS_HEAVY_BOW:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_HEAVY_BOW)
+        case ItemClass::CLASS_LIGHT_BOW:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_LIGHT_BOW)
                 return false;
             break;
-        case CLASS_LIGHT_BOW:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_LIGHT_BOW)
+        case ItemClass::CLASS_CROSSBOW:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_CROSSBOW)
                 return false;
             break;
-        case CLASS_CROSSBOW:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_CROSSBOW)
+        case ItemClass::CLASS_ONEHAND_STAFF:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_ONEHAND_STAFF)
                 return false;
             break;
-        case CLASS_ONEHAND_STAFF:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_STAFF)
+        case ItemClass::CLASS_TWOHAND_STAFF:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_TWOHAND_STAFF)
                 return false;
             break;
-        case CLASS_TWOHAND_STAFF:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_TWOHAND_STAFF)
+        case ItemClass::CLASS_ONEHAND_AXE:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_ONEHAND_AXE)
                 return false;
             break;
-        case CLASS_ONEHAND_AXE:
-            if (pItem->m_pItemBase->iclass != CLASS_DECO_ONEHAND_AXE)
+        case ItemClass::CLASS_SHIELD:
+            if (pItem->GetItemClass() != ItemClass::CLASS_DECO_SHIELD)
                 return false;
             break;
         default:
             return false;
         }
     }
-    if (pos >= 24 || pos < 0)
+
+    if (pos >= MAX_ITEM_WEAR || pos < 0)
         return false;
 
-    if (m_anWear[pos] != nullptr)
-        vpOverlappItemList.emplace_back(pos);
-    if (pItem->m_pItemBase->wear_type == WEAR_TWOHAND)
+    if (vpOverlappItemList != nullptr)
     {
-        if (m_anWear[1] != nullptr)
-        {
-            if ((!pItem->IsBow() && !pItem->IsCrossBow()) || (m_anWear[1]->m_pItemBase->group != GROUP_BULLET))
-            {
-                vpOverlappItemList.emplace_back(1);
-            }
-            if (m_anWear[15] != nullptr)
-            {
-                vpOverlappItemList.emplace_back(15);
-            }
-        }
-    }
-    if (pos == WEAR_SHIELD)
-    {
-        item1 = m_anWear[15];
-        if (item1 != nullptr)
-        {
-            if (pItem->m_pItemBase->iclass == CLASS_SHIELD && item1->m_pItemBase->iclass != CLASS_DECO_SHIELD)
-                vpOverlappItemList.emplace_back(15);
-            if (item1->m_pItemBase->iclass == CLASS_DECO_SHIELD)
-                vpOverlappItemList.emplace_back(15);
-        }
-    }
-    item1 = m_anWear[0];
-    if (item1 != nullptr)
-    {
-        if (item1->m_pItemBase->wear_type == WEAR_TWOHAND)
-        {
-            if (pos == WEAR_SHIELD)
-            {
-                if ((!item1->IsBow() && !item1->IsCrossBow()) || pItem->m_pItemBase->group != GROUP_BULLET)
-                {
-                    vpOverlappItemList.emplace_back(0);
-                }
-            }
-        }
-    }
+        if (m_anWear[pos] != nullptr)
+            vpOverlappItemList->emplace_back(pos);
 
-    if (m_anWear[10] != nullptr && pItem->GetWearType() == WEAR_TWOFINGER_RING)
-        vpOverlappItemList.emplace_back(10);
-
-    item1 = m_anWear[9];
-    if (item1 != nullptr)
-    {
-        if (item1->GetWearType() == WEAR_TWOFINGER_RING)
+        if (pItem->IsTwoHandItem() && m_anWear[ItemWearType::WEAR_LEFTHAND] != nullptr)
         {
-            if (pItem->GetWearType() == WEAR_RING)
-                vpOverlappItemList.emplace_back(9);
+            if ((!pItem->IsBow() && !pItem->IsCrossBow()) || !m_anWear[ItemWearType::WEAR_LEFTHAND]->IsBullet())
+                vpOverlappItemList->emplace_back(ItemWearType::WEAR_LEFTHAND);
+
+            if (m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr)
+                vpOverlappItemList->emplace_back(ItemWearType::WEAR_DECO_SHIELD);
+        }
+
+        if (pos == ItemWearType::WEAR_SHIELD)
+        {
+            if (pItem->GetItemClass() == ItemClass::CLASS_SHIELD && m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr && m_anWear[ItemWearType::WEAR_DECO_SHIELD]->GetItemClass() != ItemClass::CLASS_DECO_SHIELD)
+                vpOverlappItemList->emplace_back(ItemWearType::WEAR_DECO_SHIELD);
+
+            if (m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr && m_anWear[ItemWearType::WEAR_DECO_SHIELD]->GetItemClass() == ItemClass::CLASS_DECO_SHIELD)
+                vpOverlappItemList->emplace_back(ItemWearType::WEAR_DECO_SHIELD);
+        }
+
+        if (m_anWear[ItemWearType::WEAR_WEAPON] != nullptr &&
+            m_anWear[ItemWearType::WEAR_WEAPON]->IsTwoHandItem() &&
+            pos == ItemWearType::WEAR_LEFTHAND)
+        {
+            if ((!m_anWear[ItemWearType::WEAR_WEAPON]->IsBow() && !m_anWear[ItemWearType::WEAR_WEAPON]->IsCrossBow()) || !pItem->IsBullet())
+                vpOverlappItemList->emplace_back(ItemWearType::WEAR_RIGHTHAND);
+        }
+
+        if (m_anWear[ItemWearType::WEAR_SECOND_RING] != nullptr &&
+            pItem->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING)
+        {
+            vpOverlappItemList->emplace_back(ItemWearType::WEAR_SECOND_RING);
+        }
+
+        if (m_anWear[ItemWearType::WEAR_RING] != nullptr &&
+            m_anWear[ItemWearType::WEAR_RING]->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING &&
+            pItem->GetWearType() == ItemWearType::WEAR_RING)
+        {
+            vpOverlappItemList->emplace_back(ItemWearType::WEAR_RING);
         }
     }
     return true;

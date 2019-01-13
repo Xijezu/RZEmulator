@@ -71,6 +71,12 @@ enum DamageType : int
     DT_STATE_PHYSICAL_DAMAGE = 8,
 };
 
+enum class NEXT_ATTACK_MODE : int32_t
+{
+    AM_ATTACK = 0,
+    AM_AIMING = 1,
+};
+
 class Unit : public WorldObject
 {
   public:
@@ -446,7 +452,7 @@ class Unit : public WorldObject
     int GetArmorClass() const;
     // Event handler
     bool IsWornByCode(int code) const;
-    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> &ItemList);
+    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList);
     Item *GetWornItem(ItemWearType);
     ushort Puton(ItemWearType pos, Item *item, bool bIsTranslated = false);
     ushort Putoff(ItemWearType pos);
@@ -457,7 +463,7 @@ class Unit : public WorldObject
 
     Skill *GetCastSkill() const { return m_castingSkill; }
 
-    virtual CreatureStat *GetBaseStat() const { return nullptr;    }
+    virtual CreatureStat *GetBaseStat() const { return nullptr; }
 
     virtual bool IsUsingBow() const
     {
