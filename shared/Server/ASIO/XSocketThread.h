@@ -17,18 +17,17 @@
 */
 #include "XSocket.h"
 
-template<class T>
+template <class T>
 class XSocketThread : public NetworkThread<XSocket>
 {
-    public:
-        void SocketAdded(std::shared_ptr<XSocket> sock) override
-        {
-            sock->SetSession(new T{sock.get()});
-            sock->Start();
-        }
+  public:
+    void SocketAdded(std::shared_ptr<XSocket> sock) override
+    {
+        sock->SetSession(new T{sock.get()});
+        sock->Start();
+    }
 
-        void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
-        {
-
-        }
+    void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
+    {
+    }
 };

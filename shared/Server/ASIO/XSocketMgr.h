@@ -26,116 +26,118 @@
 #include "SocketMgr.h"
 #include "XSocketThread.h"
 #include "Config.h"
+#include "XSocketMgrHandler.h"
 /// Manages all sockets connected to peers and network threads
 
-template<class T>
-static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex);
+template <class T>
+static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex, uint32_t nMgrIdx);
 
-template<class T>
+template <class T>
+class XSocketMgrHandler;
+
+template <class T>
 class XSocketMgr : public SocketMgr<XSocket>
 {
-        typedef SocketMgr<XSocket> BaseSocketMgr;
+    typedef SocketMgr<XSocket> BaseSocketMgr;
 
-    public:
-        ~XSocketMgr() = default;
+  public:
+    XSocketMgr() : BaseSocketMgr(), _socketSystemSendBufferSize(-1), _socketApplicationSendBufferSize(65536), _tcpNoDelay(true)
+    {
+    }
+    ~XSocketMgr() = default;
 
-        static XSocketMgr &Instance()
+    /// Start network, listen at address:port .
+    bool StartWorldNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount)
+    {
+        _tcpNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
+
+        int const max_connections = NGEMITY_MAX_LISTEN_CONNECTIONS;
+        NG_LOG_DEBUG("misc", "Max allowed socket connections %d", max_connections);
+
+        // -1 means use default
+        _socketSystemSendBufferSize = sConfigMgr->GetIntDefault("Network.OutKBuff", -1);
+
+        _socketApplicationSendBufferSize = sConfigMgr->GetIntDefault("Network.OutUBuff", 65536);
+
+        if (_socketApplicationSendBufferSize <= 0)
         {
-            static XSocketMgr instance;
-            return instance;
+            NG_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
+            return false;
         }
 
-        /// Start network, listen at address:port .
-        bool StartWorldNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount)
+        m_nSocketMgrIdx = XSocketMgrHandler<T>::Instance().Insert(this);
+
+        if (!BaseSocketMgr::StartNetwork(ioContext, bindIp, port, threadCount))
+            return false;
+
+        _acceptor->SetSocketFactory(std::bind(&BaseSocketMgr::GetSocketForAccept, this));
+        _acceptor->AsyncAcceptWithCallback<&OnSocketAccept<T>>();
+
+        return true;
+    }
+
+    /// Stops all network threads, It will wait for all running threads .
+    void StopNetwork() override
+    {
+        BaseSocketMgr::StopNetwork();
+    }
+
+    void OnSocketOpen(tcp::socket &&sock, uint32 threadIndex) override
+    {
+        // set some options here
+        if (_socketSystemSendBufferSize >= 0)
         {
-            _tcpNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
-
-            int const max_connections = NGEMITY_MAX_LISTEN_CONNECTIONS;
-            NG_LOG_DEBUG("misc", "Max allowed socket connections %d", max_connections);
-
-            // -1 means use default
-            _socketSystemSendBufferSize = sConfigMgr->GetIntDefault("Network.OutKBuff", -1);
-
-            _socketApplicationSendBufferSize = sConfigMgr->GetIntDefault("Network.OutUBuff", 65536);
-
-            if (_socketApplicationSendBufferSize <= 0)
+            boost::system::error_code err;
+            sock.set_option(boost::asio::socket_base::send_buffer_size(_socketSystemSendBufferSize), err);
+            if (err && err != boost::system::errc::not_supported)
             {
-                NG_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
-                return false;
+                NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::socket_base::send_buffer_size) err = %s", err.message().c_str());
+                return;
             }
-
-            if (!BaseSocketMgr::StartNetwork(ioContext, bindIp, port, threadCount))
-                return false;
-
-            _acceptor->SetSocketFactory(std::bind(&BaseSocketMgr::GetSocketForAccept, this));
-            _acceptor->AsyncAcceptWithCallback<&OnSocketAccept<T>>();
-
-            return true;
         }
 
-/// Stops all network threads, It will wait for all running threads .
-        void StopNetwork() override
+        // Set TCP_NODELAY.
+        if (_tcpNoDelay)
         {
-            BaseSocketMgr::StopNetwork();
-        }
-
-        void OnSocketOpen(tcp::socket &&sock, uint32 threadIndex) override
-        {
-            // set some options here
-            if (_socketSystemSendBufferSize >= 0)
+            boost::system::error_code err;
+            sock.set_option(boost::asio::ip::tcp::no_delay(true), err);
+            if (err)
             {
-                boost::system::error_code err;
-                sock.set_option(boost::asio::socket_base::send_buffer_size(_socketSystemSendBufferSize), err);
-                if (err && err != boost::system::errc::not_supported)
-                {
-                    NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::socket_base::send_buffer_size) err = %s", err.message().c_str());
-                    return;
-                }
+                NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::ip::tcp::no_delay) err = %s", err.message().c_str());
+                return;
             }
-
-            // Set TCP_NODELAY.
-            if (_tcpNoDelay)
-            {
-                boost::system::error_code err;
-                sock.set_option(boost::asio::ip::tcp::no_delay(true), err);
-                if (err)
-                {
-                    NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::ip::tcp::no_delay) err = %s", err.message().c_str());
-                    return;
-                }
-            }
-
-            //sock->m_OutBufferSize = static_cast<size_t> (m_SockOutUBuff);
-
-            BaseSocketMgr::OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
         }
 
-        std::size_t GetApplicationSendBufferSize() const { return _socketApplicationSendBufferSize; }
+        //sock->m_OutBufferSize = static_cast<size_t> (m_SockOutUBuff);
 
-    protected:
-        XSocketMgr() : BaseSocketMgr(), _socketSystemSendBufferSize(-1), _socketApplicationSendBufferSize(65536), _tcpNoDelay(true)
-        {
-        }
+        BaseSocketMgr::OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
+    }
 
-        NetworkThread<XSocket> *CreateThreads() const override
-        {
-            return new XSocketThread<T>[GetNetworkThreadCount()];
-        }
+    std::size_t GetApplicationSendBufferSize() const { return _socketApplicationSendBufferSize; }
 
-    private:
-// private, must not be called directly
-        bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount) override
-        {
-            return BaseSocketMgr::StartNetwork(ioContext, bindIp, port, threadCount);
-        }
+  protected:
+    NetworkThread<XSocket> *CreateThreads() const override
+    {
+        return new XSocketThread<T>[GetNetworkThreadCount()];
+    }
 
-        int32 _socketSystemSendBufferSize;
-        int32 _socketApplicationSendBufferSize;
-        bool  _tcpNoDelay;
+  private:
+    // private, must not be called directly
+    bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount) override
+    {
+        return BaseSocketMgr::StartNetwork(ioContext, bindIp, port, threadCount);
+    }
+
+    int32 _socketSystemSendBufferSize;
+    int32 _socketApplicationSendBufferSize;
+    bool _tcpNoDelay;
 };
 
-template<class T>
-static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex)
+template <class T>
+static void OnSocketAccept(tcp::socket &&sock, uint32 threadIndex, uint32_t nMgrIdx)
 {
-    XSocketMgr<T>::Instance().OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
+    auto pMgr = XSocketMgrHandler<T>::Instance().GetManager(nMgrIdx);
+    if (pMgr == nullptr)
+        return;
+    pMgr->OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
 }
