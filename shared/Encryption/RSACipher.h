@@ -1,6 +1,10 @@
 #ifndef RSACIPHER_H
 #define RSACIPHER_H
 
+/*
+* Taken from glandu2s librzu: https://github.com/glandu2/librzu
+*/
+
 #include "Common.h"
 #include <memory>
 #include <stdint.h>

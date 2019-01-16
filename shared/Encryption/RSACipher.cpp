@@ -1,3 +1,7 @@
+/*
+* Taken from glandu2s librzu: https://github.com/glandu2/librzu
+*/
+
 #include "RSACipher.h"
 #include <openssl/err.h>
 #include <openssl/pem.h>

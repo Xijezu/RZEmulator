@@ -13,6 +13,9 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * Partial implementation taken from glandu2 at https://github.com/glandu2/librzu
+ * 
 */
 
 #include "Common.h"
