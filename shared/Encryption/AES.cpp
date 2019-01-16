@@ -1,3 +1,7 @@
+/*
+* Taken from glandu2s librzu: https://github.com/glandu2/librzu
+*/
+
 #include "AES.h"
 #include <openssl/evp.h>
 #include <stdlib.h>
