@@ -631,7 +631,7 @@ class WorldObject : public Object, public ArMoveVector
 
     void SetName(const std::string &newname) { m_name = newname; }
 
-    Region *pRegion;
+    Region *pRegion{nullptr};
     int region_index;
     bool _bIsInWorld{false};
 

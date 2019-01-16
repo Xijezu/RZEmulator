@@ -291,169 +291,185 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
     m_pPlayer->SendLoginProperties();
 }
 
-void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
+bool GetValidWayPoint(Player *pClient, Unit *pMObj, const TS_CS_MOVE_REQUEST *pMsg, std::vector<Position> &vMoveInfo, Position &startPos)
 {
+    auto curPosFromServer = pMObj->GetCurrentPosition(sWorld.GetArTime());
+    Position wayPoint{pMsg->x, pMsg->y};
 
-    std::vector<Position> vPctInfo{}, vMoveInfo{};
-
-    if (m_pPlayer == nullptr || m_pPlayer->GetHealth() == 0 || !m_pPlayer->IsInWorld() || pRecvPct->move_infos.size() == 0)
-        return;
-
-    for (const auto &mi : pRecvPct->move_infos)
+    if (wayPoint.GetPositionX() < 0 || wayPoint.GetPositionX() > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || wayPoint.GetPositionY() < 0 || wayPoint.GetPositionY() > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
     {
-        Position pos{};
-        pos.SetCurrentXY(mi.tx, mi.ty);
-        vPctInfo.push_back(pos);
+        Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+        return false;
     }
 
-    int speed;
-    float distance;
-    Position npos{};
-    Position curPosFromClient{};
-    Position wayPoint{};
-
-    uint ct = sWorld.GetArTime();
-    speed = m_pPlayer->GetMoveSpeed() / 7;
-    auto mover = dynamic_cast<Unit *>(m_pPlayer);
-
-    if (pRecvPct->handle == 0 || pRecvPct->handle == m_pPlayer->GetHandle())
+    if (curPosFromServer.GetExactDist2d(&wayPoint) > GameRule::VISIBLE_RANGE)
     {
-        // Set Speed if ride
+        Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+        return false;
     }
-    else
+
+    if (pMObj->IsPlayer())
     {
-        mover = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
-        if (mover != nullptr && mover->GetHandle() == pRecvPct->handle)
+        if (GameContent::CollisionToLine(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY(), wayPoint.GetPositionX(), wayPoint.GetPositionY()))
         {
-            npos.m_positionX = pRecvPct->x;
-            npos.m_positionY = pRecvPct->y;
-            npos.m_positionZ = 0;
+            Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
 
-            distance = npos.GetExactDist2d(m_pPlayer);
-            if (distance >= 1800.0f)
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_FAR, 0);
-                return;
-            }
+            if (GameContent::IsBlocked(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY()))
+                return false;
 
-            if (distance < 120.0f)
-            {
-                speed = (int)((float)speed * 1.1f);
-            }
-            else
-            {
-                speed = (int)((float)speed * 2.0f);
-            }
+            startPos = curPosFromServer;
+            vMoveInfo.clear();
+            vMoveInfo.emplace_back(curPosFromServer);
+            return true;
         }
     }
 
-    if (mover == nullptr)
+    for (const auto &mv : pMsg->move_infos)
+    {
+        if (mv.tx < 0 || mv.tx > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || mv.ty < 0 || mv.ty > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
+        {
+            Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+            return false;
+        }
+
+        if (pMObj->IsPlayer())
+        {
+            if (GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mv.tx, mv.ty))
+            {
+                Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+                if (GameContent::IsBlocked(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY()))
+                    return false;
+
+                startPos = curPosFromServer;
+                vMoveInfo.clear();
+                vMoveInfo.emplace_back(curPosFromServer);
+                return true;
+            }
+        }
+
+        wayPoint.Relocate(mv.tx, mv.ty);
+        vMoveInfo.emplace_back(wayPoint);
+    }
+
+    startPos.Relocate(pMsg->x, pMsg->y);
+    return true;
+}
+
+void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
+{
+
+    if (m_pPlayer == nullptr || m_pPlayer->IsDead() || !m_pPlayer->IsInWorld())
+        return;
+
+    auto t = sWorld.GetArTime();
+
+    Unit *pMObj = m_pPlayer;
+    auto speed = m_pPlayer->GetRealMoveSpeed();
+    if (pRecvPct->handle != 0 && pRecvPct->handle != m_pPlayer->GetHandle())
+    {
+        pMObj = m_pPlayer->GetSummon(pRecvPct->handle);
+        if (pMObj != nullptr)
+        {
+            if (m_pPlayer->IsRiding() && m_pPlayer->GetRideObject() == pMObj)
+            {
+                pMObj = m_pPlayer;
+            }
+            else
+            {
+                speed = pMObj->GetRealMoveSpeed();
+                if (pRecvPct->speed_sync != 0)
+                {
+                    speed = (m_pPlayer->HasRidingState() ? m_pPlayer->GetRealRidingSpeed() : m_pPlayer->GetRealMoveSpeed());
+
+                    Position pos{pRecvPct->x, pRecvPct->y};
+                    auto distance = pos.GetExactDist2d(m_pPlayer);
+                    if (distance >= GameRule::SUMMON_FOLLOWING_LIMIT_RANGE)
+                    {
+                        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_FAR, 0);
+                        return;
+                    }
+                    else if (distance >= GameRule::SUMMON_FOLLOWING_SECOND_SPEED_UP_RANGE)
+                    {
+                        speed *= GameRule::SUMMON_FOLLOWING_SECOND_SPEED_UP_RATE;
+                    }
+                    else if (distance >= GameRule::SUMMON_FOLLOWING_FIRST_SPEED_UP_RANGE)
+                    {
+                        speed *= GameRule::SUMMON_FOLLOWING_FIRST_SPEED_UP_RATE;
+                    }
+                }
+            }
+        }
+        // Todo Epic 5: Pet handle)
+    }
+
+    if (pMObj == m_pPlayer && (m_pPlayer->IsRiding() || m_pPlayer->HasRidingState()))
+        speed = m_pPlayer->GetRealRidingSpeed();
+
+    if (pMObj == nullptr)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
         return;
     }
 
-    npos.m_positionX = pRecvPct->x;
-    npos.m_positionY = pRecvPct->y;
-    npos.m_positionZ = 0.0f;
+    speed = speed < 1 ? 1 : speed;
+    speed = speed > UINT8_MAX ? UINT8_MAX : speed;
+    auto moveSpeed = static_cast<uint8_t>(speed);
 
-    if (pRecvPct->x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < pRecvPct->x || pRecvPct->y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < pRecvPct->y || mover->GetExactDist2d(&npos) > 525.0f)
-    {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+    std::vector<Position> vMoveInfo{};
+    Position start_pos{};
+    if (!GetValidWayPoint(m_pPlayer, pMObj, pRecvPct, vMoveInfo, start_pos))
         return;
-    }
-    if (speed < 1)
-        speed = 1;
-
-    wayPoint.m_positionX = pRecvPct->x;
-    wayPoint.m_positionY = pRecvPct->y;
-    wayPoint.m_positionZ = 0.0f;
-    wayPoint._orientation = 0.0f;
-
-    for (auto &mi : vPctInfo)
-    {
-        if (mover->IsPlayer() && GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-            return;
-        }
-        curPosFromClient.m_positionX = mi.m_positionX;
-        curPosFromClient.m_positionY = mi.m_positionY;
-        curPosFromClient.m_positionZ = 0.0f;
-        wayPoint.m_positionX = curPosFromClient.m_positionX;
-        wayPoint.m_positionY = curPosFromClient.m_positionY;
-        wayPoint.m_positionZ = curPosFromClient.m_positionZ;
-        wayPoint._orientation = curPosFromClient._orientation;
-        if (mi.m_positionX < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < mi.m_positionX ||
-            mi.m_positionY < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < mi.m_positionY)
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-            return;
-        }
-        vMoveInfo.emplace_back(wayPoint);
-    }
 
     if (vMoveInfo.empty())
         return;
 
-    Position cp = vMoveInfo.back();
-    if (mover->IsPlayer() && GameContent::IsBlocked(cp.GetPositionX(), cp.GetPositionY()))
+    if (!m_pPlayer->IsInWorld())
+        return;
+
+    if (pMObj->IsAttacking())
+        pMObj->CancelAttack();
+
+    if (pMObj->GetNextMovableTime() > t)
     {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
+        if (!pMObj->SetPendingMove(vMoveInfo, moveSpeed))
+            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
         return;
     }
 
-    if (mover->IsInWorld())
+    if (!pMObj->IsActable() || !pMObj->IsInWorld())
     {
-        if (mover->GetTargetHandle() != 0)
-            mover->CancelAttack();
-        if (mover->m_nMovableTime <= ct)
-        {
-            if (mover->IsActable() && mover->IsMovable() && mover->IsInWorld())
-            {
-                auto tpos2 = mover->GetCurrentPosition(pRecvPct->cur_time);
-                if (!vMoveInfo.empty())
-                {
-                    cp = vMoveInfo.back();
-                    npos.m_positionX = cp.GetPositionX();
-                    npos.m_positionY = cp.GetPositionY();
-                    npos.m_positionZ = cp.GetPositionZ();
-                    npos._orientation = cp.GetOrientation();
-                }
-                else
-                {
-                    npos.m_positionX = 0.0f;
-                    npos.m_positionY = 0.0f;
-                    npos.m_positionZ = 0.0f;
-                    npos._orientation = 0.0f;
-                }
-                if (mover->GetHandle() != m_pPlayer->GetHandle() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5.0 >= tpos2.GetExactDist2d(&cp)
-                    /*|| !m_pPlayer.m_bAutoUsed*/
-                    || m_pPlayer->m_nWorldLocationId != 110900)
-                {
-                    if (vMoveInfo.empty() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
-                    {
-                        if (mover->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-                            mover->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
-                        npos.m_positionX = pRecvPct->x;
-                        npos.m_positionY = pRecvPct->y;
-                        npos.m_positionZ = 0.0f;
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
+        return;
+    }
 
-                        sWorld.SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
-                        // TODO: Mount
-                    }
-                }
-                return;
-            } //if (true /* IsActable() && IsMovable() && isInWorld*/)
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
-            return;
-        }
-        if (!mover->SetPendingMove(vMoveInfo, (uint8_t)speed))
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
-            return;
-        }
-    } // is in world
+    if (m_pPlayer == pMObj && m_pPlayer->IsSitDown())
+    {
+        //m_pPlayer->StandUp(); @todo
+        Messages::BroadcastStatusMessage(m_pPlayer);
+    }
+
+    if (!pMObj->IsMovable())
+    {
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
+        return;
+    }
+
+    auto pos = pMObj->GetCurrentPosition(sWorld.GetArTime());
+    auto targetPos = vMoveInfo.back();
+
+    if (pMObj == m_pPlayer && pos.GetExactDist2d(&start_pos) > (sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5))
+    {
+        // Check for Abyss
+    }
+
+    if (!vMoveInfo.empty() && pMObj->GetCurrentPosition(t).GetExactDist2d(&targetPos) > sWorld.getFloatConfig(CONFIG_MAP_LENGTH))
+        return;
+
+    if (pMObj->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
+        pMObj->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
+
+    if (pMObj->IsPlayer() && pMObj->As<Player>()->IsRiding())
+        sWorld.SetMultipleMove(pMObj->As<Player>()->GetRideObject(), start_pos, vMoveInfo, moveSpeed, true, t, true);
 }
 
 void WorldSession::onReturnToLobby(const TS_CS_RETURN_LOBBY *pRecvPct)

@@ -134,7 +134,7 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
     }
 
     calcPartyContribute(pKiller, vPartyContribute);
-    if (m_Base->exp > 0)
+    if (m_Base->exp[0] > 0)
         procEXP(pKiller, vPartyContribute);
 
     if (!m_bTamedSuccess)
@@ -617,7 +617,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
     for (int i = 0; i < static_cast<int32_t>(count); ++i)
     {
         int32_t nItemID = nDropGroupID;
-        int64_t nItemCount = nItemCount = 1;
+        int64_t nItemCount = 1;
 
         do
             GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);

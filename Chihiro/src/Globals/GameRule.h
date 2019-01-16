@@ -54,6 +54,12 @@ public:
   constexpr static float MONSTER_TRACKING_RANGE_BY_TIME{30 * DEFAULT_UNIT_SIZE};
   constexpr static int32_t MONSTER_FIND_ATTACK_POS_RATIO{5};
   constexpr static int32_t MAX_FIRST_ATTACK_BONUS_TIME{6000};
+  constexpr static float SUMMON_FOLLOWING_LIMIT_RANGE{150 * DEFAULT_UNIT_SIZE};
+  constexpr static float SUMMON_FOLLOWING_SECOND_SPEED_UP_RATE{1.5f};
+  constexpr static float SUMMON_FOLLOWING_SECOND_SPEED_UP_RANGE{40 * DEFAULT_UNIT_SIZE};
+  constexpr static float SUMMON_FOLLOWING_FIRST_SPEED_UP_RANGE{3 * DEFAULT_UNIT_SIZE};
+  constexpr static float SUMMON_FOLLOWING_FIRST_SPEED_UP_RATE{1.2f};
+  constexpr static float VISIBLE_RANGE{525.0f};
 
 private:
   static int _chipLevelLimit[];
