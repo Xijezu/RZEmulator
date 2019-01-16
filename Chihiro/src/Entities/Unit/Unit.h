@@ -144,6 +144,7 @@ class Unit : public WorldObject
 
     virtual int GetMoveSpeed();
     inline int GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
+    uint8_t GetRealRidingSpeed();
 
     inline int GetStrength() const { return m_cStat.strength; }
     inline int GetVital() const { return m_cStat.vital; }

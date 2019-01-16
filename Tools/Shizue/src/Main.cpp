@@ -102,7 +102,8 @@ int main(int argc, char **argv)
     TS_CS_REQUEST requestTest{};
     requestTest.t = 's';
     requestTest.command = XStrZlibWithSimpleCipherUtil::Encrypt("cprint('Hello glandu!')");
-    SendPacket(requestTest, pSocket.get());
+    //SendPacket(requestTest, pSocket.get());
+    TS_CS_SET_PROPERTY property{};
 
     ioContext->run_for(std::chrono::seconds(5));
 

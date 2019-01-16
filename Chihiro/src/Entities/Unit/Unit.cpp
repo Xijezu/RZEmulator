@@ -3070,3 +3070,11 @@ void Unit::EnumPassiveSkill(SkillFunctor &fn)
     for (const auto &pSkill : m_vPassiveSkillList)
         fn.onSkill(pSkill);
 }
+
+uint8_t Unit::GetRealRidingSpeed()
+{
+    uint8_t nMoveSpeed = GetMoveSpeed() / 7;
+    if (nMoveSpeed > UINT8_MAX)
+        nMoveSpeed = UINT8_MAX;
+    return nMoveSpeed;
+}
