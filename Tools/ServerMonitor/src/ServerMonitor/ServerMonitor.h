@@ -55,8 +55,10 @@ class ServerMonitor
     void InitializeServerMonitor();
     void InitializeMonitoring(std::shared_ptr<NGemity::Asio::IoContext> pIoContext);
     void Update();
+    void AddSession(std::shared_ptr<MonitorSession> session) { m_pSession.emplace_back(session); }
 
     std::string GetEverything();
+    uint32_t GetTime() { return GetMSTimeDiffToNow(m_nStartTime) / 10; }
 
     const std::vector<ServerRegion> &GetServerList() const { return m_vServerRegion; }
 
@@ -68,7 +70,10 @@ class ServerMonitor
 
   protected:
     ServerMonitor();
+    uint32_t m_nStartTime{};
+    std::chrono::steady_clock::time_point lastRequester;
     std::mutex m_pMutex;
+    std::vector<std::shared_ptr<MonitorSession>> m_pSession;
 };
 } // namespace NGemity
 #define sServerMonitor NGemity::ServerMonitor::Instance()

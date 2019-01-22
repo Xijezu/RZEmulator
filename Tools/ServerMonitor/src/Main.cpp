@@ -16,10 +16,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    ConfigMgr::instance()->SetPacketVersion(EPIC_9_5_2);
     sServerMonitor.InitializeServerMonitor();
     NGemity::SingleSocketInstance::Instance().InitializeSingleSocketInstance();
 
-    ConfigMgr::instance()->SetPacketVersion(EPIC_9_5_2);
     sServerMonitor.InitializeMonitoring(ioContext);
 
     auto threadPool = NGemity::GetThreadPool(ioContext);

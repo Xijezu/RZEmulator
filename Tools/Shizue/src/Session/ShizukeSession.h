@@ -21,23 +21,17 @@
 class XPacket;
 
 // Handle login commands
-class ShizukeSession : public XSession
+class ShizukeSession : public XSocket
 {
-  public:
-    explicit ShizukeSession(XSocket *pSocket);
-    ~ShizukeSession();
+public:
+  explicit ShizukeSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)) {}
+  ~ShizukeSession();
 
-    // Network handlers
-    void OnClose() override;
-    ReadDataHandlerResult ProcessIncoming(XPacket *) override;
-    bool IsEncrypted() const override { return true; }
+  // Network handlers
+  void OnClose() override;
+  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+  bool IsEncrypted() const override { return true; }
 
-    // Packet handlers
-    void onResultHandler(const TS_SC_RESULT *);
-
-    int GetAccountId() const;
-    std::string GetAccountName();
-
-  private:
-    XSocket *m_pSocket;
+  // Packet handlers
+  void onResultHandler(const TS_SC_RESULT *);
 };

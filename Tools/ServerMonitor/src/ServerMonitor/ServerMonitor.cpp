@@ -25,7 +25,7 @@
 #include <iostream>
 #include "MonitorSocket.h"
 
-NGemity::ServerMonitor::ServerMonitor() : _stopped(true)
+NGemity::ServerMonitor::ServerMonitor() : _stopped(true), m_nStartTime(getMSTime())
 {
 }
 
@@ -60,7 +60,7 @@ void NGemity::ServerMonitor::InitializeMonitoring(std::shared_ptr<NGemity::Asio:
     _stopped = false;
     _ioContext = pIoContext;
     _updateTimer = std::make_shared<boost::asio::deadline_timer>((*_ioContext.get()));
-    _updateTimer->expires_from_now(boost::posix_time::minutes(ConfigMgr::instance()->GetIntDefault("monitor.tick", 1)));
+    _updateTimer->expires_from_now(boost::posix_time::seconds(1));
     _updateTimer->async_wait(std::bind(&NGemity::ServerMonitor::Update, this));
     _ioContext->run();
 }
@@ -73,7 +73,9 @@ void NGemity::ServerMonitor::Update()
     _updateTimer->expires_from_now(boost::posix_time::minutes(ConfigMgr::instance()->GetIntDefault("monitor.tick", 1)));
     _updateTimer->async_wait(std::bind(&NGemity::ServerMonitor::Update, this));
 
-    std::ofstream outFile("serverlist.json");
+    std::remove_if(m_pSession.begin(), m_pSession.end(), [](std::shared_ptr<MonitorSession> s) -> bool { return s == nullptr || s->DeleteRequested(); });
+
+    std::ofstream outFile(ConfigMgr::instance()->GetStringDefault("monitor.outfile", "/tmp/currlist.json"));
     outFile << GetEverything();
     outFile.close();
 
@@ -81,7 +83,15 @@ void NGemity::ServerMonitor::Update()
     {
         for (auto &server : serverRegion.vServerList)
         {
-            new MonitorSocket(server.szIPAddress, server.nPort, &server.nPlayerCount, &server.bRequesterEnabled, *(_ioContext.get()));
+            if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - lastRequester) > std::chrono::minutes(30))
+            {
+                new MonitorSocket(server.szIPAddress, server.nPort, nullptr, &server.bRequesterEnabled, *(_ioContext.get()));
+                lastRequester = std::chrono::steady_clock::now();
+            }
+            else
+            {
+                new MonitorSocket(server.szIPAddress, server.nPort, &server.nPlayerCount, nullptr, *(_ioContext.get()));
+            }
         }
     }
 }
@@ -97,7 +107,8 @@ std::string NGemity::ServerMonitor::GetEverything()
         for (auto &server : serverRegion.vServerList)
         {
             nlohmann::json region_server;
-            region_server[server.szName] = server.nPlayerCount;
+            region_server["name"] = server.szName;
+            region_server["usercount"] = server.nPlayerCount;
             region_server["requester"] = server.bRequesterEnabled;
             region["server"].push_back(region_server);
         }

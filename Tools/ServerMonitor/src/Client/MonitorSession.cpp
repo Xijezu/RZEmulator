@@ -22,6 +22,7 @@
 #include "MonitorSession.h"
 #include "Config.h"
 #include <iostream>
+#include "ServerMonitor.h"
 #include "cipher/XStrZlibWithSimpleCipherUtil.h"
 
 enum eStatus
@@ -91,23 +92,35 @@ void MonitorSession::DoRequest(int *ppUserCount, bool *pbRequesterEnabled)
     pUserCount = ppUserCount;
     bRequesterEnabled = pbRequesterEnabled;
 
-    TS_CS_REQUEST requestPct{};
-    requestPct.t = 'u';
-    requestPct.command = XStrZlibWithSimpleCipherUtil::Encrypt("SELECT TOP 1 id FROM Character");
-    SendPacket(requestPct);
+    if (pbRequesterEnabled != nullptr)
+    {
+        TS_CS_REQUEST requestPct{};
+        requestPct.t = 'u';
+        requestPct.command = XStrZlibWithSimpleCipherUtil::Encrypt("SELECT TOP 1 id FROM Character");
+        SendPacket(requestPct);
+    }
 
-    TS_CS_VERSION versionPct{};
-    versionPct.szVersion = sConfigMgr->GetStringDefault("monitor.version", "ASER");
-    SendPacket(versionPct);
+    if (ppUserCount != nullptr)
+    {
+        TS_CS_VERSION versionPct{};
+        versionPct.szVersion = sConfigMgr->GetStringDefault("monitor.version", "ASER");
+        SendPacket(versionPct);
+    }
 }
 
 void MonitorSession::onResultHandler(const TS_SC_RESULT *resultPct)
 {
-    if (resultPct->getReceivedId() == 60)
-    {
+    if (resultPct->getReceivedId() == 60 && bRequesterEnabled != nullptr)
         *bRequesterEnabled = true;
-        return;
-    }
-    *pUserCount = resultPct->value ^ 0xADADADAD;
-    CloseSocket();
+    else if (pUserCount != nullptr)
+        *pUserCount = resultPct->value ^ 0xADADADAD;
+}
+
+bool MonitorSession::DeleteRequested()
+{
+    return m_bDeleteRequested || sServerMonitor.GetTime() > 10000;
+}
+
+MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime())
+{
 }
