@@ -17,6 +17,7 @@
 */
 
 #include "Common.h"
+#include "StateBase.h"
 
 struct TS_SC_STAT_INFO;
 

@@ -25,12 +25,13 @@
 class XPacket;
 
 // Handle login commands
-class LunaSession : public XSession
+class LunaSession : public XSocket
 {
 public:
-  explicit LunaSession(XSocket *pSocket);
-  ~LunaSession();
-
+  explicit LunaSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket))
+  {
+    m_pCipher = std::make_unique<RsaCipher>();
+  }
   // Network handlers
   void OnClose() override;
   ReadDataHandlerResult ProcessIncoming(XPacket *) override;
@@ -41,15 +42,12 @@ public:
   void onRsaKey(const TS_AC_AES_KEY_IV *pRecv);
   void onPacketServerList(const TS_AC_SERVER_LIST *pRecv);
   void onAuthResult(const TS_AC_RESULT *pRecv);
+  void onAuthResultString(const TS_AC_RESULT_WITH_STRING *pRecv);
   void InitConnection(const std::string &szUsername, const std::string &szPassword);
-
-  int GetAccountId() const;
-  std::string GetAccountName();
 
 private:
   std::string m_szUsername;
   std::string m_szPassword;
   std::vector<uint8_t> aesKey{};
-  XSocket *m_pSocket;
   std::unique_ptr<RsaCipher> m_pCipher;
 };

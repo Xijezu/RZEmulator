@@ -29,111 +29,107 @@
 
 class AuthNetwork
 {
-    public:
-        static AuthNetwork &Instance()
+  public:
+    static AuthNetwork &Instance()
+    {
+        static AuthNetwork instance;
+        return instance;
+    }
+
+    ~AuthNetwork()
+    {
+        if (!m_bClosed)
         {
-            static AuthNetwork instance;
-            return instance;
+            Stop();
         }
+    }
 
-        ~AuthNetwork()
-        {
-            if (!m_bClosed)
-            {
-                Stop();
-            }
-        }
+    void Update()
+    {
+        if (m_bClosed)
+            return;
 
-        void Update()
-        {
-            if (m_bClosed)
-                return;
-
-            if (!m_pSocket->IsOpen())
-                m_bClosed = true;
-
-            if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
-            {
-                m_nLastPingTime = sWorld.GetArTime();
-                TS_CS_PING ping{ };
-                m_pSocket->SendPacket(ping);
-            }
-
-            std::this_thread::sleep_for(std::chrono::seconds(20));
-        }
-
-        void Stop()
-        {
-            NG_UNIQUE_GUARD _guard(_mutex);
+        if (!m_pSocket->IsOpen())
             m_bClosed = true;
-            if (m_pThread != nullptr && m_pThread->joinable())
-            {
-                m_pThread->join();
-            }
 
-            if (m_pSocket != nullptr)
-            {
-                m_pSocket->CloseSocket();
-                m_pSocket->DeleteSession();
-            }
+        if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
+        {
+            m_nLastPingTime = sWorld.GetArTime();
+            TS_CS_PING ping{};
+            m_pSocket->SendPacket(ping);
         }
 
-        bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
+        std::this_thread::sleep_for(std::chrono::seconds(20));
+    }
+
+    void Stop()
+    {
+        NG_UNIQUE_GUARD _guard(_mutex);
+        m_bClosed = true;
+        if (m_pThread != nullptr && m_pThread->joinable())
         {
-            NG_UNIQUE_GUARD               _guard(_mutex);
-            boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
-            boost::asio::ip::tcp::socket  socket(ioContext);
-            m_pNetworkThread = std::make_unique<NetworkThread<XSocket>>();
-
-            try
-            {
-                socket.connect(endpoint);
-                socket.set_option(boost::asio::ip::tcp::no_delay(true));
-            }
-            catch (std::exception &)
-            {
-                NG_LOG_ERROR("server.network", "Cannot connect to login server at %s:%d", bindIp.c_str(), port);
-                return false;
-            }
-
-            m_pSocket.reset(new XSocket(std::move(socket)));
-            m_pSocket->SetSendBufferSize(sConfigMgr->GetIntDefault("Network.OutUBuff", 65536));
-            m_pSocket->SetSession(new GameAuthSession{m_pSocket.get()});
-
-            m_pNetworkThread->AddSocket(m_pSocket);
-            m_pSocket->Start();
-            m_pNetworkThread->Start();
-
-            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->SendGameLogin();
-
-            m_pThread = std::make_unique<std::thread>(&AuthNetwork::Update, this);
-            return true;
+            m_pThread->join();
         }
 
-        void SendAccountToAuth(WorldSession &session, const std::string &login_name, uint64 one_time_key)
+        if (m_pSocket != nullptr)
         {
-            NG_UNIQUE_GUARD _guard(_mutex);
-            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->AccountToAuth(&session, login_name, one_time_key);
+            m_pSocket->CloseSocket();
+        }
+    }
+
+    bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
+    {
+        NG_UNIQUE_GUARD _guard(_mutex);
+        boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
+        boost::asio::ip::tcp::socket socket(ioContext);
+        m_pNetworkThread = std::make_unique<NetworkThread>();
+
+        try
+        {
+            socket.connect(endpoint);
+            socket.set_option(boost::asio::ip::tcp::no_delay(true));
+        }
+        catch (std::exception &)
+        {
+            NG_LOG_ERROR("server.network", "Cannot connect to login server at %s:%d", bindIp.c_str(), port);
+            return false;
         }
 
-        void SendClientLogoutToAuth(const std::string &account)
-        {
-            NG_UNIQUE_GUARD _guard(_mutex);
-            reinterpret_cast<GameAuthSession *>(m_pSocket->GetSession())->ClientLogoutToAuth(account);
-        }
+        m_pSocket = std::make_unique<GameAuthSession>(std::move(socket));
+        m_pSocket->SetSendBufferSize(sConfigMgr->GetIntDefault("Network.OutUBuff", 65536));
 
-    private:
-        bool                                    m_bClosed;
-        std::shared_ptr<XSocket>                m_pSocket;
-        std::unique_ptr<std::thread>            m_pThread;
-        std::atomic<uint32>                     m_nLastPingTime;
-        std::unique_ptr<NetworkThread<XSocket>> m_pNetworkThread;
-        NG_SHARED_MUTEX _mutex;
+        m_pNetworkThread->AddSocket(m_pSocket);
+        m_pSocket->Start();
+        m_pNetworkThread->Start();
 
-    protected:
-        AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr)
-        {
-        };
+        m_pSocket->SendGameLogin();
+
+        m_pThread = std::make_unique<std::thread>(&AuthNetwork::Update, this);
+        return true;
+    }
+
+    void SendAccountToAuth(WorldSession &session, const std::string &login_name, uint64 one_time_key)
+    {
+        NG_UNIQUE_GUARD _guard(_mutex);
+        m_pSocket->AccountToAuth(&session, login_name, one_time_key);
+    }
+
+    void SendClientLogoutToAuth(const std::string &account)
+    {
+        NG_UNIQUE_GUARD _guard(_mutex);
+        m_pSocket->ClientLogoutToAuth(account);
+    }
+
+  private:
+    bool m_bClosed;
+    std::shared_ptr<GameAuthSession> m_pSocket;
+    std::unique_ptr<std::thread> m_pThread;
+    std::atomic<uint32> m_nLastPingTime;
+    std::unique_ptr<NetworkThread> m_pNetworkThread;
+    NG_SHARED_MUTEX _mutex;
+
+  protected:
+    AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr){};
 };
 
 #define sAuthNetwork AuthNetwork::Instance()

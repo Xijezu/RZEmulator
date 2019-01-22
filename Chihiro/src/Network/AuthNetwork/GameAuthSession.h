@@ -22,40 +22,39 @@ class XPacket;
 class WorldSession;
 
 // Handle login commands
-class GameAuthSession : public XSession
+class GameAuthSession : public XSocket
 {
-    public:
-        typedef std::unordered_map<std::string, WorldSession *> AuthQueue;
-        explicit GameAuthSession(XSocket *pSocket);
-        ~GameAuthSession();
+public:
+  typedef std::unordered_map<std::string, WorldSession *> AuthQueue;
+  explicit GameAuthSession(boost::asio::ip::tcp::socket &&socket);
+  ~GameAuthSession();
 
-        // Network handlers
-        void OnClose() override;
-        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
-        bool IsEncrypted() const override { return false; }
+  // Network handlers
+  void OnClose() override;
+  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+  bool IsEncrypted() const override { return false; }
 
-        // Packet handlers
-        void HandleGameLoginResult(XPacket *);
-        void HandleClientLoginResult(XPacket *);
-        void HandleClientKick(XPacket *);
+  // Packet handlers
+  void HandleGameLoginResult(XPacket *);
+  void HandleClientLoginResult(XPacket *);
+  void HandleClientKick(XPacket *);
 
-        void HandleNullPacket(XPacket *);
+  void HandleNullPacket(XPacket *);
 
-        void SendGameLogin();
-        void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey);
-        void ClientLogoutToAuth(const std::string &account);
+  void SendGameLogin();
+  void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey);
+  void ClientLogoutToAuth(const std::string &account);
 
-        int GetAccountId() const;
-        std::string GetAccountName();
+  int GetAccountId() const;
+  std::string GetAccountName();
 
-    private:
-        AuthQueue m_queue;
-        XSocket   *m_pSocket;
+private:
+  AuthQueue m_queue;
 
-        uint16      m_nGameIDX;
-        std::string m_szGameName;
-        std::string m_szGameSSU;
-        bool        m_bGameIsAdultServer;
-        std::string m_szGameIP;
-        int         m_nGamePort;
+  uint16 m_nGameIDX;
+  std::string m_szGameName;
+  std::string m_szGameSSU;
+  bool m_bGameIsAdultServer;
+  std::string m_szGameIP;
+  int m_nGamePort;
 };

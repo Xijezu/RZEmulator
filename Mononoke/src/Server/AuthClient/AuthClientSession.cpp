@@ -27,7 +27,7 @@
 #include "Config.h"
 
 // Constructo - give it a socket
-AuthClientSession::AuthClientSession(XSocket *socket) : _socket(socket), m_pPlayer(nullptr)
+AuthClientSession::AuthClientSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_pPlayer(nullptr)
 {
     _desCipther.Init("MERONG");
 }
@@ -47,7 +47,6 @@ void AuthClientSession::OnClose()
         sPlayerMapList.RemovePlayer(g->szLoginName);
         delete m_pPlayer;
     }
-    _socket->DeleteSession();
 }
 
 enum eStatus
@@ -58,19 +57,19 @@ enum eStatus
 
 typedef struct AuthHandler
 {
-    int                                                 cmd;
-    eStatus                                             status;
+    int cmd;
+    eStatus status;
     std::function<void(AuthClientSession *, XPacket *)> handler;
 } AuthHandler;
 
-template<typename T>
+template <typename T>
 AuthHandler declareHandler(eStatus status, void (AuthClientSession::*handler)(const T *packet))
 {
-    AuthHandler handlerData{ };
-    handlerData.cmd     = T::getId(EPIC_4_1_1);
-    handlerData.status  = status;
+    AuthHandler handlerData{};
+    handlerData.cmd = T::getId(EPIC_4_1_1);
+    handlerData.status = status;
     handlerData.handler = [handler](AuthClientSession *instance, XPacket *packet) -> void {
-        T                       deserializedPacket;
+        T deserializedPacket;
         MessageSerializerBuffer buffer(packet);
         deserializedPacket.deserialize(&buffer);
         (instance->*handler)(&deserializedPacket);
@@ -80,10 +79,10 @@ AuthHandler declareHandler(eStatus status, void (AuthClientSession::*handler)(co
 }
 
 const AuthHandler packetHandler[] = {
-        declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleVersion),
-        declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket),
-        declareHandler(STATUS_AUTHED, &AuthClientSession::HandleServerList),
-        declareHandler(STATUS_AUTHED, &AuthClientSession::HandleSelectServer),
+    declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleVersion),
+    declareHandler(STATUS_CONNECTED, &AuthClientSession::HandleLoginPacket),
+    declareHandler(STATUS_AUTHED, &AuthClientSession::HandleServerList),
+    declareHandler(STATUS_AUTHED, &AuthClientSession::HandleSelectServer),
 };
 
 constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
@@ -91,7 +90,7 @@ constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
 /// Handler for incoming packets
 ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 {
-            ASSERT(pRecvPct);
+    ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
 
@@ -107,7 +106,7 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == tableSize && _cmd != static_cast<int>(NGemity::Packets::TS_CS_PING))
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_v4().to_string().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_v4().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
     return ReadDataHandlerResult::Ok;
@@ -127,13 +126,13 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
     stmt->setString(1, szPassword);
     if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt))
     {
-        m_pPlayer = new Player{ };
-        m_pPlayer->nAccountID     = (*dbResult)[0].GetUInt32();
-        m_pPlayer->szLoginName    = (*dbResult)[1].GetString();
+        m_pPlayer = new Player{};
+        m_pPlayer->nAccountID = (*dbResult)[0].GetUInt32();
+        m_pPlayer->szLoginName = (*dbResult)[1].GetString();
         m_pPlayer->nLastServerIDX = (*dbResult)[2].GetUInt32();
-        m_pPlayer->bIsBlocked     = (*dbResult)[3].GetBool();
-        m_pPlayer->nPermission    = (*dbResult)[4].GetInt32();
-        m_pPlayer->bIsInGame      = false;
+        m_pPlayer->bIsBlocked = (*dbResult)[3].GetBool();
+        m_pPlayer->nPermission = (*dbResult)[4].GetInt32();
+        m_pPlayer->bIsInGame = false;
 
         std::transform(m_pPlayer->szLoginName.begin(), m_pPlayer->szLoginName.end(), m_pPlayer->szLoginName.begin(), ::tolower);
 
@@ -173,34 +172,34 @@ void AuthClientSession::HandleVersion(const TS_CA_VERSION *pRecvPct)
 void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
 {
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
-    auto            map = sGameMapList.GetMap();
+    auto map = sGameMapList.GetMap();
     TS_AC_SERVER_LIST serverList{};
     for (auto &x : *map)
     {
         serverList.servers.emplace_back(*x.second);
     }
-    _socket->SendPacket(serverList);
+    SendPacket(serverList);
 }
 
 void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
 {
-    m_pPlayer->nGameIDX    = pRecvPct->server_idx;
+    m_pPlayer->nGameIDX = pRecvPct->server_idx;
     m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
-    m_pPlayer->bIsInGame   = true;
-    bool    bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
+    m_pPlayer->bIsInGame = true;
+    bool bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
 
-    TS_AC_SELECT_SERVER resultPct{ };
-    resultPct.result       = (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
+    TS_AC_SELECT_SERVER resultPct{};
+    resultPct.result = (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
     resultPct.one_time_key = (bExist ? m_pPlayer->nOneTimeKey : 0);
     resultPct.pending_time = 0;
-    _socket->SendPacket(resultPct);
+    SendPacket(resultPct);
 }
 
 void AuthClientSession::SendResultMsg(uint16 pctID, uint16 result, uint value)
 {
-    TS_AC_RESULT resultMsg{ };
+    TS_AC_RESULT resultMsg{};
     resultMsg.request_msg_id = pctID;
-    resultMsg.result         = result;
-    resultMsg.login_flag     = value;
-    _socket->SendPacket(resultMsg);
+    resultMsg.result = result;
+    resultMsg.login_flag = value;
+    SendPacket(resultMsg);
 }

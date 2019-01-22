@@ -17,13 +17,14 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
 endif()
 
 option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
-option(WITH_PCH               "Use Precompiled Headers"                       1)
+option(WITH_PCH               "Use Precompiled Headers"                       0)
 option(WITH_TOOLS           "Also compile additional tools"                 1)
 
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)
 find_package(MYSQL REQUIRED)
 find_package(Readline REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
@@ -51,5 +52,6 @@ add_subdirectory(shared)
 add_subdirectory(Mononoke)
 add_subdirectory(Chihiro)
 if(WITH_TOOLS)
+    add_subdirectory(dep/pistache)
     add_subdirectory(Tools)
 endif()

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  * 
- * Partial implementation taken from glandu2 at https://github.com/glandu2/librzu
+ * Partial implementation taken from glandu2 at https://github.com/glandu2/librzuxi
  * 
 */
 
@@ -22,22 +22,13 @@
 #include "LunaSession.h"
 #include "AES.h"
 
-template <class TS_SERIALIZABLE_PACKET>
-void SendPacket(TS_SERIALIZABLE_PACKET const &packet, XSocket *Socket)
+template <class TS_SERIALIZABLE_PACKET, class SOCKET_TYPE>
+void SendSerializedPacket(TS_SERIALIZABLE_PACKET const &packet, SOCKET_TYPE *Socket)
 {
     XPacket output;
     MessageSerializerBuffer serializer(&output);
     packet.serialize(&serializer);
     Socket->SendPacket(*serializer.getFinalizedPacket());
-}
-
-LunaSession::LunaSession(XSocket *socket) : m_pSocket(socket)
-{
-    m_pCipher = std::make_unique<RsaCipher>();
-}
-
-LunaSession::~LunaSession()
-{
 }
 
 enum eStatus
@@ -57,6 +48,7 @@ template <typename T>
 LunaHandler declareHandler(eStatus status, void (LunaSession::*handler)(const T *packet))
 {
     LunaHandler handlerData{};
+    handlerData.cmd = T::getId(EPIC_9_5_2);
     handlerData.handler = [handler](LunaSession *instance, XPacket *packet) -> void {
         T deserializedPacket;
         MessageSerializerBuffer buffer(packet);
@@ -71,6 +63,7 @@ const LunaHandler LunaPacketHandler[] =
         {declareHandler(STATUS_CONNECTED, &LunaSession::onResultHandler)},
         {declareHandler(STATUS_CONNECTED, &LunaSession::onPacketServerList)},
         {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResult)},
+        {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResultString)},
         {declareHandler(STATUS_CONNECTED, &LunaSession::onRsaKey)}};
 
 constexpr int LunaTableSize = (sizeof(LunaPacketHandler) / sizeof(LunaHandler));
@@ -94,20 +87,10 @@ ReadDataHandlerResult LunaSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == LunaTableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
     return ReadDataHandlerResult::Ok;
-}
-
-int LunaSession::GetAccountId() const
-{
-    return 0;
-}
-
-std::string LunaSession::GetAccountName()
-{
-    return "";
 }
 
 void LunaSession::OnClose()
@@ -130,7 +113,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
     if (!m_pCipher->privateDecrypt(pRecv->data.data(), pRecv->data.size(), aesKey) || aesKey.size() != 32)
     {
         NG_LOG_INFO("network", "onPacketAuthPasswordKey: invalid decrypted data size: %d", static_cast<int32_t>(aesKey.size()));
-        m_pSocket->CloseSocket();
+        CloseSocket();
         return;
     }
 
@@ -140,7 +123,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
     if (!cipher.encrypt((const uint8_t *)m_szPassword.c_str(), m_szPassword.size(), encryptedPassword))
     {
         NG_LOG_WARN("network", "onPacketAuthPasswordKey: could not encrypt password !");
-        m_pSocket->CloseSocket();
+        CloseSocket();
         return;
     }
 
@@ -150,7 +133,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
     accountMsg.account = m_szUsername;
     accountMsg.passwordAes.password_size = encryptedPassword.size();
 
-    SendPacket(accountMsg, m_pSocket);
+    SendSerializedPacket(accountMsg, this);
 }
 
 void LunaSession::onPacketServerList(const TS_AC_SERVER_LIST *pRecv)
@@ -159,7 +142,7 @@ void LunaSession::onPacketServerList(const TS_AC_SERVER_LIST *pRecv)
     {
         NG_LOG_INFO("network", "Name: %s - IP: %s, Port: %d", server.server_name.c_str(), server.server_ip.c_str(), server.server_port);
     }
-    m_pSocket->CloseSocket();
+    CloseSocket();
 }
 
 void LunaSession::onAuthResult(const TS_AC_RESULT *pRecv)
@@ -168,12 +151,17 @@ void LunaSession::onAuthResult(const TS_AC_RESULT *pRecv)
     if (pRecv->result == 0)
     {
         TS_CA_SERVER_LIST list{};
-        SendPacket(list, m_pSocket);
+        SendSerializedPacket(list, this);
     }
     else
     {
-        m_pSocket->CloseSocket();
+        CloseSocket();
     }
+}
+
+void LunaSession::onAuthResultString(const TS_AC_RESULT_WITH_STRING *pRecv)
+{
+    NG_LOG_INFO("network", "%d - %s", pRecv->result, pRecv->string.c_str());
 }
 
 void LunaSession::InitConnection(const std::string &szUsername, const std::string &szPassword)
@@ -183,7 +171,7 @@ void LunaSession::InitConnection(const std::string &szUsername, const std::strin
 
     TS_CA_VERSION versionPkt{};
     versionPkt.szVersion = "200701120";
-    SendPacket(versionPkt, m_pSocket);
+    SendSerializedPacket(versionPkt, this);
 
     if (!m_pCipher->isInitialized())
     {
@@ -197,11 +185,11 @@ void LunaSession::InitConnection(const std::string &szUsername, const std::strin
 
         m_pCipher->getPemPublicKey(keyMsg.key);
 
-        SendPacket(keyMsg, m_pSocket);
+        SendSerializedPacket(keyMsg, this);
     }
     else
     {
         NG_LOG_ERROR("network", "No RSA key to send, aborting...");
-        m_pSocket->CloseSocket();
+        CloseSocket();
     }
 }

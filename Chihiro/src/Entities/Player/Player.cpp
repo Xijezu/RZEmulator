@@ -1710,9 +1710,9 @@ void Player::SendPacket(const XPacket &pPacket)
 
     if (m_session != nullptr)
     {
-        if (m_session->GetSocket() != nullptr)
+        if (m_session != nullptr)
         {
-            m_session->GetSocket()->SendPacket(pPacket);
+            m_session->SendPacket(pPacket);
         }
     }
 }

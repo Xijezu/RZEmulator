@@ -24,114 +24,28 @@
 
 using boost::asio::ip::tcp;
 
-template <class SocketType>
 class SocketMgr
 {
-  public:
-    virtual ~SocketMgr()
-    {
-        ASSERT(!_threads && !_acceptor && !_threadCount, "StopNetwork must be called prior to SocketMgr destruction");
-    }
+public:
+  virtual ~SocketMgr();
 
-    virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount)
-    {
-        ASSERT(threadCount > 0);
+  virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount);
+  virtual void StopNetwork();
 
-        AsyncAcceptor *acceptor = nullptr;
-        try
-        {
-            acceptor = new AsyncAcceptor(ioContext, bindIp, port, m_nSocketMgrIdx);
-        }
-        catch (boost::system::system_error const &err)
-        {
-            NG_LOG_ERROR("network", "Exception caught in SocketMgr.StartNetwork (%s:%u): %s", bindIp.c_str(), port, err.what());
-            return false;
-        }
+  void Wait();
 
-        if (!acceptor->Bind())
-        {
-            NG_LOG_ERROR("network", "StartNetwork failed to bind socket acceptor");
-            return false;
-        }
+  virtual void OnSocketOpen(tcp::socket &&sock, uint32_t nThreadIndex);
 
-        _acceptor = acceptor;
-        _threadCount = threadCount;
-        _threads = CreateThreads();
+  int32_t GetNetworkThreadCount() const { return _threadCount; }
+  uint32_t SelectThreadWithMinConnections() const;
+  std::pair<tcp::socket *, uint32_t> GetSocketForAccept();
 
-        ASSERT(_threads);
+protected:
+  SocketMgr();
+  virtual NetworkThread *CreateThreads() const = 0;
 
-        for (int32 i = 0; i < _threadCount; ++i)
-            _threads[i].Start();
-
-        return true;
-    }
-
-    virtual void StopNetwork()
-    {
-        _acceptor->Close();
-
-        if (_threadCount != 0)
-            for (int32 i = 0; i < _threadCount; ++i)
-                _threads[i].Stop();
-
-        Wait();
-
-        delete _acceptor;
-        _acceptor = nullptr;
-        delete[] _threads;
-        _threads = nullptr;
-        _threadCount = 0;
-    }
-
-    void Wait()
-    {
-        if (_threadCount != 0)
-            for (int32 i = 0; i < _threadCount; ++i)
-                _threads[i].Wait();
-    }
-
-    virtual void OnSocketOpen(tcp::socket &&sock, uint32 threadIndex)
-    {
-        try
-        {
-            std::shared_ptr<SocketType> newSocket = std::make_shared<SocketType>(std::move(sock));
-
-            _threads[threadIndex].AddSocket(newSocket);
-        }
-        catch (boost::system::system_error const &err)
-        {
-            NG_LOG_WARN("network", "Failed to retrieve client's remote address %s", err.what());
-        }
-    }
-
-    int32 GetNetworkThreadCount() const { return _threadCount; }
-
-    uint32 SelectThreadWithMinConnections() const
-    {
-        uint32 min = 0;
-
-        for (int32 i = 1; i < _threadCount; ++i)
-            if (_threads[i].GetConnectionCount() < _threads[min].GetConnectionCount())
-                min = i;
-
-        return min;
-    }
-
-    std::pair<tcp::socket *, uint32> GetSocketForAccept()
-    {
-        uint32 threadIndex = SelectThreadWithMinConnections();
-        return std::make_pair(_threads[threadIndex].GetSocketForAccept(), threadIndex);
-    }
-
-  protected:
-    SocketMgr() : _acceptor(nullptr), _threads(nullptr), _threadCount(0)
-    {
-    }
-
-    virtual NetworkThread<SocketType> *CreateThreads() const = 0;
-
-    AsyncAcceptor *_acceptor;
-    NetworkThread<SocketType> *_threads;
-    int32 _threadCount;
-    uint32_t m_nSocketMgrIdx;
+  AsyncAcceptor *_acceptor;
+  NetworkThread *_threads;
+  int32_t _threadCount;
+  uint32_t m_nSocketMgrIdx;
 };

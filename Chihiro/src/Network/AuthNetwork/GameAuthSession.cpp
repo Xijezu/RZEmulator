@@ -22,19 +22,18 @@
 #include "WorldSession.h"
 #include "World.h"
 
-GameAuthSession::GameAuthSession(XSocket *socket) : m_pSocket(socket)
+GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket))
 {
-    m_nGameIDX           = (uint16)sConfigMgr->GetIntDefault("GameServer.Index", 1);
-    m_szGameName         = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
-    m_szGameSSU          = sConfigMgr->GetStringDefault("GameServer.SSU", "about:blank");
+    m_nGameIDX = (uint16)sConfigMgr->GetIntDefault("GameServer.Index", 1);
+    m_szGameName = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
+    m_szGameSSU = sConfigMgr->GetStringDefault("GameServer.SSU", "about:blank");
     m_bGameIsAdultServer = sConfigMgr->GetIntDefault("GameServer.AdultServer", 0) != 0;
-    m_szGameIP           = sConfigMgr->GetStringDefault("GameServer.IP", "127.0.0.1");
-    m_nGamePort          = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+    m_szGameIP = sConfigMgr->GetStringDefault("GameServer.IP", "127.0.0.1");
+    m_nGamePort = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 }
 
 GameAuthSession::~GameAuthSession()
 {
-
 }
 
 typedef struct AuthHandler
@@ -44,21 +43,20 @@ typedef struct AuthHandler
 } AuthHandler;
 
 constexpr AuthHandler authPacketHandler[] =
-                              {
-                                      {NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
-                                      {NGemity::Packets::TS_AG_KICK_CLIENT,  &GameAuthSession::HandleClientKick},
-                                      {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
-                                      {NGemity::Packets::TS_CS_PING,         &GameAuthSession::HandleNullPacket}
-                              };
+    {
+        {NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
+        {NGemity::Packets::TS_AG_KICK_CLIENT, &GameAuthSession::HandleClientKick},
+        {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
+        {NGemity::Packets::TS_CS_PING, &GameAuthSession::HandleNullPacket}};
 
 constexpr int authTableSize = (sizeof(authPacketHandler) / sizeof(AuthHandler));
 
 ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
 {
-            ASSERT(pGamePct);
+    ASSERT(pGamePct);
 
     auto _cmd = pGamePct->GetPacketID();
-    int  i    = 0;
+    int i = 0;
 
     for (i = 0; i < authTableSize; i++)
     {
@@ -72,7 +70,7 @@ ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     // Report unknown packets in the error log
     if (i == authTableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
     return ReadDataHandlerResult::Ok;
@@ -92,7 +90,7 @@ void GameAuthSession::HandleClientLoginResult(XPacket *pRecvPct)
 void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 {
     auto szPlayer = pRecvPct->ReadString(61);
-    auto player   = Player::FindPlayer(szPlayer);
+    auto player = Player::FindPlayer(szPlayer);
     if (player != nullptr)
     {
         player->GetSession().KickPlayer();
@@ -102,10 +100,10 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey)
 {
     m_queue[szLoginName] = pSession;
-    TS_GA_CLIENT_LOGIN loginPct{ };
-    loginPct.account      = szLoginName;
+    TS_GA_CLIENT_LOGIN loginPct{};
+    loginPct.account = szLoginName;
     loginPct.one_time_key = nOneTimeKey;
-    m_pSocket->SendPacket(loginPct);
+    SendPacket(loginPct);
 }
 
 int GameAuthSession::GetAccountId() const
@@ -135,24 +133,23 @@ void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 
 void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
 {
-    TS_GA_CLIENT_LOGOUT logoutPct{ };
+    TS_GA_CLIENT_LOGOUT logoutPct{};
     logoutPct.account = szAccount;
-    m_pSocket->SendPacket(logoutPct);
+    SendPacket(logoutPct);
 }
 
 void GameAuthSession::SendGameLogin()
 {
-    TS_GA_LOGIN loginPct{ };
-    loginPct.server_idx            = m_nGameIDX;
-    loginPct.server_name           = m_szGameName;
+    TS_GA_LOGIN loginPct{};
+    loginPct.server_idx = m_nGameIDX;
+    loginPct.server_name = m_szGameName;
     loginPct.server_screenshot_url = m_szGameSSU;
-    loginPct.is_adult_server       = static_cast<uint8_t>(m_bGameIsAdultServer ? 1 : 0);
-    loginPct.server_ip             = m_szGameIP;
-    loginPct.server_port           = m_nGamePort;
-    m_pSocket->SendPacket(loginPct);
+    loginPct.is_adult_server = static_cast<uint8_t>(m_bGameIsAdultServer ? 1 : 0);
+    loginPct.server_ip = m_szGameIP;
+    loginPct.server_port = m_nGamePort;
+    SendPacket(loginPct);
 }
 
 void GameAuthSession::HandleNullPacket(XPacket *)
 {
-
 }

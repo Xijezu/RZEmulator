@@ -30,258 +30,64 @@
 
 class EncryptablePacket : public XPacket
 {
-  public:
-    EncryptablePacket(XPacket const &packet, bool encrypt) : XPacket(packet), _encrypt(encrypt) {}
+public:
+  EncryptablePacket(XPacket const &packet, bool encrypt) : XPacket(packet), _encrypt(encrypt) {}
+  bool NeedsEncryption() const { return _encrypt; }
 
-    bool NeedsEncryption() const { return _encrypt; }
-
-  private:
-    bool _encrypt;
-};
-
-class XSession
-{
-  public:
-    virtual ReadDataHandlerResult ProcessIncoming(XPacket *) = 0;
-
-    virtual bool IsEncrypted() const { return true; }
-
-    virtual void OnClose() {}
-
-    virtual ~XSession() = default;
+private:
+  bool _encrypt;
 };
 
 constexpr int HEADER_SIZE = sizeof(TS_MESSAGE);
-
 class XSocket : public Socket<XSocket>
 {
-    typedef Socket<XSocket> BaseSocket;
+  typedef Socket<XSocket> BaseSocket;
 
-  public:
-    explicit XSocket(boost::asio::ip::tcp::socket &&socket) : Socket(std::move(socket)), _session(nullptr), _sendBufferSize(4096)
-    {
-        _headerBuffer.Resize(HEADER_SIZE);
-    }
+public:
+  explicit XSocket(boost::asio::ip::tcp::socket &&socket);
+  XSocket(XSocket const &right) = delete;
+  XSocket &operator=(XSocket const &right) = delete;
 
-    XSocket(XSocket const &right) = delete;
-    XSocket &operator=(XSocket const &right) = delete;
+  // Overrides
+  virtual ReadDataHandlerResult ProcessIncoming(XPacket *) { return ReadDataHandlerResult::Error; };
+  virtual bool IsEncrypted() const { return true; }
+  virtual ~XSocket() = default;
 
-    void Start() override
-    {
-        //AsyncReadWithCallback(&XSocket::InitializeHandler);
-        AsyncRead();
-    }
+  void Start() override;
+  bool Update() override;
 
-    bool Update() override
-    {
-        EncryptablePacket *queued;
-        MessageBuffer buffer(_sendBufferSize);
-        while (_bufferQueue.Dequeue(queued))
-        {
-            auto packetSize = queued->size();
-            queued->FinalizePacket();
-            if (queued->NeedsEncryption())
-            {
-                _encryption.Encode((char *)queued->contents(), (char *)queued->contents(), packetSize);
-            }
+  void SendPacket(XPacket const &packet);
 
-            if (buffer.GetRemainingSpace() < packetSize)
-            {
-                QueuePacket(std::move(buffer));
-                buffer.Resize(_sendBufferSize);
-            }
+  template <class TS_SERIALIZABLE_PACKET>
+  void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
+  {
+    if (!IsOpen())
+      return;
 
-            if (buffer.GetRemainingSpace() >= packetSize + HEADER_SIZE)
-                WritePacketToBuffer(*queued, buffer);
-            else // single packet larger than 4096 bytes
-            {
-                MessageBuffer packetBuffer(packetSize + HEADER_SIZE);
-                WritePacketToBuffer(*queued, packetBuffer);
-                QueuePacket(std::move(packetBuffer));
-            }
+    XPacket output;
+    MessageSerializerBuffer serializer(&output);
+    packet.serialize(&serializer);
+    SendPacket(*serializer.getFinalizedPacket());
+  }
 
-            delete queued;
-        }
+  void SetSendBufferSize(std::size_t sendBufferSize);
 
-        if (buffer.GetActiveSize() > 0)
-            QueuePacket(std::move(buffer));
+protected:
+  virtual void OnClose() {}
 
-        return BaseSocket::Update();
-    }
+  void ReadHandler() override;
+  bool ReadHeaderHandler();
+  ReadDataHandlerResult ReadDataHandler();
 
-    void SendPacket(XPacket const &packet)
-    {
-        if (!IsOpen())
-            return;
+  virtual void InitSocket() {}
 
-        //if (sPacketLog->CanLogPacket())
-        //sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
+private:
+  void WritePacketToBuffer(EncryptablePacket const &packet, MessageBuffer &buffer);
 
-        _bufferQueue.Enqueue(new EncryptablePacket(packet, _session->IsEncrypted()));
-    }
+  XRC4Cipher _encryption, _decryption;
 
-    template <class TS_SERIALIZABLE_PACKET>
-    void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
-    {
-        if (!IsOpen())
-            return;
-
-        XPacket output;
-        MessageSerializerBuffer serializer(&output);
-        packet.serialize(&serializer);
-        SendPacket(*serializer.getFinalizedPacket());
-    }
-
-    void SetSession(XSession *session)
-    {
-        std::lock_guard<std::mutex> sessionGuard(_sessionLock);
-        _session = session;
-        if (_session->IsEncrypted())
-        {
-            _encryption.SetKey("}h79q~B%al;k'y $E");
-            _decryption.SetKey("}h79q~B%al;k'y $E");
-        }
-        SetSendBufferSize(65536);
-    }
-
-    // Make sure to NEVER call this function from the WorldSession (Gameserver)!
-    void DeleteSession()
-    {
-        std::lock_guard<std::mutex> sessionGuard(_sessionLock);
-        if (_session != nullptr)
-        {
-            delete _session;
-            _session = nullptr;
-        }
-    }
-
-    void SetSendBufferSize(std::size_t sendBufferSize) { _sendBufferSize = sendBufferSize; }
-
-    XSession *GetSession() { return _session; }
-
-  protected:
-    void OnClose() override
-    {
-        {
-            if (_session)
-                _session->OnClose();
-            std::lock_guard<std::mutex> sessionGuard(_sessionLock);
-            _session = nullptr;
-        }
-    }
-
-    void ReadHandler() override
-    {
-        if (!IsOpen())
-            return;
-
-        MessageBuffer &packet = GetReadBuffer();
-        while (packet.GetActiveSize() > 0)
-        {
-            if (_headerBuffer.GetRemainingSpace() > 0)
-            {
-                // need to receive the header
-                std::size_t readHeaderSize = std::min(packet.GetActiveSize(), _headerBuffer.GetRemainingSpace());
-                _headerBuffer.Write(packet.GetReadPointer(), readHeaderSize);
-                packet.ReadCompleted(readHeaderSize);
-
-                if (_headerBuffer.GetRemainingSpace() > 0)
-                {
-                    // Couldn't receive the whole header this time.
-                    ASSERT(packet.GetActiveSize() == 0);
-                    break;
-                }
-
-                // We just received nice new header
-                if (!ReadHeaderHandler())
-                {
-                    CloseSocket();
-                    return;
-                }
-            }
-
-            // We have full read header, now check the data payload
-            if (_packetBuffer.GetRemainingSpace() > 0)
-            {
-                // need more data in the payload
-                std::size_t readDataSize = std::min(packet.GetActiveSize(), _packetBuffer.GetRemainingSpace());
-                _packetBuffer.Write(packet.GetReadPointer(), readDataSize);
-                packet.ReadCompleted(readDataSize);
-
-                if (_packetBuffer.GetRemainingSpace() > 0)
-                {
-                    // Couldn't receive the whole data this time.
-                    ASSERT(packet.GetActiveSize() == 0);
-                    break;
-                }
-            }
-
-            // just received fresh new payload
-            ReadDataHandlerResult result = ReadDataHandler();
-            _headerBuffer.Reset();
-            if (result != ReadDataHandlerResult::Ok)
-            {
-                //if (result != ReadDataHandlerResult::WaitingForQuery)
-                //    CloseSocket();
-
-                return;
-            }
-        }
-
-        AsyncRead();
-    }
-
-    bool ReadHeaderHandler()
-    {
-        if (_session->IsEncrypted())
-        {
-            _decryption.Decode((char *)_headerBuffer.GetReadPointer(), (char *)_headerBuffer.GetReadPointer(), sizeof(TS_MESSAGE));
-        }
-        auto header = reinterpret_cast<TS_MESSAGE *>(_headerBuffer.GetReadPointer());
-
-        if (header->size > 4098)
-        {
-            NG_LOG_ERROR("network", "XSocket::ReadHeaderHandler(): client %s sent malformed packet (size: %u, cmd: %u)",
-                         GetRemoteIpAddress().to_string().c_str(), header->size, header->id);
-            return false;
-        }
-
-        _packetBuffer.Resize(header->size - HEADER_SIZE);
-        return true;
-    }
-
-    ReadDataHandlerResult ReadDataHandler()
-    {
-        auto header = reinterpret_cast<TS_MESSAGE *>(_headerBuffer.GetReadPointer());
-        if (_session->IsEncrypted())
-        {
-            _decryption.Decode((char *)_packetBuffer.GetReadPointer(), (char *)_packetBuffer.GetReadPointer(), _packetBuffer.GetBufferSize());
-        }
-        XPacket packet(header->id, std::move(_packetBuffer));
-
-        std::unique_lock<std::mutex> sessionGuard(_sessionLock, std::defer_lock);
-
-        return _session->ProcessIncoming(&packet);
-    }
-
-  private:
-    void WritePacketToBuffer(EncryptablePacket const &packet, MessageBuffer &buffer)
-    {
-        // Reserve space for buffer
-        if (packet.NeedsEncryption() && !packet.empty())
-        {
-            buffer.Write(packet.contents(), packet.size());
-        }
-        else if (!packet.empty())
-            buffer.Write(packet.contents(), packet.size());
-    }
-
-    std::mutex _sessionLock;
-    XSession *_session;
-    XRC4Cipher _encryption, _decryption;
-
-    MPSCQueue<EncryptablePacket> _bufferQueue;
-    MessageBuffer _headerBuffer;
-    MessageBuffer _packetBuffer;
-    std::size_t _sendBufferSize;
+  MPSCQueue<EncryptablePacket> _bufferQueue;
+  MessageBuffer _headerBuffer;
+  MessageBuffer _packetBuffer;
+  std::size_t _sendBufferSize;
 };

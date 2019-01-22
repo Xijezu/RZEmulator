@@ -393,7 +393,7 @@ void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResul
     resultPct.request_msg_id = nMsg;
     resultPct.result = nResult;
     resultPct.value = nValue;
-    worldSession->GetSocket()->SendPacket(resultPct);
+    worldSession->SendPacket(resultPct);
 }
 
 void Messages::SendDropResult(Player *pPlayer, uint itemHandle, bool bIsSuccess)

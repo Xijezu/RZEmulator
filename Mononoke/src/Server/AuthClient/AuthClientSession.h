@@ -24,46 +24,42 @@
 struct Player;
 
 // Handle the player network
-class AuthClientSession : public XSession
+class AuthClientSession : public XSocket
 {
-    public:
-        explicit AuthClientSession(XSocket *socket);
-        virtual ~AuthClientSession();
+  public:
+    explicit AuthClientSession(boost::asio::ip::tcp::socket &&socket);
+    ~AuthClientSession();
 
-        void OnClose() override;
-        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+    void OnClose() override;
+    ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
-        /// \brief Handler for the Login packet - checks accountname and password
-        /// \param packet received packet
-        void HandleLoginPacket(const TS_CA_ACCOUNT *);
-        /// \brief Handler for the Version packet, not used yet
-        void HandleVersion(const TS_CA_VERSION *);
-        /// \brief Handler for the server list packet - sends the client the currently connected gameserver(s)
-        void HandleServerList(const TS_CA_SERVER_LIST *);
-        /// \brief Handler for the select server packet - generates one time key for gameserver login
-        void HandleSelectServer(const TS_CA_SELECT_SERVER *);
+    /// \brief Handler for the Login packet - checks accountname and password
+    /// \param packet received packet
+    void HandleLoginPacket(const TS_CA_ACCOUNT *);
+    /// \brief Handler for the Version packet, not used yet
+    void HandleVersion(const TS_CA_VERSION *);
+    /// \brief Handler for the server list packet - sends the client the currently connected gameserver(s)
+    void HandleServerList(const TS_CA_SERVER_LIST *);
+    /// \brief Handler for the select server packet - generates one time key for gameserver login
+    void HandleSelectServer(const TS_CA_SELECT_SERVER *);
 
-        /// \brief Sends a result message to the client
-        /// \param pctID Response to received pctID
-        /// \param result TS_RESULT code
-        /// \param value More informations
-        void SendResultMsg(uint16 pctID, uint16 result, uint value);
+    /// \brief Sends a result message to the client
+    /// \param pctID Response to received pctID
+    /// \param result TS_RESULT code
+    /// \param value More informations
+    void SendResultMsg(uint16 pctID, uint16 result, uint value);
 
-        /// \brief Gets the current players AccountID, used in WorldSocket
-        /// \return account id
-        int GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
+    /// \brief Gets the current players AccountID, used in WorldSocket
+    /// \return account id
+    int GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
 
-        /// \brief Gets the current players account name, used in WorldSocket
-        /// \return account name
-        std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->szLoginName : "<null>"; }
+    /// \brief Gets the current players account name, used in WorldSocket
+    /// \return account name
+    std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->szLoginName : "<null>"; }
 
-        /// \brief Gets the Socket
-        /// \return AuthSocket
-        XSocket *GetSocket() const { return _socket != nullptr ? _socket : nullptr; }
-    private:
-        XSocket *_socket{nullptr};
-        XDes    _desCipther{ };
+  private:
+    XDes _desCipther{};
 
-        Player *m_pPlayer{nullptr};
-        bool   _isAuthed{false};
+    Player *m_pPlayer{nullptr};
+    bool _isAuthed{false};
 };
