@@ -17,10 +17,7 @@
 
 #include "Common.h"
 #include "ShizukeSession.h"
-
-ShizukeSession::ShizukeSession(XSocket *socket) : m_pSocket(socket)
-{
-}
+#include "Config.h"
 
 ShizukeSession::~ShizukeSession()
 {
@@ -43,7 +40,7 @@ template <typename T>
 ShizukeHandler declareHandler(eStatus status, void (ShizukeSession::*handler)(const T *packet))
 {
     ShizukeHandler handlerData{};
-    handlerData.cmd = T::getId(EPIC_4_1_1);
+    handlerData.cmd = sConfigMgr->GetPacketVersion();
     handlerData.handler = [handler](ShizukeSession *instance, XPacket *packet) -> void {
         T deserializedPacket;
         MessageSerializerBuffer buffer(packet);
@@ -61,7 +58,6 @@ constexpr int shizukeTableSize = (sizeof(shizukePacketHandler) / sizeof(ShizukeH
 
 ReadDataHandlerResult ShizukeSession::ProcessIncoming(XPacket *pRecvPct)
 {
-    NG_LOG_INFO("network", "received");
     ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
@@ -79,20 +75,10 @@ ReadDataHandlerResult ShizukeSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == shizukeTableSize)
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), m_pSocket->GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
     return ReadDataHandlerResult::Ok;
-}
-
-int ShizukeSession::GetAccountId() const
-{
-    return 0;
-}
-
-std::string ShizukeSession::GetAccountName()
-{
-    return "";
 }
 
 void ShizukeSession::OnClose()

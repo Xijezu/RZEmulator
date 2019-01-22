@@ -44,6 +44,7 @@ class MonitorSocket
             std::shared_ptr<MonitorSession> pSocket = std::make_shared<MonitorSession>(std::move(_socket));
             NGemity::SingleSocketInstance::Instance().AddSocket(pSocket);
             pSocket->DoRequest(pUserCount, bRequesterEnabled);
+            sServerMonitor.AddSession(pSocket);
             delete this;
         }
         else

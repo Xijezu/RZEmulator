@@ -22,14 +22,13 @@
 #include "XSocket.h"
 #include "RSACipher.h"
 #include <iostream>
-
 class XPacket;
 
 // Handle login commands
 class MonitorSession : public XSocket
 {
 public:
-  explicit MonitorSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)) {}
+  explicit MonitorSession(boost::asio::ip::tcp::socket &&socket);
   ~MonitorSession() = default;
 
   // Network handlers
@@ -38,9 +37,12 @@ public:
   bool IsEncrypted() const override { return true; }
   void DoRequest(int *pUserCount, bool *bRequesterEnabled);
   void onResultHandler(const TS_SC_RESULT *resultPct);
+  bool DeleteRequested();
 
 private:
+  uint32_t m_nLastUpdateTime;
   int *pUserCount{nullptr};
+  bool m_bDeleteRequested;
   bool *bRequesterEnabled{nullptr};
   std::unique_ptr<RsaCipher> m_pCipher;
 };
