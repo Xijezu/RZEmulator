@@ -98,6 +98,7 @@ std::string NGemity::ServerMonitor::GetEverything()
         {
             nlohmann::json region_server;
             region_server[server.szName] = server.nPlayerCount;
+            region_server["requester"] = server.bRequesterEnabled;
             region["server"].push_back(region_server);
         }
         root["servers"].push_back(region);
