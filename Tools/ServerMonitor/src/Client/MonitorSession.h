@@ -14,20 +14,33 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * Partial implementation taken from glandu2 at https://github.com/glandu2/librzu
+ * 
 */
+#include "Common.h"
 #include "XSocket.h"
+#include "RSACipher.h"
+#include <iostream>
 
-template <class T>
-class XSocketThread : public NetworkThread<XSocket>
+class XPacket;
+
+// Handle login commands
+class MonitorSession : public XSocket
 {
-  public:
-    void SocketAdded(std::shared_ptr<XSocket> sock) override
-    {
-        sock->SetSession(new T{sock.get()});
-        sock->Start();
-    }
+public:
+  explicit MonitorSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)) {}
+  ~MonitorSession() = default;
 
-    void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
-    {
-    }
+  // Network handlers
+  void OnClose() override;
+  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+  bool IsEncrypted() const override { return true; }
+  void DoRequest(int *pUserCount, bool *bRequesterEnabled);
+  void onResultHandler(const TS_SC_RESULT *resultPct);
+
+private:
+  int *pUserCount{nullptr};
+  bool *bRequesterEnabled{nullptr};
+  std::unique_ptr<RsaCipher> m_pCipher;
 };

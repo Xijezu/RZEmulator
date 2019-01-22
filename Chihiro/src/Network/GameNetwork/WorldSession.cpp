@@ -34,10 +34,11 @@
 #include "MixManager.h"
 #include "GroupManager.h"
 #include "GameContent.h"
+#include "Player.h"
 #include "DatabaseEnv.h"
 
 // Constructo - give it a socket
-WorldSession::WorldSession(XSocket *socket) : _socket(socket), m_nLastPing(sWorld.GetArTime())
+WorldSession::WorldSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_nLastPing(sWorld.GetArTime())
 {
 }
 
@@ -54,6 +55,11 @@ void WorldSession::OnClose()
         sAuthNetwork.SendClientLogoutToAuth(_accountName);
     if (m_pPlayer)
         onReturnToLobby(nullptr);
+}
+
+std::string WorldSession::GetAccountName() const
+{
+    return m_pPlayer != nullptr ? m_pPlayer->GetName() : "<null>";
 }
 
 enum eStatus
@@ -161,7 +167,7 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
     // Report unknown packets in the error log
     if (i == worldTableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets))
     {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), _socket->GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
     return ReadDataHandlerResult::Ok;
@@ -181,7 +187,7 @@ void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
     resultPct.request_msg_id = _msg;
     resultPct.result = _result;
     resultPct.value = _value;
-    _socket->SendPacket(resultPct);
+    SendPacket(resultPct);
 }
 
 void WorldSession::onCharacterList(const TS_CS_CHARACTER_LIST * /*pGamePct*/)
@@ -190,7 +196,7 @@ void WorldSession::onCharacterList(const TS_CS_CHARACTER_LIST * /*pGamePct*/)
     characterPct.current_server_time = sWorld.GetArTime();
     characterPct.last_character_idx = 0;
     _PrepareCharacterList(_accountId, &characterPct.characters);
-    _socket->SendPacket(characterPct);
+    SendPacket(characterPct);
 }
 
 /// TODO: Might need to put this in player class?
@@ -287,7 +293,7 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
     resultPct.cell_size = sWorld.getIntConfig(CONFIG_CELL_SIZE);
     resultPct.guild_id = m_pPlayer->GetGuildID();
 
-    GetSocket()->SendPacket(resultPct);
+    SendPacket(resultPct);
     m_pPlayer->SendLoginProperties();
 }
 
@@ -357,7 +363,6 @@ bool GetValidWayPoint(Player *pClient, Unit *pMObj, const TS_CS_MOVE_REQUEST *pM
 
 void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 {
-
     if (m_pPlayer == nullptr || m_pPlayer->IsDead() || !m_pPlayer->IsInWorld())
         return;
 
@@ -887,7 +892,7 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
             resultPct.price = nTotalPrice;
             resultPct.huntaholic_point = mt.huntaholic_ratio;
             resultPct.target = m_pPlayer->GetLastContactLong("npc");
-            GetSocket()->SendPacket(resultPct);
+            SendPacket(resultPct);
         }
     }
 }
@@ -915,7 +920,7 @@ void WorldSession::onTimeSync(const TS_TIMESYNC *pRecvPct)
     {
         TS_SC_SET_TIME timePct{};
         timePct.gap = m_pPlayer->m_TS.GetInterval();
-        GetSocket()->SendPacket(timePct);
+        SendPacket(timePct);
     }
     else
     {
@@ -1259,8 +1264,7 @@ void WorldSession::onSetProperty(const TS_CS_SET_PROPERTY *pRecvPct)
 
 void WorldSession::KickPlayer()
 {
-    if (_socket)
-        _socket->CloseSocket();
+    CloseSocket();
 }
 
 void WorldSession::onAttackRequest(const TS_CS_ATTACK_REQUEST *pRecvPct)
@@ -1524,9 +1528,6 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
 
 bool WorldSession::Update(uint /*diff*/)
 {
-    if (_socket == nullptr)
-        return false;
-
     if (_accountId != 0 && (m_nLastPing > 0 && m_nLastPing + 30000 < sWorld.GetArTime()))
     {
         NG_LOG_DEBUG("server.worldserver", "Kicking Account [%d : %s] due to inactivity.", _accountId, _accountName.c_str());
@@ -1620,7 +1621,6 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
 
 void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
 {
-
     if (m_pPlayer->GetLastContactLong("SoulStoneCraft") == 0)
         return;
 

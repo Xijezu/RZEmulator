@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "SharedMutex.h"
+#include <map>
 
 class AuthClientSession;
 // Storage object for a player

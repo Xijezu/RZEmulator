@@ -1,6 +1,7 @@
 set(LIBRARY_NAME Luna)
 
 find_package(OpenSSL)
+find_package(ZLIB)
 
 include_directories(
     ${CMAKE_BINARY_DIR}
@@ -16,7 +17,7 @@ file(GLOB_RECURSE SRC_GRP_LUNA_CLIENT src/Client/*.cpp src/Client/*.h)
 source_group("Luna-Client" FILES ${SRC_GRP_LUNA_CLIENT})
 
 add_executable(${LIBRARY_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp ${SRC_GRP_LUNA_CLIENT})
-target_link_libraries(${LIBRARY_NAME} shared OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(${LIBRARY_NAME} shared OpenSSL::SSL OpenSSL::Crypto ${ZLIB_LIBRARIES})
 
 if(UNIX)
     set(EXECUTABLE_LINK_FLAGS "")

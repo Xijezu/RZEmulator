@@ -23,42 +23,41 @@
 class XPacket;
 
 // Handle login commands
-class AuthGameSession : public XSession
+class AuthGameSession : public XSocket
 {
-    public:
-        explicit AuthGameSession(XSocket *pSocket);
-        ~AuthGameSession();
+  public:
+    explicit AuthGameSession(boost::asio::ip::tcp::socket &&socket);
+    ~AuthGameSession();
 
-        // Network handlers
-        void OnClose() override;
-        ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+    // Network handlers
+    void OnClose() override;
+    ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
-        bool IsEncrypted() const override { return false; }
+    bool IsEncrypted() const override { return false; }
 
-        /// \brief Handles game login (packet contains servername, ...)
-        void HandleGameLogin(const TS_GA_LOGIN *);
-        /// \brief Handles client login on server - checks one-time-key
-        void HandleClientLogin(const TS_GA_CLIENT_LOGIN *);
-        /// \brief Handles client logout on server - removes player from our list
-        void HandleClientLogout(const TS_GA_CLIENT_LOGOUT *);
-        /// \brief Handles client kick failed - not used yet
-        void HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *);
-        /// \brief Receives and sends a Ping packet from/to the Gameserver
-        void HandlePingPacket(const TS_CS_PING *);
-        /// \brief Kicks a player from the gameserver
-        /// \param pPlayer The player to be kicked
-        void KickPlayer(Player *pPlayer);
+    /// \brief Handles game login (packet contains servername, ...)
+    void HandleGameLogin(const TS_GA_LOGIN *);
+    /// \brief Handles client login on server - checks one-time-key
+    void HandleClientLogin(const TS_GA_CLIENT_LOGIN *);
+    /// \brief Handles client logout on server - removes player from our list
+    void HandleClientLogout(const TS_GA_CLIENT_LOGOUT *);
+    /// \brief Handles client kick failed - not used yet
+    void HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *);
+    /// \brief Receives and sends a Ping packet from/to the Gameserver
+    void HandlePingPacket(const TS_CS_PING *);
+    /// \brief Kicks a player from the gameserver
+    /// \param pPlayer The player to be kicked
+    void KickPlayer(Player *pPlayer);
 
-        /// \brief Gets the GameIDX - used in WorldSocket
-        /// \return GameIDX
-        int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->server_idx : 0); }
+    /// \brief Gets the GameIDX - used in WorldSocket
+    /// \return GameIDX
+    int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->server_idx : 0); }
 
-        /// \brief Gets the server name - used in WorldSocket
-        /// \return server name
-        std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->server_name : "<null>"); }
+    /// \brief Gets the server name - used in WorldSocket
+    /// \return server name
+    std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->server_name : "<null>"); }
 
-    private:
-        XSocket *m_pSocket;
-        Game    *m_pGame;
-        bool    m_bIsAuthed;
+  private:
+    Game *m_pGame;
+    bool m_bIsAuthed;
 };

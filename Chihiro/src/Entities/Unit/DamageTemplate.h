@@ -17,6 +17,7 @@
 */
 #include "Common.h"
 #include "ItemFields.h"
+#include "StateBase.h"
 
 enum Target
 {
