@@ -114,11 +114,15 @@ void MonitorSession::onResultHandler(const TS_SC_RESULT *resultPct)
         *bRequesterEnabled = true;
     else if (pUserCount != nullptr)
         *pUserCount = resultPct->value ^ 0xADADADAD;
+    CloseSocket();
 }
 
 bool MonitorSession::DeleteRequested()
 {
-    return m_bDeleteRequested || sServerMonitor.GetTime() > 10000;
+    bool bRet = m_bDeleteRequested || sServerMonitor.GetTime() > 10000;
+    if (bRet)
+        CloseSocket();
+    return bRet;
 }
 
 MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime())

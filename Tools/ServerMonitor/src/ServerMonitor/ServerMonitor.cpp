@@ -86,7 +86,6 @@ void NGemity::ServerMonitor::Update()
             if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - lastRequester) > std::chrono::minutes(30))
             {
                 new MonitorSocket(server.szIPAddress, server.nPort, nullptr, &server.bRequesterEnabled, *(_ioContext.get()));
-                lastRequester = std::chrono::steady_clock::now();
             }
             else
             {
@@ -94,6 +93,7 @@ void NGemity::ServerMonitor::Update()
             }
         }
     }
+    lastRequester = std::chrono::steady_clock::now();
 }
 
 std::string NGemity::ServerMonitor::GetEverything()
