@@ -40,6 +40,10 @@ branches:
 before_install:
   - sudo apt-get install libmysqlclient15-dev libmysql++-dev
   - eval "${MATRIX_EVAL}"
+ # Install a supported cmake version (>= 3.4.3)
+ - wget -O cmake.sh https://cmake.org/files/v3.10/cmake-3.10.0-rc1-Linux-x86_64.sh 
+ - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
+
 
 script:
   - mkdir build
