@@ -10,7 +10,7 @@ matrix:
             - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages:
-            - boost1.68
+            - boost1.67
             - g++-8
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
@@ -21,7 +21,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++8
-            - boost1.68
+            - boost1.67
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
 
