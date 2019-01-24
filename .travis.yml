@@ -9,17 +9,17 @@ matrix:
           sources:
             - sourceline: 'ppa:mhier/libboost-latest'
           packages:
-            - boost1.67
+            - boost
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
     - addons:
         apt:
           sources:
             - sourceline: 'ppa:mhier/libboost-latest'
           packages:
-            - boost1.67
+            - boost
       env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 branches:
   only:
