@@ -87,12 +87,9 @@ void MonitorSession::OnClose()
 {
 }
 
-void MonitorSession::DoRequest(int *ppUserCount, bool *pbRequesterEnabled)
+void MonitorSession::DoRequest()
 {
-    pUserCount = ppUserCount;
-    bRequesterEnabled = pbRequesterEnabled;
-
-    if (pbRequesterEnabled != nullptr)
+    if (bRequesterEnabled != nullptr)
     {
         TS_CS_REQUEST requestPct{};
         requestPct.t = 'u';
@@ -100,7 +97,7 @@ void MonitorSession::DoRequest(int *ppUserCount, bool *pbRequesterEnabled)
         SendPacket(requestPct);
     }
 
-    if (ppUserCount != nullptr)
+    if (pUserCount != nullptr)
     {
         TS_CS_VERSION versionPct{};
         versionPct.szVersion = sConfigMgr->GetStringDefault("monitor.version", "ASER");
@@ -117,14 +114,19 @@ void MonitorSession::onResultHandler(const TS_SC_RESULT *resultPct)
     CloseSocket();
 }
 
-bool MonitorSession::DeleteRequested()
+bool MonitorSession::Finished()
 {
-    bool bRet = m_bDeleteRequested || sServerMonitor.GetTime() > 10000;
-    if (bRet)
+    bool bRet = sServerMonitor.GetTime() > m_nLastUpdateTime + 10000 || !IsOpen();
+    if (bRet && IsOpen())
         CloseSocket();
     return bRet;
 }
 
-MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime())
+MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester)
+    : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime()), pUserCount(ppUserCount), bRequesterEnabled(ppRequester)
+{
+}
+
+MonitorSession::~MonitorSession()
 {
 }

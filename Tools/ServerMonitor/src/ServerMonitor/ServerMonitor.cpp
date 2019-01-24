@@ -23,7 +23,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
-#include "MonitorSocket.h"
+#include "SingleSocketInstance.h"
 
 NGemity::ServerMonitor::ServerMonitor() : _stopped(true), m_nStartTime(getMSTime())
 {
@@ -73,26 +73,51 @@ void NGemity::ServerMonitor::Update()
     _updateTimer->expires_from_now(boost::posix_time::minutes(ConfigMgr::instance()->GetIntDefault("monitor.tick", 1)));
     _updateTimer->async_wait(std::bind(&NGemity::ServerMonitor::Update, this));
 
-    std::remove_if(m_pSession.begin(), m_pSession.end(), [](std::shared_ptr<MonitorSession> s) -> bool { return s == nullptr || s->DeleteRequested(); });
-
     std::ofstream outFile(ConfigMgr::instance()->GetStringDefault("monitor.outfile", "/tmp/currlist.json"));
     outFile << GetEverything();
     outFile.close();
+
+    // Remove finished sockets
+    for (auto it = std::begin(vSockets); it != std::end(vSockets);)
+    {
+        if (it->second->Finished())
+            it = vSockets.erase(it);
+        else
+            ++it;
+    }
 
     for (auto &serverRegion : m_vServerRegion)
     {
         for (auto &server : serverRegion.vServerList)
         {
+
+            if (vSockets.count(server.szName) != 0)
+                continue;
+
+            boost::asio::ip::tcp_endpoint endpoint(NGemity::Net::make_address_v4(server.szIPAddress), server.nPort);
+            boost::asio::ip::tcp::socket socket(*(_ioContext.get()));
+            try
+            {
+                socket.connect(endpoint);
+                socket.set_option(boost::asio::ip::tcp::no_delay(true));
+            }
+            catch (std::exception &)
+            {
+                NG_LOG_ERROR("network", "Cannot connect to game server at %s:%d", server.szIPAddress.c_str(), server.nPort);
+                continue;
+            }
+
             if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - lastRequester) > std::chrono::minutes(30))
-            {
-                new MonitorSocket(server.szIPAddress, server.nPort, nullptr, &server.bRequesterEnabled, *(_ioContext.get()));
-            }
+                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), nullptr, &server.bRequesterEnabled);
             else
-            {
-                new MonitorSocket(server.szIPAddress, server.nPort, &server.nPlayerCount, nullptr, *(_ioContext.get()));
-            }
+                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), &server.nPlayerCount, nullptr);
+
+            NGemity::SingleSocketInstance::Instance().AddSocket(vSockets[server.szName]);
+            vSockets[server.szName]->DoRequest();
         }
     }
+
+    NG_LOG_TRACE("network", "Currently %d connections.", NGemity::SingleSocketInstance::Instance().GetConnectionCount());
     lastRequester = std::chrono::steady_clock::now();
 }
 
@@ -100,6 +125,7 @@ std::string NGemity::ServerMonitor::GetEverything()
 {
     std::string szResult{};
     nlohmann::json root; // ServerList
+    root["last_update"] = time(nullptr);
     for (auto &serverRegion : m_vServerRegion)
     {
         nlohmann::json region; //Server

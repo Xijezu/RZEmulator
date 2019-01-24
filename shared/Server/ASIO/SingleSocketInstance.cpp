@@ -33,3 +33,10 @@ void NGemity::SingleSocketInstance::StopSingleSocketInstance()
     m_pNetworkThread.release();
     m_pNetworkThread = nullptr;
 }
+
+int32_t NGemity::SingleSocketInstance::GetConnectionCount()
+{
+    if (m_pNetworkThread != nullptr)
+        return m_pNetworkThread->GetConnectionCount();
+    return -1;
+}
