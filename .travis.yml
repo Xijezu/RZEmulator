@@ -12,7 +12,6 @@ matrix:
           packages:
             - g++-7
             - cmake-data
-            - cmake
             - boost1.67
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
@@ -27,8 +26,6 @@ matrix:
           packages:
             - g++-7 # Doesn't work otherwise, no idea why
             - clang-5.0
-            - cmake-data
-            - cmake
             - boost1.67
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
@@ -36,6 +33,20 @@ matrix:
 branches:
   only:
     - master
+
+install:
+  ############################################################################
+  # Install a recent CMake
+  ############################################################################
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.10/cmake-3.10.0-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      brew install cmake || brew upgrade cmake
+    fi
+  - cmake --version
 
 before_install:
   - wget -O cmake.sh https://cmake.org/files/v3.10/cmake-3.10.0-rc1-Linux-x86_64.sh 
