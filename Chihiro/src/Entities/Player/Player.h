@@ -79,7 +79,7 @@ struct BonusInfo
 {
     int type;
     int rate;
-    int64 exp;
+    int64_t exp;
     int jp;
 };
 
@@ -97,7 +97,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     friend class Summon;
     friend class WorldSession;
 
-    explicit Player(uint32);
+    explicit Player(uint32_t);
     ~Player() override;
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -143,12 +143,12 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     /* ****************** QUEST END *******************/
 
     int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
-    int64 GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
+    int64_t GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
     uint32_t GetTamingTarget() const { return m_hTamingTarget; }
     Summon *GetMainSummon() const { return m_pMainSummon; }
     Summon *GetSubSummon() const { return m_pSubSummon; }
-    int64 GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
-    int64 GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
+    int64_t GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
+    int64_t GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
     int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
     int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
     bool HasRidingState() { return GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0; }
@@ -208,7 +208,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     // Item relevant
     Item *FindItemByCode(int);
-    Item *FindItemBySID(int64);
+    Item *FindItemBySID(int64_t);
     Item *FindItemByHandle(uint);
     Item *FindItem(uint code, uint flag, bool bFlag);
     Item *FindStorageItem(int code);
@@ -217,18 +217,18 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
     void onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
     /* InventoryEventReceiver End*/
-    Item *PushItem(Item *, int64, bool);
-    Item *PopItem(Item *, int64, bool);
+    Item *PushItem(Item *, int64_t, bool);
+    Item *PopItem(Item *, int64_t, bool);
     Item *GetItem(uint idx);
     Item *GetStorageItem(uint idx);
     uint GetItemCount() const;
     uint GetStorageItemCount() const;
-    bool GiveItem(Player *pTarget, uint32 ItemHandle, int64 count);
-    Item *DropItem(Player *pTarget, Item *pItem, int64 count);
-    void MoveStorageToInventory(Item *pItem, int64 count);
-    void MoveInventoryToStorage(Item *pItem, int64 count);
-    bool EraseItem(Item *pItem, int64 count);
-    bool EraseBullet(int64 count);
+    bool GiveItem(Player *pTarget, uint32_t ItemHandle, int64_t count);
+    Item *DropItem(Player *pTarget, Item *pItem, int64_t count);
+    void MoveStorageToInventory(Item *pItem, int64_t count);
+    void MoveInventoryToStorage(Item *pItem, int64_t count);
+    bool EraseItem(Item *pItem, int64_t count);
+    bool EraseBullet(int64_t count);
     bool IsMixable(Item *pItem) const;
     bool IsErasable(Item *pItem) const;
     bool IsSellable(Item *pItem) const;
@@ -239,7 +239,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void RemoveSummonFromStorage(Summon *pSummon);
     void OpenStorage();
 
-    void StartTrade(uint32 pTargetHandle);
+    void StartTrade(uint32_t pTargetHandle);
     void CancelTrade(bool bIsNeedBroadcast);
     void FreezeTrade();
     void ConfirmTrade();
@@ -247,14 +247,14 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void ClearTradeInfo();
     Player *GetTradeTarget();
     bool IsTradableWith(Player *pTarget);
-    void AddGoldToTradeWindow(int64 nGold);
-    bool AddItemToTradeWindow(Item *item, int32 count);
-    bool RemoveItemFromTradeWindow(Item *item, int32 count);
+    void AddGoldToTradeWindow(int64_t nGold);
+    bool AddItemToTradeWindow(Item *item, int32_t count);
+    bool RemoveItemFromTradeWindow(Item *item, int32_t count);
     bool IsTradable(Item *pItem);
     bool CheckTradeWeight();
     bool CheckTradeItem();
 
-    void AddEXP(int64 exp, uint jp, bool bApplyStamina) override;
+    void AddEXP(int64_t exp, uint jp, bool bApplyStamina) override;
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
     void SendItemWearInfoMessage(Item *item, Unit *u);
@@ -315,11 +315,11 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     uint GetCreatureGroup() const override { return 9; }
 
-    ushort ChangeGold(int64);
-    ushort ChangeStorageGold(int64);
+    ushort ChangeGold(int64_t);
+    ushort ChangeStorageGold(int64_t);
 
-    uint16 IsUseableItem(Item *pItem, Unit *pTarget);
-    uint16 UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
+    uint16_t IsUseableItem(Item *pItem, Unit *pTarget);
+    uint16_t UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
 
     void SendPacket(const XPacket &pPacket);
 
@@ -361,10 +361,10 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     bool m_bTradeAccepted{false};
 
   protected:
-    bool isInLocationType(uint8 nLocationType);
+    bool isInLocationType(uint8_t nLocationType);
     void onCompleteCalculateStat() override;
     void onBeforeCalculateStat() override;
-    void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
+    void onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level) override;
     void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
     void onExpChange() override;
     void onEnergyChange() override;
@@ -382,15 +382,15 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
   private:
     void onDropQuest(Quest *pQuest);
     void openStorage();
-    Item *popItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB);
+    Item *popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB);
 
     void applyCharm(Item *pItem);
-    void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP);
+    void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64_t nBonusEXP, int nBonusJP);
     void clearPendingBonusMsg();
     void sendBonusEXPJPMsg();
 
-    uint16 processTradeGold();
-    uint16 processTradeItem();
+    uint16_t processTradeGold();
+    uint16_t processTradeItem();
 
     WorldSession *m_session{nullptr};
     std::string m_szAccount;
@@ -413,7 +413,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     std::vector<Summon *> m_vStorageSummonList{};
     std::vector<Item *> m_vCharmList{};
 
-    std::unordered_map<uint32, int32> m_vTradeItemList{};
+    std::unordered_map<uint32_t, int32_t> m_vTradeItemList{};
 
     BonusInfo m_pBonusInfo[BONUS_TYPE::MAX_BONUS_TYPE]{};
 

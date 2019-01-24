@@ -26,7 +26,7 @@ std::mutex TransactionTask::_deadlockLock;
 void Transaction::Append(const char *sql)
 {
     SQLElementData data;
-    data.type          = SQL_ELEMENT_RAW;
+    data.type = SQL_ELEMENT_RAW;
     data.element.query = strdup(sql);
     m_queries.push_back(data);
 }
@@ -35,7 +35,7 @@ void Transaction::Append(const char *sql)
 void Transaction::Append(PreparedStatement *stmt)
 {
     SQLElementData data;
-    data.type         = SQL_ELEMENT_PREPARED;
+    data.type = SQL_ELEMENT_PREPARED;
     data.element.stmt = stmt;
     m_queries.push_back(data);
 }
@@ -50,12 +50,12 @@ void Transaction::Cleanup()
     {
         switch (data.type)
         {
-            case SQL_ELEMENT_PREPARED:
-                delete data.element.stmt;
-                break;
-            case SQL_ELEMENT_RAW:
-                free((void *)(data.element.query));
-                break;
+        case SQL_ELEMENT_PREPARED:
+            delete data.element.stmt;
+            break;
+        case SQL_ELEMENT_RAW:
+            free((void *)(data.element.query));
+            break;
         }
     }
 
@@ -73,8 +73,8 @@ bool TransactionTask::Execute()
     {
         // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
         std::lock_guard<std::mutex> lock(_deadlockLock);
-        uint8                       loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
-        for (uint8                  i           = 0; i < loopBreaker; ++i)
+        uint8_t loopBreaker = 5; // Handle MySQL Errno 1213 without extending deadlock to the core itself
+        for (uint8_t i = 0; i < loopBreaker; ++i)
             if (!m_conn->ExecuteTransaction(m_trans))
                 return true;
     }

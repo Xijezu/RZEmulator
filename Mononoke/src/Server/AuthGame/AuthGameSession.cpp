@@ -174,7 +174,7 @@ void AuthGameSession::HandleGameLogin(const TS_GA_LOGIN *pGamePct)
 void AuthGameSession::HandleClientLogin(const TS_GA_CLIENT_LOGIN *pGamePct)
 {
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
-    uint16 result = TS_RESULT_ACCESS_DENIED;
+    uint16_t result = TS_RESULT_ACCESS_DENIED;
 
     if (p != nullptr)
     {
@@ -196,10 +196,10 @@ void AuthGameSession::HandleClientLogin(const TS_GA_CLIENT_LOGIN *pGamePct)
     resultPct.permission = (p != nullptr ? p->nPermission : 0);
     /*
     resultPct << (uint8)0;  // PC Bang Mode
-    resultPct << (uint32)0; // Age
-    resultPct << (uint32)0; // Event Code
-    resultPct << (uint32)0; // Continuous Playtime
-    resultPct << (uint32)0; // Continuous Logouttime
+    resultPct << (uint32_t)0; // Age
+    resultPct << (uint32_t)0; // Event Code
+    resultPct << (uint32_t)0; // Continuous Playtime
+    resultPct << (uint32_t)0; // Continuous Logouttime
     */
 
     SendPacket(resultPct);

@@ -27,53 +27,53 @@
 
 #include <mysql.h>
 
-static uint32 SizeForType(MYSQL_FIELD *field)
+static uint32_t SizeForType(MYSQL_FIELD *field)
 {
     switch (field->type)
     {
-        case MYSQL_TYPE_NULL:
-            return 0;
-        case MYSQL_TYPE_TINY:
-            return 1;
-        case MYSQL_TYPE_YEAR:
-        case MYSQL_TYPE_SHORT:
-            return 2;
-        case MYSQL_TYPE_INT24:
-        case MYSQL_TYPE_LONG:
-        case MYSQL_TYPE_FLOAT:
-            return 4;
-        case MYSQL_TYPE_DOUBLE:
-        case MYSQL_TYPE_LONGLONG:
-        case MYSQL_TYPE_BIT:
-            return 8;
+    case MYSQL_TYPE_NULL:
+        return 0;
+    case MYSQL_TYPE_TINY:
+        return 1;
+    case MYSQL_TYPE_YEAR:
+    case MYSQL_TYPE_SHORT:
+        return 2;
+    case MYSQL_TYPE_INT24:
+    case MYSQL_TYPE_LONG:
+    case MYSQL_TYPE_FLOAT:
+        return 4;
+    case MYSQL_TYPE_DOUBLE:
+    case MYSQL_TYPE_LONGLONG:
+    case MYSQL_TYPE_BIT:
+        return 8;
 
-        case MYSQL_TYPE_TIMESTAMP:
-        case MYSQL_TYPE_DATE:
-        case MYSQL_TYPE_TIME:
-        case MYSQL_TYPE_DATETIME:
-            return sizeof(MYSQL_TIME);
+    case MYSQL_TYPE_TIMESTAMP:
+    case MYSQL_TYPE_DATE:
+    case MYSQL_TYPE_TIME:
+    case MYSQL_TYPE_DATETIME:
+        return sizeof(MYSQL_TIME);
 
-        case MYSQL_TYPE_TINY_BLOB:
-        case MYSQL_TYPE_MEDIUM_BLOB:
-        case MYSQL_TYPE_LONG_BLOB:
-        case MYSQL_TYPE_BLOB:
-        case MYSQL_TYPE_STRING:
-        case MYSQL_TYPE_VAR_STRING:
-            return field->max_length + 1;
+    case MYSQL_TYPE_TINY_BLOB:
+    case MYSQL_TYPE_MEDIUM_BLOB:
+    case MYSQL_TYPE_LONG_BLOB:
+    case MYSQL_TYPE_BLOB:
+    case MYSQL_TYPE_STRING:
+    case MYSQL_TYPE_VAR_STRING:
+        return field->max_length + 1;
 
-        case MYSQL_TYPE_DECIMAL:
-        case MYSQL_TYPE_NEWDECIMAL:
-            return 64;
+    case MYSQL_TYPE_DECIMAL:
+    case MYSQL_TYPE_NEWDECIMAL:
+        return 64;
 
-        case MYSQL_TYPE_GEOMETRY:
-            /*
+    case MYSQL_TYPE_GEOMETRY:
+        /*
             Following types are not sent over the wire:
             MYSQL_TYPE_ENUM:
             MYSQL_TYPE_SET:
            */
-        default:
-            NG_LOG_WARN("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32(field->type));
-            return 0;
+    default:
+        NG_LOG_WARN("sql.sql", "SQL::SizeForType(): invalid field type %u", uint32_t(field->type));
+        return 0;
     }
 }
 
@@ -81,66 +81,64 @@ DatabaseFieldTypes MysqlTypeToFieldType(enum_field_types type)
 {
     switch (type)
     {
-        case MYSQL_TYPE_NULL:
-            return DatabaseFieldTypes::Null;
-        case MYSQL_TYPE_TINY:
-            return DatabaseFieldTypes::Int8;
-        case MYSQL_TYPE_YEAR:
-        case MYSQL_TYPE_SHORT:
-            return DatabaseFieldTypes::Int16;
-        case MYSQL_TYPE_INT24:
-        case MYSQL_TYPE_LONG:
-            return DatabaseFieldTypes::Int32;
-        case MYSQL_TYPE_LONGLONG:
-        case MYSQL_TYPE_BIT:
-            return DatabaseFieldTypes::Int64;
-        case MYSQL_TYPE_FLOAT:
-            return DatabaseFieldTypes::Float;
-        case MYSQL_TYPE_DOUBLE:
-            return DatabaseFieldTypes::Double;
-        case MYSQL_TYPE_DECIMAL:
-        case MYSQL_TYPE_NEWDECIMAL:
-            return DatabaseFieldTypes::Decimal;
-        case MYSQL_TYPE_TIMESTAMP:
-        case MYSQL_TYPE_DATE:
-        case MYSQL_TYPE_TIME:
-        case MYSQL_TYPE_DATETIME:
-            return DatabaseFieldTypes::Date;
-        case MYSQL_TYPE_TINY_BLOB:
-        case MYSQL_TYPE_MEDIUM_BLOB:
-        case MYSQL_TYPE_LONG_BLOB:
-        case MYSQL_TYPE_BLOB:
-        case MYSQL_TYPE_STRING:
-        case MYSQL_TYPE_VAR_STRING:
-            return DatabaseFieldTypes::Binary;
-        default:
-            NG_LOG_WARN("sql.sql", "MysqlTypeToFieldType(): invalid field type %u", uint32(type));
-            break;
+    case MYSQL_TYPE_NULL:
+        return DatabaseFieldTypes::Null;
+    case MYSQL_TYPE_TINY:
+        return DatabaseFieldTypes::Int8;
+    case MYSQL_TYPE_YEAR:
+    case MYSQL_TYPE_SHORT:
+        return DatabaseFieldTypes::Int16;
+    case MYSQL_TYPE_INT24:
+    case MYSQL_TYPE_LONG:
+        return DatabaseFieldTypes::Int32;
+    case MYSQL_TYPE_LONGLONG:
+    case MYSQL_TYPE_BIT:
+        return DatabaseFieldTypes::Int64;
+    case MYSQL_TYPE_FLOAT:
+        return DatabaseFieldTypes::Float;
+    case MYSQL_TYPE_DOUBLE:
+        return DatabaseFieldTypes::Double;
+    case MYSQL_TYPE_DECIMAL:
+    case MYSQL_TYPE_NEWDECIMAL:
+        return DatabaseFieldTypes::Decimal;
+    case MYSQL_TYPE_TIMESTAMP:
+    case MYSQL_TYPE_DATE:
+    case MYSQL_TYPE_TIME:
+    case MYSQL_TYPE_DATETIME:
+        return DatabaseFieldTypes::Date;
+    case MYSQL_TYPE_TINY_BLOB:
+    case MYSQL_TYPE_MEDIUM_BLOB:
+    case MYSQL_TYPE_LONG_BLOB:
+    case MYSQL_TYPE_BLOB:
+    case MYSQL_TYPE_STRING:
+    case MYSQL_TYPE_VAR_STRING:
+        return DatabaseFieldTypes::Binary;
+    default:
+        NG_LOG_WARN("sql.sql", "MysqlTypeToFieldType(): invalid field type %u", uint32_t(type));
+        break;
     }
 
     return DatabaseFieldTypes::Null;
 }
 
-ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64 rowCount, uint32 fieldCount) :
-        _rowCount(rowCount),
-        _fieldCount(fieldCount),
-        _result(result),
-        _fields(fields)
+ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, uint32_t fieldCount) : _rowCount(rowCount),
+                                                                                                       _fieldCount(fieldCount),
+                                                                                                       _result(result),
+                                                                                                       _fields(fields)
 {
     _currentRow = new Field[_fieldCount];
 #ifdef NGEMITY_DEBUG
-    for (uint32 i = 0; i < _fieldCount; i++)
+    for (uint32_t i = 0; i < _fieldCount; i++)
         _currentRow[i].SetMetadata(&_fields[i], i);
 #endif
 }
 
-PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
-        m_rowCount(rowCount),
-        m_rowPosition(0),
-        m_fieldCount(fieldCount),
-        m_rBind(NULL),
-        m_stmt(stmt),
-        m_metadataResult(result)
+PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64_t rowCount, uint32_t fieldCount) : m_rowCount(rowCount),
+                                                                                                                    m_rowPosition(0),
+                                                                                                                    m_fieldCount(fieldCount),
+                                                                                                                    m_rBind(NULL),
+                                                                                                                    m_stmt(stmt),
+                                                                                                                    m_metadataResult(result)
 {
     if (!m_metadataResult)
         return;
@@ -156,7 +154,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     //- for future readers wondering where the fuck this is freed - mysql_stmt_bind_result moves pointers to these
     // from m_rBind to m_stmt->bind and it is later freed by the `if (m_stmt->bind_result_done)` block just above here
     // MYSQL_STMT lifetime is equal to connection lifetime
-    my_bool       *m_isNull = new my_bool[m_fieldCount];
+    my_bool *m_isNull = new my_bool[m_fieldCount];
     unsigned long *m_length = new unsigned long[m_fieldCount];
 
     memset(m_isNull, 0, sizeof(my_bool) * m_fieldCount);
@@ -178,21 +176,21 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     //- This is where we prepare the buffer based on metadata
     MYSQL_FIELD *field = mysql_fetch_fields(m_metadataResult);
     std::size_t rowSize = 0;
-    for (uint32 i       = 0; i < m_fieldCount; ++i)
+    for (uint32_t i = 0; i < m_fieldCount; ++i)
     {
-        uint32 size = SizeForType(&field[i]);
+        uint32_t size = SizeForType(&field[i]);
         rowSize += size;
 
-        m_rBind[i].buffer_type   = field[i].type;
+        m_rBind[i].buffer_type = field[i].type;
         m_rBind[i].buffer_length = size;
-        m_rBind[i].length        = &m_length[i];
-        m_rBind[i].is_null       = &m_isNull[i];
-        m_rBind[i].error         = NULL;
-        m_rBind[i].is_unsigned   = field[i].flags & UNSIGNED_FLAG;
+        m_rBind[i].length = &m_length[i];
+        m_rBind[i].is_null = &m_isNull[i];
+        m_rBind[i].error = NULL;
+        m_rBind[i].is_unsigned = field[i].flags & UNSIGNED_FLAG;
     }
 
     char *dataBuffer = new char[rowSize * m_rowCount];
-    for (uint32 i = 0, offset = 0; i < m_fieldCount; ++i)
+    for (uint32_t i = 0, offset = 0; i < m_fieldCount; ++i)
     {
         m_rBind[i].buffer = dataBuffer + offset;
         offset += m_rBind[i].buffer_length;
@@ -209,54 +207,54 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
         return;
     }
 
-    m_rows.resize(uint32(m_rowCount) * m_fieldCount);
+    m_rows.resize(uint32_t(m_rowCount) * m_fieldCount);
     while (_NextRow())
     {
-        for (uint32 fIndex = 0; fIndex < m_fieldCount; ++fIndex)
+        for (uint32_t fIndex = 0; fIndex < m_fieldCount; ++fIndex)
         {
-            unsigned long buffer_length  = m_rBind[fIndex].buffer_length;
+            unsigned long buffer_length = m_rBind[fIndex].buffer_length;
             unsigned long fetched_length = *m_rBind[fIndex].length;
             if (!*m_rBind[fIndex].is_null)
             {
                 void *buffer = m_stmt->bind[fIndex].buffer;
                 switch (m_rBind[fIndex].buffer_type)
                 {
-                    case MYSQL_TYPE_TINY_BLOB:
-                    case MYSQL_TYPE_MEDIUM_BLOB:
-                    case MYSQL_TYPE_LONG_BLOB:
-                    case MYSQL_TYPE_BLOB:
-                    case MYSQL_TYPE_STRING:
-                    case MYSQL_TYPE_VAR_STRING:
-                        // warning - the string will not be null-terminated if there is no space for it in the buffer
-                        // when mysql_stmt_fetch returned MYSQL_DATA_TRUNCATED
-                        // we cannot blindly null-terminate the data either as it may be retrieved as binary blob and not specifically a string
-                        // in this case using Field::GetCString will result in garbage
-                        // TODO: remove Field::GetCString and use boost::string_ref (currently proposed for TS as string_view, maybe in C++17)
-                        if (fetched_length < buffer_length)
-                            *((char *)buffer + fetched_length) = '\0';
-                        break;
-                    default:
-                        break;
+                case MYSQL_TYPE_TINY_BLOB:
+                case MYSQL_TYPE_MEDIUM_BLOB:
+                case MYSQL_TYPE_LONG_BLOB:
+                case MYSQL_TYPE_BLOB:
+                case MYSQL_TYPE_STRING:
+                case MYSQL_TYPE_VAR_STRING:
+                    // warning - the string will not be null-terminated if there is no space for it in the buffer
+                    // when mysql_stmt_fetch returned MYSQL_DATA_TRUNCATED
+                    // we cannot blindly null-terminate the data either as it may be retrieved as binary blob and not specifically a string
+                    // in this case using Field::GetCString will result in garbage
+                    // TODO: remove Field::GetCString and use boost::string_ref (currently proposed for TS as string_view, maybe in C++17)
+                    if (fetched_length < buffer_length)
+                        *((char *)buffer + fetched_length) = '\0';
+                    break;
+                default:
+                    break;
                 }
 
-                m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                        buffer,
-                        MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                        fetched_length);
+                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
+                    buffer,
+                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
+                    fetched_length);
 
                 // move buffer pointer to next part
                 m_stmt->bind[fIndex].buffer = (char *)buffer + rowSize;
             }
             else
             {
-                m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                        nullptr,
-                        MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                        *m_rBind[fIndex].length);
+                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
+                    nullptr,
+                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
+                    *m_rBind[fIndex].length);
             }
 
 #ifdef NGEMITY_DEBUG
-            m_rows[uint32(m_rowPosition) * m_fieldCount + fIndex].SetMetadata(&field[fIndex], fIndex);
+            m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetMetadata(&field[fIndex], fIndex);
 #endif
         }
         m_rowPosition++;
@@ -299,7 +297,7 @@ bool ResultSet::NextRow()
         return false;
     }
 
-    for (uint32 i = 0; i < _fieldCount; i++)
+    for (uint32_t i = 0; i < _fieldCount; i++)
         _currentRow[i].SetStructuredValue(row[i], MysqlTypeToFieldType(_fields[i].type), lengths[i]);
 
     return true;
@@ -348,7 +346,7 @@ void PreparedResultSet::CleanUp()
 
     if (m_rBind)
     {
-        delete[](char *)m_rBind->buffer;
+        delete[](char *) m_rBind->buffer;
         delete[] m_rBind;
         m_rBind = nullptr;
     }
@@ -356,19 +354,19 @@ void PreparedResultSet::CleanUp()
 
 Field const &ResultSet::operator[](std::size_t index) const
 {
-            ASSERT(index < _fieldCount);
+    ASSERT(index < _fieldCount);
     return _currentRow[index];
 }
 
 Field *PreparedResultSet::Fetch() const
 {
-            ASSERT(m_rowPosition < m_rowCount);
-    return const_cast<Field *>(&m_rows[uint32(m_rowPosition) * m_fieldCount]);
+    ASSERT(m_rowPosition < m_rowCount);
+    return const_cast<Field *>(&m_rows[uint32_t(m_rowPosition) * m_fieldCount]);
 }
 
 Field const &PreparedResultSet::operator[](std::size_t index) const
 {
-            ASSERT(m_rowPosition < m_rowCount);
-            ASSERT(index < m_fieldCount);
-    return m_rows[uint32(m_rowPosition) * m_fieldCount + index];
+    ASSERT(m_rowPosition < m_rowCount);
+    ASSERT(index < m_fieldCount);
+    return m_rows[uint32_t(m_rowPosition) * m_fieldCount + index];
 }

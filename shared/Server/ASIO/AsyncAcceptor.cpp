@@ -1,8 +1,8 @@
 #include "AsyncAcceptor.h"
 #include "XSocket.h"
 
-AsyncAcceptor::AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port) : _acceptor(ioContext), _endpoint(NGemity::Net::make_address(bindIp), port),
-                                                                                                            _socket(ioContext), _closed(false), _socketFactory(std::bind(&AsyncAcceptor::DefeaultSocketFactory, this))
+AsyncAcceptor::AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port) : _acceptor(ioContext), _endpoint(NGemity::Net::make_address(bindIp), port),
+                                                                                                              _socket(ioContext), _closed(false), _socketFactory(std::bind(&AsyncAcceptor::DefeaultSocketFactory, this))
 {
 }
 

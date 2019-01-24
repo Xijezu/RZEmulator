@@ -20,7 +20,7 @@
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 
-State::State(StateType type, StateCode code, int uid, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue)
+State::State(StateType type, StateCode code, int uid, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue)
 {
     init(uid, (int)code);
     m_nCode = code;
@@ -81,7 +81,7 @@ void State::HoldRemainDuration()
     m_bAura = true;
 }
 
-bool State::AddState(StateType type, uint caster, uint16 level, uint start_time, uint end_time, int base_damage, bool bIsAura)
+bool State::AddState(StateType type, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura)
 {
     if (m_nLevel[type] > level)
         return false;
@@ -119,7 +119,7 @@ bool State::IsDuplicatedGroup(int nGroupID)
     return ((m_pTemplate->duplicate_group[0] && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] && m_pTemplate->duplicate_group[1] == nGroupID) || (m_pTemplate->duplicate_group[2] && m_pTemplate->duplicate_group[2] == nGroupID));
 }
 
-void State::SetState(int code, int uid, uint caster, const uint16 *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)
+void State::SetState(int code, int uid, uint caster, const uint16_t *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)
 {
     uint t = sWorld.GetArTime();
     init(uid, code);
@@ -195,7 +195,7 @@ void State::init(int uid, int code)
     _InitValues();
 
     m_pTemplate = sObjectMgr.GetStateInfo(code);
-    m_nUID = (uint16)uid;
+    m_nUID = (uint16_t)uid;
 }
 
 void State::DB_InsertState(Unit *pOwner, State *pState)

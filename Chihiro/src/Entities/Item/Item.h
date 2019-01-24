@@ -32,7 +32,7 @@ public:
 
   uint OwnerHandle{0};     // 0x0
   uint OwnSummonHandle{0}; // 0x4
-  int64 UID{0};            // 0x8
+  int64_t UID{0};            // 0x8
   int Code{0};             // 0x10
   int nIdx{0};             // 0x14
   int nLevel{0};           // 0x18
@@ -43,8 +43,8 @@ public:
   int nOwnSummonUID{0};  // 0x24
   int nAuctionID{0};     // 0x28
   int nItemKeepingID{0}; // 0x2C
-  int64 nCount{0};       // 0x30
-  int64 tExpire{0};      // 0x40
+  int64_t nCount{0};       // 0x30
+  int64_t tExpire{0};      // 0x40
   //Elemental::Type eElementalEffectType;         // 0x48
   int Flag{0};                            // 0x60
   GenerateCode GenerateInfo = BY_UNKNOWN; // 0x64
@@ -65,7 +65,7 @@ public:
   };
 
   static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-  static Item *AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info = BY_BASIC, int level = -1, int enhance = -1,
+  static Item *AllocItem(uint64_t uid, int code, int64_t cnt, GenerateCode info = BY_BASIC, int level = -1, int enhance = -1,
                          int flag = -1, int socket_0 = 0, int socket_1 = 0, int socket_2 = 0, int socket_3 = 0, int remain_time = 0);
   static void PendFreeItem(Item *pItem);
 
@@ -75,7 +75,7 @@ public:
   Item(const Item &) = delete;
   Item &operator=(const Item &) = delete;
 
-  void SetCount(int64 count);
+  void SetCount(int64_t count);
   bool IsDropable();
   bool IsWearable();
   int32_t GetItemCode() const { return m_Instance.Code; }

@@ -36,22 +36,22 @@ enum ColorTypes
     WHITE
 };
 
-const uint8 MaxColors = uint8(WHITE) + 1;
+const uint8_t MaxColors = uint8_t(WHITE) + 1;
 
 class AppenderConsole : public Appender
 {
-    public:
-        typedef std::integral_constant<AppenderType, APPENDER_CONSOLE>::type TypeIndex;
+  public:
+    typedef std::integral_constant<AppenderType, APPENDER_CONSOLE>::type TypeIndex;
 
-        AppenderConsole(uint8 _id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs);
-        void InitColors(const std::string &init_str);
+    AppenderConsole(uint8_t _id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs);
+    void InitColors(const std::string &init_str);
 
-        AppenderType getType() const override { return TypeIndex::value; }
+    AppenderType getType() const override { return TypeIndex::value; }
 
-    private:
-        void SetColor(bool stdout_stream, ColorTypes color);
-        void ResetColor(bool stdout_stream);
-        void _write(LogMessage const *message) override;
-        bool                                                                 _colored;
-        ColorTypes                                                           _colors[NUM_ENABLED_LOG_LEVELS];
+  private:
+    void SetColor(bool stdout_stream, ColorTypes color);
+    void ResetColor(bool stdout_stream);
+    void _write(LogMessage const *message) override;
+    bool _colored;
+    ColorTypes _colors[NUM_ENABLED_LOG_LEVELS];
 };

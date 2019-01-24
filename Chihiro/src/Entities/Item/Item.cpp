@@ -22,8 +22,8 @@
 #include "GameRule.h"
 #include "Item.h"
 
-Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int level, int enhance,
-        int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
+Item *Item::AllocItem(uint64_t uid, int code, int64_t cnt, GenerateCode info, int level, int enhance,
+                      int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
 {
     Item *item = sMemoryPool.AllocItem();
     if (item == nullptr)
@@ -31,8 +31,8 @@ Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int le
 
     item->m_pItemBase = sObjectMgr.GetItemBase((uint)code);
 
-    item->m_Instance.UID    = uid;
-    item->m_Instance.Code   = code;
+    item->m_Instance.UID = uid;
+    item->m_Instance.Code = code;
     item->m_Instance.nCount = cnt;
 
     // Workaround for gold :^)
@@ -46,8 +46,8 @@ Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int le
         if (item->m_Instance.nLevel <= 0)
             item->m_Instance.nLevel = 1;
 
-        item->m_Instance.GenerateInfo      = info;
-        item->m_Instance.Flag              = flag;
+        item->m_Instance.GenerateInfo = info;
+        item->m_Instance.Flag = flag;
         item->m_Instance.nCurrentEndurance = item->m_pItemBase->endurance;
 
         if (enhance == -1)
@@ -65,7 +65,7 @@ Item *Item::AllocItem(uint64 uid, int code, int64 cnt, GenerateCode info, int le
     }
 
     item->m_Instance.OwnerHandle = 0;
-    item->m_Instance.nOwnerUID   = 0;
+    item->m_Instance.nOwnerUID = 0;
     item->m_Instance.Socket[0] = socket_0;
     item->m_Instance.Socket[1] = socket_1;
     item->m_Instance.Socket[2] = socket_2;
@@ -95,7 +95,7 @@ void Item::DBUpdate()
     /*if (!m_bIsNeedUpdateToDB)
         return;*/
 
-    uint8_t           i     = 0;
+    uint8_t i = 0;
     //PrepareStatement(CHARACTER_UPD_ITEM, "UPDATE `Item` SET owner_id = ?, account_id = ?,
     // summon_id = ?, auction_id = ?, keeping_id = ?, idx = ?, cnt = ?, level = ?, enhance = ?,
     // flag = ?, wear_info = ?, socket_0 = ?, socket_1 = ?, socket_2 = ?, socket_3 = ?, remain_time = ?, update_time = ? WHERE sid = ?", CONNECTION_ASYNC);
@@ -127,41 +127,41 @@ void Item::DBUpdate()
 void Item::SetOwnerInfo(uint handle, int UID, int account_id)
 {
     m_Instance.OwnerHandle = handle;
-    m_Instance.nOwnerUID   = UID;
+    m_Instance.nOwnerUID = UID;
     m_nAccountID = account_id;
 }
 
 void Item::DBInsert()
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_ITEM);
-    uint8_t           idx   = 0;
+    uint8_t idx = 0;
 
-    stmt->setUInt64(idx++, m_Instance.UID); // owner_id
-    stmt->setInt32(idx++, m_Instance.nOwnerUID); // owner_id
-    stmt->setInt32(idx++, 0); // account_id
-    stmt->setInt32(idx++, m_Instance.nOwnSummonUID); // summon_id
-    stmt->setInt32(idx++, m_Instance.nAuctionID); // auction_id
+    stmt->setUInt64(idx++, m_Instance.UID);           // owner_id
+    stmt->setInt32(idx++, m_Instance.nOwnerUID);      // owner_id
+    stmt->setInt32(idx++, 0);                         // account_id
+    stmt->setInt32(idx++, m_Instance.nOwnSummonUID);  // summon_id
+    stmt->setInt32(idx++, m_Instance.nAuctionID);     // auction_id
     stmt->setInt32(idx++, m_Instance.nItemKeepingID); // keepind_id
-    stmt->setInt32(idx++, m_Instance.nIdx); // Idx
-    stmt->setInt32(idx++, m_Instance.Code); // code
-    stmt->setInt64(idx++, m_Instance.nCount); // Count
-    stmt->setInt32(idx++, m_Instance.nLevel); // level
-    stmt->setInt32(idx++, m_Instance.nEnhance); // enhance
-    stmt->setInt32(idx++, m_Instance.nEndurance); // Endurance
-    stmt->setInt32(idx++, m_Instance.Flag); // Flag
-    stmt->setInt32(idx++, m_Instance.GenerateInfo); // GCode
-    stmt->setInt32(idx++, m_Instance.nWearInfo); // Wear Info
-    stmt->setInt32(idx++, m_Instance.Socket[0]); // Socket_0
-    stmt->setInt32(idx++, m_Instance.Socket[1]); // Socket_1
-    stmt->setInt32(idx++, m_Instance.Socket[2]); // Socket_2
-    stmt->setInt32(idx++, m_Instance.Socket[3]); // Socket_3
-    stmt->setInt32(idx++, 0); // Socket_4
-    stmt->setInt32(idx++, 0); // Socket_5
-    stmt->setInt32(idx++, m_Instance.tExpire); // remain time
-    stmt->setInt32(idx++, 0); // elemental effect type
-    stmt->setInt32(idx++, 0); // elemental effect expire_time
-    stmt->setInt32(idx++, 0); // elemental effect attack point
-    stmt->setInt32(idx, 0); // elemental effect magic point
+    stmt->setInt32(idx++, m_Instance.nIdx);           // Idx
+    stmt->setInt32(idx++, m_Instance.Code);           // code
+    stmt->setInt64(idx++, m_Instance.nCount);         // Count
+    stmt->setInt32(idx++, m_Instance.nLevel);         // level
+    stmt->setInt32(idx++, m_Instance.nEnhance);       // enhance
+    stmt->setInt32(idx++, m_Instance.nEndurance);     // Endurance
+    stmt->setInt32(idx++, m_Instance.Flag);           // Flag
+    stmt->setInt32(idx++, m_Instance.GenerateInfo);   // GCode
+    stmt->setInt32(idx++, m_Instance.nWearInfo);      // Wear Info
+    stmt->setInt32(idx++, m_Instance.Socket[0]);      // Socket_0
+    stmt->setInt32(idx++, m_Instance.Socket[1]);      // Socket_1
+    stmt->setInt32(idx++, m_Instance.Socket[2]);      // Socket_2
+    stmt->setInt32(idx++, m_Instance.Socket[3]);      // Socket_3
+    stmt->setInt32(idx++, 0);                         // Socket_4
+    stmt->setInt32(idx++, 0);                         // Socket_5
+    stmt->setInt32(idx++, m_Instance.tExpire);        // remain time
+    stmt->setInt32(idx++, 0);                         // elemental effect type
+    stmt->setInt32(idx++, 0);                         // elemental effect expire_time
+    stmt->setInt32(idx++, 0);                         // elemental effect attack point
+    stmt->setInt32(idx, 0);                           // elemental effect magic point
 
     CharacterDatabase.Execute(stmt);
 
@@ -171,7 +171,7 @@ void Item::DBInsert()
 void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
 {
     Messages::GetEncodedInt(pEnterPct, pItem->m_Instance.Code);
-    pEnterPct << (uint64)pItem->m_Instance.nCount;
+    pEnterPct << (uint64_t)pItem->m_Instance.nCount;
 
     pEnterPct << (uint)pItem->m_nDropTime;
     for (int i = 0; i < 3; i++)
@@ -185,7 +185,7 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 {
     for (int i = 0; i < 3; i++)
     {
-        m_pPickupOrder.hPlayer[i]  = order.hPlayer[i];
+        m_pPickupOrder.hPlayer[i] = order.hPlayer[i];
         m_pPickupOrder.nPartyID[i] = order.nPartyID[i];
     }
 }
@@ -224,7 +224,7 @@ int Item::GetItemRank() const
 void Item::SetCurrentEndurance(int n)
 {
     int maxendurance = GetMaxEndurance();
-    m_Instance.nCurrentEndurance     = n;
+    m_Instance.nCurrentEndurance = n;
     if (n > maxendurance)
         m_Instance.nCurrentEndurance = maxendurance;
     if (m_Instance.nCurrentEndurance < 0)
@@ -244,8 +244,8 @@ int Item::GetMaxEndurance() const
         if (m_pItemBase->socket <= 0)
             return m_pItemBase->endurance;
 
-        int      total_endurance = 0;
-        for (int i               = 0; i < m_pItemBase->socket; ++i)
+        int total_endurance = 0;
+        for (int i = 0; i < m_pItemBase->socket; ++i)
         {
             if (m_Instance.Socket[i] != 0)
             {
@@ -253,7 +253,7 @@ int Item::GetMaxEndurance() const
             }
         }
         if (total_endurance != 0)
-            result               = total_endurance;
+            result = total_endurance;
         else
             result = m_pItemBase->endurance;
     }
@@ -283,7 +283,7 @@ float Item::GetWeight() const
     return m_pItemBase->weight * (float)m_Instance.nCount;
 }
 
-void Item::SetCount(int64 count)
+void Item::SetCount(int64_t count)
 {
     m_Instance.nCount = count;
 }
@@ -306,12 +306,12 @@ bool Item::IsInStorage() const
 void Item::CopyFrom(const Item *pFrom)
 {
     auto oldOwner = m_Instance.OwnerHandle;
-    auto oldUID   = m_Instance.UID;
+    auto oldUID = m_Instance.UID;
     Relocate(pFrom->GetPositionX(), pFrom->GetPositionY(), pFrom->GetPositionZ(), pFrom->GetOrientation());
     SetLayer(pFrom->GetLayer());
     m_Instance.Copy(pFrom->m_Instance);
-    m_Instance.UID         = 0;
-    m_Instance.nOwnerUID   = (int)oldUID;
+    m_Instance.UID = 0;
+    m_Instance.nOwnerUID = (int)oldUID;
     m_Instance.OwnerHandle = oldOwner;
 }
 
@@ -338,8 +338,8 @@ void Item::SetBindTarget(Unit *pUnit)
 Item::Item() : WorldObject(true)
 {
     _mainType = MT_StaticObject;
-    _subType  = ST_Object;
-    _objType  = OBJ_STATIC;
+    _subType = ST_Object;
+    _objType = OBJ_STATIC;
 
     _valuesCount = UNIT_FIELD_HANDLE + 1;
     _InitValues();
@@ -355,30 +355,30 @@ bool Item::IsTradable()
 
 bool Item::IsDropable()
 {
-	if (m_pItemBase == nullptr)
-		return false;
+    if (m_pItemBase == nullptr)
+        return false;
 
-	return m_pItemBase->flaglist[FLAG_DROP] == 0;
+    return m_pItemBase->flaglist[FLAG_DROP] == 0;
 }
 
 void ItemInstance::Copy(const ItemInstance &pFrom)
 {
-    OwnerHandle       = pFrom.OwnerHandle;
-    OwnSummonHandle   = pFrom.OwnSummonHandle;
-    UID               = pFrom.UID;
-    Code              = pFrom.Code;
-    nIdx              = pFrom.nIdx;
-    nLevel            = pFrom.nLevel;
-    nEnhance          = pFrom.nEnhance;
-    nOwnerUID         = pFrom.nOwnerUID;
-    nOwnSummonUID     = pFrom.nOwnSummonUID;
-    nAuctionID        = pFrom.nAuctionID;
-    nItemKeepingID    = pFrom.nItemKeepingID;
-    nCount            = pFrom.nCount;
+    OwnerHandle = pFrom.OwnerHandle;
+    OwnSummonHandle = pFrom.OwnSummonHandle;
+    UID = pFrom.UID;
+    Code = pFrom.Code;
+    nIdx = pFrom.nIdx;
+    nLevel = pFrom.nLevel;
+    nEnhance = pFrom.nEnhance;
+    nOwnerUID = pFrom.nOwnerUID;
+    nOwnSummonUID = pFrom.nOwnSummonUID;
+    nAuctionID = pFrom.nAuctionID;
+    nItemKeepingID = pFrom.nItemKeepingID;
+    nCount = pFrom.nCount;
     nCurrentEndurance = pFrom.nCurrentEndurance;
-    tExpire           = pFrom.tExpire;
-    Flag              = pFrom.Flag;
-    GenerateInfo      = pFrom.GenerateInfo;
-    nWearInfo         = pFrom.nWearInfo;
+    tExpire = pFrom.tExpire;
+    Flag = pFrom.Flag;
+    GenerateInfo = pFrom.GenerateInfo;
+    nWearInfo = pFrom.nWearInfo;
     std::copy(std::begin(pFrom.Socket), std::end(pFrom.Socket), std::begin(Socket));
 }

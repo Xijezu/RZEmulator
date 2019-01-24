@@ -25,14 +25,14 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
 {
     this->Release();
 
-    std::vector<std::string> TextLines{ };
-    std::string              strPropNum{ };
-    std::string              strPropName{ };
+    std::vector<std::string> TextLines{};
+    std::string strPropNum{};
+    std::string strPropName{};
 
-    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/"+szFileName));
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/" + szFileName));
 
-    std::ifstream      inStream(configFile.c_str(), std::ios::in);
-    std::string        row{ };
+    std::ifstream inStream(configFile.c_str(), std::ios::in);
+    std::string row{};
     while (std::getline(inStream, row))
     {
         if (!row.empty() || row[0] == ';')
@@ -44,11 +44,11 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
         return false;
 
     float fCurrentVisibleRatio = 1.0f;
-    int   ptype                = 0;
-    int   rtype                = 0;
-    int   sflag                = 0;
-    int   line_num             = 0;
-    int   nCurrentCategory     = 0;
+    int ptype = 0;
+    int rtype = 0;
+    int sflag = 0;
+    int line_num = 0;
+    int nCurrentCategory = 0;
 
     for (const auto &s : TextLines)
     {
@@ -74,7 +74,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
         }
         else if (lines[0] == "VISIBLE_RATIO"s)
         {
-            fCurrentVisibleRatio     = std::stof(lines[1]);
+            fCurrentVisibleRatio = std::stof(lines[1]);
             if (fCurrentVisibleRatio == 0.0f)
                 fCurrentVisibleRatio = 1.0f;
         }
@@ -91,7 +91,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
             if (vars.size() < 2)
                 continue;
 
-            strPropNum  = vars[0];
+            strPropNum = vars[0];
             strPropName = vars[1];
 
             if (vars.size() == 4)
@@ -112,7 +112,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
                     continue;
                 ptype = 4;
             }
-            SetPropInfo(line_num, (uint16)prop_num, (PropType)ptype, (RenderType)rtype, nCurrentCategory, fCurrentVisibleRatio, strPropName, sflag);
+            SetPropInfo(line_num, (uint16_t)prop_num, (PropType)ptype, (RenderType)rtype, nCurrentCategory, fCurrentVisibleRatio, strPropName, sflag);
         }
     }
     return true;
@@ -145,15 +145,15 @@ bool TerrainPropInfo::CheckPropFileType(std::string rname, std::string szTail)
     return rname.find(szTail) != std::string::npos;
 }
 
-void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16 /*wPropNum*/, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
+void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16_t /*wPropNum*/, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
 {
-    PropInfo p{ };
-    p.nLineIndex    = nLineIndex;
-    p.Type          = propType;
-    p.mRenderType   = renderType;
-    p.nCategory     = nCategory;
+    PropInfo p{};
+    p.nLineIndex = nLineIndex;
+    p.Type = propType;
+    p.mRenderType = renderType;
+    p.nCategory = nCategory;
     p.fVisibleRatio = fVisibleRatio;
-    p.strName       = std::move(rName);
-    p.nShadowFlag   = nShadowFlag;
+    p.strName = std::move(rName);
+    p.nShadowFlag = nShadowFlag;
     m_pPropInfo.emplace_back(p);
 }

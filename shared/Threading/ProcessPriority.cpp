@@ -28,7 +28,7 @@
 #define PROCESS_HIGH_PRIORITY -15 // [-20, 19], default is 0
 #endif
 
-void SetProcessPriority(std::string const &logChannel, uint32 affinity, bool highPriority)
+void SetProcessPriority(std::string const &logChannel, uint32_t affinity, bool highPriority)
 {
     ///- Handle affinity for multiple processors and process priority
 #ifdef _WIN32 // Windows

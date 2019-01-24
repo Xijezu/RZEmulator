@@ -27,90 +27,91 @@
 #include "Monster.h"
 #include <unordered_map>
 
-typedef std::unordered_map<uint32, Object *> UpdateMap;
+typedef std::unordered_map<uint32_t, Object *> UpdateMap;
 class MemoryPoolMgr
 {
-    public:
-        ~MemoryPoolMgr() = default;
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        MemoryPoolMgr(const MemoryPoolMgr &) = delete;
-        MemoryPoolMgr &operator=(const MemoryPoolMgr &) = delete;
+  public:
+    ~MemoryPoolMgr() = default;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    MemoryPoolMgr(const MemoryPoolMgr &) = delete;
+    MemoryPoolMgr &operator=(const MemoryPoolMgr &) = delete;
 
-        static MemoryPoolMgr &Instance()
+    static MemoryPoolMgr &Instance()
+    {
+        static MemoryPoolMgr instance;
+        return instance;
+    }
+
+    template <class T>
+    T *GetObjectInWorld(uint handle)
+    {
+        uint idbase = handle & 0xE0000000;
+        switch (idbase)
         {
-            static MemoryPoolMgr instance;
-            return instance;
+        case 0x00000000:
+            return dynamic_cast<T *>(HashMapHolder<Item>::Find(handle));
+        case 0x20000000:
+            return dynamic_cast<T *>(HashMapHolder<Object>::Find(handle));
+        case 0x40000000:
+            return dynamic_cast<T *>(HashMapHolder<Monster>::Find(handle));
+        case 0x80000000:
+            return dynamic_cast<T *>(HashMapHolder<Player>::Find(handle));
+        case 0xC0000000:
+            return dynamic_cast<T *>(HashMapHolder<Summon>::Find(handle));
+        default:
+            return nullptr;
         }
+    }
 
-        template<class T>
-        T *GetObjectInWorld(uint handle)
-        {
-            uint idbase = handle & 0xE0000000;
-            switch (idbase)
-            {
-                case 0x00000000:
-                    return dynamic_cast<T *>(HashMapHolder<Item>::Find(handle));
-                case 0x20000000:
-                    return dynamic_cast<T *>(HashMapHolder<Object>::Find(handle));
-                case 0x40000000:
-                    return dynamic_cast<T *>(HashMapHolder<Monster>::Find(handle));
-                case 0x80000000:
-                    return dynamic_cast<T *>(HashMapHolder<Player>::Find(handle));
-                case 0xC0000000:
-                    return dynamic_cast<T *>(HashMapHolder<Summon>::Find(handle));
-                default:
-                    return nullptr;
-            }
-        }
+    template <class T>
+    void RemoveObject(T *object)
+    {
+        HashMapHolder<T>::Remove(object);
+    }
 
-        template<class T>
-        void RemoveObject(T *object)
-        {
-            HashMapHolder<T>::Remove(object);
-        }
+    template <class T>
+    void AddObject(T *object)
+    {
+        HashMapHolder<T>::Insert(object);
+        if (!object->IsItem() && !object->IsFieldProp())
+            addUpdateQueue.add(object);
+    }
 
-        template<class T>
-        void AddObject(T *object)
-        {
-            HashMapHolder<T>::Insert(object);
-            if (!object->IsItem() && !object->IsFieldProp())
-                addUpdateQueue.add(object);
-        }
+    Item *AllocItem();
+    Item *AllocGold(int64_t gold, GenerateCode gcode);
+    void AllocMiscHandle(Object *obj);
+    void AllocItemHandle(Item *item);
+    Player *AllocPlayer();
+    Summon *AllocSummon(uint);
+    Monster *AllocMonster(uint idx);
+    Summon *AllocNewSummon(Player *, Item *);
 
-        Item *AllocItem();
-        Item *AllocGold(int64 gold, GenerateCode gcode);
-        void AllocMiscHandle(Object *obj);
-        void AllocItemHandle(Item *item);
-        Player *AllocPlayer();
-        Summon *AllocSummon(uint);
-        Monster *AllocMonster(uint idx);
-        Summon *AllocNewSummon(Player *, Item *);
+    void Destroy();
+    void Update(uint diff);
+    // when using this, you must use the HashMapHolders lock!
+    const HashMapHolder<Player>::MapType &GetPlayers();
 
-        void Destroy();
-        void Update(uint diff);
-        // when using this, you must use the HashMapHolders lock!
-        const HashMapHolder<Player>::MapType &GetPlayers();
-    private:
-        template<class T>
-        void _unload();
-        void AddToDeleteList(Object *obj);
-        std::set<Object *>    i_objectsToRemove{ };
-        LockedQueue<Object *> addUpdateQueue;
+  private:
+    template <class T>
+    void _unload();
+    void AddToDeleteList(Object *obj);
+    std::set<Object *> i_objectsToRemove{};
+    LockedQueue<Object *> addUpdateQueue;
 
-        UpdateMap i_objectsToUpdate{ };
+    UpdateMap i_objectsToUpdate{};
 
-        uint32_t m_nMiscTop{0x20000001};
-        uint32_t m_nMonsterTop{0x40000001};
-        uint32_t m_nPlayerTop{0x80000001};
-        uint32_t m_nSummonTop{0xC0000001};
+    uint32_t m_nMiscTop{0x20000001};
+    uint32_t m_nMonsterTop{0x40000001};
+    uint32_t m_nPlayerTop{0x80000001};
+    uint32_t m_nSummonTop{0xC0000001};
 #if EPIC >= EPIC_5_1
-        uint32_t m_nPetTop{0xE0000001};
+    uint32_t m_nPetTop{0xE0000001};
 #endif
-        uint32_t m_nItemTop{0x00000001};
+    uint32_t m_nItemTop{0x00000001};
 
-    protected:
-        MemoryPoolMgr() = default;
+  protected:
+    MemoryPoolMgr() = default;
 };
 
 #define sMemoryPool MemoryPoolMgr::Instance()

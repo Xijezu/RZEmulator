@@ -98,7 +98,7 @@ class Unit : public WorldObject
     void RemoveFromWorld() override;
     void CleanupBeforeRemoveFromMap(bool finalCleanup);
     void CleanupsBeforeDelete(bool finalCleanup = true);
-    void Update(uint32 time) override;
+    void Update(uint32_t time) override;
     virtual void OnUpdate();
 
     bool AddToEnemyList(uint32_t handle);
@@ -116,7 +116,7 @@ class Unit : public WorldObject
     virtual bool StartAttack(uint target, bool bNeedFastReaction);
     bool IsUsingDoubleWeapon() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON); }
 
-    int32 GetPrevJobId(int nDepth) const
+    int32_t GetPrevJobId(int nDepth) const
     {
         if (nDepth > 3)
             return 0;
@@ -124,7 +124,7 @@ class Unit : public WorldObject
             return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth);
     }
 
-    int32 GetPrevJobLv(int nDepth) const
+    int32_t GetPrevJobLv(int nDepth) const
     {
         if (nDepth > 3)
             return 0;
@@ -134,7 +134,7 @@ class Unit : public WorldObject
 
     void regenHPMP(uint t);
 
-    uint32 HasUnitTypeMask(uint32 mask) const { return mask & m_unitTypeMask; }
+    uint32_t HasUnitTypeMask(uint32_t mask) const { return mask & m_unitTypeMask; }
 
     /// BATTLE START
     void Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
@@ -226,7 +226,7 @@ class Unit : public WorldObject
     void RemoveGoodState(int state_level);
 
     // Setters
-    void SetLevel(uint8 lvl)
+    void SetLevel(uint8_t lvl)
     {
         SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int>(lvl));
     }
@@ -301,12 +301,12 @@ class Unit : public WorldObject
         return false;
     }
 
-    void SetMaxHealth(uint32 val)
+    void SetMaxHealth(uint32_t val)
     {
         SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val);
     };
 
-    void SetMaxMana(uint32 val)
+    void SetMaxMana(uint32_t val)
     {
         SetUInt32Value(UNIT_FIELD_MAX_MANA, val);
     };
@@ -316,7 +316,7 @@ class Unit : public WorldObject
         SetHealth(GetMaxHealth());
     }
 
-    void SetEXP(int64 exp);
+    void SetEXP(int64_t exp);
 
     int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
 
@@ -414,7 +414,7 @@ class Unit : public WorldObject
         return GetInt32Value(UNIT_FIELD_JOBPOINT);
     }
 
-    uint32 GetTotalJP() const
+    uint32_t GetTotalJP() const
     {
         return GetUInt32Value(UNIT_FIELD_JOBPOINT);
     }
@@ -426,9 +426,9 @@ class Unit : public WorldObject
 
     float GetItemChance() const;
 
-    int64 GetEXP() const
+    int64_t GetEXP() const
     {
-        return static_cast<int64>(GetUInt64Value(UNIT_FIELD_EXP));
+        return static_cast<int64_t>(GetUInt64Value(UNIT_FIELD_EXP));
     }
 
     virtual uint GetCreatureGroup() const;
@@ -443,13 +443,13 @@ class Unit : public WorldObject
         SetMana(GetMana() + mp);
     }
 
-    virtual void AddEXP(int64 exp, uint jp, bool bApplyStamina);
+    virtual void AddEXP(int64_t exp, uint jp, bool bApplyStamina);
     void CancelSkill();
     void CancelAttack();
-    int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem);
+    int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8_t layer, bool bIsCastedByItem);
     bool OnCompleteSkill();
     void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time);
-    void SetMove(Position _to, uint8 _speed, uint _start_time);
+    void SetMove(Position _to, uint8_t _speed, uint _start_time);
     int GetArmorClass() const;
     // Event handler
     bool IsWornByCode(int code) const;
@@ -488,18 +488,18 @@ class Unit : public WorldObject
 
     void CalculateStat();
 
-    uint16 AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura = false, int nStateValue = 0, std::string szStateValue = "");
+    uint16_t AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura = false, int nStateValue = 0, std::string szStateValue = "");
 
   protected:
-    uint16 onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
+    uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
 
     virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
     virtual void procStateDamage(uint t);
 
-    int64 GetBulletCount() const;
+    int64_t GetBulletCount() const;
     State *GetStateByEffectType(int effectType) const;
 
-    virtual void onRegisterSkill(int64, int, int, int){};
+    virtual void onRegisterSkill(int64_t, int, int, int){};
 
     virtual void onExpChange(){};
 
@@ -561,7 +561,7 @@ class Unit : public WorldObject
 
     void _InitTimerFieldsAndStatus();
     std::vector<State *> m_vStateList{};
-    uint32 m_unitTypeMask;
+    uint32_t m_unitTypeMask;
     //	typedef std::list<GameObject*> GameObjectList;
     //	GameObjectList m_gameObj;
 

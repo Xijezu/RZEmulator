@@ -77,7 +77,7 @@ class AuthNetwork
         }
     }
 
-    bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port)
+    bool InitializeNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port)
     {
         NG_UNIQUE_GUARD _guard(_mutex);
         boost::asio::ip::tcp_endpoint endpoint(boost::asio::ip::make_address_v4(bindIp), port);
@@ -108,7 +108,7 @@ class AuthNetwork
         return true;
     }
 
-    void SendAccountToAuth(WorldSession &session, const std::string &login_name, uint64 one_time_key)
+    void SendAccountToAuth(WorldSession &session, const std::string &login_name, uint64_t one_time_key)
     {
         NG_UNIQUE_GUARD _guard(_mutex);
         m_pSocket->AccountToAuth(&session, login_name, one_time_key);
@@ -124,7 +124,7 @@ class AuthNetwork
     bool m_bClosed;
     std::shared_ptr<GameAuthSession> m_pSocket;
     std::unique_ptr<std::thread> m_pThread;
-    std::atomic<uint32> m_nLastPingTime;
+    std::atomic<uint32_t> m_nLastPingTime;
     std::unique_ptr<NetworkThread> m_pNetworkThread;
     NG_SHARED_MUTEX _mutex;
 

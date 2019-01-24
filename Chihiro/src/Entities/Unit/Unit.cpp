@@ -98,7 +98,7 @@ void Unit::CleanupsBeforeDelete(bool finalCleanup)
 {
 }
 
-void Unit::Update(uint32 p_time)
+void Unit::Update(uint32_t p_time)
 {
     if (!IsInWorld())
         return;
@@ -160,7 +160,7 @@ void Unit::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _sta
     lastStepTime = start_time;
 }
 
-void Unit::SetMove(Position _to, uint8 _speed, uint _start_time)
+void Unit::SetMove(Position _to, uint8_t _speed, uint _start_time)
 {
     ArMoveVector::SetMove(_to, _speed, _start_time, sWorld.GetArTime());
     lastStepTime = start_time;
@@ -377,7 +377,7 @@ Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time,
 
         onExpChange();
 
-        int64 nSkillUID = 0;
+        int64_t nSkillUID = 0;
         int nPrevLevel = GetBaseSkillLevel(skill_id);
         if (nPrevLevel == 0)
         {
@@ -429,7 +429,7 @@ void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_coo
         pSkill->m_nNextCoolTime = remain_cool_time + sWorld.GetArTime();
 }
 
-int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8 layer, bool bIsCastedByItem)
+int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8_t layer, bool bIsCastedByItem)
 {
     auto player = dynamic_cast<Player *>(this);
     Summon *summon{nullptr};
@@ -1380,7 +1380,7 @@ int Unit::damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead)
 
 void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int tm, int delay, bool bIsDoubleAttack, bool bIsAiming, bool bEndAttack, bool bCancelAttack)
 {
-    uint8 attack_count = 1;
+    uint8_t attack_count = 1;
     if (bEndAttack || bCancelAttack)
         attack_count = 0;
 
@@ -1500,7 +1500,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     m_vStateList.clear();
 }
 
-void Unit::AddEXP(int64 exp, uint jp, bool bApplyStamina)
+void Unit::AddEXP(int64_t exp, uint jp, bool bApplyStamina)
 {
     SetUInt64Value(UNIT_FIELD_EXP, GetEXP() + exp);
     SetUInt32Value(UNIT_FIELD_JOBPOINT, GetJP() + jp);
@@ -1698,7 +1698,7 @@ float Unit::GetItemChance() const
     return m_Attribute.nItemChance;
 }
 
-uint16 Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
+uint16_t Unit::AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura, int nStateValue, std::string szStateValue)
 {
     SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_UPDATE_STATE);
     auto stateInfo = sObjectMgr.GetStateInfo(code);
@@ -1919,7 +1919,7 @@ void Unit::onUpdateState(State *state, bool bIsExpire)
     Messages::BroadcastStateMessage(this, state, bIsExpire);
 }
 
-uint16 Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter)
+uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter)
 {
     uint16_t result{TS_RESULT_SUCCESS};
 
@@ -2229,7 +2229,7 @@ void Unit::SetJP(int jp)
         onExpChange();
 }
 
-void Unit::SetEXP(int64 exp)
+void Unit::SetEXP(int64_t exp)
 {
     SetUInt64Value(UNIT_FIELD_EXP, exp);
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
@@ -2263,7 +2263,7 @@ int Unit::Heal(int hp)
     return heal;
 }
 
-int64 Unit::GetBulletCount() const
+int64_t Unit::GetBulletCount() const
 {
     auto item = m_anWear[WEAR_SHIELD];
     if (item != nullptr && item->m_pItemBase->group == GROUP_BULLET)
@@ -2293,7 +2293,7 @@ void Unit::procStateDamage(uint t)
             {
                 if (st->m_nCode != StateCode::SC_GAIA_MEMBER_SHIP && st->m_nCode != StateCode::SC_NEMESIS && st->m_nCode != StateCode::SC_NEMESIS_FOR_AUTO && st->m_nCode != StateCode::SC_FALL_FROM_SUMMON && st->IsHarmful())
                 {
-                    st->AddState(StateType::SG_NORMAL, st->m_hCaster[0], (uint16)st->m_nLevel[0], st->m_nStartTime[0], (uint)(t - 1), st->m_nBaseDamage[0], false);
+                    st->AddState(StateType::SG_NORMAL, st->m_hCaster[0], (uint16_t)st->m_nLevel[0], st->m_nStartTime[0], (uint)(t - 1), st->m_nBaseDamage[0], false);
                     onUpdateState(st, false);
                     continue;
                 }

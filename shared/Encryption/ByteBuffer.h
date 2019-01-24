@@ -104,7 +104,7 @@ class ByteBuffer
     {
         FlushBits();
         EndianConvert(value);
-        append((uint8 *)&value, sizeof(value));
+        append((uint8_t *)&value, sizeof(value));
     }
 
     void FlushBits()
@@ -112,7 +112,7 @@ class ByteBuffer
         if (_bitpos == 8)
             return;
 
-        append((uint8 *)&_curbitval, sizeof(uint8));
+        append((uint8_t *)&_curbitval, sizeof(uint8_t));
         _curbitval = 0;
         _bitpos = 8;
     }
@@ -121,7 +121,7 @@ class ByteBuffer
     void put(size_t pos, T value)
     {
         EndianConvert(value);
-        put(pos, (uint8 *)&value, sizeof(value));
+        put(pos, (uint8_t *)&value, sizeof(value));
     }
 
     /**
@@ -137,7 +137,7 @@ class ByteBuffer
         * @param  bitCount Number of bits to store the value on.
        */
     template <typename T>
-    void PutBits(size_t pos, T value, uint32 bitCount)
+    void PutBits(size_t pos, T value, uint32_t bitCount)
     {
         if (!bitCount)
             throw ByteBufferSourceException((pos + bitCount) / 8, size(), 0);
@@ -145,7 +145,7 @@ class ByteBuffer
         if (pos + bitCount > size() * 8)
             throw ByteBufferPositionException(false, (pos + bitCount) / 8, size(), (bitCount - 1) / 8 + 1);
 
-        for (uint32 i = 0; i < bitCount; ++i)
+        for (uint32_t i = 0; i < bitCount; ++i)
         {
             size_t wp = (pos + i) / 8;
             size_t bit = (pos + i) % 8;
@@ -167,8 +167,8 @@ class ByteBuffer
     ByteBuffer &operator<<(const std::string &value)
     {
         if (size_t len = value.length())
-            append((uint8 const *)value.c_str(), len);
-        append((uint8)0);
+            append((uint8_t const *)value.c_str(), len);
+        append((uint8_t)0);
         return *this;
     }
 
@@ -201,14 +201,14 @@ class ByteBuffer
         return *this;
     }
 
-    uint8 &operator[](size_t const pos)
+    uint8_t &operator[](size_t const pos)
     {
         if (pos >= size())
             throw ByteBufferPositionException(false, pos, 1, size());
         return _storage[pos];
     }
 
-    uint8 const &operator[](size_t const pos) const
+    uint8_t const &operator[](size_t const pos) const
     {
         if (pos >= size())
             throw ByteBufferPositionException(false, pos, 1, size());
@@ -264,7 +264,7 @@ class ByteBuffer
         return val;
     }
 
-    void read(uint8 *dest, size_t len)
+    void read(uint8_t *dest, size_t len)
     {
         if (_rpos + len > size())
             throw ByteBufferPositionException(false, _rpos, len, size());
@@ -272,12 +272,12 @@ class ByteBuffer
         _rpos += len;
     }
 
-    std::string ReadString(uint32 length)
+    std::string ReadString(uint32_t length)
     {
         if (!length)
             return std::string();
         char *buffer = new char[length + 1]();
-        read((uint8 *)buffer, length);
+        read((uint8_t *)buffer, length);
         std::string retval = buffer;
         delete[] buffer;
         return retval;
@@ -298,15 +298,15 @@ class ByteBuffer
         {
             while (src.length() < cnt)
             {
-                append<uint8>(0);
+                append<uint8_t>(0);
                 --cnt;
             }
         }
     }
 
-    uint8 *contents() { return &_storage[0]; }
+    uint8_t *contents() { return &_storage[0]; }
 
-    const uint8 *contents() const { return &_storage[0]; }
+    const uint8_t *contents() const { return &_storage[0]; }
 
     size_t size() const { return _storage.size(); }
 
@@ -327,16 +327,16 @@ class ByteBuffer
 
     void append(const char *src, size_t cnt)
     {
-        return append((const uint8 *)src, cnt);
+        return append((const uint8_t *)src, cnt);
     }
 
     template <class T>
     void append(const T *src, size_t cnt)
     {
-        return append((const uint8 *)src, cnt * sizeof(T));
+        return append((const uint8_t *)src, cnt * sizeof(T));
     }
 
-    void append(const uint8 *src, size_t cnt)
+    void append(const uint8_t *src, size_t cnt)
     {
         if (!cnt)
             return;
@@ -360,7 +360,7 @@ class ByteBuffer
             append(buffer.contents(), buffer.wpos());
     }
 
-    void put(size_t pos, const uint8 *src, size_t cnt)
+    void put(size_t pos, const uint8_t *src, size_t cnt)
     {
         if (pos + cnt > size())
             throw ByteBufferPositionException(true, pos, cnt, size());
@@ -377,14 +377,14 @@ class ByteBuffer
 
   protected:
     size_t _rpos, _wpos, _bitpos;
-    uint8 _curbitval;
-    std::vector<uint8> _storage;
+    uint8_t _curbitval;
+    std::vector<uint8_t> _storage;
 };
 
 template <typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {
-    b << (uint32)v.size();
+    b << (uint32_t)v.size();
     for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i)
     {
         b << *i;
@@ -395,7 +395,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 template <typename T>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 {
-    uint32 vsize;
+    uint32_t vsize;
     b >> vsize;
     v.clear();
     while (vsize--)
@@ -410,7 +410,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 template <typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 {
-    b << (uint32)v.size();
+    b << (uint32_t)v.size();
     for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i)
     {
         b << *i;
@@ -421,7 +421,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 template <typename T>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
 {
-    uint32 vsize;
+    uint32_t vsize;
     b >> vsize;
     v.clear();
     while (vsize--)
@@ -436,7 +436,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
 template <typename K, typename V>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 {
-    b << (uint32)m.size();
+    b << (uint32_t)m.size();
     for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); ++i)
     {
         b << i->first << i->second;
@@ -447,7 +447,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 template <typename K, typename V>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
 {
-    uint32 msize;
+    uint32_t msize;
     b >> msize;
     m.clear();
     while (msize--)

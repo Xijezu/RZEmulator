@@ -24,7 +24,7 @@
 
 GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket))
 {
-    m_nGameIDX = (uint16)sConfigMgr->GetIntDefault("GameServer.Index", 1);
+    m_nGameIDX = (uint16_t)sConfigMgr->GetIntDefault("GameServer.Index", 1);
     m_szGameName = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
     m_szGameSSU = sConfigMgr->GetStringDefault("GameServer.SSU", "about:blank");
     m_bGameIsAdultServer = sConfigMgr->GetIntDefault("GameServer.AdultServer", 0) != 0;
@@ -97,7 +97,7 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
     }
 }
 
-void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey)
+void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64_t nOneTimeKey)
 {
     m_queue[szLoginName] = pSession;
     TS_GA_CLIENT_LOGIN loginPct{};
@@ -123,7 +123,7 @@ void GameAuthSession::OnClose()
 
 void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 {
-    auto result = pRecvPct->read<uint16>();
+    auto result = pRecvPct->read<uint16_t>();
     if (result != TS_RESULT_SUCCESS)
     {
         NG_LOG_ERROR("network", "Authserver refused login! Shutting down...");

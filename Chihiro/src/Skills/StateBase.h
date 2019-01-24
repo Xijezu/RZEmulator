@@ -296,13 +296,13 @@ struct StateTemplate
     int state_id;
     int text_id;
     int tooltip_id;
-    uint8 is_harmful;
+    uint8_t is_harmful;
     int state_time_type;
     int state_group;
     int duplicate_group[3]{0};
-    uint8 uf_avatar;
-    uint8 uf_summon;
-    uint8 uf_monster;
+    uint8_t uf_avatar;
+    uint8_t uf_summon;
+    uint8_t uf_monster;
     int base_effect_id;
     int fire_interval;
     int elemental_type;

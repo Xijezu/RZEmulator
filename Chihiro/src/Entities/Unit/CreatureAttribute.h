@@ -23,9 +23,9 @@ struct TS_SC_STAT_INFO;
 
 struct CreatureElementalResist
 {
-    uint16 nResist[7];
+    uint16_t nResist[7];
 
-    void Reset(uint16 v)
+    void Reset(uint16_t v)
     {
         for (unsigned short &i : nResist)
         {

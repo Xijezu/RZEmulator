@@ -43,11 +43,11 @@ bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
 
 bool GameContent::LearnAllSkill(Player *pPlayer)
 {
-    auto     depth = pPlayer->GetJobDepth();
-    for (int i     = 0; i <= depth; ++i)
+    auto depth = pPlayer->GetJobDepth();
+    for (int i = 0; i <= depth; ++i)
     {
-        int  nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
-        auto tree     = sObjectMgr.getSkillTree(nCurrJob);
+        int nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
+        auto tree = sObjectMgr.getSkillTree(nCurrJob);
         if (tree.empty())
             continue;
 
@@ -57,8 +57,8 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
             pPlayer->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
         for (auto &s : tree)
         {
-            auto currSkill      = pPlayer->GetSkill(s.skill_id);
-            int  currSkillLevel = 0;
+            auto currSkill = pPlayer->GetSkill(s.skill_id);
+            int currSkillLevel = 0;
             if (currSkill != nullptr)
                 currSkillLevel = currSkill->m_nSkillLevel;
 
@@ -79,11 +79,11 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
 bool GameContent::IsInRandomPoolMonster(int group_id, int monster_id)
 {
     bool result{false};
-//             ArMoveVector::MOVE_INFO *v3; // eax@11
-//             ArMoveVector::MOVE_INFO *v4; // eax@14
-//             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
-//             std::_Vector_iterator<GameContent::RANDOM_POOL_INFO,std::allocator<GameContent::RANDOM_POOL_INFO> > itRandom; // [sp+10h] [bp-10h]@8
-//             std::_Vector_iterator<RANDOM_POOL,std::allocator<RANDOM_POOL> > it; // [sp+18h] [bp-8h]@5
+    //             ArMoveVector::MOVE_INFO *v3; // eax@11
+    //             ArMoveVector::MOVE_INFO *v4; // eax@14
+    //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
+    //             std::_Vector_iterator<GameContent::RANDOM_POOL_INFO,std::allocator<GameContent::RANDOM_POOL_INFO> > itRandom; // [sp+10h] [bp-10h]@8
+    //             std::_Vector_iterator<RANDOM_POOL,std::allocator<RANDOM_POOL> > it; // [sp+18h] [bp-8h]@5
 
     if (group_id == monster_id)
     {
@@ -93,7 +93,7 @@ bool GameContent::IsInRandomPoolMonster(int group_id, int monster_id)
     {
         if (group_id < 0)
         {
-/*
+            /*
                     std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
                         &this,
                         dword_64F594,
@@ -143,7 +143,7 @@ bool GameContent::IsInRandomPoolMonster(int group_id, int monster_id)
     return result;
 }
 
-NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8 layer)
+NPC *GameContent::GetNewNPC(NPCTemplate *npc_info, uint8_t layer)
 {
     auto npc = new NPC{npc_info};
     npc->SetLayer(layer);
@@ -169,17 +169,17 @@ void GameContent::AddNPCToWorld()
     }
 }
 
-bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount)
+bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64_t &nItemCount)
 {
-    nItemID    = 0;
+    nItemID = 0;
     nItemCount = 1;
 
-    auto dg    = sObjectMgr.GetDropGroupInfo(nDropGroupID);
+    auto dg = sObjectMgr.GetDropGroupInfo(nDropGroupID);
     if (dg != nullptr)
     {
-        int      cp = 0;
-        int      p  = irand(1, 100000000);
-        for (int i  = 0; i < MAX_DROP_GROUP; ++i)
+        int cp = 0;
+        int p = irand(1, 100000000);
+        for (int i = 0; i < MAX_DROP_GROUP; ++i)
         {
             cp += dg->drop_percentage[i];
             if (p <= cp)
@@ -187,22 +187,22 @@ bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int6
                 // temporary workaround for dropgroup
                 if (dg->drop_item_id[i] > 0 && sObjectMgr.GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
                     continue;
-                nItemID    = dg->drop_item_id[i];
+                nItemID = dg->drop_item_id[i];
                 nItemCount = 1;
                 return true;
             }
         }
     }
-    nItemID    = 0;
+    nItemID = 0;
     nItemCount = 1;
     return false;
 }
 
-int64 GameContent::GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying)
+int64_t GameContent::GetItemSellPrice(int64_t price, int rank, int lv, bool same_price_for_buying)
 {
-    int64 k;
+    int64_t k;
     float f[8]{0};
-    int   i;
+    int i;
 
     k = price;
     if (rank <= 8)
@@ -224,16 +224,16 @@ int64 GameContent::GetItemSellPrice(int64 price, int rank, int lv, bool same_pri
                 {
                     if (rank == 2)
                     {
-                        k += (int64)((k * 0.4f * 0.01f) * 100);
+                        k += (int64_t)((k * 0.4f * 0.01f) * 100);
                     }
                     else
                     {
-                        k += (int64)((f[rank] * k * 0.001f) * 1000);
+                        k += (int64_t)((f[rank] * k * 0.001f) * 1000);
                     }
                 }
                 else
                 {
-                    k += (int64)((k * 1.35f * 0.1f) * 10);
+                    k += (int64_t)((k * 1.35f * 0.1f) * 10);
                 }
                 --i;
             } while (i > 0);
@@ -253,8 +253,8 @@ Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bo
     {
         mob->SetCurrentXY(x, y);
         mob->SetLayer(layer);
-        mob->m_pDeleteHandler    = pDeleteHandler;
-        mob->m_bIsWandering      = is_wandering;
+        mob->m_pDeleteHandler = pDeleteHandler;
+        mob->m_bIsWandering = is_wandering;
         if (way_point_id != 0)
             mob->m_pWayPointInfo = sObjectMgr.GetWayPoint(way_point_id);
         mob->SetRespawnPosition({x, y, 0});
@@ -266,8 +266,8 @@ Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bo
 
 ushort GameContent::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
 {
-    ushort   ilsResult = TS_RESULT_ACCESS_DENIED;
-    for (int i         = 0; i < 4; ++i)
+    ushort ilsResult = TS_RESULT_ACCESS_DENIED;
+    for (int i = 0; i < 4; ++i)
     {
         if (pUnit->GetPrevJobLv(i) != 0)
         {
@@ -283,7 +283,7 @@ ushort GameContent::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
     }
     if (ilsResult == TS_RESULT_ACCESS_DENIED || ilsResult == TS_RESULT_LIMIT_MAX || ilsResult == TS_RESULT_NOT_ENOUGH_JOB_LEVEL)
     {
-        ilsResult  = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
+        ilsResult = isLearnableSkill(pUnit, skill_id, skill_level, pUnit->GetCurrentJob(), pUnit->GetCurrentJLv());
         if (ilsResult == TS_RESULT_SUCCESS)
             job_id = pUnit->GetCurrentJob();
     }
@@ -293,7 +293,7 @@ ushort GameContent::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
 ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
 {
     bool bMaxLimit = false;
-    bool bFound    = false;
+    bool bFound = false;
 
     auto st = sObjectMgr.getSkillTree(nJobID);
     if (st.empty())
@@ -320,7 +320,7 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
                             return TS_RESULT_NOT_ENOUGH_SKILL;
                         }
                     }
-                    auto     sb  = sObjectMgr.GetSkillBase(skill_id);
+                    auto sb = sObjectMgr.GetSkillBase(skill_id);
                     if (sb->id == 0)
                         return TS_RESULT_ACCESS_DENIED;
 
@@ -349,19 +349,19 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
 
 int GameContent::GetLocationID(const float x, const float y)
 {
-    int         loc_id   = 0;
-    int         priority = 0x7fffffff;
-    X2D::Pointf pt{ };
+    int loc_id = 0;
+    int priority = 0x7fffffff;
+    X2D::Pointf pt{};
     pt.x = x;
     pt.y = y;
-    X2D::QuadTreeMapInfo::FunctorAdaptor fn{ };
+    X2D::QuadTreeMapInfo::FunctorAdaptor fn{};
     sMapContent.g_qtLocationInfo->Enum(pt, fn);
 
     for (auto &info : fn.pResult)
     {
         if (info.priority < priority)
         {
-            loc_id   = info.location_id;
+            loc_id = info.location_id;
             priority = info.priority;
         }
     }

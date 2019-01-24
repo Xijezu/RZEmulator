@@ -49,18 +49,18 @@ public:
 
   friend struct SkillTargetFunctor;
   Skill() = delete;
-  Skill(Unit *pOwner, int64 _uid, int _id);
+  Skill(Unit *pOwner, int64_t _uid, int _id);
   // Deleting the copy & assignment operators
   // Better safe than sorry
   Skill(const Skill &) = delete;
   Skill &operator=(const Skill &) = delete;
   // Replace statement - acts as insert and update
-  static void DB_InsertSkill(Unit *pUnit, int64 skillUID, int skill_id,
+  static void DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id,
                              int skill_level, int cool_time);
   // skills
   static void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess,
                              int nSuccessType, uint handle);
-  static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8 type,
+  static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
                                    int damageType, DamageInfo damageInfo,
                                    uint handle);
   static void AddSkillDamageWithKnockBackResult(
@@ -75,7 +75,7 @@ public:
       const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList,
       bool bEnemyOnly = true);
 
-  int Cast(int nSkillLevel, uint handle, Position pos, uint8 layer,
+  int Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer,
            bool bIsCastedByItem);
 
   int GetSkillId() const { return GetSkillBase()->GetID(); }
@@ -99,7 +99,7 @@ public:
   void SetRemainCoolTime(uint time);
   void SetRequestedSkillLevel(int nLevel);
 
-  int64 m_nSkillUID;
+  int64_t m_nSkillUID;
   Unit *m_pOwner{nullptr};
   int m_nSummonID;
   int m_nSkillID;
@@ -115,14 +115,14 @@ public:
                              int cost_mp, int nType);
 
   // For processing skill
-  uint8 m_nRequestedSkillLevel;
+  uint8_t m_nRequestedSkillLevel;
 
 private:
   Position m_targetPosition{};
   float m_fRange;
   uint m_nCastingDelay;
   uint m_nEnhance{};
-  uint16 m_nErrorCode{};
+  uint16_t m_nErrorCode{};
   uint m_hTarget{};
   uint m_nCastTime{};
   uint m_nNextCoolTime{};
@@ -161,8 +161,8 @@ private:
   void PostFireSkill(Unit *pTarget);
   Position GetMovableKnockBackPosition(Position &OriginalPos,
                                        Position &TargetPos);
-  uint16 PrepareSummon(uint handle, Position pos);
-  uint16 PrepareTaming(uint handle);
+  uint16_t PrepareSummon(uint handle, Position pos);
+  uint16_t PrepareTaming(uint handle);
 
   void PHYSICAL_SINGLE_DAMAGE(Unit *pTarget);
   void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);

@@ -67,7 +67,7 @@ struct QuestBase
     int       nLimitLevel;
     int       nLimitJobLevel;
     int       nLimitMaxLevel;
-    uint8     nLimitIndication;
+    uint8_t     nLimitIndication;
     uint      LimitFlag;
     int       nLimitJob;
     int       nLimitFavor;
@@ -80,9 +80,9 @@ struct QuestBase
     int       nDropGroupID;
     int       nQuestDifficulty;
     int       nFavor;
-    int64     nEXP;
+    int64_t     nEXP;
     int       nJP;
-    int64     nGold;
+    int64_t     nGold;
     Reward    DefaultReward;
     Reward    OptionalReward[MAX_OPTIONAL_REWARD];
     int       nForeQuest[MAX_FOREQUEST];

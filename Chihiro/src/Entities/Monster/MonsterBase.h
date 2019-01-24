@@ -130,7 +130,7 @@ struct HateModifierTag
     int nHate;
 };
 
-enum ATTACK_TYPE_FLAG : uint16
+enum ATTACK_TYPE_FLAG : uint16_t
 {
     AT_FIRST_ATTACK = 0x1,
     AT_GROUP_FIRST_ATTACK = 0x2,
@@ -163,7 +163,7 @@ struct MonsterRespawnInfo
     float top;
     float right;
     float bottom;
-    uint8 layer;
+    uint8_t layer;
     uint monster_id;
     uint max_num;
     uint inc;

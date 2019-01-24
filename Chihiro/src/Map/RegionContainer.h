@@ -43,9 +43,9 @@ class RegionContainer
         RegionContainer &operator=(const RegionContainer &) = delete;
 
         void InitRegion(float map_width, float map_height);
-        bool IsValidRegion(uint rx, uint ry, uint8 layer);
+        bool IsValidRegion(uint rx, uint ry, uint8_t layer);
         Region *GetRegion(WorldObject *pObject);
-        Region *GetRegion(uint rx, uint ry, uint8 layer);
+        Region *GetRegion(uint rx, uint ry, uint8_t layer);
         /* Deprecated*/
         void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, RegionFunctor &fn);
         void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, RegionFunctor &fn);
@@ -188,8 +188,8 @@ class RegionContainer
         void deinitRegion();
         RegionBlock *getRegionBlockPtr(uint rcx, uint rcy);
         RegionBlock *getRegionBlock(uint rcx, uint rcy);
-        Region *getRegionPtr(uint rx, uint ry, uint8 layer);
-        Region *getRegion(uint rx, uint ry, uint8 layer);
+        Region *getRegionPtr(uint rx, uint ry, uint8_t layer);
+        Region *getRegion(uint rx, uint ry, uint8_t layer);
 
         float                      m_MapWidth;
         float                      m_MapHeight;

@@ -67,7 +67,7 @@ struct FieldPropRespawnInfo
     int   nPropID;
     float x;
     float y;
-    uint8 layer;
+    uint8_t layer;
     float fZOffset;
     float fRotateX;
     float fRotateY;

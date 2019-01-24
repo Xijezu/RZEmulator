@@ -38,12 +38,12 @@ class Inventory
     Inventory(const Inventory &) = delete;
     Inventory &operator=(const Inventory &) = delete;
 
-    Item *Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB);
-    Item *Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB);
-    bool Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB);
+    Item *Push(Item *item, int64_t cnt, bool bSkipUpdateItemToDB);
+    Item *Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB);
+    bool Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB);
     Item *Find(int code, uint flag, bool bFlag);
     Item *FindByCode(int code);
-    Item *FindBySID(int64 uid);
+    Item *FindBySID(int64_t uid);
     Item *FindByHandle(uint handle);
 
     void SetWeightModifier(float fWeightModifier) { m_fWeightModifier = fWeightModifier; }
@@ -52,7 +52,7 @@ class Inventory
     float GetWeightModifier() const { return m_fWeightModifier; }
 
   private:
-    void setCount(Item *item, int64 newCnt, bool bSkipUpdateItemToDB);
+    void setCount(Item *item, int64_t newCnt, bool bSkipUpdateItemToDB);
     void push(Item *item, bool bSkipUpdateItemToDB);
     void pop(Item *pItem, bool bSkipUpdateItemToDB);
     bool check(Item *pItem);

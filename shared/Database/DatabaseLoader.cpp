@@ -22,12 +22,12 @@
 
 #include <mysqld_error.h>
 
-DatabaseLoader::DatabaseLoader(std::string const &logger, uint32 const /*defaultUpdateMask*/)
-        : _logger(logger), _autoSetup(false), _updateFlags(false)
+DatabaseLoader::DatabaseLoader(std::string const &logger, uint32_t const /*defaultUpdateMask*/)
+    : _logger(logger), _autoSetup(false), _updateFlags(false)
 {
 }
 
-template<class T>
+template <class T>
 DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name)
 {
     //bool constexpr updatesEnabledForThis = false;
@@ -40,21 +40,23 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
             return false;
         }
 
-        uint8 const asyncThreads = uint8(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
+        uint8_t const asyncThreads = uint8_t(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
         if (asyncThreads < 1 || asyncThreads > 32)
         {
             NG_LOG_ERROR(_logger, "%s database: invalid number of worker threads specified. "
-                                  "Please pick a value between 1 and 32.", name.c_str());
+                                  "Please pick a value between 1 and 32.",
+                         name.c_str());
             return false;
         }
 
-        uint8 const synchThreads = uint8(sConfigMgr->GetIntDefault((name + "Database.SynchThreads").c_str(), 1));
+        uint8_t const synchThreads = uint8_t(sConfigMgr->GetIntDefault((name + "Database.SynchThreads").c_str(), 1));
 
         pool.SetConnectionInfo(dbString, asyncThreads, synchThreads);
         if (auto error = pool.Open() != 0)
         {
             NG_LOG_ERROR("sql.driver", "\nDatabasePool %s NOT opened. There were errors opening the MySQL connections. Check your SQLDriverLogFile "
-                                       "for specific errors. Read wiki at https://www.trinitycore.info/display/tc/TrinityCore+Home", name.c_str());
+                                       "for specific errors. Read wiki at https://www.trinitycore.info/display/tc/TrinityCore+Home",
+                         name.c_str());
 
             return false;
         }
@@ -141,4 +143,3 @@ bool DatabaseLoader::Process(std::queue<Predicate> &queue)
 template DatabaseLoader &DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection> &, std::string const &);
 template DatabaseLoader &DatabaseLoader::AddDatabase<CharacterDatabaseConnection>(DatabaseWorkerPool<CharacterDatabaseConnection> &, std::string const &);
 template DatabaseLoader &DatabaseLoader::AddDatabase<GameDatabaseConnection>(DatabaseWorkerPool<GameDatabaseConnection> &, std::string const &);
-

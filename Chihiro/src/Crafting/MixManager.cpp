@@ -44,7 +44,7 @@ void MixManager::RegisterMixInfo(const MixBase &info)
     m_vMixInfo.emplace_back(info);
 }
 
-bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubMaterial, std::vector<uint16> &pCountList)
+bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubMaterial, std::vector<uint16_t> &pCountList)
 {
     if (pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
@@ -100,7 +100,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     uint nRandom = pInfo->fPercentage[nCurrentEnhance] * 100000;
 
     bool bResult = false;
-    if (irand(0, 100000) <= nRandom)
+    if (urand(0, 100000) <= nRandom)
     {
         pMainMaterial->m_Instance.nEnhance += itemEnhance;
         Messages::SendItemMessage(pPlayer, pMainMaterial);
@@ -188,7 +188,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMa
     return false;
 }
 
-bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
     if (pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
@@ -207,7 +207,7 @@ bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial
     return true;
 }
 
-bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
     if (pMainMaterial != nullptr)
     {
@@ -225,8 +225,8 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
         return bResult;
     }
 
-    int64 nRandom = irand(pMixInfo->value[3], pMixInfo->value[4]);
-    int64 nItemCount = 0;
+    int64_t nRandom = irand(pMixInfo->value[3], pMixInfo->value[4]);
+    int64_t nItemCount = 0;
     if (pMixInfo->value[0] < 0)
         nItemCount = nRandom;
     else
@@ -265,7 +265,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
     return bResult;
 }
 
-MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
     for (int i = 0; i < static_cast<int>(m_vMixInfo.size()); i++)
     {
@@ -287,7 +287,7 @@ MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount
     return nullptr;
 }
 
-bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
     bool vCheckInfo[9]{false};
     for (int i = 0; i < SubMaterialCount; ++i)
@@ -311,7 +311,7 @@ bool MixManager::getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vec
     return true;
 }
 
-Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCount)
+Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64_t nItemCount)
 {
     auto retItem = sMemoryPool.GetObjectInWorld<Item>(hItem);
     if (retItem == nullptr)
@@ -340,7 +340,7 @@ Item *MixManager::check_mixable_item(Player *pPlayer, uint hItem, int64 nItemCou
     return retItem;
 }
 
-bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint16 &pItemCount)
+bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint16_t &pItemCount)
 {
     bool bIsCountChecked = false;
     if (info.type[0] == 0)
@@ -543,7 +543,7 @@ bool MixManager::CompatibilityCheck(const int *nSubMaterialCount, std::vector<It
     return true;
 }
 
-bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16> &pCountList)
+bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
     if (pPlayer == nullptr || pMainMaterial == nullptr)
         return false;

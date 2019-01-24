@@ -17,7 +17,7 @@ void MessageSerializerBuffer::writeString(const char *fieldName, const std::stri
     size_t stringSize = std::min(val.size(), maxSize - 1);
     packet->append(val.c_str(), stringSize);
     for (size_t i = stringSize; i < maxSize; i++)
-        packet->append<uint8>(0);
+        packet->append<uint8_t>(0);
 }
 
 void MessageSerializerBuffer::writeDynString(const char *fieldName, const std::string &val, size_t count)
@@ -33,16 +33,16 @@ void MessageSerializerBuffer::readString(const char *fieldName, std::string &val
 }
 
 void MessageSerializerBuffer::readDynString(const char *fieldName,
-        std::string &val,
-        uint32_t sizeToRead,
-        bool hasNullTerminator)
+                                            std::string &val,
+                                            uint32_t sizeToRead,
+                                            bool hasNullTerminator)
 {
     (void)fieldName;
     if (sizeToRead > 0)
     {
         // don't include the null terminator in std::string, else ::size() will be wrong
         val.resize(sizeToRead - hasNullTerminator);
-        packet->read((uint8 *)val.data(), val.size());
+        packet->read((uint8_t *)val.data(), val.size());
         if (hasNullTerminator)
             packet->read_skip(1);
     }
@@ -59,7 +59,7 @@ void MessageSerializerBuffer::readEndString(const char *fieldName, std::string &
     if (remainingSize > 0)
     {
         val.resize(remainingSize - hasNullTerminator);
-        packet->read((uint8 *)val.data(), val.size());
+        packet->read((uint8_t *)val.data(), val.size());
         if (hasNullTerminator)
             packet->read_skip(1);
     }

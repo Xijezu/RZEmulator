@@ -40,7 +40,7 @@ MySQLConnectionInfo::MySQLConnectionInfo(std::string const &infoString)
     if (tokens.size() != 5)
         return;
 
-    uint8 i = 0;
+    uint8_t i = 0;
 
     host.assign(tokens[i++]);
     port_or_socket.assign(tokens[i++]);
@@ -85,7 +85,7 @@ void MySQLConnection::Close()
     }
 }
 
-uint32 MySQLConnection::Open()
+uint32_t MySQLConnection::Open()
 {
     MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
@@ -172,11 +172,11 @@ bool MySQLConnection::Execute(const char *sql)
         return false;
 
     {
-        uint32 _s = getMSTime();
+        uint32_t _s = getMSTime();
 
         if (mysql_query(m_Mysql, sql))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
 
             NG_LOG_INFO("sql.sql", "SQL: %s", sql);
             NG_LOG_ERROR("sql.sql", "[%u] %s", lErrno, mysql_error(m_Mysql));
@@ -198,7 +198,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
     if (!m_Mysql)
         return false;
 
-    uint32 index = stmt->m_index;
+    uint32_t index = stmt->m_index;
     {
         MySQLPreparedStatement *m_mStmt = GetPreparedStatement(index);
         ASSERT(m_mStmt);        // Can only be null if preparation failed, server side error or bad query
@@ -210,11 +210,11 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
         MYSQL_STMT *msql_STMT = m_mStmt->GetSTMT();
         MYSQL_BIND *msql_BIND = m_mStmt->GetBind();
 
-        uint32 _s = getMSTime();
+        uint32_t _s = getMSTime();
 
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
             if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
@@ -226,7 +226,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
 
         if (mysql_stmt_execute(msql_STMT))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
             if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
@@ -243,12 +243,12 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
     }
 }
 
-bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint64 *pRowCount, uint32 *pFieldCount)
+bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint64_t *pRowCount, uint32_t *pFieldCount)
 {
     if (!m_Mysql)
         return false;
 
-    uint32 index = stmt->m_index;
+    uint32_t index = stmt->m_index;
     {
         MySQLPreparedStatement *m_mStmt = GetPreparedStatement(index);
         ASSERT(m_mStmt);        // Can only be null if preparation failed, server side error or bad query
@@ -260,11 +260,11 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
         MYSQL_STMT *msql_STMT = m_mStmt->GetSTMT();
         MYSQL_BIND *msql_BIND = m_mStmt->GetBind();
 
-        uint32 _s = getMSTime();
+        uint32_t _s = getMSTime();
 
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
             if (_HandleMySQLErrno(lErrno))                            // If it returns true, an error was handled successfully (i.e. reconnection)
@@ -276,7 +276,7 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
 
         if (mysql_stmt_execute(msql_STMT))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s",
                          m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
@@ -306,8 +306,8 @@ ResultSet *MySQLConnection::Query(const char *sql)
 
     MYSQL_RES *result = NULL;
     MYSQL_FIELD *fields = NULL;
-    uint64 rowCount = 0;
-    uint32 fieldCount = 0;
+    uint64_t rowCount = 0;
+    uint32_t fieldCount = 0;
 
     if (!_Query(sql, &result, &fields, &rowCount, &fieldCount))
         return NULL;
@@ -315,17 +315,17 @@ ResultSet *MySQLConnection::Query(const char *sql)
     return new ResultSet(result, fields, rowCount, fieldCount);
 }
 
-bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **pFields, uint64 *pRowCount, uint32 *pFieldCount)
+bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD **pFields, uint64_t *pRowCount, uint32_t *pFieldCount)
 {
     if (!m_Mysql)
         return false;
 
     {
-        uint32 _s = getMSTime();
+        uint32_t _s = getMSTime();
 
         if (mysql_query(m_Mysql, sql))
         {
-            uint32 lErrno = mysql_errno(m_Mysql);
+            uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_INFO("sql.sql", "SQL: %s", sql);
             NG_LOG_ERROR("sql.sql", "[%u] %s", lErrno, mysql_error(m_Mysql));
 
@@ -390,7 +390,7 @@ int MySQLConnection::ExecuteTransaction(SQLTransaction &transaction)
             ASSERT(stmt);
             if (!Execute(stmt))
             {
-                NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32_t)queries.size());
                 int errorCode = GetLastError();
                 RollbackTransaction();
                 return errorCode;
@@ -403,7 +403,7 @@ int MySQLConnection::ExecuteTransaction(SQLTransaction &transaction)
             ASSERT(sql);
             if (!Execute(sql))
             {
-                NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32)queries.size());
+                NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32_t)queries.size());
                 int errorCode = GetLastError();
                 RollbackTransaction();
                 return errorCode;
@@ -427,7 +427,7 @@ void MySQLConnection::Ping()
     mysql_ping(m_Mysql);
 }
 
-uint32 MySQLConnection::GetLastError()
+uint32_t MySQLConnection::GetLastError()
 {
     return mysql_errno(m_Mysql);
 }
@@ -442,7 +442,7 @@ void MySQLConnection::Unlock()
     m_Mutex.unlock();
 }
 
-MySQLPreparedStatement *MySQLConnection::GetPreparedStatement(uint32 index)
+MySQLPreparedStatement *MySQLConnection::GetPreparedStatement(uint32_t index)
 {
     ASSERT(index < m_stmts.size());
     MySQLPreparedStatement *ret = m_stmts[index].get();
@@ -453,7 +453,7 @@ MySQLPreparedStatement *MySQLConnection::GetPreparedStatement(uint32 index)
     return ret;
 }
 
-void MySQLConnection::PrepareStatement(uint32 index, const char *sql, ConnectionFlags flags)
+void MySQLConnection::PrepareStatement(uint32_t index, const char *sql, ConnectionFlags flags)
 {
     m_queries.insert(PreparedStatementMap::value_type(index, std::make_pair(sql, flags)));
 
@@ -492,8 +492,8 @@ void MySQLConnection::PrepareStatement(uint32 index, const char *sql, Connection
 PreparedResultSet *MySQLConnection::Query(PreparedStatement *stmt)
 {
     MYSQL_RES *result = NULL;
-    uint64 rowCount = 0;
-    uint32 fieldCount = 0;
+    uint64_t rowCount = 0;
+    uint32_t fieldCount = 0;
 
     if (!_Query(stmt, &result, &rowCount, &fieldCount))
         return NULL;
@@ -505,7 +505,7 @@ PreparedResultSet *MySQLConnection::Query(PreparedStatement *stmt)
     return new PreparedResultSet(stmt->m_stmt->GetSTMT(), result, rowCount, fieldCount);
 }
 
-bool MySQLConnection::_HandleMySQLErrno(uint32 errNo, uint8 attempts /*= 5*/)
+bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/)
 {
     switch (errNo)
     {
@@ -531,7 +531,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo, uint8 attempts /*= 5*/)
 
         m_reconnecting = true;
 
-        uint32 const lErrno = Open();
+        uint32_t const lErrno = Open();
         if (!lErrno)
         {
             // Don't remove 'this' pointer unless you want to skip loading all prepared statements...

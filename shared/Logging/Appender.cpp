@@ -20,12 +20,11 @@
 #include "StringFormat.h"
 #include <sstream>
 
-Appender::Appender(uint8 _id, std::string const &_name, LogLevel _level /* = LOG_LEVEL_DISABLED*/, AppenderFlags _flags /* = APPENDER_FLAGS_NONE*/) :
-        id(_id), name(_name), level(_level), flags(_flags) {}
+Appender::Appender(uint8_t _id, std::string const &_name, LogLevel _level /* = LOG_LEVEL_DISABLED*/, AppenderFlags _flags /* = APPENDER_FLAGS_NONE*/) : id(_id), name(_name), level(_level), flags(_flags) {}
 
 Appender::~Appender() {}
 
-uint8 Appender::getId() const
+uint8_t Appender::getId() const
 {
     return id;
 }
@@ -74,19 +73,19 @@ const char *Appender::getLogLevelString(LogLevel level)
 {
     switch (level)
     {
-        case LOG_LEVEL_FATAL:
-            return "FATAL";
-        case LOG_LEVEL_ERROR:
-            return "ERROR";
-        case LOG_LEVEL_WARN:
-            return "WARN";
-        case LOG_LEVEL_INFO:
-            return "INFO";
-        case LOG_LEVEL_DEBUG:
-            return "DEBUG";
-        case LOG_LEVEL_TRACE:
-            return "TRACE";
-        default:
-            return "DISABLED";
+    case LOG_LEVEL_FATAL:
+        return "FATAL";
+    case LOG_LEVEL_ERROR:
+        return "ERROR";
+    case LOG_LEVEL_WARN:
+        return "WARN";
+    case LOG_LEVEL_INFO:
+        return "INFO";
+    case LOG_LEVEL_DEBUG:
+        return "DEBUG";
+    case LOG_LEVEL_TRACE:
+        return "TRACE";
+    default:
+        return "DISABLED";
     }
 }

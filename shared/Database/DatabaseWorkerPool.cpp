@@ -43,18 +43,18 @@
 
 class PingOperation : public SQLOperation
 {
-        //! Operation for idle delaythreads
-        bool Execute() override
-        {
-            m_conn->Ping();
-            return true;
-        }
+    //! Operation for idle delaythreads
+    bool Execute() override
+    {
+        m_conn->Ping();
+        return true;
+    }
 };
 
-template<class T>
+template <class T>
 DatabaseWorkerPool<T>::DatabaseWorkerPool()
-        : _queue(new ProducerConsumerQueue<SQLOperation *>()),
-          _async_threads(0), _synch_threads(0)
+    : _queue(new ProducerConsumerQueue<SQLOperation *>()),
+      _async_threads(0), _synch_threads(0)
 {
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
     WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "RZEmulator does not support MySQL versions below 5.1");
@@ -62,15 +62,15 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
             mysql_get_client_info(), "MYSQL_SERVER_VERSION");
 }
 
-template<class T>
+template <class T>
 DatabaseWorkerPool<T>::~DatabaseWorkerPool()
 {
     _queue->Cancel();
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::SetConnectionInfo(std::string const &infoString,
-        uint8 const asyncThreads, uint8 const synchThreads)
+                                              uint8_t const asyncThreads, uint8_t const synchThreads)
 {
     _connectionInfo = NGemity::make_unique<MySQLConnectionInfo>(infoString);
 
@@ -78,8 +78,8 @@ void DatabaseWorkerPool<T>::SetConnectionInfo(std::string const &infoString,
     _synch_threads = synchThreads;
 }
 
-template<class T>
-uint32 DatabaseWorkerPool<T>::Open()
+template <class T>
+uint32_t DatabaseWorkerPool<T>::Open()
 {
     WPFatal(_connectionInfo.get(), "Connection info was not set!");
 
@@ -87,7 +87,7 @@ uint32 DatabaseWorkerPool<T>::Open()
                               "Asynchronous connections: %u, synchronous connections: %u.",
                 GetDatabaseName(), _async_threads, _synch_threads);
 
-    uint32 error = OpenConnections(IDX_ASYNC, _async_threads);
+    uint32_t error = OpenConnections(IDX_ASYNC, _async_threads);
 
     if (error)
         return error;
@@ -96,16 +96,14 @@ uint32 DatabaseWorkerPool<T>::Open()
 
     if (!error)
     {
-        NG_LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. "
-                SZFMTD
-                " total connections running.", GetDatabaseName(),
+        NG_LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. " SZFMTD " total connections running.", GetDatabaseName(),
                     (_connections[IDX_SYNCH].size() + _connections[IDX_ASYNC].size()));
     }
 
     return error;
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::Close()
 {
     NG_LOG_INFO("sql.driver", "Closing down DatabasePool '%s'.", GetDatabaseName());
@@ -126,7 +124,7 @@ void DatabaseWorkerPool<T>::Close()
     NG_LOG_INFO("sql.driver", "All connections on DatabasePool '%s' closed.", GetDatabaseName());
 }
 
-template<class T>
+template <class T>
 bool DatabaseWorkerPool<T>::PrepareStatements()
 {
     for (auto &connections : _connections)
@@ -146,7 +144,7 @@ bool DatabaseWorkerPool<T>::PrepareStatements()
     return true;
 }
 
-template<class T>
+template <class T>
 QueryResult DatabaseWorkerPool<T>::Query(const char *sql, T *connection /*= nullptr*/)
 {
     if (!connection)
@@ -163,7 +161,7 @@ QueryResult DatabaseWorkerPool<T>::Query(const char *sql, T *connection /*= null
     return QueryResult(result);
 }
 
-template<class T>
+template <class T>
 PreparedQueryResult DatabaseWorkerPool<T>::Query(PreparedStatement *stmt)
 {
     auto connection = GetFreeConnection();
@@ -182,7 +180,7 @@ PreparedQueryResult DatabaseWorkerPool<T>::Query(PreparedStatement *stmt)
     return PreparedQueryResult(ret);
 }
 
-template<class T>
+template <class T>
 QueryCallback DatabaseWorkerPool<T>::AsyncQuery(const char *sql)
 {
     BasicStatementTask *task = new BasicStatementTask(sql, true);
@@ -192,7 +190,7 @@ QueryCallback DatabaseWorkerPool<T>::AsyncQuery(const char *sql)
     return QueryCallback(std::move(result));
 }
 
-template<class T>
+template <class T>
 QueryCallback DatabaseWorkerPool<T>::AsyncQuery(PreparedStatement *stmt)
 {
     PreparedStatementTask *task = new PreparedStatementTask(stmt, true);
@@ -202,7 +200,7 @@ QueryCallback DatabaseWorkerPool<T>::AsyncQuery(PreparedStatement *stmt)
     return QueryCallback(std::move(result));
 }
 
-template<class T>
+template <class T>
 QueryResultHolderFuture DatabaseWorkerPool<T>::DelayQueryHolder(SQLQueryHolder *holder)
 {
     SQLQueryHolderTask *task = new SQLQueryHolderTask(holder);
@@ -212,13 +210,13 @@ QueryResultHolderFuture DatabaseWorkerPool<T>::DelayQueryHolder(SQLQueryHolder *
     return result;
 }
 
-template<class T>
+template <class T>
 SQLTransaction DatabaseWorkerPool<T>::BeginTransaction()
 {
     return std::make_shared<Transaction>();
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::CommitTransaction(SQLTransaction transaction)
 {
 #ifdef NGEMITY_DEBUG
@@ -241,14 +239,14 @@ void DatabaseWorkerPool<T>::CommitTransaction(SQLTransaction transaction)
     Enqueue(new TransactionTask(transaction));
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::DirectCommitTransaction(SQLTransaction &transaction)
 {
     T *connection = GetFreeConnection();
     int errorCode = connection->ExecuteTransaction(transaction);
     if (!errorCode)
     {
-        connection->Unlock();      // OK, operation succesful
+        connection->Unlock(); // OK, operation succesful
         return;
     }
 
@@ -256,8 +254,8 @@ void DatabaseWorkerPool<T>::DirectCommitTransaction(SQLTransaction &transaction)
     /// @todo More elegant way
     if (errorCode == ER_LOCK_DEADLOCK)
     {
-        uint8      loopBreaker = 5;
-        for (uint8 i           = 0; i < loopBreaker; ++i)
+        uint8_t loopBreaker = 5;
+        for (uint8_t i = 0; i < loopBreaker; ++i)
         {
             if (!connection->ExecuteTransaction(transaction))
                 break;
@@ -270,25 +268,25 @@ void DatabaseWorkerPool<T>::DirectCommitTransaction(SQLTransaction &transaction)
     connection->Unlock();
 }
 
-template<class T>
+template <class T>
 PreparedStatement *DatabaseWorkerPool<T>::GetPreparedStatement(PreparedStatementIndex index)
 {
     return new PreparedStatement(index);
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::EscapeString(std::string &str)
 {
     if (str.empty())
         return;
 
     char *buf = new char[str.size() * 2 + 1];
-    EscapeString(buf, str.c_str(), uint32(str.size()));
+    EscapeString(buf, str.c_str(), uint32_t(str.size()));
     str = buf;
     delete[] buf;
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::KeepAlive()
 {
     //! Ping synchronous connections
@@ -305,29 +303,29 @@ void DatabaseWorkerPool<T>::KeepAlive()
     //! If one or more worker threads are busy, the ping operations will not be split evenly, but this doesn't matter
     //! as the sole purpose is to prevent connections from idling.
     auto const count = _connections[IDX_ASYNC].size();
-    for (uint8 i     = 0; i < count; ++i)
+    for (uint8_t i = 0; i < count; ++i)
         Enqueue(new PingOperation);
 }
 
-template<class T>
-uint32 DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8 numConnections)
+template <class T>
+uint32_t DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8_t numConnections)
 {
-    for (uint8 i = 0; i < numConnections; ++i)
+    for (uint8_t i = 0; i < numConnections; ++i)
     {
         // Create the connection
         auto connection = [&] {
             switch (type)
             {
-                case IDX_ASYNC:
-                    return NGemity::make_unique<T>(_queue.get(), *_connectionInfo);
-                case IDX_SYNCH:
-                    return NGemity::make_unique<T>(*_connectionInfo);
-                default:
-                            ABORT();
+            case IDX_ASYNC:
+                return NGemity::make_unique<T>(_queue.get(), *_connectionInfo);
+            case IDX_SYNCH:
+                return NGemity::make_unique<T>(*_connectionInfo);
+            default:
+                ABORT();
             }
         }();
 
-        if (uint32 error = connection->Open())
+        if (uint32_t error = connection->Open())
         {
             // Failed to open a connection or invalid version, abort and cleanup
             _connections[type].clear();
@@ -348,26 +346,26 @@ uint32 DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8 numConne
     return 0;
 }
 
-template<class T>
+template <class T>
 unsigned long DatabaseWorkerPool<T>::EscapeString(char *to, const char *from, unsigned long length)
 {
     if (!to || !from || !length)
         return 0;
 
     return mysql_real_escape_string(
-            _connections[IDX_SYNCH].front()->GetHandle(), to, from, length);
+        _connections[IDX_SYNCH].front()->GetHandle(), to, from, length);
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::Enqueue(SQLOperation *op)
 {
     _queue->Push(op);
 }
 
-template<class T>
+template <class T>
 T *DatabaseWorkerPool<T>::GetFreeConnection()
 {
-    uint8      i        = 0;
+    uint8_t i = 0;
     auto const num_cons = _connections[IDX_SYNCH].size();
     T *connection = nullptr;
     //! Block forever until a connection is free
@@ -382,13 +380,13 @@ T *DatabaseWorkerPool<T>::GetFreeConnection()
     return connection;
 }
 
-template<class T>
+template <class T>
 char const *DatabaseWorkerPool<T>::GetDatabaseName() const
 {
     return _connectionInfo->database.c_str();
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::Execute(const char *sql)
 {
     if (NGemity::IsFormatEmptyOrNull(sql))
@@ -398,14 +396,14 @@ void DatabaseWorkerPool<T>::Execute(const char *sql)
     Enqueue(task);
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::Execute(PreparedStatement *stmt)
 {
     PreparedStatementTask *task = new PreparedStatementTask(stmt);
     Enqueue(task);
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::DirectExecute(const char *sql)
 {
     if (NGemity::IsFormatEmptyOrNull(sql))
@@ -416,7 +414,7 @@ void DatabaseWorkerPool<T>::DirectExecute(const char *sql)
     connection->Unlock();
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::DirectExecute(PreparedStatement *stmt)
 {
     T *connection = GetFreeConnection();
@@ -427,7 +425,7 @@ void DatabaseWorkerPool<T>::DirectExecute(PreparedStatement *stmt)
     delete stmt;
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction &trans, const char *sql)
 {
     if (!trans)
@@ -436,7 +434,7 @@ void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction &trans, const char *s
         trans->Append(sql);
 }
 
-template<class T>
+template <class T>
 void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction &trans, PreparedStatement *stmt)
 {
     if (!trans)
@@ -448,4 +446,3 @@ void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction &trans, PreparedState
 template class DatabaseWorkerPool<LoginDatabaseConnection>;
 template class DatabaseWorkerPool<CharacterDatabaseConnection>;
 template class DatabaseWorkerPool<GameDatabaseConnection>;
-

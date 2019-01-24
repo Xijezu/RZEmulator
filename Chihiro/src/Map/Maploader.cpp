@@ -114,7 +114,7 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int x, int y, fl
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
-    int64 size = infile.tellg();
+    int64_t size = infile.tellg();
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
@@ -172,7 +172,7 @@ void Maploader::LoadAttributeFile(const std::string &szFilename, int x, int y, f
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
-    int64 size = infile.tellg();
+    int64_t size = infile.tellg();
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
@@ -209,7 +209,7 @@ void Maploader::LoadScriptFile(const std::string &szFilename, int x, int y, floa
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
-    int64 size = infile.tellg();
+    int64_t size = infile.tellg();
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
@@ -324,7 +324,7 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
-    int64 size = infile.tellg();
+    int64_t size = infile.tellg();
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;

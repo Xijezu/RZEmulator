@@ -49,7 +49,7 @@ public:
 
   ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
-  uint32 GetAccountId() const { return _accountId; }
+  uint32_t GetAccountId() const { return _accountId; }
 
   std::string GetAccountName() const;
 
@@ -123,15 +123,15 @@ public:
   void onGetSummonSetupInfo(const TS_CS_GET_SUMMON_SETUP_INFO *);
   void onStorage(const TS_CS_STORAGE *);
 
-  void _SendResultMsg(uint16, uint16, int);
-  void _PrepareCharacterList(uint32, std::vector<LOBBY_CHARACTER_INFO> *);
+  void _SendResultMsg(uint16_t, uint16_t, int);
+  void _PrepareCharacterList(uint32_t, std::vector<LOBBY_CHARACTER_INFO> *);
 
 private:
   bool checkCharacterName(const std::string &);
   bool isValidTradeTarget(Player *);
 
-  uint32 m_nLastPing{0};
-  uint32 _accountId{};
+  uint32_t m_nLastPing{0};
+  uint32_t _accountId{};
   std::string _accountName{};
   Player *m_pPlayer{nullptr};
   bool _isAuthed{false};

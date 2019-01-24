@@ -42,7 +42,7 @@ public:
   void HandleNullPacket(XPacket *);
 
   void SendGameLogin();
-  void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64 nOneTimeKey);
+  void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64_t nOneTimeKey);
   void ClientLogoutToAuth(const std::string &account);
 
   int GetAccountId() const;
@@ -51,7 +51,7 @@ public:
 private:
   AuthQueue m_queue;
 
-  uint16 m_nGameIDX;
+  uint16_t m_nGameIDX;
   std::string m_szGameName;
   std::string m_szGameSSU;
   bool m_bGameIsAdultServer;

@@ -46,7 +46,7 @@ Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
     m_Base = mb;
     SetInt32Value(UNIT_FIELD_RACE, m_Base->race);
     m_nStatus = STATUS_NORMAL;
-    SetLevel((uint8)mb->level);
+    SetLevel((uint8_t)mb->level);
     CalculateStat();
     SetHealth(GetMaxHealth());
     SetMana(GetMaxMana());
@@ -525,7 +525,7 @@ void Monster::SetStatus(MONSTER_STATUS status)
 
 void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
 {
-    int64 item_count;
+    int64_t item_count;
     for (int i = 0; i < 10; ++i)
     {
         if (m_Base->drop_item_id[i] != 0 && sWorld.checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1))
@@ -646,7 +646,7 @@ void Monster::ForceKill(Player *byPlayer)
 
 void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
 {
-    int64 gold;
+    int64_t gold;
     int tax;
     int nGuildID;
     Player *player{nullptr};
@@ -654,7 +654,7 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
     if ((uint)rand32() % 100 >= m_Base->gold_drop_percentage * fDropRatePenalty)
         return;
 
-    gold = (int64)irand(m_Base->gold_min[0], m_Base->gold_max[0]);
+    gold = (int64_t)irand(m_Base->gold_min[0], m_Base->gold_max[0]);
     if (gold < 0)
         gold = 1;
 
@@ -758,7 +758,7 @@ void Monster::comeBackHome(bool bInvincible)
         if (bInvincible)
             SetFlag(UNIT_FIELD_STATUS, STATUS_INVINCIBLE);
 
-        SetPendingMove(pl, (uint8)(2 * m_Attribute.nMoveSpeed / 7));
+        SetPendingMove(pl, (uint8_t)(2 * m_Attribute.nMoveSpeed / 7));
     }
 }
 
@@ -1252,7 +1252,7 @@ void Monster::processMove(uint t)
                     getMovePosition(targetPos);
                     if (!GameContent::IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
                     {
-                        auto speed = (uint8)(m_Attribute.nMoveSpeed / 7);
+                        auto speed = (uint8_t)(m_Attribute.nMoveSpeed / 7);
                         sWorld.SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld.GetArTime(), true);
                         m_pRespawn.m_positionX = targetPos.GetPositionX();
                         m_pRespawn.m_positionY = targetPos.GetPositionY();
@@ -1293,10 +1293,10 @@ void Monster::processMove(uint t)
             }
 
             t = sWorld.GetArTime();
-            auto speed = (uint8)(m_pWayPointInfo->way_point_speed / 7);
+            auto speed = (uint8_t)(m_pWayPointInfo->way_point_speed / 7);
 
             if (speed == 0)
-                speed = (uint8)(m_Attribute.nMoveSpeed / 7);
+                speed = (uint8_t)(m_Attribute.nMoveSpeed / 7);
 
             sWorld.SetMultipleMove(this, GetCurrentPosition(t), vMoveInfo, speed, true, t, true);
         }

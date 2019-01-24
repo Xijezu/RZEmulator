@@ -201,7 +201,7 @@ void Summon::onExpChange()
     {
         if (level != GetLevel())
         {
-            uint64 uid{0};
+            uint64_t uid{0};
             if (m_pItem != nullptr)
                 uid = m_pItem->m_Instance.UID;
             int ljp{0};
@@ -372,7 +372,7 @@ Summon::~Summon()
     }
 }
 
-void Summon::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
+void Summon::onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level)
 {
     Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
     Messages::SendSkillList(GetMaster(), this, skill_id);
@@ -410,7 +410,7 @@ void Summon::Update(uint /*diff*/)
     }
 }
 
-uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
+uint16_t Summon::putonItem(ItemWearType pos, Item *pItem)
 {
     auto pMaster = GetMaster();
     if (pMaster == nullptr || !pMaster->IsInWorld() || (pItem->m_Instance.Flag & 1) == 0)
@@ -431,7 +431,7 @@ uint16 Summon::putonItem(ItemWearType pos, Item *pItem)
     return TS_RESULT_SUCCESS;
 }
 
-uint16 Summon::putoffItem(ItemWearType pos)
+uint16_t Summon::putoffItem(ItemWearType pos)
 {
     auto pMaster = GetMaster();
     if (pMaster == nullptr || !pMaster->IsInWorld())

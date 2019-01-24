@@ -32,14 +32,14 @@ class GameContent
         static Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
         static bool IsInRandomPoolMonster(int group_id, int monster_id);
         static bool LearnAllSkill(Player *pPlayer);
-        static bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64 &nItemCount);
+        static bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64_t &nItemCount);
         static ushort IsLearnableSkill(Unit *, int, int, int &);
         static int GetLocationID(float x, float y);
         static bool IsBlocked(float x, float y);
         static bool CollisionToLine(float x1, float y1, float x2, float y2);
-        static NPC *GetNewNPC(NPCTemplate *npc_info, uint8 layer);
+        static NPC *GetNewNPC(NPCTemplate *npc_info, uint8_t layer);
         static void AddNPCToWorld();
-        static int64 GetItemSellPrice(int64 price, int rank, int lv, bool same_price_for_buying);
+        static int64_t GetItemSellPrice(int64_t price, int rank, int lv, bool same_price_for_buying);
     private:
         static ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
         GameContent() = default;

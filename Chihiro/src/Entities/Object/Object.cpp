@@ -28,8 +28,8 @@
 #include "SkillProp/SkillProp.h"
 
 // used for creating values for respawn for example
-#define PAIR64_HIPART(x) (uint32)((uint64(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
-#define PAIR64_LOPART(x) (uint32)(uint64(x) & UI64LIT(0x00000000FFFFFFFF))
+#define PAIR64_HIPART(x) (uint32_t)((uint64_t(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
+#define PAIR64_LOPART(x) (uint32_t)(uint64_t(x) & UI64LIT(0x00000000FFFFFFFF))
 
 Object::Object()
 {
@@ -59,8 +59,8 @@ Object::~Object()
 
 void Object::_InitValues()
 {
-    _uint32Values = new uint32[_valuesCount];
-    memset(_uint32Values, 0, _valuesCount * sizeof(uint32));
+    _uint32Values = new uint32_t[_valuesCount];
+    memset(_uint32Values, 0, _valuesCount * sizeof(uint32_t));
 
     _changedFields = new bool[_valuesCount];
     memset(_changedFields, 0, _valuesCount * sizeof(bool));
@@ -86,7 +86,7 @@ void Object::RemoveFromWorld()
     m_inWorld = false;
 }
 
-void Object::SetInt32Value(uint16 index, int32 value)
+void Object::SetInt32Value(uint16_t index, int32_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -102,7 +102,7 @@ void Object::SetInt32Value(uint16 index, int32 value)
     }
 }
 
-void Object::SetUInt32Value(uint16 index, uint32 value)
+void Object::SetUInt32Value(uint16_t index, uint32_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -118,7 +118,7 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
     }
 }
 
-void Object::UpdateUInt32Value(uint16 index, uint32 value)
+void Object::UpdateUInt32Value(uint16_t index, uint32_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -126,10 +126,10 @@ void Object::UpdateUInt32Value(uint16 index, uint32 value)
     _changedFields[index] = true;
 }
 
-void Object::SetUInt64Value(uint16 index, uint64 value)
+void Object::SetUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (*((uint64 *)&(_uint32Values[index])) != value)
+    if (*((uint64_t *)&(_uint32Values[index])) != value)
     {
         _uint32Values[index] = PAIR64_LOPART(value);
         _uint32Values[index + 1] = PAIR64_HIPART(value);
@@ -143,10 +143,10 @@ void Object::SetUInt64Value(uint16 index, uint64 value)
     }
 }
 
-bool Object::AddUInt64Value(uint16 index, uint64 value)
+bool Object::AddUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && !*((uint64 *)&(_uint32Values[index])))
+    if (value && !*((uint64_t *)&(_uint32Values[index])))
     {
         _uint32Values[index] = PAIR64_LOPART(value);
         _uint32Values[index + 1] = PAIR64_HIPART(value);
@@ -164,10 +164,10 @@ bool Object::AddUInt64Value(uint16 index, uint64 value)
     return false;
 }
 
-bool Object::RemoveUInt64Value(uint16 index, uint64 value)
+bool Object::RemoveUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && *((uint64 *)&(_uint32Values[index])) == value)
+    if (value && *((uint64_t *)&(_uint32Values[index])) == value)
     {
         _uint32Values[index] = 0;
         _uint32Values[index + 1] = 0;
@@ -185,7 +185,7 @@ bool Object::RemoveUInt64Value(uint16 index, uint64 value)
     return false;
 }
 
-void Object::SetFloatValue(uint16 index, float value)
+void Object::SetFloatValue(uint16_t index, float value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -201,7 +201,7 @@ void Object::SetFloatValue(uint16 index, float value)
     }
 }
 
-void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
+void Object::SetByteValue(uint16_t index, uint8_t offset, uint8_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -211,10 +211,10 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
         return;
     }
 
-    if (uint8(_uint32Values[index] >> (offset * 8)) != value)
+    if (uint8_t(_uint32Values[index] >> (offset * 8)) != value)
     {
-        _uint32Values[index] &= ~uint32(uint32(0xFF) << (offset * 8));
-        _uint32Values[index] |= uint32(uint32(value) << (offset * 8));
+        _uint32Values[index] &= ~uint32_t(uint32_t(0xFF) << (offset * 8));
+        _uint32Values[index] |= uint32_t(uint32_t(value) << (offset * 8));
         _changedFields[index] = true;
 
         if (m_inWorld && !m_objectUpdated)
@@ -224,7 +224,7 @@ void Object::SetByteValue(uint16 index, uint8 offset, uint8 value)
     }
 }
 
-void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
+void Object::SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -234,10 +234,10 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
         return;
     }
 
-    if (uint16(_uint32Values[index] >> (offset * 16)) != value)
+    if (uint16_t(_uint32Values[index] >> (offset * 16)) != value)
     {
-        _uint32Values[index] &= ~uint32(uint32(0xFFFF) << (offset * 16));
-        _uint32Values[index] |= uint32(uint32(value) << (offset * 16));
+        _uint32Values[index] &= ~uint32_t(uint32_t(0xFFFF) << (offset * 16));
+        _uint32Values[index] |= uint32_t(uint32_t(value) << (offset * 16));
         _changedFields[index] = true;
 
         if (m_inWorld && !m_objectUpdated)
@@ -247,7 +247,7 @@ void Object::SetUInt16Value(uint16 index, uint8 offset, uint16 value)
     }
 }
 
-void Object::SetStatFloatValue(uint16 index, float value)
+void Object::SetStatFloatValue(uint16_t index, float value)
 {
     if (value < 0)
         value = 0.0f;
@@ -255,38 +255,38 @@ void Object::SetStatFloatValue(uint16 index, float value)
     SetFloatValue(index, value);
 }
 
-void Object::SetStatInt32Value(uint16 index, int32 value)
+void Object::SetStatInt32Value(uint16_t index, int32_t value)
 {
     if (value < 0)
         value = 0;
 
-    SetUInt32Value(index, uint32(value));
+    SetUInt32Value(index, uint32_t(value));
 }
 
-void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
+void Object::ApplyModUInt32Value(uint16_t index, int32_t val, bool apply)
 {
-    int32 cur = GetUInt32Value(index);
+    int32_t cur = GetUInt32Value(index);
     cur += (apply ? val : -val);
     if (cur < 0)
         cur = 0;
     SetUInt32Value(index, cur);
 }
 
-void Object::ApplyModInt32Value(uint16 index, int32 val, bool apply)
+void Object::ApplyModInt32Value(uint16_t index, int32_t val, bool apply)
 {
-    int32 cur = GetInt32Value(index);
+    int32_t cur = GetInt32Value(index);
     cur += (apply ? val : -val);
     SetInt32Value(index, cur);
 }
 
-void Object::ApplyModSignedFloatValue(uint16 index, float val, bool apply)
+void Object::ApplyModSignedFloatValue(uint16_t index, float val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
     SetFloatValue(index, cur);
 }
 
-void Object::ApplyModPositiveFloatValue(uint16 index, float val, bool apply)
+void Object::ApplyModPositiveFloatValue(uint16_t index, float val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
@@ -295,11 +295,11 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float val, bool apply)
     SetFloatValue(index, cur);
 }
 
-void Object::SetFlag(uint16 index, uint32 newFlag)
+void Object::SetFlag(uint16_t index, uint32_t newFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
-    uint32 oldval = _uint32Values[index];
-    uint32 newval = oldval | newFlag;
+    uint32_t oldval = _uint32Values[index];
+    uint32_t newval = oldval | newFlag;
 
     if (oldval != newval)
     {
@@ -313,13 +313,13 @@ void Object::SetFlag(uint16 index, uint32 newFlag)
     }
 }
 
-void Object::RemoveFlag(uint16 index, uint32 oldFlag)
+void Object::RemoveFlag(uint16_t index, uint32_t oldFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
     ASSERT(_uint32Values);
 
-    uint32 oldval = _uint32Values[index];
-    uint32 newval = oldval & ~oldFlag;
+    uint32_t oldval = _uint32Values[index];
+    uint32_t newval = oldval & ~oldFlag;
 
     if (oldval != newval)
     {
@@ -333,7 +333,7 @@ void Object::RemoveFlag(uint16 index, uint32 oldFlag)
     }
 }
 
-void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
+void Object::SetByteFlag(uint16_t index, uint8_t offset, uint8_t newFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -343,9 +343,9 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
         return;
     }
 
-    if (!(uint8(_uint32Values[index] >> (offset * 8)) & newFlag))
+    if (!(uint8_t(_uint32Values[index] >> (offset * 8)) & newFlag))
     {
-        _uint32Values[index] |= uint32(uint32(newFlag) << (offset * 8));
+        _uint32Values[index] |= uint32_t(uint32_t(newFlag) << (offset * 8));
         _changedFields[index] = true;
 
         if (m_inWorld && !m_objectUpdated)
@@ -355,7 +355,7 @@ void Object::SetByteFlag(uint16 index, uint8 offset, uint8 newFlag)
     }
 }
 
-void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
+void Object::RemoveByteFlag(uint16_t index, uint8_t offset, uint8_t oldFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -365,9 +365,9 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
         return;
     }
 
-    if (uint8(_uint32Values[index] >> (offset * 8)) & oldFlag)
+    if (uint8_t(_uint32Values[index] >> (offset * 8)) & oldFlag)
     {
-        _uint32Values[index] &= ~uint32(uint32(oldFlag) << (offset * 8));
+        _uint32Values[index] &= ~uint32_t(uint32_t(oldFlag) << (offset * 8));
         _changedFields[index] = true;
 
         if (m_inWorld && !m_objectUpdated)
@@ -377,7 +377,7 @@ void Object::RemoveByteFlag(uint16 index, uint8 offset, uint8 oldFlag)
     }
 }
 
-bool Object::PrintIndexError(uint32 index, bool set) const
+bool Object::PrintIndexError(uint32_t index, bool set) const
 {
     //sLog->outError("Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, _valuesCount, GetTypeId(), _subType);
 
@@ -400,7 +400,7 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
     packet << tmpPos.GetPositionX();
     packet << tmpPos.GetPositionY();
     packet << tmpPos.GetPositionZ();
-    packet << (uint8)GetLayer();
+    packet << (uint8_t)GetLayer();
     packet << (uint8_t)GetSubType();
 
     switch (GetSubType())

@@ -24,10 +24,10 @@
 #include <Windows.h>
 #endif
 
-AppenderConsole::AppenderConsole(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs)
-        : Appender(id, name, level, flags), _colored(false)
+AppenderConsole::AppenderConsole(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs)
+    : Appender(id, name, level, flags), _colored(false)
 {
-    for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+    for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
         _colors[i] = ColorTypes(MaxColors);
 
     if (!extraArgs.empty())
@@ -46,7 +46,7 @@ void AppenderConsole::InitColors(std::string const &str)
 
     std::istringstream ss(str);
 
-    for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+    for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
     {
         ss >> color[i];
 
@@ -57,7 +57,7 @@ void AppenderConsole::InitColors(std::string const &str)
             return;
     }
 
-    for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+    for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
         _colors[i] = ColorTypes(color[i]);
 
     _colored = true;
@@ -67,38 +67,37 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     static WORD WinColorFG[MaxColors] =
-                        {
-                                0,                                                  // BLACK
-                                FOREGROUND_RED,                                     // RED
-                                FOREGROUND_GREEN,                                   // GREEN
-                                FOREGROUND_RED | FOREGROUND_GREEN,                  // BROWN
-                                FOREGROUND_BLUE,                                    // BLUE
-                                FOREGROUND_RED |                    FOREGROUND_BLUE, // MAGENTA
-                                FOREGROUND_GREEN | FOREGROUND_BLUE,                 // CYAN
-                                FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE, // WHITE
-                                // YELLOW
-                                FOREGROUND_RED | FOREGROUND_GREEN |                   FOREGROUND_INTENSITY,
-                                // RED_BOLD
-                                FOREGROUND_RED |                                      FOREGROUND_INTENSITY,
-                                // GREEN_BOLD
-                                FOREGROUND_GREEN |                   FOREGROUND_INTENSITY,
-                                FOREGROUND_BLUE | FOREGROUND_INTENSITY,             // BLUE_BOLD
-                                // MAGENTA_BOLD
-                                FOREGROUND_RED |                    FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-                                // CYAN_BOLD
-                                FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-                                // WHITE_BOLD
-                                FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY
-                        };
+        {
+            0,                                                   // BLACK
+            FOREGROUND_RED,                                      // RED
+            FOREGROUND_GREEN,                                    // GREEN
+            FOREGROUND_RED | FOREGROUND_GREEN,                   // BROWN
+            FOREGROUND_BLUE,                                     // BLUE
+            FOREGROUND_RED | FOREGROUND_BLUE,                    // MAGENTA
+            FOREGROUND_GREEN | FOREGROUND_BLUE,                  // CYAN
+            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE, // WHITE
+            // YELLOW
+            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+            // RED_BOLD
+            FOREGROUND_RED | FOREGROUND_INTENSITY,
+            // GREEN_BOLD
+            FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+            FOREGROUND_BLUE | FOREGROUND_INTENSITY, // BLUE_BOLD
+            // MAGENTA_BOLD
+            FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+            // CYAN_BOLD
+            FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+            // WHITE_BOLD
+            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY};
 
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, WinColorFG[color]);
 #else
     enum ANSITextAttr
     {
-        TA_NORMAL  = 0,
-        TA_BOLD    = 1,
-        TA_BLINK   = 5,
+        TA_NORMAL = 0,
+        TA_BOLD = 1,
+        TA_BLINK = 5,
         TA_REVERSE = 7
     };
 
@@ -127,24 +126,24 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
         BG_WHITE
     };
 
-    static uint8 UnixColorFG[MaxColors] =
-                         {
-                                 FG_BLACK,                                          // BLACK
-                                 FG_RED,                                            // RED
-                                 FG_GREEN,                                          // GREEN
-                                 FG_BROWN,                                          // BROWN
-                                 FG_BLUE,                                           // BLUE
-                                 FG_MAGENTA,                                        // MAGENTA
-                                 FG_CYAN,                                           // CYAN
-                                 FG_WHITE,                                          // WHITE
-                                 FG_YELLOW,                                         // YELLOW
-                                 FG_RED,                                            // LRED
-                                 FG_GREEN,                                          // LGREEN
-                                 FG_BLUE,                                           // LBLUE
-                                 FG_MAGENTA,                                        // LMAGENTA
-                                 FG_CYAN,                                           // LCYAN
-                                 FG_WHITE                                           // LWHITE
-                         };
+    static uint8_t UnixColorFG[MaxColors] =
+        {
+            FG_BLACK,   // BLACK
+            FG_RED,     // RED
+            FG_GREEN,   // GREEN
+            FG_BROWN,   // BROWN
+            FG_BLUE,    // BLUE
+            FG_MAGENTA, // MAGENTA
+            FG_CYAN,    // CYAN
+            FG_WHITE,   // WHITE
+            FG_YELLOW,  // YELLOW
+            FG_RED,     // LRED
+            FG_GREEN,   // LGREEN
+            FG_BLUE,    // LBLUE
+            FG_MAGENTA, // LMAGENTA
+            FG_CYAN,    // LCYAN
+            FG_WHITE    // LWHITE
+        };
 
     fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
 #endif
@@ -166,28 +165,28 @@ void AppenderConsole::_write(LogMessage const *message)
 
     if (_colored)
     {
-        uint8 index;
+        uint8_t index;
         switch (message->level)
         {
-            case LOG_LEVEL_TRACE:
-                index = 5;
-                break;
-            case LOG_LEVEL_DEBUG:
-                index = 4;
-                break;
-            case LOG_LEVEL_INFO:
-                index = 3;
-                break;
-            case LOG_LEVEL_WARN:
-                index = 2;
-                break;
-            case LOG_LEVEL_FATAL:
-                index = 0;
-                break;
-            case LOG_LEVEL_ERROR: // No break on purpose
-            default:
-                index = 1;
-                break;
+        case LOG_LEVEL_TRACE:
+            index = 5;
+            break;
+        case LOG_LEVEL_DEBUG:
+            index = 4;
+            break;
+        case LOG_LEVEL_INFO:
+            index = 3;
+            break;
+        case LOG_LEVEL_WARN:
+            index = 2;
+            break;
+        case LOG_LEVEL_FATAL:
+            index = 0;
+            break;
+        case LOG_LEVEL_ERROR: // No break on purpose
+        default:
+            index = 1;
+            break;
         }
 
         SetColor(stdout_stream, _colors[index]);

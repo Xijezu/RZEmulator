@@ -29,7 +29,7 @@ class SocketMgr
 public:
   virtual ~SocketMgr();
 
-  virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount);
+  virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port, int threadCount);
   virtual void StopNetwork();
 
   void Wait();

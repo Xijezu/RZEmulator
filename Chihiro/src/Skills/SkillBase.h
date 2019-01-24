@@ -52,7 +52,7 @@ enum DISTRIBUTION_TYPE
 
 struct SkillResult
 {
-    uint8 type;
+    uint8_t type;
     uint  hTarget;
 
     TS_SC_SKILL__HIT_DAMAGE                hitDamage;
@@ -527,8 +527,8 @@ struct SkillBase
     uint32_t GetCommonDelay() const;
     uint GetCoolTime(int enhance) const;
     uint32_t GetFireRange() const;
-    bool IsUsable(uint8 nUseIndex) const;
-    int GetCostEnergy(uint8 skill_lv) const;
+    bool IsUsable(uint8_t nUseIndex) const;
+    int GetCostEnergy(uint8_t skill_lv) const;
 
     int m_need_jp[50]{ };
 

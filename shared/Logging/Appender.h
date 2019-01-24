@@ -25,36 +25,34 @@ struct LogMessage;
 
 class Appender
 {
-    public:
-        Appender(uint8 _id, std::string const &name, LogLevel level = LOG_LEVEL_DISABLED, AppenderFlags flags = APPENDER_FLAGS_NONE);
-        virtual ~Appender();
+  public:
+    Appender(uint8_t _id, std::string const &name, LogLevel level = LOG_LEVEL_DISABLED, AppenderFlags flags = APPENDER_FLAGS_NONE);
+    virtual ~Appender();
 
-        uint8 getId() const;
-        std::string const &getName() const;
-        virtual AppenderType getType() const = 0;
-        LogLevel getLogLevel() const;
-        AppenderFlags getFlags() const;
+    uint8_t getId() const;
+    std::string const &getName() const;
+    virtual AppenderType getType() const = 0;
+    LogLevel getLogLevel() const;
+    AppenderFlags getFlags() const;
 
-        void setLogLevel(LogLevel);
-        void write(LogMessage *message);
-        static const char *getLogLevelString(LogLevel level);
+    void setLogLevel(LogLevel);
+    void write(LogMessage *message);
+    static const char *getLogLevelString(LogLevel level);
 
-        virtual void setRealmId(uint32 /*realmId*/) {}
+    virtual void setRealmId(uint32_t /*realmId*/) {}
 
-    private:
-        virtual void _write(LogMessage const * /*message*/) = 0;
+  private:
+    virtual void _write(LogMessage const * /*message*/) = 0;
 
-        uint8         id;
-        std::string   name;
-        LogLevel      level;
-        AppenderFlags flags;
+    uint8_t id;
+    std::string name;
+    LogLevel level;
+    AppenderFlags flags;
 };
 
 class InvalidAppenderArgsException
-        : public std::length_error
+    : public std::length_error
 {
-    public:
-        explicit InvalidAppenderArgsException(std::string
-        const &message) :
-                std::length_error(message) {}
+  public:
+    explicit InvalidAppenderArgsException(std::string const &message) : std::length_error(message) {}
 };
