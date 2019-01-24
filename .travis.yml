@@ -1,4 +1,6 @@
 language: cpp
+os: linux
+dist: trusty
 
 matrix:
   include:
@@ -11,7 +13,6 @@ matrix:
             - george-edison55-precise-backports
           packages:
             - g++-7
-            - cmake-data
             - boost1.67
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
