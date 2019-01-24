@@ -31,16 +31,16 @@ struct LogMessage
     static std::string getTimeStr(time_t time);
     std::string getTimeStr();
 
-    LogLevel const    level;
+    LogLevel const level;
     std::string const type;
     std::string const text;
-    std::string       prefix;
-    std::string       param1;
-    time_t            mtime;
+    std::string prefix;
+    std::string param1;
+    time_t mtime;
 
     ///@ Returns size of the log message content in bytes
-    uint32 Size() const
+    uint32_t Size() const
     {
-        return static_cast<uint32>(prefix.size() + text.size());
+        return static_cast<uint32_t>(prefix.size() + text.size());
     }
 };

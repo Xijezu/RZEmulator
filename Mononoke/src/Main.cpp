@@ -36,7 +36,7 @@ void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef,
                    int /*signalNumber*/);
 void KeepDatabaseAliveHandler(
     std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef,
-    int32 dbPingInterval, boost::system::error_code const &error);
+    int32_t dbPingInterval, boost::system::error_code const &error);
 
 int main(int argc, char **argv)
 {
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
   NG_LOG_INFO("server.authserver", "           NGemity (c) 2018 - For Rappelz");
   NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
-  auto authPort = (uint16)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
+  auto authPort = (uint16_t)sConfigMgr->GetIntDefault("Authserver.Port", 4500);
   std::string authBindIp =
       sConfigMgr->GetStringDefault("Authserver.IP", "0.0.0.0");
 
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
                  authBindIp.c_str(), authPort);
   }
 
-  auto gamePort = (uint16)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
+  auto gamePort = (uint16_t)sConfigMgr->GetIntDefault("Gameserver.Port", 4502);
   std::string bindIp = sConfigMgr->GetStringDefault("Gameserver.IP", "0.0.0.0");
 
   auto pGameNetwork = std::make_unique<XSocketMgr<AuthGameSession>>();
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
       std::placeholders::_1, std::placeholders::_2));
 
   // Enabled a timed callback for handling the database keep alive ping
-  int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+  int32_t dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
   std::shared_ptr<boost::asio::deadline_timer> dbPingTimer =
       std::make_shared<boost::asio::deadline_timer>(*ioContext);
   dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
@@ -147,7 +147,7 @@ void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef,
 
 void KeepDatabaseAliveHandler(
     std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef,
-    int32 dbPingInterval, boost::system::error_code const &error)
+    int32_t dbPingInterval, boost::system::error_code const &error)
 {
   if (!error)
   {

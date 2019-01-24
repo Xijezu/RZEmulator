@@ -117,7 +117,7 @@ protected:
 
 private:
   // private, must not be called directly
-  bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount) override
+  bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port, int threadCount) override
   {
     return SocketMgr::StartNetwork(ioContext, bindIp, port, threadCount);
   }

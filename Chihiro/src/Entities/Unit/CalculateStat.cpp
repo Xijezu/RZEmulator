@@ -297,7 +297,7 @@ void Unit::amplifyStatByState()
     }
     for (auto &s : m_vStateList)
     {
-        uint16 nOriginalLevel[3]{0};
+        uint16_t nOriginalLevel[3]{0};
 
         for (int i = 0; i < 3; i++)
             nOriginalLevel[i] = s->m_nLevel[i];
@@ -1408,7 +1408,7 @@ void Unit::applyStateEffect()
 
     for (auto &s : m_vStateList)
     {
-        uint16 nOriginalLevel[3]{0};
+        uint16_t nOriginalLevel[3]{0};
 
         for (int i = 0; i < 3; i++)
             nOriginalLevel[i] = s->GetLevel(i);
@@ -1461,7 +1461,7 @@ void Unit::applyStatByState()
     }
     for (auto &s : m_vStateList)
     {
-        uint16 nOriginalLevel[3]{0};
+        uint16_t nOriginalLevel[3]{0};
 
         for (int i = 0; i < 3; i++)
             nOriginalLevel[i] = s->GetLevel(i);
@@ -1984,7 +1984,7 @@ void Unit::applyStateAmplifyEffect()
     }
     for (auto &s : m_vStateList)
     {
-        uint16 nOriginalLevel[3]{0};
+        uint16_t nOriginalLevel[3]{0};
 
         for (int i = 0; i < 3; i++)
             nOriginalLevel[i] = s->m_nLevel[i];

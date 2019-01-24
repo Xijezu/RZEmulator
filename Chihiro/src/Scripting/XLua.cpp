@@ -375,7 +375,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
         auto player = dynamic_cast<Player *>(m_pUnit);
         if (szKey == "gold")
         {
-            return return_object((int64)player->GetGold());
+            return return_object((int64_t)player->GetGold());
         }
         else if (szKey == "guild_id")
         {
@@ -484,7 +484,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
         auto player = dynamic_cast<Player *>(m_pUnit);
         if (szKey == "gold")
         {
-            player->ChangeGold(args[0].get<int64>());
+            player->ChangeGold(args[0].get<int64_t>());
         }
         else if (szKey == "permission")
         {
@@ -1011,7 +1011,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     }
 
     int nStateCode = args[0].get<int>();
-    int nStateLevel = args[1].get<uint8>();
+    int nStateLevel = args[1].get<uint8_t>();
     uint nStateTime = args[2].get<uint>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr)
@@ -1032,7 +1032,7 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
     }
 
     int nStateCode = args[0].get<int>();
-    int nStateLevel = args[1].get<uint8>();
+    int nStateLevel = args[1].get<uint8_t>();
     uint nStateTime = args[2].get<uint>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     Summon *summon = player->m_pMainSummon;

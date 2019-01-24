@@ -184,7 +184,7 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
 void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
 {
     m_pPlayer->nGameIDX = pRecvPct->server_idx;
-    m_pPlayer->nOneTimeKey = ((uint64)rand32()) * rand32() * rand32() * rand32();
+    m_pPlayer->nOneTimeKey = ((uint64_t)rand32()) * rand32() * rand32() * rand32();
     m_pPlayer->bIsInGame = true;
     bool bExist = sGameMapList.GetGame((uint)m_pPlayer->nGameIDX) != 0;
 
@@ -195,7 +195,7 @@ void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
     SendPacket(resultPct);
 }
 
-void AuthClientSession::SendResultMsg(uint16 pctID, uint16 result, uint value)
+void AuthClientSession::SendResultMsg(uint16_t pctID, uint16_t result, uint value)
 {
     TS_AC_RESULT resultMsg{};
     resultMsg.request_msg_id = pctID;

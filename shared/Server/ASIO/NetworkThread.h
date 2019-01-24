@@ -34,53 +34,53 @@ using boost::asio::ip::tcp;
 
 class NetworkThread
 {
-  public:
-    NetworkThread();
-    virtual ~NetworkThread();
+public:
+  NetworkThread();
+  virtual ~NetworkThread();
 
-    bool Start();
-    void Stop();
-    void Wait();
+  bool Start();
+  void Stop();
+  void Wait();
 
-    int32 GetConnectionCount() const { return _connections; }
-    virtual void AddSocket(std::shared_ptr<XSocket> sock);
-    tcp::socket *GetSocketForAccept() { return &_acceptSocket; }
+  int32_t GetConnectionCount() const { return _connections; }
+  virtual void AddSocket(std::shared_ptr<XSocket> sock);
+  tcp::socket *GetSocketForAccept() { return &_acceptSocket; }
 
-  protected:
-    virtual void SocketAdded(std::shared_ptr<XSocket> /*sock*/) {}
-    virtual void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) {}
+protected:
+  virtual void SocketAdded(std::shared_ptr<XSocket> /*sock*/) {}
+  virtual void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) {}
 
-    void AddNewSockets();
-    void Run();
-    void Update();
+  void AddNewSockets();
+  void Run();
+  void Update();
 
-  private:
-    typedef std::vector<std::shared_ptr<XSocket>> SocketContainer;
+private:
+  typedef std::vector<std::shared_ptr<XSocket>> SocketContainer;
 
-    std::atomic<int32> _connections;
-    std::atomic<bool> _stopped;
+  std::atomic<int32_t> _connections;
+  std::atomic<bool> _stopped;
 
-    std::thread *_thread;
+  std::thread *_thread;
 
-    SocketContainer _sockets;
+  SocketContainer _sockets;
 
-    std::mutex _newSocketsLock;
-    SocketContainer _newSockets;
+  std::mutex _newSocketsLock;
+  SocketContainer _newSockets;
 
-    NGemity::Asio::IoContext _ioContext;
-    tcp::socket _acceptSocket;
-    boost::asio::deadline_timer _updateTimer;
+  NGemity::Asio::IoContext _ioContext;
+  tcp::socket _acceptSocket;
+  boost::asio::deadline_timer _updateTimer;
 };
 
 class XSocketThread : public NetworkThread
 {
-  public:
-    void SocketAdded(std::shared_ptr<XSocket> sock) override
-    {
-        sock->Start();
-    }
+public:
+  void SocketAdded(std::shared_ptr<XSocket> sock) override
+  {
+    sock->Start();
+  }
 
-    void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
-    {
-    }
+  void SocketRemoved(std::shared_ptr<XSocket> /*sock*/) override
+  {
+  }
 };

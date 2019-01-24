@@ -136,7 +136,7 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
     pPlayer->SendPacket(summonPct);
 }
 
-void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string &szKey, int64 nValue)
+void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::string &szKey, int64_t nValue)
 {
     TS_SC_PROPERTY propertyPct{};
     propertyPct.handle = pUnit->GetHandle();
@@ -338,15 +338,15 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
     Item *item{nullptr};
     if (pPlayer->GetItemCount() > 0)
     {
-        int64 count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
-        int64 idx = 0;
+        int64_t count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
+        int64_t idx = 0;
         if (count != 0)
         {
             do
             {
                 TS_SC_INVENTORY inventoryPct{};
                 auto lcnt = idx;
-                int64 mcount = 200;
+                int64_t mcount = 200;
                 if (count - idx <= 200)
                     mcount = count - idx;
 
@@ -372,7 +372,7 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
     }
 }
 
-void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 nValue)
+void Messages::SendResult(Player *pPlayer, uint16_t nMsg, uint16_t nResult, uint32_t nValue)
 {
     if (pPlayer == nullptr)
         return;
@@ -384,7 +384,7 @@ void Messages::SendResult(Player *pPlayer, uint16 nMsg, uint16 nResult, uint32 n
     pPlayer->SendPacket(resultPct);
 }
 
-void Messages::SendResult(WorldSession *worldSession, uint16 nMsg, uint16 nResult, uint32 nValue)
+void Messages::SendResult(WorldSession *worldSession, uint16_t nMsg, uint16_t nResult, uint32_t nValue)
 {
     if (worldSession == nullptr)
         return;
@@ -487,12 +487,12 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
     sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
 }
 
-void Messages::GetEncodedInt(XPacket &packet, uint32 nDecoded)
+void Messages::GetEncodedInt(XPacket &packet, uint32_t nDecoded)
 {
-    packet << (int16)0;
-    packet << (int16)HIWORD(nDecoded);
-    packet << (int16)0;
-    packet << (int16)LOWORD(nDecoded);
+    packet << (int16_t)0;
+    packet << (int16_t)HIWORD(nDecoded);
+    packet << (int16_t)0;
+    packet << (int16_t)LOWORD(nDecoded);
 }
 
 void Messages::SendWarpMessage(Player *pPlayer)
@@ -528,7 +528,7 @@ void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
     pPlayer->SendPacket(itemPct);
 }
 
-void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint target, uint16 skill_id, uint8 skill_level, Position pos, int error_code)
+void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint target, uint16_t skill_id, uint8_t skill_level, Position pos, int error_code)
 {
     if (pPlayer == nullptr)
         return;
@@ -1092,7 +1092,7 @@ void Messages::SendTradeCancelMessage(Player *pClient)
     pClient->SendPacket(tradePct);
 }
 
-void Messages::SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Player *pPlayer, Player *pTarget)
+void Messages::SendTradeItemInfo(int32_t nTradeMode, Item *pItem, int32_t nCount, Player *pPlayer, Player *pTarget)
 {
     TS_TRADE tradePct{};
     tradePct.target_player = pPlayer->GetHandle();
@@ -1105,14 +1105,14 @@ void Messages::SendTradeItemInfo(int32 nTradeMode, Item *pItem, int32 nCount, Pl
     pTarget->SendPacket(tradePct);
 }
 
-void Messages::SendResult(Player *pPlayer, NGemity::Packets pPacketID, uint16 result, uint32 handle)
+void Messages::SendResult(Player *pPlayer, NGemity::Packets pPacketID, uint16_t result, uint32_t handle)
 {
-    Messages::SendResult(pPlayer, static_cast<uint16>(pPacketID), result, handle);
+    Messages::SendResult(pPlayer, static_cast<uint16_t>(pPacketID), result, handle);
 }
 
-void Messages::SendResult(WorldSession *pPlayer, NGemity::Packets pPacketID, uint16 result, uint32 handle)
+void Messages::SendResult(WorldSession *pPlayer, NGemity::Packets pPacketID, uint16_t result, uint32_t handle)
 {
-    Messages::SendResult(pPlayer, static_cast<uint16>(pPacketID), result, handle);
+    Messages::SendResult(pPlayer, static_cast<uint16_t>(pPacketID), result, handle);
 }
 
 void Messages::SendStateMessage(Player *pPlayer, uint32_t handle, State *pState, bool bIsCancel)

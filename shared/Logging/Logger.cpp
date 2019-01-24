@@ -31,12 +31,12 @@ LogLevel Logger::getLogLevel() const
     return level;
 }
 
-void Logger::addAppender(uint8 id, Appender *appender)
+void Logger::addAppender(uint8_t id, Appender *appender)
 {
     appenders[id] = appender;
 }
 
-void Logger::delAppender(uint8 id)
+void Logger::delAppender(uint8_t id)
 {
     appenders.erase(id);
 }

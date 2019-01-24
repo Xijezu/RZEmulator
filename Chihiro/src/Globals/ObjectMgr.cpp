@@ -88,7 +88,7 @@ void ObjectMgr::UnloadAll()
 
 void ObjectMgr::LoadItemResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
 
     QueryResult result = GameDatabase.Query("SELECT id, type, `group`, class, wear_type, set_id, set_part_flag, rank, level,"
                                             "enhance, socket, status_flag, limit_deva, limit_asura, limit_gaia, limit_fighter,"
@@ -111,7 +111,7 @@ void ObjectMgr::LoadItemResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *fields = result->Fetch();
@@ -208,7 +208,7 @@ void ObjectMgr::LoadMonsterResource()
         return;
     }
 
-    uint32 count = 0, y = 0;
+    uint32_t count = 0, y = 0;
     do
     {
         Field *field = result->Fetch();
@@ -305,7 +305,7 @@ void ObjectMgr::LoadQuestResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -399,7 +399,7 @@ void ObjectMgr::LoadFieldPropResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -479,7 +479,7 @@ void ObjectMgr::LoadQuestLinkResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -513,7 +513,7 @@ void ObjectMgr::LoadDropGroupResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -542,7 +542,7 @@ void ObjectMgr::LoadSkillTreeResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -577,7 +577,7 @@ void ObjectMgr::LoadSkillResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         int idx = 0;
@@ -707,7 +707,7 @@ void ObjectMgr::LoadDungeonResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -771,7 +771,7 @@ void ObjectMgr::LoadLevelResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -797,7 +797,7 @@ void ObjectMgr::LoadStateResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -842,7 +842,7 @@ void ObjectMgr::LoadStatResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -872,7 +872,7 @@ void ObjectMgr::LoadMarketResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     std::string lastMarket{};
     std::vector<MarketInfo> vContainer{};
     do
@@ -921,7 +921,7 @@ void ObjectMgr::LoadJobResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         int i = 0;
@@ -954,7 +954,7 @@ void ObjectMgr::LoadSummonLevelResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -977,7 +977,7 @@ void ObjectMgr::LoadSummonLevelBonus()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1014,7 +1014,7 @@ void ObjectMgr::LoadJobLevelBonus()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1041,7 +1041,7 @@ void ObjectMgr::LoadJobLevelBonus()
 
 void ObjectMgr::LoadNPCResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script, spawn_type FROM NPCResource;");
 
     if (!result)
@@ -1050,7 +1050,7 @@ void ObjectMgr::LoadNPCResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1074,7 +1074,7 @@ void ObjectMgr::LoadNPCResource()
 
 void ObjectMgr::LoadSkillJP()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM SkillJPResource;");
 
     if (!result)
@@ -1083,7 +1083,7 @@ void ObjectMgr::LoadSkillJP()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1104,7 +1104,7 @@ void ObjectMgr::LoadSkillJP()
 
 void ObjectMgr::LoadWorldLocation()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, location_type, time_id, weather_id, weather_ratio, weather_change_time FROM WorldLocation;");
 
     if (!result)
@@ -1113,7 +1113,7 @@ void ObjectMgr::LoadWorldLocation()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1131,7 +1131,7 @@ void ObjectMgr::LoadWorldLocation()
 
 void ObjectMgr::LoadEnhanceResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM EnhanceResource");
 
     if (!result)
@@ -1140,7 +1140,7 @@ void ObjectMgr::LoadEnhanceResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1169,7 +1169,7 @@ void ObjectMgr::LoadEnhanceResource()
 
 void ObjectMgr::LoadMixResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM MixResource");
 
     if (!result)
@@ -1178,7 +1178,7 @@ void ObjectMgr::LoadMixResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1214,7 +1214,7 @@ void ObjectMgr::LoadMixResource()
 
 void ObjectMgr::LoadSummonResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, type, magic_type, rate, stat_id, size, scale, standard_walk_speed, standard_run_speed,"
                                             "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
                                             "form, evolve_target, card_id FROM SummonResource;");
@@ -1225,7 +1225,7 @@ void ObjectMgr::LoadSummonResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1257,7 +1257,7 @@ void ObjectMgr::LoadSummonResource()
 
 void ObjectMgr::LoadStringResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT code, value FROM StringResource;");
 
     if (!result)
@@ -1266,7 +1266,7 @@ void ObjectMgr::LoadStringResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1282,7 +1282,7 @@ void ObjectMgr::LoadStringResource()
 
 void ObjectMgr::LoadSummonNameResource()
 {
-    uint32 oldMSTime = getMSTime();
+    uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT is_post_fix, text_id FROM SummonDefaultNameResource;");
 
     if (!result)
@@ -1291,7 +1291,7 @@ void ObjectMgr::LoadSummonNameResource()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         Field *field = result->Fetch();
@@ -1518,7 +1518,7 @@ SkillBase *ObjectMgr::GetSkillBase(const int skill_id)
     return nullptr;
 }
 
-int64 ObjectMgr::GetNeedExp(int level)
+int64_t ObjectMgr::GetNeedExp(int level)
 {
     int l = level;
     if (l < 1)
@@ -1537,7 +1537,7 @@ MonsterBase *ObjectMgr::GetMonsterInfo(int idx)
     return nullptr;
 }
 
-int64 ObjectMgr::GetNeedSummonExp(int level)
+int64_t ObjectMgr::GetNeedSummonExp(int level)
 {
     if (level <= 300 && level > 0)
         return _summonLevelStore[level];

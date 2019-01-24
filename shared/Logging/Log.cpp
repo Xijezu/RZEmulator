@@ -43,7 +43,7 @@ Log::~Log()
     Close();
 }
 
-uint8 Log::NextAppenderId()
+uint8_t Log::NextAppenderId()
 {
     return AppenderId++;
 }
@@ -68,9 +68,9 @@ void Log::CreateAppenderFromConfig(std::string const &appenderName)
     std::string options = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
 
     Tokenizer tokens(options, ',');
-    auto      iter      = tokens.begin();
+    auto iter = tokens.begin();
 
-    size_t      size = tokens.size();
+    size_t size = tokens.size();
     std::string name = appenderName.substr(9);
 
     if (size < 2)
@@ -80,8 +80,8 @@ void Log::CreateAppenderFromConfig(std::string const &appenderName)
     }
 
     AppenderFlags flags = APPENDER_FLAGS_NONE;
-    AppenderType  type  = AppenderType(atoi(*iter++));
-    LogLevel      level = LogLevel(atoi(*iter++));
+    AppenderType type = AppenderType(atoi(*iter++));
+    LogLevel level = LogLevel(atoi(*iter++));
 
     if (level > LOG_LEVEL_FATAL)
     {
@@ -116,10 +116,10 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
         return;
 
     LogLevel level = LOG_LEVEL_DISABLED;
-    uint8    type  = uint8(-1);
+    uint8_t type = uint8_t(-1);
 
-    std::string options            = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
-    std::string name               = appenderName.substr(7);
+    std::string options = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
+    std::string name = appenderName.substr(7);
 
     if (options.empty())
     {
@@ -127,7 +127,7 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
         return;
     }
 
-    Tokenizer                 tokens(options, ',');
+    Tokenizer tokens(options, ',');
     Tokenizer::const_iterator iter = tokens.begin();
 
     if (tokens.size() != 2)
@@ -157,7 +157,7 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
     //fprintf(stdout, "Log::CreateLoggerFromConfig: Created Logger %s, Level %u\n", name.c_str(), level);
 
     std::istringstream ss(*iter);
-    std::string        str;
+    std::string str;
 
     ss >> str;
     while (ss)
@@ -207,10 +207,10 @@ void Log::ReadLoggersFromConfig()
     }
 }
 
-void Log::RegisterAppender(uint8 index, AppenderCreatorFn appenderCreateFn)
+void Log::RegisterAppender(uint8_t index, AppenderCreatorFn appenderCreateFn)
 {
     auto itr = appenderFactory.find(index);
-            ASSERT(itr == appenderFactory.end());
+    ASSERT(itr == appenderFactory.end());
     appenderFactory[index] = appenderCreateFn;
 }
 
@@ -247,7 +247,7 @@ Logger const *Log::GetLoggerByType(std::string const &type) const
         return NULL;
 
     std::string parentLogger = LOGGER_ROOT;
-    size_t      found        = type.find_last_of(".");
+    size_t found = type.find_last_of(".");
     if (found != std::string::npos)
         parentLogger = type.substr(0, found);
 
@@ -270,13 +270,13 @@ std::string Log::GetTimestampStr()
     try
     {
         return NGemity::StringFormatTC("%04d-%02d-%02d_%02d-%02d-%02d",
-                                     aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
+                                       aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     }
     catch (std::exception const &ex)
     {
         fprintf(stderr, "Failed to initialize timestamp part of log filename! %s", ex.what());
         fflush(stderr);
-                ABORT();
+        ABORT();
     }
 }
 
@@ -312,17 +312,18 @@ bool Log::SetLogLevel(std::string const &name, const char *newLevelc, bool isLog
     return true;
 }
 
-void Log::outCharDump(char const *str, uint32 accountId, uint64 guid, char const *name)
+void Log::outCharDump(char const *str, uint32_t accountId, uint64_t guid, char const *name)
 {
     if (!str || !ShouldLog("entities.player.dump", LOG_LEVEL_INFO))
         return;
 
     std::ostringstream ss;
     ss << "== START DUMP == (account: " << accountId << " guid: " << guid << " name: " << name
-       << ")\n" << str << "\n== END DUMP ==\n";
+       << ")\n"
+       << str << "\n== END DUMP ==\n";
 
     std::unique_ptr<LogMessage> msg(new LogMessage(LOG_LEVEL_INFO, "entities.player.dump", ss.str()));
-    std::ostringstream          param;
+    std::ostringstream param;
     param << guid << '_' << name;
 
     msg->param1 = param.str();
@@ -330,7 +331,7 @@ void Log::outCharDump(char const *str, uint32 accountId, uint64 guid, char const
     write(std::move(msg));
 }
 
-void Log::SetRealmId(uint32 id)
+void Log::SetRealmId(uint32_t id)
 {
     for (auto it = appenders.begin(); it != appenders.end(); ++it)
         it->second->setRealmId(id);
@@ -371,7 +372,7 @@ void Log::Initialize(NGemity::Asio::IoContext *ioContext)
     if (ioContext)
     {
         _ioContext = ioContext;
-        _strand    = new NGemity::Asio::Strand(*ioContext);
+        _strand = new NGemity::Asio::Strand(*ioContext);
     }
 
     LoadFromConfig();
@@ -380,7 +381,7 @@ void Log::Initialize(NGemity::Asio::IoContext *ioContext)
 void Log::SetSynchronous()
 {
     delete _strand;
-    _strand    = nullptr;
+    _strand = nullptr;
     _ioContext = nullptr;
 }
 
@@ -389,8 +390,8 @@ void Log::LoadFromConfig()
     Close();
 
     lowestLogLevel = LOG_LEVEL_FATAL;
-    AppenderId     = 0;
-    m_logsDir      = sConfigMgr->GetStringDefault("LogsDir", "");
+    AppenderId = 0;
+    m_logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
     if (!m_logsDir.empty())
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
             m_logsDir.push_back('/');

@@ -22,11 +22,11 @@
 
 void RegionContainer::InitRegion(float map_width, float map_height)
 {
-    m_MapWidth           = map_width;
-    m_MapHeight          = map_height;
-    m_nRegionWidth       = (uint)((map_width / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
-    m_nRegionHeight      = (uint)((map_height / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
-    m_nRegionBlockWidth  = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
+    m_MapWidth = map_width;
+    m_MapHeight = map_height;
+    m_nRegionWidth = (uint)((map_width / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
+    m_nRegionHeight = (uint)((map_height / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
+    m_nRegionBlockWidth = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
     m_nRegionBlockHeight = (m_nRegionHeight / REGION_BLOCK_COUNT) + 1;
     initRegion();
 }
@@ -40,7 +40,7 @@ void RegionContainer::initRegion()
     }
 }
 
-bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8/* layer*/)
+bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8_t /* layer*/)
 {
     return rx < m_nRegionWidth && ry < m_nRegionHeight;
 }
@@ -50,7 +50,7 @@ Region *RegionContainer::GetRegion(WorldObject *pObject)
     return GetRegion((uint)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
 }
 
-Region *RegionContainer::GetRegion(uint rx, uint ry, uint8 layer)
+Region *RegionContainer::GetRegion(uint rx, uint ry, uint8_t layer)
 {
     Region *result{nullptr};
     if (IsValidRegion(rx, ry, layer))
@@ -65,19 +65,19 @@ void RegionContainer::DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Regio
     uint bottom;
     uint left;
 
-    left     = rx - 3;
+    left = rx - 3;
     if (rx < 3)
         left = 0;
 
-    top     = ry - 3;
+    top = ry - 3;
     if (ry < 3)
         top = 0;
 
-    right     = rx + 3;
+    right = rx + 3;
     if (right >= m_nRegionWidth)
         right = m_nRegionWidth - 1;
 
-    bottom     = ry + 3;
+    bottom = ry + 3;
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
     for (uint x = left; x <= right; ++x)
@@ -101,49 +101,49 @@ void RegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2
     uint bottom;
     uint left;
 
-//             left = rx1;
-//             if(rx2 < rx1)
-//                 left = rx2;
-//
-//             top = ry1;
-//             if(ry2 < ry1)
-//                 top = ry2;
-//
-//             right = rx1;
-//             if(rx2 > rx1)
-//                 right = rx2;
-//             if(right >= this.m_nRegionWidth)
-//                 right = this.m_nRegionWidth-1;
-//
-//             bottom = ry1;
-//             if(ry2 > ry1)
-//                 bottom = ry2;
-//             if(bottom >= this.m_nRegionHeight)
-//                 bottom = this.m_nRegionHeight-1;
-//
-//
-//             right = rx2 - 3;
-//             left = rx1 - 3;
+    //             left = rx1;
+    //             if(rx2 < rx1)
+    //                 left = rx2;
+    //
+    //             top = ry1;
+    //             if(ry2 < ry1)
+    //                 top = ry2;
+    //
+    //             right = rx1;
+    //             if(rx2 > rx1)
+    //                 right = rx2;
+    //             if(right >= this.m_nRegionWidth)
+    //                 right = this.m_nRegionWidth-1;
+    //
+    //             bottom = ry1;
+    //             if(ry2 > ry1)
+    //                 bottom = ry2;
+    //             if(bottom >= this.m_nRegionHeight)
+    //                 bottom = this.m_nRegionHeight-1;
+    //
+    //
+    //             right = rx2 - 3;
+    //             left = rx1 - 3;
 
-    left     = rx2 - 3;
+    left = rx2 - 3;
     if ((rx2 - 3) >= (rx1 - 3))
         left = rx1 - 3;
     if (left <= 0)
         left = 0;
 
-    top     = ry2 - 3;
+    top = ry2 - 3;
     if ((ry2 - 3) >= (ry1 - 3))
         top = ry1 - 3;
     if (top <= 0)
         top = 0;
 
-    right     = rx2 + 3;
+    right = rx2 + 3;
     if ((rx1 + 3) >= (rx2 + 3))
         right = rx1 + 3;
     if (right >= m_nRegionWidth)
         right = m_nRegionWidth - 1;
 
-    bottom     = ry2 + 3;
+    bottom = ry2 + 3;
     if ((ry1 + 3) >= (ry2 + 3))
         bottom = ry1 + 3;
     if (bottom >= m_nRegionHeight)
@@ -170,19 +170,19 @@ void RegionContainer::DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint
     uint bottom;
     uint left;
 
-    left     = rx - 3;
+    left = rx - 3;
     if (rx < 3)
         left = 0;
 
-    top     = ry - 3;
+    top = ry - 3;
     if (ry < 3)
         top = 0;
 
-    right     = rx + 3;
+    right = rx + 3;
     if (right >= m_nRegionWidth)
         right = m_nRegionWidth - 1;
 
-    bottom     = ry + 3;
+    bottom = ry + 3;
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
 
@@ -243,14 +243,14 @@ RegionBlock *RegionContainer::getRegionBlock(uint rcx, uint rcy)
         res = m_RegionBlock[rcx + rcy * m_nRegionBlockWidth];
         if (res == nullptr)
         {
-            res = new RegionBlock{ };
+            res = new RegionBlock{};
             m_RegionBlock[rcx + rcy * m_nRegionBlockWidth] = res;
         }
     }
     return res;
 }
 
-Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8 layer)
+Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8_t layer)
 {
     RegionBlock *b = getRegionBlockPtr(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
     if (b != nullptr)
@@ -258,7 +258,7 @@ Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8 layer)
     return nullptr;
 }
 
-Region *RegionContainer::getRegion(uint rx, uint ry, uint8 layer)
+Region *RegionContainer::getRegion(uint rx, uint ry, uint8_t layer)
 {
     RegionBlock *b = getRegionBlock(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
     if (b != nullptr)
@@ -274,11 +274,9 @@ RegionContainer::~RegionContainer()
 void RegionContainer::deinitRegion()
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
-    for (auto       &x : m_RegionBlock)
+    for (auto &x : m_RegionBlock)
     {
         delete x;
         x = nullptr;
     }
 }
-
-

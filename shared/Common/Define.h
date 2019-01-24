@@ -19,14 +19,14 @@
  */
 #include "CompilerDefs.h"
 #include "PacketEpics.h"
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
 
 #define EPIC EPIC_4_1_1
 #define NGEMITY_LITTLEENDIAN 0
 #define NGEMITY_BIGENDIAN 1
 
 #if !defined(NGEMITY_ENDIAN)
-#if defined(BOOST_BIG_ENDIAN)
+#if defined(BOOST_ENDIAN_BIG_BYTE) && BOOST_ENDIAN_BIG_BYTE
 #define NGEMITY_ENDIAN NGEMITY_BIGENDIAN
 #else
 #define NGEMITY_ENDIAN NGEMITY_LITTLEENDIAN
@@ -78,15 +78,3 @@ typedef unsigned short WORD;
 #define SI64LIT(N) INT64_C(N)
 
 #define SZFMTD "%" PRIuPTR
-
-typedef int64_t int64;
-typedef int32_t int32;
-typedef int16_t int16;
-typedef int8_t int8;
-typedef uint64_t uint64;
-typedef uint32_t uint32;
-typedef uint16_t uint16;
-typedef uint8_t uint8;
-
-typedef uint32 uint;
-typedef uint16 ushort;

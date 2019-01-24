@@ -21,12 +21,11 @@
 #include <algorithm>
 #include "StringFormat.h"
 
-AppenderFile::AppenderFile(uint8 id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs) :
-        Appender(id, name, level, flags),
-        logfile(NULL),
-        _logDir(sLog->GetLogsDir()),
-        _maxFileSize(0),
-        _fileSize(0)
+AppenderFile::AppenderFile(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs) : Appender(id, name, level, flags),
+                                                                                                                                            logfile(NULL),
+                                                                                                                                            _logDir(sLog->GetLogsDir()),
+                                                                                                                                            _maxFileSize(0),
+                                                                                                                                            _fileSize(0)
 {
     if (extraArgs.empty())
         throw InvalidAppenderArgsException(NGemity::StringFormatTC("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));
@@ -50,7 +49,7 @@ AppenderFile::AppenderFile(uint8 id, std::string const &name, LogLevel level, Ap
         _maxFileSize = atoi(extraArgs[2]);
 
     _dynamicName = std::string::npos != _fileName.find("%s");
-    _backup      = (flags & APPENDER_FLAGS_MAKE_FILE_BACKUP) != 0;
+    _backup = (flags & APPENDER_FLAGS_MAKE_FILE_BACKUP) != 0;
 
     if (!_dynamicName)
         logfile = OpenFile(_fileName, mode, !strcmp(mode, "w") && _backup);
@@ -75,7 +74,7 @@ void AppenderFile::_write(LogMessage const *message)
             return;
         fprintf(file, "%s%s\n", message->prefix.c_str(), message->text.c_str());
         fflush(file);
-        _fileSize += uint64(message->Size());
+        _fileSize += uint64_t(message->Size());
         fclose(file);
         return;
     }
@@ -87,7 +86,7 @@ void AppenderFile::_write(LogMessage const *message)
 
     fprintf(logfile, "%s%s\n", message->prefix.c_str(), message->text.c_str());
     fflush(logfile);
-    _fileSize += uint64(message->Size());
+    _fileSize += uint64_t(message->Size());
 }
 
 FILE *AppenderFile::OpenFile(std::string const &filename, std::string const &mode, bool backup)

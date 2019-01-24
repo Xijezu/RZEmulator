@@ -25,7 +25,7 @@ bool SQLQueryHolder::SetPreparedQuery(size_t index, PreparedStatement *stmt)
 {
     if (m_queries.size() <= index)
     {
-        NG_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for prepared statement", uint32(index), (uint32)m_queries.size());
+        NG_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for prepared statement", uint32_t(index), (uint32_t)m_queries.size());
         return false;
     }
 

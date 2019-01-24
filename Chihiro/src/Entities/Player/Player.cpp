@@ -39,7 +39,7 @@
 #pragma warning(disable : 4355)
 #endif
 
-Player::Player(uint32 handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_session(nullptr)
+Player::Player(uint32_t handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_session(nullptr)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -287,10 +287,10 @@ void Player::DB_ReadStorage()
         {
             int fidx = 0;
             Field *field = result->Fetch();
-            int64 sid = field[fidx++].GetInt64();
+            int64_t sid = field[fidx++].GetInt64();
             int idx = field[fidx++].GetInt32();
             int code = field[fidx++].GetInt32();
-            int64 cnt = field[fidx++].GetInt64();
+            int64_t cnt = field[fidx++].GetInt64();
             int level = field[fidx++].GetInt32();
             int enhance = field[fidx++].GetInt32();
             int endurance = field[fidx++].GetInt32();
@@ -380,7 +380,7 @@ void Player::DB_ReadStorage()
                     }
                     else
                     {
-                        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64)newItem->m_Instance.UID);
+                        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64_t)newItem->m_Instance.UID);
                         bIsGoldExist = true;
                     }
                     if (ChangeStorageGold(cnt) != TS_RESULT_SUCCESS)
@@ -429,10 +429,10 @@ bool Player::ReadItemList(int sid)
             Field *fields = result->Fetch();
             int i = 0, invIdx = 0;
 
-            uint64 uid = fields[i++].GetUInt64();
+            uint64_t uid = fields[i++].GetUInt64();
             int idx = fields[i++].GetInt32();
             int code = fields[i++].GetInt32();
-            uint64 cnt = fields[i++].GetUInt64();
+            uint64_t cnt = fields[i++].GetUInt64();
             int gcode = fields[i++].GetInt32();
             int level = fields[i++].GetInt32();
             int enhance = fields[i++].GetInt32();
@@ -498,7 +498,7 @@ bool Player::ReadStateList(Unit *pUnit)
             int idx = 3;
 
             uint duration[3] = {0};
-            uint16 levels[3] = {0};
+            uint16_t levels[3] = {0};
             int base_damage[3] = {0};
             int remain_times[3] = {0};
 
@@ -835,17 +835,17 @@ void Player::SendLoginProperties()
 
     SendWearInfo();
     SendGoldChaosMessage();
-    Messages::SendPropertyMessage(this, this, "chaos", (int64)GetChaos());
+    Messages::SendPropertyMessage(this, this, "chaos", (int64_t)GetChaos());
     Messages::SendLevelMessage(this, this);
     Messages::SendEXPMessage(this, this);
     SendJobInfo();
 
     Messages::SendStatInfo(this, this);
 
-    Messages::SendPropertyMessage(this, this, "pk_count", (int64)GetUInt32Value(PLAYER_FIELD_PKC));
-    Messages::SendPropertyMessage(this, this, "dk_count", (int64)GetUInt32Value(PLAYER_FIELD_DKC));
-    Messages::SendPropertyMessage(this, this, "immoral", (int64)GetUInt32Value(PLAYER_FIELD_IP));
-    Messages::SendPropertyMessage(this, this, "channel", (int64)0);
+    Messages::SendPropertyMessage(this, this, "pk_count", (int64_t)GetUInt32Value(PLAYER_FIELD_PKC));
+    Messages::SendPropertyMessage(this, this, "dk_count", (int64_t)GetUInt32Value(PLAYER_FIELD_DKC));
+    Messages::SendPropertyMessage(this, this, "immoral", (int64_t)GetUInt32Value(PLAYER_FIELD_IP));
+    Messages::SendPropertyMessage(this, this, "channel", (int64_t)0);
     Messages::SendPropertyMessage(this, this, "client_info", m_szClientInfo);
     Messages::SendGameTime(this);
     ChangeLocation(GetPositionX(), GetPositionY(), false, false);
@@ -1042,12 +1042,12 @@ Item *Player::FindItemByCode(int id)
     return m_Inventory.FindByCode(id);
 }
 
-Item *Player::FindItemBySID(int64 uid)
+Item *Player::FindItemBySID(int64_t uid)
 {
     return m_Inventory.FindBySID(uid);
 }
 
-Item *Player::FindItemByHandle(uint32 handle)
+Item *Player::FindItemByHandle(uint32_t handle)
 {
     return m_Inventory.FindByHandle(handle);
 }
@@ -1219,7 +1219,7 @@ bool Player::IsValidTrigger(const std::string &szTrigger)
     return false;
 }
 
-ushort Player::ChangeGold(int64 nGold)
+ushort Player::ChangeGold(int64_t nGold)
 {
     if (nGold != GetGold())
     {
@@ -1227,7 +1227,7 @@ ushort Player::ChangeGold(int64 nGold)
             return TS_RESULT_TOO_MUCH_MONEY;
         if (nGold < 0)
             return TS_RESULT_TOO_CHEAP;
-        SetUInt64Value(PLAYER_FIELD_GOLD, (uint64)nGold);
+        SetUInt64Value(PLAYER_FIELD_GOLD, (uint64_t)nGold);
         SendGoldChaosMessage();
     }
     return TS_RESULT_SUCCESS;
@@ -1357,7 +1357,7 @@ void Player::onChangeCount(Inventory * /*pInventory*/, Item *pItem, bool bSkipUp
     UpdateWeightWithInventory();
 }
 
-Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
+Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
 {
     if ((uint)pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID))
     {
@@ -1368,8 +1368,8 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
     // In this case gold
     if (pItem->m_Instance.Code == 0)
     {
-        int64 nPrevGoldAmount = GetGold();
-        int64 gold = GetGold() + pItem->m_Instance.nCount;
+        int64_t nPrevGoldAmount = GetGold();
+        int64_t gold = GetGold() + pItem->m_Instance.nCount;
         if (ChangeGold(gold) != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
@@ -1390,7 +1390,7 @@ Item *Player::PushItem(Item *pItem, int64 count, bool bSkipUpdateToDB)
     return ni;
 }
 
-Item *Player::PopItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB)
+Item *Player::PopItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB)
 {
     if (pItem != nullptr && cnt != 0 && pItem->m_Instance.nCount >= cnt && pItem->m_Instance.OwnerHandle == GetHandle() && pItem->IsInInventory())
     {
@@ -1407,7 +1407,7 @@ Item *Player::PopItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB)
     return nullptr;
 }
 
-Item *Player::popItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB)
+Item *Player::popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB)
 {
     if (pItem->m_Instance.nCount >= cnt)
     {
@@ -1417,7 +1417,7 @@ Item *Player::popItem(Item *pItem, int64 cnt, bool bSkipUpdateToDB)
     return nullptr;
 }
 
-bool Player::EraseItem(Item *pItem, int64 count)
+bool Player::EraseItem(Item *pItem, int64_t count)
 {
     return m_Inventory.Erase(pItem, count, false);
 }
@@ -1524,7 +1524,7 @@ void Player::OnUpdate()
     Unit::OnUpdate();
 }
 
-void Player::onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level)
+void Player::onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level)
 {
     auto sb = sObjectMgr.GetSkillBase((uint)skill_id);
     if (sb->id != 0 && sb->is_valid == 2)
@@ -1554,7 +1554,7 @@ void Player::onExpChange()
     int oldLevel = GetLevel();
     if (level != 0 && level != oldLevel)
     {
-        SetLevel((uint8)level);
+        SetLevel((uint8_t)level);
         if (level < oldLevel)
         {
             this->CalculateStat();
@@ -2297,7 +2297,7 @@ void Player::onModifyStatAndAttribute()
     Messages::SendPropertyMessage(this, this, "max_chaos", GetMaxChaos());
 }
 
-uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
+uint16_t Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint ct = sWorld.GetArTime();
     if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || (pItem->m_pItemBase->cool_time_group != 0 && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
@@ -2318,7 +2318,7 @@ uint16 Player::IsUseableItem(Item *pItem, Unit *pTarget)
     return TS_RESULT_LIMIT_MIN;
 }
 
-uint16 Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter)
+uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter)
 {
     if (pTarget == nullptr)
         pTarget = this;
@@ -2593,7 +2593,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
     {
         fMod = 1.0f;
     }
-    auto res = ChangeGold((int64)(q->m_QuestBase->nGold * fMod) + GetGold());
+    auto res = ChangeGold((int64_t)(q->m_QuestBase->nGold * fMod) + GetGold());
     if (res != TS_RESULT_SUCCESS)
     {
         Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|TOO_MUCH_MONEY|{}", res));
@@ -2626,7 +2626,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
             // @todo: max JP
         }
 
-        Unit::AddEXP(static_cast<int64>(nRewardEXP * fMod), nRewardJP, false);
+        Unit::AddEXP(static_cast<int64_t>(nRewardEXP * fMod), nRewardJP, false);
         // @todo: favor
 
         if (q->m_QuestBase->nType == QuestType::QUEST_COLLECT || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM || q->m_QuestBase->nType == QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS)
@@ -2639,14 +2639,14 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
                 {
                     auto pItem = FindItemByCode(nItemCode);
                     if (pItem != nullptr)
-                        EraseItem(pItem, (uint64)q->GetValue((2 * i) + 1));
+                        EraseItem(pItem, (uint64_t)q->GetValue((2 * i) + 1));
                 }
             }
         }
 
         if (q->m_QuestBase->DefaultReward.nItemCode != 0)
         {
-            auto pItem = Item::AllocItem(0, q->m_QuestBase->DefaultReward.nItemCode, (uint64)(q->m_QuestBase->DefaultReward.nQuantity * fMod), BY_QUEST,
+            auto pItem = Item::AllocItem(0, q->m_QuestBase->DefaultReward.nItemCode, (uint64_t)(q->m_QuestBase->DefaultReward.nQuantity * fMod), BY_QUEST,
                                          q->m_QuestBase->DefaultReward.nLevel < 1 ? 1 : q->m_QuestBase->DefaultReward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->m_Instance.nCount, false);
@@ -2656,7 +2656,7 @@ void Player::EndQuest(int code, int nRewardID, bool bForce)
         if (nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
         {
             auto reward = q->m_QuestBase->OptionalReward[nRewardID];
-            auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64)(reward.nQuantity * fMod), BY_QUEST,
+            auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64_t)(reward.nQuantity * fMod), BY_QUEST,
                                          reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->m_Instance.nCount, false);
@@ -2829,7 +2829,7 @@ void Player::DB_ItemCoolTime(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    uint8 idx = 0;
+    uint8_t idx = 0;
     int cool_down = 0;
     uint ct = sWorld.GetArTime();
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_ITEMCOOLTIME);
@@ -2854,12 +2854,12 @@ bool Player::IsUsingCrossBow() const
     return m_anWear[0] != nullptr ? m_anWear[0]->IsCrossBow() : false;
 }
 
-bool Player::EraseBullet(int64 count)
+bool Player::EraseBullet(int64_t count)
 {
     auto item = GetWornItem(WEAR_SHIELD);
     if (item != nullptr && item->m_pItemBase->group == GROUP_BULLET && item->m_Instance.nCount >= count)
     {
-        int64 nc = item->m_Instance.nCount - count;
+        int64_t nc = item->m_Instance.nCount - count;
         m_QuestManager.UpdateQuestStatusByItemCount(item->m_Instance.Code, nc);
         if (item->m_Instance.nCount == count)
             Putoff(WEAR_SHIELD);
@@ -2869,24 +2869,24 @@ bool Player::EraseBullet(int64 count)
     return false;
 }
 
-void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
+void Player::AddEXP(int64_t exp, uint jp, bool bApplyStamina)
 {
     // @todo immoral
 
     // @todo summon level exp
 
-    int64 gain_exp = exp;
-    int64 bonus_exp = 0;
+    int64_t gain_exp = exp;
+    int64_t bonus_exp = 0;
     int bonus_jp = 0;
     if (exp != 0)
     {
         if (bApplyStamina)
         {
-            gain_exp = (int64)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
+            gain_exp = (int64_t)((float)gain_exp / GameRule::GetStaminaRatio(GetLevel()));
             auto s = GetStamina();
             if (s >= gain_exp || m_bStaminaActive)
             {
-                bonus_exp = (int64)((float)exp * GameRule::GetStaminaBonus());
+                bonus_exp = (int64_t)((float)exp * GameRule::GetStaminaBonus());
                 bonus_jp = (int)((float)jp * GameRule::GetStaminaBonus());
                 if (bonus_exp != 0 || bonus_jp != 0)
                 {
@@ -2922,7 +2922,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
             }
         }
 
-        int64 nActiveSummonEXP = GameRule::GetIntValueByRandomInt64(m_fActiveSummonExpAmp + m_fDistEXPMod * (double)exp);
+        int64_t nActiveSummonEXP = GameRule::GetIntValueByRandomInt64(m_fActiveSummonExpAmp + m_fDistEXPMod * (double)exp);
         for (auto &sum1 : vActiveSummonList)
         {
             if (nActiveSummonEXP != 0 && sum1->GetLevel() < GetLevel())
@@ -2931,7 +2931,7 @@ void Player::AddEXP(int64 exp, uint jp, bool bApplyStamina)
             }
         }
 
-        int64 nDeactiveSummonEXP = GameRule::GetIntValueByRandomInt64((m_fDistEXPMod - 1.0f + m_fDeactiveSummonExpAmp) * (double)exp);
+        int64_t nDeactiveSummonEXP = GameRule::GetIntValueByRandomInt64((m_fDistEXPMod - 1.0f + m_fDeactiveSummonExpAmp) * (double)exp);
         for (auto &sum2 : vDeActiveSummonList)
         {
             if (nDeactiveSummonEXP != 0 && sum2->GetLevel() < GetLevel())
@@ -3052,7 +3052,7 @@ void Player::applyState(State &state)
     Unit::applyState(state);
 }
 
-void Player::setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64 nBonusEXP, int nBonusJP)
+void Player::setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64_t nBonusEXP, int nBonusJP)
 {
     m_pBonusInfo[type].type = type;
     m_pBonusInfo[type].rate = nBonusPerc;
@@ -3072,7 +3072,7 @@ void Player::clearPendingBonusMsg()
 
 void Player::sendBonusEXPJPMsg()
 {
-    uint16 cnt{0};
+    uint16_t cnt{0};
     for (auto &bonus : m_pBonusInfo)
     {
         if (bonus.exp != -1)
@@ -3099,7 +3099,7 @@ void Player::sendBonusEXPJPMsg()
     clearPendingBonusMsg();
 }
 
-bool Player::isInLocationType(uint8 nLocationType)
+bool Player::isInLocationType(uint8_t nLocationType)
 {
     return m_WorldLocation != nullptr && m_WorldLocation->location_type == nLocationType;
 }
@@ -3220,7 +3220,7 @@ void Player::OpenStorage()
     }
 }
 
-ushort Player::ChangeStorageGold(int64 gold)
+ushort Player::ChangeStorageGold(int64_t gold)
 {
     if (GetStorageGold() != gold)
     {
@@ -3228,7 +3228,7 @@ ushort Player::ChangeStorageGold(int64 gold)
             return TS_RESULT_TOO_MUCH_MONEY;
         if (gold < 0)
             return TS_RESULT_TOO_CHEAP;
-        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD, (uint64)gold);
+        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD, (uint64_t)gold);
         DB_UpdateStorageGold();
         Messages::SendPropertyMessage(this, this, "storage_gold", GetStorageGold());
     }
@@ -3237,11 +3237,11 @@ ushort Player::ChangeStorageGold(int64 gold)
 
 void Player::DB_UpdateStorageGold()
 {
-    auto sid = (int64)GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID);
+    auto sid = (int64_t)GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID);
     if (sid == 0)
     {
         sid = sWorld.GetItemIndex();
-        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64)sid);
+        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64_t)sid);
     }
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STORAGE_GOLD);
     stmt->setInt64(0, sid);
@@ -3261,7 +3261,7 @@ Item *Player::FindStorageItem(int code)
     return m_Storage.FindByCode(code);
 }
 
-void Player::MoveStorageToInventory(Item *pItem, int64 count)
+void Player::MoveStorageToInventory(Item *pItem, int64_t count)
 {
     if (m_bIsUsingStorage && pItem->IsInStorage() && m_Storage.check(pItem) && pItem->m_nAccountID == GetInt32Value(PLAYER_FIELD_ACCOUNT_ID) && pItem->m_Instance.nCount >= count && (pItem->IsJoinable() || pItem->m_Instance.nCount == count)
         /* && IsTakeable(pItem->GetHandle, count)*/)
@@ -3288,9 +3288,9 @@ void Player::MoveStorageToInventory(Item *pItem, int64 count)
     }
 }
 
-void Player::MoveInventoryToStorage(Item *pItem, int64 count)
+void Player::MoveInventoryToStorage(Item *pItem, int64_t count)
 {
-    int64 nResultCnt = 0;
+    int64_t nResultCnt = 0;
     Item *pNewItem{nullptr};
 
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
@@ -3483,7 +3483,7 @@ void Player::onDropQuest(Quest *pQuest)
     Messages::SendNPCStatusInVisibleRange(this);
 }
 
-void Player::StartTrade(uint32 pTargetHandle)
+void Player::StartTrade(uint32_t pTargetHandle)
 {
     if (!m_bTrading && !m_bTradeFreezed)
     {
@@ -3591,10 +3591,10 @@ LABEL_10:
 }
 */
 
-void Player::AddGoldToTradeWindow(int64 nGold)
+void Player::AddGoldToTradeWindow(int64_t nGold)
 {
     if (!m_bTradeFreezed)
-        SetUInt64Value(PLAYER_FIELD_TRADE_GOLD, (uint64)nGold);
+        SetUInt64Value(PLAYER_FIELD_TRADE_GOLD, (uint64_t)nGold);
 }
 
 bool Player::IsTradable(Item *pItem)
@@ -3602,7 +3602,7 @@ bool Player::IsTradable(Item *pItem)
     return IsErasable(pItem) && pItem->IsTradable();
 }
 
-bool Player::AddItemToTradeWindow(Item *item, int32 count)
+bool Player::AddItemToTradeWindow(Item *item, int32_t count)
 {
     if (!m_bTradeFreezed && count <= item->m_Instance.nCount)
     {
@@ -3612,7 +3612,7 @@ bool Player::AddItemToTradeWindow(Item *item, int32 count)
     return false;
 }
 
-bool Player::RemoveItemFromTradeWindow(Item *item, int32 count)
+bool Player::RemoveItemFromTradeWindow(Item *item, int32_t count)
 {
     if (m_bTradeFreezed)
         return false;
@@ -3640,10 +3640,10 @@ bool Player::ProcessTrade()
         if (tradeTarget == nullptr)
             return false;
 
-        int64 nTradeTargetResult = GetGold();
-        int64 nPrevTradeTargetGold = tradeTarget->GetGold();
+        int64_t nTradeTargetResult = GetGold();
+        int64_t nPrevTradeTargetGold = tradeTarget->GetGold();
 
-        uint16 resultGold = processTradeGold();
+        uint16_t resultGold = processTradeGold();
         if (resultGold != TS_RESULT_SUCCESS)
         {
             if (resultGold == TS_RESULT_TOO_MUCH_MONEY)
@@ -3692,7 +3692,7 @@ bool Player::ProcessTrade()
     return false;
 }
 
-uint16 Player::processTradeGold()
+uint16_t Player::processTradeGold()
 {
     if (!m_bTrading || !m_bTradeFreezed)
         return TS_RESULT_NOT_ACTABLE;
@@ -3703,8 +3703,8 @@ uint16 Player::processTradeGold()
 
     if (IsInWorld())
     {
-        int64 tradeGold = GetTradeGold();
-        int64 prevGold = GetGold();
+        int64_t tradeGold = GetTradeGold();
+        int64_t prevGold = GetGold();
 
         if (tradeGold == 0)
             return TS_RESULT_SUCCESS;
@@ -3738,7 +3738,7 @@ uint16 Player::processTradeGold()
     return TS_RESULT_SUCCESS;
 }
 
-uint16 Player::processTradeItem()
+uint16_t Player::processTradeItem()
 {
     auto tradeTarget = GetTradeTarget();
     if (tradeTarget == nullptr)
@@ -3799,7 +3799,7 @@ bool Player::CheckTradeItem()
     return true;
 }
 
-bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
+bool Player::GiveItem(Player *pTarget, uint32_t ItemHandle, int64_t count)
 {
     Item *origItem = FindItemByHandle(ItemHandle);
 
@@ -3822,7 +3822,7 @@ bool Player::GiveItem(Player *pTarget, uint32 ItemHandle, int64 count)
     return true;
 }
 
-Item *Player::DropItem(Player *pTarget, Item *pItem, int64 count)
+Item *Player::DropItem(Player *pTarget, Item *pItem, int64_t count)
 {
     if (pTarget == nullptr || pItem == nullptr)
         return nullptr;

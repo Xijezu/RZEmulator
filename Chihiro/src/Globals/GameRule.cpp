@@ -18,16 +18,16 @@
 #include "GameRule.h"
 #include "World.h"
 
-int   GameRule::_modtable[8]         = {0, 3, 3, 2, 2, 3, 2, 2};
-int   GameRule::_chipLevelLimit[8]   = {20, 50, 80, 100, 120, 150, 180, 200};
+int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
+int GameRule::_chipLevelLimit[8] = {20, 50, 80, 100, 120, 150, 180, 200};
 float GameRule::_staminaExpRate[300] = {0};
-int   GameRule::nEnhanceFailType     = 2;
+int GameRule::nEnhanceFailType = 2;
 
 float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
 {
     float ilp = GetItemLevelPenalty(creature_level, item_rank, item_level);
     //-,*,+
-    float v8  = (item_current_value - item_rank_value) * ilp;
+    float v8 = (item_current_value - item_rank_value) * ilp;
     return v8 + item_rank_value;
     //float f1 = item_current_value * item_rank_value;
     //return f1 * ilp;
@@ -42,9 +42,9 @@ float GameRule::GetItemValue(float item_current_value, int item_rank_value, int 
 */
 float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_level)
 {
-    float result      = 0;
-    int   recommended = GetItemRecommendedLevel(item_rank, item_level);
-    int   limit       = GetItemLevelLimit(item_rank);
+    float result = 0;
+    int recommended = GetItemRecommendedLevel(item_rank, item_level);
+    int limit = GetItemLevelLimit(item_rank);
 
     if (item_level == 1 || creature_level < limit || creature_level >= recommended)
     {
@@ -52,15 +52,15 @@ float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_
     }
     else
     {
-        int64 B = 500ll;
+        int64_t B = 500ll;
 
-        int64 n       = 10000ll * (recommended - limit);                                        // 0
-        int64 resulta = 10000ll * (recommended - creature_level);                        // 0
+        int64_t n = 10000ll * (recommended - limit);                // 0
+        int64_t resulta = 10000ll * (recommended - creature_level); // 0
         resulta /= n;
 
-        int64 v6 = (item_level) * B;
+        int64_t v6 = (item_level)*B;
         B = 10000 - v6;
-        int64 v8 = 10000 - (resulta * B);
+        int64_t v8 = 10000 - (resulta * B);
         result = v8;
     }
     return result / 10000;
@@ -87,24 +87,24 @@ int GameRule::GetRankLevel(int rank)
 
     switch (idx)
     {
-        case 1:
-            return 0;
-        case 2:
-            return 20;
-        case 3:
-            return 50;
-        case 4:
-            return 80;
-        case 5:
-            return 100;
-        case 6:
-            return 120;
-        case 7:
-            return 150;
-        case 8:
-            return 180;
-        default:
-            return 0;
+    case 1:
+        return 0;
+    case 2:
+        return 20;
+    case 3:
+        return 50;
+    case 4:
+        return 80;
+    case 5:
+        return 100;
+    case 6:
+        return 120;
+    case 7:
+        return 150;
+    case 8:
+        return 180;
+    default:
+        return 0;
     }
 }
 
@@ -165,12 +165,12 @@ int GameRule::GetIntValueByRandomInt(double fValue)
     return (int)result;
 }
 
-int64 GameRule::GetIntValueByRandomInt64(double fValue)
+int64_t GameRule::GetIntValueByRandomInt64(double fValue)
 {
     double result = fValue + 1;
     if (((uint)rand32() % 100) / 100.0 + fValue >= fValue)
         result = fValue;
-    return (int64)result;
+    return (int64_t)result;
 }
 
 float GameRule::GetStaminaRatio(int level)

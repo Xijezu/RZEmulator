@@ -29,72 +29,72 @@ struct Player
     {
     }
 
-    uint32      nAccountID;
+    uint32_t nAccountID;
     std::string szLoginName;
-    bool        bIsBlocked;
-    uint32      nLastServerIDX;
-    bool        bIsInGame;
-    bool        bKickNextLogin;
-    uint64      nOneTimeKey;
-    int         nGameIDX;
-    int         nPermission;
+    bool bIsBlocked;
+    uint32_t nLastServerIDX;
+    bool bIsInGame;
+    bool bKickNextLogin;
+    uint64_t nOneTimeKey;
+    int nGameIDX;
+    int nPermission;
 };
 
 /// Storage object for the list of players on the server
 class PlayerList
 {
-    public:
-        typedef std::map<std::string, Player *> PlayerMap;
-        ~PlayerList() = default;
+  public:
+    typedef std::map<std::string, Player *> PlayerMap;
+    ~PlayerList() = default;
 
-        static PlayerList &Instance()
+    static PlayerList &Instance()
+    {
+        static PlayerList instance;
+        return instance;
+    }
+
+    void AddPlayer(Player *pNewPlayer)
+    {
+        // Adds a player to the list
         {
-            static PlayerList instance;
-            return instance;
+            NG_UNIQUE_GUARD writeGuard(*GetGuard());
+            m_players[pNewPlayer->szLoginName] = pNewPlayer;
         }
+    }
 
-        void AddPlayer(Player *pNewPlayer)
+    void RemovePlayer(const std::string &szAccount)
+    {
+        // Removes a player from the list
         {
-            // Adds a player to the list
-            {
-                NG_UNIQUE_GUARD writeGuard(*GetGuard());
-                m_players[pNewPlayer->szLoginName] = pNewPlayer;
-            }
-        }
-
-        void RemovePlayer(const std::string &szAccount)
-        {
-            // Removes a player from the list
-            {
-                NG_UNIQUE_GUARD writeGuard(*GetGuard());
-                if (m_players.count(szAccount) == 1)
-                    m_players.erase(szAccount);
-            }
-        }
-
-        NG_SHARED_MUTEX *GetGuard()
-        {
-            return &i_lock;
-        }
-
-        // You need to use the mutex while working with the map!
-        PlayerMap *GetMap()
-        {
-            return &m_players;
-        }
-
-        Player *GetPlayer(const std::string &szAccount)
-        {
+            NG_UNIQUE_GUARD writeGuard(*GetGuard());
             if (m_players.count(szAccount) == 1)
-                return m_players[szAccount];
-            return nullptr;
+                m_players.erase(szAccount);
         }
+    }
 
-    private:
-        NG_SHARED_MUTEX i_lock;
-        PlayerMap                               m_players;                                  ///< Internal map of players
-    protected:
-        PlayerList() = default;
+    NG_SHARED_MUTEX *GetGuard()
+    {
+        return &i_lock;
+    }
+
+    // You need to use the mutex while working with the map!
+    PlayerMap *GetMap()
+    {
+        return &m_players;
+    }
+
+    Player *GetPlayer(const std::string &szAccount)
+    {
+        if (m_players.count(szAccount) == 1)
+            return m_players[szAccount];
+        return nullptr;
+    }
+
+  private:
+    NG_SHARED_MUTEX i_lock;
+    PlayerMap m_players; ///< Internal map of players
+  protected:
+    PlayerList() = default;
 };
 
 #define sPlayerMapList PlayerList::Instance()

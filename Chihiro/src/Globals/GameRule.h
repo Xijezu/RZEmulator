@@ -37,7 +37,7 @@ public:
   static int GetMaxLevel() { return 150; }
 
   static int GetIntValueByRandomInt(double fValue);
-  static int64 GetIntValueByRandomInt64(double fValue);
+  static int64_t GetIntValueByRandomInt64(double fValue);
   static float GetStaminaRatio(int level);
   static float GetStaminaBonus();
   static int nEnhanceFailType;

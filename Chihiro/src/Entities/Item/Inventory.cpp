@@ -25,7 +25,7 @@ Inventory::Inventory() : m_pEventReceiver(nullptr), m_fWeight(0),
 
 }
 
-Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
+Item *Inventory::Push(Item *item, int64_t cnt, bool bSkipUpdateItemToDB)
 {
     if (item->IsJoinable())
     {
@@ -35,7 +35,7 @@ Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
             m_fWeight += item->m_pItemBase->weight * (float)cnt;
             if (ji->m_Instance.nWearInfo != WEAR_NONE)
                 m_fWeightModifier -= item->m_pItemBase->weight * (float)cnt;
-            int64 new_cnt = cnt + ji->m_Instance.nCount;
+            int64_t new_cnt = cnt + ji->m_Instance.nCount;
             setCount(ji, new_cnt, bSkipUpdateItemToDB);
             return ji;
         }
@@ -53,9 +53,9 @@ Item *Inventory::Push(Item *item, int64 cnt, bool bSkipUpdateItemToDB)
     return item;
 }
 
-Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
+Item *Inventory::Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
 {
-    int64 new_cnt;
+    int64_t new_cnt;
 
     if (!check(pItem))
         return nullptr;
@@ -84,7 +84,7 @@ Item *Inventory::Pop(Item *pItem, int64 cnt, bool bSkipUpdateItemToDB)
     return nullptr;
 }
 
-bool Inventory::Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB)
+bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
 {
     if (!check(pItem))
         return false;
@@ -102,7 +102,7 @@ bool Inventory::Erase(Item *pItem, int64 count, bool bSkipUpdateItemToDB)
     m_fWeight -= pItem->m_pItemBase->weight * (float)count;
     if (pItem->m_Instance.nWearInfo != WEAR_NONE)
         m_fWeightModifier += pItem->m_pItemBase->weight * (float)count;
-    int64 nc = pItem->m_Instance.nCount - count;
+    int64_t nc = pItem->m_Instance.nCount - count;
     setCount(pItem, nc, bSkipUpdateItemToDB);
     return true;
 }
@@ -131,7 +131,7 @@ Item *Inventory::FindByCode(int code)
     return nullptr;
 }
 
-Item *Inventory::FindBySID(int64 uid)
+Item *Inventory::FindBySID(int64_t uid)
 {
     for (auto &i : m_vList)
     {
@@ -151,7 +151,7 @@ Item *Inventory::FindByHandle(uint handle)
     return nullptr;
 }
 
-void Inventory::setCount(Item *item, int64 newCnt, bool bSkipUpdateItemToDB)
+void Inventory::setCount(Item *item, int64_t newCnt, bool bSkipUpdateItemToDB)
 {
     item->SetCount(newCnt);
     if (m_pEventReceiver != nullptr)

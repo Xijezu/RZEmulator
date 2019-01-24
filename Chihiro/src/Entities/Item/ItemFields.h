@@ -16,8 +16,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-constexpr int64 MAX_GOLD_FOR_INVENTORY = 100000000000;
-constexpr int64 MAX_GOLD_FOR_STORAGE = 100000000000;
+constexpr int64_t MAX_GOLD_FOR_INVENTORY = 100000000000;
+constexpr int64_t MAX_GOLD_FOR_STORAGE = 100000000000;
 constexpr int MAX_OPTION_NUMBER = 4;
 constexpr int MAX_ITEM_WEAR = 24;
 constexpr int MAX_COOLTIME_GROUP = 40;
@@ -75,7 +75,7 @@ enum class ITEM_EFFECT_PASSIVE
     AMP_PARAMETER_B = 99,
 };
 
-enum FlagBits : uint
+enum FlagBits : uint32_t
 {
     ITEM_FLAG_NORMAL = 0x00,
     ITEM_FLAG_CARD = 0x01,
@@ -91,7 +91,7 @@ enum FlagBits : uint
 
 /// \brief This is actually the idx for the ItemBase::flaglist
 /// Not the retail bitset
-enum ItemFlag : int
+enum ItemFlag : int32_t
 {
     FLAG_CASHITEM = 0,
     FLAG_WEAR = 1,
@@ -114,7 +114,7 @@ enum ItemFlag : int
     FLAG_HUNTAHOLIC = 18
 };
 
-enum GenerateCode : int
+enum GenerateCode : int32_t
 {
     BY_MONSTER = 0,
     BY_MARKET = 1,
@@ -134,7 +134,7 @@ enum GenerateCode : int
     BY_UNKNOWN = 126
 };
 
-enum ItemWearType : int16
+enum ItemWearType : int16_t
 {
     WEAR_CANTWEAR = -1,
     WEAR_NONE = -1,
@@ -170,7 +170,7 @@ enum ItemWearType : int16
     WEAR_BULLET = 1,
 };
 
-enum ItemClass : int
+enum ItemClass : int32_t
 {
     CLASS_ETC = 0,
     CLASS_DOUBLE_AXE = 95,
@@ -234,7 +234,7 @@ enum ItemClass : int
     CLASS_DECO_ONEHAND_AXE = 621,
 };
 
-enum ItemType : int
+enum ItemType : int32_t
 {
     TYPE_ETC = 0,
     TYPE_ARMOR = 1,
@@ -247,7 +247,7 @@ enum ItemType : int
     TYPE_USE_CARD = 8,
 };
 
-enum ItemGroup : int
+enum ItemGroup : int32_t
 {
     GROUP_ETC = 0,
     GROUP_WEAPON = 1,
@@ -292,7 +292,7 @@ enum class LIMIT_FLAG : int32_t
     LIMIT_SUMMONER = (1 << 13),
 };
 
-enum ItemCode : int
+enum ItemCode : int32_t
 {
     CHALK_OF_RESTORATION = 800000,
     UNIT_CARD = 800001,

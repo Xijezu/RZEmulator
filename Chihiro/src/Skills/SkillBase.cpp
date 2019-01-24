@@ -107,7 +107,7 @@ int SkillBase::GetNeedJobPoint(int skill_lv)
     return result;
 }
 
-bool SkillBase::IsUsable(uint8 nUseIndex) const
+bool SkillBase::IsUsable(uint8_t nUseIndex) const
 {
     switch (nUseIndex)
     {
@@ -128,7 +128,7 @@ bool SkillBase::IsUsable(uint8 nUseIndex) const
     }
 }
 
-int SkillBase::GetCostEnergy(uint8 skill_lv) const
+int SkillBase::GetCostEnergy(uint8_t skill_lv) const
 {
     return static_cast<int32_t>((cost_energy_per_skl * skill_lv) + cost_energy);
 }

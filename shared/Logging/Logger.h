@@ -25,19 +25,19 @@ struct LogMessage;
 
 class Logger
 {
-    public:
-        Logger(std::string const &name, LogLevel level);
+  public:
+    Logger(std::string const &name, LogLevel level);
 
-        void addAppender(uint8 type, Appender *appender);
-        void delAppender(uint8 type);
+    void addAppender(uint8_t type, Appender *appender);
+    void delAppender(uint8_t type);
 
-        std::string const &getName() const;
-        LogLevel getLogLevel() const;
-        void setLogLevel(LogLevel level);
-        void write(LogMessage *message) const;
+    std::string const &getName() const;
+    LogLevel getLogLevel() const;
+    void setLogLevel(LogLevel level);
+    void write(LogMessage *message) const;
 
-    private:
-        std::string                           name;
-        LogLevel                              level;
-        std::unordered_map<uint8, Appender *> appenders;
+  private:
+    std::string name;
+    LogLevel level;
+    std::unordered_map<uint8_t, Appender *> appenders;
 };

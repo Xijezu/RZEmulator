@@ -342,7 +342,7 @@ class XPacket : public ByteBuffer
     {
     }
 
-    explicit XPacket(NGemity::Packets packID) : ByteBuffer(0), m_nPacketID(static_cast<uint16>(packID))
+    explicit XPacket(NGemity::Packets packID) : ByteBuffer(0), m_nPacketID(static_cast<uint16_t>(packID))
     {
         resize(7);
         put(4, m_nPacketID);
@@ -354,13 +354,13 @@ class XPacket : public ByteBuffer
         return nullptr;
     }
 
-    explicit XPacket(uint16 packID) : ByteBuffer(0), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID) : ByteBuffer(0), m_nPacketID(packID)
     {
         resize(7);
         put(4, packID);
     }
 
-    explicit XPacket(uint16 packID, int32 res, char *encrypted) : ByteBuffer(res), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID, int32_t res, char *encrypted) : ByteBuffer(res), m_nPacketID(packID)
     {
         append(encrypted, 7);
     }
@@ -370,14 +370,14 @@ class XPacket : public ByteBuffer
     {
     }
 
-    explicit XPacket(uint16 packID, MessageBuffer &&buffer) : ByteBuffer(std::move(buffer)), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID, MessageBuffer &&buffer) : ByteBuffer(std::move(buffer)), m_nPacketID(packID)
     {
     }
 
     void FinalizePacket()
     {
-        put(0, (uint32)size());
-        put(6, (uint8)TS_MESSAGE::GetChecksum(m_nPacketID, size()));
+        put(0, (uint32_t)size());
+        put(6, (uint8_t)TS_MESSAGE::GetChecksum(m_nPacketID, size()));
     }
 
     void Reset()
@@ -387,17 +387,17 @@ class XPacket : public ByteBuffer
         put(4, m_nPacketID);
     }
 
-    void Initialize(uint16 packID, size_t newres = 200)
+    void Initialize(uint16_t packID, size_t newres = 200)
     {
         clear();
         _storage.reserve(newres);
         m_nPacketID = packID;
     }
 
-    uint16 GetPacketID() const { return m_nPacketID; }
+    uint16_t GetPacketID() const { return m_nPacketID; }
 
-    void SetPacketID(uint16 packID) { m_nPacketID = packID; }
+    void SetPacketID(uint16_t packID) { m_nPacketID = packID; }
 
   protected:
-    uint16 m_nPacketID;
+    uint16_t m_nPacketID;
 };

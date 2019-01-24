@@ -19,18 +19,18 @@
 #include "DatabaseEnvFwd.h"
 #include <vector>
 
-enum class DatabaseFieldTypes : uint8
+enum class DatabaseFieldTypes : uint8_t
 {
-        Null,
-        Int8,
-        Int16,
-        Int32,
-        Int64,
-        Float,
-        Double,
-        Decimal,
-        Date,
-        Binary
+    Null,
+    Int8,
+    Int16,
+    Int32,
+    Int64,
+    Float,
+    Double,
+    Decimal,
+    Date,
+    Binary
 };
 
 /**
@@ -42,9 +42,9 @@ enum class DatabaseFieldTypes : uint8
 
     |   MySQL type           |  method to use                         |
     |------------------------|----------------------------------------|
-    | TINYINT                | GetBool, GetInt8, GetUInt8             |
-    | SMALLINT               | GetInt16, GetUInt16                    |
-    | MEDIUMINT, INT         | GetInt32, GetUInt32                    |
+    | TINYINT                | GetBool, GetInt8, Getuint8_t             |
+    | SMALLINT               | GetInt16, Getuint16_t                    |
+    | MEDIUMINT, INT         | GetInt32, Getuint32_t                    |
     | BIGINT                 | GetInt64, GetUInt64                    |
     | FLOAT                  | GetFloat                               |
     | DOUBLE, DECIMAL        | GetDouble                              |
@@ -65,77 +65,77 @@ enum class DatabaseFieldTypes : uint8
 */
 class Field
 {
-        friend class ResultSet;
-        friend class PreparedResultSet;
+    friend class ResultSet;
+    friend class PreparedResultSet;
 
-    public:
-        Field();
-        ~Field();
+  public:
+    Field();
+    ~Field();
 
-        bool GetBool() const // Wrapper, actually gets integer
-        {
-            return GetUInt8() == 1 ? true : false;
-        }
+    bool GetBool() const // Wrapper, actually gets integer
+    {
+        return GetUInt8() == 1 ? true : false;
+    }
 
-        uint8 GetUInt8() const;
-        int8 GetInt8() const;
-        uint16 GetUInt16() const;
-        int16 GetInt16() const;
-        uint32 GetUInt32() const;
-        int32 GetInt32() const;
-        uint64 GetUInt64() const;
-        int64 GetInt64() const;
-        float GetFloat() const;
-        double GetDouble() const;
-        char const *GetCString() const;
-        std::string GetString() const;
-        std::vector<uint8> GetBinary() const;
+    uint8_t GetUInt8() const;
+    int8_t GetInt8() const;
+    uint16_t GetUInt16() const;
+    int16_t GetInt16() const;
+    uint32_t GetUInt32() const;
+    int32_t GetInt32() const;
+    uint64_t GetUInt64() const;
+    int64_t GetInt64() const;
+    float GetFloat() const;
+    double GetDouble() const;
+    char const *GetCString() const;
+    std::string GetString() const;
+    std::vector<uint8_t> GetBinary() const;
 
-        bool IsNull() const
-        {
-            return data.value == NULL;
-        }
+    bool IsNull() const
+    {
+        return data.value == NULL;
+    }
 
-        struct Metadata
-        {
-            char const *TableName;
-            char const *TableAlias;
-            char const *Name;
-            char const *Alias;
-            char const *Type;
-            uint32 Index;
-        };
+    struct Metadata
+    {
+        char const *TableName;
+        char const *TableAlias;
+        char const *Name;
+        char const *Alias;
+        char const *Type;
+        uint32_t Index;
+    };
 
-    protected:
+  protected:
 #pragma pack(push, 1)
-        struct
-        {
-            uint32 length;          // Length (prepared strings only)
-            void *value;            // Actual data in memory
-            DatabaseFieldTypes type;  // Field type
-            bool               raw;               // Raw bytes? (Prepared statement or ad hoc)
-        } data;
+    struct
+    {
+        uint32_t length;         // Length (prepared strings only)
+        void *value;             // Actual data in memory
+        DatabaseFieldTypes type; // Field type
+        bool raw;                // Raw bytes? (Prepared statement or ad hoc)
+    } data;
 #pragma pack(pop)
 
-        void SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32 length);
-        void SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32 length);
+    void SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32_t length);
+    void SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32_t length);
 
-        void CleanUp()
-        {
-            // Field does not own the data if fetched with prepared statement
-            if (!data.raw)
-                delete[] ((char *)data.value);
-            data.value = NULL;
-        }
+    void CleanUp()
+    {
+        // Field does not own the data if fetched with prepared statement
+        if (!data.raw)
+            delete[]((char *)data.value);
+        data.value = NULL;
+    }
 
-        bool IsType(DatabaseFieldTypes type) const;
+    bool IsType(DatabaseFieldTypes type) const;
 
-        bool IsNumeric() const;
+    bool IsNumeric() const;
 
-    private:
+  private:
 #ifdef NGEMITY_DEBUG
-        void LogWrongType(char* getter) const;
-        void SetMetadata(MYSQL_FIELD* field, uint32 fieldIndex);
-        Metadata meta;
+    void LogWrongType(char *getter) const;
+    void SetMetadata(MYSQL_FIELD *field, uint32_t fieldIndex);
+    Metadata meta;
 #endif
 };

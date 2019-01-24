@@ -20,10 +20,10 @@
 
 Field::Field()
 {
-    data.value  = NULL;
-    data.type   = DatabaseFieldTypes::Null;
+    data.value = NULL;
+    data.type = DatabaseFieldTypes::Null;
     data.length = 0;
-    data.raw    = false;
+    data.raw = false;
 }
 
 Field::~Field()
@@ -31,7 +31,7 @@ Field::~Field()
     CleanUp();
 }
 
-uint8 Field::GetUInt8() const
+uint8_t Field::GetUInt8() const
 {
     if (!data.value)
         return 0;
@@ -45,11 +45,11 @@ uint8 Field::GetUInt8() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint8 *>(data.value);
-    return static_cast<uint8>(strtoul((char *)data.value, nullptr, 10));
+        return *reinterpret_cast<uint8_t *>(data.value);
+    return static_cast<uint8_t>(strtoul((char *)data.value, nullptr, 10));
 }
 
-int8 Field::GetInt8() const
+int8_t Field::GetInt8() const
 {
     if (!data.value)
         return 0;
@@ -63,11 +63,11 @@ int8 Field::GetInt8() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int8 *>(data.value);
-    return static_cast<int8>(strtol((char *)data.value, NULL, 10));
+        return *reinterpret_cast<int8_t *>(data.value);
+    return static_cast<int8_t>(strtol((char *)data.value, NULL, 10));
 }
 
-uint16 Field::GetUInt16() const
+uint16_t Field::GetUInt16() const
 {
     if (!data.value)
         return 0;
@@ -81,11 +81,11 @@ uint16 Field::GetUInt16() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint16 *>(data.value);
-    return static_cast<uint16>(strtoul((char *)data.value, nullptr, 10));
+        return *reinterpret_cast<uint16_t *>(data.value);
+    return static_cast<uint16_t>(strtoul((char *)data.value, nullptr, 10));
 }
 
-int16 Field::GetInt16() const
+int16_t Field::GetInt16() const
 {
     if (!data.value)
         return 0;
@@ -99,11 +99,11 @@ int16 Field::GetInt16() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int16 *>(data.value);
-    return static_cast<int16>(strtol((char *)data.value, NULL, 10));
+        return *reinterpret_cast<int16_t *>(data.value);
+    return static_cast<int16_t>(strtol((char *)data.value, NULL, 10));
 }
 
-uint32 Field::GetUInt32() const
+uint32_t Field::GetUInt32() const
 {
     if (!data.value)
         return 0;
@@ -117,11 +117,11 @@ uint32 Field::GetUInt32() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint32 *>(data.value);
-    return static_cast<uint32>(strtoul((char *)data.value, nullptr, 10));
+        return *reinterpret_cast<uint32_t *>(data.value);
+    return static_cast<uint32_t>(strtoul((char *)data.value, nullptr, 10));
 }
 
-int32 Field::GetInt32() const
+int32_t Field::GetInt32() const
 {
     if (!data.value)
         return 0;
@@ -135,17 +135,17 @@ int32 Field::GetInt32() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int32 *>(data.value);
-    return static_cast<int32>(strtol((char *)data.value, NULL, 10));
+        return *reinterpret_cast<int32_t *>(data.value);
+    return static_cast<int32_t>(strtol((char *)data.value, NULL, 10));
 }
 
-uint64 Field::GetUInt64() const
+uint64_t Field::GetUInt64() const
 {
     if (!data.value)
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int64))
+    if (!IsType(DatabaseFieldTypes::int64_t))
     {
         LogWrongType(__FUNCTION__);
         return 0;
@@ -153,17 +153,17 @@ uint64 Field::GetUInt64() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<uint64 *>(data.value);
-    return static_cast<uint64>(strtoull((char *)data.value, nullptr, 10));
+        return *reinterpret_cast<uint64_t *>(data.value);
+    return static_cast<uint64_t>(strtoull((char *)data.value, nullptr, 10));
 }
 
-int64 Field::GetInt64() const
+int64_t Field::GetInt64() const
 {
     if (!data.value)
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int64))
+    if (!IsType(DatabaseFieldTypes::int64_t))
     {
         LogWrongType(__FUNCTION__);
         return 0;
@@ -171,8 +171,8 @@ int64 Field::GetInt64() const
 #endif
 
     if (data.raw)
-        return *reinterpret_cast<int64 *>(data.value);
-    return static_cast<int64>(strtoll((char *)data.value, NULL, 10));
+        return *reinterpret_cast<int64_t *>(data.value);
+    return static_cast<int64_t>(strtoll((char *)data.value, NULL, 10));
 }
 
 float Field::GetFloat() const
@@ -238,9 +238,9 @@ std::string Field::GetString() const
     return std::string(string, data.length);
 }
 
-std::vector<uint8> Field::GetBinary() const
+std::vector<uint8_t> Field::GetBinary() const
 {
-    std::vector<uint8> result;
+    std::vector<uint8_t> result;
     if (!data.value || !data.length)
         return result;
 
@@ -249,16 +249,16 @@ std::vector<uint8> Field::GetBinary() const
     return result;
 }
 
-void Field::SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32 length)
+void Field::SetByteValue(void *newValue, DatabaseFieldTypes newType, uint32_t length)
 {
     // This value stores raw bytes that have to be explicitly cast later
-    data.value  = newValue;
+    data.value = newValue;
     data.length = length;
-    data.type   = newType;
-    data.raw    = true;
+    data.type = newType;
+    data.raw = true;
 }
 
-void Field::SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32 length)
+void Field::SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint32_t length)
 {
     if (data.value)
         CleanUp();
@@ -273,7 +273,7 @@ void Field::SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint3
     }
 
     data.type = newType;
-    data.raw  = false;
+    data.raw = false;
 }
 
 bool Field::IsType(DatabaseFieldTypes type) const
@@ -293,10 +293,10 @@ bool Field::IsNumeric() const
 
 #ifdef NGEMITY_DEBUG
 
-void Field::LogWrongType(char* getter) const
+void Field::LogWrongType(char *getter) const
 {
     NG_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
-        getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
+                getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
 }
 
 #ifdef _WIN32 // hack for broken mysql.h not including the correct winsock header for SOCKET definition, fixed in 5.7
@@ -304,41 +304,68 @@ void Field::LogWrongType(char* getter) const
 #endif
 #include <mysql.h>
 
-static char const* FieldTypeToString(enum_field_types type)
+static char const *FieldTypeToString(enum_field_types type)
 {
     switch (type)
     {
-        case MYSQL_TYPE_BIT:         return "BIT";
-        case MYSQL_TYPE_BLOB:        return "BLOB";
-        case MYSQL_TYPE_DATE:        return "DATE";
-        case MYSQL_TYPE_DATETIME:    return "DATETIME";
-        case MYSQL_TYPE_NEWDECIMAL:  return "NEWDECIMAL";
-        case MYSQL_TYPE_DECIMAL:     return "DECIMAL";
-        case MYSQL_TYPE_DOUBLE:      return "DOUBLE";
-        case MYSQL_TYPE_ENUM:        return "ENUM";
-        case MYSQL_TYPE_FLOAT:       return "FLOAT";
-        case MYSQL_TYPE_GEOMETRY:    return "GEOMETRY";
-        case MYSQL_TYPE_INT24:       return "INT24";
-        case MYSQL_TYPE_LONG:        return "LONG";
-        case MYSQL_TYPE_LONGLONG:    return "LONGLONG";
-        case MYSQL_TYPE_LONG_BLOB:   return "LONG_BLOB";
-        case MYSQL_TYPE_MEDIUM_BLOB: return "MEDIUM_BLOB";
-        case MYSQL_TYPE_NEWDATE:     return "NEWDATE";
-        case MYSQL_TYPE_NULL:        return "NULL";
-        case MYSQL_TYPE_SET:         return "SET";
-        case MYSQL_TYPE_SHORT:       return "SHORT";
-        case MYSQL_TYPE_STRING:      return "STRING";
-        case MYSQL_TYPE_TIME:        return "TIME";
-        case MYSQL_TYPE_TIMESTAMP:   return "TIMESTAMP";
-        case MYSQL_TYPE_TINY:        return "TINY";
-        case MYSQL_TYPE_TINY_BLOB:   return "TINY_BLOB";
-        case MYSQL_TYPE_VAR_STRING:  return "VAR_STRING";
-        case MYSQL_TYPE_YEAR:        return "YEAR";
-        default:                     return "-Unknown-";
+    case MYSQL_TYPE_BIT:
+        return "BIT";
+    case MYSQL_TYPE_BLOB:
+        return "BLOB";
+    case MYSQL_TYPE_DATE:
+        return "DATE";
+    case MYSQL_TYPE_DATETIME:
+        return "DATETIME";
+    case MYSQL_TYPE_NEWDECIMAL:
+        return "NEWDECIMAL";
+    case MYSQL_TYPE_DECIMAL:
+        return "DECIMAL";
+    case MYSQL_TYPE_DOUBLE:
+        return "DOUBLE";
+    case MYSQL_TYPE_ENUM:
+        return "ENUM";
+    case MYSQL_TYPE_FLOAT:
+        return "FLOAT";
+    case MYSQL_TYPE_GEOMETRY:
+        return "GEOMETRY";
+    case MYSQL_TYPE_INT24:
+        return "INT24";
+    case MYSQL_TYPE_LONG:
+        return "LONG";
+    case MYSQL_TYPE_LONGLONG:
+        return "LONGLONG";
+    case MYSQL_TYPE_LONG_BLOB:
+        return "LONG_BLOB";
+    case MYSQL_TYPE_MEDIUM_BLOB:
+        return "MEDIUM_BLOB";
+    case MYSQL_TYPE_NEWDATE:
+        return "NEWDATE";
+    case MYSQL_TYPE_NULL:
+        return "NULL";
+    case MYSQL_TYPE_SET:
+        return "SET";
+    case MYSQL_TYPE_SHORT:
+        return "SHORT";
+    case MYSQL_TYPE_STRING:
+        return "STRING";
+    case MYSQL_TYPE_TIME:
+        return "TIME";
+    case MYSQL_TYPE_TIMESTAMP:
+        return "TIMESTAMP";
+    case MYSQL_TYPE_TINY:
+        return "TINY";
+    case MYSQL_TYPE_TINY_BLOB:
+        return "TINY_BLOB";
+    case MYSQL_TYPE_VAR_STRING:
+        return "VAR_STRING";
+    case MYSQL_TYPE_YEAR:
+        return "YEAR";
+    default:
+        return "-Unknown-";
     }
 }
 
-void Field::SetMetadata(MYSQL_FIELD* field, uint32 fieldIndex)
+void Field::SetMetadata(MYSQL_FIELD *field, uint32_t fieldIndex)
 {
     meta.TableName = field->org_table;
     meta.TableAlias = field->table;

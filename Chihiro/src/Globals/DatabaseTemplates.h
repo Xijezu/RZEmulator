@@ -30,7 +30,7 @@ struct DropGroup
 struct LevelResourceTemplate
 {
     int level;
-    int64 normal_exp;
+    int64_t normal_exp;
     int jlv[4];
 };
 

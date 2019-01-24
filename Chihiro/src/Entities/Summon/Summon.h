@@ -70,9 +70,9 @@ public:
 
 protected:
   void onCantAttack(uint handle, uint t) override;
-  uint16 putonItem(ItemWearType pos, Item *pItem) override;
-  uint16 putoffItem(ItemWearType pos) override;
-  void onRegisterSkill(int64 skillUID, int skill_id, int prev_level, int skill_level) override;
+  uint16_t putonItem(ItemWearType pos, Item *pItem) override;
+  uint16_t putoffItem(ItemWearType pos) override;
+  void onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level) override;
   void processWalk(uint t);
   void onExpChange() override;
   ///- Stat calculations overwriting from Unit class

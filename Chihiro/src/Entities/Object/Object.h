@@ -165,7 +165,7 @@ class Object
     virtual void AddToWorld();
     virtual void RemoveFromWorld();
 
-    uint32 GetHandle() const { return GetUInt32Value(0); }
+    uint32_t GetHandle() const { return GetUInt32Value(0); }
 
     SubType GetSubType() const { return _subType; }
 
@@ -173,81 +173,69 @@ class Object
 
     ObjType GetObjType() const { return _objType; }
 
-    int32 GetInt32Value(uint16 index) const
+    int32_t GetInt32Value(uint16_t index) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         return m_int32Values[index];
     }
 
-    uint32 GetUInt32Value(uint16 index) const
+    uint32_t GetUInt32Value(uint16_t index) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         return _uint32Values[index];
     }
 
-    uint64 GetUInt64Value(uint16 index) const
+    uint64_t GetUInt64Value(uint16_t index) const
     {
         ASSERT(index + 1 < _valuesCount || PrintIndexError(index, false));
-        return *((uint64 *)&(_uint32Values[index]));
+        return *((uint64_t *)&(_uint32Values[index]));
     }
 
-    float GetFloatValue(uint16 index) const
+    float GetFloatValue(uint16_t index) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         return m_floatValues[index];
     }
 
-    uint8 GetByteValue(uint16 index, uint8 offset) const
+    uint8_t GetByteValue(uint16_t index, uint8_t offset) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         ASSERT(offset < 4);
-        return *(((uint8 *)&_uint32Values[index]) + offset);
+        return *(((uint8_t *)&_uint32Values[index]) + offset);
     }
 
-    uint16 GetUInt16Value(uint16 index, uint8 offset) const
+    uint16_t GetUInt16Value(uint16_t index, uint8_t offset) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         ASSERT(offset < 2);
-        return *(((uint16 *)&_uint32Values[index]) + offset);
+        return *(((uint16_t *)&_uint32Values[index]) + offset);
     }
 
-    void SetInt32Value(uint16 index, int32 value);
+    void SetInt32Value(uint16_t index, int32_t value);
+    void SetUInt32Value(uint16_t index, uint32_t value);
+    void UpdateUInt32Value(uint16_t index, uint32_t value);
+    void SetUInt64Value(uint16_t index, uint64_t value);
+    void SetFloatValue(uint16_t index, float value);
+    void SetByteValue(uint16_t index, uint8_t offset, uint8_t value);
+    void SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value);
+    void SetInt16Value(uint16_t index, uint8_t offset, int16_t value) { SetUInt16Value(index, offset, (uint16_t)value); }
 
-    void SetUInt32Value(uint16 index, uint32 value);
+    void SetStatFloatValue(uint16_t index, float value);
+    void SetStatInt32Value(uint16_t index, int32_t value);
 
-    void UpdateUInt32Value(uint16 index, uint32 value);
+    bool AddUInt64Value(uint16_t index, uint64_t value);
+    bool RemoveUInt64Value(uint16_t index, uint64_t value);
 
-    void SetUInt64Value(uint16 index, uint64 value);
+    void ApplyModUInt32Value(uint16_t index, int32_t val, bool apply);
+    void ApplyModInt32Value(uint16_t index, int32_t val, bool apply);
+    void ApplyModPositiveFloatValue(uint16_t index, float val, bool apply);
+    void ApplyModSignedFloatValue(uint16_t index, float val, bool apply);
 
-    void SetFloatValue(uint16 index, float value);
+    void SetFlag(uint16_t index, uint32_t newFlag);
 
-    void SetByteValue(uint16 index, uint8 offset, uint8 value);
+    void RemoveFlag(uint16_t index, uint32_t oldFlag);
 
-    void SetUInt16Value(uint16 index, uint8 offset, uint16 value);
-
-    void SetInt16Value(uint16 index, uint8 offset, int16 value) { SetUInt16Value(index, offset, (uint16)value); }
-
-    void SetStatFloatValue(uint16 index, float value);
-
-    void SetStatInt32Value(uint16 index, int32 value);
-
-    bool AddUInt64Value(uint16 index, uint64 value);
-
-    bool RemoveUInt64Value(uint16 index, uint64 value);
-
-    void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
-
-    void ApplyModInt32Value(uint16 index, int32 val, bool apply);
-
-    void ApplyModPositiveFloatValue(uint16 index, float val, bool apply);
-
-    void ApplyModSignedFloatValue(uint16 index, float val, bool apply);
-
-    void SetFlag(uint16 index, uint32 newFlag);
-
-    void RemoveFlag(uint16 index, uint32 oldFlag);
-
-    void ToggleFlag(uint16 index, uint32 flag)
+    void ToggleFlag(uint16_t index, uint32_t flag)
     {
         if (HasFlag(index, flag))
             RemoveFlag(index, flag);
@@ -255,18 +243,18 @@ class Object
             SetFlag(index, flag);
     }
 
-    bool HasFlag(uint16 index, uint32 flag) const
+    bool HasFlag(uint16_t index, uint32_t flag) const
     {
         if (index >= _valuesCount && !PrintIndexError(index, false))
             return false;
         return (_uint32Values[index] & flag) != 0;
     }
 
-    void SetByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+    void SetByteFlag(uint16_t index, uint8_t offset, uint8_t newFlag);
 
-    void RemoveByteFlag(uint16 index, uint8 offset, uint8 newFlag);
+    void RemoveByteFlag(uint16_t index, uint8_t offset, uint8_t newFlag);
 
-    void ToggleFlag(uint16 index, uint8 offset, uint8 flag)
+    void ToggleFlag(uint16_t index, uint8_t offset, uint8_t flag)
     {
         if (HasByteFlag(index, offset, flag))
             RemoveByteFlag(index, offset, flag);
@@ -274,14 +262,14 @@ class Object
             SetByteFlag(index, offset, flag);
     }
 
-    bool HasByteFlag(uint16 index, uint8 offset, uint8 flag) const
+    bool HasByteFlag(uint16_t index, uint8_t offset, uint8_t flag) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         ASSERT(offset < 4);
-        return (((uint8 *)&_uint32Values[index])[offset] & flag) != 0;
+        return (((uint8_t *)&_uint32Values[index])[offset] & flag) != 0;
     }
 
-    void ApplyModFlag(uint16 index, uint32 flag, bool apply)
+    void ApplyModFlag(uint16_t index, uint32_t flag, bool apply)
     {
         if (apply)
             SetFlag(index, flag);
@@ -289,21 +277,21 @@ class Object
             RemoveFlag(index, flag);
     }
 
-    void SetFlag64(uint16 index, uint64 newFlag)
+    void SetFlag64(uint16_t index, uint64_t newFlag)
     {
-        uint64 oldval = GetUInt64Value(index);
-        uint64 newval = oldval | newFlag;
+        uint64_t oldval = GetUInt64Value(index);
+        uint64_t newval = oldval | newFlag;
         SetUInt64Value(index, newval);
     }
 
-    void RemoveFlag64(uint16 index, uint64 oldFlag)
+    void RemoveFlag64(uint16_t index, uint64_t oldFlag)
     {
-        uint64 oldval = GetUInt64Value(index);
-        uint64 newval = oldval & ~oldFlag;
+        uint64_t oldval = GetUInt64Value(index);
+        uint64_t newval = oldval & ~oldFlag;
         SetUInt64Value(index, newval);
     }
 
-    void ToggleFlag64(uint16 index, uint64 flag)
+    void ToggleFlag64(uint16_t index, uint64_t flag)
     {
         if (HasFlag64(index, flag))
             RemoveFlag64(index, flag);
@@ -311,13 +299,13 @@ class Object
             SetFlag64(index, flag);
     }
 
-    bool HasFlag64(uint16 index, uint64 flag) const
+    bool HasFlag64(uint16_t index, uint64_t flag) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         return (GetUInt64Value(index) & flag) != 0;
     }
 
-    void ApplyModFlag64(uint16 index, uint64 flag, bool apply)
+    void ApplyModFlag64(uint16_t index, uint64_t flag, bool apply)
     {
         if (apply)
             SetFlag64(index, flag);
@@ -325,7 +313,7 @@ class Object
             RemoveFlag64(index, flag);
     }
 
-    uint16 GetValuesCount() const { return _valuesCount; }
+    uint16_t GetValuesCount() const { return _valuesCount; }
 
     virtual bool IsPlayer() const { return false; }
 
@@ -350,14 +338,14 @@ class Object
   protected:
     Object();
     void _InitValues();
-    uint16 m_updateFlag;
+    uint16_t m_updateFlag;
     union {
-        int32 *m_int32Values;
-        uint32 *_uint32Values;
+        int32_t *m_int32Values;
+        uint32_t *_uint32Values;
         float *m_floatValues;
     };
     bool *_changedFields;
-    uint16 _valuesCount;
+    uint16_t _valuesCount;
     bool m_objectUpdated;
 
     MainType _mainType;
@@ -369,7 +357,7 @@ class Object
     bool m_bDeleteRequest;
 
     // for output helpful error messages from asserts
-    bool PrintIndexError(uint32 index, bool set) const;
+    bool PrintIndexError(uint32_t index, bool set) const;
 };
 
 struct Position
@@ -378,7 +366,7 @@ struct Position
     float m_positionY{};
     float m_positionZ{};
     float _orientation{};
-    uint8 m_nLayer{};
+    uint8_t m_nLayer{};
 
     bool operator==(Position pos)
     {
@@ -394,9 +382,9 @@ struct Position
         this->m_positionY = y;
     }
 
-    uint8 GetLayer() const { return m_nLayer; }
+    uint8_t GetLayer() const { return m_nLayer; }
 
-    void SetLayer(uint8 value) { m_nLayer = value; }
+    void SetLayer(uint8_t value) { m_nLayer = value; }
 
     void Relocate(float x, float y)
     {
@@ -606,7 +594,7 @@ class WorldObject : public Object, public ArMoveVector
 
     bool IsWorldObject() const override { return true; }
 
-    virtual void Update(uint32 /*time_diff*/) {}
+    virtual void Update(uint32_t /*time_diff*/) {}
 
     bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
     bool Step(uint tm) override;

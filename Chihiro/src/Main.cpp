@@ -41,7 +41,7 @@ void StopDB();
 void WorldUpdateLoop();
 void ShutdownCLIThread(std::thread *cliThread);
 void SignalHandler(boost::system::error_code const &error, int signalNumber);
-void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error);
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32_t dbPingInterval, boost::system::error_code const &error);
 
 constexpr int WORLD_SLEEP_CONST = 50;
 
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     signals.async_wait(SignalHandler);
 
     // Enabled a timed callback for handling the database keep alive ping
-    int32 dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    int32_t dbPingInterval = sConfigMgr->GetIntDefault("MaxPingTime", 30);
     std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = std::make_shared<boost::asio::deadline_timer>(*ioContext);
     dbPingTimer->expires_from_now(boost::posix_time::minutes(dbPingInterval));
     dbPingTimer->async_wait(std::bind(&KeepDatabaseAliveHandler, std::weak_ptr<boost::asio::deadline_timer>(dbPingTimer), dbPingInterval, std::placeholders::_1));
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
     }
 
     std::shared_ptr<void> sAuthHandle(nullptr, [](void *) { sAuthNetwork.Stop(); });
-    auto worldPort = (uint16)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
+    auto worldPort = (uint16_t)sConfigMgr->GetIntDefault("GameServer.Port", 4514);
     std::string bindIp = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
 
     auto pWorldNetwork = std::make_unique<XSocketMgr<WorldSession>>();
@@ -163,7 +163,7 @@ void SignalHandler(boost::system::error_code const &error, int /*signalNumber*/)
         World::StopNow(SHUTDOWN_EXIT_CODE);
 }
 
-void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32 dbPingInterval, boost::system::error_code const &error)
+void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32_t dbPingInterval, boost::system::error_code const &error)
 {
     if (!error)
     {
@@ -207,8 +207,8 @@ void StopDB()
 
 void WorldUpdateLoop()
 {
-    uint32 realCurrTime = 0;
-    uint32 realPrevTime = getMSTime();
+    uint32_t realCurrTime = 0;
+    uint32_t realPrevTime = getMSTime();
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
@@ -216,12 +216,12 @@ void WorldUpdateLoop()
         ++World::m_worldLoopCounter;
         realCurrTime = getMSTime();
 
-        uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
+        uint32_t diff = getMSTimeDiff(realPrevTime, realCurrTime);
 
         sWorld.Update(diff);
         realPrevTime = realCurrTime;
 
-        uint32 executionTimeDiff = getMSTimeDiff(realCurrTime, getMSTime());
+        uint32_t executionTimeDiff = getMSTimeDiff(realCurrTime, getMSTime());
 
         // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
         if (executionTimeDiff < WORLD_SLEEP_CONST)

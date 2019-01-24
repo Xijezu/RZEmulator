@@ -36,16 +36,16 @@ class AsyncAcceptor
     using SocketHandler = std::function<void(tcp::socket &&sock, uint32_t threadIndex)>;
 
   public:
-    //typedef void (*AcceptCallback)(tcp::socket &&newSocket, uint32 threadIndex);
+    //typedef void (*AcceptCallback)(tcp::socket &&newSocket, uint32_t threadIndex);
 
-    AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port);
+    AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port);
     void AsyncAccept();
 
     //template <AcceptCallback acceptCallback>
     void AsyncAcceptWithCallback(SocketHandler handler)
     {
         tcp::socket *socket;
-        uint32 threadIndex;
+        uint32_t threadIndex;
         std::tie(socket, threadIndex) = _socketFactory();
         _acceptor.async_accept(*socket, [this, socket, threadIndex, handler](boost::system::error_code error) {
             if (!error)

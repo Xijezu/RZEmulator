@@ -355,7 +355,7 @@ void GroupManager::InitGroupSystem()
         return;
     }
 
-    uint32 count = 0;
+    uint32_t count = 0;
     do
     {
         uint      idx    = 0;
@@ -396,7 +396,7 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
 
     do
     {
-        uint32         idx    = 0;
+        uint32_t         idx    = 0;
         Field          *field = result->Fetch();
         PartyMemberTag tag{ };
         tag.sid       = field[idx++].GetInt32();

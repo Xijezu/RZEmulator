@@ -37,8 +37,8 @@
 #include "WorldSession.h"
 
 std::atomic<bool> World::m_stopEvent{false};
-std::atomic<uint32> World::m_worldLoopCounter{0};
-uint8 World::m_ExitCode{SHUTDOWN_EXIT_CODE};
+std::atomic<uint32_t> World::m_worldLoopCounter{0};
+uint8_t World::m_ExitCode{SHUTDOWN_EXIT_CODE};
 
 World::World() : startTime(getMSTime())
 {
@@ -148,7 +148,7 @@ void World::LoadConfigSettings(bool reload)
 }
 
 /// Find a session by its id
-WorldSession *World::FindSession(uint32 id) const
+WorldSession *World::FindSession(uint32_t id) const
 {
     SessionMap::const_iterator itr = m_sessions.find(id);
 
@@ -159,7 +159,7 @@ WorldSession *World::FindSession(uint32 id) const
 }
 
 /// Remove a given session
-bool World::RemoveSession(uint32 id)
+bool World::RemoveSession(uint32_t id)
 {
     ///- Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
     SessionMap::const_iterator itr = m_sessions.find(id);
@@ -177,32 +177,32 @@ void World::AddSession(WorldSession *s)
     addSessQueue.add(s);
 }
 
-uint64 World::GetItemIndex()
+uint64_t World::GetItemIndex()
 {
     return ++s_nItemIndex;
 }
 
-uint64 World::GetPlayerIndex()
+uint64_t World::GetPlayerIndex()
 {
     return ++s_nPlayerIndex;
 }
 
-uint64 World::GetStateIndex()
+uint64_t World::GetStateIndex()
 {
     return ++s_nStateIndex;
 }
 
-uint64 World::GetPetIndex()
+uint64_t World::GetPetIndex()
 {
     return ++s_nPetIndex;
 }
 
-uint64 World::GetSummonIndex()
+uint64_t World::GetSummonIndex()
 {
     return ++s_nSummonIndex;
 }
 
-uint64 World::GetSkillIndex()
+uint64_t World::GetSkillIndex()
 {
     return ++s_nSkillIndex;
 }
@@ -246,7 +246,7 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
     return result;
 }
 
-bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
+bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
 {
     Position oldPos{};
     Position curPos2{};
@@ -898,7 +898,7 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     }
 }
 
-void World::EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
+void World::EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
     sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);

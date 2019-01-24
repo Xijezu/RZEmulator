@@ -118,7 +118,7 @@ struct DamageInfo : public Damage
         target_hp = damage.target_hp;
     }
 
-    uint16 elemental_damage[7];
+    uint16_t elemental_damage[7];
 };
 
 struct AttackInfo : public DamageInfo
@@ -146,7 +146,7 @@ struct AttackInfo : public DamageInfo
 
 struct AdditionalDamageInfo
 {
-    AdditionalDamageInfo(uint8 _ratio, ElementalType _require_type, ElementalType _type, uint16 _nDamage, float _fDamage)
+    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, uint16_t _nDamage, float _fDamage)
     {
         ratio = _ratio;
         require_type = _require_type;
@@ -155,19 +155,19 @@ struct AdditionalDamageInfo
         fDamage = _fDamage;
     }
 
-    AdditionalDamageInfo(uint8 _ratio, ElementalType _require_type, ElementalType _type, float _fDamage)
+    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, float _fDamage)
     {
         ratio = _ratio;
         require_type = _require_type;
         type = _type;
-        nDamage = (uint16)_fDamage;
+        nDamage = static_cast<uint16_t>(_fDamage);
         fDamage = _fDamage;
     }
 
-    uint8 ratio;
+    uint8_t ratio;
     ElementalType require_type;
     ElementalType type;
-    uint16 nDamage;
+    uint16_t nDamage;
     float fDamage;
 };
 

@@ -22,19 +22,19 @@
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
-#pragma warning(disable:4355)
+#pragma warning(disable : 4355)
 #endif
 
 NPC::NPC(NPCTemplate *base) : Unit(true)
 {
 #ifdef _MSC_VER
-#   pragma warning(default:4355)
+#pragma warning(default : 4355)
 #endif
-    _mainType    = MT_NPC;
-    _subType     = ST_NPC;
-    _objType     = OBJ_MOVABLE;
+    _mainType = MT_NPC;
+    _subType = ST_NPC;
+    _objType = OBJ_MOVABLE;
     _valuesCount = UNIT_END;
-    m_pBase      = base;
+    m_pBase = base;
 
     _InitValues();
 
@@ -52,10 +52,10 @@ NPC::NPC(NPCTemplate *base) : Unit(true)
 void NPC::EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer)
 {
     Unit::EnterPacket(pEnterPct, pNPC, pPlayer);
-    pEnterPct << (uint16)0;
-    pEnterPct << (uint16)HIWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
-    pEnterPct << (uint16)0;
-    pEnterPct << (uint16)LOWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
+    pEnterPct << (uint16_t)0;
+    pEnterPct << (uint16_t)HIWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
+    pEnterPct << (uint16_t)0;
+    pEnterPct << (uint16_t)LOWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
 }
 
 void NPC::LinkQuest(QuestLink *quest_link_info)
@@ -113,7 +113,6 @@ bool NPC::HasStartableQuest(Player *player)
         }
     }
     return isstart && !bHasProgressRandom;
-
 }
 
 bool NPC::HasFinishableQuest(Player *player)
@@ -171,7 +170,7 @@ void NPC::DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player
 
 int NPC::GetQuestTextID(int code, int progress) const
 {
-    std::vector<QuestLink *> wpl{ };
+    std::vector<QuestLink *> wpl{};
     if (progress == 2)
         wpl = m_vQuestLink_End;
     else if (progress == 1)

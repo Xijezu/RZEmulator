@@ -90,13 +90,13 @@ class Player;
 class Summon;
 class XPacket;
 
-typedef std::unordered_map<uint32, WorldSession *> SessionMap;
+typedef std::unordered_map<uint32_t, WorldSession *> SessionMap;
 
 class World
 {
   public:
-    static std::atomic<uint32> m_worldLoopCounter;
-    typedef std::atomic<uint64> AtomicIndex;
+    static std::atomic<uint32_t> m_worldLoopCounter;
+    typedef std::atomic<uint64_t> AtomicIndex;
     ~World();
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -113,15 +113,15 @@ class World
     void LoadConfigSettings(bool reload);
 
     bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
-    bool SetMove(Unit *obj, Position curPos, Position newPos, uint8 speed, bool bAbsoluteMove, uint t, bool bBroadcastMove = true);
-    void EnumMovableObject(Position pos, uint8 layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
+    bool SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove = true);
+    void EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
     void addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp);
     void addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp);
 
-    WorldSession *FindSession(uint32 id) const;
+    WorldSession *FindSession(uint32_t id) const;
     void AddSession(WorldSession *s);
-    bool RemoveSession(uint32 id);
+    bool RemoveSession(uint32_t id);
     void UpdateSessions(uint diff);
     void KickAll();
 
@@ -155,10 +155,10 @@ class World
     /// Get the number of current active sessions
     const SessionMap &GetAllSessions() const { return m_sessions; }
 
-    uint32 GetSessionCount() const { return m_sessions.size(); }
+    uint32_t GetSessionCount() const { return m_sessions.size(); }
 
     template <typename TS_PACKET>
-    void Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8 layer, TS_PACKET packet)
+    void Broadcast(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, TS_PACKET packet)
     {
         BroadcastFunctor<TS_PACKET> broadcastFunctor;
         broadcastFunctor.packet = packet;
@@ -171,7 +171,7 @@ class World
     }
 
     template <typename TS_PACKET>
-    void Broadcast(uint rx, uint ry, uint8 layer, TS_PACKET packet)
+    void Broadcast(uint rx, uint ry, uint8_t layer, TS_PACKET packet)
     {
         BroadcastFunctor<TS_PACKET> broadcastFunctor;
         broadcastFunctor.packet = packet;
@@ -186,9 +186,9 @@ class World
 
     void Update(uint);
 
-    static uint8 GetExitCode() { return m_ExitCode; }
+    static uint8_t GetExitCode() { return m_ExitCode; }
 
-    static void StopNow(uint8 exitcode)
+    static void StopNow(uint8_t exitcode)
     {
         m_stopEvent = true;
         m_ExitCode = exitcode;
@@ -197,12 +197,12 @@ class World
     static bool IsStopped() { return m_stopEvent; }
 
     /// Gets and increments the identifier for DB insert statements
-    uint64 GetItemIndex();
-    uint64 GetPlayerIndex();
-    uint64 GetPetIndex();
-    uint64 GetStateIndex();
-    uint64 GetSummonIndex();
-    uint64 GetSkillIndex();
+    uint64_t GetItemIndex();
+    uint64_t GetPlayerIndex();
+    uint64_t GetPetIndex();
+    uint64_t GetStateIndex();
+    uint64_t GetSummonIndex();
+    uint64_t GetSkillIndex();
 
     /// Set a server rate
     void setRate(Rates rate, float value) { rate_values[rate] = value; }
@@ -254,7 +254,7 @@ class World
   private:
     static std::atomic<bool> m_stopEvent;
 
-    static uint8 m_ExitCode;
+    static uint8_t m_ExitCode;
 
     SessionMap m_sessions;
     const uint startTime;

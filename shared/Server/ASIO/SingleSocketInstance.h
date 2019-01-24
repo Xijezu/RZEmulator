@@ -30,7 +30,7 @@ namespace NGemity
 {
 
 template <class SOCKET_TYPE>
-static std::shared_ptr<SOCKET_TYPE> &&GetXSocket(NGemity::Asio::IoContext &ioContext, const std::string &szIPAddress, uint16_t nPort)
+static std::shared_ptr<SOCKET_TYPE> GetXSocket(NGemity::Asio::IoContext &ioContext, const std::string &szIPAddress, uint16_t nPort)
 {
     boost::asio::ip::tcp_endpoint endpoint(NGemity::Net::make_address_v4(szIPAddress), nPort);
     boost::asio::ip::tcp::socket socket(ioContext);

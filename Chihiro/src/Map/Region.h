@@ -78,5 +78,5 @@ class Region
         NG_SHARED_MUTEX i_lock;
         uint       x;
         uint       y;
-        uint8      layer;
+        uint8_t      layer;
 };

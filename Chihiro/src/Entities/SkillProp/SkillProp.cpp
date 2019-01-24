@@ -721,7 +721,7 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
         if (irand(0, 99) < m_pSkill->GetSkillBase()->GetProbabilityOnHit(m_pSkill->GetRequestedSkillLevel()))
         {
             int       nLevel     = m_pSkill->GetSkillBase()->GetStateLevel(m_pSkill->GetRequestedSkillLevel(), m_pSkill->GetSkillEnhance());
-            uint32    nDuration  = m_pSkill->GetSkillBase()->GetStateSecond(m_pSkill->GetRequestedSkillLevel(), m_pSkill->GetSkillEnhance());
+            uint32_t    nDuration  = m_pSkill->GetSkillBase()->GetStateSecond(m_pSkill->GetRequestedSkillLevel(), m_pSkill->GetSkillEnhance());
             StateType nStateType = static_cast< StateType >(m_pSkill->GetSkillBase()->GetStateType());
             StateCode nStateCode = static_cast< StateCode >(m_pSkill->GetSkillBase()->GetStateId());
             pDealTarget->AddState(nStateType, nStateCode, pCaster->GetHandle(), nLevel, t, t + nDuration, false, 0, "");

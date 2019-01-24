@@ -9,7 +9,7 @@ SocketMgr::~SocketMgr()
     ASSERT(!_threads && !_acceptor && !_threadCount, "StopNetwork must be called prior to SocketMgr destruction");
 }
 
-bool SocketMgr::StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16 port, int threadCount)
+bool SocketMgr::StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port, int threadCount)
 {
     ASSERT(threadCount > 0);
 
@@ -36,7 +36,7 @@ bool SocketMgr::StartNetwork(NGemity::Asio::IoContext &ioContext, std::string co
 
     ASSERT(_threads);
 
-    for (int32 i = 0; i < _threadCount; ++i)
+    for (int32_t i = 0; i < _threadCount; ++i)
         _threads[i].Start();
 
     return true;
@@ -47,7 +47,7 @@ void SocketMgr::StopNetwork()
     _acceptor->Close();
 
     if (_threadCount != 0)
-        for (int32 i = 0; i < _threadCount; ++i)
+        for (int32_t i = 0; i < _threadCount; ++i)
             _threads[i].Stop();
 
     Wait();
@@ -62,7 +62,7 @@ void SocketMgr::StopNetwork()
 void SocketMgr::Wait()
 {
     if (_threadCount != 0)
-        for (int32 i = 0; i < _threadCount; ++i)
+        for (int32_t i = 0; i < _threadCount; ++i)
             _threads[i].Wait();
 }
 

@@ -37,140 +37,140 @@ class NPC;
 
 struct WayPointInfo
 {
-    int way_point_speed;
-    int way_point_type;
-    int way_point_id;
-    std::vector<Position> vWayPoint;
+  int way_point_speed;
+  int way_point_type;
+  int way_point_id;
+  std::vector<Position> vWayPoint;
 };
 
 class ObjectMgr
 {
-  public:
-    friend class GameContent;
-    ~ObjectMgr() = default;
+public:
+  friend class GameContent;
+  ~ObjectMgr() = default;
 
-    // Deleting the copy & assignment operators
-    // Better safe than sorry
-    ObjectMgr(const ObjectMgr &) = delete;
-    ObjectMgr &operator=(const ObjectMgr &) = delete;
+  // Deleting the copy & assignment operators
+  // Better safe than sorry
+  ObjectMgr(const ObjectMgr &) = delete;
+  ObjectMgr &operator=(const ObjectMgr &) = delete;
 
-    static ObjectMgr &Instance()
-    {
-        static ObjectMgr instance;
-        return instance;
-    }
+  static ObjectMgr &Instance()
+  {
+    static ObjectMgr instance;
+    return instance;
+  }
 
-    typedef std::unordered_map<int32, ItemTemplate> ItemTemplateContainer;
-    typedef std::unordered_map<int32, uint64> SummonLevelBaseContainer;
-    typedef std::unordered_map<int32, CreatureStat> CreatureBaseStat;
-    typedef std::unordered_map<int32, JobLevelBonusTemplate> JobLevelBonusTemplateContainer;
-    typedef std::unordered_map<int32, SummonLevelBonus> SummonBonusTemplateContainer;
-    typedef std::unordered_map<int32, JobResourceTemplate> JobResourceTemplateContainer;
-    typedef std::unordered_map<int32, SummonResourceTemplate> SummonResourceTemplateContainer;
-    typedef std::vector<SkillTreeGroup> SkillTreeTemplateContainer;
-    typedef std::unordered_map<int32, SkillBase> SkillBaseContainer;
-    typedef std::unordered_map<int32, MonsterBase> MonsterBaseContainer;
-    typedef std::unordered_map<int32, LevelResourceTemplate> LevelTemplateContainer;
-    typedef std::unordered_map<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
-    typedef std::unordered_map<int, DropGroup> DropGroupTemplateContainer;
-    typedef std::unordered_map<int, std::string> StringContainer;
-    typedef std::unordered_map<int, QuestBaseServer> QuestResourceTemplateContainer;
-    typedef std::unordered_map<int, FieldPropTemplate> FieldPropTemplateContainer;
-    typedef std::vector<QuestLink> QuestLinkTemplateContainer;
-    typedef std::unordered_map<int, NPCTemplate> NPCTemplateContainer;
-    typedef std::unordered_map<int, StateTemplate> StateTemplateContainer;
+  typedef std::unordered_map<int32_t, ItemTemplate> ItemTemplateContainer;
+  typedef std::unordered_map<int32_t, uint64_t> SummonLevelBaseContainer;
+  typedef std::unordered_map<int32_t, CreatureStat> CreatureBaseStat;
+  typedef std::unordered_map<int32_t, JobLevelBonusTemplate> JobLevelBonusTemplateContainer;
+  typedef std::unordered_map<int32_t, SummonLevelBonus> SummonBonusTemplateContainer;
+  typedef std::unordered_map<int32_t, JobResourceTemplate> JobResourceTemplateContainer;
+  typedef std::unordered_map<int32_t, SummonResourceTemplate> SummonResourceTemplateContainer;
+  typedef std::vector<SkillTreeGroup> SkillTreeTemplateContainer;
+  typedef std::unordered_map<int32_t, SkillBase> SkillBaseContainer;
+  typedef std::unordered_map<int32_t, MonsterBase> MonsterBaseContainer;
+  typedef std::unordered_map<int32_t, LevelResourceTemplate> LevelTemplateContainer;
+  typedef std::unordered_map<std::string, std::vector<MarketInfo>> MarketResourceTemplateContainer;
+  typedef std::unordered_map<int, DropGroup> DropGroupTemplateContainer;
+  typedef std::unordered_map<int, std::string> StringContainer;
+  typedef std::unordered_map<int, QuestBaseServer> QuestResourceTemplateContainer;
+  typedef std::unordered_map<int, FieldPropTemplate> FieldPropTemplateContainer;
+  typedef std::vector<QuestLink> QuestLinkTemplateContainer;
+  typedef std::unordered_map<int, NPCTemplate> NPCTemplateContainer;
+  typedef std::unordered_map<int, StateTemplate> StateTemplateContainer;
 
-    void LoadStatResource();
-    void LoadJobResource();
-    void LoadJobLevelBonus();
-    void LoadNPCResource();
-    void LoadMonsterResource();
-    void LoadItemResource();
-    void LoadSummonLevelResource();
-    void LoadSummonResource();
-    void LoadQuestResource();
-    void LoadQuestLinkResource();
-    void LoadDropGroupResource();
-    void LoadFieldPropResource();
-    void LoadStateResource();
-    void LoadMarketResource();
-    void LoadSummonLevelBonus();
-    void LoadWorldLocation();
-    void LoadSkillResource();
-    void LoadLevelResource();
-    void LoadSkillTreeResource();
-    void LoadDungeonResource();
-    void LoadEnhanceResource();
-    void LoadMixResource();
-    void LoadStringResource();
-    void LoadSkillJP();
-    void LoadSummonNameResource();
-    void LoadEffectResource();
-    void InitGameContent();
+  void LoadStatResource();
+  void LoadJobResource();
+  void LoadJobLevelBonus();
+  void LoadNPCResource();
+  void LoadMonsterResource();
+  void LoadItemResource();
+  void LoadSummonLevelResource();
+  void LoadSummonResource();
+  void LoadQuestResource();
+  void LoadQuestLinkResource();
+  void LoadDropGroupResource();
+  void LoadFieldPropResource();
+  void LoadStateResource();
+  void LoadMarketResource();
+  void LoadSummonLevelBonus();
+  void LoadWorldLocation();
+  void LoadSkillResource();
+  void LoadLevelResource();
+  void LoadSkillTreeResource();
+  void LoadDungeonResource();
+  void LoadEnhanceResource();
+  void LoadMixResource();
+  void LoadStringResource();
+  void LoadSkillJP();
+  void LoadSummonNameResource();
+  void LoadEffectResource();
+  void InitGameContent();
 
-    void UnloadAll();
+  void UnloadAll();
 
-    const std::string &GetValueFromNameID(int name_id);
-    CreatureStat *GetStatInfo(int stat_id);
-    ItemTemplate *GetItemBase(int item_id);
-    SkillBase *GetSkillBase(int);
-    CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
-    CreatureStat GetSummonLevelBonus(int summon_code, int growth_depth, int level);
-    JobResourceTemplate *GetJobInfo(int job_id);
-    SummonResourceTemplate *GetSummonBase(int idx);
-    MonsterBase *GetMonsterInfo(int idx);
-    FieldPropTemplate *GetFieldPropBase(int idx);
-    std::vector<MarketInfo> *GetMarketInfo(const std::string &);
-    QuestBaseServer *GetQuestBase(int code);
-    QuestLink *GetQuestLink(int code, int start_id);
-    StateTemplate *GetStateInfo(int code);
-    bool checkQuestTypeFlag(QuestType type, int flag);
-    std::string GetSummonName();
-    int GetNeedJpForJobLevelUp(int, int);
-    int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
-    int64 GetNeedExp(int level);
-    int64 GetNeedSummonExp(int level);
-    WayPointInfo *GetWayPoint(int waypoint_id);
-    DropGroup *GetDropGroupInfo(int drop_group_id);
+  const std::string &GetValueFromNameID(int name_id);
+  CreatureStat *GetStatInfo(int stat_id);
+  ItemTemplate *GetItemBase(int item_id);
+  SkillBase *GetSkillBase(int);
+  CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
+  CreatureStat GetSummonLevelBonus(int summon_code, int growth_depth, int level);
+  JobResourceTemplate *GetJobInfo(int job_id);
+  SummonResourceTemplate *GetSummonBase(int idx);
+  MonsterBase *GetMonsterInfo(int idx);
+  FieldPropTemplate *GetFieldPropBase(int idx);
+  std::vector<MarketInfo> *GetMarketInfo(const std::string &);
+  QuestBaseServer *GetQuestBase(int code);
+  QuestLink *GetQuestLink(int code, int start_id);
+  StateTemplate *GetStateInfo(int code);
+  bool checkQuestTypeFlag(QuestType type, int flag);
+  std::string GetSummonName();
+  int GetNeedJpForJobLevelUp(int, int);
+  int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
+  int64_t GetNeedExp(int level);
+  int64_t GetNeedSummonExp(int level);
+  WayPointInfo *GetWayPoint(int waypoint_id);
+  DropGroup *GetDropGroupInfo(int drop_group_id);
 
-    void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
-    void AddWayPoint(int waypoint_id, float x, float y);
-    void SetWayPointType(int waypoint_id, int type);
+  void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
+  void AddWayPoint(int waypoint_id, float x, float y);
+  void SetWayPointType(int waypoint_id, int type);
 
-    int g_currentLocationId{0};
+  int g_currentLocationId{0};
 
-    std::unordered_map<int, WayPointInfo> g_vWayPoint{};
-    std::vector<MonsterRespawnInfo> g_vRespawnInfo{};
-    X2D::QuadTreeMapInfo g_qtBlockInfo;
+  std::unordered_map<int, WayPointInfo> g_vWayPoint{};
+  std::vector<MonsterRespawnInfo> g_vRespawnInfo{};
+  X2D::QuadTreeMapInfo g_qtBlockInfo;
 
-  private:
-    JobResourceTemplateContainer _jobTemplateStore;
-    ItemTemplateContainer _itemTemplateStore;
-    CreatureBaseStat _creatureBaseStore;
-    JobLevelBonusTemplateContainer _jobBonusStore;
-    SummonResourceTemplateContainer _summonResourceStore;
-    MarketResourceTemplateContainer _marketResourceStore;
-    SkillTreeTemplateContainer _skillTreeResourceStore;
-    SummonLevelBaseContainer _summonLevelStore;
-    StringContainer _stringResourceStore;
-    LevelTemplateContainer _levelResourceStore;
-    SkillBaseContainer _skillBaseStore;
-    MonsterBaseContainer _monsterBaseStore;
-    DropGroupTemplateContainer _dropTemplateStore;
-    QuestResourceTemplateContainer _questTemplateStore;
-    QuestLinkTemplateContainer _questLinkStore;
-    NPCTemplateContainer _npcTemplateStore;
-    FieldPropTemplateContainer _fieldPropTemplateStore;
-    std::vector<int> _summonPrefixStore;
-    std::vector<int> _summonPostfixStore;
-    SummonBonusTemplateContainer _summonBonusStore;
-    StateTemplateContainer _stateTemplateStore;
+private:
+  JobResourceTemplateContainer _jobTemplateStore;
+  ItemTemplateContainer _itemTemplateStore;
+  CreatureBaseStat _creatureBaseStore;
+  JobLevelBonusTemplateContainer _jobBonusStore;
+  SummonResourceTemplateContainer _summonResourceStore;
+  MarketResourceTemplateContainer _marketResourceStore;
+  SkillTreeTemplateContainer _skillTreeResourceStore;
+  SummonLevelBaseContainer _summonLevelStore;
+  StringContainer _stringResourceStore;
+  LevelTemplateContainer _levelResourceStore;
+  SkillBaseContainer _skillBaseStore;
+  MonsterBaseContainer _monsterBaseStore;
+  DropGroupTemplateContainer _dropTemplateStore;
+  QuestResourceTemplateContainer _questTemplateStore;
+  QuestLinkTemplateContainer _questLinkStore;
+  NPCTemplateContainer _npcTemplateStore;
+  FieldPropTemplateContainer _fieldPropTemplateStore;
+  std::vector<int> _summonPrefixStore;
+  std::vector<int> _summonPostfixStore;
+  SummonBonusTemplateContainer _summonBonusStore;
+  StateTemplateContainer _stateTemplateStore;
 
-    void RegisterSkillTree(SkillTreeBase base);
-    std::vector<SkillTreeBase> getSkillTree(int job_id);
+  void RegisterSkillTree(SkillTreeBase base);
+  std::vector<SkillTreeBase> getSkillTree(int job_id);
 
-  protected:
-    ObjectMgr();
+protected:
+  ObjectMgr();
 };
 
 #define sObjectMgr ObjectMgr::Instance()

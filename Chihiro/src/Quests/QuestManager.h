@@ -44,7 +44,7 @@ class QuestManager
         void GetRelatedQuest(std::vector<Quest *> &vQuestList, int flag);
         void GetRelatedQuestByItem(int code, std::vector<Quest *> &vQuest, int flag);
         void GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest *> &vQuest, int flag);
-        void UpdateQuestStatusByItemCount(int code, int64 count);
+        void UpdateQuestStatusByItemCount(int code, int64_t count);
         void UpdateQuestStatusByMonsterKill(int nMonsterID);
         void UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel);
         void UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel);

@@ -181,7 +181,7 @@ void WorldSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *pGamePct)
     sAuthNetwork.SendAccountToAuth(*this, szAccount, pGamePct->one_time_key);
 }
 
-void WorldSession::_SendResultMsg(uint16 _msg, uint16 _result, int _value)
+void WorldSession::_SendResultMsg(uint16_t _msg, uint16_t _result, int _value)
 {
     TS_SC_RESULT resultPct{};
     resultPct.request_msg_id = _msg;
@@ -200,7 +200,7 @@ void WorldSession::onCharacterList(const TS_CS_CHARACTER_LIST * /*pGamePct*/)
 }
 
 /// TODO: Might need to put this in player class?
-void WorldSession::_PrepareCharacterList(uint32 account_id, std::vector<LOBBY_CHARACTER_INFO> *_info)
+void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_CHARACTER_INFO> *_info)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_CHARACTERLIST);
     stmt->setInt32(0, account_id);
@@ -985,7 +985,7 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
 
     for (auto &mt : *market)
     {
-        if (mt.code == pRecvPct->item_code)
+        if (mt.code == static_cast<uint32_t>(pRecvPct->item_code))
         {
             auto ibs = sObjectMgr.GetItemBase((uint32_t)pRecvPct->item_code);
             if (ibs == nullptr)
@@ -1597,7 +1597,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
                 ///- Gold
                 std::vector<Player *> vList{};
                 sGroupManager.GetNearMember(m_pPlayer, 400.0f, vList);
-                auto incGold = (int64)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
+                auto incGold = (int64_t)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
 
                 for (auto &np : vList)
                 {
@@ -1648,7 +1648,7 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
 
     // Eventmap
 
-    uint16 nResult = m_pPlayer->IsUseableItem(item, nullptr);
+    uint16_t nResult = m_pPlayer->IsUseableItem(item, nullptr);
     if (nResult != TS_RESULT_SUCCESS)
     {
         if (nResult == TS_RESULT_COOL_TIME)
@@ -1741,7 +1741,7 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
         return;
 
     std::vector<Item *> pSubItem{};
-    std::vector<uint16> pCountList{};
+    std::vector<uint16_t> pCountList{};
     if (pRecvPct->sub_items.size() != 0)
     {
         for (auto &mixInfo : pRecvPct->sub_items)
@@ -2098,7 +2098,7 @@ void WorldSession::onTrade(const TS_TRADE *pRecvPct)
     }
 }
 
-void WorldSession::onRequestTrade(uint32 hTradeTarget)
+void WorldSession::onRequestTrade(uint32_t hTradeTarget)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
@@ -2117,7 +2117,7 @@ void WorldSession::onRequestTrade(uint32 hTradeTarget)
     }
 }
 
-void WorldSession::onAcceptTrade(uint32 hTradeTarget)
+void WorldSession::onAcceptTrade(uint32_t hTradeTarget)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
@@ -2160,7 +2160,7 @@ void WorldSession::onCancelTrade()
     m_pPlayer->CancelTrade(true);
 }
 
-void WorldSession::onRejectTrade(uint32 hTradeTarget)
+void WorldSession::onRejectTrade(uint32_t hTradeTarget)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
@@ -2172,7 +2172,7 @@ void WorldSession::onRejectTrade(uint32 hTradeTarget)
     tradeTarget->SendPacket(tradePct);
 }
 
-void WorldSession::onAddItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
+void WorldSession::onAddItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
@@ -2207,7 +2207,7 @@ void WorldSession::onAddItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
     }
 }
 
-void WorldSession::onRemoveItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
+void WorldSession::onRemoveItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))
@@ -2235,7 +2235,7 @@ void WorldSession::onRemoveItem(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
     }
 }
 
-void WorldSession::onAddGold(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
+void WorldSession::onAddGold(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 {
     if (!m_pPlayer->m_bTradeFreezed)
     {
@@ -2243,7 +2243,7 @@ void WorldSession::onAddGold(uint32 hTradeTarget, const TS_TRADE *pRecvPct)
         if (!isValidTradeTarget(tradeTarget))
             return;
 
-        int64 gold = pRecvPct->item_info.base_info.count;
+        int64_t gold = pRecvPct->item_info.base_info.count;
         if (gold <= 0)
         {
             NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
@@ -2333,8 +2333,8 @@ void WorldSession::onConfirmTrade(uint hTradeTarget)
         return;
     }
 
-    int64 tradeGold = m_pPlayer->GetGold() + tradeTarget->GetTradeGold();
-    int64 tradeTargetGold = tradeTarget->GetGold() + m_pPlayer->GetTradeGold();
+    int64_t tradeGold = m_pPlayer->GetGold() + tradeTarget->GetTradeGold();
+    int64_t tradeTargetGold = tradeTarget->GetGold() + m_pPlayer->GetTradeGold();
 
     bool bExceedGold = tradeGold > MAX_GOLD_FOR_INVENTORY;
     bool bExceedGoldTradeTarget = tradeTargetGold > MAX_GOLD_FOR_INVENTORY;

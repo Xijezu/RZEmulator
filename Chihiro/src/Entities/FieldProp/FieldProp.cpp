@@ -34,7 +34,7 @@ void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player * 
     pEnterPct << pFieldProp->m_PropInfo.fScaleX;
     pEnterPct << pFieldProp->m_PropInfo.fScaleY;
     pEnterPct << pFieldProp->m_PropInfo.fScaleZ;
-    pEnterPct << (uint8)(pFieldProp->m_PropInfo.bLockHeight ? 1 : 0);
+    pEnterPct << (uint8_t)(pFieldProp->m_PropInfo.bLockHeight ? 1 : 0);
     pEnterPct << pFieldProp->m_PropInfo.fLockHeight;
 }
 
@@ -140,7 +140,7 @@ bool FieldProp::UseProp(Player *pPlayer)
                 {
                     int nItemCount = irand(i.min_count, i.max_count);
                     int nLevel = irand(i.min_level, i.max_level + 1);
-                    auto ti = Item::AllocItem(0, i.code, (uint64)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
+                    auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
                     auto cnt = ti->m_Instance.nCount;
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);
