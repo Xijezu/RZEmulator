@@ -17,6 +17,7 @@
 
 #include "Common.h"
 #include "WorldSession.h"
+#include "Player.h"
 #include "World.h"
 #include "ClientPackets.h"
 #include "AuthNetwork.h"
@@ -34,7 +35,6 @@
 #include "MixManager.h"
 #include "GroupManager.h"
 #include "GameContent.h"
-#include "Player.h"
 #include "DatabaseEnv.h"
 
 // Constructo - give it a socket
@@ -363,171 +363,6 @@ bool GetValidWayPoint(Player *pClient, Unit *pMObj, const TS_CS_MOVE_REQUEST *pM
 
 void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 {
-
-    std::vector<Position> vPctInfo{}, vMoveInfo{};
-
-    if (m_pPlayer == nullptr || m_pPlayer->GetHealth() == 0 || !m_pPlayer->IsInWorld() || pRecvPct->move_infos.size() == 0)
-        return;
-
-    for (const auto &mi : pRecvPct->move_infos)
-    {
-        Position pos{};
-        pos.SetCurrentXY(mi.tx, mi.ty);
-        vPctInfo.push_back(pos);
-    }
-
-    int speed;
-    float distance;
-    Position npos{};
-    Position curPosFromClient{};
-    Position wayPoint{};
-
-    uint ct = sWorld.GetArTime();
-    speed = m_pPlayer->GetMoveSpeed() / 7;
-    auto mover = dynamic_cast<Unit *>(m_pPlayer);
-
-    if (pRecvPct->handle == 0 || pRecvPct->handle == m_pPlayer->GetHandle())
-    {
-        // Set Speed if ride
-    }
-    else
-    {
-        mover = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
-        if (mover != nullptr && mover->GetHandle() == pRecvPct->handle)
-        {
-            npos.m_positionX = pRecvPct->x;
-            npos.m_positionY = pRecvPct->y;
-            npos.m_positionZ = 0;
-
-            distance = npos.GetExactDist2d(m_pPlayer);
-            if (distance >= 1800.0f)
-            {
-                Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_FAR, 0);
-                return;
-            }
-
-            if (distance < 120.0f)
-            {
-                speed = (int)((float)speed * 1.1f);
-            }
-            else
-            {
-                speed = (int)((float)speed * 2.0f);
-            }
-        }
-    }
-
-    if (mover == nullptr)
-    {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
-        return;
-    }
-
-    npos.m_positionX = pRecvPct->x;
-    npos.m_positionY = pRecvPct->y;
-    npos.m_positionZ = 0.0f;
-
-    if (pRecvPct->x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < pRecvPct->x || pRecvPct->y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < pRecvPct->y || mover->GetExactDist2d(&npos) > 525.0f)
-    {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-        return;
-    }
-    if (speed < 1)
-        speed = 1;
-
-    wayPoint.m_positionX = pRecvPct->x;
-    wayPoint.m_positionY = pRecvPct->y;
-    wayPoint.m_positionZ = 0.0f;
-    wayPoint._orientation = 0.0f;
-
-    for (auto &mi : vPctInfo)
-    {
-        if (mover->IsPlayer() && GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mi.GetPositionX(), mi.GetPositionY()))
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-            return;
-        }
-        curPosFromClient.m_positionX = mi.m_positionX;
-        curPosFromClient.m_positionY = mi.m_positionY;
-        curPosFromClient.m_positionZ = 0.0f;
-        wayPoint.m_positionX = curPosFromClient.m_positionX;
-        wayPoint.m_positionY = curPosFromClient.m_positionY;
-        wayPoint.m_positionZ = curPosFromClient.m_positionZ;
-        wayPoint._orientation = curPosFromClient._orientation;
-        if (mi.m_positionX < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < mi.m_positionX ||
-            mi.m_positionY < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < mi.m_positionY)
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-            return;
-        }
-        vMoveInfo.emplace_back(wayPoint);
-    }
-
-    if (vMoveInfo.empty())
-        return;
-
-    Position cp = vMoveInfo.back();
-    if (mover->IsPlayer() && GameContent::IsBlocked(cp.GetPositionX(), cp.GetPositionY()))
-    {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
-        return;
-    }
-
-    if (mover->IsInWorld())
-    {
-        if (mover->GetTargetHandle() != 0)
-            mover->CancelAttack();
-        if (mover->m_nMovableTime <= ct)
-        {
-            if (mover->IsActable() && mover->IsMovable() && mover->IsInWorld())
-            {
-                auto tpos2 = mover->GetCurrentPosition(pRecvPct->cur_time);
-                if (!vMoveInfo.empty())
-                {
-                    cp = vMoveInfo.back();
-                    npos.m_positionX = cp.GetPositionX();
-                    npos.m_positionY = cp.GetPositionY();
-                    npos.m_positionZ = cp.GetPositionZ();
-                    npos._orientation = cp.GetOrientation();
-                }
-                else
-                {
-                    npos.m_positionX = 0.0f;
-                    npos.m_positionY = 0.0f;
-                    npos.m_positionZ = 0.0f;
-                    npos._orientation = 0.0f;
-                }
-                if (mover->GetHandle() != m_pPlayer->GetHandle() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5.0 >= tpos2.GetExactDist2d(&cp)
-                    /*|| !m_pPlayer.m_bAutoUsed*/
-                    || m_pPlayer->m_nWorldLocationId != 110900)
-                {
-                    if (vMoveInfo.empty() || sWorld.getFloatConfig(CONFIG_MAP_LENGTH) >= m_pPlayer->GetCurrentPosition(ct).GetExactDist2d(&npos))
-                    {
-                        if (mover->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-                            mover->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
-                        npos.m_positionX = pRecvPct->x;
-                        npos.m_positionY = pRecvPct->y;
-                        npos.m_positionZ = 0.0f;
-
-                        sWorld.SetMultipleMove(mover, npos, vMoveInfo, speed, true, ct, true);
-                        // TODO: Mount
-                    }
-                }
-                return;
-            } //if (true /* IsActable() && IsMovable() && isInWorld*/)
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
-            return;
-        }
-        if (!mover->SetPendingMove(vMoveInfo, (uint8_t)speed))
-        {
-            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
-            return;
-        }
-    } // is in world
-}
-
-/*void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
-{
     if (m_pPlayer == nullptr || m_pPlayer->IsDead() || !m_pPlayer->IsInWorld())
         return;
 
@@ -535,10 +370,9 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 
     Unit *pMObj = m_pPlayer;
     auto speed = m_pPlayer->GetRealMoveSpeed();
-    NG_LOG_DEBUG("network", "H: %d, P: %d", pRecvPct->handle, m_pPlayer->GetHandle());
     if (pRecvPct->handle != 0 && pRecvPct->handle != m_pPlayer->GetHandle())
     {
-        pMObj = m_pPlayer->GetSummon(pRecvPct->handle);
+        pMObj = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
         if (pMObj != nullptr)
         {
             if (m_pPlayer->IsRiding() && m_pPlayer->GetRideObject() == pMObj)
@@ -639,9 +473,14 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     if (pMObj->HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
         pMObj->RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
 
+    sWorld.SetMultipleMove(pMObj, start_pos, vMoveInfo, moveSpeed, true, t, true);
+
     if (pMObj->IsPlayer() && pMObj->As<Player>()->IsRiding())
         sWorld.SetMultipleMove(pMObj->As<Player>()->GetRideObject(), start_pos, vMoveInfo, moveSpeed, true, t, true);
-}*/
+
+    /*if (!mover->SetPendingMove(vMoveInfo, (uint8_t)speed))
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);*/
+}
 
 void WorldSession::onReturnToLobby(const TS_CS_RETURN_LOBBY *pRecvPct)
 {
