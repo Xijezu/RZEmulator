@@ -14,21 +14,21 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#include <limits>
 #include "Unit.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "Messages.h"
 #include "ClientPackets.h"
-#include "Skill.h"
-#include "MemPool.h"
-#include "RegionContainer.h"
 #include "GameContent.h"
-#include "Log.h"
-#include "Player.h"
-#include "NPC.h"
-#include "WorldSession.h"
 #include "GameRule.h"
+#include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "NPC.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "RegionContainer.h"
+#include "Skill.h"
+#include "World.h"
+#include "WorldSession.h"
+#include <limits>
 
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
@@ -1965,7 +1965,22 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1,
     }
     case ITEM_EFFECT_INSTANT::RESURECTION:
     {
-        // @todo
+        result = TS_RESULT_ACCESS_DENIED;
+        if (pItem->GetOwnerHandle() == GetHandle())
+            break;
+
+        if (IsAlive())
+            break;
+
+        if (!pCaster->IsAlly(this))
+            break;
+
+        int prev_hp = GetHealth();
+        AddHealth(GetMaxHealth() * 0.2f);
+        Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, true);
+        // @Todo: ClearRemovedStateByDead();
+
+        result = TS_RESULT_SUCCESS;
         break;
     }
     case ITEM_EFFECT_INSTANT::WARP:
@@ -2068,8 +2083,56 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1,
             AddState(SG_NORMAL, static_cast<StateCode>(pItem->m_pItemBase->state_id), pItem->m_Instance.OwnerHandle, pItem->m_pItemBase->state_level, t, -1, true);
             break;
         }
+        break;
     }
-    break;
+    case ITEM_EFFECT_INSTANT::GENERATE_ITEM:
+    {
+        if (!IsPlayer())
+        {
+            result = TS_RESULT_ACCESS_DENIED;
+            break;
+        }
+
+        if (var1 == 0)
+        {
+            auto pPlayer = this->As<Player>();
+            if (pPlayer->ChangeGold(pPlayer->GetGold() + static_cast<int64_t>(var2)) != TS_RESULT_SUCCESS)
+            {
+                result = TS_RESULT_TOO_MUCH_MONEY;
+                break;
+            }
+        }
+        else
+        {
+            auto pPlayer = this->As<Player>();
+            int nGenCount = (var1 >= 0) ? 1 : var2;
+
+            for (int i = 0; i < nGenCount; ++i)
+            {
+                int32_t nItemID = var1;
+                auto nItemCount = static_cast<int64_t>(var2);
+
+                while (nItemID < 0)
+                {
+                    GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
+                }
+
+                if (nItemID != 0)
+                {
+                    auto pItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::BY_ITEM);
+                    auto pNewItem = this->As<Player>()->PushItem(pItem, pItem->GetCount(), false);
+
+                    if (pNewItem != nullptr && IsPlayer())
+                        Messages::SendResult(this->As<Player>(), NGemity::Packets::TS_CS_TAKE_ITEM, pNewItem->GetHandle(), 0);
+
+                    if (pNewItem != pItem)
+                        Item::PendFreeItem(pItem);
+                }
+            }
+        }
+
+        break;
+    }
     default:
     {
         std::string error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->m_Instance.Code, type);

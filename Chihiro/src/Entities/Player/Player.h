@@ -16,12 +16,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "Unit.h"
-#include "TimeSync.h"
-#include "QuestManager.h"
 #include "Inventory.h"
-#include "XPacket.h"
 #include "Packets/MessageSerializerBuffer.h"
+#include "QuestManager.h"
+#include "TimeSync.h"
+#include "Unit.h"
+#include "XPacket.h"
 
 class WorldSession;
 class Item;
@@ -217,8 +217,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
     void onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
     /* InventoryEventReceiver End*/
-    Item *PushItem(Item *, int64_t, bool);
-    Item *PopItem(Item *, int64_t, bool);
+    Item *PushItem(Item *, int64_t, bool = false);
+    Item *PopItem(Item *, int64_t, bool = false);
     Item *GetItem(uint idx);
     Item *GetStorageItem(uint idx);
     uint GetItemCount() const;
