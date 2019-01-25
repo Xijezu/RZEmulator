@@ -16,8 +16,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Common.h"
 #include "ByteBuffer.h"
+#include "Common.h"
 #include "Util.h"
 
 enum ObjType : int
@@ -212,10 +212,14 @@ class Object
     }
 
     void SetInt32Value(uint16_t index, int32_t value);
+    void AddInt32Valie(uint16_t index, int32_t value) { SetInt32Value(index, GetInt32Value(index) + value); }
     void SetUInt32Value(uint16_t index, uint32_t value);
+    void AddUInt32Valie(uint16_t index, uint32_t value) { SetUInt32Value(index, GetUInt32Value(index) + value); }
     void UpdateUInt32Value(uint16_t index, uint32_t value);
     void SetUInt64Value(uint16_t index, uint64_t value);
+    void AddUInt32Valie(uint16_t index, uint64_t value) { SetUInt64Value(index, GetUInt64Value(index) + value); }
     void SetFloatValue(uint16_t index, float value);
+    void AddFloatValue(uint16_t index, float value) { SetFloatValue(index, GetFloatValue(index) + value); }
     void SetByteValue(uint16_t index, uint8_t offset, uint8_t value);
     void SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value);
     void SetInt16Value(uint16_t index, uint8_t offset, int16_t value) { SetUInt16Value(index, offset, (uint16_t)value); }

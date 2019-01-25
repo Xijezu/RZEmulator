@@ -16,9 +16,9 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
+#include "Encryption/XRc4Cipher.h"
 #include "Log.h"
 #include "XSocket.h"
-#include "Encryption/XRc4Cipher.h"
 
 enum STORAGE_MODE : int
 {

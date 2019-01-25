@@ -11,3 +11,4 @@ Server.log
 Mononoke.log
 debug/
 shared/Utilities/.directory
+compile_commands.json
