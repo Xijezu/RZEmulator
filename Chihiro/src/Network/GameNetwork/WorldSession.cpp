@@ -15,27 +15,26 @@
   *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
 #include "WorldSession.h"
-#include "Player.h"
-#include "World.h"
-#include "ClientPackets.h"
+#include "AllowedCommandInfo.h"
 #include "AuthNetwork.h"
+#include "ClientPackets.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "Encryption/MD5.h"
+#include "GameContent.h"
+#include "GameRule.h"
+#include "GroupManager.h"
 #include "MemPool.h"
 #include "Messages.h"
-#include "Scripting/XLua.h"
-
-#include "Encryption/MD5.h"
-#include "RegionContainer.h"
+#include "MixManager.h"
 #include "NPC.h"
 #include "ObjectMgr.h"
+#include "Player.h"
+#include "RegionContainer.h"
+#include "Scripting/XLua.h"
 #include "Skill.h"
-#include "GameRule.h"
-#include "AllowedCommandInfo.h"
-#include "MixManager.h"
-#include "GroupManager.h"
-#include "GameContent.h"
-#include "DatabaseEnv.h"
+#include "World.h"
 
 // Constructo - give it a socket
 WorldSession::WorldSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_nLastPing(sWorld.GetArTime())

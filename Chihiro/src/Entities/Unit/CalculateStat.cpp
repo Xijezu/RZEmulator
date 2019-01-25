@@ -15,16 +15,16 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Unit.h"
-#include "ObjectMgr.h"
-#include "Item.h"
-#include "Messages.h"
-#include "Skill.h"
-#include "Summon.h"
-#include "Player.h"
 #include "GameRule.h"
-#include "StateBase.h"
+#include "Item.h"
 #include "Log.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "Skill.h"
+#include "StateBase.h"
+#include "Summon.h"
+#include "Unit.h"
 
 void Unit::CalculateStat()
 {
@@ -237,27 +237,26 @@ void Unit::applyPassiveSkillAmplifyEffect()
 
 void Unit::applyPassiveSkillAmplifyEffect(Skill *pSkill)
 {
-    bool bFighterArmor = false;
-    bool bHunterArmor = false;
-    bool bMagicianArmor = false;
-    bool bSummonerArmor = false;
+    bool bFighterArmor{false};
 
-    auto armor_class = GetArmorClass();
-
-    if (armor_class == CLASS_FIGHTER_ARMOR)
+    if (GetArmorClass() == CLASS_FIGHTER_ARMOR)
         bFighterArmor = true;
-    else if (armor_class == CLASS_HUNTER_ARMOR)
-        bHunterArmor = true;
-    else if (armor_class == CLASS_MAGICIAN_ARMOR)
-        bMagicianArmor = true;
-    else if (armor_class == CLASS_SUMMONER_ARMOR)
-        bSummonerArmor = true;
 
     if (pSkill->GetSkillId() == SKILL_AMORY_UNIT && bFighterArmor)
         m_AttributeAmplifier.fDefence += pSkill->GetVar(0);
 
     switch (pSkill->GetSkillBase()->GetSkillEffectType())
     {
+    case EF_PARAMETER_AMP:
+    {
+        ampParameter(pSkill->GetVar(0), pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel(), false);
+        ampParameter(pSkill->GetVar(3), pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel(), false);
+        ampParameter2(pSkill->GetVar(6), pSkill->GetVar(7) + pSkill->GetVar(8) * pSkill->GetCurrentSkillLevel());
+        ampParameter2(pSkill->GetVar(9), pSkill->GetVar(10) + pSkill->GetVar(11) * pSkill->GetCurrentSkillLevel());
+        ampParameter(pSkill->GetVar(12), pSkill->GetVar(13) + pSkill->GetVar(14) * pSkill->GetCurrentSkillLevel(), false);
+        ampParameter(pSkill->GetVar(15), pSkill->GetVar(16) + pSkill->GetVar(17) * pSkill->GetCurrentSkillLevel(), false);
+        break;
+    }
     case EF_AMPLIFY_HP_MP:
     {
         float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
@@ -269,9 +268,52 @@ void Unit::applyPassiveSkillAmplifyEffect(Skill *pSkill)
         m_fMaxMPAmplifier += fMaxMPInc;*/
         m_AttributeAmplifier.fHPRegenPercentage += fHPRegenInc;
         m_AttributeAmplifier.fMPRegenPercentage += fMPRegenInc;
+        break;
     }
-    break;
+    case EF_AMP_PARAM_AMPLIFY_HEAL:
+    {
+        ampParameter(pSkill->GetVar(0), pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel(), false);
+        ampParameter(pSkill->GetVar(3), pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel(), false);
+        ampParameter2(pSkill->GetVar(6), pSkill->GetVar(7) + pSkill->GetVar(8) * pSkill->GetCurrentSkillLevel());
+        ampParameter2(pSkill->GetVar(9), pSkill->GetVar(10) + pSkill->GetVar(11) * pSkill->GetCurrentSkillLevel());
 
+        AddFloatValue(UNIT_FIELD_HEAL_RATIO, pSkill->GetVar(12) + pSkill->GetVar(13) * pSkill->GetCurrentSkillLevel());
+        AddFloatValue(UNIT_FIELD_MP_HEAL_RATIO, pSkill->GetVar(14) + pSkill->GetVar(15) * pSkill->GetCurrentSkillLevel());
+
+        if (pSkill->GetVar(16) != 0)
+        {
+            AddFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM, pSkill->GetVar(12) + pSkill->GetVar(13) * pSkill->GetCurrentSkillLevel());
+            AddFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM, pSkill->GetVar(14) + pSkill->GetVar(15) * pSkill->GetCurrentSkillLevel());
+        }
+        break;
+    }
+    case EF_AMP_PARAM_BY_STATE:
+    {
+        bool exist{false};
+        for (int i = 12; i < 20; i++)
+        {
+            StateCode stateCode = static_cast<StateCode>(pSkill->GetVar(i));
+
+            if (static_cast<int32_t>(stateCode) == 0)
+            {
+                break;
+            }
+            if (GetState(stateCode) != nullptr)
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (exist == true)
+        {
+            ampParameter(pSkill->GetVar(0), pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel(), false);
+            ampParameter(pSkill->GetVar(3), pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel(), false);
+            ampParameter2(pSkill->GetVar(6), pSkill->GetVar(7) + pSkill->GetVar(8) * pSkill->GetCurrentSkillLevel());
+            ampParameter2(pSkill->GetVar(9), pSkill->GetVar(10) + pSkill->GetVar(11) * pSkill->GetCurrentSkillLevel());
+        }
+        break;
+    }
     default:
         break;
     }
