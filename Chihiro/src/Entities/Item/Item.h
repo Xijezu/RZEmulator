@@ -17,8 +17,8 @@
 */
 
 #include "Common.h"
-#include "ItemFields.h"
 #include "DatabaseTemplates.h"
+#include "ItemFields.h"
 #include "Object.h"
 
 class XPacket;
@@ -32,7 +32,7 @@ public:
 
   uint OwnerHandle{0};     // 0x0
   uint OwnSummonHandle{0}; // 0x4
-  int64_t UID{0};            // 0x8
+  int64_t UID{0};          // 0x8
   int Code{0};             // 0x10
   int nIdx{0};             // 0x14
   int nLevel{0};           // 0x18
@@ -43,8 +43,8 @@ public:
   int nOwnSummonUID{0};  // 0x24
   int nAuctionID{0};     // 0x28
   int nItemKeepingID{0}; // 0x2C
-  int64_t nCount{0};       // 0x30
-  int64_t tExpire{0};      // 0x40
+  int64_t nCount{0};     // 0x30
+  int64_t tExpire{0};    // 0x40
   //Elemental::Type eElementalEffectType;         // 0x48
   int Flag{0};                            // 0x60
   GenerateCode GenerateInfo = BY_UNKNOWN; // 0x64
@@ -85,6 +85,8 @@ public:
   ItemTemplate *GetItemBase() const { return m_pItemBase; }
   int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
   int GetItemEnhance() const { return m_Instance.nEnhance; }
+  inline uint32_t GetOwnerHandle() const { return m_Instance.OwnerHandle; }
+  inline int64_t GetCount() const { return m_Instance.nCount; }
 
   inline void SetWearInfo(ItemWearType wear_info)
   {
