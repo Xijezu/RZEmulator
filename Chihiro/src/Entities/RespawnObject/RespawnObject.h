@@ -16,12 +16,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "Monster.h"
 #include "GameRule.h"
+#include "Monster.h"
 
 struct RespawnInfo : public MonsterRespawnInfo
 {
-    explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info)
+    explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info), count(0)
     {
         prespawn_count = (!info.dungeon_id && !info.way_point_id && (info.max_num * GameRule::MONSTER_PRESPAWN_RATE >= 1.0f)) ? (info.max_num * GameRule::MONSTER_PRESPAWN_RATE) : info.max_num;
         way_point_id = info.way_point_id;

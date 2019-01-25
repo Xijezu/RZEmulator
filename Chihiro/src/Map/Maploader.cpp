@@ -16,11 +16,11 @@
 */
 
 #include "Maploader.h"
-#include "Scripting/XLua.h"
-#include <fstream>
 #include "FieldPropManager.h"
 #include "Log.h"
 #include "ObjectMgr.h"
+#include "Scripting/XLua.h"
+#include <fstream>
 
 bool Maploader::LoadMapContent()
 {
@@ -37,7 +37,7 @@ bool Maploader::LoadMapContent()
     }
 
     int y = 0;
-    fTileSize  = seamlessWorldInfo.m_fTileLength;
+    fTileSize = seamlessWorldInfo.m_fTileLength;
     fMapLength = seamlessWorldInfo.m_nSegmentCountPerMap * seamlessWorldInfo.m_fTileLength * seamlessWorldInfo.m_nTileCountPerSegment;
     for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y)
     {
@@ -85,13 +85,13 @@ bool Maploader::LoadMapContent()
 
 void Maploader::SetDefaultLocation(int x, int y, float fMapLength, int LocationId)
 {
-    X2D::Pointf begin{ };
-    X2D::Pointf end{ };
+    X2D::Pointf begin{};
+    X2D::Pointf end{};
 
     begin.x = (x * fMapLength);
     begin.y = (y * fMapLength);
-    end.x   = ((x + 1) * fMapLength);
-    end.y   = ((y + 1) * fMapLength);
+    end.x = ((x + 1) * fMapLength);
+    end.y = ((y + 1) * fMapLength);
     MapLocationInfo li(begin, end, LocationId, 2147483646);
     RegisterMapLocationInfo(li);
 }
@@ -107,10 +107,10 @@ void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
 
 void Maploader::LoadLocationFile(const std::string &szFilename, int x, int y, float fAttrLen, float fMapLength)
 {
-    int                nCharSize;
+    int nCharSize;
     LocationInfoHeader lih;
-    int                nPolygonCount;
-    int                nPointCount;
+    int nPolygonCount;
+    int nPointCount;
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
@@ -118,19 +118,19 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int x, int y, fl
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
-    ByteBuffer buffer{ };
+    ByteBuffer buffer{};
     buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    auto     total_entries = buffer.read<int>();
-    for (int i             = 0; i < total_entries; ++i)
+    auto total_entries = buffer.read<int>();
+    for (int i = 0; i < total_entries; ++i)
     {
         lih.nPriority = buffer.read<int>();
-        lih.x         = buffer.read<float>();
-        lih.y         = buffer.read<float>();
-        lih.z         = buffer.read<float>();
-        lih.fRadius   = buffer.read<float>();
+        lih.x = buffer.read<float>();
+        lih.y = buffer.read<float>();
+        lih.z = buffer.read<float>();
+        lih.fRadius = buffer.read<float>();
 
         nCharSize = buffer.read<int>();
         if (nCharSize > 1)
@@ -151,13 +151,13 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int x, int y, fl
         for (int cp = 0; cp < nPolygonCount; ++cp)
         {
             nPointCount = buffer.read<int>();
-            float                    sx = x * fMapLength;
-            float                    sy = y * fMapLength;
-            std::vector<X2D::Pointf> points{ };
+            float sx = x * fMapLength;
+            float sy = y * fMapLength;
+            std::vector<X2D::Pointf> points{};
 
             for (int p = 0; p < nPointCount; ++p)
             {
-                X2D::Pointf pt{ };
+                X2D::Pointf pt{};
                 pt.x = sx + ((float)buffer.read<int>() * fAttrLen);
                 pt.x = sy + ((float)buffer.read<int>() * fAttrLen);
                 points.emplace_back(pt);
@@ -177,35 +177,35 @@ void Maploader::LoadAttributeFile(const std::string &szFilename, int x, int y, f
     if (size == -1)
         return;
 
-    ByteBuffer buffer{ };
+    ByteBuffer buffer{};
     buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    auto  total_entries = buffer.read<int>();
-    float sx            = x * fMapLength;
-    float sy            = y * fMapLength;
+    auto total_entries = buffer.read<int>();
+    float sx = x * fMapLength;
+    float sy = y * fMapLength;
 
     for (int i = 0; i < total_entries; ++i)
     {
-        auto nPointCount           = buffer.read<int>();
+        auto nPointCount = buffer.read<int>();
 
-        std::vector<X2D::Pointf> points{ };
-        for (int                 p = 0; p < nPointCount; ++p)
+        std::vector<X2D::Pointf> points{};
+        for (int p = 0; p < nPointCount; ++p)
         {
-            X2D::Pointf pt{ };
+            X2D::Pointf pt{};
             pt.x = sx + ((float)buffer.read<int>() * fAttrLen);
             pt.y = sy + ((float)buffer.read<int>() * fAttrLen);
             points.emplace_back(pt);
         }
-        X2D::PolygonF            pg{points};
+        X2D::PolygonF pg{points};
         sObjectMgr.g_qtBlockInfo.Add({points, 0, 0});
     }
 }
 
 void Maploader::LoadScriptFile(const std::string &szFilename, int x, int y, float fMapLength)
 {
-    NfsHeader header{ };
+    NfsHeader header{};
 
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
@@ -213,16 +213,16 @@ void Maploader::LoadScriptFile(const std::string &szFilename, int x, int y, floa
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
-    ByteBuffer buffer{ };
+    ByteBuffer buffer{};
     buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    header.szSign                = buffer.ReadString(16);
-    header.dwVersion             = buffer.read<uint>();
+    header.szSign = buffer.ReadString(16);
+    header.dwVersion = buffer.read<uint>();
     header.dwEventLocationOffset = buffer.read<uint>();
-    header.dwEventScriptOffset   = buffer.read<uint>();
-    header.dwPropScriptOffset    = buffer.read<uint>();
+    header.dwEventScriptOffset = buffer.read<uint>();
+    header.dwPropScriptOffset = buffer.read<uint>();
 
     if (header.szSign != "nFlavor Script"s)
     {
@@ -244,16 +244,16 @@ void Maploader::LoadScriptFile(const std::string &szFilename, int x, int y, floa
 
 void Maploader::LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLength)
 {
-    auto  nLocationCount = buffer.read<int>();
-    float sx             = x * fMapLength;
-    float sy             = y * fMapLength;
+    auto nLocationCount = buffer.read<int>();
+    float sx = x * fMapLength;
+    float sy = y * fMapLength;
 
     for (int i = 0; i < nLocationCount; ++i)
     {
-        ScriptRegion sr{ };
-        sr.left   = (fTileSize * (float)buffer.read<int>()) + sx;
-        sr.top    = (fTileSize * (float)buffer.read<int>()) + sy;
-        sr.right  = (fTileSize * (float)buffer.read<int>()) + sx;
+        ScriptRegion sr{};
+        sr.left = (fTileSize * (float)buffer.read<int>()) + sx;
+        sr.top = (fTileSize * (float)buffer.read<int>()) + sy;
+        sr.right = (fTileSize * (float)buffer.read<int>()) + sx;
         sr.bottom = (fTileSize * (float)buffer.read<int>()) + sy;
         auto nLength = buffer.read<int>();
         if (nLength > 0)
@@ -265,28 +265,28 @@ void Maploader::LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLengt
 
 void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
 {
-    auto     nScriptCount = buffer.read<int>();
-    for (int i            = 0; i < nScriptCount; ++i)
+    auto nScriptCount = buffer.read<int>();
+    for (int i = 0; i < nScriptCount; ++i)
     {
-        std::string szBox{ };
-        std::string szRight{ };
-        std::string szTop{ };
-        std::string szLeft{ };
-        std::string szBottom{ };
+        std::string szBox{};
+        std::string szRight{};
+        std::string szTop{};
+        std::string szLeft{};
+        std::string szBottom{};
 
-        ScriptRegionInfo ri{ };
+        ScriptRegionInfo ri{};
         ri.nRegionIndex = buffer.read<int>();
         ri.nRegionIndex += nCurrentRegionIdx;
         ScriptRegion sr = m_vRegionList[ri.nRegionIndex];
-        szRight  = std::to_string(sr.right);
-        szTop    = std::to_string(sr.top);
-        szLeft   = std::to_string(sr.left);
+        szRight = std::to_string(sr.right);
+        szTop = std::to_string(sr.top);
+        szLeft = std::to_string(sr.left);
         szBottom = std::to_string(sr.bottom);
-        szBox    = NGemity::StringFormat("{},{},{},{}", szLeft, szTop, szRight, szBottom);
-        auto     nFunctionCount = buffer.read<int>();
-        for (int x              = 0; x < nFunctionCount; ++x)
+        szBox = NGemity::StringFormat("{},{},{},{}", szLeft, szTop, szRight, szBottom);
+        auto nFunctionCount = buffer.read<int>();
+        for (int x = 0; x < nFunctionCount; ++x)
         {
-            ScriptTag nt{ };
+            ScriptTag nt{};
             nt.nTrigger = buffer.read<int>();
             auto cc = buffer.read<int>();
             if (cc > 0)
@@ -320,7 +320,7 @@ bool Maploader::InitMapInfo()
     return true;
 }
 
-void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, float/* fAttrLen*/, float fMapLength)
+void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, float /* fAttrLen*/, float fMapLength)
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
@@ -328,31 +328,31 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
     infile.seekg(0, std::ios::beg);
     if (size == -1)
         return;
-    ByteBuffer buffer{ };
+    ByteBuffer buffer{};
     buffer.resize((size_t)size);
     infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    buffer.read_skip(18); // Sign
-    auto version = buffer.read<int>();  // Version
+    buffer.read_skip(18);              // Sign
+    auto version = buffer.read<int>(); // Version
 
-    auto  total_entries = buffer.read<int>();
-    float rx            = x * fMapLength;
-    float ry            = y * fMapLength;
+    auto total_entries = buffer.read<int>();
+    float rx = x * fMapLength;
+    float ry = y * fMapLength;
 
     for (int i = 0; i < total_entries; ++i)
     {
-        FieldPropRespawnInfo sr{ };
-        sr.nPropID  = buffer.read<int>();
-        sr.x        = buffer.read<float>() + rx;
-        sr.y        = buffer.read<float>() + ry;
+        FieldPropRespawnInfo sr{};
+        sr.nPropID = buffer.read<int>();
+        sr.x = buffer.read<float>() + rx;
+        sr.y = buffer.read<float>() + ry;
         sr.fZOffset = buffer.read<float>();
         sr.fRotateX = buffer.read<float>();
         sr.fRotateY = buffer.read<float>();
         sr.fRotateZ = buffer.read<float>();
-        sr.fScaleX  = buffer.read<float>();
-        sr.fScaleY  = buffer.read<float>();
-        sr.fScaleZ  = buffer.read<float>();
+        sr.fScaleX = buffer.read<float>();
+        sr.fScaleY = buffer.read<float>();
+        sr.fScaleZ = buffer.read<float>();
 
         sr.layer = 0;
         sr.bOnce = false;
