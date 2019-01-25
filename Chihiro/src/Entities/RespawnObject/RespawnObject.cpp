@@ -16,12 +16,12 @@
 */
 
 #include "RespawnObject.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "MemPool.h"
 #include "GameContent.h"
+#include "MemPool.h"
+#include "ObjectMgr.h"
+#include "World.h"
 
-RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo(rh))
+RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo{rh})
 {
     m_nMaxRespawnNum = info.prespawn_count;
     lastDeadTime = 0;

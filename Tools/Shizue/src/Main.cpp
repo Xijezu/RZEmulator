@@ -1,15 +1,15 @@
 #include "Common.h"
-#include <iostream>
-#include "XPacket.h"
-#include "XSocket.h"
-#include "XRc4Cipher.h"
-#include "IoContext.h"
-#include "NetworkThread.h"
-#include "Log.h"
-#include "ShizukeSession.h"
 #include "Config.h"
-#include "SingleSocketInstance.h"
+#include "IoContext.h"
+#include "Log.h"
 #include "NGInit.h"
+#include "NetworkThread.h"
+#include "ShizukeSession.h"
+#include "SingleSocketInstance.h"
+#include "XPacket.h"
+#include "XRc4Cipher.h"
+#include "XSocket.h"
+#include <iostream>
 
 int main(int argc, char **argv)
 {

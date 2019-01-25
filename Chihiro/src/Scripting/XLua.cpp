@@ -16,15 +16,15 @@
 */
 
 #include "XLua.h"
-#include <boost/filesystem.hpp>
-#include "Messages.h"
-#include "ObjectMgr.h"
-#include "MemPool.h"
-#include "World.h"
+#include "Config.h"
 #include "DungeonManager.h"
 #include "GameContent.h"
-#include "Config.h"
 #include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
+#include "World.h"
+#include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -45,7 +45,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("respawn_roaming_mob", &XLua::SCRIPT_RespawnRoamingMob, this);
     m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian, this);
     m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
-    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
+    m_pState.set_function("raid_respawn", &XLua::SCRIPT_AddRespawnInfo, this); /// TODO!!!!
     // NPC relevant
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);
@@ -189,16 +189,16 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
     if (args.size() < 7)
         return;
 
-    uint id = args[0].get<uint>();
+    uint id = args[0].get<int>();
     uint interval = args[1].get<uint>();
-    float left = args[3].get<float>();
-    float top = args[4].get<float>();
+    float left = args[2].get<float>();
+    float top = args[3].get<float>();
     float right = left + 1;
     float bottom = top + 1;
-    uint monster_id = args[5].get<uint>();
-    uint max_num = args[6].get<uint>();
-    bool is_wander = args[7].get<bool>();
-    int wander_id = args.size() > 7 ? args[8].get<uint>() : 0;
+    uint monster_id = args[4].get<uint>();
+    uint max_num = args[5].get<uint>();
+    bool is_wander = args[6].get<bool>();
+    int wander_id = args.size() > 7 ? args[7].get<uint>() : 0;
 
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
@@ -726,6 +726,7 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
 {
     if (args.size() < 9)
         return;
+
     auto id = args[0].get<uint>();
     auto interval = args[1].get<uint>();
     auto left = args[2].get<float>();
@@ -736,6 +737,9 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
     auto max_num = args[7].get<uint>();
     auto inc = args[8].get<uint>();
     auto wander_id = args.size() > 9 ? args[9].get<int>() : 0;
+
+    assert(max_num != 0);
+
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
