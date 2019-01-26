@@ -16,20 +16,20 @@
 */
 
 #include "Monster.h"
-#include "Messages.h"
-#include "XPacket.h"
-#include "World.h"
-#include "Summon.h"
-#include "Player.h"
-#include "MemPool.h"
-#include "ObjectMgr.h"
+#include "EncodingScrambled.h"
+#include "GameContent.h"
 #include "GameRule.h"
+#include "GroupManager.h"
+#include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
+#include "Player.h"
 #include "RegionContainer.h"
 #include "Skill.h"
-#include "GroupManager.h"
-#include "GameContent.h"
-#include "EncodingScrambled.h"
-#include "Log.h"
+#include "Summon.h"
+#include "World.h"
+#include "XPacket.h"
 #include <algorithm>
 
 Monster::Monster(uint handle, MonsterBase *mb) : Unit(true)
@@ -961,7 +961,7 @@ uint Monster::GetCreatureGroup() const
 
 bool Monster::IsEnvironmentMonster() const
 {
-    return m_Base->fight_type == 1;
+    return m_Base->fight_type == MonsterBase::FIGHT_TYPE_ENVIRONMENT;
 }
 
 bool Monster::IsBattleMode() const
@@ -971,27 +971,27 @@ bool Monster::IsBattleMode() const
 
 bool Monster::IsBossMonster() const
 {
-    return m_Base->monster_type >= 22;
+    return m_Base->monster_type >= MonsterBase::MONSTER_TYPE_DUNGEON_SUB_BOSS;
 }
 
 bool Monster::IsDungeonConnector() const
 {
-    return GetRace() == 20001;
+    return GetRace() == MonsterBase::MONSTER_RACE_DUNGEON_CONNECTOR;
+}
+
+bool Monster::IsDungeonCore() const
+{
+    return m_Base->race == MonsterBase::MONSTER_RACE_DUNGEON_CORE;
 }
 
 bool Monster::IsAgent() const
 {
-    return m_Base->fight_type == 4;
+    return m_Base->fight_type == MonsterBase::FIGHT_TYPE_AGENT;
 }
 
 bool Monster::IsAutoTrap() const
 {
-    return m_Base->fight_type == 5;
-}
-
-bool Monster::IsNonAttacker() const
-{
-    return m_Base->fight_type == 6 || m_Base->attacK_point == 0;
+    return m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP;
 }
 
 float Monster::GetChaseRange() const
@@ -1064,6 +1064,28 @@ CreatureStat *Monster::GetBaseStat() const
 int Monster::GetRace() const
 {
     return m_Base->race;
+}
+
+bool Monster::IsMovable()
+{
+    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_TRAP ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_NOT_MOVABLE)
+        return false;
+
+    return Unit::IsMovable();
+}
+
+bool Monster::IsAttackable()
+{
+    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_ENVIRONMENT ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP ||
+        m_Base->fight_type == MonsterBase::FIGHT_TYPE_TRAP)
+        return false;
+
+    return Unit::IsAttackable();
 }
 
 int Monster::AddHate(uint handle, int pt, bool bBroadcast, bool bProcRoamingMonster)

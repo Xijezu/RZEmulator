@@ -17,8 +17,8 @@
 */
 
 #include "Common.h"
-#include "Unit.h"
 #include "MonsterBase.h"
+#include "Unit.h"
 
 struct VirtualParty
 {
@@ -94,15 +94,10 @@ class Monster : public Unit
     void Update(uint) override;
     void OnUpdate() override;
     bool StartAttack(uint target, bool bNeedFastReaction) override;
-
     void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
-
     MonsterBase *GetBase() const { return m_Base; }
-
     void applyJobLevelBonus() override{};
-
     float GetSize() const override { return m_Base->size; }
-
     float GetScale() const override { return m_Base->scale; }
 
     const std::string &GetNameAsString() override;
@@ -117,9 +112,13 @@ class Monster : public Unit
     bool IsBattleMode() const; // override;
     bool IsBossMonster() const;
     bool IsDungeonConnector() const;
+    bool IsDungeonCore() const;
     bool IsAgent() const;
     bool IsAutoTrap() const;
-    bool IsNonAttacker() const;
+
+    bool IsAttackable() override;
+    bool IsMovable() override;
+    //bool IsKnockbackable() override;
 
     bool IsMonster() const override { return true; }
 
