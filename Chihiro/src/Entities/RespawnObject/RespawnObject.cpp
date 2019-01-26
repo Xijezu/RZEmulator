@@ -17,6 +17,7 @@
 
 #include "RespawnObject.h"
 #include "GameContent.h"
+#include "Log.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -39,7 +40,7 @@ void RespawnObject::Update(uint diff)
     if (lastDeadTime != 0 && lastDeadTime + info.interval > ct)
         return;
 
-    auto respawn_count = m_nMaxRespawnNum - info.count;
+    auto respawn_count = std::min(m_nMaxRespawnNum - info.count, info.inc);
 
     if (lastDeadTime == 0)
     {
@@ -50,18 +51,28 @@ void RespawnObject::Update(uint diff)
     /// Do we need a respawn?
     if (respawn_count > 0)
     {
-        while (true)
+        int try_cnt = 0;
+        for (int i = 0; i < respawn_count; ++i)
         {
             /// Generate random respawn coordinates based on a rectangle
-            int x = irand((int)info.left, (int)info.right);
-            int y = irand((int)info.top, (int)info.bottom);
+            int x{};
+            int y{};
+
+            do
+            {
+                x = irand((int)info.left, (int)info.right);
+                y = irand((int)info.top, (int)info.bottom);
+
+                if (++try_cnt > 500)
+                {
+                    NG_LOG_ERROR("server.worldserver", "Cannot respawn monster - try_cnt = 500");
+                    return;
+                }
+            } while (GameContent::IsBlocked(x, y));
 
             /// Generate monster if not blocked
-            Monster *monster{nullptr};
-            if (!GameContent::IsBlocked(x, y))
-            {
-                monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
-            }
+            auto monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
+
             /// Put it to the list when it's not blocked
             if (monster != nullptr)
             {
@@ -72,9 +83,6 @@ void RespawnObject::Update(uint diff)
                 m_vRespawnedMonster.emplace_back(monster->GetHandle());
                 info.count++;
             }
-            /// And finally break if we reached our respawn count
-            if (info.count >= respawn_count)
-                break;
         }
     }
 }
@@ -84,12 +92,16 @@ void RespawnObject::onMonsterDelete(Monster *mob)
     if (mob == nullptr)
         return;
 
+    lastDeadTime = sWorld.GetArTime();
+    --info.count;
+
     auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
     if (pos != m_vRespawnedMonster.end())
     {
         m_vRespawnedMonster.erase(pos);
         mob->m_pDeleteHandler = nullptr;
-        lastDeadTime = sWorld.GetArTime();
-        info.count--;
     }
+
+    if (m_nMaxRespawnNum < info.max_num)
+        ++m_nMaxRespawnNum;
 }
