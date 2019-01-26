@@ -77,6 +77,20 @@ enum class NEXT_ATTACK_MODE : int32_t
     AM_AIMING = 1,
 };
 
+enum _CHARACTER_RESURRECTION_TYPE
+{
+    CRT_NORMAL = 0,
+    CRT_BATTLE = 1,
+    CRT_COMPETE = 2,
+    CRT_SKILL = 3,
+    CRT_SKILL_WITH_RECOVER = 4,
+    CRT_ITEM = 5,
+    CRT_STATE = 6,
+    CRT_FAIRY_POTION = 7,
+    CRT_HUNTAHOLIC = 8,
+    CRT_BATTLE_ARENA = 9,
+};
+
 class Unit : public WorldObject
 {
   public:
@@ -219,6 +233,8 @@ class Unit : public WorldObject
     int MPHeal(int mp);
     int HealByItem(int hp);
     int MPHealByItem(int mp);
+
+    bool Resurrect(_CHARACTER_RESURRECTION_TYPE eResurrectType, int nIncHP, int nIncMP, int64_t nRecoveryEXP, bool bIsRestoreRemovedStateByDead);
 
     /// BATTLE END
     void RemoveState(StateCode code, int state_level);
@@ -443,6 +459,12 @@ class Unit : public WorldObject
         SetMana(GetMana() + mp);
     }
 
+    void RestoreRemovedStateByDeath();
+    void ClearRemovedStateByDeath();
+
+    void RemoveAllAura();
+    void RemoveAllHate();
+
     virtual void AddEXP(int64_t exp, uint jp, bool bApplyStamina);
     void CancelSkill();
     void CancelAttack();
@@ -519,6 +541,7 @@ class Unit : public WorldObject
     }
 
     virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
+    void removeStateByDead();
     void processAttack();
     void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming = false, bool bEndAttack = false, bool bCancelAttack = false);
     void onAfterAddState(State *);
@@ -561,6 +584,7 @@ class Unit : public WorldObject
 
     void _InitTimerFieldsAndStatus();
     std::vector<State *> m_vStateList{};
+    std::vector<State *> m_vStateListRemovedByDeath{};
     uint32_t m_unitTypeMask;
     //	typedef std::list<GameObject*> GameObjectList;
     //	GameObjectList m_gameObj;
@@ -649,4 +673,6 @@ class Unit : public WorldObject
     void AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, bool bIsPhysicalSkill, bool bIsHarmful);
     void RemoveStatesOnDamage();
     int GetCriticalDamage(int damage, float critical_amp, int critical_bonus);
+    template <typename COMPARER>
+    void RemoveStateIf(COMPARER comparer, std::vector<State *> *result = nullptr, bool bByDead = false);
 };

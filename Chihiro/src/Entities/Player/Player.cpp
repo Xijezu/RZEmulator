@@ -138,7 +138,7 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
     pEnterPct.fill(pPlayer->GetName(), 19);
     pEnterPct << (uint16_t)pPlayer->GetCurrentJob();
-    pEnterPct << (uint32_t)0; // TODO: Ride Handle
+    pEnterPct << (uint32_t)pPlayer->GetRideHandle();
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
 }
 
@@ -519,7 +519,7 @@ bool Player::ReadStateList(Unit *pUnit)
             State *state = new State{};
             auto si = sObjectMgr.GetStateInfo(code);
             m_nCurrentStateUID++;
-            state->SetState(code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint)(remain_fire_time - 100 * si->fire_interval + sWorld.GetArTime()), base_damage, 0, "");
+            state->SetState(code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint)(sWorld.GetArTime() + remain_fire_time - 100 * si->fire_interval), base_damage, 0, "");
             sMemoryPool.AllocMiscHandle(state);
             pUnit->m_vStateList.emplace_back(state);
         } while (result->NextRow());

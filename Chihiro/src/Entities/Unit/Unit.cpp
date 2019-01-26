@@ -1475,29 +1475,24 @@ void Unit::EndAttack()
 
 void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
 {
-    Position pos{};
 
     if (m_castingSkill != nullptr)
-    {
         CancelSkill();
-    }
-    if (bIsMoving && IsInWorld())
+
+    if (IsMoving() && IsInWorld())
     {
-        pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
+        auto pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
         sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
-        if (IsPlayer())
-        {
-            // Ride handle
-        }
+        if (IsPlayer() && this->As<Player>()->GetRideObject() != nullptr)
+            sWorld.SetMove(this->As<Player>()->GetRideObject(), pos, pos, 0, true, sWorld.GetArTime(), true);
     }
-    if (GetTargetHandle() != 0)
+
+    if (IsAttacking())
         EndAttack();
 
-    for (auto &state : m_vStateList)
-    {
-        Messages::BroadcastStateMessage(this, state, true);
-    }
-    m_vStateList.clear();
+    RemoveAllAura();
+    RemoveAllHate();
+    removeStateByDead();
 }
 
 void Unit::AddEXP(int64_t exp, uint jp, bool bApplyStamina)
@@ -1978,7 +1973,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1,
         int prev_hp = GetHealth();
         AddHealth(GetMaxHealth() * 0.2f);
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, true);
-        // @Todo: ClearRemovedStateByDead();
+        ClearRemovedStateByDeath();
 
         result = TS_RESULT_SUCCESS;
         break;
@@ -3136,8 +3131,164 @@ void Unit::EnumPassiveSkill(SkillFunctor &fn)
 
 uint8_t Unit::GetRealRidingSpeed()
 {
-    uint8_t nMoveSpeed = GetMoveSpeed() / 7;
+    int nMoveSpeed = GetMoveSpeed() / 7;
     if (nMoveSpeed > UINT8_MAX)
         nMoveSpeed = UINT8_MAX;
-    return nMoveSpeed;
+    return static_cast<uint8_t>(nMoveSpeed);
+}
+
+void Unit::removeStateByDead()
+{
+    ClearRemovedStateByDeath();
+
+    std::vector<State *> removedStates{};
+    RemoveStateIf([](const State *p) { return p->GetTimeType() & AF_ERASE_ON_DEAD; }, &removedStates, true);
+
+    if (IsPlayer())
+    {
+        for (auto pState : removedStates)
+        {
+            if (!pState->IsHarmful())
+            {
+                State::DB_InsertState(this, pState);
+                m_vStateListRemovedByDeath.emplace_back(pState);
+            }
+            else
+            {
+                //pState->Expire(this);
+                pState->DeleteThis();
+            }
+        }
+    }
+}
+
+template <typename COMPARER>
+void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool bByDead)
+{
+    std::vector<State *> removedStates{};
+    std::vector<State *>::iterator it, trail;
+    if (result != nullptr)
+        removedStates.swap(*result);
+
+    for (it = m_vStateList.begin(), trail = it; it != m_vStateList.end(); ++it)
+    {
+        if (comparer(*it))
+        {
+            removedStates.emplace_back(*it);
+        }
+        else
+        {
+            if (trail != it)
+            {
+                *trail = *it;
+            }
+            ++trail;
+        }
+    }
+
+    m_vStateList.resize(trail - m_vStateList.begin());
+
+    for (it = removedStates.begin(); it != removedStates.end(); ++it)
+    {
+        onUpdateState((*it), true);
+        onAfterRemoveState(*it);
+    }
+
+    if (!removedStates.empty())
+        CalculateStat();
+
+    if (result != nullptr)
+        removedStates.swap(*result);
+}
+
+void Unit::RestoreRemovedStateByDeath()
+{
+    auto t = sWorld.GetArTime();
+    for (auto it = m_vStateListRemovedByDeath.begin(); it != m_vStateListRemovedByDeath.end();)
+    {
+        const State *state = (*it);
+        if (GetState(state->GetCode()) || (state->GetTimeType() & AF_ERASE_ON_DEAD))
+        {
+            ++it;
+            continue;
+        }
+
+        if (state->GetEndTime() == UINT32_MAX)
+        {
+            AddState(StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), UINT32_MAX, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
+        }
+        else
+        {
+            auto time_difference = sWorld.GetArTime() - GetUInt32Value(UNIT_FIELD_DEAD_TIME);
+            AddState(StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), time_difference, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
+        }
+        it = m_vStateListRemovedByDeath.erase(it);
+    }
+    ClearRemovedStateByDeath();
+}
+
+void Unit::ClearRemovedStateByDeath()
+{
+    for (auto &it : m_vStateListRemovedByDeath)
+        it->DeleteThis();
+    m_vStateListRemovedByDeath.clear();
+}
+
+bool Unit::Resurrect(_CHARACTER_RESURRECTION_TYPE eResurrectType, int nIncHP, int nIncMP, int64_t nRecoveryEXP, bool bIsRestoreRemovedStateByDead)
+{
+    if (!IsDead() || (!IsSummon() && !IsPlayer()))
+        return false;
+
+    AddHealth(std::max(nIncHP, 1));
+    AddMana(nIncMP);
+    SetEXP(GetEXP() + nRecoveryEXP);
+
+    if (bIsRestoreRemovedStateByDead)
+        RestoreRemovedStateByDeath();
+    else
+        ClearRemovedStateByDeath();
+
+    if (IsPlayer())
+        this->As<Player>()->Save(true);
+    else if (IsSummon())
+        Summon::DB_UpdateSummon(this->As<Summon>()->GetMaster(), this->As<Summon>());
+
+    Messages::BroadcastHPMPMessage(this, nIncHP, nIncMP, true);
+    return true;
+}
+
+void Unit::RemoveAllAura()
+{
+    if (m_vAura.empty())
+        return;
+
+    for (auto &it : m_vAura)
+    {
+        TS_SC_AURA msg{};
+
+        msg.caster = GetHandle();
+        msg.skill_id = it.first->GetSkillId();
+        msg.status = false;
+
+        if (IsPlayer())
+            this->As<Player>()->SendPacket(msg);
+        else if (IsSummon())
+            this->As<Summon>()->GetMaster()->SendPacket(msg);
+    }
+    m_vAura.clear();
+}
+
+void Unit::RemoveAllHate()
+{
+    for (auto &it : m_vEnemyList)
+    {
+        auto pUnit = sMemoryPool.GetObjectInWorld<Monster>(it);
+        if (pUnit != nullptr && pUnit->IsMonster())
+        {
+            auto pMonster = pUnit->As<Monster>();
+            pMonster->RemoveHate(GetHandle(), pMonster->GetHate(GetHandle()));
+        }
+    }
+
+    m_vEnemyList.clear();
 }
