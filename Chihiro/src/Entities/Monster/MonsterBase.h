@@ -17,6 +17,7 @@
 */
 
 #include "Common.h"
+#include "ItemFields.h"
 
 class Monster;
 
@@ -35,6 +36,48 @@ struct PARTY_DAMAGE
 
 struct MonsterBase
 {
+    enum
+    {
+        FIGHT_TYPE_NORMAL = 0,
+        FIGHT_TYPE_ENVIRONMENT = 1,
+        FIGHT_TYPE_DUNGEON_CONNECTOR = 2,
+        FIGHT_TYPE_BOSS = 3,
+        FIGHT_TYPE_AGENT = 4,
+        FIGHT_TYPE_AUTO_TRAP = 5,
+        FIGHT_TYPE_TRAP = 6,
+        FIGHT_TYPE_NOT_MOVABLE = 7,
+    };
+
+    enum
+    {
+        MONSTER_TYPE_NORMAL = 0,
+        MONSTER_TYPE_WARRIOR = 1,
+        MONSTER_TYPE_MAGICAN = 2,
+        MONSTER_TYPE_SUMMONEE = 3,
+        MONSTER_TYPE_RESERVED_1 = 4,
+        MONSTER_TYPE_RESERVED_2 = 5,
+        MONSTER_TYPE_RESERVED_3 = 6,
+        MONSTER_TYPE_RESERVED_4 = 7,
+        MONSTER_TYPE_RESERVED_5 = 8,
+        MONSTER_TYPE_EVENT_GUARDIAN = 9,
+        MONSTER_TYPE_ENHANCE = 11,
+        MONSTER_TYPE_FIELD_SUB_BOSS = 12,
+        MONSTER_TYPE_HUNTAHOLIC_1LV = 15,
+        MONSTER_TYPE_HUNTAHOLIC_2LV = 16,
+        MONSTER_TYPE_HUNTAHOLIC_3LV = 17,
+        MONSTER_TYPE_HUNTAHOLIC_BOSS = 18,
+        MONSTER_TYPE_DUNGEON = 21,
+        MONSTER_TYPE_DUNGEON_SUB_BOSS = 22,
+        MONSTER_TYPE_C_BOSS = 31,
+        MONSTER_TYPE_B_BOSS = 32,
+    };
+
+    enum
+    {
+        MONSTER_RACE_DUNGEON_CORE = 20000,
+        MONSTER_RACE_DUNGEON_CONNECTOR = 20001,
+    };
+
     int id;
     int name_id;
     int monster_group;
