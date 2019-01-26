@@ -1541,15 +1541,51 @@ bool WorldSession::Update(uint /*diff*/)
     return true;
 }
 
-void WorldSession::onRevive(const TS_CS_RESURRECTION *)
+void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
 {
     if (m_pPlayer == nullptr)
         return;
 
-    if (m_pPlayer->GetHealth() != 0)
+    if (m_pPlayer->IsAlive())
         return;
 
-    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("revive_in_town({})", 0));
+    switch (pRecvPct->type)
+    {
+    case TS_RESURRECTION_TYPE::RT_UseState:
+    {
+        break;
+    }
+
+    case TS_RESURRECTION_TYPE::RT_UsePotion:
+    {
+        break;
+    }
+
+    case TS_RESURRECTION_TYPE::RT_Compete:
+    {
+        break;
+    }
+
+    case TS_RESURRECTION_TYPE::RT_Deathmatch:
+    {
+        break;
+    }
+    }
+
+    enum _REVIVE_TYPE
+    {
+        REVIVE_NORMAL = 0,
+        REVIVE_BATTLE = 1,
+        REVIVE_COMPETE = 2,
+        REVIVE_DUNGEON_SIEGE = 3,
+    };
+
+    _REVIVE_TYPE eReviveType = REVIVE_NORMAL;
+    if (m_pPlayer->IsInSiegeDungeon())
+        eReviveType = REVIVE_DUNGEON_SIEGE;
+
+    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("revive_in_town({})", eReviveType));
+    m_pPlayer->ClearRemovedStateByDeath();
 }
 
 void WorldSession::onDropItem(const TS_CS_DROP_ITEM *pRecvPct)
