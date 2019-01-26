@@ -358,6 +358,8 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int x, int y, f
         sr.bOnce = false;
         if (version == 2)
             buffer.read_skip(7);
+        else if (version == 3)
+            buffer.read_skip(9);
         else
             buffer.read_skip(2);
         sFieldPropManager.RegisterFieldProp(sr);
