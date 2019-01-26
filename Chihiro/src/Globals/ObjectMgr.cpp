@@ -16,14 +16,14 @@
 */
 
 #include "ObjectMgr.h"
-#include <fstream>
-#include "DungeonManager.h"
-#include "MixManager.h"
-#include "GameRule.h"
-#include "WorldLocation.h"
-#include "World.h"
 #include "DatabaseEnv.h"
+#include "DungeonManager.h"
+#include "GameRule.h"
 #include "Log.h"
+#include "MixManager.h"
+#include "World.h"
+#include "WorldLocation.h"
+#include <fstream>
 
 ObjectMgr::ObjectMgr() : g_qtBlockInfo(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
 {
