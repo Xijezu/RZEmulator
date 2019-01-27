@@ -3029,27 +3029,47 @@ CONDITION_INFO Player::GetCondition() const
 
 void Player::applyState(State &state)
 {
-    int stateType = state.GetEffectType();
-    if (stateType == 200)
+    if (state.GetEffectType() == SEF_RIDING)
     {
         if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
-            m_Attribute.nMoveSpeed += state.GetValue(0);
+            m_Attribute.nMoveSpeed = state.GetValue(0);
         SetUInt32Value(PLAYER_FIELD_RIDING_UID, state.m_nUID);
         return;
     }
-    if (stateType == 0)
+
+    switch (state.GetEffectType())
     {
-        switch (state.m_nCode)
+    case SEF_CHANGING_FORM:
+    {
+        break;
+    }
+    case SEF_MISC:
+    {
+        switch (state.GetCode())
         {
-        case StateCode::SC_STAMINA_SAVE:
+        case SC_STAMINA_SAVE:
             m_bStaminaActive = true;
-            return;
+            break;
+
+            // Cracker here
+
+        case SC_PASS_DAMAGE:
+            break;
+
+        case SC_FUSION_WITH_SUMMON:
+            break;
         default:
             Unit::applyState(state);
-            return;
+            break;
         }
+        break;
     }
-    Unit::applyState(state);
+    break;
+
+    default:
+        Unit::applyState(state);
+        break;
+    }
 }
 
 void Player::setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64_t nBonusEXP, int nBonusJP)
@@ -3170,16 +3190,15 @@ void Player::applyCharm(Item *pItem)
 
 void Player::onBeforeCalculateStat()
 {
-    m_fDistEXPMod = 1.0f;
     m_bStaminaActive = false;
     SetInt32Value(PLAYER_FIELD_MAX_STAMINA, 500000);
     m_bUsingTent = false;
     SetInt32Value(PLAYER_FIELD_MAX_CHAOS, 0);
+    m_fDistEXPMod = 1.0f;
+    SetUInt32Value(PLAYER_FIELD_RIDING_UID, 0);
 
     m_vApplySummonPassive.clear();
     m_vApmlifySummonPassive.clear();
-
-    Unit::onBeforeCalculateStat();
 }
 
 void Player::AddSummonToStorage(Summon *pSummon)
@@ -3407,7 +3426,7 @@ bool Player::ReadStorageSummonList(std::vector<Summon *> &vList)
 
 bool Player::IsSitdownable()
 {
-    if (!IsActable() || IsSitDown() || IsUsingSkill() /*|| IsRiding() || HasRidingState()*/)
+    if (!IsActable() || IsSitDown() || IsUsingSkill() || IsRiding() || HasRidingState())
         return false;
     return true;
 }
