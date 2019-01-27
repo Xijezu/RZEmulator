@@ -140,6 +140,8 @@ void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
     pEnterPct << (uint16_t)pPlayer->GetCurrentJob();
     pEnterPct << (uint32_t)pPlayer->GetRideHandle();
     pEnterPct << (uint32_t)pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
+    if (pPlayer->GetRideHandle() != 0)
+        Messages::sendEnterMessage(pPlayer, pPlayer->GetRideObject(), true);
 }
 
 bool Player::ReadCharacter(const std::string &_name, int _race)
