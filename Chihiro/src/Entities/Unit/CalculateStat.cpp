@@ -1743,7 +1743,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
 
         if (nBitset & FLAG_MOVE_SPEED)
         {
-            if (!IsPlayer() || false /* !static_cast<StructPlayer *>(this)->HasRidingState()*/)
+            if (!IsPlayer() || !this->As<Player>()->HasRidingState())
                 m_AttributeAmplifier.fMoveSpeed += fValue;
         }
 
@@ -1809,159 +1809,187 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
 {
     if (bStat)
     {
-        if ((nBitset & 1) != 0)
+        if (nBitset & StateStatFlag::FLAG_STR)
             m_cStat.strength += nValue;
-        if ((nBitset & 2) != 0)
+        if (nBitset & StateStatFlag::FLAG_VIT)
             m_cStat.vital += nValue;
-        if ((nBitset & 4) != 0)
+        if (nBitset & StateStatFlag::FLAG_AGI)
             m_cStat.agility += nValue;
-        if ((nBitset & 8) != 0)
+        if (nBitset & StateStatFlag::FLAG_DEX)
             m_cStat.dexterity += nValue;
-        if ((nBitset & 0x10) != 0)
+        if (nBitset & StateStatFlag::FLAG_INT)
             m_cStat.intelligence += nValue;
-        if ((nBitset & 0x20) != 0)
+        if (nBitset & StateStatFlag::FLAG_MEN)
             m_cStat.mentality += nValue;
-        if ((nBitset & 0x40) != 0)
+        if (nBitset & StateStatFlag::FLAG_LUK)
             m_cStat.luck += nValue;
     }
     else
     {
-        if ((nBitset & 0x80) != 0)
+        if (nBitset & StateStatFlag::FLAG_ATTACK_POINT)
         {
             m_Attribute.nAttackPointRight += nValue;
-            //m_nAttackPointRightWithoutWeapon += (short)nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
+            //m_nAttackPointRightWithoutWeapon += nValue;
+
+            if (IsUsingDoubleWeapon())
             {
                 m_Attribute.nAttackPointLeft += nValue;
-                //this.m_nAttackPointLeftWithoutWeapon += (short)nValue;
+                //m_nAttackPointLeftWithoutWeapon += nValue;
             }
         }
-        if ((nBitset & 0x100) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAGIC_POINT)
             m_Attribute.nMagicPoint += nValue;
-        if ((nBitset & 0x200) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_DEFENCE)
             m_Attribute.nDefence += nValue;
-        if ((nBitset & 0x400) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAGIC_DEFENCE)
             m_Attribute.nMagicDefence += nValue;
-        if ((nBitset & 0x800) != 0)
-        {
+
+        if (nBitset & StateStatFlag::FLAG_ATTACK_SPEED)
             m_Attribute.nAttackSpeedRight += nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-                m_Attribute.nAttackSpeedLeft += nValue;
-        }
-        if ((nBitset & 0x1000) != 0)
+
+        if (IsUsingDoubleWeapon())
+            m_Attribute.nAttackSpeedLeft += nValue;
+
+        if (nBitset & StateStatFlag::FLAG_CAST_SPEED)
             m_Attribute.nCastingSpeed += nValue;
-        if ((nBitset & 0x2000) != 0 && !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
+
+        if (nBitset & StateStatFlag::FLAG_MOVE_SPEED)
         {
-            auto p = dynamic_cast<Player *>(this);
-            if (p != nullptr /*|| p.m_nRidingStateUid == 0*/)
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED) && (!IsPlayer() || !this->As<Player>()->HasRidingState()))
                 m_Attribute.nMoveSpeed += nValue;
         }
-        if ((nBitset & 0x4000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_ACCURACY)
         {
             m_Attribute.nAccuracyRight += nValue;
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
+
+            if (IsUsingDoubleWeapon())
                 m_Attribute.nAccuracyLeft += nValue;
         }
-        if ((nBitset & 0x8000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAGIC_ACCURACY)
             m_Attribute.nMagicAccuracy += nValue;
-        if ((nBitset & 0x10000) != 0)
-            m_Attribute.nCritical += (short)nValue;
-        if ((nBitset & 0x20000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_CRITICAL)
+            m_Attribute.nCritical += nValue;
+
+        if (nBitset & StateStatFlag::FLAG_BLOCK)
             m_Attribute.nBlockChance += nValue;
-        if ((nBitset & 0x40000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_BLOCK_DEFENCE)
             m_Attribute.nBlockDefence += nValue;
-        if ((nBitset & 0x80000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_AVOID)
             m_Attribute.nAvoid += nValue;
-        if ((nBitset & 0x100000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAGIC_RESISTANCE)
             m_Attribute.nMagicAvoid += nValue;
-        if ((nBitset & 0x200000) != 0)
-            SetInt32Value(UNIT_FIELD_MAX_HEALTH, GetInt32Value(UNIT_FIELD_MAX_HEALTH) + (int)nValue);
-        if ((nBitset & 0x400000) != 0)
-            SetInt32Value(UNIT_FIELD_MAX_MANA, GetInt32Value(UNIT_FIELD_MAX_MANA) + (int)nValue);
-        if ((nBitset & 0x1000000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAX_HP)
+            SetMaxHealth(GetMaxHealth() + nValue);
+
+        if (nBitset & StateStatFlag::FLAG_MAX_MP)
+            SetMaxMana(GetMaxMana() + nValue);
+
+        if (nBitset & StateStatFlag::FLAG_MAX_SP)
+        {
+        }
+
+        if (nBitset & StateStatFlag::FLAG_HP_REGEN_ADD)
             m_Attribute.nHPRegenPoint += nValue;
-        if ((nBitset & 0x2000000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MP_REGEN_ADD)
             m_Attribute.nMPRegenPoint += nValue;
-        if ((nBitset & 0x8000000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_SP_REGEN_ADD)
+        {
+        }
+
+        if (nBitset & StateStatFlag::FLAG_HP_REGEN_RATIO)
             m_Attribute.nHPRegenPercentage += nValue;
-        if ((nBitset & 0x10000000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MP_REGEN_RATIO)
             m_Attribute.nMPRegenPercentage += nValue;
-        if ((nBitset & 0x40000000) != 0)
+
+        if (nBitset & StateStatFlag::FLAG_MAX_WEIGHT)
             m_Attribute.nMaxWeight += nValue;
     }
 }
 
 void Unit::incParameter2(uint nBitset, float fValue)
 {
+    if (nBitset & FlagEffectType::FLAG_ET_NONE_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_NONE] += fValue;
 
-    if ((nBitset & 1) != 0)
+    if (nBitset & FlagEffectType::FLAG_ET_FIRE_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_FIRE] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_WATER_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_WATER] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_WIND_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_WIND] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_EARTH_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_EARTH] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_LIGHT_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_LIGHT] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_DARK_RESIST)
+        m_Resist.nResist[ElementalType::TYPE_DARK] += fValue;
+
+    if (nBitset & FlagEffectType::FLAG_ET_NONE_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[0] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_NONE, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_NONE, fValue, 0));
     }
-    if ((nBitset & 2) != 0)
+    if (nBitset & FlagEffectType::FLAG_ET_FIRE_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[1] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_FIRE, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_FIRE, fValue, 0));
     }
-    if ((nBitset & 4) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_ET_WATER_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[2] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WATER, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WATER, fValue, 0));
     }
-    if ((nBitset & 8) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_ET_WIND_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[3] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WIND, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_WIND, fValue, 0));
     }
-    if ((nBitset & 0x10) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_ET_EARTH_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[4] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_EARTH, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_EARTH, fValue, 0));
     }
-    if ((nBitset & 0x20) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_ET_LIGHT_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[5] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_LIGHT, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_LIGHT, fValue, 0));
     }
-    if ((nBitset & 0x40) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_ET_DARK_ADDITIONAL_DAMAGE)
     {
-        m_Resist.nResist[6] += (short)fValue;
+        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_DARK, fValue, 0));
+        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(100, ElementalType::TYPE_NONE, ElementalType::TYPE_DARK, fValue, 0));
     }
-    if ((nBitset & 0x200000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_NONE, fValue});
-    }
-    if ((nBitset & 0x400000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_FIRE, fValue});
-    }
-    if ((nBitset & 0x800000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WATER, fValue});
-    }
-    if ((nBitset & 0x1000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_WIND, fValue});
-    }
-    if ((nBitset & 0x2000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_EARTH, fValue});
-    }
-    if ((nBitset & 0x4000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_LIGHT, fValue});
-    }
-    if ((nBitset & 0x8000000) != 0)
-    {
-        m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
-        m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo{100, TYPE_NONE, TYPE_DARK, fValue});
-    }
-    if ((nBitset & 0x10000000) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_CRITICAL_DAMAGE)
         m_Attribute.nCriticalPower += fValue;
-    if ((nBitset & 0x20000000) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_HP_REGEN_STOP)
         SetFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED);
-    if ((nBitset & 0x40000000) != 0)
+
+    if (nBitset & FlagEffectType::FLAG_MP_REGEN_STOP)
         SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
