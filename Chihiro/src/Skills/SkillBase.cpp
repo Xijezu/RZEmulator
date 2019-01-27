@@ -27,42 +27,42 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
     {
         switch (c)
         {
-            case 101:
-                return vf_one_hand_sword != 0;
-            case 102:
-                return vf_two_hand_sword != 0;
-            case 98:
-                return vf_double_dagger != 0;
-            case 96:
-                return vf_double_sword != 0;
-            case 103:
-                return vf_dagger != 0;
-            case 104:
-                return vf_spear != 0;
-            case 105:
-                return vf_axe != 0;
-            case 113:
-                return vf_one_hand_axe != 0;
-            case 95:
-                return vf_double_axe != 0;
-            case 106:
-                return vf_one_hand_mace != 0;
-            case 107:
-                return vf_two_hand_mace != 0;
-            case 109:
-                return vf_lightbow != 0;
-            case 108:
-                return vf_heavybow != 0;
-            case 110:
-                return vf_crossbow != 0;
-            case 111:
-                return vf_one_hand_staff != 0;
-            case 112:
-                return vf_two_hand_staff != 0;
-            case 210:
-                return vf_shield_only != 0;
-            default:
-                return false;
+        case 101:
+            return vf_one_hand_sword != 0;
+        case 102:
+            return vf_two_hand_sword != 0;
+        case 98:
+            return vf_double_dagger != 0;
+        case 96:
+            return vf_double_sword != 0;
+        case 103:
+            return vf_dagger != 0;
+        case 104:
+            return vf_spear != 0;
+        case 105:
+            return vf_axe != 0;
+        case 113:
+            return vf_one_hand_axe != 0;
+        case 95:
+            return vf_double_axe != 0;
+        case 106:
+            return vf_one_hand_mace != 0;
+        case 107:
+            return vf_two_hand_mace != 0;
+        case 109:
+            return vf_lightbow != 0;
+        case 108:
+            return vf_heavybow != 0;
+        case 110:
+            return vf_crossbow != 0;
+        case 111:
+            return vf_one_hand_staff != 0;
+        case 112:
+            return vf_two_hand_staff != 0;
+        case 210:
+            return vf_shield_only != 0;
+        default:
+            return false;
         }
     }
 
@@ -81,9 +81,7 @@ int SkillBase::GetHitBonus(int enhance, int level_diff) const
 
 int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
 {
-    return (int)(state_level_base
-                 + (state_level_per_enhance * enhance_lv)
-                 + (state_level_per_skl * skill_lv));
+    return (int)(state_level_base + (state_level_per_enhance * enhance_lv) + (state_level_per_skl * skill_lv));
 }
 
 uint SkillBase::GetCastDelay(int skill_lv, int enhance)
@@ -111,20 +109,20 @@ bool SkillBase::IsUsable(uint8_t nUseIndex) const
 {
     switch (nUseIndex)
     {
-        case 0:
-            return uf_self != 0;
-        case 1:
-            return uf_party != 0;
-        case 2:
-            return uf_guild != 0;
-        case 3:
-            return uf_neutral != 0;
-        case 4:
-            return uf_purple != 0;
-        case 5:
-            return uf_enemy != 0;
-        default:
-            return false;
+    case 0:
+        return uf_self != 0;
+    case 1:
+        return uf_party != 0;
+    case 2:
+        return uf_guild != 0;
+    case 3:
+        return uf_neutral != 0;
+    case 4:
+        return uf_purple != 0;
+    case 5:
+        return uf_enemy != 0;
+    default:
+        return false;
     }
 }
 
@@ -145,17 +143,19 @@ int SkillBase::GetNameID() const
 
 bool SkillBase::IsPassive() const
 {
-    return is_passive;
+    // Yes, the DB Value is actually is_active, not is_passive.
+    // No questions asked.
+    return is_passive == 0;
 }
 
 bool SkillBase::IsPhysicalSkill() const
 {
-    return is_physical_act;
+    return is_physical_act != 0;
 }
 
 bool SkillBase::IsMagicalSkill() const
 {
-    return !is_physical_act;
+    return is_physical_act;
 }
 
 bool SkillBase::IsHarmful() const
