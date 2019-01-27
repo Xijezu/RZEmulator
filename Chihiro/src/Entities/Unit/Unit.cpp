@@ -1894,10 +1894,9 @@ void Unit::procMoveSpeedChange()
 
     auto pos = GetCurrentPosition(sWorld.GetArTime());
     if (!IsMovable())
-    {
         sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
-    }
-    else if (GetMoveSpeed() != speed)
+
+    else if (GetMoveSpeed() != GetRealMoveSpeed())
     {
         const std::vector<ArMoveVector::MoveInfo> &vMoveVector(ends);
         std::vector<Position> vMovePos{};
