@@ -19,9 +19,10 @@
 #include "AdhocStatement.h"
 #include "Common.h"
 #include "Errors.h"
-#include "Implementation/LoginDatabase.h"
 #include "Implementation/CharacterDatabase.h"
 #include "Implementation/GameDatabase.h"
+#include "Implementation/LogDatabase.h"
+#include "Implementation/LoginDatabase.h"
 #include "Log.h"
 #include "PreparedStatement.h"
 #include "ProducerConsumerQueue.h"
@@ -446,3 +447,4 @@ void DatabaseWorkerPool<T>::ExecuteOrAppend(SQLTransaction &trans, PreparedState
 template class DatabaseWorkerPool<LoginDatabaseConnection>;
 template class DatabaseWorkerPool<CharacterDatabaseConnection>;
 template class DatabaseWorkerPool<GameDatabaseConnection>;
+template class DatabaseWorkerPool<LogDatabaseConnection>;

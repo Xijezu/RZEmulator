@@ -19,30 +19,14 @@
  * 
 */
 #include "Common.h"
-#include <string>
-#include <mutex>
-#include "NetworkThread.h"
 #include "MonitorSession.h"
+#include "MonitorStructs.h"
+#include "NetworkThread.h"
+#include <mutex>
+#include <string>
 
 namespace NGemity
 {
-
-struct Server
-{
-    std::string szName;
-    std::string szIPAddress;
-    int32_t nPlayerCount;
-    uint16_t nPort;
-    bool bRequesterEnabled;
-};
-
-struct ServerRegion
-{
-    std::string szRegionName;
-    std::string szAuthIPAddress;
-    std::vector<Server> vServerList;
-};
-
 class ServerMonitor
 {
   public:
@@ -59,10 +43,10 @@ class ServerMonitor
     std::string GetEverything();
     uint32_t GetTime() { return GetMSTimeDiffToNow(m_nStartTime) / 10; }
 
-    const std::vector<ServerRegion> &GetServerList() const { return m_vServerRegion; }
+    const std::vector<NGemity::ServerRegion> &GetServerList() const { return m_vServerRegion; }
 
   private:
-    std::vector<ServerRegion> m_vServerRegion{};
+    std::vector<NGemity::ServerRegion> m_vServerRegion{};
     std::shared_ptr<NGemity::Asio::IoContext> _ioContext;
     std::shared_ptr<boost::asio::deadline_timer> _updateTimer;
     bool _stopped;

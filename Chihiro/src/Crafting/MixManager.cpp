@@ -15,13 +15,14 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Item.h"
 #include "MixManager.h"
-#include "Messages.h"
-#include "GameRule.h"
-#include "MemPool.h"
 #include "GameContent.h"
+#include "GameRule.h"
+#include "Item.h"
 #include "ItemFields.h"
+#include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
 #include "World.h"
 
 void MixManager::RegisterEnhanceInfo(const EnhanceInfo &info)
@@ -49,8 +50,9 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     if (pMixInfo == nullptr || pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-    int nCurrentEnhance = pMainMaterial->m_Instance.nEnhance;
+    int nCurrentEnhance = pMainMaterial->GetItemEnhance();
     auto pInfo = getenhanceInfo(pMixInfo->value[0]);
+
     if (pInfo == nullptr)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
@@ -62,7 +64,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
 
     if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
     {
-        if (pCube != nullptr && pCube->GetItemBase()->type == TYPE_CUBE)
+        if (pCube != nullptr && pCube->m_pItemBase->type == ItemType::TYPE_CUBE)
         {
             pPowder = pSubMaterial[1];
         }
@@ -73,21 +75,24 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
         }
     }
 
-    if (pCube == nullptr || pCube->m_Instance.Code != pInfo->nNeedItemCode)
+    if (pCube == nullptr || pCube->GetItemCode() != pInfo->nNeedItemCode)
     {
-        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+        Messages::SendResult(pPlayer, NGemity::Packets::TS_CS_MIX, TS_RESULT_INVALID_ARGUMENT, 0);
         return false;
     }
 
-    if (pMixInfo->type == MIX_ENHANCE_WITHOUT_FAIL && pPowder == nullptr)
+    if (!(pMixInfo->type != MIX_TYPE::MIX_ENHANCE || (pMixInfo->value[1] != 0 && pMixInfo->value[2] != 0)))
     {
-        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
-        return false;
+        NG_LOG_ERROR("server.mixing", "Invalid mix!! %s", pPlayer->GetName());
     }
 
-    if (pInfo->nMaxEnhance <= pMainMaterial->GetItemEnhance())
+    int itemEnhance = (pMixInfo->type == MIX_TYPE::MIX_ENHANCE) ? irand(pMixInfo->value[1], pMixInfo->value[2]) : 1;
+    if (pInfo->nMaxEnhance < pMainMaterial->GetItemEnhance() + itemEnhance)
+        itemEnhance = pInfo->nMaxEnhance - pMainMaterial->GetItemEnhance();
+
+    if (itemEnhance <= 0)
     {
-        Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
+        Messages::SendResult(pPlayer, NGemity::Packets::TS_CS_MIX, TS_RESULT_INVALID_ARGUMENT, 0);
         return false;
     }
 
@@ -96,13 +101,12 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
     if (pMixInfo->type == MIX_ENHANCE_WITHOUT_FAIL)
         pPlayer->EraseItem(pPowder, 1);
 
-    int itemEnhance = (pMixInfo->type == MIX_ENHANCE) ? irand(pMixInfo->value[1], pMixInfo->value[2]) : 1;
-    uint nRandom = pInfo->fPercentage[nCurrentEnhance] * 100000;
+    uint32_t nRandom = pInfo->fPercentage[nCurrentEnhance] * 100000;
+    bool bResult{false};
 
-    bool bResult = false;
     if (urand(0, 100000) <= nRandom)
     {
-        pMainMaterial->m_Instance.nEnhance += itemEnhance;
+        pMainMaterial->m_Instance.nEnhance = nCurrentEnhance + itemEnhance;
         Messages::SendItemMessage(pPlayer, pMainMaterial);
         std::vector<uint32_t> tmpVec{};
         tmpVec.emplace_back(pMainMaterial->GetHandle());
@@ -120,7 +124,6 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
             pMainMaterial->m_Instance.nEnhance -= 1;
             Messages::SendItemMessage(pPlayer, pMainMaterial);
         }
-
         Messages::SendMixResult(pPlayer, nullptr);
     }
     pMainMaterial->m_bIsNeedUpdateToDB = true;
@@ -267,22 +270,65 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
 
 MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList)
 {
-    for (int i = 0; i < static_cast<int>(m_vMixInfo.size()); i++)
+    for (auto it = m_vMixInfo.begin(); it != m_vMixInfo.end(); ++it)
     {
-        if (m_vMixInfo[i].sub_material_cnt == nSubMaterialCount)
+        if ((*it).sub_material_cnt != nSubMaterialCount)
+            continue;
+
+        uint16_t nMainMaterialCount{1};
+        if (!check_material_info((*it).main_material, pMainMaterial, nMainMaterialCount))
+            continue;
+
+        bool bSuccess{true};
+        std::vector<Item *> pSubMaterialArrangeBuffer(MAX_SUB_MATERIAL_COUNT, nullptr);
+        std::vector<uint16_t> pSubMaterialArrangeCountList(MAX_SUB_MATERIAL_COUNT, 0);
+        std::vector<bool> bSubMaterialChecked(MAX_SUB_MATERIAL_COUNT, false);
+
+        for (int nMaterialInfoIdx = 0; nMaterialInfoIdx < nSubMaterialCount; ++nMaterialInfoIdx)
         {
-            if (getProperMixInfoSub(&m_vMixInfo[i], nSubMaterialCount, pSubItem, pCountList))
+            bool bFind{false};
+            for (int nSubMaterialIdx = 0; nSubMaterialIdx < nSubMaterialCount; ++nSubMaterialIdx)
             {
-                if (CompatibilityCheck(&nSubMaterialCount, pSubItem, pMainMaterial))
+                if (bSubMaterialChecked[nSubMaterialIdx])
+                    continue;
+
+                if (check_material_info((*it).sub_material[nSubMaterialIdx], pSubItem[nSubMaterialIdx], pCountList[nSubMaterialIdx]))
                 {
-                    return &m_vMixInfo[i];
-                }
-                else
-                {
-                    return nullptr;
+                    bSubMaterialChecked[nSubMaterialIdx] = true;
+                    pSubMaterialArrangeBuffer[nMaterialInfoIdx] = pSubItem[nSubMaterialIdx];
+                    pSubMaterialArrangeCountList[nMaterialInfoIdx] = pCountList[nSubMaterialIdx];
+                    bFind = true;
+                    break;
                 }
             }
+
+            if (!bFind)
+            {
+                bSuccess = false;
+                break;
+            }
         }
+
+        if (!bSuccess)
+            continue;
+
+        if (!post_arrange_check_material_info((*it).main_material, pMainMaterial, nSubMaterialCount, pSubMaterialArrangeBuffer, pSubMaterialArrangeCountList, pMainMaterial, nMainMaterialCount))
+            continue;
+
+        for (int nMaterialInfoIdx = 0; nMaterialInfoIdx < nSubMaterialCount; ++nMaterialInfoIdx)
+        {
+            if (!post_arrange_check_material_info((*it).sub_material[nMaterialInfoIdx], pMainMaterial, nSubMaterialCount, pSubMaterialArrangeBuffer, pSubMaterialArrangeCountList,
+                                                  pSubMaterialArrangeBuffer[nMaterialInfoIdx], pSubMaterialArrangeCountList[nMaterialInfoIdx]))
+            {
+                bSuccess = false;
+                break;
+            }
+        }
+
+        if (!bSuccess)
+            continue;
+
+        return &(*it);
     }
     return nullptr;
 }
@@ -353,57 +399,57 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
     {
         switch (info.type[i])
         {
-        case (int)CheckType::CT_ItemGroup:
-            if (pItem->m_pItemBase->group != info.value[i])
+        case MixBase::CHECK_ITEM_GROUP:
+            if (pItem->GetItemGroup() != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ItemClass:
-            if ((int)pItem->m_pItemBase->iclass != info.value[i])
+        case MixBase::CHECK_ITEM_CLASS:
+            if (static_cast<int32_t>(pItem->GetItemClass()) != info.value[i])
                 return false;
             break;
-        case (int)CheckType::CT_ItemId:
-            if (pItem->m_Instance.Code != info.value[i])
+        case MixBase::CHECK_ITEM_ID:
+            if (static_cast<int32_t>(pItem->GetItemCode()) != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ItemRank:
+        case MixBase::CHECK_ITEM_RANK:
             if (pItem->GetItemRank() != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ItemLevel:
-            if (pItem->m_Instance.nLevel != info.value[i])
+        case MixBase::CHECK_ITEM_LEVEL:
+            if (static_cast<int32_t>(pItem->m_Instance.nLevel) != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_FlagOn:
+        case MixBase::CHECK_FLAG_ON:
             if (((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) == 0)
                 return false;
             break;
 
-        case (int)CheckType::CT_FlagOff:
+        case MixBase::CHECK_FLAG_OFF:
             if (((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) != 0)
                 return false;
             break;
 
-        case (int)CheckType::CT_EnhanceMatch:
-            if (pItem->m_Instance.nEnhance != info.value[i])
+        case MixBase::CHECK_ENHANCE_MATCH:
+            if (pItem->GetItemEnhance() != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_EnhanceMismatch:
-            if (pItem->m_Instance.nEnhance == info.value[i])
+        case MixBase::CHECK_ENHANCE_DISMATCH:
+            if (pItem->GetItemEnhance() == info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ItemCount:
-            bIsCountChecked = true;
+        case MixBase::CHECK_ITEM_COUNT:
             if (pItemCount != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ElementalEffectMatch:
+        case MixBase::CHECK_ELEMENTAL_EFFECT_MATCH:
+            break;
             /*tv = ((int)pow(2.0,(double)pItem->GetElementalEffectType())) >> 1;
                 if (tv != 0)
                 {
@@ -431,13 +477,13 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
                     }
                     break;*/
 
-        case (int)CheckType::CT_ItemWearPositionMatch:
-            if ((int)pItem->GetWearType() != info.value[i])
+        case MixBase::CHECK_ITEM_WEAR_POSITION_MATCH:
+            if (static_cast<int32_t>(pItem->GetWearType()) != info.value[i])
                 return false;
             break;
 
-        case (int)CheckType::CT_ItemWearPositionMismatch:
-            if ((int)pItem->GetWearType() == info.value[i])
+        case MixBase::CHECK_ITEM_WEAR_POSITION_MISMATCH:
+            if (static_cast<int32_t>(pItem->GetWearType()) == info.value[i])
                 return false;
             break;
         default:
@@ -561,6 +607,45 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMateri
         handles.emplace_back(pMainMaterial->GetHandle());
         Messages::SendMixResult(pPlayer, &handles);
         pMainMaterial->DBUpdate();
+    }
+    return true;
+}
+
+bool MixManager::post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial,
+                                                  std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount)
+{
+    for (int i = 0; i < MATERIAL_INFO_COUNT; ++i)
+    {
+        switch (info.type[i])
+        {
+        case MixBase::CHECK_SAME_ITEM_ID:
+        {
+            int nSlotIndex = info.value[i];
+            if (nSlotIndex < 0 && nSlotIndex > nSubMaterialCount)
+            {
+                NG_LOG_ERROR("server.mixing", "Invalid post_arrange_check!!");
+                return false;
+            }
+
+            if (nSlotIndex == 0)
+            {
+                if (pItem->GetItemCode() != pMainMaterial->GetItemCode())
+                    return false;
+            }
+            else if (pItem->GetItemCode() != pArrangedSubMaterial[nSlotIndex - 1]->GetItemCode())
+            {
+                return false;
+            }
+            break;
+        }
+        case MixBase::CHECK_SAME_SUMMON_CODE:
+        {
+            NG_LOG_DEBUG("server.mixing", "CHECK_SAME_SUMMON_CODE - Not implemented yet");
+            return false;
+        }
+        default:
+            break;
+        }
     }
     return true;
 }

@@ -18,12 +18,13 @@
  * 
 */
 
-#include "Common.h"
 #include "MonitorSession.h"
+#include "Common.h"
 #include "Config.h"
-#include <iostream>
+#include "DatabaseEnv.h"
 #include "ServerMonitor.h"
 #include "cipher/XStrZlibWithSimpleCipherUtil.h"
+#include <iostream>
 
 enum eStatus
 {
@@ -108,9 +109,17 @@ void MonitorSession::DoRequest()
 void MonitorSession::onResultHandler(const TS_SC_RESULT *resultPct)
 {
     if (resultPct->getReceivedId() == 60 && bRequesterEnabled != nullptr)
+    {
         *bRequesterEnabled = true;
+    }
     else if (pUserCount != nullptr)
+    {
         *pUserCount = resultPct->value ^ 0xADADADAD;
+        auto stmt = LogDatabase.GetPreparedStatement(LOG_REP_USER_COUNT);
+        stmt->setString(0, m_Server.szName);
+        stmt->setInt32(1, *pUserCount);
+        LogDatabase.Execute(stmt);
+    }
     CloseSocket();
 }
 
@@ -122,8 +131,8 @@ bool MonitorSession::Finished()
     return bRet;
 }
 
-MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester)
-    : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime()), pUserCount(ppUserCount), bRequesterEnabled(ppRequester)
+MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server)
+    : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime()), pUserCount(ppUserCount), bRequesterEnabled(ppRequester), m_Server(server)
 {
 }
 

@@ -82,7 +82,7 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
 bool DatabaseLoader::Load()
 {
     if (!_updateFlags)
-        NG_LOG_INFO("sql.updates", "Automatic database updates are disabled for all databases!");
+        NG_LOG_INFO("sql.updates", "Automatic database updates are disabltemplate DatabaseLoader &DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection> &, std::string const &); all databases!");
 
     if (!OpenDatabases())
         return false;
@@ -143,3 +143,4 @@ bool DatabaseLoader::Process(std::queue<Predicate> &queue)
 template DatabaseLoader &DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection> &, std::string const &);
 template DatabaseLoader &DatabaseLoader::AddDatabase<CharacterDatabaseConnection>(DatabaseWorkerPool<CharacterDatabaseConnection> &, std::string const &);
 template DatabaseLoader &DatabaseLoader::AddDatabase<GameDatabaseConnection>(DatabaseWorkerPool<GameDatabaseConnection> &, std::string const &);
+template DatabaseLoader &DatabaseLoader::AddDatabase<LogDatabaseConnection>(DatabaseWorkerPool<LogDatabaseConnection> &, std::string const &);
