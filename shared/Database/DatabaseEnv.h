@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "Define.h"
 #include "DatabaseWorkerPool.h"
+#include "Define.h"
 
 #include "Implementation/CharacterDatabase.h"
 #include "Implementation/GameDatabase.h"
+#include "Implementation/LogDatabase.h"
 #include "Implementation/LoginDatabase.h"
 
 #include "Field.h"
@@ -32,6 +33,8 @@
 /// Accessor to the character database
 extern DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
 /// Accessor to the realm/login database
-extern DatabaseWorkerPool<LoginDatabaseConnection>     LoginDatabase;
+extern DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
 
 extern DatabaseWorkerPool<GameDatabaseConnection> GameDatabase;
+
+extern DatabaseWorkerPool<LogDatabaseConnection> LogDatabase;

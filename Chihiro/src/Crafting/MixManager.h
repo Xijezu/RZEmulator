@@ -42,24 +42,6 @@ enum MIX_TYPE
     MIX_CREATE_ITEM = 601,                    //0x259
 };
 
-enum CheckType : int
-{
-    CT_ItemGroup = 1,
-    CT_ItemClass = 2,
-    CT_ItemId = 3,
-    CT_ItemRank = 4,
-    CT_ItemLevel = 5,
-    CT_FlagOn = 6,
-    CT_FlagOff = 7,
-    CT_EnhanceMatch = 8,
-    CT_EnhanceMismatch = 9,
-    CT_ItemCount = 10,
-    CT_ElementalEffectMatch = 11,
-    CT_ElementalEffectMismatch = 12,
-    CT_ItemWearPositionMatch = 13,
-    CT_ItemWearPositionMismatch = 14,
-};
-
 struct EnhanceInfo
 {
     int nSID;
@@ -86,6 +68,33 @@ struct MixBase
     int sub_material_cnt;
     MaterialInfo main_material;
     MaterialInfo sub_material[MAX_SUB_MATERIAL_COUNT];
+
+    enum
+    {
+        CHECK_ITEM_GROUP = 1,
+        CHECK_ITEM_CLASS = 2,
+        CHECK_ITEM_ID = 3,
+        CHECK_ITEM_RANK = 4,
+        CHECK_ITEM_LEVEL = 5,
+        CHECK_FLAG_ON = 6,
+        CHECK_FLAG_OFF = 7,
+
+        CHECK_ENHANCE_MATCH = 8,
+        CHECK_ENHANCE_DISMATCH = 9,
+        CHECK_ITEM_COUNT = 10,
+        CHECK_ELEMENTAL_EFFECT_MATCH = 11,
+        CHECK_ELEMENTAL_EFFECT_MISMATCH = 12,
+        CHECK_ITEM_WEAR_POSITION_MATCH = 13,
+        CHECK_ITEM_WEAR_POSITION_MISMATCH = 14,
+        CHECK_ITEM_COUNT_GE = 15,
+
+        CHECK_ITEM_ETHEREAL_DURABILITY_E = 16,
+        CHECK_ITEM_ETHEREAL_DURABILITY_NE = 17,
+        CHECK_ITEM_GRADE = 18,
+
+        CHECK_SAME_ITEM_ID = 19,
+        CHECK_SAME_SUMMON_CODE = 20,
+    };
 };
 
 class Player;
@@ -110,6 +119,8 @@ class MixManager
     /// \param pCountList Usable amount of pSubItem[IDX]
     /// \return true on success, false on failure
     bool EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    /// Not implemented yet
+    bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubItem);
     /// \brief General mix function
     /// \param pMixInfo The mix info to be used
     /// \param pPlayer The owner of the item
@@ -120,9 +131,9 @@ class MixManager
     /// \return true on success, false on failure
     bool MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
     /// Not implemented yet
-    bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubItem);
-    /// Not implemented yet
     bool CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+
+    bool RestoreEnhance(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
 
     /// \brief Adds the EnhanceInfo to our list
     /// \param info thing to be added to our list
@@ -179,6 +190,7 @@ class MixManager
     std::vector<EnhanceInfo> m_vEnhanceInfo{};
     /// \brief Check if a mix makes sense
     bool CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
+    bool post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount);
 
   protected:
     MixManager() = default;

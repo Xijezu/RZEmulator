@@ -19,32 +19,22 @@
  * 
 */
 #include "Common.h"
-#include "MonitorStructs.h"
-#include "RSACipher.h"
-#include "XSocket.h"
-#include <iostream>
 
-class XPacket;
-struct Server;
-// Handle login commands
-class MonitorSession : public XSocket
+namespace NGemity
 {
-public:
-  explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server);
-  ~MonitorSession();
-
-  // Network handlers
-  void OnClose() override;
-  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
-  bool IsEncrypted() const override { return true; }
-  void DoRequest();
-  void onResultHandler(const TS_SC_RESULT *resultPct);
-  bool Finished();
-
-private:
-  uint32_t m_nLastUpdateTime;
-  int *pUserCount{nullptr};
-  bool *bRequesterEnabled{nullptr};
-  std::unique_ptr<RsaCipher> m_pCipher;
-  NGemity::Server m_Server;
+struct Server
+{
+    std::string szName;
+    std::string szIPAddress;
+    int32_t nPlayerCount;
+    uint16_t nPort;
+    bool bRequesterEnabled;
 };
+
+struct ServerRegion
+{
+    std::string szRegionName;
+    std::string szAuthIPAddress;
+    std::vector<Server> vServerList;
+};
+} // namespace NGemity

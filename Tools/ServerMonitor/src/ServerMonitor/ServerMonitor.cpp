@@ -20,10 +20,10 @@
 
 #include "ServerMonitor.h"
 #include "Config.h"
-#include <nlohmann/json.hpp>
+#include "SingleSocketInstance.h"
 #include <fstream>
 #include <iostream>
-#include "SingleSocketInstance.h"
+#include <nlohmann/json.hpp>
 
 NGemity::ServerMonitor::ServerMonitor() : _stopped(true), m_nStartTime(getMSTime())
 {
@@ -108,9 +108,9 @@ void NGemity::ServerMonitor::Update()
             }
 
             if (std::chrono::duration_cast<std::chrono::minutes>(std::chrono::steady_clock::now() - lastRequester) > std::chrono::minutes(30))
-                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), nullptr, &server.bRequesterEnabled);
+                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), nullptr, &server.bRequesterEnabled, server);
             else
-                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), &server.nPlayerCount, nullptr);
+                vSockets[server.szName] = std::make_shared<MonitorSession>(std::move(socket), &server.nPlayerCount, nullptr, server);
 
             NGemity::SingleSocketInstance::Instance().AddSocket(vSockets[server.szName]);
             vSockets[server.szName]->DoRequest();
