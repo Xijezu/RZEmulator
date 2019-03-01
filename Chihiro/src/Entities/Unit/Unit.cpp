@@ -365,39 +365,35 @@ Skill *Unit::GetSkill(int skill_id) const
     return nullptr;
 }
 
-Skill *Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID)
+void Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID)
 {
-    Skill *pSkill = nullptr;
+    if(nJobID == 0)
+        nJobID = GetCurrentJob();
+    
     int nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(skill_id, skill_level, nJobID);
-    if (GetJP() >= nNeedJP)
-    {
-        SetJP(GetJP() - nNeedJP);
-        if (GetJP() < 0)
-            SetJP(0);
 
-        onExpChange();
+    if(nNeedJP > GetJP())
+        return;
 
-        int64_t nSkillUID = 0;
-        int nPrevLevel = GetBaseSkillLevel(skill_id);
-        if (nPrevLevel == 0)
-        {
-            nSkillUID = sWorld.GetSkillIndex();
-            pSkill = new Skill{this, nSkillUID, skill_id};
-            m_vSkillList.emplace_back(pSkill);
-        }
-        else
-        {
-            pSkill = GetSkill(skill_id);
-            nSkillUID = pSkill == nullptr ? 0 : pSkill->m_nSkillUID;
-        }
-        if (pSkill != nullptr)
-        {
-            pSkill->m_nSkillLevel = skill_level;
+    SetJP(GetJP() - nNeedJP);
+    if (GetJP() < 0)
+        SetJP(0);
 
-            onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
-        }
-    }
-    return pSkill;
+    onExpChange();
+
+    int64_t nSkillUID = 0;
+    int nPrevLevel = GetBaseSkillLevel(skill_id);
+    if (nPrevLevel == 0)
+        nSkillUID = sWorld.GetSkillIndex();
+
+    auto pSkill = SetSkill(nSkillUID, skill_id, skill_level, remain_cool_time);
+    if(pSkill == nullptr)
+        return;
+
+    if(pSkill->GetSkillBase()->IsPassive())
+        CalculateStat();
+
+    onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
 }
 
 int Unit::GetCurrentSkillLevel(int skill_id) const
@@ -406,10 +402,10 @@ int Unit::GetCurrentSkillLevel(int skill_id) const
     return s == nullptr ? 0 : s->m_nSkillLevel + 0;
 }
 
-void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
+Skill* Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
 {
     if (!sObjectMgr.GetSkillBase(skill_id))
-        return;
+        return nullptr;
 
     auto pSkill = GetSkill(skill_id);
     if (pSkill == nullptr)
@@ -427,6 +423,8 @@ void Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_coo
     pSkill->m_nSkillLevel = skill_level;
     if (remain_cool_time != 0)
         pSkill->m_nNextCoolTime = remain_cool_time + sWorld.GetArTime();
+
+    return pSkill;
 }
 
 int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8_t layer, bool bIsCastedByItem)
