@@ -1533,7 +1533,16 @@ void Player::onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int
         return;
 
     Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
-    
+
+    int skill_type = sb->GetSkillEffectType();
+
+    if (skill_id == SKILL_CREATURE_MASTERY ||
+        skill_type == EF_INCREASE_SUMMON_HP_MP_SP ||
+        skill_type == EF_AMPLIFY_SUMMON_HP_MP_SP)
+    {
+        setSummonUpdate();
+    }
+
     m_QuestManager.UpdateQuestStatusBySkillLevel(skill_id, skill_level);
     Messages::SendSkillList(this, this, skill_id);
 }
@@ -2946,32 +2955,34 @@ void Player::AddEXP(int64_t exp, uint jp, bool bApplyStamina)
     }
 }
 
-void Player::applyPassiveSkillEffect(Skill *skill)
+void Player::applyPassiveSkillEffect(Skill *pSkill)
 {
-    if (skill->m_SkillBase->effect_type != 0)
+    switch (pSkill->GetSkillBase()->GetSkillEffectType())
     {
-        switch (skill->m_SkillBase->effect_type)
-        {
-        case SKILL_EFFECT_TYPE::EF_INCREASE_SUMMON_HP_MP_SP:
-            m_vApplySummonPassive.emplace_back(skill);
-            return;
+    case EF_INCREASE_SUMMON_HP_MP_SP:
+        m_vApplySummonPassive.emplace_back(pSkill);
+        break;
+        ;
 
-        case SKILL_EFFECT_TYPE::EF_AMPLIFY_SUMMON_HP_MP_SP:
-            m_vApmlifySummonPassive.emplace_back(skill);
-            return;
+    case EF_AMPLIFY_SUMMON_HP_MP_SP:
+        m_vApmlifySummonPassive.emplace_back(pSkill);
+        break;
+        ;
 
-        /*case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
-            m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-            return;*/
-        case SKILL_EFFECT_TYPE::EF_AMPLIFY_EXP_FOR_SUMMON:
-            m_fActiveSummonExpAmp += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-            m_fDeactiveSummonExpAmp += (skill->m_SkillBase->var[2] + (skill->m_SkillBase->var[3] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
-            return;
-        default:
-            break;
-        }
+    /*case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
+        m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
+        return;*/
+    case EF_AMPLIFY_EXP_FOR_SUMMON:
+        m_fActiveSummonExpAmp += (pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1));
+        m_fDeactiveSummonExpAmp += (pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3));
+        break;
+    case EF_MISC:
+        // @Todo: Toggle
+        break;
+    default:
+        Unit::applyPassiveSkillEffect(pSkill);
+        break;
     }
-    Unit::applyPassiveSkillEffect(skill);
 }
 
 int Player::AddStamina(int nStamina)
@@ -3962,4 +3973,18 @@ void Player::EnumSummonAmplifySkill(SkillFunctor &fn) const
 {
     for (const auto &pSkill : m_vApmlifySummonPassive)
         fn.onSkill(pSkill);
+}
+
+void Player::setSummonUpdate()
+{
+    for (auto &summon : m_vSummonList)
+    {
+        if (summon == nullptr)
+            continue;
+
+        if (summon->IsInWorld())
+            summon->SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
+        else
+            summon->CalculateStat();
+    }
 }

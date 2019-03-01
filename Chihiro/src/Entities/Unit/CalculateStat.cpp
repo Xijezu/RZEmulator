@@ -202,25 +202,36 @@ void Unit::CalculateStat()
     applyStateAmplifyEffect();
     getAmplifiedAttributeByAmplifier(m_Attribute);
     applyDoubeWeaponEffect();
-    SetMaxHealth((uint32_t)GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) * GetMaxHealth());
-    SetMaxMana((uint32_t)GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) * GetMaxMana());
+
+    SetMaxHealth(static_cast<int32_t>((GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + 1.0f) * GetMaxHealth()));
+    SetMaxMana(static_cast<int32_t>((GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + 1.0f) * GetMaxMana()));
     // TODO this.getAmplifiedResistByAmplifier(m_Resist);
     onCompleteCalculateStat();
+
+    if (m_Attribute.nAttackSpeed < 10)
+        m_Attribute.nAttackSpeed = 10;
+    if (m_Attribute.nMoveSpeed < 10)
+        m_Attribute.nMoveSpeed = 10;
+    if (m_Attribute.nCritical > 100)
+        m_Attribute.nCritical = 100;
+    if (m_Attribute.nAvoid < 0)
+        m_Attribute.nAvoid = 0;
+    if (m_Attribute.nMagicAvoid < 0)
+        m_Attribute.nMagicAvoid = 0;
+
     SetHealth(GetHealth());
     SetMana(GetMana());
     onModifyStatAndAttribute();
+
     if (IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
     {
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
     }
-    else
+    else if (IsSummon() && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
     {
-        if (IsSummon() && !IsInWorld() && (prev_max_hp != GetMaxHealth() || prev_max_mp != GetMaxMana() || prev_hp != GetHealth() || prev_mp != GetMana()))
-        {
-            auto s = dynamic_cast<Summon *>(this);
-            if (s != nullptr)
-                Messages::SendHPMPMessage(s->GetMaster(), this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
-        }
+        auto pPlayer = this->As<Summon>()->GetMaster();
+        if (pPlayer != nullptr)
+            Messages::SendHPMPMessage(pPlayer, this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
     }
 }
 
