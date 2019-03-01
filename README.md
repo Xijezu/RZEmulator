@@ -8,7 +8,7 @@ We used it to get a proper base for networking & database, see /shared/README.md
 
 ## Dependencies
 * Platform: Linux, Windows or Mac
-* Boost 1.63 (latest stable recommended)
+* Boost 1.67 (latest stable recommended)
 * MySQL >= 5.6.36 (Windows / Linux)
 * A C++17 Compiler
 
