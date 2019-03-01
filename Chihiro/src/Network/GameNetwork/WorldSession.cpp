@@ -1028,7 +1028,7 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
     if (result == TS_RESULT_SUCCESS)
     {
         target->RegisterSkill(pRecvPct->skill_id, currentLevel, 0, jobID);
-        target->CalculateStat();
+        m_pPlayer->Save(true);
     }
     Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), result, value);
     //}

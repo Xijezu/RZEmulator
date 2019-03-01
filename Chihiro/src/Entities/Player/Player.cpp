@@ -1529,11 +1529,12 @@ void Player::OnUpdate()
 void Player::onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level)
 {
     auto sb = sObjectMgr.GetSkillBase((uint)skill_id);
-    if (sb->id != 0 && sb->is_valid == 2)
+    if (sb == nullptr || sb->IsSystemSkill())
         return;
+
     Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
+    
     m_QuestManager.UpdateQuestStatusBySkillLevel(skill_id, skill_level);
-    //Messages::SendPropertyMessage(this, this, "jp", GetJP());
     Messages::SendSkillList(this, this, skill_id);
 }
 

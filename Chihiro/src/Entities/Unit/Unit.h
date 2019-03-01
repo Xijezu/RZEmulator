@@ -122,8 +122,9 @@ class Unit : public WorldObject
     /// SKILLS
     int GetCurrentSkillLevel(int skill_id) const;
     int GetBaseSkillLevel(int skill_id) const;
+    Skill* SetSkill(int, int, int, int);
     Skill *GetSkill(int skill_id) const;
-    Skill *RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
+    void RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
     void EnumPassiveSkill(struct SkillFunctor &fn);
     /// END SKILLS
 
@@ -254,7 +255,6 @@ class Unit : public WorldObject
 
     void SetJP(int jp);
     void SetCurrentJLv(int jlv);
-    void SetSkill(int, int, int, int);
     void SetHealth(int);
     void SetMana(int);
 

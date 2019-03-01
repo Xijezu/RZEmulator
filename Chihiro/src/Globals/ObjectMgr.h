@@ -16,18 +16,18 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "DatabaseTemplates.h"
-#include <unordered_map>
-#include "QuadTreeMapInfo.h"
-#include "SkillBase.h"
-#include "NPCBase.h"
-#include "StateBase.h"
-#include "QuestBase.h"
-#include "FieldPropBase.h"
-#include "SummonBase.h"
 #include "CreatureAttribute.h"
+#include "DatabaseTemplates.h"
+#include "FieldPropBase.h"
 #include "MonsterBase.h"
+#include "NPCBase.h"
 #include "Object.h"
+#include "QuadTreeMapInfo.h"
+#include "QuestBase.h"
+#include "SkillBase.h"
+#include "StateBase.h"
+#include "SummonBase.h"
+#include <unordered_map>
 
 class Player;
 class Item;
@@ -60,7 +60,7 @@ public:
     return instance;
   }
 
-  typedef std::unordered_map<int32_t, ItemTemplate> ItemTemplateContainer;
+  typedef std::unordered_map<int32_t, std::shared_ptr<ItemTemplate>> ItemTemplateContainer;
   typedef std::unordered_map<int32_t, uint64_t> SummonLevelBaseContainer;
   typedef std::unordered_map<int32_t, CreatureStat> CreatureBaseStat;
   typedef std::unordered_map<int32_t, JobLevelBonusTemplate> JobLevelBonusTemplateContainer;

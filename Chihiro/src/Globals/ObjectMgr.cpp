@@ -115,82 +115,82 @@ void ObjectMgr::LoadItemResource()
     do
     {
         Field *fields = result->Fetch();
-        ItemTemplate itemTemplate{};
+        auto itemTemplate = std::make_shared<ItemTemplate>();
 
-        itemTemplate.id = fields[0].GetInt32();
-        itemTemplate.type = fields[1].GetInt32();
-        itemTemplate.group = fields[2].GetInt32();
-        itemTemplate.iclass = fields[3].GetInt32();
-        itemTemplate.wear_type = fields[4].GetInt32();
-        itemTemplate.set_id = fields[5].GetInt32();
-        itemTemplate.set_part_flag = fields[6].GetInt32();
-        itemTemplate.rank = fields[7].GetInt32();
-        itemTemplate.level = fields[8].GetInt32();
-        itemTemplate.enhance = fields[9].GetInt32();
-        itemTemplate.socket = fields[10].GetInt32();
-        itemTemplate.status_flag = fields[11].GetInt32();
-        itemTemplate.limit_deva = fields[12].GetInt32();
-        itemTemplate.limit_asura = fields[13].GetInt32();
-        itemTemplate.limit_gaia = fields[14].GetInt32();
-        itemTemplate.limit_fighter = fields[15].GetInt32();
-        itemTemplate.limit_hunter = fields[16].GetInt32();
-        itemTemplate.limit_magician = fields[17].GetInt32();
-        itemTemplate.limit_summoner = fields[18].GetInt32();
-        itemTemplate.use_min_level = fields[19].GetInt32();
-        itemTemplate.use_max_level = fields[20].GetInt32();
-        itemTemplate.target_min_level = fields[21].GetInt32();
-        itemTemplate.target_max_level = fields[22].GetInt32();
-        itemTemplate.range = fields[23].GetFloat() * 100;
-        itemTemplate.weight = fields[24].GetFloat();
-        itemTemplate.price = fields[25].GetUInt32();
-        itemTemplate.endurance = fields[26].GetInt32();
-        itemTemplate.material = fields[27].GetInt32();
-        itemTemplate.summon_id = fields[28].GetInt32();
+        itemTemplate->id = fields[0].GetInt32();
+        itemTemplate->type = fields[1].GetInt32();
+        itemTemplate->group = fields[2].GetInt32();
+        itemTemplate->iclass = fields[3].GetInt32();
+        itemTemplate->wear_type = fields[4].GetInt32();
+        itemTemplate->set_id = fields[5].GetInt32();
+        itemTemplate->set_part_flag = fields[6].GetInt32();
+        itemTemplate->rank = fields[7].GetInt32();
+        itemTemplate->level = fields[8].GetInt32();
+        itemTemplate->enhance = fields[9].GetInt32();
+        itemTemplate->socket = fields[10].GetInt32();
+        itemTemplate->status_flag = fields[11].GetInt32();
+        itemTemplate->limit_deva = fields[12].GetInt32();
+        itemTemplate->limit_asura = fields[13].GetInt32();
+        itemTemplate->limit_gaia = fields[14].GetInt32();
+        itemTemplate->limit_fighter = fields[15].GetInt32();
+        itemTemplate->limit_hunter = fields[16].GetInt32();
+        itemTemplate->limit_magician = fields[17].GetInt32();
+        itemTemplate->limit_summoner = fields[18].GetInt32();
+        itemTemplate->use_min_level = fields[19].GetInt32();
+        itemTemplate->use_max_level = fields[20].GetInt32();
+        itemTemplate->target_min_level = fields[21].GetInt32();
+        itemTemplate->target_max_level = fields[22].GetInt32();
+        itemTemplate->range = fields[23].GetFloat() * 100;
+        itemTemplate->weight = fields[24].GetFloat();
+        itemTemplate->price = fields[25].GetUInt32();
+        itemTemplate->endurance = fields[26].GetInt32();
+        itemTemplate->material = fields[27].GetInt32();
+        itemTemplate->summon_id = fields[28].GetInt32();
         for (int i = 0; i < 19; i++)
         {
-            itemTemplate.flaglist[i] = fields[29 + i].GetUInt8();
+            itemTemplate->flaglist[i] = fields[29 + i].GetUInt8();
         }
-        itemTemplate.available_period = fields[48].GetInt32();
-        itemTemplate.decrease_type = fields[49].GetInt16();
-        itemTemplate.throw_range = fields[50].GetFloat();
-        itemTemplate.distribute_type = fields[51].GetUInt8();
+        itemTemplate->available_period = fields[48].GetInt32();
+        itemTemplate->decrease_type = fields[49].GetInt16();
+        itemTemplate->throw_range = fields[50].GetFloat();
+        itemTemplate->distribute_type = fields[51].GetUInt8();
         int y = 52;
         for (int i = 0; i < 4; i++)
         {
-            itemTemplate.base_type[i] = fields[y++].GetInt16();
-            itemTemplate.base_var[i][0] = fields[y++].GetFloat();
-            itemTemplate.base_var[i][1] = fields[y++].GetFloat();
+            itemTemplate->base_type[i] = fields[y++].GetInt16();
+            itemTemplate->base_var[i][0] = fields[y++].GetFloat();
+            itemTemplate->base_var[i][1] = fields[y++].GetFloat();
         }
         y = 64;
         for (int i = 0; i < 4; i++)
         {
-            itemTemplate.opt_type[i] = fields[y++].GetInt16();
-            itemTemplate.opt_var[i][0] = fields[y++].GetFloat();
-            itemTemplate.opt_var[i][1] = fields[y++].GetFloat();
+            itemTemplate->opt_type[i] = fields[y++].GetInt16();
+            itemTemplate->opt_var[i][0] = fields[y++].GetFloat();
+            itemTemplate->opt_var[i][1] = fields[y++].GetFloat();
         }
         y = 76;
         for (int i = 0; i < 2; i++)
         {
-            itemTemplate.enhance_id[i] = fields[y++].GetInt16();
-            itemTemplate._enhance[i][0] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][1] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][2] = fields[y++].GetFloat();
-            itemTemplate._enhance[i][3] = fields[y++].GetFloat();
+            itemTemplate->enhance_id[i] = fields[y++].GetInt16();
+            itemTemplate->_enhance[i][0] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][1] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][2] = fields[y++].GetFloat();
+            itemTemplate->_enhance[i][3] = fields[y++].GetFloat();
         }
 
-        itemTemplate.skill_id = fields[86].GetInt32();
-        itemTemplate.state_id = fields[87].GetInt32();
-        itemTemplate.state_level = fields[88].GetInt32();
-        itemTemplate.state_time = fields[89].GetInt32();
-        itemTemplate.state_type = fields[90].GetInt32();
-        itemTemplate.cool_time = fields[91].GetInt32();
-        itemTemplate.cool_time_group = fields[92].GetInt16();
-        itemTemplate.script_text = fields[93].GetString();
-        itemTemplate.name_id = fields[94].GetInt32();
+        itemTemplate->skill_id = fields[86].GetInt32();
+        itemTemplate->state_id = fields[87].GetInt32();
+        itemTemplate->state_level = fields[88].GetInt32();
+        itemTemplate->state_time = fields[89].GetInt32();
+        itemTemplate->state_type = fields[90].GetInt32();
+        itemTemplate->cool_time = fields[91].GetInt32();
+        itemTemplate->cool_time_group = fields[92].GetInt16();
+        itemTemplate->script_text = fields[93].GetString();
+        itemTemplate->name_id = fields[94].GetInt32();
 
-        itemTemplate.SetCombinedFlags();
+        itemTemplate->SetCombinedFlags();
 
-        _itemTemplateStore[itemTemplate.id] = itemTemplate;
+        _itemTemplateStore[itemTemplate->id] = itemTemplate;
 
         ++count;
     } while (result->NextRow());
@@ -1318,7 +1318,7 @@ CreatureStat *ObjectMgr::GetStatInfo(const int stat_id)
 ItemTemplate *ObjectMgr::GetItemBase(const int item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1)
-        return &_itemTemplateStore[item_id];
+        return _itemTemplateStore[item_id].get();
     return nullptr;
 }
 
