@@ -16,10 +16,10 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "RespawnObject.h"
-#include "Timer.h"
 #include "LockedQueue.h"
 #include "RegionContainer.h"
+#include "RespawnObject.h"
+#include "Timer.h"
 #include <atomic>
 
 enum ShutdownExitCode
@@ -114,6 +114,7 @@ class World
 
     bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove);
     bool SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove = true);
+    void MoveObject(Unit *pObject, Position &newPos, float face);
     void EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
     void addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp);

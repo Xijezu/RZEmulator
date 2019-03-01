@@ -82,7 +82,7 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
 bool DatabaseLoader::Load()
 {
     if (!_updateFlags)
-        NG_LOG_INFO("sql.updates", "Automatic database updates are disabltemplate DatabaseLoader &DatabaseLoader::AddDatabase<LoginDatabaseConnection>(DatabaseWorkerPool<LoginDatabaseConnection> &, std::string const &); all databases!");
+        NG_LOG_INFO("sql.updates", "Automatic database updates are disabled on all databases!");
 
     if (!OpenDatabases())
         return false;
