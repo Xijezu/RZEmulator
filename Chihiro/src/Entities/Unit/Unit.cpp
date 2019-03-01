@@ -357,7 +357,7 @@ int Unit::GetBaseSkillLevel(int skill_id) const
 
 Skill *Unit::GetSkill(int skill_id) const
 {
-    for (auto s : m_vSkillList)
+    for (auto &s : m_vSkillList)
     {
         if (s->m_nSkillID == skill_id)
             return s;
@@ -367,12 +367,12 @@ Skill *Unit::GetSkill(int skill_id) const
 
 void Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID)
 {
-    if(nJobID == 0)
+    if (nJobID == 0)
         nJobID = GetCurrentJob();
-    
+
     int nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(skill_id, skill_level, nJobID);
 
-    if(nNeedJP > GetJP())
+    if (nNeedJP > GetJP())
         return;
 
     SetJP(GetJP() - nNeedJP);
@@ -387,13 +387,13 @@ void Unit::RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, i
         nSkillUID = sWorld.GetSkillIndex();
 
     auto pSkill = SetSkill(nSkillUID, skill_id, skill_level, remain_cool_time);
-    if(pSkill == nullptr)
+    if (pSkill == nullptr)
         return;
 
-    if(pSkill->GetSkillBase()->IsPassive())
+    if (pSkill->GetSkillBase()->IsPassive())
         CalculateStat();
 
-    onRegisterSkill(nSkillUID, skill_id, nPrevLevel, skill_level);
+    onRegisterSkill(pSkill->m_nSkillUID, skill_id, nPrevLevel, skill_level);
 }
 
 int Unit::GetCurrentSkillLevel(int skill_id) const
@@ -402,7 +402,7 @@ int Unit::GetCurrentSkillLevel(int skill_id) const
     return s == nullptr ? 0 : s->m_nSkillLevel + 0;
 }
 
-Skill* Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
+Skill *Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_cool_time)
 {
     if (!sObjectMgr.GetSkillBase(skill_id))
         return nullptr;
@@ -418,11 +418,9 @@ Skill* Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_c
             m_vActiveSkillList.emplace_back(pSkill);
     }
 
-    pSkill->m_nSkillID = skill_id;
-    pSkill->m_nSkillUID = skill_uid;
     pSkill->m_nSkillLevel = skill_level;
     if (remain_cool_time != 0)
-        pSkill->m_nNextCoolTime = remain_cool_time + sWorld.GetArTime();
+        pSkill->SetRemainCoolTime(remain_cool_time + sWorld.GetArTime());
 
     return pSkill;
 }

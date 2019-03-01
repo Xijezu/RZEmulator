@@ -903,3 +903,28 @@ void World::EnumMovableObject(Position pos, uint8_t layer, float range, std::vec
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
     sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
 }
+
+void World::MoveObject(Unit *pObject, Position &newPos, float face)
+{
+    uint32_t tm = GetArTime();
+
+    Position oldPos = pObject->GetPosition();
+
+    auto rx = newPos.GetRX();
+    auto ry = newPos.GetRY();
+    auto prx = pObject->GetRX();
+    auto pry = pObject->GetRY();
+
+    pObject->SetCurrentXY(newPos.GetPositionX(), newPos.GetPositionY());
+    pObject->SetOrientation(face);
+    pObject->StopMove();
+
+    Position _newPos = newPos;
+
+    onMoveObject(pObject, oldPos, _newPos);
+
+    pObject->lastStepTime = tm;
+
+    if (prx != rx || pry != ry)
+        enterProc(pObject, prx, pry);
+}

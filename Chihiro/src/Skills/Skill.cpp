@@ -16,19 +16,19 @@
 */
 
 #include "Skill.h"
-#include "MemPool.h"
 #include "ClientPackets.h"
-#include "SkillFunctor.h"
-#include "Messages.h"
-#include "FieldPropManager.h"
-#include "RegionContainer.h"
-#include "GroupManager.h"
-#include "GameContent.h"
-#include "RegionTester.h"
-#include "SkillProp/SkillProp.h"
-#include "ObjectMgr.h"
 #include "DatabaseEnv.h"
+#include "FieldPropManager.h"
+#include "GameContent.h"
+#include "GroupManager.h"
 #include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
+#include "RegionContainer.h"
+#include "RegionTester.h"
+#include "SkillFunctor.h"
+#include "SkillProp/SkillProp.h"
 #include "World.h"
 
 constexpr int PREDICTION_AIMING_TIME = 200;
@@ -3202,7 +3202,7 @@ bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
     result.hitRush.bResult = true;
     result.hitRush.x = RushPos.GetPositionX();
     result.hitRush.y = RushPos.GetPositionY();
-    result.hitRush.speed = -116;
+    result.hitRush.speed = GameRule::DEFAULT_RUSH_SPEED;
 
     m_vResultList.emplace_back(result);
     return true;
@@ -3214,7 +3214,8 @@ bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRus
     auto t = sWorld.GetArTime();
     Position original_pos = m_pOwner->GetCurrentPosition(t);
     auto tmpPos = pTarget->GetCurrentPosition(t);
-    int nDelay = static_cast<int32_t>(original_pos.GetExactDist2d(&tmpPos) / (-116.0f / 30));
+
+    int nDelay = static_cast<int32_t>(original_pos.GetExactDist2d(&tmpPos) / (GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT));
     Position target_pos = pTarget->GetCurrentPosition(t + nDelay);
 
     float x{}, y{}, m{}, face{};
@@ -3236,7 +3237,7 @@ bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRus
 
     Position pos{};
 
-    pos.SetCurrentXY(original_pos.GetPositionY() + x * m, original_pos.GetPositionY() + y * m);
+    pos.SetCurrentXY(original_pos.GetPositionX() + x * m, original_pos.GetPositionY() + y * m);
 
     if (GameContent::IsBlocked(pos.GetPositionX(), pos.GetPositionY()))
         return false;
@@ -3248,7 +3249,7 @@ bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRus
     pRushPos = pos;
     pface = face;
 
-    m_nFireTime += m / ((float)-116 / 30) + 20;
+    m_nFireTime += m / ((float)GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT) + 20;
 
     return true;
 }
@@ -3287,8 +3288,7 @@ int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_ti
 
         Position newPos = GetMovableKnockBackPosition(OriginalPos, pos);
 
-        /// @TODO HIGH PRIORITY
-        //sWorld.MoveObject( pTarget, newPos, pTarget->GetFace() );
+        sWorld.MoveObject(pTarget, newPos, pTarget->GetOrientation());
         pTarget->SetNextMovableTime(next_movable_time);
         Player *pTargetPlayer{nullptr};
 
@@ -3297,11 +3297,12 @@ int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_ti
         else if (pTarget->IsSummon())
         {
             pTargetPlayer = pTarget->As<Summon>()->GetMaster();
-
-            /// @Todo: check Ride object
+            if (pTargetPlayer != nullptr && pTargetPlayer->GetRideObject() != pTarget)
+                pTargetPlayer = nullptr;
         }
 
-        /// @Todo: Remove riding
+        if (pTargetPlayer && (pTargetPlayer->IsRiding() || pTargetPlayer->HasRidingState()))
+            pTargetPlayer->UnMount(UNMOUNT_FALL, m_pOwner);
     }
 
     return next_movable_time;
@@ -4163,7 +4164,8 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
         }
         else
         {
-            //sWorld.MoveObject( m_pOwner, m_RushPos, m_fRushFace );
+            sWorld.MoveObject(m_pOwner, m_RushPos, m_fRushFace);
+
             nDamage += m_nRushDamage;
             ++m_nCurrentFire;
         }
