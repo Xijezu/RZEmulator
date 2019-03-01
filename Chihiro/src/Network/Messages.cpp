@@ -67,7 +67,6 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
     statPct.max_mp = pUnit->GetMaxMana();
 
     statPct.need_to_display = static_cast<uint8_t>(display ? 1 : 0);
-    ;
 
     pPlayer->SendPacket(statPct);
 }

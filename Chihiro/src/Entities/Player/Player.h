@@ -382,6 +382,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
   private:
     void onDropQuest(Quest *pQuest);
     void openStorage();
+    void setSummonUpdate();
     Item *popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB);
 
     void applyCharm(Item *pItem);
