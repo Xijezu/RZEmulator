@@ -231,17 +231,64 @@ void Unit::OnUpdate()
         }
     }
 
-    if (IsInWorld())
+    if (!IsInWorld())
+        return;
+
+    if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct)
     {
-        if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct)
+        procStateDamage(ct);
+        procState(ct);
+        if (ClearExpiredState(ct))
         {
-            procStateDamage(ct);
-            //procState(ct);
-            if (ClearExpiredState(ct))
+            CalculateStat();
+        }
+        SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
+    }
+
+    if (IsFeared() && (!IsMoving(sWorld.GetArTime()) || !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR)))
+    {
+        auto pState = GetState(StateCode::SC_FEAR);
+        if (pState != nullptr)
+        {
+            int nMoveSpeedAdd = pState->GetValue(1);
+            Position newPos{};
+            float theta = static_cast<float>(irand(1, 628)) / 100.0f;
+            newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
+
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR))
             {
-                CalculateStat();
-                SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
+                SetFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
+                auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(pState->GetCaster(SG_NORMAL));
+                if (pCaster != nullptr)
+                {
+                    auto myPos = GetCurrentPosition(sWorld.GetArTime());
+                    auto distance = myPos.GetExactDist2d(pCaster);
+
+                    if (distance > 0)
+                    {
+                        newPos.SetCurrentXY(myPos.GetPositionX() + (pCaster->GetPositionX() - myPos.GetPositionX()) * 120 / distance,
+                                            myPos.GetPositionY() + (pCaster->GetPositionY() - myPos.GetPositionY()) * 120 / distance);
+                    }
+                }
             }
+            int try_cnt{10};
+            while (--try_cnt > 0 && GameContent::IsBlocked(newPos.GetPositionX(), newPos.GetPositionY()))
+            {
+                float theta = static_cast<float>(irand(1, 628)) / 100.0f;
+                newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
+            }
+
+            if (newPos.GetPositionX() > sWorld.getIntConfig(CONFIG_MAP_WIDTH))
+                newPos.SetCurrentXY(sWorld.getIntConfig(CONFIG_MAP_WIDTH), newPos.GetPositionY());
+            if (newPos.GetPositionY() > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
+                newPos.SetCurrentXY(newPos.GetPositionX(), sWorld.getIntConfig(CONFIG_MAP_HEIGHT));
+            if (newPos.GetPositionX() < 0)
+                newPos.SetCurrentXY(0, newPos.GetPositionY());
+            if (newPos.GetPositionY() < 0)
+                newPos.SetCurrentXY(newPos.GetPositionX(), 0);
+
+            if (IsInWorld() && !GameContent::IsBlocked(newPos.GetPositionX(), newPos.GetPositionY()) && GetRealMoveSpeed() != 0)
+                sWorld.SetMove(this, GetPosition(), newPos, static_cast<uint8_t>(GetRealMoveSpeed() + nMoveSpeedAdd / 7), true, sWorld.GetArTime());
         }
     }
 }
@@ -2332,6 +2379,127 @@ int64_t Unit::GetBulletCount() const
 int Unit::GetArmorClass() const
 {
     return m_anWear[WEAR_ARMOR] != nullptr ? m_anWear[WEAR_ARMOR]->m_pItemBase->iclass : 0;
+}
+
+void Unit::procState(uint32_t t)
+{
+    struct ADD_STATE_INFO
+    {
+        StateCode code;
+        int nLevel;
+        uint32_t nEndTime;
+        int nHate;
+        Unit *pTarget;
+    } add_state_info;
+
+    std::vector<ADD_STATE_INFO> vAddStateInfo{};
+    std::vector<State *> vGoodStateRemover{};
+    std::vector<int32_t> vGoodStates{};
+    bool bHasSequentialStateRemover{false};
+
+    for (auto &pState : m_vStateList)
+    {
+        if (pState->GetEffectType() == SEF_REMOVE_GOOD_STATE)
+        {
+            uint32_t nFireTime = pState->GetLastProcessedTime() + pState->GetFireInterval();
+            if (nFireTime >= t || nFireTime > pState->GetEndTime(SG_NORMAL))
+                continue;
+
+            if (pState->GetValue(5) == 0)
+                bHasSequentialStateRemover = true;
+
+            vGoodStateRemover.emplace_back(pState);
+        }
+        else if (!pState->IsHarmful() && pState->GetTimeType() & AF_ERASE_ON_DEAD)
+        {
+            vGoodStates.emplace_back(pState->GetUID());
+        }
+
+        if (pState->GetEffectType() == SEF_ADD_REGION_STATE)
+        {
+            auto curr = sWorld.GetArTime();
+            if (pState->GetLastProcessedTime() + pState->GetValue(1) > curr)
+                continue;
+
+            auto code = static_cast<StateCode>(pState->GetValue(0));
+            float fEffectLength = pState->GetValue(4) * GameRule::DEFAULT_UNIT_SIZE;
+            auto nTargetType = static_cast<int32_t>(pState->GetValue(7));
+            int32_t nLevel = pState->GetLevel();
+            auto nHitRate = static_cast<int32_t>(pState->GetValue(8) + nLevel * pState->GetValue(9));
+            uint32_t end_time = curr + (pState->GetValue(2) + nLevel * pState->GetValue(3)) * 100;
+
+            auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(pState->GetCaster(SG_NORMAL));
+            if (pCaster == nullptr)
+                continue;
+
+            std::vector<Unit *> vTargetList{};
+            Skill::EnumSkillTargetsAndCalcDamage(GetCurrentPosition(curr), GetLayer(), GetCurrentPosition(curr), true,
+                                                 fEffectLength, -1, 0, 0, true, pCaster, static_cast<int32_t>(pState->GetValue(5)), static_cast<int32_t>(pState->GetValue(6)), vTargetList);
+
+            for (auto &pTarget : vTargetList)
+            {
+                if (pTarget == nullptr || pTarget->IsDead())
+                    continue;
+
+                if (nTargetType == 3 && !IsEnemy(pTarget))
+                    continue;
+                else if (nTargetType == 2 && !IsAlly(pTarget))
+                    continue;
+                else if (nTargetType == 1 && (!IsAlly(pTarget) && !pTarget->IsNPC()))
+                    continue;
+
+                if (nHitRate < irand(0, 99))
+                    continue;
+
+                add_state_info.code = code;
+                add_state_info.nLevel = nLevel;
+                add_state_info.nEndTime = end_time;
+                add_state_info.nHate = pState->GetValue(10) + nLevel * pState->GetValue(11);
+                add_state_info.pTarget = pTarget;
+
+                vAddStateInfo.emplace_back(add_state_info);
+            }
+        }
+    }
+
+    if (!vGoodStateRemover.empty())
+    {
+        if (bHasSequentialStateRemover)
+        {
+            std::sort(vGoodStateRemover.begin(), vGoodStateRemover.end(), [](State *lh, State *rh) -> bool { return lh->GetValue(5) == 0 && rh->GetValue(5) != 0; });
+            std::reverse(vGoodStates.begin(), vGoodStates.end());
+        }
+
+        for (auto it = vGoodStateRemover.begin(); it != vGoodStateRemover.end(); ++it)
+        {
+            if (vGoodStates.empty() || ((*it)->GetValue(0) + (*it)->GetValue(1) * (*it)->GetLevel()) <= irand(0, 99))
+                break;
+            if ((*it)->GetValue(5) != 0)
+                std::random_shuffle(vGoodStates.begin(), vGoodStates.end());
+
+            int32_t nRemoveCount = (*it)->GetValue(3) + (*it)->GetValue(4) * (*it)->GetLevel();
+            for (int i = 0; i < nRemoveCount; i++)
+            {
+                if (vGoodStates.empty())
+                    break;
+                RemoveState(vGoodStates.back());
+                vGoodStates.pop_back();
+            }
+        }
+    }
+
+    if (!vAddStateInfo.empty())
+    {
+        for (auto &stateInfo : vAddStateInfo)
+        {
+            if (stateInfo.pTarget->IsDead() || !stateInfo.pTarget->IsInWorld())
+                continue;
+
+            stateInfo.pTarget->AddState(SG_NORMAL, stateInfo.code, GetHandle(), stateInfo.nLevel, t, stateInfo.nEndTime);
+            if (stateInfo.pTarget->IsMonster())
+                stateInfo.pTarget->As<Monster>()->AddHate(GetHandle(), stateInfo.nHate);
+        }
+    }
 }
 
 void Unit::procStateDamage(uint t)

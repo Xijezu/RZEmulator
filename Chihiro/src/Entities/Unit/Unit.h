@@ -122,7 +122,7 @@ class Unit : public WorldObject
     /// SKILLS
     int GetCurrentSkillLevel(int skill_id) const;
     int GetBaseSkillLevel(int skill_id) const;
-    Skill* SetSkill(int, int, int, int);
+    Skill *SetSkill(int, int, int, int);
     Skill *GetSkill(int skill_id) const;
     void RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
     void EnumPassiveSkill(struct SkillFunctor &fn);
@@ -517,6 +517,7 @@ class Unit : public WorldObject
 
     virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
     virtual void procStateDamage(uint t);
+    virtual void procState(uint t);
 
     int64_t GetBulletCount() const;
     State *GetStateByEffectType(int effectType) const;
