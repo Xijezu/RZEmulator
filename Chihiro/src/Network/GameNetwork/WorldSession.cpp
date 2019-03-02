@@ -1788,24 +1788,26 @@ void WorldSession::onStorage(const TS_CS_STORAGE *pRecvPct)
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
             return;
         }
-        if (pItem->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
+        if (pItem->GetOwnerHandle() != m_pPlayer->GetHandle())
         {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
             return;
         }
+
         if (pItem->IsInInventory() && pRecvPct->mode == ITEM_INVENTORY_TO_STORAGE)
         {
-            if (pItem->m_pSummon != nullptr)
-            {
-                for (const auto &v : m_pPlayer->m_aBindSummonCard)
+            if (pItem->GetItemBase()->flaglist[ITEM_FLAG_EVENT])
+                if (pItem->m_pSummon != nullptr)
                 {
-                    if (v == pItem)
+                    for (const auto &v : m_pPlayer->m_aBindSummonCard)
                     {
-                        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
-                        return;
+                        if (v == pItem)
+                        {
+                            Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
+                            return;
+                        }
                     }
                 }
-            }
             /*if((pItem->m_Instance.Flag & 0x40) == 0 || m_pPlayer->FindStorageItem(pItem->m_Instance.Code) == nullptr)
                 {
                     Messages::SendResult(m_pPlayer, pRecvPct->GetPacketID(), TS_RESULT_TOO_HEAVY, handle); // too heavy??

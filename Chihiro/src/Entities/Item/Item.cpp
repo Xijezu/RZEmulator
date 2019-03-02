@@ -15,12 +15,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "MemPool.h"
-#include "ObjectMgr.h"
-#include "DatabaseEnv.h"
-#include "Messages.h"
-#include "GameRule.h"
 #include "Item.h"
+#include "DatabaseEnv.h"
+#include "GameRule.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
 
 Item *Item::AllocItem(uint64_t uid, int code, int64_t cnt, GenerateCode info, int level, int enhance,
                       int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
@@ -286,6 +286,16 @@ float Item::GetWeight() const
 void Item::SetCount(int64_t count)
 {
     m_Instance.nCount = count;
+}
+
+void Item::SetIdx(int32_t idx)
+{
+    m_Instance.nIdx = idx;
+}
+
+void Item::SetStorageIndex(uint32_t idx)
+{
+    m_unInventoryIndex = idx;
 }
 
 bool Item::IsExpireItem() const

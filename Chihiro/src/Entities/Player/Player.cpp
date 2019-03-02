@@ -1240,13 +1240,12 @@ ushort Player::ChangeGold(int64_t nGold)
 void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
 {
     int oldOwner = pItem->m_Instance.nOwnerUID;
-    int oldAccount = pItem->m_nAccountID;
-    bool is_inv = pInventory == &m_Inventory;
+    int oldAccount = pItem->GetAccountID();
 
-    if (is_inv)
+    if (pInventory == &m_Inventory)
     {
         pItem->SetOwnerInfo(GetHandle(), GetUInt32Value(UNIT_FIELD_UID), 0);
-        if (pItem->m_pItemBase->group == GROUP_SUMMONCARD && pItem->m_pSummon != nullptr)
+        if (pItem->IsSummonCard() && pItem->m_pSummon != nullptr)
         {
             AddSummon(pItem->m_pSummon, true);
             Messages::SendSkillList(this, pItem->m_pSummon, -1);
@@ -1256,22 +1255,29 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         {
         }
 #endif
-        if (pItem->GetWearType() == WEAR_RIDE_ITEM && HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE) && m_anWear[22] == nullptr)
+        if (pItem->GetWearType() == ItemWearType::WEAR_RIDE_ITEM && HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE) && m_anWear[ItemWearType::WEAR_RIDE_ITEM] == nullptr)
             putonItem(WEAR_RIDE_ITEM, pItem);
-        if (pItem->m_pItemBase->type == TYPE_CHARM)
+
+        if (pItem->IsCharm())
         {
             m_vCharmList.emplace_back(pItem);
             if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
             {
                 CalculateStat();
-                // TODO: Ride index
+                if (IsRiding())
+                {
+                    auto pSummon = GetRideObject();
+                    if (pSummon != nullptr)
+                        pSummon->CalculateStat();
+                }
             }
         }
+        // EPIC 5/6: ElementalEffectType()
     }
     else
     {
-        pItem->SetOwnerInfo(GetHandle(), 0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
-        if (pItem->m_pItemBase->group == GROUP_SUMMONCARD && pItem->m_pSummon != nullptr)
+        pItem->SetOwnerInfo(GetHandle(), 0, GetAccountID());
+        if (pItem->IsSummonCard() && pItem->m_pSummon != nullptr)
         {
             AddSummonToStorage(pItem->m_pSummon);
         }
@@ -1281,27 +1287,19 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
         }
 #endif
     }
-    if (pItem->m_Instance.UID != 0)
-    {
-        if (bSkipUpdateItemToDB || (oldOwner == pItem->m_Instance.nOwnerUID && oldAccount == pItem->m_nAccountID) || !HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
-        {
-            if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
-                Messages::SendItemMessage(this, pItem);
-            UpdateWeightWithInventory();
-            return;
-        }
 
-        pItem->DBUpdate();
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
-            Messages::SendItemMessage(this, pItem);
-        UpdateWeightWithInventory();
-        return;
-    }
-    sMemoryPool.AllocItemHandle(pItem);
-    if (!bSkipUpdateItemToDB)
+    if (pItem->GetItemUID() == 0)
     {
-        pItem->DBInsert();
+        sMemoryPool.AllocItemHandle(pItem);
+        if (!bSkipUpdateItemToDB)
+            pItem->DBInsert();
     }
+    else
+    {
+        if (!bSkipUpdateItemToDB && (oldOwner != pItem->GetOwnerUID() || oldAccount != pItem->GetAccountID()) && HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
+            pItem->DBUpdate();
+    }
+
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
         Messages::SendItemMessage(this, pItem);
     UpdateWeightWithInventory();
@@ -1312,17 +1310,15 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
     {
         pItem->SetOwnerInfo(0, 0, 0);
-        if (!bSkipUpdateItemToDB && pItem->m_Instance.UID != 0)
-        {
+        if (!bSkipUpdateItemToDB && pItem->GetItemUID() != 0)
             pItem->DBUpdate();
-        }
 
         if (pInventory == &m_Inventory)
         {
-            if (pItem->m_pItemBase->group == GROUP_SUMMONCARD && pItem->m_pSummon != nullptr)
+            if (pItem->IsSummonCard() && pItem->m_pSummon != nullptr)
                 RemoveSummon(pItem->m_pSummon);
 
-            if (pItem->m_pItemBase->type == TYPE_CHARM)
+            if (pItem->IsCharm())
             {
                 auto pos = std::find(m_vCharmList.begin(), m_vCharmList.end(), pItem);
                 if (pos != m_vCharmList.end())
@@ -1330,19 +1326,25 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
                 if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
                 {
                     CalculateStat();
-                    // TODO: Ride Handle
+                    if (IsRiding())
+                    {
+                        auto pSummon = GetRideObject();
+                        if (pSummon != nullptr)
+                            pSummon->CalculateStat();
+                    }
                 }
             }
-            if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+
+            if (pItem->IsSkillCard() && pItem->GetBindedCreatureHandle() != 0)
             {
-                auto scu = sMemoryPool.GetObjectInWorld<Unit>(pItem->m_hBindedTarget);
+                auto scu = sMemoryPool.GetObjectInWorld<Unit>(pItem->GetBindedCreatureHandle());
                 if (scu != nullptr)
                     scu->UnBindSkillCard(pItem);
             }
         }
         else
         {
-            if (pItem->m_pItemBase->group == GROUP_SUMMONCARD && pItem->m_pSummon != nullptr)
+            if (pItem->IsSummonCard() && pItem->m_pSummon != nullptr)
                 RemoveSummonFromStorage(pItem->m_pSummon);
         }
         Messages::SendItemDestroyMessage(this, pItem);
@@ -1352,7 +1354,9 @@ void Player::onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemTo
 
 void Player::onChangeCount(Inventory * /*pInventory*/, Item *pItem, bool bSkipUpdateItemToDB)
 {
-    Messages::SendItemCountMessage(this, pItem);
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE))
+        Messages::SendItemCountMessage(this, pItem);
+
     if (!bSkipUpdateItemToDB && pItem->IsInStorage())
         pItem->DBUpdate();
 
@@ -3237,19 +3241,24 @@ void Player::RemoveSummonFromStorage(Summon *pSummon)
 
 void Player::OpenStorage()
 {
-    if (m_castingSkill == nullptr)
+    if (IsUsingSkill())
+        return;
+
+    if (!m_bIsStorageRequested)
     {
-        if (m_bIsStorageRequested)
-        {
-            Messages::SendItemList(this, true);
-            openStorage();
-            Messages::SendPropertyMessage(this, this, "storage_gold", GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD));
-        }
-        else
-        {
-            m_bIsStorageRequested = true;
-            DB_ReadStorage();
-        }
+        bool bReload = m_bIsStorageLoaded;
+        m_bIsStorageRequested = true;
+        m_bIsStorageLoaded = false;
+
+        DB_ReadStorage();
+        return;
+    }
+
+    if (m_bIsStorageLoaded)
+    {
+        Messages::SendItemList(this, true);
+        openStorage();
+        Messages::SendPropertyMessage(this, this, "storage_gold", GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD));
     }
 }
 
@@ -3294,78 +3303,98 @@ Item *Player::FindStorageItem(int code)
     return m_Storage.FindByCode(code);
 }
 
-void Player::MoveStorageToInventory(Item *pItem, int64_t count)
+bool Player::MoveStorageToInventory(Item *pItem, int64_t count)
 {
-    if (m_bIsUsingStorage && pItem->IsInStorage() && m_Storage.check(pItem) && pItem->m_nAccountID == GetInt32Value(PLAYER_FIELD_ACCOUNT_ID) && pItem->m_Instance.nCount >= count && (pItem->IsJoinable() || pItem->m_Instance.nCount == count)
-        /* && IsTakeable(pItem->GetHandle, count)*/)
+    if (!m_bIsUsingStorage)
+        return false;
+
+    if (!pItem->IsInStorage() || !m_Storage.IsValid(pItem))
+        return false;
+
+    if (pItem->GetAccountID() != GetAccountID())
+        return false;
+
+    if (pItem->GetCount() < count)
+        return false;
+
+    if (!pItem->IsJoinable() && pItem->GetCount() != count)
+        return false;
+
+    if (!IsTakeable(pItem->GetHandle(), count))
+        return false;
+
+    Item *pNewItem{nullptr};
+    if (!pItem->IsJoinable())
     {
-        if (pItem->IsJoinable())
-        {
-            Item *pNewItem = m_Storage.Pop(pItem, count, false);
-            pNewItem->m_Instance.nIdx = ++m_Inventory.m_nIndex;
-            pNewItem->m_bIsNeedUpdateToDB = true;
-            auto pDividedItem = m_Inventory.Push(pNewItem, count, false);
-            m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, pDividedItem->m_Instance.nCount);
-            if (pItem->GetHandle() != pNewItem->GetHandle())
-                pItem->DBUpdate();
-            if (pDividedItem->GetHandle() != pNewItem->GetHandle())
-                Item::PendFreeItem(pNewItem);
-        }
-        else
-        {
-            m_Storage.Pop(pItem, count, false);
-            pItem->m_Instance.nIdx = ++m_Inventory.m_nIndex;
-            pItem->m_bIsNeedUpdateToDB = true;
-            m_Inventory.Push(pItem, count, false);
-        }
+        m_Storage.Pop(pItem, count, false);
+        pItem->SetIdx(m_Inventory.IssueNewIndex());
+        m_Inventory.Push(pItem, count, false);
+        return true;
     }
+    else
+    {
+        auto nResultCnt = pItem->GetCount() - count;
+        Item *pDividedItem = m_Storage.Pop(pItem, count, false);
+        pNewItem = m_Inventory.Push(pDividedItem, count, false);
+
+        m_QuestManager.UpdateQuestStatusByItemCount(pItem->GetItemCode(), pNewItem->GetCount());
+
+        if (pItem != pDividedItem)
+            pItem->DBUpdate();
+
+        if (pNewItem != pDividedItem)
+            pDividedItem->DeleteThis();
+
+        return true;
+    }
+    return false;
 }
 
-void Player::MoveInventoryToStorage(Item *pItem, int64_t count)
+bool Player::MoveInventoryToStorage(Item *pItem, int64_t count)
 {
-    int64_t nResultCnt = 0;
+    if (!IsErasable(pItem))
+        return false;
+
+    if (pItem->GetItemBase()->flaglist[FLAG_STORAGE] != 0)
+        return false;
+
+    if ((pItem->m_Instance.Flag & ITEM_FLAG_TAMING) != 0)
+        return false;
+
+    if (!m_bIsUsingStorage)
+        return false;
+
+    if (pItem->GetCount() < count)
+        return false;
+
+    if (!pItem->IsJoinable() && pItem->GetCount() != count)
+        return false;
+
     Item *pNewItem{nullptr};
-
-    if (pItem->m_Instance.nWearInfo != WEAR_NONE)
+    if (!pItem->IsJoinable())
     {
-        if (pItem->m_Instance.OwnSummonHandle != 0)
-        {
-            auto summon = sMemoryPool.GetObjectInWorld<Summon>(pItem->m_Instance.OwnSummonHandle);
-            if (summon != nullptr)
-                summon->Putoff(pItem->m_Instance.nWearInfo);
-            else
-                return;
-        }
-        else
-        {
-            Putoff(pItem->m_Instance.nWearInfo);
-        }
+        m_Inventory.Pop(pItem, count, false);
+        pItem->SetIdx(m_Storage.IssueNewIndex());
+        m_Storage.Push(pItem, count, false);
+        return true;
     }
-
-    if (IsErasable(pItem) &&
-        (pItem->m_Instance.Flag & 0x20000000) == 0 && m_bIsUsingStorage && pItem->m_Instance.nCount >= count && (pItem->IsJoinable() || pItem->m_Instance.nCount == count))
+    else
     {
-        if (pItem->IsJoinable())
-        {
-            nResultCnt = pItem->m_Instance.nCount - count;
-            m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, nResultCnt);
-            auto pDividedItem = m_Inventory.Pop(pItem, count, false);
-            pDividedItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
-            pDividedItem->m_bIsNeedUpdateToDB = true;
-            pNewItem = m_Storage.Push(pDividedItem, count, false);
-            if (pItem->GetHandle() != pDividedItem->GetHandle())
-                pItem->DBUpdate();
-            if (pNewItem->GetHandle() != pDividedItem->GetHandle())
-                Item::PendFreeItem(pDividedItem);
-        }
-        else
-        {
-            m_Inventory.Pop(pItem, count, false);
-            pItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
-            pItem->m_bIsNeedUpdateToDB = true;
-            m_Storage.Push(pItem, count, false);
-        }
+        auto nResultCnt = pItem->GetCount() - count;
+        m_QuestManager.UpdateQuestStatusByItemCount(pItem->GetItemCode(), nResultCnt);
+
+        auto pDividedItem = m_Inventory.Pop(pItem, count, false);
+        pDividedItem->SetIdx(m_Storage.IssueNewIndex());
+        pNewItem = m_Storage.Push(pDividedItem, count, false);
+
+        if (pItem != pDividedItem)
+            pItem->DBUpdate();
+
+        if (pNewItem != pDividedItem)
+            pDividedItem->DeleteThis();
+        return true;
     }
+    return false;
 }
 
 bool Player::IsAlly(const Unit *pUnit)
@@ -3987,4 +4016,26 @@ void Player::setSummonUpdate()
         else
             summon->CalculateStat();
     }
+}
+
+bool Player::IsTakeable(uint32_t nItemHandle, int64_t cnt)
+{
+    auto pItem = sMemoryPool.GetObjectInWorld<Item>(nItemHandle);
+    if (pItem == nullptr)
+        return false;
+
+    if (pItem->IsQuestItem() && !IsTakeableQuestItem(pItem->GetItemCode()) && !pItem->IsInStorage())
+        return false;
+
+    if (pItem->IsJoinable() && cnt != 0)
+    {
+        if (pItem->GetWeight() + GetWeight() > GetMaxWeight())
+            return false;
+    }
+    else
+    {
+        if (pItem->GetWeight() + GetWeight() > GetMaxWeight())
+            return false;
+    }
+    return true;
 }

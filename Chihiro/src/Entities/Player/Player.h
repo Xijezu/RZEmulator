@@ -116,6 +116,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     /* ****************** QUEST *******************/
     void DoEachActiveQuest(const std::function<void(Quest *)> &fn) { m_QuestManager.DoEachActiveQuest(fn); }
 
+    int32_t GetAccountID() const { return GetInt32Value(PLAYER_FIELD_ACCOUNT_ID); }
+
     void UpdateQuestStatusByMonsterKill(int monster_id);
     void GetQuestByMonster(int monster_id, std::vector<Quest *> &vQuest, int type);
     void StartQuest(int code, int nStartQuestID, bool bForce);
@@ -128,6 +130,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
 
     bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
+    bool IsTakeable(uint32_t nItemHandle, int64_t cnt);
 
     bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
     bool IsInProgressQuest(int code);
@@ -225,8 +228,8 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     uint GetStorageItemCount() const;
     bool GiveItem(Player *pTarget, uint32_t ItemHandle, int64_t count);
     Item *DropItem(Player *pTarget, Item *pItem, int64_t count);
-    void MoveStorageToInventory(Item *pItem, int64_t count);
-    void MoveInventoryToStorage(Item *pItem, int64_t count);
+    bool MoveStorageToInventory(Item *pItem, int64_t count);
+    bool MoveInventoryToStorage(Item *pItem, int64_t count);
     bool EraseItem(Item *pItem, int64_t count);
     bool EraseBullet(int64_t count);
     bool IsMixable(Item *pItem) const;

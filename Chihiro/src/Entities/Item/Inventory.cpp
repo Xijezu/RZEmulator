@@ -22,65 +22,65 @@ Inventory::Inventory() : m_pEventReceiver(nullptr), m_fWeight(0),
                          m_fWeightModifier(0), m_vList(),
                          m_vExpireItemList(), m_nIndex(0)
 {
-
 }
 
-Item *Inventory::Push(Item *item, int64_t cnt, bool bSkipUpdateItemToDB)
+Item *Inventory::Push(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
 {
-    if (item->IsJoinable())
+    Item *pExistItem{nullptr};
+    if (pItem->IsJoinable())
+        pExistItem = FindByCode(pItem->GetItemCode());
+
+    if (!pItem->IsJoinable() || pExistItem == nullptr)
     {
-        auto ji = FindByCode(item->m_Instance.Code);
-        if (ji != nullptr)
-        {
-            m_fWeight += item->m_pItemBase->weight * (float)cnt;
-            if (ji->m_Instance.nWearInfo != WEAR_NONE)
-                m_fWeightModifier -= item->m_pItemBase->weight * (float)cnt;
-            int64_t new_cnt = cnt + ji->m_Instance.nCount;
-            setCount(ji, new_cnt, bSkipUpdateItemToDB);
-            return ji;
-        }
+        m_fWeight += pItem->GetWeight();
+        if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
+            m_fWeightModifier -= pItem->GetWeight();
+
+        push(pItem, bSkipUpdateItemToDB);
+
+        if (pItem->GetIdx() > m_nIndex)
+            m_nIndex = pItem->GetIdx();
+
+        return pItem;
     }
 
-    m_fWeight += item->GetWeight();
-    if (item->m_Instance.nWearInfo != WEAR_NONE)
-    {
-        m_fWeightModifier -= item->GetWeight();
-    }
-    push(item, bSkipUpdateItemToDB);
-    if (item->m_Instance.nIdx > m_nIndex)
-        m_nIndex = item->m_Instance.nIdx;
+    m_fWeight += pExistItem->GetWeight();
+    if (pExistItem->GetWearInfo() != ItemWearType::WEAR_NONE)
+        m_fWeightModifier -= pExistItem->GetWeight();
 
-    return item;
+    setCount(pExistItem, pExistItem->GetCount() + cnt, bSkipUpdateItemToDB);
+    return pExistItem;
 }
 
 Item *Inventory::Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
 {
-    int64_t new_cnt;
+    check(pItem);
 
-    if (!check(pItem))
-        return nullptr;
-
-    if (pItem->m_Instance.nCount == cnt)
+    if (pItem->GetCount() > cnt)
     {
-        m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
-        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
-            m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
+        auto pNewItem = Item::AllocItem(0, pItem->GetItemCode(), 1, GenerateCode::BY_DIVIDE);
+
+        pNewItem->CopyFrom(pItem);
+        pNewItem->SetCount(cnt);
+
+        m_fWeight -= pItem->GetWeight();
+        if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
+            m_fWeightModifier += pItem->GetWeight();
+
+        setCount(pItem, pItem->GetCount() - cnt, bSkipUpdateItemToDB);
+        return pNewItem;
+    }
+
+    if (pItem->GetCount() == cnt)
+    {
+        m_fWeight -= pItem->GetWeight();
+        if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
+            m_fWeightModifier += pItem->GetWeight();
+
         pop(pItem, bSkipUpdateItemToDB);
         return pItem;
     }
-    else if (pItem->m_Instance.nCount > cnt)
-    {
-        new_cnt = pItem->m_Instance.nCount - cnt;
-        auto pNewItem = Item::AllocItem(0, pItem->m_Instance.Code, new_cnt, BY_DIVIDE, -1, -1, -1 - 1, 0, 0, 0, 0, 0);
-        pNewItem->CopyFrom(pItem);
-        pNewItem->SetCount(cnt);
-        m_fWeight -= pItem->m_pItemBase->weight * (float)cnt;
-        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
-            m_fWeightModifier += pItem->m_pItemBase->weight * (float)cnt;
-        new_cnt       = pItem->m_Instance.nCount - cnt;
-        setCount(pItem, new_cnt, bSkipUpdateItemToDB);
-        return pNewItem;
-    }
+
     return nullptr;
 }
 
@@ -89,21 +89,21 @@ bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
     if (!check(pItem))
         return false;
 
-    if (pItem->m_Instance.nCount <= count)
+    if (pItem->GetCount() <= count)
     {
         m_fWeight -= pItem->GetWeight();
-        if (pItem->m_Instance.nWearInfo != WEAR_NONE)
+        if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
             m_fWeightModifier += pItem->GetWeight();
         pop(pItem, bSkipUpdateItemToDB);
-        Item::PendFreeItem(pItem);
-        return true;
+        pItem->DeleteThis();
+        return false;
     }
 
-    m_fWeight -= pItem->m_pItemBase->weight * (float)count;
-    if (pItem->m_Instance.nWearInfo != WEAR_NONE)
-        m_fWeightModifier += pItem->m_pItemBase->weight * (float)count;
-    int64_t nc = pItem->m_Instance.nCount - count;
-    setCount(pItem, nc, bSkipUpdateItemToDB);
+    m_fWeight -= pItem->GetWeight();
+    if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
+        m_fWeightModifier += pItem->GetWeight();
+    auto newCount = pItem->GetCount() - count;
+    setCount(pItem, newCount, bSkipUpdateItemToDB);
     return true;
 }
 
@@ -151,21 +151,23 @@ Item *Inventory::FindByHandle(uint handle)
     return nullptr;
 }
 
-void Inventory::setCount(Item *item, int64_t newCnt, bool bSkipUpdateItemToDB)
+void Inventory::setCount(Item *pItem, int64_t newCnt, bool bSkipUpdateItemToDB)
 {
-    item->SetCount(newCnt);
+    pItem->SetCount(newCnt);
     if (m_pEventReceiver != nullptr)
-        m_pEventReceiver->onChangeCount(this, item, bSkipUpdateItemToDB);
+        m_pEventReceiver->onChangeCount(this, pItem, bSkipUpdateItemToDB);
 }
 
-void Inventory::push(Item *item, bool bSkipUpdateItemToDB)
+void Inventory::push(Item *pItem, bool bSkipUpdateItemToDB)
 {
-    m_vList.emplace_back(item);
-    if (item->IsExpireItem())
-        m_vExpireItemList.emplace_back(item);
-    item->m_unInventoryIndex = (uint)m_vList.size() - 1;
+    m_vList.emplace_back(pItem);
+
+    if (pItem->IsExpireItem())
+        m_vExpireItemList.emplace_back(pItem);
+
+    pItem->SetStorageIndex(static_cast<uint32_t>(m_vList.size() - 1));
     if (m_pEventReceiver != nullptr)
-        m_pEventReceiver->onAdd(this, item, bSkipUpdateItemToDB);
+        m_pEventReceiver->onAdd(this, pItem, bSkipUpdateItemToDB);
 }
 
 void Inventory::pop(Item *pItem, bool bSkipUpdateItemToDB)
@@ -173,22 +175,21 @@ void Inventory::pop(Item *pItem, bool bSkipUpdateItemToDB)
     if (m_pEventReceiver != nullptr)
         m_pEventReceiver->onRemove(this, pItem, bSkipUpdateItemToDB);
 
-    Item *last = m_vList.back();
-    auto idx = (int)last->m_unInventoryIndex;
-    if (last->GetHandle() != pItem->GetHandle())
+    if (m_vList.back() != pItem)
     {
-        last->m_unInventoryIndex = pItem->m_unInventoryIndex;
-        m_vList[(int)last->m_unInventoryIndex] = last;
+        m_vList.back()->SetStorageIndex(pItem->GetStorageIndex());
+        m_vList[pItem->GetStorageIndex()] = m_vList.back();
     }
-    m_vList.erase(m_vList.begin() + idx);
+    m_vList.pop_back();
+
     auto pos = std::find(m_vExpireItemList.begin(), m_vExpireItemList.end(), pItem);
     if (pos != m_vExpireItemList.end())
         m_vExpireItemList.erase(pos);
 }
 
-bool Inventory::check(Item *pItem)
+bool Inventory::check(Item *pItem) const
 {
-    if (pItem->m_unInventoryIndex < m_vList.size())
-        return m_vList[(int)pItem->m_unInventoryIndex]->GetHandle() == pItem->GetHandle();
-    return false;
+    ASSERT(pItem->GetStorageIndex() < m_vList.size(), "Inventory::check: GetStorageIndex invalid!!!");
+    ASSERT(m_vList[pItem->GetStorageIndex()] == pItem, "Inventory::check: Position in list invalid!!!");
+    return true;
 }
