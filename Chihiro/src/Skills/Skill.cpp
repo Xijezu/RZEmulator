@@ -71,19 +71,20 @@ Skill::Skill(Unit *pOwner, int64_t _uid, int _id) : m_nErrorCode(0), m_nAuraRefr
 
 void Skill::Init()
 {
-    m_nErrorCode = 0;
+    m_nErrorCode = TS_RESULT_SUCCESS;
     m_Status = SkillStatus::SS_IDLE;
     m_nCastTime = 0;
     m_nCastingDelay = 0;
     m_nFireTime = 0;
     m_nRequestedSkillLevel = 0;
     m_hTarget = 0;
+    m_targetPosition.Relocate(0, 0, 0, 0);
+    m_targetPosition.SetLayer(0);
     m_nCurrentFire = 0;
     m_nTotalFire = 0;
     m_nTargetCount = 1;
     m_nFireCount = 1;
-    m_targetPosition.Relocate(0, 0, 0, 0);
-    m_targetPosition.SetLayer(0);
+    m_vResultList.clear();
 }
 
 int Skill::InitError(uint16_t nErrorCode)
@@ -178,7 +179,7 @@ void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, 
     skillResult.hitDamageWithKnockBack.x = x;
     skillResult.hitDamageWithKnockBack.y = y;
     skillResult.hitDamageWithKnockBack.knock_back_time = knock_back_time;
-    skillResult.hitDamageWithKnockBack.speed = -116; // @todo: Make sure to double check, this seems odd
+    skillResult.hitDamageWithKnockBack.speed = GameRule::DEFAULT_KNOCK_BACK_SPEED;
 
     pvList.emplace_back(skillResult);
 }
@@ -292,7 +293,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     m_vResultList.clear();
     auto current_time = sWorld.GetArTime();
     int delay = -1;
-    m_Status = SS_CAST;
+    m_Status = SS_PRE_CAST;
 
     SetRequestedSkillLevel(std::min(nSkillLevel, GetCurrentSkillLevel()));
 
@@ -627,7 +628,9 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     m_nCastingDelay = static_cast<uint32_t>(nOriginalCastingDelay);
     m_nFireTime = current_time + delay;
 
+    m_Status = SS_CAST;
     broadcastSkillMessage(m_pOwner, 0, mana_cost, ST_Casting);
+    ASSERT(m_Status == SS_CAST, "Not casting wtf, casting is %u", m_Status);
     if (GetSkillBase()->IsHarmful() && !GetSkillBase()->IsPhysicalSkill())
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
@@ -789,7 +792,7 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
 
 void Skill::ProcSkill()
 {
-    if (m_Status == SS_IDLE)
+    if (m_Status == SS_IDLE || m_Status == SS_PRE_CAST)
         return;
 
     if (m_pOwner->GetHealth() == 0)
@@ -991,8 +994,8 @@ void Skill::ProcSkill()
         else
             broadcastSkillMessage(m_pOwner, 0, 0, ST_Complete);
 
-        m_pOwner->OnCompleteSkill();
         Init();
+        m_pOwner->OnCompleteSkill();
     }
 }
 
@@ -1001,7 +1004,11 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
     auto t = m_nFireTime;
     m_vResultList.clear();
 
-    /// @TODO: IsHiding
+    if (m_pOwner->IsHiding())
+    {
+        m_pOwner->RemoveState(SC_HIDE, GameRule::MAX_STATE_LEVEL);
+        m_pOwner->RemoveState(SC_TRACE_OF_FUGITIVE, GameRule::MAX_STATE_LEVEL);
+    }
 
     bool bHandled{true};
 
@@ -1860,7 +1867,7 @@ void Skill::PHYSICAL_SINGLE_DAMAGE(Unit *pTarget)
         }
         else
         {
-            /// @todo: MoveObject
+            sWorld.MoveObject(m_pOwner, m_RushPos, m_fRushFace);
             ++m_nCurrentFire;
         }
     }
@@ -4972,8 +4979,8 @@ bool Skill::RUSH(Unit *pTarget, float fSpeed)
     }
 
     result.hitRush.bResult = true;
-    result.hitRush.x = RushPos.GetPositionY();
-    result.hitRush.y = RushPos.GetPositionX();
+    result.hitRush.x = RushPos.GetPositionX();
+    result.hitRush.y = RushPos.GetPositionY();
     result.hitRush.speed = static_cast<int8_t>(fSpeed);
 
     m_vResultList.emplace_back(result);

@@ -16,9 +16,9 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Common.h"
+#include "DamageTemplate.h"
 #include "Object.h"
 #include "SkillBase.h"
-#include "DamageTemplate.h"
 
 class XPacket;
 class Unit;
@@ -28,7 +28,8 @@ enum SkillStatus : int
   SS_IDLE = 0,
   SS_CAST = 1,
   SS_FIRE = 2,
-  SS_COMPLETE = 3
+  SS_COMPLETE = 3,
+  SS_PRE_CAST = 4
 };
 
 struct SkillTargetFunctor;

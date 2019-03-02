@@ -472,52 +472,56 @@ Skill *Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_c
     return pSkill;
 }
 
-int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8_t layer, bool bIsCastedByItem)
+int Unit::CastSkill(int nSkillID, int nSkillLevel, uint32_t target_handle, Position pos, uint8_t layer, bool bIsCastedByItem)
 {
-    auto player = dynamic_cast<Player *>(this);
-    Summon *summon{nullptr};
-    Unit *pSkillTarget{nullptr};
-    auto tpos = pos.GetPosition();
+    Position targetPos = pos;
 
-    auto pSkill = GetSkill(nSkillID);
-    if (pSkill == nullptr || pSkill->m_SkillBase == nullptr || m_castingSkill != nullptr /*|| using storage*/)
+    if (IsUsingSkill())
         return TS_RESULT_NOT_ACTABLE;
 
-    //auto pSkillTarget = sMemoryPool.getPtrFromId(target_handle);
-    auto obj = sMemoryPool.GetObjectInWorld<WorldObject>(target_handle);
-    if (obj != nullptr && (!obj->IsItem() && !obj->IsFieldProp()))
-    {
-        pSkillTarget = dynamic_cast<Unit *>(obj);
-    }
+    if (IsPlayer() && As<Player>()->IsUsingStorage())
+        return TS_RESULT_NOT_ACTABLE;
 
-    switch (pSkill->m_SkillBase->target)
+    auto pSkill = GetSkill(nSkillID);
+    if (pSkill == nullptr)
+        return TS_RESULT_NOT_ACTABLE;
+
+    Unit *pSkillTarget{nullptr};
+    auto pObj = sMemoryPool.GetObjectInWorld<WorldObject>(target_handle);
+    if (pObj != nullptr && pObj->IsUnit())
+        pSkillTarget = pObj->As<Unit>();
+
+    switch (pSkill->GetSkillBase()->GetSkillTargetType())
     {
     case TARGET_TYPE::TARGET_MASTER:
+    {
         if (!IsSummon())
             return TS_RESULT_NOT_ACTABLE;
-        summon = dynamic_cast<Summon *>(this);
-        if (summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
+        auto pSummon = As<Summon>();
+        if (pSummon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
             return TS_RESULT_NOT_ACTABLE;
-        break;
+    }
+    break;
     case TARGET_TYPE::TARGET_SELF_WITH_MASTER:
+    {
         if (!IsSummon())
             return TS_RESULT_NOT_ACTABLE;
-        summon = this->As<Summon>();
-        if (pSkillTarget->GetHandle() != GetHandle() && summon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
+        auto pSummon = As<Summon>();
+        if (pSkillTarget->GetHandle() != GetHandle() && pSummon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
             return TS_RESULT_NOT_ACTABLE;
-        break;
+    }
+    break;
     case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER:
-        if (pSkillTarget->GetHandle() == GetHandle())
+        if (pSkillTarget == this)
             return TS_RESULT_NOT_ACTABLE;
         break;
     default:
         break;
     }
 
-    // Return feather
     if (pSkillTarget == nullptr)
     {
-        if (nSkillID == 6020 && IsPlayer() /* && IsInSiegeOrRaidDungeon*/)
+        if (nSkillID == SKILL_RETURN_FEATHER && IsPlayer() /* && IsInSiegeOrRaidDungeon*/)
             return TS_RESULT_NOT_ACTABLE;
     }
     else
@@ -525,73 +529,66 @@ int Unit::CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position 
         if (!pSkillTarget->IsInWorld())
             return TS_RESULT_NOT_ACTABLE;
 
-        uint ct = sWorld.GetArTime();
+        uint32_t ct = sWorld.GetArTime();
 
-        Position t = (pSkillTarget->GetCurrentPosition(ct));
-        float target_distance = (GetCurrentPosition(ct).GetExactDist2d(&t) - GetUnitSize() * 0.5f);
-        float enemy_distance = target_distance - (pSkillTarget->GetUnitSize() * 0.5f);
+        auto enemyPosition = pSkillTarget->GetCurrentPosition(ct);
+        auto myPosition = GetCurrentPosition(ct);
+        auto distance = myPosition.GetExactDist2d(&enemyPosition) - GetUnitSize() / 2 - pSkillTarget->GetUnitSize() / 2;
+
         float range_mod = 1.2f;
-        if (pSkillTarget->bIsMoving)
+        if (pSkillTarget->IsMoving())
+            range_mod = 1.5f;
+
+        if (pSkill->GetSkillBase()->GetCastRange() == -1)
         {
-            if (pSkillTarget->IsInWorld())
-                range_mod = 1.5f;
+            if (distance > GetRealAttackRange() * range_mod)
+                return TS_RESULT_TOO_FAR;
         }
-        bool isInRange{false};
-        if (pSkill->m_SkillBase->cast_range == -1)
+        else if (distance > pSkill->GetSkillBase()->GetCastRange() * GameRule::DEFAULT_UNIT_SIZE * range_mod)
         {
-            isInRange = enemy_distance < GetRealAttackRange() * range_mod;
-        }
-        else
-        {
-            target_distance = 12 * pSkill->m_SkillBase->cast_range * range_mod;
-            isInRange = enemy_distance < target_distance;
-        }
-        if (!isInRange)
             return TS_RESULT_TOO_FAR;
-
-        if (pSkill->m_SkillBase->is_corpse != 0 && pSkillTarget->GetHealth() != 0)
-            return TS_RESULT_NOT_ACTABLE;
-        if (pSkill->m_SkillBase->is_corpse == 0 && pSkillTarget->GetHealth() == 0)
-            return TS_RESULT_NOT_ACTABLE;
-
-        if (pSkillTarget->GetHandle() == GetHandle() || (pSkillTarget->IsSummon() && pSkillTarget->As<Summon>()->GetMaster()->GetHandle() == GetHandle()))
-        {
-            if (!pSkill->m_SkillBase->IsUsable(0))
-                return TS_RESULT_NOT_ACTABLE;
-        }
-        else
-        {
-            if (IsAlly(pSkillTarget))
-            {
-                if (!pSkill->m_SkillBase->IsUsable(1))
-                    return TS_RESULT_NOT_ACTABLE;
-            }
-            else if (IsEnemy(pSkillTarget, false))
-            {
-                if (!pSkill->m_SkillBase->IsUsable(5))
-                    return TS_RESULT_NOT_ACTABLE;
-            }
-            else if (!pSkill->m_SkillBase->IsUsable(3))
-            {
-                return TS_RESULT_NOT_ACTABLE;
-            }
         }
 
-        if ((pSkillTarget->IsPlayer() && pSkill->m_SkillBase->tf_avatar == 0) || (pSkillTarget->IsMonster() && pSkill->m_SkillBase->tf_monster == 0) || (pSkillTarget->IsSummon() && pSkill->m_SkillBase->tf_summon == 0))
+        if (pSkill->GetSkillBase()->IsValidToCorpse() != 0 && !pSkillTarget->IsDead())
             return TS_RESULT_NOT_ACTABLE;
 
-        tpos = pSkillTarget->GetCurrentPosition(ct);
+        if (pSkillTarget == this || (pSkillTarget->IsSummon() && pSkillTarget->As<Summon>()->GetMaster() == this))
+        {
+            if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_SELF))
+                return TS_RESULT_NOT_ACTABLE;
+        }
+        else if (IsAlly(pSkillTarget))
+        {
+            if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_ALLY))
+                return TS_RESULT_NOT_ACTABLE;
+        }
+        else if (IsEnemy(pSkillTarget, false))
+        {
+            if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_ENEMY))
+                return TS_RESULT_NOT_ACTABLE;
+        }
+        else if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_NEUTRAL))
+        {
+            return TS_RESULT_NOT_ACTABLE;
+        }
+
+        if (pSkillTarget->IsPlayer() && !pSkill->GetSkillBase()->IsUseableOnAvatar())
+            return TS_RESULT_NOT_ACTABLE;
+        if (pSkillTarget->IsMonster() && !pSkill->GetSkillBase()->IsUseableOnMonster())
+            return TS_RESULT_NOT_ACTABLE;
+        if (pSkillTarget->IsSummon() && !pSkill->GetSkillBase()->IsUseableOnSummon())
+            return TS_RESULT_NOT_ACTABLE;
+
+        targetPos = pSkillTarget->GetCurrentPosition(sWorld.GetArTime());
     }
 
-    SetDirection(tpos);
+    SetDirection(targetPos);
     m_castingSkill = pSkill;
-    int res = pSkill->Cast(nSkillLevel, target_handle, tpos, layer, bIsCastedByItem);
-    if (res != TS_RESULT_SUCCESS)
-    {
+    int nResult = pSkill->Cast(nSkillLevel, target_handle, targetPos, layer, bIsCastedByItem);
+    if (nResult != TS_RESULT_SUCCESS)
         m_castingSkill = nullptr;
-    }
 
-    return res;
+    return nResult;
 }
 
 void Unit::onAttackAndSkillProcess()
@@ -599,6 +596,7 @@ void Unit::onAttackAndSkillProcess()
     if (m_castingSkill != nullptr)
     {
         m_castingSkill->ProcSkill();
+        NG_LOG_INFO("server.worldserver", "ProcSkill");
     }
     else
     {
