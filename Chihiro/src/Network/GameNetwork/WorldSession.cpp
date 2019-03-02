@@ -1201,7 +1201,7 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (m_pPlayer->GetHealth() == 0)
+    if (m_pPlayer->IsDead())
         return;
 
     WorldObject *pTarget{nullptr};
@@ -1218,15 +1218,20 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
         return;
     }
     auto base = sObjectMgr.GetSkillBase(pRecvPct->skill_id);
-    if (base == nullptr || base->id == 0 || base->is_valid == 0 || base->is_valid == 2)
+    if (base == nullptr || !base->IsValid() || base->IsSystemSkill())
     {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_ACCESS_DENIED);
         return;
     }
-    /// @todo isCastable
+
+    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable()))
+    {
+        Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_ACTABLE);
+        return;
+    }
+
     if (pRecvPct->target != 0)
     {
-        //pTarget = dynamic_cast<WorldObject*>(sMemoryPool.getPtrFromId(target));
         pTarget = sMemoryPool.GetObjectInWorld<WorldObject>(pRecvPct->target);
         if (pTarget == nullptr)
         {
@@ -1242,19 +1247,32 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
         return;
     }
 
-    // @todo is_spell_act
-    auto skill = pCaster->GetSkill(pRecvPct->skill_id);
-    if (skill != nullptr && skill->m_nSkillUID != -1)
+    // Once again
+    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable()))
     {
-        //if(skill_level > skill->skill_level /* +skill.m_nSkillLevelAdd*/)
-        //skill_level = skill_level + skill.m_nSkillLevelAdd;
-        int res = pCaster->CastSkill(pRecvPct->skill_id, pRecvPct->skill_level, pRecvPct->target, pos, pCaster->GetLayer(), false);
-        if (res != 0)
-        {
-            Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, res);
-            if (skill->m_SkillBase->is_harmful != 0 && pCaster->GetTargetHandle() != 0)
-                pCaster->StartAttack(pRecvPct->target, false);
-        }
+        Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_ACTABLE);
+        return;
+    }
+
+    auto pSkill = pCaster->GetSkill(pRecvPct->skill_id);
+    if (pSkill == nullptr || (pSkill != nullptr && pSkill->m_nSkillUID == -1))
+        return;
+
+    if (pSkill->GetCurrentSkillLevel() <= 0)
+    {
+        Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_ACCESS_DENIED);
+        return;
+    }
+
+    int32_t nSkillLv = pRecvPct->skill_level;
+    if (pRecvPct->skill_level <= 0 || pRecvPct->skill_level > pSkill->GetCurrentSkillLevel())
+        nSkillLv = pSkill->GetCurrentSkillLevel();
+
+    int nResult = pCaster->CastSkill(pRecvPct->skill_id, nSkillLv, pRecvPct->target, pos, pCaster->GetLayer(), false);
+    if (nResult != TS_RESULT_SUCCESS)
+    {
+        Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, nResult);
+        return;
     }
 }
 

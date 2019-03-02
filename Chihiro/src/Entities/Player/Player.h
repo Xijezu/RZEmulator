@@ -230,6 +230,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     Item *DropItem(Player *pTarget, Item *pItem, int64_t count);
     bool MoveStorageToInventory(Item *pItem, int64_t count);
     bool MoveInventoryToStorage(Item *pItem, int64_t count);
+    bool IsUsingStorage() const { return m_bIsUsingStorage; }
     bool EraseItem(Item *pItem, int64_t count);
     bool EraseBullet(int64_t count);
     bool IsMixable(Item *pItem) const;

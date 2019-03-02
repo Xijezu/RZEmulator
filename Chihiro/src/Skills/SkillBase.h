@@ -528,6 +528,15 @@ struct SkillTreeGroup
 
 struct SkillBase
 {
+    enum
+    {
+        USE_SELF = 0,
+        USE_ALLY,
+        USE_GUILD,
+        USE_NEUTRAL,
+        USE_PURPLE,
+        USE_ENEMY,
+    };
 
     int GetID() const;
     int GetNameID() const;
