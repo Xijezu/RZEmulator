@@ -76,17 +76,27 @@ public:
   Item &operator=(const Item &) = delete;
 
   void SetCount(int64_t count);
+  void SetIdx(int32_t idx);
   bool IsDropable();
   bool IsWearable();
-  int32_t GetItemCode() const { return m_Instance.Code; }
-  int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
+
+  inline int32_t GetItemCode() const { return m_Instance.Code; }
+  inline int64_t GetItemUID() const { return m_Instance.UID; }
+  inline int GetOwnerUID() const { return m_Instance.nOwnerUID; }
+  inline ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
+  inline ItemTemplate *GetItemBase() const { return m_pItemBase; }
+  inline int32_t GetAccountID() const { return m_nAccountID; }
+  inline int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
+  inline uint32_t GetBindedCreatureHandle() const { return m_hBindedTarget; }
+  inline int GetItemEnhance() const { return m_Instance.nEnhance; }
+  inline int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
+  inline int GetItemType() const { return m_pItemBase != nullptr ? m_pItemBase->type : 0; }
   ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
-  ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
-  ItemTemplate *GetItemBase() const { return m_pItemBase; }
-  int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
-  int GetItemEnhance() const { return m_Instance.nEnhance; }
   inline uint32_t GetOwnerHandle() const { return m_Instance.OwnerHandle; }
   inline int64_t GetCount() const { return m_Instance.nCount; }
+  inline int32_t GetIdx() const { return m_Instance.nIdx; }
+  inline uint32_t GetStorageIndex() const { return m_unInventoryIndex; }
+  void SetStorageIndex(uint32_t idx);
 
   inline void SetWearInfo(ItemWearType wear_info)
   {
@@ -122,6 +132,7 @@ public:
   inline bool IsDefenceCube() const { return GetItemGroup() == ItemGroup::GROUP_DEFENCE_CUBE; }
   inline bool IsSkillCube() const { return GetItemGroup() == ItemGroup::GROUP_SKILL_CUBE; }
   inline bool IsArtifact() const { return GetItemGroup() == ItemGroup::GROUP_ARTIFACT; }
+  inline bool IsCharm() const { return GetItemType() == ItemType::TYPE_CHARM; }
 
   inline bool IsTwoHandItem() const { return GetItemBase()->wear_type == ItemWearType::WEAR_TWOHAND; }
 
