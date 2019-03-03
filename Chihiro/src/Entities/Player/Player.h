@@ -179,7 +179,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     bool ReadQuestList();
     bool ReadStateList(Unit *);
     bool ReadStorageSummonList(std::vector<Summon *> &);
-    void DB_ReadStorage();
+    void DB_ReadStorage(bool bReload);
     void DB_UpdateStorageGold();
     /* ****************** DATABASE END *******************/
 

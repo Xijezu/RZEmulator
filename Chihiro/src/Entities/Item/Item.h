@@ -91,12 +91,15 @@ public:
   inline int GetItemEnhance() const { return m_Instance.nEnhance; }
   inline int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
   inline int GetItemType() const { return m_pItemBase != nullptr ? m_pItemBase->type : 0; }
+  int GetSummonSID() const { return static_cast<int>(m_Instance.Socket[0]); }
   ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
   inline uint32_t GetOwnerHandle() const { return m_Instance.OwnerHandle; }
   inline int64_t GetCount() const { return m_Instance.nCount; }
   inline int32_t GetIdx() const { return m_Instance.nIdx; }
   inline uint32_t GetStorageIndex() const { return m_unInventoryIndex; }
+
   void SetStorageIndex(uint32_t idx);
+  void SetSummonSID(int32_t idx);
 
   inline void SetWearInfo(ItemWearType wear_info)
   {

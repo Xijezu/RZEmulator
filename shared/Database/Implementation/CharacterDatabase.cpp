@@ -55,7 +55,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_ADD_PARTY, "INSERT INTO Party VALUES(?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_DEL_PARTY, "DELETE FROM Party WHERE sid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_STORAGE, "SELECT sid, idx, code, cnt, level, enhance, endurance, flag, gcode, socket_0, socket_1, socket_2, socket_3, remain_time FROM Item WHERE account_id = ? AND owner_id = 0 AND auction_id = 0 AND keeping_id = 0", CONNECTION_SYNCH);
-    PrepareStatement(CHARACTER_REP_STORAGE_GOLD, "REPLACE INTO Item (sid, account_id, cnt, owner_id, keeping_id, summon_id, idx, code, `level`, enhance, endurance, flag, gcode, socket_0, socket_1, socket_2, socket_3, socket_4, socket_5, remain_time, elemental_effect_expire_time, create_time, update_time, wear_info) VALUES(?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NOW(), 0);", CONNECTION_ASYNC);
+    PrepareStatement(CHARACTER_UPD_STORAGE_GOLD, "UPDATE Item SET cnt = ? WHERE account_id = ?", CONNECTION_ASYNC);
 }
 
 CharacterDatabaseConnection::CharacterDatabaseConnection(MySQLConnectionInfo &connInfo) : MySQLConnection(connInfo)

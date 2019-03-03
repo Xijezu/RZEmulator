@@ -16,8 +16,8 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Common.h"
-#include "Unit.h"
 #include "SummonBase.h"
+#include "Unit.h"
 
 class Player;
 class Summon : public Unit
@@ -37,6 +37,7 @@ public:
   static void EnterPacket(XPacket &, Summon *, Player *pPlayer);
 
   CreatureStat *GetBaseStat() const override;
+  inline uint32_t GetSummonSID() const { return GetUInt32Value(UNIT_FIELD_UID); }
 
   uint GetCreatureGroup() const override { return 9; }
 

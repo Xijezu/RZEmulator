@@ -138,7 +138,7 @@ void Item::DBInsert()
 
     stmt->setUInt64(idx++, m_Instance.UID);           // owner_id
     stmt->setInt32(idx++, m_Instance.nOwnerUID);      // owner_id
-    stmt->setInt32(idx++, 0);                         // account_id
+    stmt->setInt32(idx++, GetAccountID());            // account_id
     stmt->setInt32(idx++, m_Instance.nOwnSummonUID);  // summon_id
     stmt->setInt32(idx++, m_Instance.nAuctionID);     // auction_id
     stmt->setInt32(idx++, m_Instance.nItemKeepingID); // keepind_id
@@ -291,6 +291,11 @@ void Item::SetCount(int64_t count)
 void Item::SetIdx(int32_t idx)
 {
     m_Instance.nIdx = idx;
+}
+
+void Item::SetSummonSID(int32_t sid)
+{
+    m_Instance.nOwnSummonUID = sid;
 }
 
 void Item::SetStorageIndex(uint32_t idx)
