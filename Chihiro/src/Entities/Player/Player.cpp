@@ -335,7 +335,7 @@ void Player::DB_ReadStorage(bool bReload)
             }
             newItem->m_Instance.Flag &= ITEM_FLAG_TAMING;
             newItem->SetCurrentEndurance(endurance);
-            newItem->SetOwnerInfo(GetHandle(), 0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
+            newItem->SetOwnerInfo(GetHandle(), 0, GetAccountID());
             if (code == 0)
             {
                 if (bReload)
@@ -409,19 +409,6 @@ void Player::DB_ReadStorage(bool bReload)
                     newItem->SetIdx(m_Storage.IssueNewIndex());
 
                 m_Storage.Push(newItem, newItem->GetCount(), false);
-            }
-
-            Item *joinItem = m_Storage.FindByCode(newItem->m_Instance.Code);
-            if (newItem->IsJoinable() && joinItem != nullptr)
-            {
-                joinItem->m_Instance.nCount += newItem->m_Instance.nCount;
-                joinItem->m_bIsNeedUpdateToDB = true;
-                newItem->SetOwnerInfo(0, 0, 0);
-                newItem->DBUpdate();
-                Item::PendFreeItem(newItem);
-                joinItem->DBUpdate();
-                nItemIndex--;
-                Messages::SendItemMessage(this, joinItem);
             }
         } while (result->NextRow());
     }
@@ -3265,8 +3252,6 @@ void Player::OpenStorage()
 {
     if (IsUsingSkill())
         return;
-
-    NG_LOG_INFO("server.worldserver", "Loaded: %u, Requested %u", m_bIsStorageLoaded, m_bIsStorageRequested);
 
     if (!m_bIsStorageRequested)
     {

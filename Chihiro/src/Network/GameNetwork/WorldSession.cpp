@@ -1174,7 +1174,7 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
         return;
     }
-    auto code = item->m_Instance.Code;
+    auto code = item->GetItemCode();
     if (!m_pPlayer->EraseItem(item, pRecvPct->sell_count))
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->GetHandle());
