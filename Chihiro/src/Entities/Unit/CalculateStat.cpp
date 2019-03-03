@@ -2848,53 +2848,73 @@ void Unit::applyPassiveSkillEffect()
 
 void Unit::applyDoubeWeaponEffect()
 {
-    float fAddPerLevel{0};
-    Skill *skill{nullptr};
+    Skill *pSkill{nullptr};
 
-    if (IsUsingDoubleWeapon())
+    if (!IsUsingDoubleWeapon())
     {
-        auto pSlot0 = GetWornItem(WEAR_WEAPON);
-        auto pSlot1 = GetWornItem(WEAR_SHIELD);
-        if (pSlot0 != nullptr || pSlot1 != nullptr)
-        {
-            int skillLevel = 1;
-            if (pSlot1->m_pItemBase->iclass == CLASS_ONEHAND_SWORD && pSlot0->m_pItemBase->iclass == CLASS_ONEHAND_SWORD)
-            {
-                skill = GetSkill((int)SKILL_DUAL_SWORD_EXPERT);
-            }
-            else if (pSlot1->m_pItemBase->iclass == CLASS_DAGGER && pSlot0->m_pItemBase->iclass == CLASS_DAGGER)
-            {
-                skill = GetSkill((int)SKILL_TWIN_BLADE_EXPERT);
-            }
-            else if (pSlot1->m_pItemBase->iclass == CLASS_ONEHAND_AXE && pSlot0->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
-            {
-                skill = GetSkill((int)SKILL_TWIN_AXE_EXPERT);
-            }
-            if (skill != nullptr)
-                skillLevel = skill->m_nSkillLevel + skill->m_nSkillLevelAdd;
-
-            m_nDoubleWeaponMasteryLevel = skillLevel;
-            m_Attribute.nAttackSpeedRight *= (0.75f + ((float)skillLevel * 0.005f));
-            m_Attribute.nAttackSpeedLeft *= (0.75f + ((float)skillLevel * 0.005f));
-            m_Attribute.nAttackSpeed = (m_Attribute.nAttackSpeedLeft + m_Attribute.nAttackSpeedRight) * 0.5f;
-            m_AttributeByState.nAttackSpeedRight *= (0.75f + ((float)skillLevel * 0.005f));
-            m_AttributeByState.nAttackSpeedLeft *= (0.75f + ((float)skillLevel * 0.005f));
-            m_AttributeByState.nAttackSpeed = (m_AttributeByState.nAttackSpeedLeft + m_AttributeByState.nAttackSpeedRight) * 0.5f;
-
-            m_Attribute.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
-            m_Attribute.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
-            m_AttributeByState.nAccuracyLeft *= (0.89f + ((float)skillLevel * 0.01f));
-            m_AttributeByState.nAccuracyRight *= (0.89f + ((float)skillLevel * 0.01f));
-
-            m_Attribute.nAttackPointRight *= (0.9f + ((float)skillLevel * 0.01f));
-            m_Attribute.nAttackPointLeft *= (0.44f + ((float)skillLevel * 0.02f));
-            /*m_nAttackPointRightWithoutWeapon *= (0.9f + ((float)skillLevel * 0.01f));
-            m_nAttackPointRightWithoutWeapon *= (0.44f + ((float)skillLevel * 0.02f));*/
-            m_AttributeByState.nAttackPointRight *= (0.9f + ((float)skillLevel * 0.01f));
-            m_AttributeByState.nAttackPointLeft *= (0.44f + ((float)skillLevel * 0.02f));
-            return;
-        }
+        m_Attribute.nAttackSpeed = m_Attribute.nAttackSpeedRight;
+        m_AttributeByState.nAttackSpeed = m_AttributeByState.nAttackSpeedRight;
+        return;
     }
-    m_Attribute.nAttackSpeed = m_Attribute.nAttackSpeedRight;
-    m_AttributeByState.nAttackSpeed = m_AttributeByState.nAttackSpeedRight;
+
+    auto pSlot0 = GetWornItem(WEAR_WEAPON);
+    auto pSlot1 = GetWornItem(WEAR_SHIELD);
+    int nExpertSkillLv{1};
+
+    if (pSlot0 == nullptr || pSlot1 == nullptr)
+        return;
+
+    if (pSlot0->GetItemClass() == CLASS_ONEHAND_SWORD &&
+        pSlot1->GetItemClass() == CLASS_ONEHAND_SWORD)
+    {
+        pSkill = GetSkill(SKILL_DUAL_SWORD_EXPERT);
+        if (pSkill == nullptr)
+            pSkill = GetSkill(SKILL_TWIN_BLADE_EXPERT);
+        if (pSkill != nullptr)
+            nExpertSkillLv = pSkill->GetCurrentSkillLevel();
+    }
+    else if (pSlot0->GetItemClass() == CLASS_DAGGER &&
+             pSlot1->GetItemClass() == CLASS_DAGGER)
+    {
+        pSkill = GetSkill(SKILL_TWIN_BLADE_EXPERT);
+        if (pSkill != nullptr)
+            nExpertSkillLv = pSkill->GetCurrentSkillLevel();
+    }
+    else if (pSlot0->GetItemClass() == CLASS_ONEHAND_AXE &&
+             pSlot1->GetItemClass() == CLASS_ONEHAND_AXE)
+    {
+        pSkill = GetSkill(SKILL_TWIN_AXE_EXPERT);
+        if (pSkill != nullptr)
+            nExpertSkillLv = pSkill->GetCurrentSkillLevel();
+    }
+
+    m_nDoubleWeaponMasteryLevel = nExpertSkillLv;
+    float fBase{0.75f}, fAddPerLevel{0.005f};
+
+    m_Attribute.nAttackSpeedRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackSpeedRight;
+    m_Attribute.nAttackSpeedLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackSpeedLeft;
+    m_Attribute.nAttackSpeed = (m_Attribute.nAttackSpeedRight + m_Attribute.nAttackSpeedLeft) * 0.5f;
+    m_AttributeByState.nAttackSpeedRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackSpeedRight;
+    m_AttributeByState.nAttackSpeedLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackSpeedLeft;
+    m_AttributeByState.nAttackSpeed = (m_AttributeByState.nAttackSpeedRight + m_AttributeByState.nAttackSpeedLeft) * 0.5f;
+
+    fBase = 0.89f;
+    fAddPerLevel = 0.01f;
+    m_Attribute.nAccuracyRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAccuracyRight;
+    m_AttributeByState.nAccuracyRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAccuracyRight;
+    m_Attribute.nAccuracyLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAccuracyLeft;
+    m_AttributeByState.nAccuracyLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAccuracyLeft;
+
+    fBase = 0.90f;
+    m_Attribute.nAttackPointRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackPointRight;
+    m_AttributeByState.nAttackPointRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackPointRight;
+    //@todo
+    //m_fAttackPointRightWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointRightWithoutWeapon;
+
+    fBase = 0.44f;
+    fAddPerLevel = 0.02f;
+    m_Attribute.nAttackPointLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackPointLeft;
+    m_AttributeByState.nAttackPointLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackPointLeft;
+    //@todo
+    //m_fAttackPointLeftWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointLeftWithoutWeapon;
 }
