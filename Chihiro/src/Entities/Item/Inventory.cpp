@@ -89,21 +89,20 @@ bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
     if (!check(pItem))
         return false;
 
-    if (pItem->GetCount() <= count)
+    if (pItem->GetCount() > count)
     {
         m_fWeight -= pItem->GetWeight();
         if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
             m_fWeightModifier += pItem->GetWeight();
-        pop(pItem, bSkipUpdateItemToDB);
-        pItem->DeleteThis();
-        return false;
+        setCount(pItem, pItem->GetCount() - count, bSkipUpdateItemToDB);
+        return true;
     }
 
     m_fWeight -= pItem->GetWeight();
     if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
         m_fWeightModifier += pItem->GetWeight();
-    auto newCount = pItem->GetCount() - count;
-    setCount(pItem, newCount, bSkipUpdateItemToDB);
+    pop(pItem, bSkipUpdateItemToDB);
+    pItem->DeleteThis();
     return true;
 }
 

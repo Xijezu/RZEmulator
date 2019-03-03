@@ -274,9 +274,8 @@ bool Player::ReadCharacter(const std::string &_name, int _race)
     return true;
 }
 
-void Player::DB_ReadStorage()
+void Player::DB_ReadStorage(bool bReload)
 {
-    //"SELECT sid, idx code, cnt, level, enhance, endurance, flag, gcode, socket_0, socket_1, socket_2, socket_3, remain_time FROM Item WHERE account_id = ? AND owner_id = 0 AND auction_id = 0 AND keeping_id = 0"
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_STORAGE);
     stmt->setInt32(0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
     int nItemIndex = 0;
@@ -308,71 +307,45 @@ void Player::DB_ReadStorage()
             if (curItem == nullptr)
                 curItem = m_Inventory.FindBySID(sid);
 
-            if (!m_bIsStorageLoaded || code == 0 || curItem == nullptr)
+            if (bReload && code != 0)
             {
-                Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
-                if (newItem == nullptr)
+                auto pPrevItem = m_Storage.FindBySID(sid);
+                if (pPrevItem == nullptr)
                 {
-                    NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                    pPrevItem = m_Inventory.FindBySID(sid);
+                    ASSERT(pPrevItem == nullptr, "ReadStorageList: Item disappeared from storage/inventory!!!");
+                }
+
+                if (pPrevItem != nullptr)
+                {
+                    pPrevItem->SetIdx(++nItemIndex);
+                    if (pPrevItem->GetIdx() == idx)
+                        pPrevItem->m_bIsNeedUpdateToDB = false;
+
+                    Messages::SendItemMessage(this, pPrevItem);
                     continue;
                 }
-                newItem->m_Instance.Flag &= 0xDFFFFFFF;
-                newItem->SetCurrentEndurance(endurance);
-                newItem->SetOwnerInfo(GetHandle(), 0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
-                if (code != 0)
-                {
-                    nItemIndex++;
-                    newItem->m_Instance.nIdx = nItemIndex;
-                    newItem->m_bIsNeedUpdateToDB = true;
-                    if (newItem->m_Instance.nIdx == idx)
-                        newItem->m_bIsNeedUpdateToDB = false;
+            }
 
-                    Item *joinItem = m_Storage.FindByCode(newItem->m_Instance.Code);
-                    if (newItem->IsJoinable() && joinItem != nullptr)
-                    {
-                        joinItem->m_Instance.nCount += newItem->m_Instance.nCount;
-                        joinItem->m_bIsNeedUpdateToDB = true;
-                        newItem->SetOwnerInfo(0, 0, 0);
-                        newItem->DBUpdate();
-                        Item::PendFreeItem(newItem);
-                        joinItem->DBUpdate();
-                        nItemIndex--;
-                        Messages::SendItemMessage(this, joinItem);
-                    }
-                    else
-                    {
-                        if (newItem->m_pItemBase->group == GROUP_SUMMONCARD)
-                        {
-                            for (int i = 0; i < static_cast<int>(vList.size()); i++)
-                            {
-                                Summon *sm = vList[i];
-                                if (sm->GetUInt32Value(UNIT_FIELD_UID) == (uint)newItem->m_Instance.Socket[0])
-                                {
-                                    vList.erase(vList.begin() + i);
-                                    sm->m_pItem = newItem;
-                                    newItem->m_pSummon = sm;
-                                    newItem->m_Instance.Socket[0] = sm->GetUInt32Value(UNIT_FIELD_UID);
-                                    newItem->m_bIsNeedUpdateToDB = true;
-                                    sm->SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
-                                    break;
-                                }
-                            }
-                        }
-                        // Do pet here
-                        if (newItem->m_Instance.nIdx == 0)
-                        {
-                            newItem->m_Instance.nIdx = ++m_Storage.m_nIndex;
-                            newItem->m_bIsNeedUpdateToDB = true;
-                        }
-                        m_Storage.Push(newItem, newItem->m_Instance.nCount, false);
-                    }
-                }
-                else if (m_bIsStorageLoaded)
+            Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
+            if (newItem == nullptr)
+            {
+                NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                continue;
+            }
+            newItem->m_Instance.Flag &= ITEM_FLAG_TAMING;
+            newItem->SetCurrentEndurance(endurance);
+            newItem->SetOwnerInfo(GetHandle(), 0, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
+            if (code == 0)
+            {
+                if (bReload)
                 {
                     bIsGoldExist = true;
-                    Item::PendFreeItem(newItem);
+                    newItem->DeleteThis();
+                    continue;
                 }
-                else
+
+                if (ChangeStorageGold(GetStorageGold() + cnt) == TS_RESULT_SUCCESS)
                 {
                     if (bIsGoldExist)
                     {
@@ -382,40 +355,89 @@ void Player::DB_ReadStorage()
                     }
                     else
                     {
-                        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64_t)newItem->m_Instance.UID);
                         bIsGoldExist = true;
+                        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, newItem->GetItemUID());
                     }
-                    if (ChangeStorageGold(cnt) != TS_RESULT_SUCCESS)
-                    {
-                        NG_LOG_ERROR("entites.player", "DB_ReadStorage: Setting storage gold failed! [%d:%s]", GetInt32Value(PLAYER_FIELD_ACCOUNT_ID), GetName());
-                    }
-                    Item::PendFreeItem(newItem);
                 }
+                else
+                {
+                    NG_LOG_ERROR("entites.player", "DB_ReadStorageList failed!!!");
+                }
+                newItem->DeleteThis();
+                continue;
+            }
+
+            newItem->SetIdx(++nItemIndex);
+            if (newItem->GetIdx() == idx)
+                newItem->m_bIsNeedUpdateToDB = false;
+
+            auto pJoinableItem = m_Storage.FindByCode(newItem->GetItemCode());
+            if (newItem->IsJoinable() && pJoinableItem != nullptr)
+            {
+                pJoinableItem->SetCount(pJoinableItem->GetCount() + newItem->GetCount());
+                newItem->SetOwnerInfo(0, 0, 0);
+                newItem->DBUpdate();
+                newItem->DeleteThis();
+
+                pJoinableItem->DBUpdate();
+
+                --nItemIndex;
+                Messages::SendItemMessage(this, pJoinableItem);
             }
             else
             {
-                nItemIndex++;
-                curItem->m_Instance.nIdx = nItemIndex;
-                curItem->m_bIsNeedUpdateToDB = true;
-                if (curItem->m_Instance.nIdx == idx)
-                    curItem->m_bIsNeedUpdateToDB = false;
-                Messages::SendItemMessage(this, curItem);
+                if (newItem->IsSummonCard())
+                {
+                    for (auto it = m_vSummonList.begin(); it != m_vSummonList.end(); ++it)
+                    {
+                        if ((*it)->GetSummonSID() == newItem->GetSummonSID())
+                        {
+                            auto pSummon = (*it);
+                            m_vSummonList.erase(it);
+
+                            pSummon->m_pItem = newItem;
+                            newItem->SetSummonSID(pSummon->GetSummonSID());
+                            // ReadCreatureSkillList
+
+                            pSummon->SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
+                            break;
+                        }
+                    }
+                }
+
+                if (newItem->GetIdx() == 0)
+                    newItem->SetIdx(m_Storage.IssueNewIndex());
+
+                m_Storage.Push(newItem, newItem->GetCount(), false);
+            }
+
+            Item *joinItem = m_Storage.FindByCode(newItem->m_Instance.Code);
+            if (newItem->IsJoinable() && joinItem != nullptr)
+            {
+                joinItem->m_Instance.nCount += newItem->m_Instance.nCount;
+                joinItem->m_bIsNeedUpdateToDB = true;
+                newItem->SetOwnerInfo(0, 0, 0);
+                newItem->DBUpdate();
+                Item::PendFreeItem(newItem);
+                joinItem->DBUpdate();
+                nItemIndex--;
+                Messages::SendItemMessage(this, joinItem);
             }
         } while (result->NextRow());
-
-        if (!bIsGoldExist)
-        {
-            DB_UpdateStorageGold();
-        }
     }
-    else
+
+    if (!bIsGoldExist)
     {
+        auto storageItem = Item::AllocItem(sWorld.GetItemIndex(), 0, 0, GenerateCode::BY_BASIC);
+        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, storageItem->GetItemUID());
+        storageItem->SetOwnerInfo(GetHandle(), 0, GetAccountID());
+        storageItem->DBInsert();
+        storageItem->DeleteThis();
         DB_UpdateStorageGold();
     }
 
     m_bIsStorageLoaded = true;
     OpenStorage();
-    m_bIsStorageRequested = false;
 }
 
 bool Player::ReadItemList(int sid)
@@ -3244,13 +3266,15 @@ void Player::OpenStorage()
     if (IsUsingSkill())
         return;
 
+    NG_LOG_INFO("server.worldserver", "Loaded: %u, Requested %u", m_bIsStorageLoaded, m_bIsStorageRequested);
+
     if (!m_bIsStorageRequested)
     {
         bool bReload = m_bIsStorageLoaded;
         m_bIsStorageRequested = true;
         m_bIsStorageLoaded = false;
 
-        DB_ReadStorage();
+        DB_ReadStorage(bReload);
         return;
     }
 
@@ -3258,7 +3282,7 @@ void Player::OpenStorage()
     {
         Messages::SendItemList(this, true);
         openStorage();
-        Messages::SendPropertyMessage(this, this, "storage_gold", GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD));
+        Messages::SendPropertyMessage(this, this, "storage_gold", GetStorageGold());
     }
 }
 
@@ -3279,16 +3303,9 @@ ushort Player::ChangeStorageGold(int64_t gold)
 
 void Player::DB_UpdateStorageGold()
 {
-    auto sid = (int64_t)GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID);
-    if (sid == 0)
-    {
-        sid = sWorld.GetItemIndex();
-        SetUInt64Value(PLAYER_FIELD_STORAGE_GOLD_SID, (uint64_t)sid);
-    }
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STORAGE_GOLD);
-    stmt->setInt64(0, sid);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_STORAGE_GOLD);
+    stmt->setInt64(0, GetStorageGold());
     stmt->setInt32(1, GetInt32Value(PLAYER_FIELD_ACCOUNT_ID));
-    stmt->setInt64(2, GetStorageGold());
     CharacterDatabase.Execute(stmt);
 }
 
