@@ -2975,12 +2975,10 @@ void Player::applyPassiveSkillEffect(Skill *pSkill)
     case EF_INCREASE_SUMMON_HP_MP_SP:
         m_vApplySummonPassive.emplace_back(pSkill);
         break;
-        ;
 
     case EF_AMPLIFY_SUMMON_HP_MP_SP:
         m_vApmlifySummonPassive.emplace_back(pSkill);
         break;
-        ;
 
     /*case SKILL_EFFECT_TYPE::EF_CREATURE_ASSIGNMENT_INCREASE:
         m_fDistEXPMod += (skill->m_SkillBase->var[0] + (skill->m_SkillBase->var[1] * (skill->m_nSkillLevel + skill->m_nSkillLevelAdd)));
@@ -2990,8 +2988,11 @@ void Player::applyPassiveSkillEffect(Skill *pSkill)
         m_fDeactiveSummonExpAmp += (pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3));
         break;
     case EF_MISC:
-        // @Todo: Toggle
-        break;
+        if (pSkill->GetSkillId() == SKILL_TECHNICAL_CREATURE_CONTROL)
+        {
+            break;
+        }
+        [[fallthrough]];
     default:
         Unit::applyPassiveSkillEffect(pSkill);
         break;

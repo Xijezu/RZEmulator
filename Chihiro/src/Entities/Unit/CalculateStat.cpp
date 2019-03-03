@@ -2802,7 +2802,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         break;
         case SKILL_ARMOR_MASTERY:
         case SKILL_GAIA_ARMOR_MASTERY:
-            if (GetWornItem(WEAR_ARMOR))
+            if (GetWornItem(WEAR_ARMOR) != nullptr)
             {
                 m_Attribute.nDefence += pSkill->GetVar(0) * pSkill->GetCurrentSkillLevel();
             }

@@ -4708,7 +4708,6 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget)
         return;
 
     int nEffectType = GetSkillBase()->GetSkillEffectType();
-
     int elemental_type = GetSkillBase()->GetElementalType();
 
     int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
