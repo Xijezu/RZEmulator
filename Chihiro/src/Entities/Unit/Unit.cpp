@@ -954,6 +954,8 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
         }
     }
 
+    ProcessAdditionalDamage(damage_info, DT_ADDITIONAL_LEFT_HAND_DAMAGE, pFrom->m_vNormalAdditionalDamage, pFrom, nDamage, elemental_type);
+
     damage_info.target_hp = GetHealth();
     return damage_info;
 }
@@ -1021,6 +1023,9 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
             }
         }
     }
+
+    ProcessAdditionalDamage(damage_info, DT_ADDITIONAL_DAMAGE,
+                            bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage, pFrom, nDamage, elemental_type);
 
     damage_info.target_hp = GetHealth();
     return damage_info;
@@ -2287,6 +2292,7 @@ DamageInfo Unit::DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType 
     DamageInfo result{};
     auto d = DealMagicalDamage(pFrom, (float)nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     result.SetDamage(d);
+    ProcessAdditionalDamage(result, DT_ADDITIONAL_MAGICAL_DAMAGE, pFrom->m_vMagicalSkillAdditionalDamage, pFrom, nDamage, elemental_type);
     result.target_hp = GetHealth();
     return result;
 }
@@ -2296,8 +2302,34 @@ DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType
     DamageInfo result{};
     auto d = DealPhysicalDamage(pFrom, (float)nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, nullptr, nullptr);
     result.SetDamage(d);
+
+    ProcessAdditionalDamage(result, DT_ADDITIONAL_DAMAGE, pFrom->m_vPhysicalSkillAdditionalDamage, pFrom, nDamage, elemental_type);
+
     result.target_hp = GetHealth();
     return result;
+}
+
+void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type)
+{
+    if (damage_info.bMiss || damage_info.bPerfectBlock)
+        return;
+
+    for (auto &additional : vAdditionalDamage)
+    {
+        if ((additional.require_type == 99 || additional.require_type == elemental_type) && additional.ratio > urand(1, 100))
+        {
+            int damage{0};
+            if (additional.nDamage != 0)
+                damage = additional.nDamage;
+            else
+                damage = additional.fDamage * damage_info.nDamage;
+
+            damage = DealDamage(pFrom, damage, additional.type, additionalDamage).nDamage;
+            if (additional.type >= 0 && additional.type < ElementalType::TYPE_COUNT)
+                damage_info.elemental_damage[additional.type] += damage;
+            damage_info.nDamage += nDamage;
+        }
+    }
 }
 
 uint Unit::GetRemainCoolTime(int skill_id) const
