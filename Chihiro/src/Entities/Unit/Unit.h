@@ -211,7 +211,7 @@ class Unit : public WorldObject
     Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0);
     DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0);
-    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int accuracy_bonus, int critical_bonus, int nFlag, StateMod *damage_penalty, StateMod *damage_advantage);
+    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
     Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
     Damage DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
     Damage DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
@@ -223,6 +223,7 @@ class Unit : public WorldObject
 
     DamageInfo DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
     DamageInfo DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
+    void ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE);
     int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead = true);
 
     bool IsPhysicalImmune() { return (GetState(SC_SEAL) != nullptr); }
