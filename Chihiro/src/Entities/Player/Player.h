@@ -378,6 +378,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void applyPassiveSkillEffect(Skill *skill) override;
     void applyState(State &state) override;
     void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
+    int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
 
     void onStartQuest(Quest *pQuest);
     void updateQuestStatus(Quest *pQuest);

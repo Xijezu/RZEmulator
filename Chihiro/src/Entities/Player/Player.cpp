@@ -3082,6 +3082,7 @@ void Player::applyState(State &state)
             // Cracker here
 
         case SC_PASS_DAMAGE:
+            SetFloatValue(PLAYER_FIELD_PASS_DAMAGE_RATIO, state.GetValue(0) + state.GetValue(1) * state.GetLevel());
             break;
 
         case SC_FUSION_WITH_SUMMON:
@@ -4041,4 +4042,26 @@ bool Player::IsTakeable(uint32_t nItemHandle, int64_t cnt)
             return false;
     }
     return true;
+}
+
+int32_t Player::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical)
+{
+    // @Todo: Remove Riding & Sitdown
+
+    auto pMainSummon = GetMainSummon();
+    if (GetFloatValue(PLAYER_FIELD_PASS_DAMAGE_RATIO) != 0 && pMainSummon != nullptr)
+    {
+        auto nPassDamage = std::min(static_cast<int>(nDamage * GetFloatValue(PLAYER_FIELD_PASS_DAMAGE_RATIO)), pMainSummon->GetHealth());
+        if (nPassDamage != 0)
+        {
+            if (sRegion.IsVisibleRegion(GetRX(), GetRY(), pMainSummon->GetRX(), pMainSummon->GetRY()) != 0)
+            {
+                pMainSummon->damage(pFrom, nPassDamage);
+                nDamage -= nPassDamage;
+
+                Messages::BroadcastHPMPMessage(pMainSummon, -nPassDamage, 0, false);
+            }
+        }
+    }
+    return Unit::onDamage(pFrom, elementalType, damageType, nDamage, bCritical);
 }

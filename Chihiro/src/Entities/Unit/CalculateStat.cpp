@@ -48,8 +48,8 @@ void Unit::CalculateStat()
     SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_REST, 1.0f);
     SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_REST, 2.0f);
 
-    SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, 1.0f);
-    SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, 1.0f);
+    SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, 0.0f);
+    SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, 0.0f);
 
     SetInt32Value(UNIT_FIELD_ADDITIONAL_HEAL, 0);
     SetInt32Value(UNIT_FIELD_ADDITIONAL_MP_HEAL, 0);
