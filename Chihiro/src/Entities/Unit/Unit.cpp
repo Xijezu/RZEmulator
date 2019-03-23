@@ -596,7 +596,6 @@ void Unit::onAttackAndSkillProcess()
     if (m_castingSkill != nullptr)
     {
         m_castingSkill->ProcSkill();
-        NG_LOG_INFO("server.worldserver", "ProcSkill");
     }
     else
     {
@@ -3339,7 +3338,7 @@ void Unit::removeStateByDead()
 
     if (IsPlayer())
     {
-        for (auto pState : removedStates)
+        for (auto &pState : removedStates)
         {
             if (!pState->IsHarmful())
             {
@@ -3484,4 +3483,45 @@ void Unit::RemoveAllHate()
     }
 
     m_vEnemyList.clear();
+}
+
+bool Unit::ResurrectByState()
+{
+    if (!IsDead() || (!IsSummon() && !IsPlayer()))
+        return false;
+
+    State *pResurrectState{nullptr};
+    for (auto &state : m_vStateList)
+    {
+        if (state->GetEffectType() == SEF_RESURRECTION)
+        {
+            if (pResurrectState == nullptr || pResurrectState->GetLevel() < state->GetLevel())
+                pResurrectState = state;
+        }
+    }
+
+    if (pResurrectState == nullptr)
+        return false;
+
+    auto nIncHP = (pResurrectState->GetValue(0) + pResurrectState->GetValue(1) * pResurrectState->GetLevel()) * GetMaxHealth();
+    auto nIncMP = (pResurrectState->GetValue(2) + pResurrectState->GetValue(3) * pResurrectState->GetLevel()) * GetMaxMana();
+    // @todo: Recovery XP
+
+    AddHealth(nIncHP);
+    AddMana(nIncMP);
+    ClearRemovedStateByDeath();
+
+    if (IsPlayer())
+    {
+        auto pPlayer = this->As<Player>();
+        pPlayer->Save(true);
+
+        if (pPlayer->HasFlag(UNIT_FIELD_STATUS, STATUS_DEAD))
+            pPlayer->RemoveFlag64(UNIT_FIELD_STATUS, STATUS_DEAD);
+    }
+
+    RemoveState(pResurrectState->GetCode(), GameRule::MAX_STATE_LEVEL);
+
+    Messages::BroadcastHPMPMessage(this, nIncHP, nIncMP);
+    return true;
 }
