@@ -150,7 +150,7 @@ bool SkillBase::IsPassive() const
 
 bool SkillBase::IsPhysicalSkill() const
 {
-    return is_physical_act != 0;
+    return is_physical_act == 0;
 }
 
 bool SkillBase::IsMagicalSkill() const
