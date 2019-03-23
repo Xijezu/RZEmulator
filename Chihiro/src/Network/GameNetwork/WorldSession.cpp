@@ -1564,31 +1564,29 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (m_pPlayer->IsAlive())
+    if (pRecvPct->use_state)
+    {
+        Unit *pTarget = m_pPlayer;
+        if (pRecvPct->handle != m_pPlayer->GetHandle())
+            pTarget = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
+        if (pTarget == nullptr)
+            return;
+
+        auto nResult = TS_RESULT_SUCCESS;
+        if (!pTarget->IsInWorld() || !pTarget->IsDead())
+            nResult = TS_RESULT_NOT_ACTABLE;
+        if (!pTarget->ResurrectByState())
+            nResult = TS_RESULT_NOT_ACTABLE;
+
+        Messages::SendResult(this, NGemity::Packets::TS_CS_RESURRECTION, nResult, 0);
         return;
-
-    switch (pRecvPct->type)
+    }
+    else if (pRecvPct->use_potion)
     {
-    case TS_RESURRECTION_TYPE::RT_UseState:
-    {
-        break;
     }
 
-    case TS_RESURRECTION_TYPE::RT_UsePotion:
-    {
-        break;
-    }
-
-    case TS_RESURRECTION_TYPE::RT_Compete:
-    {
-        break;
-    }
-
-    case TS_RESURRECTION_TYPE::RT_Deathmatch:
-    {
-        break;
-    }
-    }
+    if (!m_pPlayer->IsDead())
+        return;
 
     enum _REVIVE_TYPE
     {

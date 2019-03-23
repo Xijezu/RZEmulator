@@ -65,7 +65,7 @@ public:
   static void SendMoveMessage(Player *, Unit *);
   static void SendTimeSynch(Player *);
   static void SendWearInfo(Player *, Unit *);
-  static void BroadcastHPMPMessage(Unit *, int, float, bool);
+  static void BroadcastHPMPMessage(Unit *, int, float, bool need_to_display = false);
   static void BroadcastLevelMsg(Unit *);
   static void BroadcastStatusMessage(WorldObject *obj);
   static void BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel);

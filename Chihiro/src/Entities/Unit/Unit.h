@@ -230,6 +230,7 @@ class Unit : public WorldObject
     bool IsMagicalImmune() { return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr); }
 
     float GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad);
+    bool ResurrectByState();
 
     int Heal(int hp);
     int MPHeal(int mp);
