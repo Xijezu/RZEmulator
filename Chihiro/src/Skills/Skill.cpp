@@ -614,10 +614,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     auto nOriginalCastingDelay = delay;
     if (delay == -1)
     {
-        /// @Todo: based on SkillUID
         nOriginalCastingDelay = delay = m_SkillBase->GetCastDelay(GetRequestedSkillLevel(), GetSkillEnhance());
-        delay /= (m_pOwner->GetCastingSpeed() / 100.0f);
-        delay *= m_pOwner->GetCastingMod(static_cast<ElementalType>(GetSkillBase()->GetElementalType()), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), static_cast<uint32_t>(nOriginalCastingDelay));
+        if (m_nSkillUID >= 0)
+        {
+            delay /= (std::max(m_pOwner->GetCastingSpeed(), 1) / 100.0f);
+            delay *= m_pOwner->GetCastingMod(static_cast<ElementalType>(GetSkillBase()->GetElementalType()), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), static_cast<uint32_t>(nOriginalCastingDelay));
+        }
     }
 
     if (GetSkillBase()->GetSkillEffectType() != EF_SUMMON)

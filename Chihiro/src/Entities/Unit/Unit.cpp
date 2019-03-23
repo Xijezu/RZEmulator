@@ -3593,3 +3593,35 @@ void Unit::removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, 
         RemoveState(*it, pState->GetLevel());
     }
 }
+
+float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) const
+{
+    if (bPhysical)
+    {
+        if (bBad)
+        {
+            if (m_BadPhysicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
+                return m_BadPhysicalElementalSkillStateMod[type].fCastingSpeed;
+            else
+                return 1.0f;
+        }
+
+        if (m_GoodPhysicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
+            return m_GoodPhysicalElementalSkillStateMod[type].fCastingSpeed;
+        else
+            return 1.0f;
+    }
+
+    if (bBad)
+    {
+        if (m_BadMagicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
+            return m_BadMagicalElementalSkillStateMod[type].fCastingSpeed;
+        else
+            return 1.0f;
+    }
+
+    if (m_GoodMagicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
+        return m_GoodMagicalElementalSkillStateMod[type].fCastingSpeed;
+
+    return 1.0f;
+}

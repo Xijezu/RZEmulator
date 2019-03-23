@@ -434,11 +434,7 @@ class Unit : public WorldObject
         return GetUInt32Value(UNIT_FIELD_JOBPOINT);
     }
 
-    float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime)
-    {
-        return 1.0f;
-    }
-
+    float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) const;
     float GetItemChance() const;
 
     int64_t GetEXP() const
