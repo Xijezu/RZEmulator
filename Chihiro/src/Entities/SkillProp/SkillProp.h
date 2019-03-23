@@ -17,59 +17,60 @@
 */
 
 #include "Common.h"
+#include "Skill.h"
 #include "Unit.h"
 
 class SkillProp : public WorldObject
 {
-    public:
-        static SkillProp *Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
-        static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
-        SkillProp() = delete;
-        ~SkillProp() override = default;
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        SkillProp(const SkillProp &) = delete;
-        SkillProp &operator=(const SkillProp &) = delete;
+  public:
+    static SkillProp *Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
+    static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
+    SkillProp() = delete;
+    ~SkillProp() override = default;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    SkillProp(const SkillProp &) = delete;
+    SkillProp &operator=(const SkillProp &) = delete;
 
-        void Update(uint diff) override;
-        bool IsSkillProp() const override;
-        void PendRemove();
+    void Update(uint diff) override;
+    bool IsSkillProp() const override;
+    void PendRemove();
 
-    protected:
-        void INIT_AREA_EFFECT_MAGIC_DAMAGE();
-        void INIT_AREA_EFFECT_HEAL();
-        void INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP();
+  protected:
+    void INIT_AREA_EFFECT_MAGIC_DAMAGE();
+    void INIT_AREA_EFFECT_HEAL();
+    void INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP();
 
-        void FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster);
-        void FIRE_AREA_EFFECT_HEAL(Unit *pCaster);
-        void FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster);
+    void FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster);
+    void FIRE_AREA_EFFECT_HEAL(Unit *pCaster);
+    void FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster);
 
-        void INIT_SKILL_PROP_PARAMETER(uint32_t nDuration, uint32_t nInterval);
+    void INIT_SKILL_PROP_PARAMETER(uint32_t nDuration, uint32_t nInterval);
 
-        void FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster);
-        void FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster);
-        void FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster);
+    void FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster);
+    void FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster);
+    void FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster);
 
-        void FIRE_TRAP_DAMAGE(Unit *pCaster);
-        void FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster);
+    void FIRE_TRAP_DAMAGE(Unit *pCaster);
+    void FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster);
 
-    private:
-        explicit SkillProp(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
+  private:
+    explicit SkillProp(uint caster, Skill pSkill, int nMagicPoint, float fHateRatio);
 
-        struct _SKILL_PROP_INFO
-        {
-            uint m_nStartTime;
-            uint m_nEndTime;
-            uint m_nInterval;
-            uint m_nLastFireTime;
-        };
+    struct _SKILL_PROP_INFO
+    {
+        uint m_nStartTime;
+        uint m_nEndTime;
+        uint m_nInterval;
+        uint m_nLastFireTime;
+    };
 
-        uint32_t         m_hCaster;
-        _SKILL_PROP_INFO m_Info;
-        Skill            *m_pSkill;
-        bool             m_bFired;
-        bool             m_bProcessEnded;
-        bool             m_bIsRemovePended;
-        int              m_nOwnerMagicPoint;
-        float            m_fHateRatio;
+    uint32_t m_hCaster;
+    _SKILL_PROP_INFO m_Info;
+    Skill m_pSkill;
+    bool m_bFired;
+    bool m_bProcessEnded;
+    bool m_bIsRemovePended;
+    int m_nOwnerMagicPoint;
+    float m_fHateRatio;
 };

@@ -51,10 +51,6 @@ public:
   friend struct SkillTargetFunctor;
   Skill() = delete;
   Skill(Unit *pOwner, int64_t _uid, int _id);
-  // Deleting the copy & assignment operators
-  // Better safe than sorry
-  Skill(const Skill &) = delete;
-  Skill &operator=(const Skill &) = delete;
   // Replace statement - acts as insert and update
   static void DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id,
                              int skill_level, int cool_time);
