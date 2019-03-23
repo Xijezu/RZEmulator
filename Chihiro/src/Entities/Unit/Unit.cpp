@@ -2349,6 +2349,22 @@ uint Unit::GetTotalCoolTime(int skill_id) const
         return sk->GetSkillCoolTime();
 }
 
+float Unit::GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
+{
+    if (bPhysical)
+    {
+        if (bBad)
+            return m_BadPhysicalElementalSkillStateMod[type].fCooltime;
+
+        return m_GoodPhysicalElementalSkillStateMod[type].fCooltime;
+    }
+
+    if (bBad)
+        return m_BadMagicalElementalSkillStateMod[type].fCooltime;
+
+    return m_GoodMagicalElementalSkillStateMod[type].fCooltime;
+}
+
 void Unit::SetJP(int jp)
 {
     if (jp < 0)
