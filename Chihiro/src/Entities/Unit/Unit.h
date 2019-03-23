@@ -343,10 +343,7 @@ class Unit : public WorldObject
         return m_Attribute.nCoolTimeSpeed / 100.0f;
     }
 
-    float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
-    {
-        return 1.0f;
-    }
+    float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const;
 
     uint GetRemainCoolTime(int skill_id) const;
     uint GetTotalCoolTime(int skill_id) const;

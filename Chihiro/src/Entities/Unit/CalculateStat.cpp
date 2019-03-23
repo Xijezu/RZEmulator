@@ -1373,7 +1373,7 @@ void Unit::applyState(State &state)
             if (IsUsingDoubleWeapon())
                 m_AttributeAmplifier.fAttackSpeedLeft += fValue1;
 
-            if (!IsPlayer() /*|| !static_cast<StructPlayer *>(this)->HasRidingState()*/)
+            if (!IsPlayer() || !this->As<Player>()->HasRidingState())
             {
                 m_AttributeAmplifier.fMoveSpeed += fValue2;
             }
