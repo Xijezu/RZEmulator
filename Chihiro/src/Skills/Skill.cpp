@@ -1793,9 +1793,9 @@ uint Skill::GetSkillCoolTime() const
     return static_cast<uint32_t>(cts * ctm * ct);
 }
 
-void Skill::SetRemainCoolTime(uint time)
+void Skill::SetRemainCoolTime(uint nTime)
 {
-    m_nNextCoolTime = time + sWorld.GetArTime();
+    m_nNextCoolTime = nTime + sWorld.GetArTime();
 }
 
 uint Skill::GetSkillEnhance() const

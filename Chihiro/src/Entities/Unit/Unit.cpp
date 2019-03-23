@@ -53,7 +53,7 @@ Unit::~Unit()
 
     for (auto &skill : m_vSkillList)
     {
-        Skill::DB_InsertSkill(this, skill->m_nSkillUID, skill->m_nSkillID, skill->m_nSkillLevel, skill->m_nNextCoolTime < ct ? 0 : skill->m_nNextCoolTime - ct);
+        Skill::DB_InsertSkill(this, skill->m_nSkillUID, skill->m_nSkillID, skill->m_nSkillLevel, std::max(0, static_cast<int32_t>(skill->m_nNextCoolTime - ct)));
         delete skill;
         skill = nullptr;
     }
@@ -467,7 +467,7 @@ Skill *Unit::SetSkill(int skill_uid, int skill_id, int skill_level, int remain_c
 
     pSkill->m_nSkillLevel = skill_level;
     if (remain_cool_time != 0)
-        pSkill->SetRemainCoolTime(remain_cool_time + sWorld.GetArTime());
+        pSkill->SetRemainCoolTime(remain_cool_time);
 
     return pSkill;
 }
