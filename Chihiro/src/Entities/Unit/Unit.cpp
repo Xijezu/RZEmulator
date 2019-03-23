@@ -3089,37 +3089,18 @@ void Unit::RemoveEnergy(int nEnergy)
 
 int Unit::GetMagicPoint(ElementalType type, bool bPhysical, bool bBad)
 {
-    /*
-    float v4;
-    float v5;
-
     if (bPhysical)
     {
         if (bBad)
-        {
-            v4 = this.m_BadPhysicalElementalSkillStateMod[(int)type].fMagicalDamage;
-            v5 = this.m_Attribute.nMagicPoint;
-        }
-        else
-        {
-            v4 = this.m_GoodPhysicalElementalSkillStateMod[(int)type].fMagicalDamage;
-            v5 = this.m_Attribute.nMagicPoint;
-        }
+            return m_Attribute.nMagicPoint * m_BadPhysicalElementalSkillStateMod[type].fMagicalDamage;
+
+        return m_Attribute.nMagicPoint * m_GoodPhysicalElementalSkillStateMod[type].fMagicalDamage;
     }
-    else
-    {
-        if (bBad)
-        {
-            v4 = this.m_BadMagicalElementalSkillStateMod[(int)type].fMagicalDamage;
-            v5 = this.m_Attribute.nMagicPoint;
-        }
-        else
-        {
-            v4 = this.m_GoodMagicalElementalSkillStateMod[(int)type].fMagicalDamage;
-            v5 = this.m_Attribute.nMagicPoint;
-        }
-    }*/
-    return m_Attribute.nMagicPoint;
+
+    if (bBad)
+        return m_Attribute.nMagicPoint * m_BadMagicalElementalSkillStateMod[type].fMagicalDamage;
+
+    return m_Attribute.nMagicPoint * m_GoodMagicalElementalSkillStateMod[type].fMagicalDamage;
 }
 
 bool Unit::onProcAura(Skill *pSkill, int nRequestedLevel)
@@ -3133,21 +3114,21 @@ bool Unit::onProcAura(Skill *pSkill, int nRequestedLevel)
 float Unit::GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad)
 {
     float result = 0;
-    /*
-        if ( bPhysical )
-        {
-            if ( bBad )
-                result = this.m_BadPhysicalElementalSkillStateMod[(int)type].fHate;
-            else
-                result = this.m_GoodPhysicalElementalSkillStateMod[(int)type].fHate;
-        }
+
+    if (bPhysical)
+    {
+        if (bBad)
+            result = m_BadPhysicalElementalSkillStateMod[(int)type].fHate;
         else
-        {
-            if ( bBad )
-                result = this.m_BadMagicalElementalSkillStateMod[(int)type].fHate;
-            else
-                result = this.m_GoodMagicalElementalSkillStateMod[(int)type].fHate;
-        }*/
+            result = m_GoodPhysicalElementalSkillStateMod[(int)type].fHate;
+    }
+    else
+    {
+        if (bBad)
+            result = m_BadMagicalElementalSkillStateMod[(int)type].fHate;
+        else
+            result = m_GoodMagicalElementalSkillStateMod[(int)type].fHate;
+    }
     return result;
 }
 
@@ -3540,4 +3521,75 @@ bool Unit::ResurrectByState()
 
     Messages::BroadcastHPMPMessage(this, nIncHP, nIncMP);
     return true;
+}
+
+void Unit::PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay)
+{
+    if (bPhysical)
+    {
+        if (bHarmful)
+        {
+            m_BadPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_BadPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
+        }
+        else
+        {
+            m_GoodPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_GoodPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
+        }
+    }
+    else
+    {
+        if (bHarmful)
+        {
+            m_BadMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_BadMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
+        }
+        else
+        {
+            m_GoodMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_GoodMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
+        }
+    }
+}
+
+void Unit::RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay)
+{
+    if (bPhysical)
+    {
+        if (bHarmful)
+        {
+            removeExhaustiveSkillStateMod(m_BadPhysicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
+        }
+        else
+        {
+            removeExhaustiveSkillStateMod(m_GoodPhysicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
+        }
+    }
+    else
+    {
+        if (bHarmful)
+        {
+            removeExhaustiveSkillStateMod(m_BadMagicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
+        }
+        else
+        {
+            removeExhaustiveSkillStateMod(m_GoodMagicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
+        }
+    }
+
+    CalculateStat();
+}
+
+void Unit::removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, uint32_t nOriginalCastingDelay)
+{
+    std::vector<StateCode> vEraseList = skillStateMod.vExhaustiveStateCodeForDelete;
+
+    for (auto it = vEraseList.begin(); it != vEraseList.end(); ++it)
+    {
+        auto pState = GetState(*it);
+        if (pState == nullptr)
+            continue;
+
+        if (pState->GetEffectType() == SEF_ADD_PARAMETER_ON_SKILL && pState->GetValue(11) && pState->GetValue(11) * 100 < nOriginalCastingDelay)
+            continue;
+
+        RemoveState(*it, pState->GetLevel());
+    }
 }

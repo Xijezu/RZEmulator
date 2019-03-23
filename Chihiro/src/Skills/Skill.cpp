@@ -839,8 +839,7 @@ void Skill::ProcSkill()
     if (m_Status == SS_CAST)
     {
         int nElementalType = GetSkillBase()->GetElementalType();
-        /// @Todo:
-        /// m_pOwner->PrepareRemoveExhaustiveSkillStateMod( GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay() );
+        m_pOwner->PrepareRemoveExhaustiveSkillStateMod(GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay());
         m_Status = SS_FIRE;
     }
     /// Retail locks here, please don't mind this here
@@ -1718,8 +1717,7 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
     }
 
     int nElementalType = GetSkillBase()->GetElementalType();
-    /// @Todo
-    //m_pOwner->RemoveExhaustiveSkillStateMod( GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay() );
+    m_pOwner->RemoveExhaustiveSkillStateMod(GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay());
 }
 
 void Skill::DO_SUMMON()
@@ -2067,7 +2065,7 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     pTarget->AddHealth(nIncHP);
     pTarget->AddMana(nIncMP);
     /// @Todo
-    /// pTarget->ClearRemovedStateByDead();
+    pTarget->ClearRemovedStateByDeath();
 
     if (pTarget->IsPlayer())
     {

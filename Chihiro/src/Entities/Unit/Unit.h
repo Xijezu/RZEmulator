@@ -482,6 +482,8 @@ class Unit : public WorldObject
     ItemClass GetWeaponClass();
     bool IsWearShield();
     std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
+    void PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay);
+    void RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay);
 
     Skill *GetCastSkill() const { return m_castingSkill; }
 
@@ -513,6 +515,7 @@ class Unit : public WorldObject
 
   protected:
     uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
+    void removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, uint32_t nOriginalCastingTime);
 
     virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
     virtual void procStateDamage(uint t);
