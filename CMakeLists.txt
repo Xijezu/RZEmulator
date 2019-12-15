@@ -9,9 +9,9 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 
-conan_cmake_run(CONANFILE conanfile.txt
-                BASIC_SETUP 
-                BUILD missing)
+conan_add_remote(NAME bincrafters URL https://api.bintray.com/conan/bincrafters/public-conan) # Add bincrafters repo
+conan_add_remote(NAME conan URL https://api.bintray.com/conan/conan-community/conan) # add (default?) conan repo
+conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP BUILD missing) # run conan setup
 
 conan_basic_setup(TARGETS)
 ######## END CONAN ########
