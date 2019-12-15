@@ -25,7 +25,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-char *command_finder(const char *text, int state)
+char *command_finder(const char *text, int32_t state)
 {
     /*
     static size_t idx, len;
@@ -56,7 +56,7 @@ char *command_finder(const char *text, int state)
     return ((char *)NULL);
 }
 
-char **cli_completion(const char *text, int start, int /*end*/)
+char **cli_completion(const char *text, int32_t start, int32_t /*end*/)
 {
     char **matches = NULL;
 
@@ -67,7 +67,7 @@ char **cli_completion(const char *text, int start, int /*end*/)
     return matches;
 }
 
-int cli_hook_func()
+int32_t cli_hook_func()
 {
     if (World::IsStopped())
         rl_done = 1;
@@ -102,7 +102,7 @@ void commandFinished(void *, bool /*success*/)
 #if PLATFORM ==  PLATFORM_UNIX
 
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
-int kb_hit_return()
+int32_t kb_hit_return()
 {
     struct timeval tv;
     fd_set         fds;
@@ -126,7 +126,7 @@ void CliThread()
     rl_event_hook                    = cli_hook_func;
 #endif
 
-    // print this here the first time
+    // print32_t this here the first time
     // later it will be printed after command queue updates
     //printf("NG> ");
 
@@ -147,7 +147,7 @@ void CliThread()
 
         if (command_str != NULL)
         {
-            for (int x = 0; command_str[x]; ++x)
+            for (int32_t x = 0; command_str[x]; ++x)
                 if (command_str[x] == '\r' || command_str[x] == '\n')
                 {
                     command_str[x] = 0;

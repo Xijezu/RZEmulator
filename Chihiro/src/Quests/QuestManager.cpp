@@ -31,14 +31,14 @@ bool QuestManager::DoEachActiveQuest(const std::function<void(Quest *)> &fn)
     return true;
 }
 
-void QuestManager::SetMaxQuestID(int id)
+void QuestManager::SetMaxQuestID(int32_t id)
 {
     m_QuestIndex = id;
 }
 
 bool QuestManager::AddQuest(Quest *quest)
 {
-    int nQuestCode{0};
+    int32_t nQuestCode{0};
     if (quest->m_QuestBase == nullptr)
         return false;
 
@@ -69,15 +69,15 @@ bool QuestManager::AddQuest(Quest *quest)
     }
     if (Quest::IsRandomQuest(quest->m_Instance.Code))
     {
-        //                 v27 = (int)&v3->m_vRandomQuestInfo;
+        //                 v27 = (int32_t)&v3->m_vRandomQuestInfo;
         //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
         //                 &thisa,
-        //                 *(unsigned int **)(v27 + 4),
+        //                 *(unsigned int32_t **)(v27 + 4),
         //                 (std::_Container_base *)v27);
-        //                 v39 = (signed int)thisa.baseclass_0.baseclass_0._Mycont;
+        //                 v39 = (signed int32_t)thisa.baseclass_0.baseclass_0._Mycont;
         //                 v35 = (std::_Container_base *)v27;
-        //                 v33 = *(unsigned int **)(v27 + 8);
-        //                 nQuestCode = (unsigned int)thisa._Myptr;
+        //                 v33 = *(unsigned int32_t **)(v27 + 8);
+        //                 nQuestCode = (unsigned int32_t)thisa._Myptr;
         //                 while ( 1 )
         //                 {
         //                     std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
@@ -100,24 +100,24 @@ bool QuestManager::AddQuest(Quest *quest)
         //                             ++v28;
         //                         }
         //                         while ( v28 < 3 );
-        //                         v7 = (std::vector<unsigned int,std::allocator<unsigned int> > *)v38;
+        //                         v7 = (std::vector<unsigned int,std::allocator<unsigned int32_t> > *)v38;
         //                         break;
         //                     }
         //                     std::_Vector_const_iterator<LuaVM::LuaScriptInfo_std::allocator<LuaVM::LuaScriptInfo>>::operator__((std::_Vector_const_iterator<StructCreature::DamageReflectInfo,std::allocator<StructCreature::DamageReflectInfo> > *)&v39);
         //                     v35 = (std::_Container_base *)v27;
-        //                     v33 = *(unsigned int **)(v27 + 8);
+        //                     v33 = *(unsigned int32_t **)(v27 + 8);
         //                 }
     }
     m_vActiveQuest.emplace_back(quest);
     return true;
 }
 
-bool QuestManager::StartQuest(int code, int nStartID)
+bool QuestManager::StartQuest(int32_t code, int32_t nStartID)
 {
     if (code == 0 || FindQuest(code) != nullptr)
         return false;
-    int qid = allocQuestID();
-    int tmp[MAX_QUEST_STATUS]{0};
+    int32_t qid = allocQuestID();
+    int32_t tmp[MAX_QUEST_STATUS]{0};
     auto q = Quest::AllocQuest(m_pHandler, qid, code, tmp, QuestProgress::QUEST_IS_IN_PROGRESS, nStartID);
     if (Quest::IsRandomQuest(q->m_Instance.Code))
     {
@@ -213,7 +213,7 @@ bool QuestManager::StartQuest(int code, int nStartID)
         //                             (v3 - 52),
         //                             *(v3 - 80),
         //                             (v3 - 84));
-        //                         v28 = std::_Vector_iterator<std::pair<int_int>_std::allocator<std::pair<int_int>>>::operator_(
+        //                         v28 = std::_Vector_iterator<std::pair<int_int32_t>_std::allocator<std::pair<int_int32_t>>>::operator_(
         //                                   (v3 - 52),
         //                                   (v3 - 60),
         //                                   v23);
@@ -255,7 +255,7 @@ bool QuestManager::EndQuest(Quest *pQuest)
     return true;
 }
 
-Quest *QuestManager::FindQuest(int code)
+Quest *QuestManager::FindQuest(int32_t code)
 {
     for (auto &q : m_vActiveQuest)
     {
@@ -265,14 +265,14 @@ Quest *QuestManager::FindQuest(int code)
     return nullptr;
 }
 
-bool QuestManager::IsFinishedQuest(int code)
+bool QuestManager::IsFinishedQuest(int32_t code)
 {
     if (m_hsFinishedQuest.count(code) == 1)
         return m_hsFinishedQuest[code];
     return false;
 }
 
-bool QuestManager::IsTakeableQuestItem(int code)
+bool QuestManager::IsTakeableQuestItem(int32_t code)
 {
     for (auto &q : m_vActiveQuest)
     {
@@ -298,7 +298,7 @@ bool QuestManager::IsTakeableQuestItem(int code)
     return false;
 }
 
-void QuestManager::GetRelatedQuest(std::vector<Quest *> &vQuestList, int flag)
+void QuestManager::GetRelatedQuest(std::vector<Quest *> &vQuestList, int32_t flag)
 {
     for (auto &q : m_vActiveQuest)
     {
@@ -312,7 +312,7 @@ void QuestManager::GetRelatedQuest(std::vector<Quest *> &vQuestList, int flag)
     }
 }
 
-void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest *> &vQuest, int flag)
+void QuestManager::GetRelatedQuestByItem(int32_t code, std::vector<Quest *> &vQuest, int32_t flag)
 {
     for (auto &q : m_vActiveQuest)
     {
@@ -343,7 +343,7 @@ void QuestManager::GetRelatedQuestByItem(int code, std::vector<Quest *> &vQuest,
     }
 }
 
-void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest *> &vQuest, int flag)
+void QuestManager::GetRelatedQuestByMonster(int32_t nMonsterID, std::vector<Quest *> &vQuest, int32_t flag)
 {
     for (auto &q : m_vActiveQuest)
     {
@@ -371,10 +371,10 @@ void QuestManager::GetRelatedQuestByMonster(int nMonsterID, std::vector<Quest *>
     }
 }
 
-void QuestManager::UpdateQuestStatusByItemCount(int code, int64_t count)
+void QuestManager::UpdateQuestStatusByItemCount(int32_t code, int64_t count)
 {
     std::vector<Quest *> vQuestList{};
-    int i{0};
+    int32_t i{0};
 
     GetRelatedQuestByItem(code, vQuestList, 6168);
 
@@ -389,7 +389,7 @@ void QuestManager::UpdateQuestStatusByItemCount(int code, int64_t count)
                     auto qv = q->GetRandomValue(i);
                     if (count > qv)
                         count = (int64_t)qv;
-                    q->UpdateStatus(i, (int)count);
+                    q->UpdateStatus(i, (int32_t)count);
                     return;
                 }
             }
@@ -403,7 +403,7 @@ void QuestManager::UpdateQuestStatusByItemCount(int code, int64_t count)
                     auto qv = q->GetValue((2 * i) + 1);
                     if (count > qv)
                         count = (int64_t)qv;
-                    q->UpdateStatus(i, (int)count);
+                    q->UpdateStatus(i, (int32_t)count);
                     return;
                 }
             }
@@ -411,7 +411,7 @@ void QuestManager::UpdateQuestStatusByItemCount(int code, int64_t count)
     }
 }
 
-void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
+void QuestManager::UpdateQuestStatusByMonsterKill(int32_t nMonsterID)
 {
     std::vector<Quest *> vQuestList{};
     GetRelatedQuest(vQuestList, 1030);
@@ -453,9 +453,9 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int nMonsterID)
     }
 }
 
-void QuestManager::UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel)
+void QuestManager::UpdateQuestStatusBySkillLevel(int32_t nSkillID, int32_t nSkillLevel)
 {
-    int v{0};
+    int32_t v{0};
     for (auto &q : m_vActiveQuest)
     {
         if (q->m_Instance.nProgress != QuestProgress::QUEST_IS_FINISHABLE && q->m_QuestBase->nType == QuestType::QUEST_LEARN_SKILL)
@@ -485,9 +485,9 @@ void QuestManager::UpdateQuestStatusBySkillLevel(int nSkillID, int nSkillLevel)
     }
 }
 
-void QuestManager::UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel)
+void QuestManager::UpdateQuestStatusByJobLevel(int32_t nJobDepth, int32_t nJobLevel)
 {
-    int v{0};
+    int32_t v{0};
     std::vector<Quest *> vQuestList{};
     GetRelatedQuest(vQuestList, 256);
 
@@ -508,9 +508,9 @@ void QuestManager::UpdateQuestStatusByJobLevel(int nJobDepth, int nJobLevel)
     }
 }
 
-void QuestManager::UpdateQuestStatusByParameter(int parameter_id, int value)
+void QuestManager::UpdateQuestStatusByParameter(int32_t parameter_id, int32_t value)
 {
-    int v{0};
+    int32_t v{0};
     std::vector<Quest *> vQuestList{};
     GetRelatedQuest(vQuestList, 512);
 
@@ -537,7 +537,7 @@ void QuestManager::PopFromActiveQuest(Quest *pQuest)
     }
 }
 
-bool QuestManager::IsStartableQuest(int code)
+bool QuestManager::IsStartableQuest(int32_t code)
 {
     bool res{false};
     if (FindQuest(code) != nullptr)
@@ -556,7 +556,7 @@ bool QuestManager::IsStartableQuest(int code)
     }
     else
     {
-        for (int &id : qbs->nForeQuest)
+        for (int32_t &id : qbs->nForeQuest)
         {
             if (id != 0 && IsFinishedQuest(id))
             {
@@ -567,7 +567,7 @@ bool QuestManager::IsStartableQuest(int code)
     }
 }
 
-void QuestManager::SetDropFlagToRandomQuestInfo(int code)
+void QuestManager::SetDropFlagToRandomQuestInfo(int32_t code)
 {
     for (auto &rqi : m_vRandomQuestInfo)
     {
@@ -579,13 +579,13 @@ void QuestManager::SetDropFlagToRandomQuestInfo(int code)
     }
 }
 
-bool QuestManager::HasRandomQuestInfo(int code)
+bool QuestManager::HasRandomQuestInfo(int32_t code)
 {
     return false;
     //             char *v2; // esi@1
-    //             unsigned int *v4; // [sp-8h] [bp-1Ch]@1
+    //             unsigned int32_t *v4; // [sp-8h] [bp-1Ch]@1
     //             std::_Container_base *v5; // [sp-4h] [bp-18h]@1
-    //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > thisa; // [sp+4h] [bp-10h]@1
+    //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int32_t> > thisa; // [sp+4h] [bp-10h]@1
     //             std::_Vector_const_iterator<StructQuestManager::RandomQuestInfo,std::allocator<StructQuestManager::RandomQuestInfo> > it; // [sp+Ch] [bp-8h]@1
     //
     //             v2 = &this->m_vRandomQuestInfo;
@@ -614,7 +614,7 @@ bool QuestManager::HasRandomQuestInfo(int code)
     //             return 1;
 }
 
-int QuestManager::allocQuestID()
+int32_t QuestManager::allocQuestID()
 {
     return ++m_QuestIndex;
 }

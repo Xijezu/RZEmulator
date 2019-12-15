@@ -42,26 +42,26 @@ class Player;
 struct PartyMemberTag
 {
     bool bIsOnline;
-    int sid;
+    int32_t sid;
     std::string strName;
     Player *pPlayer;
-    int nLevel;
-    int nJobID;
+    int32_t nLevel;
+    int32_t nJobID;
 };
 
 struct PartyInfo
 {
-    uint nPartyPassword;
-    int nPartyID;
-    int nLeaderSID;
+    uint32_t nPartyPassword;
+    int32_t nPartyID;
+    int32_t nLeaderSID;
     ITEM_SHARE_MODE eShareMode;
     PARTY_TYPE ePartyType;
     std::string strPartyName;
     std::string strLeaderName;
-    int nLeaderJobID;
+    int32_t nLeaderJobID;
     std::vector<PartyMemberTag> vMemberNameList;
-    std::vector<uint> vOnlineList;
-    int nLastItemAcquirerIdx;
+    std::vector<uint32_t> vOnlineList;
+    int32_t nLastItemAcquirerIdx;
     // ATtackTeamInfo
 };
 
@@ -84,41 +84,41 @@ class GroupManager
     void InitGroupSystem();
 
     ///- Getters
-    int GetAttackTeamLeadPartyID(int nPartyID);
-    int GetAttackTeamGuildID(int nPartyID);
-    int GetMemberCount(int nPartyID);
-    int GetMinLevel(int nPartyID);
-    int GetMaxLevel(int nPartyID);
-    int GetShareMode(int nPartyID);
-    uint GetPassword(int nPartyID);
-    std::string GetPartyName(int nPartyID);
-    PARTY_TYPE GetPartyType(int nPartyID);
-    std::string GetLeaderName(int nPartyID);
+    int32_t GetAttackTeamLeadPartyID(int32_t nPartyID);
+    int32_t GetAttackTeamGuildID(int32_t nPartyID);
+    int32_t GetMemberCount(int32_t nPartyID);
+    int32_t GetMinLevel(int32_t nPartyID);
+    int32_t GetMaxLevel(int32_t nPartyID);
+    int32_t GetShareMode(int32_t nPartyID);
+    uint32_t GetPassword(int32_t nPartyID);
+    std::string GetPartyName(int32_t nPartyID);
+    PARTY_TYPE GetPartyType(int32_t nPartyID);
+    std::string GetLeaderName(int32_t nPartyID);
     void GetNearMember(Player *pPlayer, float distance, std::vector<Player *> &vList);
 
     ///- booleans
-    bool IsLeader(int nPartyID, const std::string &szPlayerName);
-    bool IsAttackTeamParty(int nPartyID);
+    bool IsLeader(int32_t nPartyID, const std::string &szPlayerName);
+    bool IsAttackTeamParty(int32_t nPartyID);
 
     ///- Functionality
-    bool JoinParty(int nPartyID, Player *pPlayer, uint nPass);
-    bool DestroyParty(int nPartyID);
-    bool LeaveParty(int nPartyID, const std::string &szName);
-    int CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType);
-    void DoEachMemberTag(int nPartyID, std::function<void(PartyMemberTag &)> fn);
-    int DoEachMemberTagNum(int nPartyID, std::function<bool(PartyMemberTag &)> fn);
+    bool JoinParty(int32_t nPartyID, Player *pPlayer, uint32_t nPass);
+    bool DestroyParty(int32_t nPartyID);
+    bool LeaveParty(int32_t nPartyID, const std::string &szName);
+    int32_t CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType);
+    void DoEachMemberTag(int32_t nPartyID, std::function<void(PartyMemberTag &)> fn);
+    int32_t DoEachMemberTagNum(int32_t nPartyID, std::function<bool(PartyMemberTag &)> fn);
 
     ///- Events
-    void OnChangeCharacterLevel(int nPartyID, const std::string &szName, int nLevel);
-    void OnChangeCharacterJob(int nPartyID, const std::string &szName, int nJobID);
-    bool onLogin(int nPartyID, Player *pPlayer);
-    bool onLogout(int nPartyID, Player *pPlayer);
+    void OnChangeCharacterLevel(int32_t nPartyID, const std::string &szName, int32_t nLevel);
+    void OnChangeCharacterJob(int32_t nPartyID, const std::string &szName, int32_t nJobID);
+    bool onLogin(int32_t nPartyID, Player *pPlayer);
+    bool onLogout(int32_t nPartyID, Player *pPlayer);
 
   protected:
     void AddGroupToDatabase(const PartyInfo &);
     void LoadPartyInfo(PartyInfo &info);
-    PartyInfo *getPartyInfo(int nPartyID);
-    PartyInfo *getPartyInfoNC(int nPartyID);
+    PartyInfo *getPartyInfo(int32_t nPartyID);
+    PartyInfo *getPartyInfoNC(int32_t nPartyID);
     GroupManager() = default;
 
   private:

@@ -48,7 +48,6 @@ set(LIBRARY_SRCS
         ${SRC_GRP_SERVER}
         ${SRC_GRP_THREAD}
         ${SRC_GRP_UTIL}
-        ${OPENSSL_INCLUDE_DIR}
 )
 
 set(SHARED_INCLUDE_DIR
@@ -77,15 +76,18 @@ set(SHARED_INCLUDE_DIR
 
 include_directories(
         ${SHARED_INCLUDE_DIR}
-        ${CMAKE_SOURCE_DIR}/dep/fmt
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}
         ${MYSQL_INCLUDE_DIR}
+        ${CONAN_INCLUDE_DIRS_BOOST}
+        ${CONAN_INCLUDE_DIRS_OPENSSL}
+        ${CONAN_INCLUDE_DIRS_FMT}
 )
+link_directories(${CONAN_LIB_DIRS_OPENSSL})
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 target_include_directories(${LIBRARY_NAME} SYSTEM PRIVATE $ENV{INCLUDE})
-target_link_libraries(${LIBRARY_NAME} ${MYSQL_LIB} fmt boost OpenSSL::Crypto OpenSSL::SSL)
+target_link_libraries(${LIBRARY_NAME} ${MYSQL_LIB} CONAN_PKG::fmt CONAN_PKG::boost CONAN_PKG::OpenSSL)
 if(WITH_PCH)
         add_cxx_pch(${LIBRARY_NAME} ${sharedPCH})
 endif()

@@ -45,7 +45,7 @@ public:
   void AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64_t nOneTimeKey);
   void ClientLogoutToAuth(const std::string &account);
 
-  int GetAccountId() const;
+  int32_t GetAccountId() const;
   std::string GetAccountName();
 
 private:
@@ -56,5 +56,5 @@ private:
   std::string m_szGameSSU;
   bool m_bGameIsAdultServer;
   std::string m_szGameIP;
-  int m_nGamePort;
+  int32_t m_nGamePort;
 };

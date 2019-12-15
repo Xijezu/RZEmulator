@@ -34,12 +34,12 @@ enum ACTIVATE_CHECK_TYPE : int
 
 struct DropItemInfo
 {
-    int code;                                        // 0x0
-    int ratio;                                       // 0x4
-    int min_count;                                   // 0x8
-    int max_count;                                   // 0xC
-    int min_level;                                   // 0x10
-    int max_level;                                   // 0x14
+    int32_t code;                                        // 0x0
+    int32_t ratio;                                       // 0x4
+    int32_t min_count;                                   // 0x8
+    int32_t max_count;                                   // 0xC
+    int32_t min_level;                                   // 0x10
+    int32_t max_level;                                   // 0x14
 };
 
 struct FieldPropRespawnInfo
@@ -64,7 +64,7 @@ struct FieldPropRespawnInfo
         bOnce       = _src.bOnce;
     }
 
-    int   nPropID;
+    int32_t   nPropID;
     float x;
     float y;
     uint8_t layer;
@@ -82,21 +82,21 @@ struct FieldPropRespawnInfo
 
 struct FieldPropTemplate
 {
-    uint         nPropID;
-    int          nPropTextID;
-    int          nType;
-    int          nLocalFlag;
-    uint         nCastingTime;
-    int          nUseCount;
-    uint         nRegenTime;
-    uint         nLifeTime;
-    int          nMinLevel;
-    int          nMaxLevel;
-    int          nLimit;
-    int          nLimitJobID;
-    int          nActivateID[2];
-    int          nActivateValue[2][2];
-    int          nActivateSkillID;
+    uint32_t         nPropID;
+    int32_t          nPropTextID;
+    int32_t          nType;
+    int32_t          nLocalFlag;
+    uint32_t         nCastingTime;
+    int32_t          nUseCount;
+    uint32_t         nRegenTime;
+    uint32_t         nLifeTime;
+    int32_t          nMinLevel;
+    int32_t          nMaxLevel;
+    int32_t          nLimit;
+    int32_t          nLimitJobID;
+    int32_t          nActivateID[2];
+    int32_t          nActivateValue[2][2];
+    int32_t          nActivateSkillID;
     DropItemInfo drop_info[2];
     std::string  strScript;
 };

@@ -17,7 +17,7 @@
 
 #include "QuadTreeMapInfo.h"
 
-X2D::QuadTreeMapInfo::Node::Node(X2D::Pointf p1, X2D::Pointf p2, ushort depth)
+X2D::QuadTreeMapInfo::Node::Node(X2D::Pointf p1, X2D::Pointf p2, uint16_t depth)
 {
     this->m_Area = RectangleF(p1, p2);
     m_unDepth = depth;
@@ -137,7 +137,7 @@ void X2D::QuadTreeMapInfo::Node::divide()
 
         float easx      = ((this->m_Area.m_BottomRight.x - this->m_Area.m_TopLeft.x) * 0.5f) + this->m_Area.m_TopLeft.x;
         float easy      = ((this->m_Area.m_BottomRight.y - this->m_Area.m_TopLeft.y) * 0.5f) + this->m_Area.m_TopLeft.y;
-        auto  new_depth = (ushort)(this->m_unDepth + 1);
+        auto  new_depth = (uint16_t)(this->m_unDepth + 1);
 
         p1 = Pointf(this->m_Area.m_TopLeft.x, this->m_Area.m_TopLeft.y);
         p2 = Pointf(this->m_Area.m_TopLeft.x + easx, this->m_Area.m_TopLeft.y + easy);

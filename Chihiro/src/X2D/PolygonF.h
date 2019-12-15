@@ -31,7 +31,7 @@ namespace X2D
             bool IsIn(X2D::Rectf t);
             void RemoveDuplicatedPoint();
             bool IsInclude(X2D::Pointf pt) override;
-            X2D::Linef GetSegment(uint idx);
+            X2D::Linef GetSegment(uint32_t idx);
             void Clear();
             bool IsCollision(X2D::Rectf rc);
         protected:
@@ -59,7 +59,7 @@ namespace X2D
             bool IsLooseInclude(Pointf pt);
             bool IsInclude(X2D::Pointf pt);
             bool IsIn(X2D::RectangleF t);
-            Linef GetSegment(uint idx);
+            Linef GetSegment(uint32_t idx);
 
             std::vector<Pointf> m_Points{ };
             RectangleF          m_Area{ };

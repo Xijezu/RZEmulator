@@ -49,7 +49,7 @@ class FieldProp : public WorldObject
         /// \param pPropInfo RespawnInfo
         /// \param lifeTime how long the prop is on the map
         /// \return Newly created Fieldprop on success, nullptr on failure
-        static FieldProp *Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint lifeTime);
+        static FieldProp *Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime);
         bool IsUsable(Player *) const;
         bool Cast();
         bool UseProp(Player *);
@@ -60,12 +60,12 @@ class FieldProp : public WorldObject
     private:
         FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo);
 
-        uint                   m_nRegenTime;
+        uint32_t                   m_nRegenTime;
         FieldPropDeleteHandler *m_pDeleteHandler;
         FieldPropTemplate      *m_pFieldPropBase;
         FieldPropRespawnInfo   m_PropInfo;
-        int                    m_nUseCount;
+        int32_t                    m_nUseCount;
         bool                   m_bIsCasting;
-        uint                   nLifeTime;
+        uint32_t                   nLifeTime;
 };
 

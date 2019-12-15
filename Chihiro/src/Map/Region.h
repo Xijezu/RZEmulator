@@ -36,9 +36,9 @@ class Region
         void AddObject(WorldObject *obj);
         void RemoveObject(WorldObject *obj);
         /* Deprecated*/
-        uint DoEachClient(WorldObjectFunctor &fn);
-        uint DoEachStaticObject(WorldObjectFunctor &fn);
-        uint DoEachMovableObject(WorldObjectFunctor &fn);
+        uint32_t DoEachClient(WorldObjectFunctor &fn);
+        uint32_t DoEachStaticObject(WorldObjectFunctor &fn);
+        uint32_t DoEachMovableObject(WorldObjectFunctor &fn);
 
         template<typename Visitor>
         void DoEachClient2(Visitor &&visitor)
@@ -76,7 +76,7 @@ class Region
         RegionType m_vClientObjects;
 
         NG_SHARED_MUTEX i_lock;
-        uint       x;
-        uint       y;
+        uint32_t       x;
+        uint32_t       y;
         uint8_t      layer;
 };

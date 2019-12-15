@@ -45,7 +45,7 @@ public:
   //void OnAccept() override;
   void OnClose() override;
   void KickPlayer();
-  bool Update(uint diff);
+  bool Update(uint32_t diff);
 
   ReadDataHandlerResult ProcessIncoming(XPacket *) override;
 
@@ -87,15 +87,15 @@ public:
   /* Trade related*/
   void onTrade(const TS_TRADE *); // Main packet
   // Those aren't actually packethandlers, but they get used by onTrade
-  void onRequestTrade(uint);
-  void onAcceptTrade(uint);
+  void onRequestTrade(uint32_t);
+  void onAcceptTrade(uint32_t);
   void onCancelTrade();
-  void onRejectTrade(uint);
-  void onAddItem(uint, const TS_TRADE *);
-  void onRemoveItem(uint, const TS_TRADE *);
-  void onAddGold(uint, const TS_TRADE *);
+  void onRejectTrade(uint32_t);
+  void onAddItem(uint32_t, const TS_TRADE *);
+  void onRemoveItem(uint32_t, const TS_TRADE *);
+  void onAddGold(uint32_t, const TS_TRADE *);
   void onFreezeTrade();
-  void onConfirmTrade(uint);
+  void onConfirmTrade(uint32_t);
 
   void onPutOnItem(const TS_CS_PUTON_ITEM *);
   void onPutOffItem(const TS_CS_PUTOFF_ITEM *);
@@ -123,7 +123,7 @@ public:
   void onGetSummonSetupInfo(const TS_CS_GET_SUMMON_SETUP_INFO *);
   void onStorage(const TS_CS_STORAGE *);
 
-  void _SendResultMsg(uint16_t, uint16_t, int);
+  void _SendResultMsg(uint16_t, uint16_t, int32_t);
   void _PrepareCharacterList(uint32_t, std::vector<LOBBY_CHARACTER_INFO> *);
 
 private:
@@ -135,5 +135,5 @@ private:
   std::string _accountName{};
   Player *m_pPlayer{nullptr};
   bool _isAuthed{false};
-  int m_nPermission;
+  int32_t m_nPermission;
 };

@@ -17,14 +17,14 @@
 */
 #include "Common.h"
 
-constexpr int MAX_VALUE_NUMBER       = 12;
-constexpr int MAX_OPTIONAL_REWARD    = 3;
-constexpr int MAX_FOREQUEST          = 3;
-constexpr int MAX_KEY_VALUE          = 3;
-constexpr int MAX_QUEST_STATUS       = 3;
-constexpr int MAX_RANDOM_QUEST_VALUE = 3;
-constexpr int QUEST_PARAMETER_CHAOS  = 99;
-constexpr int FAVOR_GROUP_ID_CONTACT = 999;
+constexpr int32_t MAX_VALUE_NUMBER       = 12;
+constexpr int32_t MAX_OPTIONAL_REWARD    = 3;
+constexpr int32_t MAX_FOREQUEST          = 3;
+constexpr int32_t MAX_KEY_VALUE          = 3;
+constexpr int32_t MAX_QUEST_STATUS       = 3;
+constexpr int32_t MAX_RANDOM_QUEST_VALUE = 3;
+constexpr int32_t QUEST_PARAMETER_CHAOS  = 99;
+constexpr int32_t FAVOR_GROUP_ID_CONTACT = 999;
 
 enum class QuestType : int
 {
@@ -53,49 +53,49 @@ enum class QuestProgress : int
 
 struct Reward
 {
-    int nItemCode;
-    int nLevel;
-    int nQuantity;
+    int32_t nItemCode;
+    int32_t nLevel;
+    int32_t nQuantity;
 };
 
 struct QuestBase
 {
-    int       nCode;
-    int       nQuestTextID;
-    int       nSummaryTextID;
-    int       nStatusTextID;
-    int       nLimitLevel;
-    int       nLimitJobLevel;
-    int       nLimitMaxLevel;
+    int32_t       nCode;
+    int32_t       nQuestTextID;
+    int32_t       nSummaryTextID;
+    int32_t       nStatusTextID;
+    int32_t       nLimitLevel;
+    int32_t       nLimitJobLevel;
+    int32_t       nLimitMaxLevel;
     uint8_t     nLimitIndication;
-    uint      LimitFlag;
-    int       nLimitJob;
-    int       nLimitFavor;
+    uint32_t      LimitFlag;
+    int32_t       nLimitJob;
+    int32_t       nLimitFavor;
     bool      bIsRepeatable;
-    int       nInvokeCondition;
-    int       nInvokeValue;
-    int       nTimeLimit;
+    int32_t       nInvokeCondition;
+    int32_t       nInvokeValue;
+    int32_t       nTimeLimit;
     QuestType nType;
-    int       nValue[MAX_VALUE_NUMBER];
-    int       nDropGroupID;
-    int       nQuestDifficulty;
-    int       nFavor;
+    int32_t       nValue[MAX_VALUE_NUMBER];
+    int32_t       nDropGroupID;
+    int32_t       nQuestDifficulty;
+    int32_t       nFavor;
     int64_t     nEXP;
-    int       nJP;
+    int32_t       nJP;
     int64_t     nGold;
     Reward    DefaultReward;
     Reward    OptionalReward[MAX_OPTIONAL_REWARD];
-    int       nForeQuest[MAX_FOREQUEST];
+    int32_t       nForeQuest[MAX_FOREQUEST];
     bool      bForceCheckType;
-    int       nIsMagicPointQuest;
-    int       nEndType;
+    int32_t       nIsMagicPointQuest;
+    int32_t       nEndType;
 };
 
 struct QuestBaseServer : public QuestBase
 {
-    int         nLimitFavorGroupID;
-    int         nFavorGroupID;
-    int         nHateGroupID;
+    int32_t         nLimitFavorGroupID;
+    int32_t         nFavorGroupID;
+    int32_t         nHateGroupID;
     std::string strAcceptScript;
     std::string strClearScript;
     std::string strScript;
@@ -103,34 +103,34 @@ struct QuestBaseServer : public QuestBase
 
 struct QuestLink
 {
-    int  nNPCID;
-    int  code;
+    int32_t  nNPCID;
+    int32_t  code;
     bool bLF_Start;
     bool bLF_Progress;
     bool bLF_End;
-    int  nStartTextID;
-    int  nInProgressTextID;
-    int  nEndTextID;
+    int32_t  nStartTextID;
+    int32_t  nInProgressTextID;
+    int32_t  nEndTextID;
 };
 
 class NPC;
 struct QuestInstance
 {
-    int           nID;
-    int           Code;
-    uint          nTime;
-    int           nStatus[MAX_QUEST_STATUS];
+    int32_t           nID;
+    int32_t           Code;
+    uint32_t          nTime;
+    int32_t           nStatus[MAX_QUEST_STATUS];
     QuestProgress nProgress;
-    int           nStartID;
-    int           nRandomKey[MAX_RANDOM_QUEST_VALUE];
-    int           nRandomValue[MAX_RANDOM_QUEST_VALUE];
+    int32_t           nStartID;
+    int32_t           nRandomKey[MAX_RANDOM_QUEST_VALUE];
+    int32_t           nRandomValue[MAX_RANDOM_QUEST_VALUE];
     NPC           *start_npc{nullptr};
 };
 
 struct RandomQuestInfo
 {
-    int  code;
-    int  key[MAX_RANDOM_QUEST_VALUE];
-    int  value[MAX_RANDOM_QUEST_VALUE];
+    int32_t  code;
+    int32_t  key[MAX_RANDOM_QUEST_VALUE];
+    int32_t  value[MAX_RANDOM_QUEST_VALUE];
     bool is_dropped;
 };

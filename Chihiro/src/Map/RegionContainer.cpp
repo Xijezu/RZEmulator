@@ -24,8 +24,8 @@ void RegionContainer::InitRegion(float map_width, float map_height)
 {
     m_MapWidth = map_width;
     m_MapHeight = map_height;
-    m_nRegionWidth = (uint)((map_width / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
-    m_nRegionHeight = (uint)((map_height / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
+    m_nRegionWidth = (uint32_t)((map_width / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
+    m_nRegionHeight = (uint32_t)((map_height / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) + 1.0f);
     m_nRegionBlockWidth = (m_nRegionWidth / REGION_BLOCK_COUNT) + 1;
     m_nRegionBlockHeight = (m_nRegionHeight / REGION_BLOCK_COUNT) + 1;
     initRegion();
@@ -35,22 +35,22 @@ void RegionContainer::initRegion()
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);
     {
-        uint count = m_nRegionBlockHeight * m_nRegionBlockWidth;
+        uint32_t count = m_nRegionBlockHeight * m_nRegionBlockWidth;
         m_RegionBlock = std::vector<RegionBlock *>(count, nullptr);
     }
 }
 
-bool RegionContainer::IsValidRegion(uint rx, uint ry, uint8_t /* layer*/)
+bool RegionContainer::IsValidRegion(uint32_t rx, uint32_t ry, uint8_t /* layer*/)
 {
     return rx < m_nRegionWidth && ry < m_nRegionHeight;
 }
 
 Region *RegionContainer::GetRegion(WorldObject *pObject)
 {
-    return GetRegion((uint)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
+    return GetRegion((uint32_t)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
 }
 
-Region *RegionContainer::GetRegion(uint rx, uint ry, uint8_t layer)
+Region *RegionContainer::GetRegion(uint32_t rx, uint32_t ry, uint8_t layer)
 {
     Region *result{nullptr};
     if (IsValidRegion(rx, ry, layer))
@@ -58,12 +58,12 @@ Region *RegionContainer::GetRegion(uint rx, uint ry, uint8_t layer)
     return result;
 }
 
-void RegionContainer::DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, RegionFunctor &fn)
+void RegionContainer::DoEachVisibleRegion(uint32_t rx, uint32_t ry, uint8_t layer, RegionFunctor &fn)
 {
-    uint right;
-    uint top;
-    uint bottom;
-    uint left;
+    uint32_t right;
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t left;
 
     left = rx - 3;
     if (rx < 3)
@@ -80,9 +80,9 @@ void RegionContainer::DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Regio
     bottom = ry + 3;
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
-    for (uint x = left; x <= right; ++x)
+    for (uint32_t x = left; x <= right; ++x)
     {
-        for (uint y = top; y < bottom; ++y)
+        for (uint32_t y = top; y < bottom; ++y)
         {
             if (IsVisibleRegion(rx, ry, x, y) != 0)
             {
@@ -94,12 +94,12 @@ void RegionContainer::DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Regio
     }
 }
 
-void RegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, RegionFunctor &fn)
+void RegionContainer::DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, RegionFunctor &fn)
 {
-    uint right;
-    uint top;
-    uint bottom;
-    uint left;
+    uint32_t right;
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t left;
 
     //             left = rx1;
     //             if(rx2 < rx1)
@@ -149,9 +149,9 @@ void RegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
 
-    for (uint x = left; x <= right; ++x)
+    for (uint32_t x = left; x <= right; ++x)
     {
-        for (uint y = top; y < bottom; ++y)
+        for (uint32_t y = top; y < bottom; ++y)
         {
             if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0)
             {
@@ -163,12 +163,12 @@ void RegionContainer::DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2
     }
 }
 
-void RegionContainer::DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, RegionFunctor &fn)
+void RegionContainer::DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, uint32_t pry, uint8_t layer, RegionFunctor &fn)
 {
-    uint right;
-    uint top;
-    uint bottom;
-    uint left;
+    uint32_t right;
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t left;
 
     left = rx - 3;
     if (rx < 3)
@@ -186,9 +186,9 @@ void RegionContainer::DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
 
-    for (uint x = left; x <= right; ++x)
+    for (uint32_t x = left; x <= right; ++x)
     {
-        for (uint y = top; y < bottom; ++y)
+        for (uint32_t y = top; y < bottom; ++y)
         {
             if (IsVisibleRegion(rx, ry, x, y) != 0)
             {
@@ -203,12 +203,12 @@ void RegionContainer::DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint
     }
 }
 
-uint RegionContainer::IsVisibleRegion(uint rx, uint ry, uint _rx, uint _ry)
+uint32_t RegionContainer::IsVisibleRegion(uint32_t rx, uint32_t ry, uint32_t _rx, uint32_t _ry)
 {
-    int result = 0;
+    int32_t result = 0;
 
-    int cx = abs((int)(_rx - rx));
-    int cy = abs((int)(_ry - ry));
+    int32_t cx = abs((int32_t)(_rx - rx));
+    int32_t cy = abs((int32_t)(_ry - ry));
     if (cx <= cy)
         result = cx + 3 * cy;
     else
@@ -216,16 +216,16 @@ uint RegionContainer::IsVisibleRegion(uint rx, uint ry, uint _rx, uint _ry)
     return (9 >= result) ? 1 : 0;
 }
 
-uint RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
+uint32_t RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
 {
     if (obj1 == nullptr || obj2 == nullptr)
         return 0;
 
-    return IsVisibleRegion((uint)(obj1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(obj1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                           (uint)(obj2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(obj2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
+    return IsVisibleRegion((uint32_t)(obj1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                           (uint32_t)(obj2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
 };
 
-RegionBlock *RegionContainer::getRegionBlockPtr(uint rcx, uint rcy)
+RegionBlock *RegionContainer::getRegionBlockPtr(uint32_t rcx, uint32_t rcy)
 {
     RegionBlock *res{nullptr};
     {
@@ -235,7 +235,7 @@ RegionBlock *RegionContainer::getRegionBlockPtr(uint rcx, uint rcy)
     return res;
 }
 
-RegionBlock *RegionContainer::getRegionBlock(uint rcx, uint rcy)
+RegionBlock *RegionContainer::getRegionBlock(uint32_t rcx, uint32_t rcy)
 {
     RegionBlock *res{nullptr};
     {
@@ -250,7 +250,7 @@ RegionBlock *RegionContainer::getRegionBlock(uint rcx, uint rcy)
     return res;
 }
 
-Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8_t layer)
+Region *RegionContainer::getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer)
 {
     RegionBlock *b = getRegionBlockPtr(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
     if (b != nullptr)
@@ -258,7 +258,7 @@ Region *RegionContainer::getRegionPtr(uint rx, uint ry, uint8_t layer)
     return nullptr;
 }
 
-Region *RegionContainer::getRegion(uint rx, uint ry, uint8_t layer)
+Region *RegionContainer::getRegion(uint32_t rx, uint32_t ry, uint8_t layer)
 {
     RegionBlock *b = getRegionBlock(rx / REGION_BLOCK_COUNT, ry / REGION_BLOCK_COUNT);
     if (b != nullptr)

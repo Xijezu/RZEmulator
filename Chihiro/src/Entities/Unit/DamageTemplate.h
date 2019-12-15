@@ -35,7 +35,7 @@ enum DamageFlag
 
 struct HateModifier
 {
-    HateModifier(int nHateModType, int nHarmfulType, float _fAmpValue, int _nIncValue)
+    HateModifier(int32_t nHateModType, int32_t nHarmfulType, float _fAmpValue, int32_t _nIncValue)
         : fAmpValue(_fAmpValue), nIncValue(_nIncValue)
     {
         bIsApplyToPhysicalSkill = false;
@@ -89,20 +89,20 @@ struct HateModifier
     bool bIsApplyToHelpful;
 
     float fAmpValue;
-    int nIncValue;
+    int32_t nIncValue;
 };
 
 struct Damage
 {
     // UserDefinedType:   _DAMAGE
     // Function       :     public void _DAMAGE()
-    int nDamage;
-    int nResistedDamage;
+    int32_t nDamage;
+    int32_t nResistedDamage;
     bool bCritical;
     bool bMiss;
     bool bBlock;
     bool bPerfectBlock;
-    int target_hp;
+    int32_t target_hp;
 };
 
 struct DamageInfo : public Damage
@@ -136,12 +136,12 @@ struct AttackInfo : public DamageInfo
         elemental_damage[6] = damage_info.elemental_damage[6];
     }
 
-    short mp_damage;
-    short attacker_damage;
-    short attacker_mp_damage;
-    ushort target_mp;
-    uint attacker_hp;
-    ushort attacker_mp;
+    int16_t mp_damage;
+    int16_t attacker_damage;
+    int16_t attacker_mp_damage;
+    uint16_t target_mp;
+    uint32_t attacker_hp;
+    uint16_t attacker_mp;
 };
 
 struct AdditionalDamageInfo
@@ -173,12 +173,12 @@ struct AdditionalDamageInfo
 
 struct AddHPMPOnCriticalInfo
 {
-    AddHPMPOnCriticalInfo(int _nAddHP, int _nAddMP, int _nActivationRate)
+    AddHPMPOnCriticalInfo(int32_t _nAddHP, int32_t _nAddMP, int32_t _nActivationRate)
         : nAddHP(_nAddHP), nAddMP(_nAddMP), nActivationRate(_nActivationRate) {}
 
-    int nAddHP;
-    int nAddMP;
-    int nActivationRate;
+    int32_t nAddHP;
+    int32_t nAddMP;
+    int32_t nActivationRate;
 };
 
 struct DamageReflectInfo
@@ -200,52 +200,52 @@ struct DamageReflectInfo
 
 struct StateReflectInfo
 {
-    StateReflectInfo(StateCode _nCode, int _nLevel, uint32_t _nDuration)
+    StateReflectInfo(StateCode _nCode, int32_t _nLevel, uint32_t _nDuration)
         : nCode(_nCode), nLevel(_nLevel), nDuration(_nDuration) {}
 
     StateCode nCode;
-    int nLevel;
+    int32_t nLevel;
     uint32_t nDuration;
 };
 
 struct _ADD_STATE_TAG
 {
-    _ADD_STATE_TAG(StateCode c, int lv, int p, uint32_t d, Target t, int cm, int min, int max, int tmin, int tmax) : code(c), level(lv), percentage(p), duration(d), target(t), cost_mp(cm), min_hp(min), max_hp(max), target_min_hp(tmin), target_max_hp(tmax) {}
+    _ADD_STATE_TAG(StateCode c, int32_t lv, int32_t p, uint32_t d, Target t, int32_t cm, int32_t min, int32_t max, int32_t tmin, int32_t tmax) : code(c), level(lv), percentage(p), duration(d), target(t), cost_mp(cm), min_hp(min), max_hp(max), target_min_hp(tmin), target_max_hp(tmax) {}
     StateCode code;
-    int level;
-    int percentage;
+    int32_t level;
+    int32_t percentage;
     uint32_t duration;
     Target target;
-    int cost_mp;
-    int min_hp;
-    int max_hp;
-    int target_min_hp;
-    int target_max_hp;
+    int32_t cost_mp;
+    int32_t min_hp;
+    int32_t max_hp;
+    int32_t target_min_hp;
+    int32_t target_max_hp;
 };
 
 struct _HEAL_ON_ATTACK_TAG
 {
-    _HEAL_ON_ATTACK_TAG(int _ratio, int _hp_inc, int _mp_inc) : ratio(_ratio), hp_inc(_hp_inc), mp_inc(_mp_inc) {}
+    _HEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_inc, int32_t _mp_inc) : ratio(_ratio), hp_inc(_hp_inc), mp_inc(_mp_inc) {}
 
-    int ratio;
-    int hp_inc;
-    int mp_inc;
+    int32_t ratio;
+    int32_t hp_inc;
+    int32_t mp_inc;
 };
 
 struct _DAMAGE_ABSORB_TAG
 {
-    _DAMAGE_ABSORB_TAG(int _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio) : ratio(_ratio), hp_absorb_ratio(_hp_absorb_ratio), mp_absorb_ratio(_mp_absorb_ratio) {}
+    _DAMAGE_ABSORB_TAG(int32_t _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio) : ratio(_ratio), hp_absorb_ratio(_hp_absorb_ratio), mp_absorb_ratio(_mp_absorb_ratio) {}
 
-    int ratio;
+    int32_t ratio;
     float hp_absorb_ratio;
     float mp_absorb_ratio;
 };
 
 struct _STEAL_ON_ATTACK_TAG
 {
-    _STEAL_ON_ATTACK_TAG(int _ratio, int _hp_steal, int _mp_steal) : ratio(_ratio), hp_steal(_hp_steal), mp_steal(_mp_steal) {}
+    _STEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_steal, int32_t _mp_steal) : ratio(_ratio), hp_steal(_hp_steal), mp_steal(_mp_steal) {}
 
-    int ratio;
-    int hp_steal;
-    int mp_steal;
+    int32_t ratio;
+    int32_t hp_steal;
+    int32_t mp_steal;
 };

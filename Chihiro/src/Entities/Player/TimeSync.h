@@ -20,12 +20,12 @@
 class TimeSynch
 {
     public:
-        TimeSynch(uint L, uint DC, uint pMAX) : m_L(L), m_DC(DC), m_MAX(pMAX) {};
+        TimeSynch(uint32_t L, uint32_t DC, uint32_t pMAX) : m_L(L), m_DC(DC), m_MAX(pMAX) {};
         ~TimeSynch() = default;
 
-        void onEcho(uint t)
+        void onEcho(uint32_t t)
         {
-            if (static_cast<uint>(m_vT.size()) == m_MAX)
+            if (static_cast<uint32_t>(m_vT.size()) == m_MAX)
             {
                 //                 m_vT.
 //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
@@ -41,11 +41,11 @@ class TimeSynch
             }
         }
 
-        uint GetInterval()
+        uint32_t GetInterval()
         {
-            uint tc   = 0;
-            uint CDC  = 0;
-            auto size = static_cast<uint>(m_vT.size());
+            uint32_t tc   = 0;
+            uint32_t CDC  = 0;
+            auto size = static_cast<uint32_t>(m_vT.size());
 
             for (auto &i : m_vT)
             {
@@ -59,14 +59,14 @@ class TimeSynch
             return tc / size >> 1;
         }
 
-        uint GetTestCount()
+        uint32_t GetTestCount()
         {
             return 0;
         }
 
-        std::vector<uint> m_vT{ };
+        std::vector<uint32_t> m_vT{ };
     private:
-        uint m_L{ };
-        uint m_DC{ };
-        uint m_MAX{ };
+        uint32_t m_L{ };
+        uint32_t m_DC{ };
+        uint32_t m_MAX{ };
 };

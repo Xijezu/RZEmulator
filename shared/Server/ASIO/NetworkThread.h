@@ -20,15 +20,15 @@
 #include "IoContext.h"
 #include "Log.h"
 #include "Timer.h"
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include "XSocket.h"
 #include <atomic>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <chrono>
 #include <memory>
 #include <mutex>
 #include <set>
 #include <thread>
-#include "XSocket.h"
 
 using boost::asio::ip::tcp;
 

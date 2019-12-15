@@ -40,12 +40,12 @@ bool StartDB();
 void StopDB();
 void WorldUpdateLoop();
 void ShutdownCLIThread(std::thread *cliThread);
-void SignalHandler(boost::system::error_code const &error, int signalNumber);
+void SignalHandler(boost::system::error_code const &error, int32_t signalNumber);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32_t dbPingInterval, boost::system::error_code const &error);
 
-constexpr int WORLD_SLEEP_CONST = 50;
+constexpr int32_t WORLD_SLEEP_CONST = 50;
 
-int main(int argc, char **argv)
+int32_t main(int32_t argc, char **argv)
 {
     Stacktrace::enableStacktracing();
 
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
     }
 
     // Start the Boost based thread pool
-    int numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
+    int32_t numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
     std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
         ioContext->stop();
         for (std::thread &thr : *del)
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
     if (numThreads < 1)
         numThreads = 1;
 
-    for (int i = 0; i < numThreads; ++i)
+    for (int32_t i = 0; i < numThreads; ++i)
         threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
 
     WorldUpdateLoop();
@@ -151,13 +151,13 @@ int main(int argc, char **argv)
     dbPingTimer->cancel();
     signals.cancel();
 
-    int exitCode = World::GetExitCode();
+    int32_t exitCode = World::GetExitCode();
     NG_LOG_INFO("server.worldserver", "Exiting with code %d", exitCode);
 
     return exitCode;
 }
 
-void SignalHandler(boost::system::error_code const &error, int /*signalNumber*/)
+void SignalHandler(boost::system::error_code const &error, int32_t /*signalNumber*/)
 {
     if (!error)
         World::StopNow(SHUTDOWN_EXIT_CODE);
@@ -237,7 +237,7 @@ void ShutdownCLIThread(std::thread *cliThread)
         // First try to cancel any I/O in the CLI thread
         if (!CancelSynchronousIo(cliThread->native_handle()))
         {
-            // if CancelSynchronousIo() fails, print the error and try with old way
+            // if CancelSynchronousIo() fails, print32_t the error and try with old way
             DWORD errorCode = GetLastError();
 
             // if CancelSynchronousIo fails with ERROR_NOT_FOUND then there was nothing to cancel, proceed with shutdown
@@ -249,7 +249,7 @@ void ShutdownCLIThread(std::thread *cliThread)
                 if (!numCharsWritten)
                     errorBuffer = "Unknown error";
 
-                NG_LOG_DEBUG("server.worldserver", "Error cancelling I/O of CliThread, error code %u, detail: %s", uint32(errorCode), errorBuffer);
+                NG_LOG_DEBUG("server.worldserver", "Error cancelling I/O of CliThread, error code %u, detail: %s", uint32_t(errorCode), errorBuffer);
 
                 if (numCharsWritten)
                     LocalFree(errorBuffer);

@@ -29,19 +29,19 @@ struct NPCTemplate;
 class GameContent
 {
     public:
-        static Monster *RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
-        static bool IsInRandomPoolMonster(int group_id, int monster_id);
+        static Monster *RespawnMonster(float x, float y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
+        static bool IsInRandomPoolMonster(int32_t group_id, int32_t monster_id);
         static bool LearnAllSkill(Player *pPlayer);
-        static bool SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64_t &nItemCount);
-        static ushort IsLearnableSkill(Unit *, int, int, int &);
-        static int GetLocationID(float x, float y);
+        static bool SelectItemIDFromDropGroup(int32_t nDropGroupID, int32_t &nItemID, int64_t &nItemCount);
+        static uint16_t IsLearnableSkill(Unit *, int, int, int32_t &);
+        static int32_t GetLocationID(float x, float y);
         static bool IsBlocked(float x, float y);
         static bool CollisionToLine(float x1, float y1, float x2, float y2);
         static NPC *GetNewNPC(NPCTemplate *npc_info, uint8_t layer);
         static void AddNPCToWorld();
-        static int64_t GetItemSellPrice(int64_t price, int rank, int lv, bool same_price_for_buying);
+        static int64_t GetItemSellPrice(int64_t price, int32_t rank, int32_t lv, bool same_price_for_buying);
     private:
-        static ushort isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level);
+        static uint16_t isLearnableSkill(Unit *pUnit, int32_t skill_id, int32_t skill_level, int32_t nJobID, int32_t unit_job_level);
         GameContent() = default;
         ~GameContent() = default;
 };

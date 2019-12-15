@@ -19,13 +19,13 @@
 
 struct NPCTemplate
 {
-    int         id;
+    int32_t         id;
     float       x;
     float       y;
     float       z;
-    int         spawn_type;
-    int         face;
-    int         local_flag;
+    int32_t         spawn_type;
+    int32_t         face;
+    int32_t         local_flag;
     std::string contact_script;
 };
 

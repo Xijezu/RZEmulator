@@ -70,13 +70,13 @@ class WorldLocation
         WorldLocation(const WorldLocation &src);
         ~WorldLocation() = default;
 
-        uint                  idx{ };
+        uint32_t                  idx{ };
         uint8_t               location_type{ };
         uint8_t               weather_ratio[7][4]{ };
         uint8_t               current_weather{ };
-        uint                  weather_change_time{ };
-        uint                  last_changed_time{ };
-        int                   shovelable_item{ };
+        uint32_t                  weather_change_time{ };
+        uint32_t                  last_changed_time{ };
+        int32_t                   shovelable_item{ };
         std::vector<Player *> m_vIncludeClient{ };
 };
 
@@ -91,18 +91,18 @@ class WorldLocationManager
 
         ~WorldLocationManager() = default;
 
-        WorldLocation *AddToLocation(uint idx, Player *player);
+        WorldLocation *AddToLocation(uint32_t idx, Player *player);
         bool RemoveFromLocation(Player *player);
-        void SendWeatherInfo(uint idx, Player *player);
-        int GetShovelableItem(uint idx);
-        uint GetShovelableMonster(uint idx);
-        void RegisterWorldLocation(uint idx, uint8_t location_type, uint time_id, uint weather_id, uint8_t ratio, uint weather_change_time, int shovelable_item);
-        void RegisterMonsterLocation(uint idx, uint monster_id);
+        void SendWeatherInfo(uint32_t idx, Player *player);
+        int32_t GetShovelableItem(uint32_t idx);
+        uint32_t GetShovelableMonster(uint32_t idx);
+        void RegisterWorldLocation(uint32_t idx, uint8_t location_type, uint32_t time_id, uint32_t weather_id, uint8_t ratio, uint32_t weather_change_time, int32_t shovelable_item);
+        void RegisterMonsterLocation(uint32_t idx, uint32_t monster_id);
 
     private:
         NG_SHARED_MUTEX                             i_lock;
         std::vector<WorldLocation>                  m_vWorldLocation{ };
-        std::unordered_map<uint, std::vector<uint>> m_hsMonsterID{ };
+        std::unordered_map<uint32_t, std::vector<uint32_t>> m_hsMonsterID{ };
 
     protected:
         WorldLocationManager() = default;

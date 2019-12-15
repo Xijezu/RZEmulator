@@ -49,14 +49,14 @@ constexpr AuthHandler authPacketHandler[] =
         {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
         {NGemity::Packets::TS_CS_PING, &GameAuthSession::HandleNullPacket}};
 
-constexpr int authTableSize = (sizeof(authPacketHandler) / sizeof(AuthHandler));
+constexpr int32_t authTableSize = (sizeof(authPacketHandler) / sizeof(AuthHandler));
 
 ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
 {
     ASSERT(pGamePct);
 
     auto _cmd = pGamePct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < authTableSize; i++)
     {
@@ -106,7 +106,7 @@ void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &s
     SendPacket(loginPct);
 }
 
-int GameAuthSession::GetAccountId() const
+int32_t GameAuthSession::GetAccountId() const
 {
     return m_nGameIDX;
 }

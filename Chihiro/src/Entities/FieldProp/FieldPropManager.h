@@ -22,7 +22,7 @@
 
 struct FieldPropRegenInfo
 {
-    FieldPropRegenInfo(uint t, uint lt)
+    FieldPropRegenInfo(uint32_t t, uint32_t lt)
     {
         tNextRegen   = t;
         nLifeTime    = lt;
@@ -30,8 +30,8 @@ struct FieldPropRegenInfo
     }
 
     FieldPropRespawnInfo pRespawnInfo;
-    uint                 tNextRegen;
-    uint                 nLifeTime;
+    uint32_t                 tNextRegen;
+    uint32_t                 nLifeTime;
 };
 
 class FieldPropManager : public FieldPropDeleteHandler
@@ -49,10 +49,10 @@ class FieldPropManager : public FieldPropDeleteHandler
         FieldPropManager &operator=(const FieldPropManager &) = delete;
 
         ~FieldPropManager() = default;
-        void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime);
+        void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32_t lifeTime);
         void RegisterFieldProp(FieldPropRespawnInfo prop);
         void onFieldPropDelete(FieldProp *prop) override;
-        void Update(uint diff);
+        void Update(uint32_t diff);
     private:
         std::vector<FieldPropRespawnInfo> m_vRespawnInfo{ };
         std::vector<FieldPropRegenInfo>   m_vRespawnList{ };

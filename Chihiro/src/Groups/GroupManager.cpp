@@ -21,22 +21,22 @@
 #include "Player.h"
 #include "Log.h"
 
-int GroupManager::GetAttackTeamLeadPartyID(int nPartyID)
+int32_t GroupManager::GetAttackTeamLeadPartyID(int32_t nPartyID)
 {
     return 0;
 }
 
-int GroupManager::GetAttackTeamGuildID(int nPartyID)
+int32_t GroupManager::GetAttackTeamGuildID(int32_t nPartyID)
 {
     return 0;
 }
 
-bool GroupManager::IsAttackTeamParty(int nPartyID)
+bool GroupManager::IsAttackTeamParty(int32_t nPartyID)
 {
     return false;
 }
 
-PARTY_TYPE GroupManager::GetPartyType(int nPartyID)
+PARTY_TYPE GroupManager::GetPartyType(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -44,7 +44,7 @@ PARTY_TYPE GroupManager::GetPartyType(int nPartyID)
     return TYPE_UNKNOWN;
 }
 
-bool GroupManager::DestroyParty(int nPartyID)
+bool GroupManager::DestroyParty(int32_t nPartyID)
 {
     auto              name  = GetPartyName(nPartyID);
     DoEachMemberTag(nPartyID, [&name](PartyMemberTag &tag) {
@@ -65,15 +65,15 @@ bool GroupManager::DestroyParty(int nPartyID)
     return true;
 }
 
-int GroupManager::GetMemberCount(int nPartyID)
+int32_t GroupManager::GetMemberCount(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
-        return (int)info->vMemberNameList.size();
+        return (int32_t)info->vMemberNameList.size();
     return 0;
 }
 
-std::string GroupManager::GetPartyName(int nPartyID)
+std::string GroupManager::GetPartyName(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -81,7 +81,7 @@ std::string GroupManager::GetPartyName(int nPartyID)
     return "";
 }
 
-bool GroupManager::IsLeader(int nPartyID, const std::string &szPlayerName)
+bool GroupManager::IsLeader(int32_t nPartyID, const std::string &szPlayerName)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -89,17 +89,17 @@ bool GroupManager::IsLeader(int nPartyID, const std::string &szPlayerName)
     return false;
 }
 
-void GroupManager::OnChangeCharacterLevel(int nPartyID, const std::string &szName, int nLevel)
+void GroupManager::OnChangeCharacterLevel(int32_t nPartyID, const std::string &szName, int32_t nLevel)
 {
 
 }
 
-void GroupManager::OnChangeCharacterJob(int nPartyID, const std::string &szName, int nJobID)
+void GroupManager::OnChangeCharacterJob(int32_t nPartyID, const std::string &szName, int32_t nJobID)
 {
 
 }
 
-std::string GroupManager::GetLeaderName(int nPartyID)
+std::string GroupManager::GetLeaderName(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -107,7 +107,7 @@ std::string GroupManager::GetLeaderName(int nPartyID)
     return "";
 }
 
-bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
+bool GroupManager::LeaveParty(int32_t nPartyID, const std::string &szName)
 {
     PartyInfo *info{nullptr};
     Messages::SendPartyChatMessage(100, "@PARTY", nPartyID, NGemity::StringFormat("LEAVE|{}|", szName));
@@ -136,7 +136,7 @@ bool GroupManager::LeaveParty(int nPartyID, const std::string &szName)
     return true;
 }
 
-bool GroupManager::onLogin(int nPartyID, Player *pPlayer)
+bool GroupManager::onLogin(int32_t nPartyID, Player *pPlayer)
 {
     bool result = false;
     {
@@ -164,7 +164,7 @@ bool GroupManager::onLogin(int nPartyID, Player *pPlayer)
     return result;
 }
 
-bool GroupManager::onLogout(int nPartyID, Player *pPlayer)
+bool GroupManager::onLogout(int32_t nPartyID, Player *pPlayer)
 {
     bool result = false;
     {
@@ -205,7 +205,7 @@ void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Pl
     }
 }
 
-PartyInfo *GroupManager::getPartyInfo(int nPartyID)
+PartyInfo *GroupManager::getPartyInfo(int32_t nPartyID)
 {
     PartyInfo *info{nullptr};
     {
@@ -216,7 +216,7 @@ PartyInfo *GroupManager::getPartyInfo(int nPartyID)
     return info;
 }
 
-PartyInfo *GroupManager::getPartyInfoNC(int nPartyID)
+PartyInfo *GroupManager::getPartyInfoNC(int32_t nPartyID)
 {
     PartyInfo *info{nullptr};
     {
@@ -226,7 +226,7 @@ PartyInfo *GroupManager::getPartyInfoNC(int nPartyID)
     return info;
 }
 
-int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType)
+int32_t GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType)
 {
     PartyInfo partyInfo{ };
     {
@@ -242,12 +242,12 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
         partyInfo.strPartyName         = szName;
         partyInfo.strLeaderName        = pPlayer->GetName();
         partyInfo.ePartyType           = partyType;
-        partyInfo.nPartyID             = (int)++m_nMaxPartyID;
+        partyInfo.nPartyID             = (int32_t)++m_nMaxPartyID;
         partyInfo.eShareMode           = ITEM_SHARE_RANDOM;
         partyInfo.nLastItemAcquirerIdx = 0;
         partyInfo.nLeaderSID           = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
         partyInfo.nLeaderJobID         = pPlayer->GetCurrentJob();
-        partyInfo.nPartyPassword       = (uint)rand32();
+        partyInfo.nPartyPassword       = (uint32_t)rand32();
         m_hshPartyID[partyInfo.nPartyID] = partyInfo;
     }
     JoinParty(partyInfo.nPartyID, pPlayer, partyInfo.nPartyPassword);
@@ -255,7 +255,7 @@ int GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_
     return partyInfo.nPartyID;
 }
 
-bool GroupManager::JoinParty(int nPartyID, Player *pPlayer, uint nPass)
+bool GroupManager::JoinParty(int32_t nPartyID, Player *pPlayer, uint32_t nPass)
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
     auto            info = getPartyInfoNC(nPartyID);
@@ -274,7 +274,7 @@ bool GroupManager::JoinParty(int nPartyID, Player *pPlayer, uint nPass)
     return true;
 }
 
-void GroupManager::DoEachMemberTag(int nPartyID, std::function<void(PartyMemberTag &)> fn)
+void GroupManager::DoEachMemberTag(int32_t nPartyID, std::function<void(PartyMemberTag &)> fn)
 {
     {
         NG_SHARED_GUARD readGuard(i_lock);
@@ -289,12 +289,12 @@ void GroupManager::DoEachMemberTag(int nPartyID, std::function<void(PartyMemberT
     }
 }
 
-int GroupManager::DoEachMemberTagNum(int nPartyID, std::function<bool(PartyMemberTag &)> fn)
+int32_t GroupManager::DoEachMemberTagNum(int32_t nPartyID, std::function<bool(PartyMemberTag &)> fn)
 {
     {
         NG_SHARED_GUARD readGuard(i_lock);
         auto            info = getPartyInfoNC(nPartyID);
-        int             nCnt{0};
+        int32_t             nCnt{0};
         if (info != nullptr)
         {
             for (auto &tag : info->vMemberNameList)
@@ -308,9 +308,9 @@ int GroupManager::DoEachMemberTagNum(int nPartyID, std::function<bool(PartyMembe
 }
 
 
-int GroupManager::GetMinLevel(int nPartyID)
+int32_t GroupManager::GetMinLevel(int32_t nPartyID)
 {
-    int min = 0xFF;
+    int32_t min = 0xFF;
     DoEachMemberTag(nPartyID, [&min](PartyMemberTag &tag) {
         if (tag.nLevel < min)
             min = tag.nLevel;
@@ -318,7 +318,7 @@ int GroupManager::GetMinLevel(int nPartyID)
     return min;
 }
 
-uint GroupManager::GetPassword(int nPartyID)
+uint32_t GroupManager::GetPassword(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -326,9 +326,9 @@ uint GroupManager::GetPassword(int nPartyID)
     return 0;
 }
 
-int GroupManager::GetMaxLevel(int nPartyID)
+int32_t GroupManager::GetMaxLevel(int32_t nPartyID)
 {
-    int max = 0;
+    int32_t max = 0;
     DoEachMemberTag(nPartyID, [&max](PartyMemberTag &tag) {
         if (tag.nLevel > max)
             max = tag.nLevel;
@@ -336,7 +336,7 @@ int GroupManager::GetMaxLevel(int nPartyID)
     return max;
 }
 
-int GroupManager::GetShareMode(int nPartyID)
+int32_t GroupManager::GetShareMode(int32_t nPartyID)
 {
     auto info = getPartyInfo(nPartyID);
     if (info != nullptr)
@@ -358,7 +358,7 @@ void GroupManager::InitGroupSystem()
     uint32_t count = 0;
     do
     {
-        uint      idx    = 0;
+        uint32_t      idx    = 0;
         Field     *field = result->Fetch();
         PartyInfo info{ };
         info.nPartyID     = field[idx++].GetInt32();

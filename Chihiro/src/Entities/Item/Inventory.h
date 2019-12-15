@@ -41,17 +41,17 @@ public:
   Item *Push(Item *item, int64_t cnt, bool bSkipUpdateItemToDB);
   Item *Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB);
   bool Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB);
-  Item *Find(int code, uint flag, bool bFlag);
-  Item *FindByCode(int code);
+  Item *Find(int32_t code, uint32_t flag, bool bFlag);
+  Item *FindByCode(int32_t code);
   Item *FindBySID(int64_t uid);
-  Item *FindByHandle(uint handle);
+  Item *FindByHandle(uint32_t handle);
 
   void SetWeightModifier(float fWeightModifier) { m_fWeightModifier = fWeightModifier; }
   void AddWeightModifier(float fWeightModifier) { m_fWeightModifier += fWeightModifier; }
   float GetWeight() const { return m_fWeight + m_fWeightModifier; }
   float GetWeightModifier() const { return m_fWeightModifier; }
   bool IsValid(Item *pItem) const { return check(pItem); }
-  int IssueNewIndex() { return ++m_nIndex; }
+  int32_t IssueNewIndex() { return ++m_nIndex; }
 
 private:
   void setCount(Item *item, int64_t newCnt, bool bSkipUpdateItemToDB);
@@ -64,5 +64,5 @@ private:
   float m_fWeightModifier;
   std::vector<Item *> m_vList;
   std::vector<Item *> m_vExpireItemList;
-  int m_nIndex;
+  int32_t m_nIndex;
 };

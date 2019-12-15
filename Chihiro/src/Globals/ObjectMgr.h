@@ -37,9 +37,9 @@ class NPC;
 
 struct WayPointInfo
 {
-  int way_point_speed;
-  int way_point_type;
-  int way_point_id;
+  int32_t way_point_speed;
+  int32_t way_point_type;
+  int32_t way_point_id;
   std::vector<Position> vWayPoint;
 };
 
@@ -110,34 +110,34 @@ public:
 
   void UnloadAll();
 
-  const std::string &GetValueFromNameID(int name_id);
-  CreatureStat *GetStatInfo(int stat_id);
-  ItemTemplate *GetItemBase(int item_id);
-  SkillBase *GetSkillBase(int);
-  CreatureStat GetJobLevelBonus(int depth, int jobs[], const int levels[]);
-  CreatureStat GetSummonLevelBonus(int summon_code, int growth_depth, int level);
-  JobResourceTemplate *GetJobInfo(int job_id);
-  SummonResourceTemplate *GetSummonBase(int idx);
-  MonsterBase *GetMonsterInfo(int idx);
-  FieldPropTemplate *GetFieldPropBase(int idx);
+  const std::string &GetValueFromNameID(int32_t name_id);
+  CreatureStat *GetStatInfo(int32_t stat_id);
+  ItemTemplate *GetItemBase(int32_t item_id);
+  SkillBase *GetSkillBase(int32_t);
+  CreatureStat GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[]);
+  CreatureStat GetSummonLevelBonus(int32_t summon_code, int32_t growth_depth, int32_t level);
+  JobResourceTemplate *GetJobInfo(int32_t job_id);
+  SummonResourceTemplate *GetSummonBase(int32_t idx);
+  MonsterBase *GetMonsterInfo(int32_t idx);
+  FieldPropTemplate *GetFieldPropBase(int32_t idx);
   std::vector<MarketInfo> *GetMarketInfo(const std::string &);
-  QuestBaseServer *GetQuestBase(int code);
-  QuestLink *GetQuestLink(int code, int start_id);
-  StateTemplate *GetStateInfo(int code);
-  bool checkQuestTypeFlag(QuestType type, int flag);
+  QuestBaseServer *GetQuestBase(int32_t code);
+  QuestLink *GetQuestLink(int32_t code, int32_t start_id);
+  StateTemplate *GetStateInfo(int32_t code);
+  bool checkQuestTypeFlag(QuestType type, int32_t flag);
   std::string GetSummonName();
-  int GetNeedJpForJobLevelUp(int, int);
-  int GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID);
-  int64_t GetNeedExp(int level);
-  int64_t GetNeedSummonExp(int level);
-  WayPointInfo *GetWayPoint(int waypoint_id);
-  DropGroup *GetDropGroupInfo(int drop_group_id);
+  int32_t GetNeedJpForJobLevelUp(int, int32_t);
+  int32_t GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_level, int32_t nJobID);
+  int64_t GetNeedExp(int32_t level);
+  int64_t GetNeedSummonExp(int32_t level);
+  WayPointInfo *GetWayPoint(int32_t waypoint_id);
+  DropGroup *GetDropGroupInfo(int32_t drop_group_id);
 
   void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
-  void AddWayPoint(int waypoint_id, float x, float y);
-  void SetWayPointType(int waypoint_id, int type);
+  void AddWayPoint(int32_t waypoint_id, float x, float y);
+  void SetWayPointType(int32_t waypoint_id, int32_t type);
 
-  int g_currentLocationId{0};
+  int32_t g_currentLocationId{0};
 
   std::unordered_map<int, WayPointInfo> g_vWayPoint{};
   std::vector<MonsterRespawnInfo> g_vRespawnInfo{};
@@ -161,13 +161,13 @@ private:
   QuestLinkTemplateContainer _questLinkStore;
   NPCTemplateContainer _npcTemplateStore;
   FieldPropTemplateContainer _fieldPropTemplateStore;
-  std::vector<int> _summonPrefixStore;
-  std::vector<int> _summonPostfixStore;
+  std::vector<int32_t> _summonPrefixStore;
+  std::vector<int32_t> _summonPostfixStore;
   SummonBonusTemplateContainer _summonBonusStore;
   StateTemplateContainer _stateTemplateStore;
 
   void RegisterSkillTree(SkillTreeBase base);
-  std::vector<SkillTreeBase> getSkillTree(int job_id);
+  std::vector<SkillTreeBase> getSkillTree(int32_t job_id);
 
 protected:
   ObjectMgr();

@@ -44,11 +44,11 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
         return false;
 
     float fCurrentVisibleRatio = 1.0f;
-    int ptype = 0;
-    int rtype = 0;
-    int sflag = 0;
-    int line_num = 0;
-    int nCurrentCategory = 0;
+    int32_t ptype = 0;
+    int32_t rtype = 0;
+    int32_t sflag = 0;
+    int32_t line_num = 0;
+    int32_t nCurrentCategory = 0;
 
     for (const auto &s : TextLines)
     {
@@ -62,13 +62,13 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
             {
                 if (m_CategoryNames[i] == lines[1])
                 {
-                    nCurrentCategory = static_cast<int>(i);
+                    nCurrentCategory = static_cast<int32_t>(i);
                     break;
                 }
             }
             if (nCurrentCategory == -1)
             {
-                nCurrentCategory = (int)m_CategoryNames.size();
+                nCurrentCategory = (int32_t)m_CategoryNames.size();
                 m_CategoryNames.emplace_back(lines[1]);
             }
         }
@@ -99,7 +99,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
             if (strPropName.empty())
                 continue;
 
-            int prop_num = std::stoi(strPropNum);
+            int32_t prop_num = std::stoi(strPropNum);
             if (CheckPropFileType(strPropName, ".nx3"s))
                 ptype = 2;
             else if (CheckPropFileType(strPropName, "_default.naf"))
@@ -124,7 +124,7 @@ void TerrainPropInfo::Release()
     m_pPropInfo.clear();
 }
 
-int TerrainPropInfo::GetShadowFlag(std::string str)
+int32_t TerrainPropInfo::GetShadowFlag(std::string str)
 {
     if (str == "no_ca"s)
         return 1;
@@ -145,7 +145,7 @@ bool TerrainPropInfo::CheckPropFileType(std::string rname, std::string szTail)
     return rname.find(szTail) != std::string::npos;
 }
 
-void TerrainPropInfo::SetPropInfo(int nLineIndex, uint16_t /*wPropNum*/, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag)
+void TerrainPropInfo::SetPropInfo(int32_t nLineIndex, uint16_t /*wPropNum*/, PropType propType, RenderType renderType, int32_t nCategory, float fVisibleRatio, std::string rName, int32_t nShadowFlag)
 {
     PropInfo p{};
     p.nLineIndex = nLineIndex;

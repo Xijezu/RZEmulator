@@ -19,7 +19,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 
-void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int lifeTime)
+void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32_t lifeTime)
 {
     auto propTemplate = sObjectMgr.GetFieldPropBase(prop.nPropID);
     if (propTemplate == nullptr)
@@ -29,7 +29,7 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int l
         NG_UNIQUE_GUARD writeGuard(i_lock);
         m_vRespawnInfo.emplace_back(prop);
 
-        FieldPropRegenInfo ri = FieldPropRegenInfo{0, (uint)lifeTime};
+        FieldPropRegenInfo ri = FieldPropRegenInfo{0, (uint32_t)lifeTime};
         ri.pRespawnInfo = prop;
         m_vRespawnList.emplace_back(ri);
     }
@@ -38,7 +38,7 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int l
 void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
     FieldPropRespawnInfo info{prop};
-    int                  nPropID = prop.nPropID;
+    int32_t nPropID = prop.nPropID;
     FieldPropTemplate *propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
     if (propTemplate == nullptr)
         return;
@@ -46,7 +46,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
         info.nPropID = nPropID;
-        info.layer   = 0; // Layer management
+        info.layer = 0; // Layer management
         m_vRespawnInfo.emplace_back(info);
         FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld.GetArTime(), propTemplate->nLifeTime};
         ri.pRespawnInfo = info;
@@ -81,16 +81,16 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
     }
 }
 
-void FieldPropManager::Update(uint/* diff*/)
+void FieldPropManager::Update(uint32_t /* diff*/)
 {
-    uint                            ct = sWorld.GetArTime();
-    std::vector<FieldPropRegenInfo> vRegenInfo{ };
-    std::vector<FieldProp *>        vDeleteList{ };
+    uint32_t ct = sWorld.GetArTime();
+    std::vector<FieldPropRegenInfo> vRegenInfo{};
+    std::vector<FieldProp *> vDeleteList{};
 
     // "Critical section" for lock (yeah, I prefer those)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        for (auto       it = m_vRespawnList.begin(); it != m_vRespawnList.end();)
+        for (auto it = m_vRespawnList.begin(); it != m_vRespawnList.end();)
         {
             if (it->tNextRegen < ct)
             {

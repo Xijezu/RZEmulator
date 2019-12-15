@@ -51,6 +51,10 @@
 #define DECLSPEC_DEPRECATED
 #endif // PLATFORM
 
+#if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
+#define snprintf _snprintf
+#endif
+
 #if COMPILER == COMPILER_GNU
 #define ATTR_NORETURN __attribute__((noreturn))
 #define ATTR_PRINTF(F, V) __attribute__((format(printf, F, V)))
@@ -60,16 +64,6 @@
 #define ATTR_PRINTF(F, V)
 #define ATTR_DEPRECATED
 #endif // COMPILER == COMPILER_GNU
-
-typedef unsigned long DWORD;
-typedef unsigned short WORD;
-
-#if PLATFORM != PLATFORM_WINDOWS && !defined(LOWORD)
-#define LOWORD(a) ((WORD)(a))
-#endif // #ifndef LOWORD
-#if PLATFORM != PLATFORM_WINDOWS && !defined(HIWORD)
-#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
-#endif // #ifndef HIWORD
 
 #define UI64FMTD "%" PRIu64
 #define UI64LIT(N) UINT64_C(N)

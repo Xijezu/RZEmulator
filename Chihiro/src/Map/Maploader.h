@@ -23,7 +23,7 @@
 
 struct LocationInfoHeader
 {
-    int   nPriority;
+    int32_t   nPriority;
     float x;
     float y;
     float z;
@@ -33,10 +33,10 @@ struct LocationInfoHeader
 struct NfsHeader
 {
     std::string szSign;//Data           :   this+0x0, Member, Type: char[0x10], szSign
-    uint        dwVersion;
-    uint        dwEventLocationOffset;
-    uint        dwEventScriptOffset;
-    uint        dwPropScriptOffset;
+    uint32_t        dwVersion;
+    uint32_t        dwEventLocationOffset;
+    uint32_t        dwEventScriptOffset;
+    uint32_t        dwPropScriptOffset;
 };
 
 struct ScriptRegion
@@ -50,13 +50,13 @@ struct ScriptRegion
 
 struct ScriptTag
 {
-    int         nTrigger;
+    int32_t         nTrigger;
     std::string strFunction;
 };
 
 struct ScriptRegionInfo
 {
-    int                    nRegionIndex;
+    int32_t                    nRegionIndex;
     std::vector<ScriptTag> vInfoList;
 };
 
@@ -83,22 +83,22 @@ class Maploader
 
         std::vector<ScriptRegion>     m_vRegionList{ };
         std::vector<ScriptRegionInfo> m_vScriptEvent{ };
-        int                           nCurrentRegionIdx{0};
+        int32_t                           nCurrentRegionIdx{0};
     private:
-        void SetDefaultLocation(int x, int y, float fMapLength, int LocationId);
+        void SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32_t LocationId);
         void RegisterMapLocationInfo(MapLocationInfo location_info);
-        void LoadLocationFile(const std::string &szFilename, int x, int y, float fAttrLen, float fMapLength);
-        void LoadScriptFile(const std::string &szFilename, int x, int y, float fMapLength);
-        void LoadAttributeFile(const std::string &szFileName, int x, int y, float fAttrLen, float fMapLength);
-        void LoadFieldPropFile(const std::string &szFileName, int x, int y, float fAttrLen, float fMapLength);
-        void LoadRegionInfo(ByteBuffer &buffer, int x, int y, float fMapLength);
+        void LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+        void LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float fMapLength);
+        void LoadAttributeFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+        void LoadFieldPropFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+        void LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float fMapLength);
         void LoadRegionScriptInfo(ByteBuffer &buffer);
 
         TerrainSeamlessWorldInfo seamlessWorldInfo{ };
         TerrainPropInfo          propInfo{ };
 
-        const int g_nMapWidth  = 700000;
-        const int g_nMapHeight = 1000000;
+        const int32_t g_nMapWidth  = 700000;
+        const int32_t g_nMapHeight = 1000000;
 
         float fTileSize{0};
         float fMapLength{0};

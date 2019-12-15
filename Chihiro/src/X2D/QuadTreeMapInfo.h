@@ -39,7 +39,7 @@ namespace X2D
                     Node() : init(true) {}
 
                     ~Node() = default;
-                    Node(Pointf p1, Pointf p2, ushort depth);
+                    Node(Pointf p1, Pointf p2, uint16_t depth);
                     bool Add(MapLocationInfo u);
                     void Enum(X2D::Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
                     bool Collision(X2D::Pointf c);
@@ -53,7 +53,7 @@ namespace X2D
                     std::vector<MapLocationInfo> m_vList{ };
                     RectangleF                   m_Area{ };
                     std::map<int, Node>          m_pNode{ };
-                    ushort                       m_unDepth{ };
+                    uint16_t                       m_unDepth{ };
             };
 
             QuadTreeMapInfo(float width, float height);

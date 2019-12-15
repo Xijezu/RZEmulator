@@ -23,7 +23,7 @@
 class SkillProp : public WorldObject
 {
   public:
-    static SkillProp *Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio);
+    static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio);
     static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
     SkillProp() = delete;
     ~SkillProp() override = default;
@@ -32,7 +32,7 @@ class SkillProp : public WorldObject
     SkillProp(const SkillProp &) = delete;
     SkillProp &operator=(const SkillProp &) = delete;
 
-    void Update(uint diff) override;
+    void Update(uint32_t diff) override;
     bool IsSkillProp() const override;
     void PendRemove();
 
@@ -55,14 +55,14 @@ class SkillProp : public WorldObject
     void FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster);
 
   private:
-    explicit SkillProp(uint caster, Skill pSkill, int nMagicPoint, float fHateRatio);
+    explicit SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio);
 
     struct _SKILL_PROP_INFO
     {
-        uint m_nStartTime;
-        uint m_nEndTime;
-        uint m_nInterval;
-        uint m_nLastFireTime;
+        uint32_t m_nStartTime;
+        uint32_t m_nEndTime;
+        uint32_t m_nInterval;
+        uint32_t m_nLastFireTime;
     };
 
     uint32_t m_hCaster;
@@ -71,6 +71,6 @@ class SkillProp : public WorldObject
     bool m_bFired;
     bool m_bProcessEnded;
     bool m_bIsRemovePended;
-    int m_nOwnerMagicPoint;
+    int32_t m_nOwnerMagicPoint;
     float m_fHateRatio;
 };
