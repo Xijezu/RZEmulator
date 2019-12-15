@@ -26,7 +26,7 @@ branches:
     - master
 
 before_install:
-  - pip install conan
+  - sudo pip install conan
   - sudo apt-get install libmysqlclient-dev libmysql++-dev
   - eval "${MATRIX_EVAL}"
 
