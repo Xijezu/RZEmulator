@@ -26,7 +26,7 @@ branches:
     - master
 
 before_install:
-  - sudo apt-install makedepend
+  - sudo apt-get install xutils-dev
   - sudo pip install conan
   - eval "${MATRIX_EVAL}"
 
