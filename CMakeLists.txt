@@ -31,14 +31,18 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(DEBUG 1)
 endif()
 
-option(WITHOUT_GIT        "Disable the GIT testing routines"             0)
-option(WITH_PCH               "Use Precompiled Headers"                       0)
-option(WITH_TOOLS           "Also compile additional tools"                 1)
+option(WITHOUT_GIT          "Disable the GIT testing routines"               0)
+option(WITH_PCH             "Use Precompiled Headers"                        1)
+option(WITH_TOOLS           "Also compile additional tools"                  1)
+option(NG_USE_CLITHREAD     "Use CLI Thread (readline on Linux)"             0)
 
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)
-find_package(MYSQL REQUIRED)
-find_package(Readline REQUIRED)
+IF(NG_USE_CLITHREAD)
+    find_package(Readline REQUIRED)
+    add_definitions(-DNG_USE_CLITHREAD)
+endif()
+
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)
 

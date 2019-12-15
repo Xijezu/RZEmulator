@@ -33,12 +33,9 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Skills
         ${CMAKE_CURRENT_SOURCE_DIR}/src/World
-        ${CMAKE_SOURCE_DIR}/dep/fmt
         ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
         ${CMAKE_SOURCE_DIR}/dep/liblua
-        ${Boost_INCLUDE_DIR}
-        ${SHARED_INCLUDE_DIR}
-        ${MYSQL_INCLUDE_DIR})
+        ${SHARED_INCLUDE_DIR})
 if (UNIX)
     include_directories(${READLINE_INCLUDE_DIR})
 endif ()

@@ -118,12 +118,14 @@ int32_t main(int32_t argc, char **argv)
         sMapContent.UnloadAll();
     });
 
+#if NG_USE_CLITHREAD
     // Launch CliRunnable thread
     std::shared_ptr<std::thread> cliThread;
     if (sConfigMgr->GetBoolDefault("Console.Enable", true))
     {
         cliThread.reset(new std::thread(CliThread), &ShutdownCLIThread);
     }
+#endif
 
     // Start the Boost based thread pool
     int32_t numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
