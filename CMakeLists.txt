@@ -7,12 +7,14 @@ if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
    file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.14/conan.cmake"
                  "${CMAKE_BINARY_DIR}/conan.cmake")
 endif()
+
 include(${CMAKE_BINARY_DIR}/conan.cmake)
+conan_check(VERSION 1.0.0 REQUIRED)
 
 conan_add_remote(NAME bincrafters URL https://api.bintray.com/conan/bincrafters/public-conan) # Add bincrafters repo
 conan_add_remote(NAME conan URL https://api.bintray.com/conan/conan-community/conan) # add (default?) conan repo
-conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP BUILD missing) # run conan setup
 
+conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP BUILD missing) # run conan setup
 conan_basic_setup(TARGETS)
 ######## END CONAN ########
 
