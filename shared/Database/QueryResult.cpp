@@ -154,10 +154,10 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     //- for future readers wondering where the fuck this is freed - mysql_stmt_bind_result moves pointers to these
     // from m_rBind to m_stmt->bind and it is later freed by the `if (m_stmt->bind_result_done)` block just above here
     // MYSQL_STMT lifetime is equal to connection lifetime
-    bool *m_isNull = new bool[m_fieldCount];
+    my_bool *m_isNull = new my_bool[m_fieldCount];
     unsigned long *m_length = new unsigned long[m_fieldCount];
 
-    memset(m_isNull, 0, sizeof(bool) * m_fieldCount);
+    memset(m_isNull, 0, sizeof(my_bool) * m_fieldCount);
     memset(m_rBind, 0, sizeof(MYSQL_BIND) * m_fieldCount);
     memset(m_length, 0, sizeof(unsigned long) * m_fieldCount);
 

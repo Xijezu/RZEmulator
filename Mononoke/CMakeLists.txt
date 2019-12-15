@@ -15,8 +15,6 @@ include_directories(
     ${MYSQL_INCLUDE_DIR}
 )
 
-message(${CONAN_INCLUDE_DIRS_BOOST})
-
 # Lists
 file(GLOB SRC_GRP_LISTS src/Lists/*.cpp src/Lists/*.h)
 source_group("Lists" FILES ${SRC_GRP_LISTS})
