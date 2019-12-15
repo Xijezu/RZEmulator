@@ -22,30 +22,30 @@
 class Item;
 class ItemCollector
 {
-    public:
-        static ItemCollector &Instance()
-        {
-            static ItemCollector instance;
-            return instance;
-        }
+public:
+    static ItemCollector &Instance()
+    {
+        static ItemCollector instance;
+        return instance;
+    }
 
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        ItemCollector(const ItemCollector &) = delete;
-        ItemCollector &operator=(const ItemCollector &) = delete;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    ItemCollector(const ItemCollector &) = delete;
+    ItemCollector &operator=(const ItemCollector &) = delete;
 
-        ~ItemCollector();
-        void RegisterItem(Item *pItem);
-        bool UnregisterItem(Item *pItem);
-        void Update();
+    ~ItemCollector();
+    void RegisterItem(Item *pItem);
+    bool UnregisterItem(Item *pItem);
+    void Update();
 
-    private:
-        typedef std::unordered_map<uint, Item *> ItemMap;
+private:
+    typedef std::unordered_map<uint32_t, Item *> ItemMap;
 
-        ItemMap m_vItemList;
-        NG_SHARED_MUTEX i_lock;
+    ItemMap m_vItemList;
+    NG_SHARED_MUTEX i_lock;
 
-    protected:
-        ItemCollector() = default;
+protected:
+    ItemCollector() = default;
 };
 #define sItemCollector ItemCollector::Instance()

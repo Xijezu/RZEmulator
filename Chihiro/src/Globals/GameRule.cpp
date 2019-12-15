@@ -18,12 +18,12 @@
 #include "GameRule.h"
 #include "World.h"
 
-int GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
-int GameRule::_chipLevelLimit[8] = {20, 50, 80, 100, 120, 150, 180, 200};
+int32_t GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
+int32_t GameRule::_chipLevelLimit[8] = {20, 50, 80, 100, 120, 150, 180, 200};
 float GameRule::_staminaExpRate[300] = {0};
-int GameRule::nEnhanceFailType = 2;
+int32_t GameRule::nEnhanceFailType = 2;
 
-float GameRule::GetItemValue(float item_current_value, int item_rank_value, int creature_level, int item_rank, int item_level)
+float GameRule::GetItemValue(float item_current_value, int32_t item_rank_value, int32_t creature_level, int32_t item_rank, int32_t item_level)
 {
     float ilp = GetItemLevelPenalty(creature_level, item_rank, item_level);
     //-,*,+
@@ -40,11 +40,11 @@ float GameRule::GetItemValue(float item_current_value, int item_rank_value, int 
  * finally I tried to reconstruct it more or less 1:1 and this is the result
  * I fricking hate IDAs pseudocode plugin...
 */
-float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_level)
+float GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level)
 {
     float result = 0;
-    int recommended = GetItemRecommendedLevel(item_rank, item_level);
-    int limit = GetItemLevelLimit(item_rank);
+    int32_t recommended = GetItemRecommendedLevel(item_rank, item_level);
+    int32_t limit = GetItemLevelLimit(item_rank);
 
     if (item_level == 1 || creature_level < limit || creature_level >= recommended)
     {
@@ -66,9 +66,9 @@ float GameRule::GetItemLevelPenalty(int creature_level, int item_rank, int item_
     return result / 10000;
 }
 
-int GameRule::GetItemRecommendModTable(int item_rank)
+int32_t GameRule::GetItemRecommendModTable(int32_t item_rank)
 {
-    int idx = item_rank;
+    int32_t idx = item_rank;
 
     if (idx < 1)
         idx = 1;
@@ -77,9 +77,9 @@ int GameRule::GetItemRecommendModTable(int item_rank)
     return _modtable[idx];
 }
 
-int GameRule::GetRankLevel(int rank)
+int32_t GameRule::GetRankLevel(int32_t rank)
 {
-    int idx = rank;
+    int32_t idx = rank;
     if (idx < 1)
         idx = 1;
     if (idx > 8)
@@ -108,14 +108,14 @@ int GameRule::GetRankLevel(int rank)
     }
 }
 
-int GameRule::GetItemLevelLimit(int item_rank)
+int32_t GameRule::GetItemLevelLimit(int32_t item_rank)
 {
     return GetRankLevel(item_rank);
 }
 
-int GameRule::GetItemRecommendedLevel(int item_rank, int item_level)
+int32_t GameRule::GetItemRecommendedLevel(int32_t item_rank, int32_t item_level)
 {
-    int result;
+    int32_t result;
     if (item_rank > 1)
     {
         result = (GetItemRecommendModTable(item_rank) * (item_level - 1)) + GetItemLevelLimit(item_rank);
@@ -147,7 +147,7 @@ float GameRule::GetEXPRate()
     return sWorld.getRate(RATES_EXP);
 }
 
-int GameRule::GetChipLevelLimit(int idx)
+int32_t GameRule::GetChipLevelLimit(int32_t idx)
 {
     return _chipLevelLimit[idx];
 }
@@ -157,23 +157,23 @@ float GameRule::GetChaosDropRate()
     return sWorld.getRate(RATES_CHAOS_DROP);
 }
 
-int GameRule::GetIntValueByRandomInt(double fValue)
+int32_t GameRule::GetIntValueByRandomInt(double fValue)
 {
     double result = fValue + 1;
-    if (((uint)rand32() % 100) / 100.0 + fValue >= fValue)
+    if (((uint32_t)rand32() % 100) / 100.0 + fValue >= fValue)
         result = fValue;
-    return (int)result;
+    return (int32_t)result;
 }
 
 int64_t GameRule::GetIntValueByRandomInt64(double fValue)
 {
     double result = fValue + 1;
-    if (((uint)rand32() % 100) / 100.0 + fValue >= fValue)
+    if (((uint32_t)rand32() % 100) / 100.0 + fValue >= fValue)
         result = fValue;
     return (int64_t)result;
 }
 
-float GameRule::GetStaminaRatio(int level)
+float GameRule::GetStaminaRatio(int32_t level)
 {
     if (level < 1)
         level = 1;
@@ -192,7 +192,7 @@ float GameRule::GetStaminaBonus()
     return sWorld.getRate(RATES_STAMINA_BONUS);
 }
 
-int GameRule::GetLocalFlag()
+int32_t GameRule::GetLocalFlag()
 {
     return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }

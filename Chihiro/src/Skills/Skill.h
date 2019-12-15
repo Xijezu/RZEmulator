@@ -50,66 +50,66 @@ public:
 
   friend struct SkillTargetFunctor;
   Skill() = delete;
-  Skill(Unit *pOwner, int64_t _uid, int _id);
+  Skill(Unit *pOwner, int64_t _uid, int32_t _id);
   // Replace statement - acts as insert and update
-  static void DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id,
-                             int skill_level, int cool_time);
+  static void DB_InsertSkill(Unit *pUnit, int64_t skillUID, int32_t skill_id,
+                             int32_t skill_level, int32_t cool_time);
   // skills
   static void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess,
-                             int nSuccessType, uint handle);
+                             int32_t nSuccessType, uint32_t handle);
   static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
-                                   int damageType, DamageInfo damageInfo,
-                                   uint handle);
+                                   int32_t damageType, DamageInfo damageInfo,
+                                   uint32_t handle);
   static void AddSkillDamageWithKnockBackResult(
-      std::vector<SkillResult> &pvList, uint8_t type, int damage_type,
+      std::vector<SkillResult> &pvList, uint8_t type, int32_t damage_type,
       const DamageInfo &damage_info, uint32_t handle, float x, float y,
       uint32_t knock_back_time);
-  static int EnumSkillTargetsAndCalcDamage(
+  static int32_t EnumSkillTargetsAndCalcDamage(
       const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos,
-      bool bTargetOrigin, const float fEffectLength, const int nRegionType,
-      const float fRegionProperty, const int nOriginalDamage,
-      const bool bIncludeOriginalPos, Unit *pCaster, const int nDistributeType,
-      const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList,
+      bool bTargetOrigin, const float fEffectLength, const int32_t nRegionType,
+      const float fRegionProperty, const int32_t nOriginalDamage,
+      const bool bIncludeOriginalPos, Unit *pCaster, const int32_t nDistributeType,
+      const int32_t nTargetMax, /*out*/ std::vector<Unit *> &vTargetList,
       bool bEnemyOnly = true);
 
-  int Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer,
+  int32_t Cast(int32_t nSkillLevel, uint32_t handle, Position pos, uint8_t layer,
            bool bIsCastedByItem);
 
-  int GetSkillId() const { return GetSkillBase()->GetID(); }
+  int32_t GetSkillId() const { return GetSkillBase()->GetID(); }
 
   void ProcSkill();
   bool ProcAura();
 
-  inline float GetVar(int idx) const { return GetSkillBase()->var[idx]; }
+  inline float GetVar(int32_t idx) const { return GetSkillBase()->var[idx]; }
 
   bool Cancel();
-  uint GetSkillEnhance() const;
+  uint32_t GetSkillEnhance() const;
 
-  int GetCurrentSkillLevel() const { return m_nSkillLevel + m_nSkillLevelAdd; }
+  int32_t GetCurrentSkillLevel() const { return m_nSkillLevel + m_nSkillLevelAdd; }
 
   SkillBase *GetSkillBase() const { return m_SkillBase; }
 
   uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
 
-  bool CheckCoolTime(uint t) const;
-  uint GetSkillCoolTime() const;
-  void SetRemainCoolTime(uint time);
-  void SetRequestedSkillLevel(int nLevel);
+  bool CheckCoolTime(uint32_t t) const;
+  uint32_t GetSkillCoolTime() const;
+  void SetRemainCoolTime(uint32_t time);
+  void SetRequestedSkillLevel(int32_t nLevel);
 
   int64_t m_nSkillUID;
   Unit *m_pOwner{nullptr};
-  int m_nSummonID;
-  int m_nSkillID;
-  int m_nSkillLevel;
-  int m_nSkillLevelAdd{0};
-  int cool_time;
+  int32_t m_nSummonID;
+  int32_t m_nSkillID;
+  int32_t m_nSkillLevel;
+  int32_t m_nSkillLevelAdd{0};
+  int32_t cool_time;
 
   SkillBase *m_SkillBase{nullptr};
 
-  void broadcastSkillMessage(WorldObject *pObject, int cost_hp, int cost_mp,
-                             int nType);
-  void broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp,
-                             int cost_mp, int nType);
+  void broadcastSkillMessage(WorldObject *pObject, int32_t cost_hp, int32_t cost_mp,
+                             int32_t nType);
+  void broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int32_t cost_hp,
+                             int32_t cost_mp, int32_t nType);
 
   // For processing skill
   uint8_t m_nRequestedSkillLevel;
@@ -117,18 +117,18 @@ public:
 private:
   Position m_targetPosition{};
   float m_fRange;
-  uint m_nCastingDelay;
-  uint m_nEnhance{};
+  uint32_t m_nCastingDelay;
+  uint32_t m_nEnhance{};
   uint16_t m_nErrorCode{};
-  uint m_hTarget{};
-  uint m_nCastTime{};
-  uint m_nNextCoolTime{};
-  uint m_nFireTime{};
-  int m_nCurrentFire{};
-  int m_nTotalFire{};
+  uint32_t m_hTarget{};
+  uint32_t m_nCastTime{};
+  uint32_t m_nNextCoolTime{};
+  uint32_t m_nFireTime{};
+  int32_t m_nCurrentFire{};
+  int32_t m_nTotalFire{};
   bool m_bMultiple{false};
-  uint m_nTargetCount;
-  uint m_nFireCount;
+  uint32_t m_nTargetCount;
+  uint32_t m_nFireCount;
   uint32_t m_nAuraMPDecTime;
   uint32_t m_nAuraRefreshTime;
   Position m_RushPos;
@@ -138,12 +138,12 @@ private:
   SkillStatus m_Status{};
 
 protected:
-  void assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp,
-                       int cost_mp);
+  void assembleMessage(TS_SC_SKILL &pSkillPct, int32_t nType, int32_t cost_hp,
+                       int32_t cost_mp);
   void Init();
 
 private:
-  int InitError(uint16_t);
+  int32_t InitError(uint16_t);
   uint32_t GetAuraMPDecTime() { return m_nAuraMPDecTime; }
   void SetAuraMPDecTime(uint32_t nTime) { m_nAuraMPDecTime = nTime; }
   uint32_t GetAuraRefreshTime() { return m_nAuraRefreshTime; }
@@ -153,13 +153,13 @@ private:
   uint32_t GetCastingTime() const { return m_nFireTime - m_nCastTime; }
   uint32_t GetOriginalCastingDelay() const { return m_nCastingDelay; }
   std::vector<SkillResult> m_vResultList{};
-  void process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget);
+  void process_target(uint32_t t, SkillTargetFunctor &fn, Unit *pTarget);
   void FireSkill(Unit *pTarget, bool &bIsSuccess);
   void PostFireSkill(Unit *pTarget);
   Position GetMovableKnockBackPosition(Position &OriginalPos,
                                        Position &TargetPos);
-  uint16_t PrepareSummon(uint handle, Position pos);
-  uint16_t PrepareTaming(uint handle);
+  uint16_t PrepareSummon(uint32_t handle, Position pos);
+  uint16_t PrepareTaming(uint32_t handle);
 
   void PHYSICAL_SINGLE_DAMAGE(Unit *pTarget);
   void SINGLE_MAGICAL_DAMAGE(Unit *pTarget);
@@ -195,10 +195,10 @@ private:
   void SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget);
   void SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
 
-  bool PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage);
+  bool PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int32_t &pnAdditionalDamage);
   bool AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos,
                        float &pface);
-  int AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time);
+  int32_t AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time);
   void PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget);
   void PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
   void PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget);

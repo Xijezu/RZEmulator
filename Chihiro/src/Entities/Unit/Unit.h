@@ -29,7 +29,7 @@ class Item;
 class World;
 class Skill;
 
-enum CREATURE_STATUS : uint
+enum CREATURE_STATUS : uint32_t
 {
     STATUS_LOGIN_COMPLETE = 0x01,
     STATUS_FIRST_ENTER = 0x02,
@@ -93,7 +93,7 @@ enum _CHARACTER_RESURRECTION_TYPE
 
 class Unit : public WorldObject
 {
-  public:
+public:
     friend class Messages;
     friend class Skill;
     friend class Player;
@@ -120,18 +120,18 @@ class Unit : public WorldObject
     uint32_t GetEnemyCount() { return static_cast<uint32_t>(m_vEnemyList.size()); }
 
     /// SKILLS
-    int GetCurrentSkillLevel(int skill_id) const;
-    int GetBaseSkillLevel(int skill_id) const;
-    Skill *SetSkill(int, int, int, int);
-    Skill *GetSkill(int skill_id) const;
-    void RegisterSkill(int skill_id, int skill_level, uint remain_cool_time, int nJobID);
+    int32_t GetCurrentSkillLevel(int32_t skill_id) const;
+    int32_t GetBaseSkillLevel(int32_t skill_id) const;
+    Skill *SetSkill(int, int, int, int32_t);
+    Skill *GetSkill(int32_t skill_id) const;
+    void RegisterSkill(int32_t skill_id, int32_t skill_level, uint32_t remain_cool_time, int32_t nJobID);
     void EnumPassiveSkill(struct SkillFunctor &fn);
     /// END SKILLS
 
-    virtual bool StartAttack(uint target, bool bNeedFastReaction);
+    virtual bool StartAttack(uint32_t target, bool bNeedFastReaction);
     bool IsUsingDoubleWeapon() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON); }
 
-    int32_t GetPrevJobId(int nDepth) const
+    int32_t GetPrevJobId(int32_t nDepth) const
     {
         if (nDepth > 3)
             return 0;
@@ -139,7 +139,7 @@ class Unit : public WorldObject
             return GetInt32Value(UNIT_FIELD_PREV_JOB + nDepth);
     }
 
-    int32_t GetPrevJobLv(int nDepth) const
+    int32_t GetPrevJobLv(int32_t nDepth) const
     {
         if (nDepth > 3)
             return 0;
@@ -147,53 +147,53 @@ class Unit : public WorldObject
             return GetInt32Value(UNIT_FIELD_PREV_JLV + nDepth);
     }
 
-    void regenHPMP(uint t);
+    void regenHPMP(uint32_t t);
 
     uint32_t HasUnitTypeMask(uint32_t mask) const { return mask & m_unitTypeMask; }
 
     /// BATTLE START
-    void Attack(Unit *pTarget, uint t, uint attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
+    void Attack(Unit *pTarget, uint32_t t, uint32_t attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
     void EndAttack();
 
-    uint GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
+    uint32_t GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
-    virtual int GetMoveSpeed();
-    inline int GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
+    virtual int32_t GetMoveSpeed();
+    inline int32_t GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
     uint8_t GetRealRidingSpeed();
 
-    inline int GetStrength() const { return m_cStat.strength; }
-    inline int GetVital() const { return m_cStat.vital; }
-    inline int GetDexterity() const { return m_cStat.dexterity; }
-    inline int GetAgility() const { return m_cStat.agility; }
-    inline int GetIntelligence() const { return m_cStat.intelligence; }
-    inline int GetMentality() const { return m_cStat.mentality; }
-    inline int GetLuck() const { return m_cStat.luck; }
+    inline int32_t GetStrength() const { return m_cStat.strength; }
+    inline int32_t GetVital() const { return m_cStat.vital; }
+    inline int32_t GetDexterity() const { return m_cStat.dexterity; }
+    inline int32_t GetAgility() const { return m_cStat.agility; }
+    inline int32_t GetIntelligence() const { return m_cStat.intelligence; }
+    inline int32_t GetMentality() const { return m_cStat.mentality; }
+    inline int32_t GetLuck() const { return m_cStat.luck; }
 
     virtual float GetFCM() const { return 1.0f; }
-    inline int GetCritical() const { return m_Attribute.nCritical; }
-    inline int GetCriticalPower() const { return m_Attribute.nCriticalPower; }
-    inline int GetAttackPointRight() const { return m_Attribute.nAttackPointRight; }
-    inline int GetAttackPointLeft() const { return m_Attribute.nAttackPointLeft; }
-    inline int GetDefence() const { return m_Attribute.nDefence; }
-    inline int GetMagicPoint() const { return m_Attribute.nMagicPoint; }
-    inline int GetMagicDefence() const { return m_Attribute.nMagicDefence; }
-    inline int GetAccuracyRight() const { return m_Attribute.nAccuracyRight; }
-    inline int GetAccuracyLeft() const { return m_Attribute.nAccuracyLeft; }
-    inline int GetMagicAccuracy() const { return m_Attribute.nMagicAccuracy; }
-    inline int GetAvoid() const { return m_Attribute.nAvoid; }
-    inline int GetMagicAvoid() const { return m_Attribute.nMagicAvoid; }
-    inline int GetBlockChance() const { return m_Attribute.nBlockChance; }
-    inline int GetBlockDefence() const { return m_Attribute.nBlockDefence; }
-    inline int GetAttackSpeed() const { return m_Attribute.nAttackSpeed; }
-    inline int GetMaxWeight() const { return m_Attribute.nMaxWeight; }
-    inline int GetCastingSpeed() const { return m_Attribute.nCastingSpeed; }
+    inline int32_t GetCritical() const { return m_Attribute.nCritical; }
+    inline int32_t GetCriticalPower() const { return m_Attribute.nCriticalPower; }
+    inline int32_t GetAttackPointRight() const { return m_Attribute.nAttackPointRight; }
+    inline int32_t GetAttackPointLeft() const { return m_Attribute.nAttackPointLeft; }
+    inline int32_t GetDefence() const { return m_Attribute.nDefence; }
+    inline int32_t GetMagicPoint() const { return m_Attribute.nMagicPoint; }
+    inline int32_t GetMagicDefence() const { return m_Attribute.nMagicDefence; }
+    inline int32_t GetAccuracyRight() const { return m_Attribute.nAccuracyRight; }
+    inline int32_t GetAccuracyLeft() const { return m_Attribute.nAccuracyLeft; }
+    inline int32_t GetMagicAccuracy() const { return m_Attribute.nMagicAccuracy; }
+    inline int32_t GetAvoid() const { return m_Attribute.nAvoid; }
+    inline int32_t GetMagicAvoid() const { return m_Attribute.nMagicAvoid; }
+    inline int32_t GetBlockChance() const { return m_Attribute.nBlockChance; }
+    inline int32_t GetBlockDefence() const { return m_Attribute.nBlockDefence; }
+    inline int32_t GetAttackSpeed() const { return m_Attribute.nAttackSpeed; }
+    inline int32_t GetMaxWeight() const { return m_Attribute.nMaxWeight; }
+    inline int32_t GetCastingSpeed() const { return m_Attribute.nCastingSpeed; }
 
     inline CreatureAtributeServer &GetAttribute() { return m_Attribute; }
     inline CreatureAttributeAmplifier &GetAttributeAmplifier() { return m_AttributeAmplifier; }
     inline CreatureStat &GetCreatureStat() { return m_cStat; }
     inline CreatureStatAmplifier &GetCreatureStatAmplifier() { return m_StatAmplifier; }
 
-    uint GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
+    uint32_t GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
     uint32_t GetTrapHandle() const { return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE); }
 
@@ -201,30 +201,30 @@ class Unit : public WorldObject
 
     float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
-    uint GetAttackInterval() const { return (uint)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
-    int GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[elemental_type]; }
+    uint32_t GetAttackInterval() const { return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
+    int32_t GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[elemental_type]; }
 
     void AddEnergy();
-    void RemoveEnergy(int nEnergy);
+    void RemoveEnergy(int32_t nEnergy);
 
     State *GetState(StateCode code);
-    Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int accuracy_bonus, float critical_amp, int critical_bonus, int nFlag);
-    DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0);
-    DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0);
-    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int accuracy_bonus = 0, int critical_bonus = 0, int nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, float critical_amp, int32_t critical_bonus, int32_t nFlag);
+    DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0);
+    DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0);
+    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
 
-    DamageInfo DealMagicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
-    DamageInfo DealPhysicalSkillDamage(Unit *pFrom, int nDamage, ElementalType elemental_type, int accuracy_bonus, int critical_bonus, int nFlag);
+    DamageInfo DealMagicalSkillDamage(Unit *pFrom, int32_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag);
+    DamageInfo DealPhysicalSkillDamage(Unit *pFrom, int32_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag);
     void ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE);
-    int damage(Unit *pFrom, int nDamage, bool decreaseEXPOnDead = true);
+    int32_t damage(Unit *pFrom, int32_t nDamage, bool decreaseEXPOnDead = true);
 
     bool IsPhysicalImmune() { return (GetState(SC_SEAL) != nullptr); }
     bool IsMagicalImmune() { return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr); }
@@ -232,33 +232,33 @@ class Unit : public WorldObject
     float GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad);
     bool ResurrectByState();
 
-    int Heal(int hp);
-    int MPHeal(int mp);
-    int HealByItem(int hp);
-    int MPHealByItem(int mp);
+    int32_t Heal(int32_t hp);
+    int32_t MPHeal(int32_t mp);
+    int32_t HealByItem(int32_t hp);
+    int32_t MPHealByItem(int32_t mp);
 
-    bool Resurrect(_CHARACTER_RESURRECTION_TYPE eResurrectType, int nIncHP, int nIncMP, int64_t nRecoveryEXP, bool bIsRestoreRemovedStateByDead);
+    bool Resurrect(_CHARACTER_RESURRECTION_TYPE eResurrectType, int32_t nIncHP, int32_t nIncMP, int64_t nRecoveryEXP, bool bIsRestoreRemovedStateByDead);
 
     /// BATTLE END
-    void RemoveState(StateCode code, int state_level);
-    void RemoveState(int uid);
-    void RemoveGoodState(int state_level);
+    void RemoveState(StateCode code, int32_t state_level);
+    void RemoveState(int32_t uid);
+    void RemoveGoodState(int32_t state_level);
 
     // Setters
     void SetLevel(uint8_t lvl)
     {
-        SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int>(lvl));
+        SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int32_t>(lvl));
     }
 
-    void SetCurrentJob(uint job)
+    void SetCurrentJob(uint32_t job)
     {
         SetInt32Value(UNIT_FIELD_JOB, job);
     }
 
-    void SetJP(int jp);
-    void SetCurrentJLv(int jlv);
-    void SetHealth(int);
-    void SetMana(int);
+    void SetJP(int32_t jp);
+    void SetCurrentJLv(int32_t jlv);
+    void SetHealth(int32_t);
+    void SetMana(int32_t);
 
     void BindSkillCard(Item *pItem);
     void UnBindSkillCard(Item *pItem);
@@ -336,7 +336,7 @@ class Unit : public WorldObject
 
     void SetEXP(int64_t exp);
 
-    int GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
+    int32_t GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
 
     float GetCoolTimeSpeed() const
     {
@@ -345,31 +345,31 @@ class Unit : public WorldObject
 
     float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const;
 
-    uint GetRemainCoolTime(int skill_id) const;
-    uint GetTotalCoolTime(int skill_id) const;
+    uint32_t GetRemainCoolTime(int32_t skill_id) const;
+    uint32_t GetTotalCoolTime(int32_t skill_id) const;
 
-    uint GetBowAttackInterval()
+    uint32_t GetBowAttackInterval()
     {
-        return (uint)((float)GetAttackInterval() * (1.0f - m_fBowInterval));
+        return (uint32_t)((float)GetAttackInterval() * (1.0f - m_fBowInterval));
     }
 
-    uint GetBowInterval()
+    uint32_t GetBowInterval()
     {
-        return (uint)((float)GetAttackInterval() * m_fBowInterval);
+        return (uint32_t)((float)GetAttackInterval() * m_fBowInterval);
     }
 
     // Getters
-    int GetLevel() const
+    int32_t GetLevel() const
     {
         return GetInt32Value(UNIT_FIELD_LEVEL);
     }
 
-    virtual int GetRace() const
+    virtual int32_t GetRace() const
     {
         return GetInt32Value(UNIT_FIELD_RACE);
     }
 
-    int GetMagicPoint(ElementalType type, bool bPhysical, bool bBad);
+    int32_t GetMagicPoint(ElementalType type, bool bPhysical, bool bBad);
 
     /// @Todo: Implement correctly
     bool IsKnockbackable() const
@@ -389,42 +389,42 @@ class Unit : public WorldObject
 
     float GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad);
 
-    int GetHealth() const
+    int32_t GetHealth() const
     {
         return GetInt32Value(UNIT_FIELD_HEALTH);
     }
 
-    int GetMaxHealth() const
+    int32_t GetMaxHealth() const
     {
         return GetInt32Value(UNIT_FIELD_MAX_HEALTH);
     }
 
-    int GetMana() const
+    int32_t GetMana() const
     {
         return GetInt32Value(UNIT_FIELD_MANA);
     }
 
-    int GetMaxMana() const
+    int32_t GetMaxMana() const
     {
         return GetInt32Value(UNIT_FIELD_MAX_MANA);
     }
 
-    int GetCurrentJob() const
+    int32_t GetCurrentJob() const
     {
         return GetInt32Value(UNIT_FIELD_JOB);
     };
 
-    int GetCurrentJLv() const
+    int32_t GetCurrentJLv() const
     {
         return GetInt32Value(UNIT_FIELD_JLV);
     }
 
-    int GetStamina() const
+    int32_t GetStamina() const
     {
         return GetInt32Value(UNIT_FIELD_STAMINA);
     }
 
-    int GetJP() const
+    int32_t GetJP() const
     {
         return GetInt32Value(UNIT_FIELD_JOBPOINT);
     }
@@ -434,7 +434,7 @@ class Unit : public WorldObject
         return GetUInt32Value(UNIT_FIELD_JOBPOINT);
     }
 
-    float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint nOriginalCoolTime) const;
+    float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_t nOriginalCoolTime) const;
     float GetItemChance() const;
 
     int64_t GetEXP() const
@@ -442,14 +442,14 @@ class Unit : public WorldObject
         return static_cast<int64_t>(GetUInt64Value(UNIT_FIELD_EXP));
     }
 
-    virtual uint GetCreatureGroup() const;
+    virtual uint32_t GetCreatureGroup() const;
 
-    void AddHealth(int hp)
+    void AddHealth(int32_t hp)
     {
         SetHealth(GetHealth() + hp);
     }
 
-    void AddMana(int mp)
+    void AddMana(int32_t mp)
     {
         SetMana(GetMana() + mp);
     }
@@ -460,26 +460,26 @@ class Unit : public WorldObject
     void RemoveAllAura();
     void RemoveAllHate();
 
-    virtual void AddEXP(int64_t exp, uint jp, bool bApplyStamina);
+    virtual void AddEXP(int64_t exp, uint32_t jp, bool bApplyStamina);
     void CancelSkill();
     void CancelAttack();
-    int CastSkill(int nSkillID, int nSkillLevel, uint target_handle, Position pos, uint8_t layer, bool bIsCastedByItem);
+    int32_t CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_handle, Position pos, uint8_t layer, bool bIsCastedByItem);
     bool OnCompleteSkill();
-    void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time);
-    void SetMove(Position _to, uint8_t _speed, uint _start_time);
-    int GetArmorClass() const;
+    void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time);
+    void SetMove(Position _to, uint8_t _speed, uint32_t _start_time);
+    int32_t GetArmorClass() const;
     // Event handler
-    bool IsWornByCode(int code) const;
-    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList);
+    bool IsWornByCode(int32_t code) const;
+    virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList);
     Item *GetWornItem(ItemWearType);
-    ushort Puton(ItemWearType pos, Item *item, bool bIsTranslated = false);
-    ushort Putoff(ItemWearType pos);
+    uint16_t Puton(ItemWearType pos, Item *item, bool bIsTranslated = false);
+    uint16_t Putoff(ItemWearType pos);
     ItemWearType GetAbsoluteWearPos(ItemWearType pos);
     ItemClass GetWeaponClass();
     bool IsWearShield();
-    std::pair<float, int> GetHateMod(int nHateModType, bool bIsHarmful);
-    void PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay);
-    void RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int nElementalType, uint32_t nOriginalCastingDelay);
+    std::pair<float, int32_t> GetHateMod(int32_t nHateModType, bool bIsHarmful);
+    void PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
+    void RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
 
     Skill *GetCastSkill() const { return m_castingSkill; }
 
@@ -507,20 +507,20 @@ class Unit : public WorldObject
 
     void CalculateStat();
 
-    uint16_t AddState(StateType type, StateCode code, uint caster, int level, uint start_time, uint end_time, bool bIsAura = false, int nStateValue = 0, std::string szStateValue = "");
+    uint16_t AddState(StateType type, StateCode code, uint32_t caster, int32_t level, uint32_t start_time, uint32_t end_time, bool bIsAura = false, int32_t nStateValue = 0, std::string szStateValue = "");
 
-  protected:
-    uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int type, float var1, float var2, const std::string &szParameter);
+protected:
+    uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float var1, float var2, const std::string &szParameter);
     void removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, uint32_t nOriginalCastingTime);
 
-    virtual bool onProcAura(Skill *pSkill, int nRequestedLevel);
-    virtual void procStateDamage(uint t);
-    virtual void procState(uint t);
+    virtual bool onProcAura(Skill *pSkill, int32_t nRequestedLevel);
+    virtual void procStateDamage(uint32_t t);
+    virtual void procState(uint32_t t);
 
     int64_t GetBulletCount() const;
-    State *GetStateByEffectType(int effectType) const;
+    State *GetStateByEffectType(int32_t effectType) const;
 
-    virtual void onRegisterSkill(int64_t, int, int, int){};
+    virtual void onRegisterSkill(int64_t, int, int, int32_t){};
 
     virtual void onExpChange(){};
 
@@ -529,12 +529,12 @@ class Unit : public WorldObject
     virtual void onJobLevelUp(){};
     virtual void onAttackAndSkillProcess();
 
-    virtual void onCantAttack(uint target, uint t){};
+    virtual void onCantAttack(uint32_t target, uint32_t t){};
     virtual uint16_t putonItem(ItemWearType pos, Item *item);
     virtual uint16_t putoffItem(ItemWearType);
 
     // Overwritten in Monster
-    virtual int onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical)
+    virtual int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical)
     {
         return nDamage;
     }
@@ -542,7 +542,7 @@ class Unit : public WorldObject
     virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
     void removeStateByDead();
     void processAttack();
-    void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int tm, int delay, bool bIsDoubleAttack, bool bIsAiming = false, bool bEndAttack = false, bool bCancelAttack = false);
+    void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int32_t tm, int32_t delay, bool bIsDoubleAttack, bool bIsAiming = false, bool bEndAttack = false, bool bCancelAttack = false);
     void onAfterAddState(State *);
     virtual void onAfterRemoveState(State *state);
     virtual void onUpdateState(State *state, bool bIsExpire);
@@ -550,10 +550,10 @@ class Unit : public WorldObject
     void processPendingMove();
 
     ///-CalculateStat functions
-    virtual void incParameter(uint nBitset, float nValue, bool bStat);
-    virtual void incParameter2(uint nBitset, float fValue);
-    virtual void ampParameter2(uint nBitset, float fValue);
-    virtual void ampParameter(uint nBitset, float fValue, bool bStat);
+    virtual void incParameter(uint32_t nBitset, float nValue, bool bStat);
+    virtual void incParameter2(uint32_t nBitset, float fValue);
+    virtual void ampParameter2(uint32_t nBitset, float fValue);
+    virtual void ampParameter(uint32_t nBitset, float fValue, bool bStat);
     virtual void applyPassiveSkillAmplifyEffect();
     virtual void applyPassiveSkillAmplifyEffect(Skill *);
     virtual void onApplyAttributeAdjustment(){};
@@ -561,7 +561,7 @@ class Unit : public WorldObject
     virtual void onApplyStat(){};
     virtual void applyState(State &state);
     virtual void applyStatByState();
-    virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio);
+    virtual void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio);
     virtual void applyJobLevelBonus(){};
     virtual void onModifyStatAndAttribute(){};
     virtual void onBeforeCalculateStat(){};
@@ -646,32 +646,32 @@ class Unit : public WorldObject
     std::vector<_STEAL_ON_ATTACK_TAG> m_vStealOnAttack{};
 
     Item *m_anWear[MAX_ITEM_WEAR]{nullptr};
-    uint m_nMovableTime{0};
-    int m_nUnitExpertLevel{0};
-    int m_nNextAttackMode{0};
+    uint32_t m_nMovableTime{0};
+    int32_t m_nUnitExpertLevel{0};
+    int32_t m_nNextAttackMode{0};
     Skill *m_castingSkill{nullptr};
     float m_nRegenHP{}, m_fRegenMP{};
 
-  private:
+private:
     std::vector<std::pair<Skill *, int32_t>> m_vAura{};
     std::vector<Skill *> m_vSkillList{};
     std::vector<Skill *> m_vActiveSkillList{};
     std::vector<Skill *> m_vPassiveSkillList{};
-    std::vector<int> m_vInterruptedSkill{};
-    std::vector<std::set<int>> m_vAllowedSkill{};
+    std::vector<int32_t> m_vInterruptedSkill{};
+    std::vector<std::set<int32_t>> m_vAllowedSkill{};
     std::vector<uint32_t> m_vEnemyList{};
 
     std::vector<Skill *> m_vAmplifyPassiveSkillList{};
 
     float m_fBowInterval{0};
-    bool ClearExpiredState(uint t);
-    uint m_nCurrentStateUID{0};
-    int m_nDoubleWeaponMasteryLevel{0};
+    bool ClearExpiredState(uint32_t t);
+    uint32_t m_nCurrentStateUID{0};
+    int32_t m_nDoubleWeaponMasteryLevel{0};
 
     void ProcessAddHPMPOnCritical();
     void AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, bool bIsPhysicalSkill, bool bIsHarmful);
     void RemoveStatesOnDamage();
-    int GetCriticalDamage(int damage, float critical_amp, int critical_bonus);
+    int32_t GetCriticalDamage(int32_t damage, float critical_amp, int32_t critical_bonus);
     template <typename COMPARER>
     void RemoveStateIf(COMPARER comparer, std::vector<State *> *result = nullptr, bool bByDead = false);
 };

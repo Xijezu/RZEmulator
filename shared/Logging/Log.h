@@ -48,7 +48,7 @@ Appender *CreateAppender(uint8_t id, std::string const &name, LogLevel level, Ap
 
 class Log
 {
-  private:
+private:
     Log();
     ~Log();
     Log(Log const &) = delete;
@@ -56,7 +56,7 @@ class Log
     Log &operator=(Log const &) = delete;
     Log &operator=(Log &&) = delete;
 
-  public:
+public:
     static Log *instance();
 
     void Initialize(NGemity::Asio::IoContext *ioContext);
@@ -96,7 +96,7 @@ class Log
 
     std::string const &GetLogsTimestamp() const { return m_logsTimestamp; }
 
-  private:
+private:
     static std::string GetTimestampStr();
     void write(std::unique_ptr<LogMessage> &&msg) const;
 

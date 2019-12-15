@@ -42,14 +42,14 @@ uint8_t World::m_ExitCode{SHUTDOWN_EXIT_CODE};
 
 World::World() : startTime(getMSTime())
 {
-    srand((unsigned int)time(nullptr));
+    srand((uint32_t)time(nullptr));
 }
 
 World::~World()
 {
 }
 
-uint World::GetArTime()
+uint32_t World::GetArTime()
 {
     return GetMSTimeDiffToNow(startTime) / 10;
 }
@@ -121,17 +121,17 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_NO_COLLISION_CHECK] = sConfigMgr->GetBoolDefault("Game.NoCollisionCheck", false);
     m_bool_configs[CONFIG_NO_SKILL_COOLTIME] = sConfigMgr->GetBoolDefault("Game.NoSkillCooltime", false);
 
-    // Int configs
-    m_int_configs[CONFIG_CELL_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.CellSize", 6);
-    m_int_configs[CONFIG_MAP_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_MAP_WIDTH] = (uint)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
-    m_int_configs[CONFIG_MAP_HEIGHT] = (uint)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
-    m_int_configs[CONFIG_REGION_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
-    m_int_configs[CONFIG_TILE_SIZE] = (uint)sConfigMgr->GetIntDefault("Game.TileSize", 42);
-    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
-    m_int_configs[CONFIG_LOCAL_FLAG] = (uint)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
-    m_int_configs[CONFIG_MAX_LEVEL] = (uint)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
-    m_int_configs[CONFIG_SERVER_INDEX] = (uint)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
+    // int32_t configs
+    m_int_configs[CONFIG_CELL_SIZE] = (uint32_t)sConfigMgr->GetIntDefault("Game.CellSize", 6);
+    m_int_configs[CONFIG_MAP_REGION_SIZE] = (uint32_t)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_MAP_WIDTH] = (uint32_t)sConfigMgr->GetIntDefault("Game.MapWidth", 700000);
+    m_int_configs[CONFIG_MAP_HEIGHT] = (uint32_t)sConfigMgr->GetIntDefault("Game.MapHeight", 1000000);
+    m_int_configs[CONFIG_REGION_SIZE] = (uint32_t)sConfigMgr->GetIntDefault("Game.RegionSize", 180);
+    m_int_configs[CONFIG_TILE_SIZE] = (uint32_t)sConfigMgr->GetIntDefault("Game.TileSize", 42);
+    m_int_configs[CONFIG_ITEM_HOLD_TIME] = (uint32_t)sConfigMgr->GetIntDefault("Game.ItemHoldTime", 18000);
+    m_int_configs[CONFIG_LOCAL_FLAG] = (uint32_t)sConfigMgr->GetIntDefault("Game.LocalFlag", 4);
+    m_int_configs[CONFIG_MAX_LEVEL] = (uint32_t)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
+    m_int_configs[CONFIG_SERVER_INDEX] = (uint32_t)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
 
     // Float Configs
     setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));
@@ -207,7 +207,7 @@ uint64_t World::GetSkillIndex()
     return ++s_nSkillIndex;
 }
 
-bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
+bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint32_t t, bool bBroadcastMove)
 {
     Position oldPos{};
     bool result{false};
@@ -225,15 +225,15 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
         curPos.SetOrientation(pUnit->GetOrientation());
 
         onMoveObject(pUnit, oldPos, curPos);
-        enterProc(pUnit, (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
+        enterProc(pUnit, (uint32_t)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
         pUnit->SetMultipleMove(newPos, speed, t);
 
         if (bBroadcastMove)
         {
             SetMoveFunctor fn;
             fn.obj = pUnit;
-            sRegion.DoEachVisibleRegion((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+            sRegion.DoEachVisibleRegion((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                        (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                         pUnit->GetLayer(), fn);
 
             if (pUnit->IsMonster())
@@ -246,7 +246,7 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
     return result;
 }
 
-bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint t, bool bBroadcastMove)
+bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint32_t t, bool bBroadcastMove)
 {
     Position oldPos{};
     Position curPos2{};
@@ -259,8 +259,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, 
             obj->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
             curPos2 = obj->GetPosition();
             onMoveObject(obj, oldPos, curPos2);
-            enterProc(obj, (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                      (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
+            enterProc(obj, (uint32_t)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                      (uint32_t)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
             obj->SetMove(newPos, speed, t);
         }
         else
@@ -271,8 +271,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, 
         {
             SetMoveFunctor fn;
             fn.obj = obj;
-            sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+            sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                        (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                         obj->GetLayer(), fn);
 
             if (obj->IsMonster())
@@ -287,9 +287,9 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, 
 
 void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
 {
-    auto prev_rx = (uint)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto prev_ry = (uint)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    if (prev_rx != (uint)(newPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || prev_ry != (uint)(newPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)))
+    auto prev_rx = (uint32_t)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto prev_ry = (uint32_t)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    if (prev_rx != (uint32_t)(newPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || prev_ry != (uint32_t)(newPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)))
     {
         auto oldRegion = sRegion.GetRegion(prev_rx, prev_ry, pUnit->GetLayer());
         oldRegion->RemoveObject(pUnit);
@@ -298,10 +298,10 @@ void World::onMoveObject(WorldObject *pUnit, Position oldPos, Position newPos)
     }
 }
 
-void World::enterProc(WorldObject *pUnit, uint prx, uint pry)
+void World::enterProc(WorldObject *pUnit, uint32_t prx, uint32_t pry)
 {
-    auto rx = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto ry = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto rx = (uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto ry = (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     if (rx != prx || ry != pry)
     {
         AddObjectFunctor fn(rx, ry, prx, pry, pUnit->GetLayer(), pUnit);
@@ -324,8 +324,8 @@ void World::AddObjectToWorld(WorldObject *obj)
     if (region == nullptr)
         return;
 
-    AddObjectFunctor rf((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                        (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+    AddObjectFunctor rf((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                        (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                         obj->GetLayer(),
                         obj);
     rf.Run();
@@ -335,13 +335,13 @@ void World::AddObjectToWorld(WorldObject *obj)
     region->AddObject(obj);
 }
 
-void World::onRegionChange(WorldObject *obj, uint update_time, bool bIsStopMessage)
+void World::onRegionChange(WorldObject *obj, uint32_t update_time, bool bIsStopMessage)
 {
-    auto oldx = (uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto oldy = (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    step(obj, (uint)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
+    auto oldx = (uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto oldy = (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    step(obj, (uint32_t)(update_time + obj->lastStepTime + (bIsStopMessage ? 0xA : 0)));
 
-    if ((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldx || (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldy)
+    if ((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldx || (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != oldy)
     {
         enterProc(obj, oldx, oldy);
     }
@@ -360,14 +360,14 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     sRegion.GetRegion(obj)->RemoveObject(obj);
 
     // Send one to each player in visible region
-    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 obj->GetLayer(),
                                 NG_REGION_FUNCTOR(broadcastFunctor),
                                 (uint8_t)RegionVisitor::ClientVisitor);
 }
 
-void World::step(WorldObject *obj, uint tm)
+void World::step(WorldObject *obj, uint32_t tm)
 {
     Position oldPos = obj->GetPosition();
     obj->Step(tm);
@@ -382,7 +382,7 @@ bool World::onSetMove(WorldObject *pObject, Position curPos, Position lastpos)
     return true;
 }
 
-void World::Update(uint diff)
+void World::Update(uint32_t diff)
 {
     ///- Update Sessions
     UpdateSessions(diff);
@@ -415,7 +415,7 @@ void World::Update(uint diff)
   */
 }
 
-void World::UpdateSessions(uint diff)
+void World::UpdateSessions(uint32_t diff)
 {
     ///- Add new sessions
     WorldSession *sess = nullptr;
@@ -464,7 +464,7 @@ void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
     if (pPlayer == nullptr)
         return;
 
-    uint ct = GetArTime();
+    uint32_t ct = GetArTime();
 
     if (layer != pPlayer->GetLayer())
     {
@@ -489,7 +489,7 @@ void World::WarpEnd(Player *pPlayer, Position pPosition, uint8_t layer)
 
 void World::WarpEndSummon(Player *pPlayer, Position pos, uint8_t layer, Summon *pSummon, bool)
 {
-    uint ct = GetArTime();
+    uint32_t ct = GetArTime();
     if (pSummon == nullptr)
         return;
     pSummon->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
@@ -533,14 +533,14 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp)
         }
     }
 
-    int levelDiff = pPlayer->GetLevel() - pCorpse->GetLevel();
+    int32_t levelDiff = pPlayer->GetLevel() - pCorpse->GetLevel();
     if (levelDiff > 0)
     {
         exp = (1.0f - (float)levelDiff * 0.05f) * exp;
         fJP = (1.0f - (float)levelDiff * 0.05f) * jp;
     }
 
-    uint ct = GetArTime();
+    uint32_t ct = GetArTime();
     Position posPlayer = pPlayer->GetCurrentPosition(ct);
     Position posCorpse = pCorpse->GetCurrentPosition(ct);
     if (posCorpse.GetExactDist2d(&posPlayer) <= 500.0f)
@@ -561,7 +561,7 @@ void World::addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp)
         }
     }
 
-    pPlayer->AddEXP(GameRule::GetIntValueByRandomInt64(GameRule::GetEXPRate() * exp), (uint)GameRule::GetIntValueByRandomInt(GameRule::GetEXPRate() * jp), true);
+    pPlayer->AddEXP(GameRule::GetIntValueByRandomInt64(GameRule::GetEXPRate() * exp), (uint32_t)GameRule::GetIntValueByRandomInt(GameRule::GetEXPRate() * jp), true);
 }
 
 void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
@@ -571,7 +571,7 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
     TS_SC_ITEM_DROP_INFO itemPct{};
     itemPct.item_handle = pItem->GetHandle();
     itemPct.monster_handle = pUnit->GetHandle();
-    Broadcast((uint)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
+    Broadcast((uint32_t)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
     AddItemToWorld(pItem);
 }
 
@@ -593,10 +593,10 @@ bool World::RemoveItemFromWorld(Item *pItem)
     return false;
 }
 
-uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
+uint32_t World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 {
-    uint item_handle = 0;
-    int code = pItem->m_Instance.Code;
+    uint32_t item_handle = 0;
+    int32_t code = pItem->m_Instance.Code;
     Item *pNewItem{nullptr};
     if (code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY)
     {
@@ -616,7 +616,7 @@ uint World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
     return item_handle;
 }
 
-bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
+bool World::checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
 {
     float fCreatureCardMod = 1.0f;
     float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
@@ -629,19 +629,19 @@ bool World::checkDrop(Unit *pKiller, int code, int percentage, float fDropRatePe
     return (irand(1, 100000000) > (percentage * fMod * GameRule::GetItemDropRate() * fDropRatePenalty * fPCBangDropRateBonus) * fCreatureCardMod) ? false : true;
 }
 
-int World::ShowQuestMenu(Player *pPlayer)
+int32_t World::ShowQuestMenu(Player *pPlayer)
 {
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr)
     {
-        int m_QuestProgress{0};
+        int32_t m_QuestProgress{0};
         auto functor = [=, &m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
             std::string szBuf{};
             std::string szButtonName{};
             auto qbs = sObjectMgr.GetQuestBase(linkInfo->code);
             if ((qbs->nType != QuestType::QUEST_RANDOM_KILL_INDIVIDUAL && qbs->nType != QuestType::QUEST_RANDOM_COLLECT) || (m_QuestProgress != 0))
             {
-                int qpid = linkInfo->nStartTextID;
+                int32_t qpid = linkInfo->nStartTextID;
                 if (m_QuestProgress == 1)
                     qpid = linkInfo->nInProgressTextID;
                 else if (m_QuestProgress == 2)
@@ -673,7 +673,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    int nTameItemCode = pMonster->GetTameItemCode();
+    int32_t nTameItemCode = pMonster->GetTameItemCode();
     if (pMonster->GetExactDist2d(player) > 500.0f || nTameItemCode == 0)
     {
         ClearTamer(pMonster, false);
@@ -681,7 +681,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    Item *pItem = player->FindItem(nTameItemCode, (uint)ITEM_FLAG_TAMING, true);
+    Item *pItem = player->FindItem(nTameItemCode, (uint32_t)ITEM_FLAG_TAMING, true);
     if (pItem == nullptr)
     {
         NG_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
@@ -727,7 +727,7 @@ bool World::ProcTame(Monster *pMonster)
 
 void World::ClearTamer(Monster *pMonster, bool bBroadcastMsg)
 {
-    uint tamer = pMonster->GetTamer();
+    uint32_t tamer = pMonster->GetTamer();
     if (tamer != 0)
     {
         if (bBroadcastMsg)
@@ -742,12 +742,12 @@ void World::ClearTamer(Monster *pMonster, bool bBroadcastMsg)
     pMonster->SetTamer(0, 0);
 }
 
-bool World::SetTamer(Monster *pMonster, Player *pPlayer, int nSkillLevel)
+bool World::SetTamer(Monster *pMonster, Player *pPlayer, int32_t nSkillLevel)
 {
     if (pPlayer == nullptr || pPlayer->m_hTamingTarget != 0 || pMonster == nullptr)
         return false;
 
-    int tameCode = pMonster->GetTameItemCode();
+    int32_t tameCode = pMonster->GetTameItemCode();
     if (pMonster->GetHealth() == pMonster->GetMaxHealth() && pMonster->GetTamer() == 0 && tameCode != 0)
     {
         auto card = pPlayer->FindItem(tameCode, ITEM_FLAG_SUMMON, false);
@@ -782,12 +782,12 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
     if (pPlayer == nullptr || pCorpse == nullptr || pPlayer->GetChaos() >= pPlayer->GetMaxChaos())
         return;
 
-    uint ct = GetArTime();
+    uint32_t ct = GetArTime();
     Position playerPos = pPlayer->GetCurrentPosition(ct);
     Position corpsePos = pCorpse->GetCurrentPosition(ct);
     if (corpsePos.GetExactDist2d(&playerPos) <= 500.0f)
     {
-        int nChaos = GameRule::GetIntValueByRandomInt(chaos);
+        int32_t nChaos = GameRule::GetIntValueByRandomInt(chaos);
 
         if (chaos > 0.0f)
         {
@@ -798,19 +798,19 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
             chaosPct.nBonus = 0;
             chaosPct.nBonusPercent = 0;
             chaosPct.nBonusType = 0;
-            Broadcast((uint)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
+            Broadcast((uint32_t)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
     }
 }
 
-void World::addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp)
+void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp)
 {
-    int nMinLevel = 255;
-    int nMaxLevel = 0;
-    int nTotalLevel = 0;
-    int nCount = 0;
-    int nTotalCount = 0;
+    int32_t nMinLevel = 255;
+    int32_t nMaxLevel = 0;
+    int32_t nTotalLevel = 0;
+    int32_t nCount = 0;
+    int32_t nTotalCount = 0;
     float fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
     sGroupManager.DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
@@ -820,7 +820,7 @@ void World::addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp)
             if (tag.pPlayer->IsInWorld() && pCorpse->GetLayer() == tag.pPlayer->GetLayer() && pCorpse->GetExactDist2d(tag.pPlayer) <= 500.0f)
             {
                 pOneManPlayer = tag.pPlayer;
-                int l = tag.pPlayer->GetLevel();
+                int32_t l = tag.pPlayer->GetLevel();
                 if (nMaxLevel < l)
                     nMaxLevel = l;
                 if (nMinLevel > l)
@@ -839,15 +839,15 @@ void World::addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp)
             return;
         }
 
-        int levelDiff = nMaxLevel - nMinLevel;
+        int32_t levelDiff = nMaxLevel - nMinLevel;
         if (levelDiff < nTotalCount + 40)
         {
             if (levelDiff >= nTotalCount + 5)
             {
                 fLevelPenalty = levelDiff - nCount - 5;
                 fLevelPenalty = 1.0f - (float)pow(fLevelPenalty, 1.1) * 0.02f;
-                exp = (int)(exp * fLevelPenalty);
-                jp = (int)(jp * fLevelPenalty);
+                exp = (int32_t)(exp * fLevelPenalty);
+                jp = (int32_t)(jp * fLevelPenalty);
             }
         }
         else
@@ -856,8 +856,8 @@ void World::addEXP(Unit *pCorpse, int nPartyID, int32_t exp, float jp)
             jp = 0;
         }
         float lp = fLevelPenalty * 0.01f + 1.0f;
-        auto nSharedEXP = (int)(exp * lp);
-        auto nSharedJP = (int)(jp * lp);
+        auto nSharedEXP = (int32_t)(exp * lp);
+        auto nSharedJP = (int32_t)(jp * lp);
         sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
             if (tag.bIsOnline && tag.pPlayer != nullptr)
             {
@@ -893,15 +893,15 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     {
         std::vector<Player *> vList{};
         sGroupManager.GetNearMember(pClient, 500.0f, vList);
-        auto idx = irand(0, (int)vList.size() - 1);
+        auto idx = irand(0, (int32_t)vList.size() - 1);
         procAddItem(vList[idx], pItem, true);
     }
 }
 
-void World::EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint> &pvResult, bool bIncludeClient, bool bIncludeNPC)
+void World::EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint32_t> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
-    sRegion.DoEachVisibleRegion((uint)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
+    sRegion.DoEachVisibleRegion((uint32_t)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
 }
 
 void World::MoveObject(Unit *pObject, Position &newPos, float face)

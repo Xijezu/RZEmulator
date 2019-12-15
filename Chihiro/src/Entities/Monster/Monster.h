@@ -24,7 +24,7 @@ struct VirtualParty
 {
     VirtualParty() = default;
 
-    VirtualParty(int id, int d, int lv)
+    VirtualParty(int32_t id, int32_t d, int32_t lv)
     {
         fContribute = 0.0f;
         hPlayer = 0;
@@ -34,7 +34,7 @@ struct VirtualParty
         bTamer = false;
     }
 
-    VirtualParty(uint h, int d, int lv)
+    VirtualParty(uint32_t h, int32_t d, int32_t lv)
     {
         fContribute = 0.0f;
         hPlayer = h;
@@ -54,26 +54,26 @@ struct VirtualParty
         return lh.fContribute > rh.fContribute;
     }
 
-    int nPartyID;
-    uint hPlayer;
-    int nDamage;
+    int32_t nPartyID;
+    uint32_t hPlayer;
+    int32_t nDamage;
     float fContribute;
     bool bTamer;
-    int nLevel;
+    int32_t nLevel;
 };
 
 struct DamageTag
 {
-    DamageTag(uint _uid, uint _time, int _damage)
+    DamageTag(uint32_t _uid, uint32_t _time, int32_t _damage)
     {
         uid = _uid;
         nTime = _time;
         nDamage = _damage;
     }
 
-    uint uid;
-    uint nTime;
-    int nDamage;
+    uint32_t uid;
+    uint32_t nTime;
+    int32_t nDamage;
 };
 
 struct WayPointInfo;
@@ -84,16 +84,16 @@ class Monster : public Unit
 
   public:
     static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
-    explicit Monster(uint handle, MonsterBase *mb);
+    explicit Monster(uint32_t handle, MonsterBase *mb);
     ~Monster() = default;
     // Deleting the copy & assignment operators
     // Better safe than sorry
     Monster(const Monster &) = delete;
     Monster &operator=(const Monster &) = delete;
 
-    void Update(uint) override;
+    void Update(uint32_t) override;
     void OnUpdate() override;
-    bool StartAttack(uint target, bool bNeedFastReaction) override;
+    bool StartAttack(uint32_t target, bool bNeedFastReaction) override;
     void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
     MonsterBase *GetBase() const { return m_Base; }
     void applyJobLevelBonus() override{};
@@ -105,9 +105,9 @@ class Monster : public Unit
     MONSTER_STATUS GetStatus() const { return m_nStatus; }
 
     void SetStatus(MONSTER_STATUS status);
-    void SetTamer(uint handle, int nTamingSkillLevel);
+    void SetTamer(uint32_t handle, int32_t nTamingSkillLevel);
 
-    uint GetCreatureGroup() const override;
+    uint32_t GetCreatureGroup() const override;
     bool IsEnvironmentMonster() const;
     bool IsBattleMode() const; // override;
     bool IsBossMonster() const;
@@ -126,22 +126,22 @@ class Monster : public Unit
     float GetFirstAttackRange();
     bool IsFirstAttacker() const;
     bool IsGroupFirstAttacker() const;
-    uint GetTamer() const;
+    uint32_t GetTamer() const;
     bool IsCastRevenger() const;
     bool IsBattleRevenger() const;
-    int GetMonsterGroup() const;
+    int32_t GetMonsterGroup() const;
     float GetTameExpAdjust() const { return m_Base != nullptr ? m_Base->taming_exp_mod : 1.0f; }
-    int GetTameItemCode() const;
-    int GetTameCode() const;
+    int32_t GetTameItemCode() const;
+    int32_t GetTameCode() const;
     float GetTamePercentage() const;
-    int GetMonsterID() const;
+    int32_t GetMonsterID() const;
     CreatureStat *GetBaseStat() const override;
-    int GetRace() const override;
+    int32_t GetRace() const override;
 
-    int GetHate(uint32_t handle);
-    int RemoveHate(uint32_t handle, int pt);
+    int32_t GetHate(uint32_t handle);
+    int32_t RemoveHate(uint32_t handle, int32_t pt);
 
-    int AddHate(uint handle, int pt, bool bBroadcast = true, bool bProcRoamingMonster = true);
+    int32_t AddHate(uint32_t handle, int32_t pt, bool bBroadcast = true, bool bProcRoamingMonster = true);
     bool IsAlly(const Unit *pTarget) override;
     void TriggerForceKill(Player *pPlayer);
 
@@ -149,14 +149,14 @@ class Monster : public Unit
     bool m_bNearClient;
 
   protected:
-    HateTag *getHateTag(uint handle, uint t);
-    HateTag *addHate(uint handle, int nHate);
-    bool removeFromHateList(uint handle);
+    HateTag *getHateTag(uint32_t handle, uint32_t t);
+    HateTag *addHate(uint32_t handle, int32_t nHate);
+    bool removeFromHateList(uint32_t handle);
 
-    void processWalk(uint t);
-    void processMove(uint t);
+    void processWalk(uint32_t t);
+    void processMove(uint32_t t);
     void ForceKill(Player *byPlayer);
-    void processFirstAttack(uint t);
+    void processFirstAttack(uint32_t t);
     void FindAttackablePosition(Position &myPosition, Position &enemyPosition, float distance, float gap);
     void getMovePosition(Position &newPos);
     Position getNonDuplicateAttackPos(Unit *pEnemy);
@@ -164,24 +164,24 @@ class Monster : public Unit
     void onBeforeCalculateStat() override;
     void onApplyAttributeAdjustment() override;
     void comeBackHome(bool bInvincible);
-    int onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
+    int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical) override;
     void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
-    void processDead(uint t); //override;
+    void processDead(uint32_t t); //override;
   private:
     void findNextEnemy();
-    void AI_processAttack(uint t);
-    void AI_processAttack(Unit *pEnemy, uint t);
+    void AI_processAttack(uint32_t t);
+    void AI_processAttack(Unit *pEnemy, uint32_t t);
 
-    DamageTag *addDamage(uint handle, int nDamage);
-    DamageTag *getDamageTag(uint handle, uint t);
+    DamageTag *addDamage(uint32_t handle, int32_t nDamage);
+    DamageTag *getDamageTag(uint32_t handle, uint32_t t);
     void calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute);
     void procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute);
     void procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
     void procQuest(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute);
     void procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
     void procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
-    void dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int code, long count, int level, bool bIsEventItem, int nFlagIndex);
-    void dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int nDropGroupID, long count, int level, int nFlagIndex);
+    void dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int32_t code, long count, int32_t level, bool bIsEventItem, int32_t nFlagIndex);
+    void dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int32_t nDropGroupID, long count, int32_t level, int32_t nFlagIndex);
 
     std::vector<DamageTag> m_vDamageList{};
     std::vector<HateTag> m_vHateList{};
@@ -191,24 +191,24 @@ class Monster : public Unit
     MonsterBase *m_Base{nullptr};
 
     float m_nLastEnemyDistance;
-    uint m_nLastTrackTime;
+    uint32_t m_nLastTrackTime;
 
     bool m_bComeBackHome;
-    uint m_nLastHateUpdateTime;
+    uint32_t m_nLastHateUpdateTime;
     // Attack related
     bool m_bNeedToFindEnemy{false};
-    uint m_hFirstAttacker;
-    uint m_nFirstAttackTime;
-    uint m_nTotalDamage;
-    int m_nMaxHate;
+    uint32_t m_hFirstAttacker;
+    uint32_t m_nFirstAttackTime;
+    uint32_t m_nTotalDamage;
+    int32_t m_nMaxHate;
     // Taming related
-    int m_nTamingSkillLevel;
-    uint m_hTamer;
-    int m_nTamedTime;
+    int32_t m_nTamingSkillLevel;
+    uint32_t m_hTamer;
+    int32_t m_nTamedTime;
     Player *pFCClient{nullptr};
     bool bForceKill{false};
     bool m_bTamedSuccess;
-    int m_nWayPointIdx;
+    int32_t m_nWayPointIdx;
     bool m_bIsWandering;
     WayPointInfo *m_pWayPointInfo;
 

@@ -19,9 +19,9 @@
 
 #include "Common.h"
 
-constexpr int MATERIAL_INFO_COUNT = 5;
-constexpr int MIX_VALUE_COUNT = 6;
-constexpr int MAX_SUB_MATERIAL_COUNT = 9;
+constexpr int32_t MATERIAL_INFO_COUNT = 5;
+constexpr int32_t MIX_VALUE_COUNT = 6;
+constexpr int32_t MAX_SUB_MATERIAL_COUNT = 9;
 
 enum MIX_TYPE
 {
@@ -44,28 +44,28 @@ enum MIX_TYPE
 
 struct EnhanceInfo
 {
-    int nSID;
-    uint Flag;
-    int nRank;
-    int nFailResult;
-    int nMaxEnhance;
-    uint nLocalFlag;
-    int nNeedItemCode;
+    int32_t nSID;
+    uint32_t Flag;
+    int32_t nRank;
+    int32_t nFailResult;
+    int32_t nMaxEnhance;
+    uint32_t nLocalFlag;
+    int32_t nNeedItemCode;
     float fPercentage[20];
 };
 
 struct MaterialInfo
 {
-    int type[MATERIAL_INFO_COUNT];
-    int value[MATERIAL_INFO_COUNT];
+    int32_t type[MATERIAL_INFO_COUNT];
+    int32_t value[MATERIAL_INFO_COUNT];
 };
 
 struct MixBase
 {
-    int id;
-    int type;
-    int value[MIX_VALUE_COUNT];
-    int sub_material_cnt;
+    int32_t id;
+    int32_t type;
+    int32_t value[MIX_VALUE_COUNT];
+    int32_t sub_material_cnt;
     MaterialInfo main_material;
     MaterialInfo sub_material[MAX_SUB_MATERIAL_COUNT];
 
@@ -101,7 +101,7 @@ class Player;
 class Item;
 class MixManager
 {
-  public:
+public:
     static MixManager &Instance()
     {
         static MixManager instance;
@@ -118,9 +118,9 @@ class MixManager
     /// \param pSubItem submaterials
     /// \param pCountList Usable amount of pSubItem[IDX]
     /// \return true on success, false on failure
-    bool EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int32_t nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
     /// Not implemented yet
-    bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int nSubMaterialCount, std::vector<Item *> &pSubItem);
+    bool EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nSubMaterialCount, std::vector<Item *> &pSubItem);
     /// \brief General mix function
     /// \param pMixInfo The mix info to be used
     /// \param pPlayer The owner of the item
@@ -129,11 +129,11 @@ class MixManager
     /// \param pSubItem submaterials
     /// \param pCountList Usable amount of pSubItem[IDX]
     /// \return true on success, false on failure
-    bool MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int32_t nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
     /// Not implemented yet
-    bool CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
 
-    bool RestoreEnhance(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool RestoreEnhance(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
 
     /// \brief Adds the EnhanceInfo to our list
     /// \param info thing to be added to our list
@@ -147,20 +147,20 @@ class MixManager
     /// \param pSubItem list of subitems
     /// \param pCountList amount of subitems[idx]
     /// \return proper MixBase for the item
-    MixBase *GetProperMixInfo(Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    MixBase *GetProperMixInfo(Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
     /// \brief Gets the sub-mix-resource
     /// \param pMainMaterial Item to be mixed
     /// \param nSubMaterialCount number of submaterials
     /// \param pSubItem list of subitems
     /// \param pCountList amount of subitems[idx]
     /// \return
-    bool getProperMixInfoSub(MixBase *mb, int SubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool getProperMixInfoSub(MixBase *mb, int32_t SubMaterialCount, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
     /// \brief Checks if mix is legit
     /// \param pPlayer owner
     /// \param hItem item to be mixed
     /// \param nItemCount amount if items
     /// \return hItem as Item
-    Item *check_mixable_item(Player *pPlayer, uint hItem, int64_t nItemCount);
+    Item *check_mixable_item(Player *pPlayer, uint32_t hItem, int64_t nItemCount);
     /// \brief Checks if the material is legit
     /// \param info The materialinfo to be checked on
     /// \param pItem item to be checked
@@ -170,12 +170,12 @@ class MixManager
     /// \brief Gets the enhanceInfo for our item
     /// \param sid EnhanceInfo idx from ItemTemplate
     /// \return nullptr if not exist, EnhanceInfo on success
-    EnhanceInfo *getenhanceInfo(int sid);
+    EnhanceInfo *getenhanceInfo(int32_t sid);
     /// \brief Handles item mix failure
     /// \param pPlayer owner
     /// \param pItem failed item
     /// \param nFailResult fail type
-    void procEnhanceFail(Player *pPlayer, Item *pItem, int nFailResult);
+    void procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResult);
     /// \brief Repair broken Items
     /// \param pPlayer The owner of the item
     /// \param pMainMaterial Main material to be used
@@ -183,16 +183,16 @@ class MixManager
     /// \param pSubItem submaterials
     /// \param pCountList Usable amount of pSubItem[IDX]
     /// \return true on success, false on failure
-    bool RepairItem(Player *pPlayer, Item *pMainMaterial, int nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
+    bool RepairItem(Player *pPlayer, Item *pMainMaterial, int32_t nSubMaterialCountItem, std::vector<Item *> &pSubItem, std::vector<uint16_t> &pCountList);
 
-  private:
+private:
     std::vector<MixBase> m_vMixInfo{};
     std::vector<EnhanceInfo> m_vEnhanceInfo{};
     /// \brief Check if a mix makes sense
-    bool CompatibilityCheck(const int *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
-    bool post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount);
+    bool CompatibilityCheck(const int32_t *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
+    bool post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount);
 
-  protected:
+protected:
     MixManager() = default;
 };
 

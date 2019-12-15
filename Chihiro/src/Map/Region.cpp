@@ -57,34 +57,34 @@ void Region::RemoveObject(WorldObject *obj)
     removeObject(obj, lbo);
 }
 
-uint Region::DoEachClient(WorldObjectFunctor &fn)
+uint32_t Region::DoEachClient(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
     for (auto       &obj : m_vClientObjects)
     {
         fn.Run(obj);
     }
-    return (uint)m_vClientObjects.size();
+    return (uint32_t)m_vClientObjects.size();
 }
 
-uint Region::DoEachStaticObject(WorldObjectFunctor &fn)
+uint32_t Region::DoEachStaticObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
     for (auto       &obj : m_vStaticObjects)
     {
         fn.Run(obj);
     }
-    return (uint)m_vStaticObjects.size();
+    return (uint32_t)m_vStaticObjects.size();
 }
 
-uint Region::DoEachMovableObject(WorldObjectFunctor &fn)
+uint32_t Region::DoEachMovableObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
     for (auto       &obj : m_vMovableObjects)
     {
         fn.Run(obj);
     }
-    return (uint)m_vMovableObjects.size();
+    return (uint32_t)m_vMovableObjects.size();
 }
 
 void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
@@ -100,7 +100,7 @@ void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
     v->emplace_back(obj);
     obj->AddToWorld();
     obj->pRegion      = this;
-    obj->region_index = (int)(v->size() - 1);
+    obj->region_index = (int32_t)(v->size() - 1);
 }
 
 void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)

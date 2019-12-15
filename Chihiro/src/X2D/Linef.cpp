@@ -90,7 +90,7 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
     CcwResult ccw341 = CheckClockWisef(tp3, tp4, tp1);
     CcwResult ccw342 = CheckClockWisef(tp3, tp4, tp2);
 
-    if ((int)ccw123 * (int)ccw124 < 0 && (int)ccw341 * (int)ccw342 < 0)
+    if ((int32_t)ccw123 * (int32_t)ccw124 < 0 && (int32_t)ccw341 * (int32_t)ccw342 < 0)
         return Intersect;
     if (ccw123 != Parallelism || ccw124 != Parallelism)
     {

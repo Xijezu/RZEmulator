@@ -49,8 +49,19 @@ NPC::NPC(NPCTemplate *base) : Unit(true)
     Relocate(m_pBase->x, m_pBase->y, m_pBase->z);
 }
 
+
 void NPC::EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer)
 {
+typedef unsigned long DWORD;
+typedef unsigned short WORD;
+
+#if !defined(LOWORD)
+#define LOWORD(a) ((WORD)(a))
+#endif // #ifndef LOWORD
+#if !defined(HIWORD)
+#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#endif // #ifndef HIWORD
+
     Unit::EnterPacket(pEnterPct, pNPC, pPlayer);
     pEnterPct << (uint16_t)0;
     pEnterPct << (uint16_t)HIWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
@@ -78,7 +89,7 @@ void NPC::SetStatus(NPC_STATUS status)
     m_nStatus = status;
 }
 
-int NPC::GetNPCID() const
+int32_t NPC::GetNPCID() const
 {
     return m_pBase->id;
 }
@@ -168,7 +179,7 @@ void NPC::DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player
     }
 }
 
-int NPC::GetQuestTextID(int code, int progress) const
+int32_t NPC::GetQuestTextID(int32_t code, int32_t progress) const
 {
     std::vector<QuestLink *> wpl{};
     if (progress == 2)
@@ -193,7 +204,7 @@ int NPC::GetQuestTextID(int code, int progress) const
     return 0;
 }
 
-int NPC::GetProgressFromTextID(int code, int textId) const
+int32_t NPC::GetProgressFromTextID(int32_t code, int32_t textId) const
 {
     for (auto &ql : m_vQuestLink_Start)
     {

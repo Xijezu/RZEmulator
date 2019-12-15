@@ -146,7 +146,7 @@ void ObjectMgr::LoadItemResource()
         itemTemplate->endurance = fields[26].GetInt32();
         itemTemplate->material = fields[27].GetInt32();
         itemTemplate->summon_id = fields[28].GetInt32();
-        for (int i = 0; i < 19; i++)
+        for (int32_t i = 0; i < 19; i++)
         {
             itemTemplate->flaglist[i] = fields[29 + i].GetUInt8();
         }
@@ -154,22 +154,22 @@ void ObjectMgr::LoadItemResource()
         itemTemplate->decrease_type = fields[49].GetInt16();
         itemTemplate->throw_range = fields[50].GetFloat();
         itemTemplate->distribute_type = fields[51].GetUInt8();
-        int y = 52;
-        for (int i = 0; i < 4; i++)
+        int32_t y = 52;
+        for (int32_t i = 0; i < 4; i++)
         {
             itemTemplate->base_type[i] = fields[y++].GetInt16();
             itemTemplate->base_var[i][0] = fields[y++].GetFloat();
             itemTemplate->base_var[i][1] = fields[y++].GetFloat();
         }
         y = 64;
-        for (int i = 0; i < 4; i++)
+        for (int32_t i = 0; i < 4; i++)
         {
             itemTemplate->opt_type[i] = fields[y++].GetInt16();
             itemTemplate->opt_var[i][0] = fields[y++].GetFloat();
             itemTemplate->opt_var[i][1] = fields[y++].GetFloat();
         }
         y = 76;
-        for (int i = 0; i < 2; i++)
+        for (int32_t i = 0; i < 2; i++)
         {
             itemTemplate->enhance_id[i] = fields[y++].GetInt16();
             itemTemplate->_enhance[i][0] = fields[y++].GetFloat();
@@ -212,7 +212,7 @@ void ObjectMgr::LoadMonsterResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
         MonsterBase base{};
         base.id = field[idx++].GetInt32();
         base.monster_group = field[idx++].GetInt32();
@@ -275,7 +275,7 @@ void ObjectMgr::LoadMonsterResource()
         for (y = 0; y < 10; y++)
         {
             base.drop_item_id[y] = field[idx++].GetInt32();
-            base.drop_percentage[y] = (int)(field[idx++].GetFloat() * 100000000);
+            base.drop_percentage[y] = (int32_t)(field[idx++].GetFloat() * 100000000);
             base.drop_min_count[y] = field[idx++].GetInt32();
             base.drop_max_count[y] = field[idx++].GetInt32();
             base.drop_min_level[y] = field[idx++].GetInt32();
@@ -309,7 +309,7 @@ void ObjectMgr::LoadQuestResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
 
         QuestBaseServer q{};
         q.nCode = field[idx++].GetInt32();
@@ -320,14 +320,14 @@ void ObjectMgr::LoadQuestResource()
         q.nLimitJobLevel = field[idx++].GetInt32();
         q.nLimitIndication = field[idx++].GetUInt8();
 
-        int limit_deva = field[idx++].GetInt32();
-        int limit_asura = field[idx++].GetInt32();
-        int limit_gaia = field[idx++].GetInt32();
+        int32_t limit_deva = field[idx++].GetInt32();
+        int32_t limit_asura = field[idx++].GetInt32();
+        int32_t limit_gaia = field[idx++].GetInt32();
 
-        int limit_fighter = field[idx++].GetInt32();
-        int limit_hunter = field[idx++].GetInt32();
-        int limit_magician = field[idx++].GetInt32();
-        int limit_summoner = field[idx++].GetInt32();
+        int32_t limit_fighter = field[idx++].GetInt32();
+        int32_t limit_hunter = field[idx++].GetInt32();
+        int32_t limit_magician = field[idx++].GetInt32();
+        int32_t limit_summoner = field[idx++].GetInt32();
 
         q.nLimitJob = field[idx++].GetInt32();
         q.nLimitFavorGroupID = field[idx++].GetInt32();
@@ -336,7 +336,7 @@ void ObjectMgr::LoadQuestResource()
         q.nInvokeCondition = field[idx++].GetInt32();
         q.nInvokeValue = field[idx++].GetInt32();
         q.nType = (QuestType)field[idx++].GetInt32();
-        for (int &i : q.nValue)
+        for (int32_t &i : q.nValue)
         {
             i = field[idx++].GetInt32();
         }
@@ -357,7 +357,7 @@ void ObjectMgr::LoadQuestResource()
             i.nLevel = field[idx++].GetInt32();
             i.nQuantity = field[idx++].GetInt32();
         }
-        for (int &i : q.nForeQuest)
+        for (int32_t &i : q.nForeQuest)
         {
             i = field[idx++].GetInt32();
         }
@@ -403,7 +403,7 @@ void ObjectMgr::LoadFieldPropResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
 
         FieldPropTemplate propTemplate{};
         propTemplate.nPropID = field[idx++].GetUInt32();
@@ -418,15 +418,15 @@ void ObjectMgr::LoadFieldPropResource()
         idx += 2; // casting range & target_fx_size
         propTemplate.nMinLevel = field[idx++].GetInt32();
         propTemplate.nMaxLevel = field[idx++].GetInt32();
-        int limit_deva = field[idx++].GetUInt8();
-        int limit_asura = field[idx++].GetUInt8();
-        int limit_gaia = field[idx++].GetUInt8();
-        int limit_fighter = field[idx++].GetUInt8();
-        int limit_hunter = field[idx++].GetUInt8();
-        int limit_magician = field[idx++].GetUInt8();
-        int limit_summoner = field[idx++].GetUInt8();
+        int32_t limit_deva = field[idx++].GetUInt8();
+        int32_t limit_asura = field[idx++].GetUInt8();
+        int32_t limit_gaia = field[idx++].GetUInt8();
+        int32_t limit_fighter = field[idx++].GetUInt8();
+        int32_t limit_hunter = field[idx++].GetUInt8();
+        int32_t limit_magician = field[idx++].GetUInt8();
+        int32_t limit_summoner = field[idx++].GetUInt8();
         propTemplate.nLimitJobID = field[idx++].GetInt32();
-        for (int i = 0; i < 2; i++)
+        for (int32_t i = 0; i < 2; i++)
         {
             propTemplate.nActivateID[i] = field[idx++].GetInt32();
             propTemplate.nActivateValue[i][0] = field[idx++].GetInt32();
@@ -436,7 +436,7 @@ void ObjectMgr::LoadFieldPropResource()
         for (auto &i : propTemplate.drop_info)
         {
             i.code = field[idx++].GetInt32();
-            i.ratio = (int)(field[idx++].GetFloat() * 100000000);
+            i.ratio = (int32_t)(field[idx++].GetFloat() * 100000000);
             i.min_count = field[idx++].GetInt32();
             i.max_count = field[idx++].GetInt32();
             i.min_level = field[idx++].GetInt32();
@@ -483,7 +483,7 @@ void ObjectMgr::LoadQuestLinkResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
 
         QuestLink ql{};
         ql.nNPCID = field[idx++].GetInt32();
@@ -517,13 +517,13 @@ void ObjectMgr::LoadDropGroupResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
         DropGroup dg{};
         dg.uid = field[idx++].GetInt32();
-        for (int i = 0; i < MAX_DROP_GROUP; i++)
+        for (int32_t i = 0; i < MAX_DROP_GROUP; i++)
         {
             dg.drop_item_id[i] = field[idx++].GetInt32();
-            dg.drop_percentage[i] = (int)(field[idx++].GetFloat() * 100000000);
+            dg.drop_percentage[i] = (int32_t)(field[idx++].GetFloat() * 100000000);
         }
         _dropTemplateStore[dg.uid] = dg;
         ++count;
@@ -546,7 +546,7 @@ void ObjectMgr::LoadSkillTreeResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
         SkillTreeBase base{};
         base.job_id = field[idx++].GetInt32();
         base.skill_id = field[idx++].GetInt32();
@@ -555,7 +555,7 @@ void ObjectMgr::LoadSkillTreeResource()
         base.lv = field[idx++].GetInt32();
         base.job_lv = field[idx++].GetInt32();
         base.jp_ratio = field[idx++].GetFloat();
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
         {
             base.need_skill_id[i] = field[idx++].GetInt32();
             base.need_skill_lv[i] = field[idx++].GetInt32();
@@ -580,7 +580,7 @@ void ObjectMgr::LoadSkillResource()
     uint32_t count = 0;
     do
     {
-        int idx = 0;
+        int32_t idx = 0;
         Field *field = result->Fetch();
         SkillBase base{};
         base.id = field[idx++].GetInt32();
@@ -711,24 +711,24 @@ void ObjectMgr::LoadDungeonResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
         DungeonTemplate base{};
         base.id = field[idx++].GetInt32();
         idx += 2;
-        int start_pos_x = field[idx++].GetInt32();
-        int start_pos_y = field[idx++].GetInt32();
+        int32_t start_pos_x = field[idx++].GetInt32();
+        int32_t start_pos_y = field[idx++].GetInt32();
         base.raid_start_pos = Position{(float)start_pos_x, (float)start_pos_y};
-        int defense_pos_x = field[idx++].GetInt32();
-        int defense_pos_y = field[idx++].GetInt32();
+        int32_t defense_pos_x = field[idx++].GetInt32();
+        int32_t defense_pos_y = field[idx++].GetInt32();
         base.siege_defense_pos = Position{(float)defense_pos_x, (float)defense_pos_y};
         base.connector_id = field[idx++].GetInt32();
-        int connector_x = field[idx++].GetInt32();
-        int connector_y = field[idx++].GetInt32();
+        int32_t connector_x = field[idx++].GetInt32();
+        int32_t connector_y = field[idx++].GetInt32();
         base.connector_pos = Position{(float)connector_x, (float)connector_y};
         idx++;
         base.core_id = field[idx++].GetInt32();
-        int core_pos_x = field[idx++].GetInt32();
-        int core_pos_y = field[idx++].GetInt32();
+        int32_t core_pos_x = field[idx++].GetInt32();
+        int32_t core_pos_y = field[idx++].GetInt32();
         base.core_pos = Position{(float)core_pos_x, (float)core_pos_y};
         base.core_offset_x = field[idx++].GetFloat();
         base.core_offset_y = field[idx++].GetFloat();
@@ -747,8 +747,8 @@ void ObjectMgr::LoadDungeonResource()
         base.raid_end_time = field[idx++].GetInt32();
         base.start_time = field[idx++].GetInt32();
         base.end_time = field[idx++].GetInt32();
-        int seamless_x = field[idx++].GetInt32();
-        int seamless_y = field[idx++].GetInt32();
+        int32_t seamless_x = field[idx++].GetInt32();
+        int32_t seamless_y = field[idx++].GetInt32();
         base.max_guild_party = field[idx++].GetInt32();
         idx++;
         base.max_raid_party = field[idx].GetInt32();
@@ -778,7 +778,7 @@ void ObjectMgr::LoadLevelResource()
         LevelResourceTemplate base{};
         base.level = field[0].GetInt32();
         base.normal_exp = field[1].GetInt64();
-        for (int i = 0; i < 4; i++)
+        for (int32_t i = 0; i < 4; i++)
             base.jlv[i] = field[2 + i].GetInt32();
         _levelResourceStore[base.level] = base;
         ++count;
@@ -801,7 +801,7 @@ void ObjectMgr::LoadStateResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
         StateTemplate state{};
         state.state_id = field[idx++].GetInt32();
         state.text_id = field[idx++].GetInt32();
@@ -924,7 +924,7 @@ void ObjectMgr::LoadJobResource()
     uint32_t count = 0;
     do
     {
-        int i = 0;
+        int32_t i = 0;
         Field *field = result->Fetch();
         JobResourceTemplate job{};
         job.id = field[i++].GetInt32();
@@ -933,7 +933,7 @@ void ObjectMgr::LoadJobResource()
         job.job_depth = field[i++].GetUInt32();
         job.up_lv = field[i++].GetInt32();
         job.up_jlv = field[i++].GetInt32();
-        for (int &j : job.available_job)
+        for (int32_t &j : job.available_job)
         {
             j = field[i++].GetInt32();
         }
@@ -983,7 +983,7 @@ void ObjectMgr::LoadSummonLevelBonus()
         Field *field = result->Fetch();
         SummonLevelBonus bonus{};
 
-        int i = 0;
+        int32_t i = 0;
         bonus.summon_id = field[i++].GetInt32();
         bonus.strength = field[i++].GetFloat();
         bonus.vital = field[i++].GetFloat();
@@ -1020,7 +1020,7 @@ void ObjectMgr::LoadJobLevelBonus()
         Field *field = result->Fetch();
         JobLevelBonusTemplate bonus{};
 
-        int i = 0, j = 0;
+        int32_t i = 0, j = 0;
         bonus.job_id = field[i++].GetInt32();
         for (j = 0; j < 4; j++)
         {
@@ -1087,12 +1087,12 @@ void ObjectMgr::LoadSkillJP()
     do
     {
         Field *field = result->Fetch();
-        int off = 0;
-        int skill_id = field[off++].GetInt32();
+        int32_t off = 0;
+        int32_t skill_id = field[off++].GetInt32();
         SkillBase *sb = &_skillBaseStore[skill_id];
         if (sb->id != 0)
         {
-            for (int &v : sb->m_need_jp)
+            for (int32_t &v : sb->m_need_jp)
             {
                 v = field[off++].GetInt32();
             }
@@ -1144,7 +1144,7 @@ void ObjectMgr::LoadEnhanceResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
 
         EnhanceInfo info{};
         info.nSID = field[idx++].GetInt32();
@@ -1182,24 +1182,24 @@ void ObjectMgr::LoadMixResource()
     do
     {
         Field *field = result->Fetch();
-        int idx = 0;
+        int32_t idx = 0;
 
         MixBase info{};
         info.id = field[idx++].GetInt32();
         info.type = field[idx++].GetInt32();
-        for (int &i : info.value)
+        for (int32_t &i : info.value)
         {
             i = field[idx++].GetInt32();
         }
         info.sub_material_cnt = field[idx++].GetInt32();
-        for (int i = 0; i < MATERIAL_INFO_COUNT; ++i)
+        for (int32_t i = 0; i < MATERIAL_INFO_COUNT; ++i)
         {
             info.main_material.type[i] = field[idx++].GetInt32();
             info.main_material.value[i] = field[idx++].GetInt32();
         }
         for (auto &i : info.sub_material)
         {
-            for (int j = 0; j < MATERIAL_INFO_COUNT; ++j)
+            for (int32_t j = 0; j < MATERIAL_INFO_COUNT; ++j)
             {
                 i.type[j] = field[idx++].GetInt32();
                 i.value[j] = field[idx++].GetInt32();
@@ -1230,7 +1230,7 @@ void ObjectMgr::LoadSummonResource()
     {
         Field *field = result->Fetch();
         SummonResourceTemplate summon{};
-        int i = 0;
+        int32_t i = 0;
         summon.id = field[i++].GetInt32();
         summon.type = field[i++].GetInt32();
         summon.magic_type = field[i++].GetInt32();
@@ -1271,7 +1271,7 @@ void ObjectMgr::LoadStringResource()
     {
         Field *field = result->Fetch();
 
-        int code = field[0].GetInt32();
+        int32_t code = field[0].GetInt32();
         const std::string value = field[1].GetString();
         _stringResourceStore[code] = value;
 
@@ -1297,7 +1297,7 @@ void ObjectMgr::LoadSummonNameResource()
         Field *field = result->Fetch();
 
         bool isPostFix = field[0].GetInt32() != 0;
-        int text_id = field[1].GetInt32();
+        int32_t text_id = field[1].GetInt32();
         if (!isPostFix)
             _summonPrefixStore.emplace_back(text_id);
         else
@@ -1308,28 +1308,28 @@ void ObjectMgr::LoadSummonNameResource()
     NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-CreatureStat *ObjectMgr::GetStatInfo(const int stat_id)
+CreatureStat *ObjectMgr::GetStatInfo(const int32_t stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
         return &_creatureBaseStore[stat_id];
     return nullptr;
 }
 
-ItemTemplate *ObjectMgr::GetItemBase(const int item_id)
+ItemTemplate *ObjectMgr::GetItemBase(const int32_t item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1)
         return _itemTemplateStore[item_id].get();
     return nullptr;
 }
 
-FieldPropTemplate *ObjectMgr::GetFieldPropBase(int idx)
+FieldPropTemplate *ObjectMgr::GetFieldPropBase(int32_t idx)
 {
     if (_fieldPropTemplateStore.count(idx) == 1)
         return &_fieldPropTemplateStore[idx];
     return nullptr;
 }
 
-void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
+void ObjectMgr::AddWayPoint(int32_t waypoint_id, float x, float y)
 {
     Position pos{};
     pos.Relocate(x, y, 0);
@@ -1351,7 +1351,7 @@ void ObjectMgr::AddWayPoint(int waypoint_id, float x, float y)
     g_vWayPoint[waypoint_id] = wp;
 }
 
-void ObjectMgr::SetWayPointType(int waypoint_id, int type)
+void ObjectMgr::SetWayPointType(int32_t waypoint_id, int32_t type)
 {
     for (const auto &wpi : g_vWayPoint)
     {
@@ -1366,14 +1366,14 @@ void ObjectMgr::SetWayPointType(int waypoint_id, int type)
     g_vWayPoint[waypoint_id] = info;
 }
 
-WayPointInfo *ObjectMgr::GetWayPoint(int waypoint_id)
+WayPointInfo *ObjectMgr::GetWayPoint(int32_t waypoint_id)
 {
     if (g_vWayPoint.count(waypoint_id) != 0)
         return &g_vWayPoint[waypoint_id];
     return nullptr;
 }
 
-DropGroup *ObjectMgr::GetDropGroupInfo(int drop_group_id)
+DropGroup *ObjectMgr::GetDropGroupInfo(int32_t drop_group_id)
 {
     if (_dropTemplateStore.count(drop_group_id) == 1)
         return &_dropTemplateStore[drop_group_id];
@@ -1388,14 +1388,14 @@ void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
         NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
 }
 
-CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels[])
+CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[])
 {
     CreatureStat stat{};
     if (depth >= 0)
     {
-        for (int i = 0; i < 4; i++)
+        for (int32_t i = 0; i < 4; i++)
         {
-            if (_jobBonusStore.count((uint)jobs[i]))
+            if (_jobBonusStore.count((uint32_t)jobs[i]))
             {
                 auto jlb = _jobBonusStore[jobs[i]];
 
@@ -1416,27 +1416,27 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int depth, int jobs[], const int levels
 
                 if (v2 <= 0)
                     v2 = 0;
-                stat.strength += (int)((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
-                stat.vital += (int)((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
-                stat.dexterity += (int)((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
-                stat.agility += (int)((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
-                stat.intelligence += (int)((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
-                stat.mentality += (int)((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
-                stat.luck += (int)((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
+                stat.strength += (int32_t)((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
+                stat.vital += (int32_t)((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
+                stat.dexterity += (int32_t)((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
+                stat.agility += (int32_t)((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
+                stat.intelligence += (int32_t)((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
+                stat.mentality += (int32_t)((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
+                stat.luck += (int32_t)((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
             }
         }
     }
     return stat;
 }
 
-JobResourceTemplate *ObjectMgr::GetJobInfo(const int job_id)
+JobResourceTemplate *ObjectMgr::GetJobInfo(const int32_t job_id)
 {
     if (_jobTemplateStore.count(job_id) == 1)
         return &_jobTemplateStore[job_id];
     return nullptr;
 }
 
-SummonResourceTemplate *ObjectMgr::GetSummonBase(const int idx)
+SummonResourceTemplate *ObjectMgr::GetSummonBase(const int32_t idx)
 {
     if (_summonResourceStore.count(idx) == 1)
         return &_summonResourceStore[idx];
@@ -1450,7 +1450,7 @@ std::vector<MarketInfo> *ObjectMgr::GetMarketInfo(const std::string &szKey)
     return nullptr;
 }
 
-int ObjectMgr::GetNeedJpForJobLevelUp(const int jlv, const int depth)
+int32_t ObjectMgr::GetNeedJpForJobLevelUp(const int32_t jlv, const int32_t depth)
 {
     if (depth > 3 || jlv > 49)
         return 0;
@@ -1474,7 +1474,7 @@ void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
     _skillTreeResourceStore.emplace_back(g);
 }
 
-std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
+std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int32_t job_id)
 {
     std::vector<SkillTreeBase> skills{};
     for (auto &stg : _skillTreeResourceStore)
@@ -1490,9 +1490,9 @@ std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int job_id)
     return skills;
 }
 
-int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobID)
+int32_t ObjectMgr::GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_level, int32_t nJobID)
 {
-    auto pSkillBase = GetSkillBase((uint)skill_id);
+    auto pSkillBase = GetSkillBase((uint32_t)skill_id);
     std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
     float jp_ratio = -1.0f;
     if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty())
@@ -1506,45 +1506,45 @@ int ObjectMgr::GetNeedJpForSkillLevelUp(int skill_id, int skill_level, int nJobI
         }
         if (jp_ratio == -1.0f)
             jp_ratio = 1.0f;
-        return (int)(pSkillBase->GetNeedJobPoint(skill_level) * jp_ratio);
+        return (int32_t)(pSkillBase->GetNeedJobPoint(skill_level) * jp_ratio);
     }
     return -1;
 }
 
-SkillBase *ObjectMgr::GetSkillBase(const int skill_id)
+SkillBase *ObjectMgr::GetSkillBase(const int32_t skill_id)
 {
     if (_skillBaseStore.count(skill_id) == 1)
         return &_skillBaseStore[skill_id];
     return nullptr;
 }
 
-int64_t ObjectMgr::GetNeedExp(int level)
+int64_t ObjectMgr::GetNeedExp(int32_t level)
 {
-    int l = level;
+    int32_t l = level;
     if (l < 1)
         l = 1;
     if (l > 300)
         l = 300;
-    if ((int)_levelResourceStore.size() < l)
-        l = (int)(_levelResourceStore.size() - 1);
+    if ((int32_t)_levelResourceStore.size() < l)
+        l = (int32_t)(_levelResourceStore.size() - 1);
     return _levelResourceStore[l - 1].normal_exp;
 }
 
-MonsterBase *ObjectMgr::GetMonsterInfo(int idx)
+MonsterBase *ObjectMgr::GetMonsterInfo(int32_t idx)
 {
     if (_monsterBaseStore.count(idx) == 1)
         return &_monsterBaseStore[idx];
     return nullptr;
 }
 
-int64_t ObjectMgr::GetNeedSummonExp(int level)
+int64_t ObjectMgr::GetNeedSummonExp(int32_t level)
 {
     if (level <= 300 && level > 0)
         return _summonLevelStore[level];
     return 0;
 }
 
-QuestBaseServer *ObjectMgr::GetQuestBase(int code)
+QuestBaseServer *ObjectMgr::GetQuestBase(int32_t code)
 {
     if (_questTemplateStore.count(code) == 1)
         return &_questTemplateStore[code];
@@ -1552,7 +1552,7 @@ QuestBaseServer *ObjectMgr::GetQuestBase(int code)
     return nullptr;
 }
 
-bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
+bool ObjectMgr::checkQuestTypeFlag(QuestType type, int32_t flag)
 {
     switch (type)
     {
@@ -1600,7 +1600,7 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int flag)
     }
 }
 
-QuestLink *ObjectMgr::GetQuestLink(int code, int start_id)
+QuestLink *ObjectMgr::GetQuestLink(int32_t code, int32_t start_id)
 {
     auto l = std::find_if(_questLinkStore.begin(),
                           _questLinkStore.end(),
@@ -1610,14 +1610,14 @@ QuestLink *ObjectMgr::GetQuestLink(int code, int start_id)
     return l != _questLinkStore.end() ? &*l : nullptr;
 }
 
-StateTemplate *ObjectMgr::GetStateInfo(int code)
+StateTemplate *ObjectMgr::GetStateInfo(int32_t code)
 {
     if (_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];
     return nullptr;
 }
 
-CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /* evolve_type*/, int level)
+CreatureStat ObjectMgr::GetSummonLevelBonus(int32_t summon_code, int32_t growth_depth /* evolve_type*/, int32_t level)
 {
     if (_summonBonusStore.count(summon_code) == 0)
         return CreatureStat{};
@@ -1641,7 +1641,7 @@ CreatureStat ObjectMgr::GetSummonLevelBonus(int summon_code, int growth_depth /*
     return stat;
 }
 
-const std::string &ObjectMgr::GetValueFromNameID(const int name_id)
+const std::string &ObjectMgr::GetValueFromNameID(const int32_t name_id)
 {
     static const std::string empty = {};
     if (_stringResourceStore.count(name_id) != 0)
@@ -1651,7 +1651,7 @@ const std::string &ObjectMgr::GetValueFromNameID(const int name_id)
 
 std::string ObjectMgr::GetSummonName()
 {
-    int pre = irand(0, (int)_summonPrefixStore.size() - 1);
-    int post = irand(0, (int)_summonPostfixStore.size() - 1);
+    int32_t pre = irand(0, (int32_t)_summonPrefixStore.size() - 1);
+    int32_t post = irand(0, (int32_t)_summonPostfixStore.size() - 1);
     return NGemity::StringFormat("{}{}", GetValueFromNameID(_summonPrefixStore[pre]), GetValueFromNameID(_summonPostfixStore[post]));
 }

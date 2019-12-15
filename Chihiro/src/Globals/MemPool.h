@@ -44,9 +44,9 @@ class MemoryPoolMgr
     }
 
     template <class T>
-    T *GetObjectInWorld(uint handle)
+    T *GetObjectInWorld(uint32_t handle)
     {
-        uint idbase = handle & 0xE0000000;
+        uint32_t idbase = handle & 0xE0000000;
         switch (idbase)
         {
         case 0x00000000:
@@ -83,12 +83,12 @@ class MemoryPoolMgr
     void AllocMiscHandle(Object *obj);
     void AllocItemHandle(Item *item);
     Player *AllocPlayer();
-    Summon *AllocSummon(uint);
-    Monster *AllocMonster(uint idx);
+    Summon *AllocSummon(uint32_t);
+    Monster *AllocMonster(uint32_t idx);
     Summon *AllocNewSummon(Player *, Item *);
 
     void Destroy();
-    void Update(uint diff);
+    void Update(uint32_t diff);
     // when using this, you must use the HashMapHolders lock!
     const HashMapHolder<Player>::MapType &GetPlayers();
 

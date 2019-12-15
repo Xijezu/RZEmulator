@@ -17,7 +17,7 @@
 
 #include "DungeonManager.h"
 
-Position DungeonManager::GetRaidStartPosition(int nDungeonID)
+Position DungeonManager::GetRaidStartPosition(int32_t nDungeonID)
 {
     for (auto &dt : m_vDungeonInfo)
     {
@@ -27,7 +27,7 @@ Position DungeonManager::GetRaidStartPosition(int nDungeonID)
     return Position{ };
 }
 
-int DungeonManager::GetDungeonID(float x, float y)
+int32_t DungeonManager::GetDungeonID(float x, float y)
 {
     for (auto &dt : m_vDungeonInfo)
     {

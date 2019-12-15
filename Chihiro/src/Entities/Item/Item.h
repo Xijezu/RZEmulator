@@ -30,26 +30,26 @@ class ItemInstance
 public:
   void Copy(const ItemInstance &pFrom);
 
-  uint OwnerHandle{0};     // 0x0
-  uint OwnSummonHandle{0}; // 0x4
-  int64_t UID{0};          // 0x8
-  int Code{0};             // 0x10
-  int nIdx{0};             // 0x14
-  int nLevel{0};           // 0x18
-  int nEnhance{0};         // 0x1C
-  int nEndurance{0};
-  int nCurrentEndurance{0};
-  int nOwnerUID{0};      // 0x20
-  int nOwnSummonUID{0};  // 0x24
-  int nAuctionID{0};     // 0x28
-  int nItemKeepingID{0}; // 0x2C
-  int64_t nCount{0};     // 0x30
-  int64_t tExpire{0};    // 0x40
+  uint32_t OwnerHandle{0};     // 0x0
+  uint32_t OwnSummonHandle{0}; // 0x4
+  int64_t UID{0};              // 0x8
+  int32_t Code{0};             // 0x10
+  int32_t nIdx{0};             // 0x14
+  int32_t nLevel{0};           // 0x18
+  int32_t nEnhance{0};         // 0x1C
+  int32_t nEndurance{0};
+  int32_t nCurrentEndurance{0};
+  int32_t nOwnerUID{0};      // 0x20
+  int32_t nOwnSummonUID{0};  // 0x24
+  int32_t nAuctionID{0};     // 0x28
+  int32_t nItemKeepingID{0}; // 0x2C
+  int64_t nCount{0};         // 0x30
+  int64_t tExpire{0};        // 0x40
   //Elemental::Type eElementalEffectType;         // 0x48
-  int Flag{0};                            // 0x60
+  int32_t Flag{0};                        // 0x60
   GenerateCode GenerateInfo = BY_UNKNOWN; // 0x64
   ItemWearType nWearInfo{WEAR_CANTWEAR};  // 0x68
-  int Socket[4]{0};
+  int32_t Socket[4]{0};
 };
 
 class Item : public WorldObject
@@ -65,8 +65,8 @@ public:
   };
 
   static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-  static Item *AllocItem(uint64_t uid, int code, int64_t cnt, GenerateCode info = BY_BASIC, int level = -1, int enhance = -1,
-                         int flag = -1, int socket_0 = 0, int socket_1 = 0, int socket_2 = 0, int socket_3 = 0, int remain_time = 0);
+  static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = BY_BASIC, int32_t level = -1, int32_t enhance = -1,
+                         int32_t flag = -1, int32_t socket_0 = 0, int32_t socket_1 = 0, int32_t socket_2 = 0, int32_t socket_3 = 0, int32_t remain_time = 0);
   static void PendFreeItem(Item *pItem);
 
   Item();
@@ -82,16 +82,16 @@ public:
 
   inline int32_t GetItemCode() const { return m_Instance.Code; }
   inline int64_t GetItemUID() const { return m_Instance.UID; }
-  inline int GetOwnerUID() const { return m_Instance.nOwnerUID; }
+  inline int32_t GetOwnerUID() const { return m_Instance.nOwnerUID; }
   inline ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
   inline ItemTemplate *GetItemBase() const { return m_pItemBase; }
   inline int32_t GetAccountID() const { return m_nAccountID; }
-  inline int GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
+  inline int32_t GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
   inline uint32_t GetBindedCreatureHandle() const { return m_hBindedTarget; }
-  inline int GetItemEnhance() const { return m_Instance.nEnhance; }
-  inline int GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
-  inline int GetItemType() const { return m_pItemBase != nullptr ? m_pItemBase->type : 0; }
-  int GetSummonSID() const { return static_cast<int>(m_Instance.Socket[0]); }
+  inline int32_t GetItemEnhance() const { return m_Instance.nEnhance; }
+  inline int32_t GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
+  inline int32_t GetItemType() const { return m_pItemBase != nullptr ? m_pItemBase->type : 0; }
+  int32_t GetSummonSID() const { return static_cast<int32_t>(m_Instance.Socket[0]); }
   ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
   inline uint32_t GetOwnerHandle() const { return m_Instance.OwnerHandle; }
   inline int64_t GetCount() const { return m_Instance.nCount; }
@@ -107,12 +107,12 @@ public:
     m_bIsNeedUpdateToDB = true;
   }
 
-  inline void SetOwnSummonInfo(uint32_t handle, int UID)
+  inline void SetOwnSummonInfo(uint32_t handle, int32_t UID)
   {
     m_Instance.OwnSummonHandle = handle;
     m_Instance.nOwnSummonUID = UID;
   }
-  inline int GetOwnSummonUID() const { return m_Instance.nOwnSummonUID; }
+  inline int32_t GetOwnSummonUID() const { return m_Instance.nOwnSummonUID; }
   Summon *GetSummon() const { return m_pSummon; }
   void SetBindedCreatureHandle(uint32_t target) { m_hBindedTarget = target; }
 
@@ -144,32 +144,32 @@ public:
 
   void DBUpdate();
   void DBInsert();
-  void SetCurrentEndurance(int n);
-  int GetMaxEndurance() const;
+  void SetCurrentEndurance(int32_t n);
+  int32_t GetMaxEndurance() const;
   void SetBindTarget(Unit *pUnit);
 
   ItemWearType GetWearType();
-  int GetLevelLimit();
-  int GetItemRank() const;
+  int32_t GetLevelLimit();
+  int32_t GetItemRank() const;
   bool IsBow();
   bool IsCrossBow();
   bool IsCashItem();
 
   bool IsItem() const override { return true; }
 
-  void SetOwnerInfo(uint, int, int);
+  void SetOwnerInfo(uint32_t, int32_t, int32_t);
   void SetPickupOrder(const ItemPickupOrder &order);
 
   // private:
   ItemInstance m_Instance{};
   ItemTemplate *m_pItemBase{};
   Summon *m_pSummon{nullptr};
-  uint m_nHandle{0};
-  int m_nAccountID{0};
-  int m_nItemID{0};
-  uint m_hBindedTarget{0};
-  uint m_unInventoryIndex{0};
-  uint m_nDropTime{0};
+  uint32_t m_nHandle{0};
+  int32_t m_nAccountID{0};
+  int32_t m_nItemID{0};
+  uint32_t m_hBindedTarget{0};
+  uint32_t m_unInventoryIndex{0};
+  uint32_t m_nDropTime{0};
   bool m_bIsEventDrop{0};
   bool m_bIsVirtualItem{0};
   bool m_bIsNeedUpdateToDB{false};

@@ -450,7 +450,7 @@ bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
     return true;
 }
 
-bool WorldObject::Step(uint tm)
+bool WorldObject::Step(uint32_t tm)
 {
     bool res = ArMoveVector::Step(tm);
     if (res)
@@ -477,23 +477,23 @@ void WorldObject::AddToWorld()
     Object::AddToWorld();
 }
 
-void WorldObject::AddNoise(int r1, int r2, int v)
+void WorldObject::AddNoise(int32_t r1, int32_t r2, int32_t v)
 {
     float prev_x = GetPositionX();
     float prev_y = GetPositionY();
 
     auto rs = (double)sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
-    auto tx = (int)(GetPositionX() / rs);
-    auto ty = (int)(GetPositionY() / rs);
+    auto tx = (int32_t)(GetPositionX() / rs);
+    auto ty = (int32_t)(GetPositionY() / rs);
     m_positionX = (float)(r1 % v - v / 2) + GetPositionX();
     m_positionY = (float)(r2 % v - v / 2) + GetPositionY();
-    if ((int)(m_positionX / rs) != tx)
+    if ((int32_t)(m_positionX / rs) != tx)
         m_positionX = prev_x;
-    if ((int)(m_positionY / rs) != ty)
+    if ((int32_t)(m_positionY / rs) != ty)
         m_positionY = prev_y;
 }
 
-Position WorldObject::GetCurrentPosition(uint t)
+Position WorldObject::GetCurrentPosition(uint32_t t)
 {
     Position result{};
     ArMoveVector _mv{};
@@ -539,7 +539,7 @@ void ArMoveVector::Copy(const ArMoveVector &src)
     this->direction._orientation = src.direction._orientation;
 }
 
-bool ArMoveVector::Step(uint current_time)
+bool ArMoveVector::Step(uint32_t current_time)
 {
     bool res{false};
     std::vector<MoveInfo> removed{};
@@ -550,7 +550,7 @@ bool ArMoveVector::Step(uint current_time)
         {
             if (current_time < info.end_time)
             {
-                uint et = current_time - proc_time;
+                uint32_t et = current_time - proc_time;
                 float fet = (float)et / (float)(info.end_time - proc_time);
                 m_positionX = (info.end.m_positionX - m_positionX) * fet + m_positionX;
                 m_positionY = (info.end.m_positionY - m_positionY) * fet + m_positionY;
@@ -593,19 +593,19 @@ bool ArMoveVector::Step(uint current_time)
     return res;
 }
 
-void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time, uint current_time)
+void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time, uint32_t current_time)
 {
     ends.clear();
     if (!_to.empty())
     {
         speed = _speed;
-        uint ct = _start_time;
+        uint32_t ct = _start_time;
         if (ct == 0)
             ct = sWorld.GetArTime();
 
         start_time = ct;
         proc_time = ct;
-        uint start_time2 = ct;
+        uint32_t start_time2 = ct;
         SetDirection(_to.front());
         float before_x = m_positionX;
         float before_y = m_positionY;
@@ -619,7 +619,7 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, u
             before_y = pos.m_positionY;
 
             float length = sqrt(cy * cy + cx * cx);
-            auto end_time = (uint)(length / ((float)this->speed / 30.0f) + (float)start_time2);
+            auto end_time = (uint32_t)(length / ((float)this->speed / 30.0f) + (float)start_time2);
 
             MoveInfo mi(pos, end_time);
             ends.emplace_back(mi);
@@ -630,13 +630,13 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, u
     }
 }
 
-void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time)
+void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint32_t _start_time, uint32_t current_time)
 {
     double v9{}, v10{}, lengtha{}, lengthb{};
 
     ends.clear();
     speed = _speed;
-    uint st = _start_time;
+    uint32_t st = _start_time;
     if (_start_time == 0)
         st = sWorld.GetArTime();
 
@@ -652,7 +652,7 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint _start_time, uint 
     if ((start_time & 0x80000000) != 0)
         v10 = v10 + 4294967300.0f;
 
-    MoveInfo mi{_to, (uint)(v9 + v10)};
+    MoveInfo mi{_to, (uint32_t)(v9 + v10)};
     ends.emplace_back(mi);
 
     bIsMoving = true;
@@ -683,7 +683,7 @@ Position ArMoveVector::GetTargetPos()
     return result;
 }
 
-bool ArMoveVector::IsMoving(uint t)
+bool ArMoveVector::IsMoving(uint32_t t)
 {
     if (bIsMoving && !ends.empty())
         return t < (ends.back()).end_time;

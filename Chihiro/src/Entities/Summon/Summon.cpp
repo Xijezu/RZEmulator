@@ -34,7 +34,7 @@ void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player *pPlayer)
     pEnterPct.fill(pSummon->GetName(), 19);
 };
 
-Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
+Summon::Summon(uint32_t pHandle, uint32_t pIdx) : Unit(true)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -50,14 +50,14 @@ Summon::Summon(uint pHandle, uint pIdx) : Unit(true)
     SetSummonInfo(pIdx);
 }
 
-Summon *Summon::AllocSummon(Player *pMaster, uint pCode)
+Summon *Summon::AllocSummon(Player *pMaster, uint32_t pCode)
 {
     Summon *summon = sMemoryPool.AllocSummon(pCode);
     summon->m_pMaster = pMaster;
     return summon;
 }
 
-void Summon::SetSummonInfo(int idx)
+void Summon::SetSummonInfo(int32_t idx)
 {
     m_tSummonBase = sObjectMgr.GetSummonBase(idx);
     if (m_tSummonBase == nullptr)
@@ -66,7 +66,7 @@ void Summon::SetSummonInfo(int idx)
     this->m_nTransform = m_tSummonBase->form;
 }
 
-int Summon::GetSummonCode()
+int32_t Summon::GetSummonCode()
 {
     return m_tSummonBase->id;
 }
@@ -135,7 +135,7 @@ void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
     CharacterDatabase.Execute(stmt);
 }
 
-void Summon::processWalk(uint t)
+void Summon::processWalk(uint32_t t)
 {
     // Do Ride check here
     ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector *>(this)};
@@ -157,10 +157,10 @@ void Summon::OnAfterReadSummon()
 
 void Summon::onExpChange()
 {
-    int level = 1;
-    int lvl = 0;
-    int oblv = 0;
-    int jp = 0;
+    int32_t level = 1;
+    int32_t lvl = 0;
+    int32_t oblv = 0;
+    int32_t jp = 0;
     switch (m_tSummonBase->form)
     {
     case 1:
@@ -204,13 +204,13 @@ void Summon::onExpChange()
             uint64_t uid{0};
             if (m_pItem != nullptr)
                 uid = m_pItem->m_Instance.UID;
-            int ljp{0};
+            int32_t ljp{0};
             if (level <= GetLevel())
                 ljp = 0;
             else
                 ljp = jp;
 
-            int levelchange = level - GetLevel();
+            int32_t levelchange = level - GetLevel();
             SetCurrentJLv(level);
             SetInt32Value(UNIT_FIELD_LEVEL, level);
             if (levelchange <= 0)
@@ -279,7 +279,7 @@ bool Summon::DoEvolution()
             evoPct.code = m_tSummonBase->id;
             if (IsInWorld())
             {
-                sWorld.Broadcast((uint)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
+                sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
             }
             else
             {
@@ -298,7 +298,7 @@ bool Summon::DoEvolution()
 
             if (m_pItem != nullptr)
             {
-                /*int i = 0;
+                /*int32_t i = 0;
                 for( i = 0; i < m_tSummonBase.form - 1; ++i) {
                     m_pItem->m_Instance.Socket[i+1] = GetPrevJobLv(i);
                 }
@@ -312,7 +312,7 @@ bool Summon::DoEvolution()
     return false;
 };
 
-bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int> *ItemList)
+bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int32_t> *ItemList)
 {
     if (!Unit::TranslateWearPosition(pos, pItem, ItemList))
         return false;
@@ -330,7 +330,7 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
 
         ///- Later epics: Accessory + Artifact slots, ain't gonna implement that yet
 
-        for (int i = startPos; i < endPos; ++i)
+        for (int32_t i = startPos; i < endPos; ++i)
         {
             auto pWornItem = m_anWear[i];
             if (!pItem->IsArtifact() && pWornItem != nullptr && pWornItem->GetItemGroup() == pItem->GetItemGroup())
@@ -361,7 +361,7 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
 
 CreatureStat *Summon::GetBaseStat() const
 {
-    return sObjectMgr.GetStatInfo((uint)m_tSummonBase->stat_id);
+    return sObjectMgr.GetStatInfo((uint32_t)m_tSummonBase->stat_id);
 }
 
 Summon::~Summon()
@@ -372,18 +372,18 @@ Summon::~Summon()
     }
 }
 
-void Summon::onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level)
+void Summon::onRegisterSkill(int64_t skillUID, int32_t skill_id, int32_t prev_level, int32_t skill_level)
 {
     Skill::DB_InsertSkill(this, skillUID, skill_id, skill_level, GetRemainCoolTime(skill_id));
     Messages::SendSkillList(GetMaster(), this, skill_id);
 }
 
-void Summon::Update(uint /*diff*/)
+void Summon::Update(uint32_t /*diff*/)
 {
     if (!IsInWorld())
         return;
 
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
     if (GetHealth() == 0)
     {
         if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 6000 < ct)
@@ -467,18 +467,18 @@ void Summon::onModifyStatAndAttribute()
     }
 }
 
-void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
+void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
 {
     /*
    StructSummon *v7; // esi@1
   c_fixed<10000> *v8; // eax@6
   double v9; // st7@6
-  unsigned int v10; // edi@9
-  unsigned int v11; // ebx@9
+  unsigned int32_t v10; // edi@9
+  unsigned int32_t v11; // ebx@9
   float n; // ST1C_4@9
   c_fixed<10000> *v13; // eax@9
-  unsigned int v14; // ecx@9
-  unsigned int v15; // eax@9
+  unsigned int32_t v14; // ecx@9
+  unsigned int32_t v15; // eax@9
   c_fixed<10000> result; // [sp+10h] [bp-8h]@6
 
   v7 = this;
@@ -574,7 +574,7 @@ float Summon::GetScale() const
     return m_tSummonBase->scale;
 }
 
-void Summon::onCantAttack(uint handle, uint t)
+void Summon::onCantAttack(uint32_t handle, uint32_t t)
 {
     if (GetUInt32Value(UNIT_LAST_CANT_ATTACK_TIME) + 100 < t)
     {
@@ -614,12 +614,12 @@ struct applyPassiveSkillEffectFunctor : SkillFunctor
         {
         case EF_INCREASE_SUMMON_HP_MP_SP:
         {
-            int nMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
-            int nMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
-            //int nMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
-            int nHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
-            int nMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
-            //int nSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+            int32_t nMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
+            int32_t nMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
+            //int32_t nMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            int32_t nHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
+            int32_t nMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
+            //int32_t nSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
 
             m_pSummon->SetMaxHealth(m_pSummon->GetMaxHealth() + nMaxHPInc);
             m_pSummon->SetMaxMana(m_pSummon->GetMaxMana() + nMaxMPInc);
@@ -712,7 +712,7 @@ struct onApplyStatFunctor : SkillFunctor
     {
         if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_INCREASE_STAT)
         {
-            int nSkillLevel = pSkill->GetCurrentSkillLevel();
+            int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
             m_pSummon->GetCreatureStat().strength += pSkill->GetVar(0) + pSkill->GetVar(1) * nSkillLevel;
             m_pSummon->GetCreatureStat().vital += pSkill->GetVar(2) + pSkill->GetVar(3) * nSkillLevel;
@@ -724,7 +724,7 @@ struct onApplyStatFunctor : SkillFunctor
         }
         else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_AMPLIFY_STAT)
         {
-            int nSkillLevel = pSkill->GetCurrentSkillLevel();
+            int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
             m_pSummon->GetCreatureStatAmplifier().strength += pSkill->GetVar(0) * nSkillLevel;
             m_pSummon->GetCreatureStatAmplifier().vital += pSkill->GetVar(1) * nSkillLevel;

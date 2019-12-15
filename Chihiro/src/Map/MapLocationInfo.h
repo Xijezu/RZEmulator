@@ -21,13 +21,13 @@
 class MapLocationInfo : public X2D::PolygonF
 {
     public:
-        MapLocationInfo(X2D::Pointf p1, X2D::Pointf p2, int id, int _pri) : X2D::PolygonF(p1, p2)
+        MapLocationInfo(X2D::Pointf p1, X2D::Pointf p2, int32_t id, int32_t _pri) : X2D::PolygonF(p1, p2)
         {
             location_id = id;
             priority    = _pri;
         }
 
-        MapLocationInfo(std::vector<X2D::Pointf> points, int id, int _pri) : X2D::PolygonF(std::move(points))
+        MapLocationInfo(std::vector<X2D::Pointf> points, int32_t id, int32_t _pri) : X2D::PolygonF(std::move(points))
         {
             location_id = id;
             priority    = _pri;
@@ -38,6 +38,6 @@ class MapLocationInfo : public X2D::PolygonF
             return std::to_string(location_id);
         }
 
-        int location_id;
-        int priority;
+        int32_t location_id;
+        int32_t priority;
 };

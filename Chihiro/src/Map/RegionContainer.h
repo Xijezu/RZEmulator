@@ -43,35 +43,35 @@ class RegionContainer
         RegionContainer &operator=(const RegionContainer &) = delete;
 
         void InitRegion(float map_width, float map_height);
-        bool IsValidRegion(uint rx, uint ry, uint8_t layer);
+        bool IsValidRegion(uint32_t rx, uint32_t ry, uint8_t layer);
         Region *GetRegion(WorldObject *pObject);
-        Region *GetRegion(uint rx, uint ry, uint8_t layer);
+        Region *GetRegion(uint32_t rx, uint32_t ry, uint8_t layer);
         /* Deprecated*/
-        void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, RegionFunctor &fn);
-        void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, RegionFunctor &fn);
-        void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, RegionFunctor &fn);
+        void DoEachVisibleRegion(uint32_t rx, uint32_t ry, uint8_t layer, RegionFunctor &fn);
+        void DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, RegionFunctor &fn);
+        void DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, uint32_t pry, uint8_t layer, RegionFunctor &fn);
 
         template<typename Visitor>
-        void DoEachVisibleRegion(uint rx, uint ry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
+        void DoEachVisibleRegion(uint32_t rx, uint32_t ry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
-            uint left = rx - 3;
+            uint32_t left = rx - 3;
             if (rx < 3)
                 left = 0;
 
-            uint top = ry - 3;
+            uint32_t top = ry - 3;
             if (ry < 3)
                 top = 0;
 
-            uint right = rx + 3;
+            uint32_t right = rx + 3;
             if (right >= m_nRegionWidth)
                 right = m_nRegionWidth - 1;
 
-            uint bottom = ry + 3;
+            uint32_t bottom = ry + 3;
             if (bottom >= m_nRegionHeight)
                 bottom = m_nRegionHeight - 1;
-            for (uint x = left; x <= right; ++x)
+            for (uint32_t x = left; x <= right; ++x)
             {
-                for (uint y = top; y < bottom; ++y)
+                for (uint32_t y = top; y < bottom; ++y)
                 {
                     if (IsVisibleRegion(rx, ry, x, y) != 0)
                     {
@@ -91,35 +91,35 @@ class RegionContainer
         }
 
         template<typename Visitor>
-        void DoEachVisibleRegion(uint rx1, uint ry1, uint rx2, uint ry2, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
+        void DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
-            uint left = rx2 - 3;
+            uint32_t left = rx2 - 3;
             if ((rx2 - 3) >= (rx1 - 3))
                 left = rx1 - 3;
             if (left <= 0)
                 left = 0;
 
-            uint top = ry2 - 3;
+            uint32_t top = ry2 - 3;
             if ((ry2 - 3) >= (ry1 - 3))
                 top = ry1 - 3;
             if (top <= 0)
                 top = 0;
 
-            uint right = rx2 + 3;
+            uint32_t right = rx2 + 3;
             if ((rx1 + 3) >= (rx2 + 3))
                 right = rx1 + 3;
             if (right >= m_nRegionWidth)
                 right = m_nRegionWidth - 1;
 
-            uint bottom = ry2 + 3;
+            uint32_t bottom = ry2 + 3;
             if ((ry1 + 3) >= (ry2 + 3))
                 bottom = ry1 + 3;
             if (bottom >= m_nRegionHeight)
                 bottom = m_nRegionHeight - 1;
 
-            for (uint x = left; x <= right; ++x)
+            for (uint32_t x = left; x <= right; ++x)
             {
-                for (uint y = top; y < bottom; ++y)
+                for (uint32_t y = top; y < bottom; ++y)
                 {
                     if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0)
                     {
@@ -139,27 +139,27 @@ class RegionContainer
         }
 
         template<typename Visitor>
-        void DoEachNewRegion(uint rx, uint ry, uint prx, uint pry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
+        void DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, uint32_t pry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
         {
-            uint left = rx - 3;
+            uint32_t left = rx - 3;
             if (rx < 3)
                 left = 0;
 
-            uint top = ry - 3;
+            uint32_t top = ry - 3;
             if (ry < 3)
                 top = 0;
 
-            uint right = rx + 3;
+            uint32_t right = rx + 3;
             if (right >= m_nRegionWidth)
                 right = m_nRegionWidth - 1;
 
-            uint bottom = ry + 3;
+            uint32_t bottom = ry + 3;
             if (bottom >= m_nRegionHeight)
                 bottom = m_nRegionHeight - 1;
 
-            for (uint x = left; x <= right; ++x)
+            for (uint32_t x = left; x <= right; ++x)
             {
-                for (uint y = top; y < bottom; ++y)
+                for (uint32_t y = top; y < bottom; ++y)
                 {
                     if (IsVisibleRegion(rx, ry, x, y) != 0)
                     {
@@ -181,22 +181,22 @@ class RegionContainer
             }
         }
 
-        uint IsVisibleRegion(uint rx, uint ry, uint _rx, uint _ry);
-        uint IsVisibleRegion(WorldObject *obj1, WorldObject *obj2);
+        uint32_t IsVisibleRegion(uint32_t rx, uint32_t ry, uint32_t _rx, uint32_t _ry);
+        uint32_t IsVisibleRegion(WorldObject *obj1, WorldObject *obj2);
     private:
         void initRegion();
         void deinitRegion();
-        RegionBlock *getRegionBlockPtr(uint rcx, uint rcy);
-        RegionBlock *getRegionBlock(uint rcx, uint rcy);
-        Region *getRegionPtr(uint rx, uint ry, uint8_t layer);
-        Region *getRegion(uint rx, uint ry, uint8_t layer);
+        RegionBlock *getRegionBlockPtr(uint32_t rcx, uint32_t rcy);
+        RegionBlock *getRegionBlock(uint32_t rcx, uint32_t rcy);
+        Region *getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer);
+        Region *getRegion(uint32_t rx, uint32_t ry, uint8_t layer);
 
         float                      m_MapWidth;
         float                      m_MapHeight;
-        uint                       m_nRegionWidth;
-        uint                       m_nRegionHeight;
-        uint                       m_nRegionBlockWidth;
-        uint                       m_nRegionBlockHeight;
+        uint32_t                       m_nRegionWidth;
+        uint32_t                       m_nRegionHeight;
+        uint32_t                       m_nRegionBlockWidth;
+        uint32_t                       m_nRegionBlockHeight;
         std::vector<RegionBlock *> m_RegionBlock;
         NG_SHARED_MUTEX i_lock;
     protected:

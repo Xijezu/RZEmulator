@@ -29,9 +29,9 @@ struct PARTY_DAMAGE
         nLevel = 0;
     }
 
-    PARTY_DAMAGE(int _damage, int _level) : nDamage(_damage), nLevel(_level) {}
-    int nDamage;
-    int nLevel;
+    PARTY_DAMAGE(int32_t _damage, int32_t _level) : nDamage(_damage), nLevel(_level) {}
+    int32_t nDamage;
+    int32_t nLevel;
 };
 
 struct MonsterBase
@@ -78,63 +78,63 @@ struct MonsterBase
         MONSTER_RACE_DUNGEON_CONNECTOR = 20001,
     };
 
-    int id;
-    int name_id;
-    int monster_group;
-    int location_id;
-    int level;
-    int grp;
+    int32_t id;
+    int32_t name_id;
+    int32_t monster_group;
+    int32_t location_id;
+    int32_t level;
+    int32_t grp;
     float size;
     float scale;
-    int magic_type;
-    int race;
-    int visible_range;
-    int chase_range;
-    int flag[5];
-    int monster_type;
-    int stat_id;
-    int fight_type;
-    int weapon_type;
-    int attack_motion_speed;
-    int ability;
-    int standard_walk_speed;
-    int standard_run_speed;
-    int walk_speed;
-    int run_speed;
+    int32_t magic_type;
+    int32_t race;
+    int32_t visible_range;
+    int32_t chase_range;
+    int32_t flag[5];
+    int32_t monster_type;
+    int32_t stat_id;
+    int32_t fight_type;
+    int32_t weapon_type;
+    int32_t attack_motion_speed;
+    int32_t ability;
+    int32_t standard_walk_speed;
+    int32_t standard_run_speed;
+    int32_t walk_speed;
+    int32_t run_speed;
     float attack_range;
-    int hp;
-    int mp;
-    int attacK_point;
-    int magic_point;
-    int defence;
-    int magic_defence;
-    int attack_speed;
-    int magic_speed;
-    int accuracy;
-    int avoid;
-    int magic_accuracy;
-    int magic_avoid;
-    int taming_id;
+    int32_t hp;
+    int32_t mp;
+    int32_t attacK_point;
+    int32_t magic_point;
+    int32_t defence;
+    int32_t magic_defence;
+    int32_t attack_speed;
+    int32_t magic_speed;
+    int32_t accuracy;
+    int32_t avoid;
+    int32_t magic_accuracy;
+    int32_t magic_avoid;
+    int32_t taming_id;
     float taming_percentage;
     float taming_exp_mod;
-    int exp[2];
-    int jp[2];
-    int gold_drop_percentage;
-    int gold_min[2];
-    int gold_max[2];
-    int chaos_drop_percentage;
-    int chaos_min[2];
-    int chaos_max[2];
-    int drop_item_id[10];
-    int drop_percentage[10];
-    int drop_min_count[10];
-    int drop_max_count[10];
-    int drop_min_level[10];
-    int drop_max_level[10];
-    int skill_id[4];
-    int skill_lv[4];
+    int32_t exp[2];
+    int32_t jp[2];
+    int32_t gold_drop_percentage;
+    int32_t gold_min[2];
+    int32_t gold_max[2];
+    int32_t chaos_drop_percentage;
+    int32_t chaos_min[2];
+    int32_t chaos_max[2];
+    int32_t drop_item_id[10];
+    int32_t drop_percentage[10];
+    int32_t drop_min_count[10];
+    int32_t drop_max_count[10];
+    int32_t drop_min_level[10];
+    int32_t drop_max_level[10];
+    int32_t skill_id[4];
+    int32_t skill_lv[4];
     float skill_probability[4];
-    int local_flag;
+    int32_t local_flag;
 };
 
 struct MonsterDeleteHandler
@@ -149,28 +149,28 @@ struct takePriority
 
 struct HateTag
 {
-    HateTag(uint _uid, uint _time, int _hate) : uid(_uid), nTime(_time), nHate(_hate), bIsActive(true), nBadAttackCount(0), nLastMaxHate(0)
+    HateTag(uint32_t _uid, uint32_t _time, int32_t _hate) : uid(_uid), nTime(_time), nHate(_hate), bIsActive(true), nBadAttackCount(0), nLastMaxHate(0)
     {
     }
 
-    uint uid;
-    uint nTime;
-    int nHate;
+    uint32_t uid;
+    uint32_t nTime;
+    int32_t nHate;
     bool bIsActive;
-    int nBadAttackCount;
-    int nLastMaxHate;
+    int32_t nBadAttackCount;
+    int32_t nLastMaxHate;
 };
 
 struct HateModifierTag
 {
-    HateModifierTag(uint _uid, int _hate)
+    HateModifierTag(uint32_t _uid, int32_t _hate)
     {
         uid = _uid;
         nHate = _hate;
     }
 
-    uint uid;
-    int nHate;
+    uint32_t uid;
+    int32_t nHate;
 };
 
 enum ATTACK_TYPE_FLAG : uint16_t
@@ -201,23 +201,23 @@ enum MONSTER_STATUS : int
 
 struct MonsterRespawnInfo
 {
-    uint interval;
+    uint32_t interval;
     float left;
     float top;
     float right;
     float bottom;
     uint8_t layer;
-    uint monster_id;
-    uint max_num;
-    uint inc;
-    uint id;
+    uint32_t monster_id;
+    uint32_t max_num;
+    uint32_t inc;
+    uint32_t id;
     bool is_wandering;
-    int dungeon_id;
-    int way_point_id;
+    int32_t dungeon_id;
+    int32_t way_point_id;
 
     MonsterRespawnInfo() = default;
 
-    MonsterRespawnInfo(uint _id, uint _interval, float _left, float _top, float _right, float _bottom, uint _monster_id, uint _max_num, uint _inc, bool _is_wandering, int _way_point_id)
+    MonsterRespawnInfo(uint32_t _id, uint32_t _interval, float _left, float _top, float _right, float _bottom, uint32_t _monster_id, uint32_t _max_num, uint32_t _inc, bool _is_wandering, int32_t _way_point_id)
     {
         id = _id;
         interval = _interval;

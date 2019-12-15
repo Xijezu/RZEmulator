@@ -105,7 +105,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
 
-    int nFiles{0};
+    int32_t nFiles{0};
     for (auto &it : fs::directory_iterator(configFile))
     {
         if (it.path().extension().string() == ".lua"s)
@@ -174,12 +174,12 @@ bool XLua::RunString(std::string szScript)
     return true;
 }
 
-void XLua::SCRIPT_SetWayPointType(int waypoint_id, int waypoint_type)
+void XLua::SCRIPT_SetWayPointType(int32_t waypoint_id, int32_t waypoint_type)
 {
     sObjectMgr.SetWayPointType(waypoint_id, waypoint_type);
 }
 
-void XLua::SCRIPT_AddWayPoint(int waypoint_id, int x, int y)
+void XLua::SCRIPT_AddWayPoint(int32_t waypoint_id, int32_t x, int32_t y)
 {
     sObjectMgr.AddWayPoint(waypoint_id, x, y);
 }
@@ -189,16 +189,16 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
     if (args.size() < 7)
         return;
 
-    uint id = args[0].get<int>();
-    uint interval = args[1].get<uint>();
+    uint32_t id = args[0].get<int32_t>();
+    uint32_t interval = args[1].get<uint32_t>();
     float left = args[2].get<float>();
     float top = args[3].get<float>();
     float right = left + 1;
     float bottom = top + 1;
-    uint monster_id = args[4].get<uint>();
-    uint max_num = args[5].get<uint>();
+    uint32_t monster_id = args[4].get<uint32_t>();
+    uint32_t max_num = args[5].get<uint32_t>();
     bool is_wander = args[6].get<bool>();
-    int wander_id = args.size() > 7 ? args[7].get<uint>() : 0;
+    int32_t wander_id = args.size() > 7 ? args[7].get<uint32_t>() : 0;
 
     MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
@@ -216,11 +216,11 @@ void XLua::SCRIPT_RespawnRoamingMob(sol::variadic_args args)
     uint32_t nRespawnInterval = (args.size() >= 5) ? args[4].get<uint32_t>() * 100 : 0;
 }
 
-void XLua::SCRIPT_RespawnGuardian(int, int, int, int, int, int, int, int)
+void XLua::SCRIPT_RespawnGuardian(int, int, int, int, int, int, int, int32_t)
 {
 }
 
-int XLua::SCRIPT_GetNPCID()
+int32_t XLua::SCRIPT_GetNPCID()
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
@@ -280,7 +280,7 @@ void XLua::SCRIPT_DialogShow()
     player->ShowDialog();
 }
 
-int XLua::SCRIPT_GetLocalFlag()
+int32_t XLua::SCRIPT_GetLocalFlag()
 {
     return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }
@@ -324,7 +324,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     }
     else if (szKey == "auto_user")
     {
-        return return_object((int)0);
+        return return_object((int32_t)0);
     }
     else if (szKey == "level" || szKey == "lv")
     {
@@ -425,59 +425,59 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
 
     if (szKey == "race")
     {
-        m_pUnit->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int32_t>());
     }
     else if (szKey == "job")
     {
-        m_pUnit->SetCurrentJob(args[0].get<uint>());
+        m_pUnit->SetCurrentJob(args[0].get<uint32_t>());
     }
     else if (szKey == "level" || szKey == "lv")
     {
-        m_pUnit->SetEXP((uint)sObjectMgr.GetNeedExp(args[0].get<uint>()));
+        m_pUnit->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
     }
     else if (szKey == "job_level" || szKey == "jlv")
     {
-        m_pUnit->SetCurrentJLv(args[0].get<int>());
+        m_pUnit->SetCurrentJLv(args[0].get<int32_t>());
     }
     else if (szKey == "x")
     {
-        m_pUnit->Relocate(args[0].get<int>(), m_pUnit->GetPositionY());
+        m_pUnit->Relocate(args[0].get<int32_t>(), m_pUnit->GetPositionY());
     }
     else if (szKey == "y")
     {
-        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int>());
+        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int32_t>());
     }
     else if (szKey == "stamina" || szKey == "stanima")
     { // I do that typo all the time /shrug
-        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
     }
     else if (szKey == "jp")
     {
-        m_pUnit->SetJP(args[0].get<int>());
-        Messages::SendPropertyMessage(dynamic_cast<Player *>(m_pUnit), m_pUnit, "jp", args[0].get<int>());
+        m_pUnit->SetJP(args[0].get<int32_t>());
+        Messages::SendPropertyMessage(dynamic_cast<Player *>(m_pUnit), m_pUnit, "jp", args[0].get<int32_t>());
     }
     else if (szKey == "hp")
     {
-        m_pUnit->SetHealth(args[0].get<uint>());
-        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint>(), 0, false);
+        m_pUnit->SetHealth(args[0].get<uint32_t>());
+        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint32_t>(), 0, false);
     }
     else if (szKey == "mp")
     {
-        m_pUnit->SetMana(args[0].get<uint>());
-        Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint>(), false);
+        m_pUnit->SetMana(args[0].get<uint32_t>());
+        Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint32_t>(), false);
     }
     else if (szKey == "job_0")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint32_t>());
     else if (szKey == "job_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint32_t>());
     else if (szKey == "job_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint32_t>());
     else if (szKey == "jlv_0")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint32_t>());
     else if (szKey == "jlv_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint32_t>());
     else if (szKey == "jlv_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint32_t>());
 
     if (m_pUnit->IsPlayer())
     {
@@ -488,17 +488,17 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
         }
         else if (szKey == "permission")
         {
-            player->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint>());
+            player->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
         }
         else if (szKey == "chaos")
         {
-            player->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint>());
+            player->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint32_t>());
             player->SendGoldChaosMessage();
         }
     }
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player != nullptr)
-        player->onChangeProperty(szKey, args[0].get<int>());
+        player->onChangeProperty(szKey, args[0].get<int32_t>());
 }
 
 sol::object XLua::SCRIPT_GetEnv(std::string szKey)
@@ -506,7 +506,7 @@ sol::object XLua::SCRIPT_GetEnv(std::string szKey)
     auto value = sConfigMgr->GetStringDefault(szKey.c_str(), "");
     if (isMXNumeric(value))
     {
-        int val = std::stoi(value);
+        int32_t val = std::stoi(value);
         return return_object(val);
     }
     else
@@ -555,7 +555,7 @@ void XLua::SCRIPT_Message(std::string szMsg)
     Messages::SendChatMessage(40, "@SCRIPT", player, szMsg);
 }
 
-void XLua::SCRIPT_SetCurrentLocationID(int location_id)
+void XLua::SCRIPT_SetCurrentLocationID(int32_t location_id)
 {
     sObjectMgr.g_currentLocationId = location_id;
 }
@@ -569,8 +569,8 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     if (player == nullptr)
         return;
 
-    int x = args[0].get<int>();
-    int y = args[1].get<int>();
+    int32_t x = args[0].get<int32_t>();
+    int32_t y = args[1].get<int32_t>();
 
     if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y)
     {
@@ -579,16 +579,16 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     player->PendWarp(x, y, 0);
 }
 
-int XLua::SCRIPT_GetServerCategory()
+int32_t XLua::SCRIPT_GetServerCategory()
 {
-    int result = 0;
+    int32_t result = 0;
     result = (sWorld.getBoolConfig(CONFIG_SERVICE_SERVER) ? 1 : 0) << 29;
     result = result | ((sWorld.getBoolConfig(CONFIG_PK_SERVER) ? 1 : 0) << 28);
     result = result + sWorld.getIntConfig(CONFIG_SERVER_INDEX);
     return result;
 }
 
-int XLua::SCRIPT_GetWearItemHandle(int index)
+int32_t XLua::SCRIPT_GetWearItemHandle(int32_t index)
 {
     if (m_pUnit == nullptr)
         return 0;
@@ -599,7 +599,7 @@ int XLua::SCRIPT_GetWearItemHandle(int index)
     return m_pUnit->m_anWear[index] == nullptr ? 0 : m_pUnit->m_anWear[index]->m_nHandle;
 }
 
-int XLua::SCRIPT_GetItemLevel(uint handle)
+int32_t XLua::SCRIPT_GetItemLevel(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
@@ -607,7 +607,7 @@ int XLua::SCRIPT_GetItemLevel(uint handle)
     return item->m_Instance.nLevel;
 }
 
-int XLua::SCRIPT_GetItemEnhance(uint handle)
+int32_t XLua::SCRIPT_GetItemEnhance(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
@@ -615,7 +615,7 @@ int XLua::SCRIPT_GetItemEnhance(uint handle)
     return item->m_Instance.nEnhance;
 }
 
-int XLua::SCRIPT_SetItemLevel(uint handle, int level)
+int32_t XLua::SCRIPT_SetItemLevel(uint32_t handle, int32_t level)
 {
     if (level > 255)
         return 0;
@@ -641,7 +641,7 @@ int XLua::SCRIPT_SetItemLevel(uint handle, int level)
     return level;
 }
 
-int XLua::SCRIPT_GetItemRank(uint handle)
+int32_t XLua::SCRIPT_GetItemRank(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr)
@@ -649,7 +649,7 @@ int XLua::SCRIPT_GetItemRank(uint handle)
     return item->m_pItemBase->rank;
 }
 
-int XLua::SCRIPT_GetItemPrice(uint handle)
+int32_t XLua::SCRIPT_GetItemPrice(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr || item->m_pItemBase == nullptr)
@@ -657,7 +657,7 @@ int XLua::SCRIPT_GetItemPrice(uint handle)
     return item->m_pItemBase->price;
 }
 
-int XLua::SCRIPT_GetItemNameID(int code)
+int32_t XLua::SCRIPT_GetItemNameID(int32_t code)
 {
     auto base = sObjectMgr.GetItemBase(code);
     if (base == nullptr)
@@ -666,7 +666,7 @@ int XLua::SCRIPT_GetItemNameID(int code)
         return base->name_id;
 }
 
-int XLua::SCRIPT_GetItemCode(uint handle)
+int32_t XLua::SCRIPT_GetItemCode(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
@@ -674,7 +674,7 @@ int XLua::SCRIPT_GetItemCode(uint handle)
     return item->m_Instance.Code;
 }
 
-int XLua::SCRIPT_UpdateGoldChaos()
+int32_t XLua::SCRIPT_UpdateGoldChaos()
 {
     if (m_pUnit == nullptr)
         return 0;
@@ -689,7 +689,7 @@ void XLua::SCRIPT_SavePlayer()
     dynamic_cast<Player *>(m_pUnit)->Save(false);
 }
 
-uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
+uint32_t XLua::SCRIPT_InsertItem(sol::variadic_args args)
 {
     if (m_pUnit == nullptr)
         return 0;
@@ -697,15 +697,15 @@ uint XLua::SCRIPT_InsertItem(sol::variadic_args args)
     if (args.size() < 2)
         return 0;
 
-    int nCode = args[0].get<int>();
-    int nCount = args[1].get<int>();
-    int nEnhance = args.size() >= 3 ? args[2].get<int>() : 0;
-    int nLevel = args.size() >= 4 ? args[3].get<int>() : 0;
-    int nFlag = args.size() >= 5 ? args[4].get<int>() : 0;
+    int32_t nCode = args[0].get<int32_t>();
+    int32_t nCount = args[1].get<int32_t>();
+    int32_t nEnhance = args.size() >= 3 ? args[2].get<int32_t>() : 0;
+    int32_t nLevel = args.size() >= 4 ? args[3].get<int32_t>() : 0;
+    int32_t nFlag = args.size() >= 5 ? args[4].get<int32_t>() : 0;
     auto pName = args.size() >= 6 ? args[5].get<std::string>() : m_pUnit->GetNameAsString();
 
     auto player = Player::FindPlayer(pName);
-    uint handle = 0;
+    uint32_t handle = 0;
     if (player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0)
     {
         auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
@@ -727,16 +727,16 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
     if (args.size() < 9)
         return;
 
-    auto id = args[0].get<uint>();
-    auto interval = args[1].get<uint>();
+    auto id = args[0].get<uint32_t>();
+    auto interval = args[1].get<uint32_t>();
     auto left = args[2].get<float>();
     auto top = args[3].get<float>();
     auto right = args[4].get<float>();
     auto bottom = args[5].get<float>();
-    auto monster_id = args[6].get<uint>();
-    auto max_num = args[7].get<uint>();
-    auto inc = args[8].get<uint>();
-    auto wander_id = args.size() > 9 ? args[9].get<int>() : 0;
+    auto monster_id = args[6].get<uint32_t>();
+    auto max_num = args[7].get<uint32_t>();
+    auto inc = args[8].get<uint32_t>();
+    auto wander_id = args.size() > 9 ? args[9].get<int32_t>() : 0;
 
     assert(max_num != 0);
 
@@ -748,16 +748,16 @@ void XLua::SCRIPT_CPrint(sol::variadic_args)
 {
 }
 
-void XLua::SCRIPT_AddMonster(int x, int y, int id, int amount)
+void XLua::SCRIPT_AddMonster(int32_t x, int32_t y, int32_t id, int32_t amount)
 {
-    for (int i = 0; i < amount; i++)
+    for (int32_t i = 0; i < amount; i++)
     {
         auto mob = GameContent::RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
         mob->m_bNearClient = true;
     }
 }
 
-int XLua::SCRIPT_GetCreatureHandle(int idx)
+int32_t XLua::SCRIPT_GetCreatureHandle(int32_t idx)
 {
     if (m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return 0;
@@ -770,9 +770,9 @@ int XLua::SCRIPT_GetCreatureHandle(int idx)
     return 0;
 }
 
-void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object value)
+void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key, sol::object value)
 {
-    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint)handle);
+    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint32_t)handle);
     if (summon == nullptr && handle < 6 && handle > 0)
     {
         auto player = dynamic_cast<Player *>(m_pUnit);
@@ -793,24 +793,24 @@ void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object valu
     {
         if (key == "level"s || key == "lv"s)
         {
-            summon->SetEXP(sObjectMgr.GetNeedSummonExp(value.as<int>()));
+            summon->SetEXP(sObjectMgr.GetNeedSummonExp(value.as<int32_t>()));
             Messages::SendEXPMessage(m_pUnit->As<Player>(), summon);
         }
         else if (key == "ev_1_ID"s)
         {
-            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, value.as<int>());
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB, value.as<int32_t>());
         }
         else if (key == "ev_2_ID"s)
         {
-            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, value.as<int>());
+            summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, value.as<int32_t>());
         }
         else if (key == "ev_1_level"s)
         {
-            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, value.as<int>());
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV, value.as<int32_t>());
         }
         else if (key == "ev_2_level"s)
         {
-            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, value.as<int>());
+            summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, value.as<int32_t>());
         }
         else if (key == "hp")
         {
@@ -825,9 +825,9 @@ void XLua::SCRIPT_SetCreatureValue(int handle, std::string key, sol::object valu
     }
 }
 
-sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
+sol::object XLua::SCRIPT_GetCreatureValue(int32_t handle, std::string key)
 {
-    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint)handle);
+    auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint32_t)handle);
     if (summon == nullptr && handle < 6 && handle > 0)
     {
         auto player = dynamic_cast<Player *>(m_pUnit);
@@ -841,7 +841,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     }
 
     if (summon == nullptr)
-        return return_object((int)0);
+        return return_object((int32_t)0);
 
     if (key == "hp"s)
     {
@@ -879,10 +879,10 @@ sol::object XLua::SCRIPT_GetCreatureValue(int handle, std::string key)
     {
         return return_object(summon->IsInWorld() ? 1 : 0);
     }
-    return return_object((int)0);
+    return return_object((int32_t)0);
 }
 
-void XLua::SCRIPT_CreatureEvolution(int slot)
+void XLua::SCRIPT_CreatureEvolution(int32_t slot)
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
@@ -895,18 +895,18 @@ void XLua::SCRIPT_CreatureEvolution(int slot)
     }
 }
 
-void XLua::SCRIPT_QuestInfo(int code, sol::variadic_args args)
+void XLua::SCRIPT_QuestInfo(int32_t code, sol::variadic_args args)
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
         return;
-    int textID = 0;
+    int32_t textID = 0;
     if (args.size() >= 1)
-        textID = args[0].get<int>();
+        textID = args[0].get<int32_t>();
     Messages::SendQuestInformation(player, code, textID, 0);
 }
 
-int XLua::SCRIPT_GetQuestProgress(int quest)
+int32_t XLua::SCRIPT_GetQuestProgress(int32_t quest)
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
@@ -914,17 +914,17 @@ int XLua::SCRIPT_GetQuestProgress(int quest)
     return player->GetQuestProgress(quest);
 }
 
-int XLua::SCRIPT_GetOwnDungeonID()
+int32_t XLua::SCRIPT_GetOwnDungeonID()
 {
     return 0;
 }
 
-int XLua::SCRIPT_GetSiegeDungeonID()
+int32_t XLua::SCRIPT_GetSiegeDungeonID()
 {
     return 0;
 }
 
-void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
+void XLua::SCRIPT_StartQuest(int32_t code, sol::variadic_args args)
 {
     if (code != 0 && args.size() >= 1)
     {
@@ -933,7 +933,7 @@ void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
             return;
 
         bool bForce = false;
-        int nStartID = args[0].get<int>();
+        int32_t nStartID = args[0].get<int32_t>();
         if (args.size() == 2)
             bForce = args[1].get<bool>();
 
@@ -941,7 +941,7 @@ void XLua::SCRIPT_StartQuest(int code, sol::variadic_args args)
     }
 }
 
-void XLua::SCRIPT_EndQuest(int quest_id, int reward_id, sol::variadic_args args)
+void XLua::SCRIPT_EndQuest(int32_t quest_id, int32_t reward_id, sol::variadic_args args)
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
@@ -954,16 +954,16 @@ void XLua::SCRIPT_EndQuest(int quest_id, int reward_id, sol::variadic_args args)
     player->EndQuest(quest_id, reward_id, bForce);
 }
 
-void XLua::SCRIPT_EnterDungeon(int nDungeonID)
+void XLua::SCRIPT_EnterDungeon(int32_t nDungeonID)
 {
     auto pos = sDungeonManager.GetRaidStartPosition(nDungeonID);
     if (pos.GetPositionX() != 0 && pos.GetPositionY() != 0)
     {
-        dynamic_cast<Player *>(m_pUnit)->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
+        dynamic_cast<Player *>(m_pUnit)->PendWarp((int32_t)pos.GetPositionX(), (int32_t)pos.GetPositionY(), 0);
     }
 }
 
-int XLua::SCRIPT_LearnAllSkill()
+int32_t XLua::SCRIPT_LearnAllSkill()
 {
     if (m_pUnit == nullptr || !m_pUnit->IsPlayer())
         return 0;
@@ -981,7 +981,7 @@ void XLua::SCRIPT_WarpToRevivePosition(sol::variadic_args)
 
     auto revive_pos = player->GetLastTownPosition();
 
-    player->PendWarp((int)revive_pos.GetPositionX(), (int)revive_pos.GetPositionY(), 0);
+    player->PendWarp((int32_t)revive_pos.GetPositionX(), (int32_t)revive_pos.GetPositionY(), 0);
     player->SetMove(player->GetCurrentPosition(sWorld.GetArTime()), 0, 0);
 }
 
@@ -1014,9 +1014,9 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
         return;
     }
 
-    int nStateCode = args[0].get<int>();
-    int nStateLevel = args[1].get<uint8_t>();
-    uint nStateTime = args[2].get<uint>();
+    int32_t nStateCode = args[0].get<int32_t>();
+    int32_t nStateLevel = args[1].get<uint8_t>();
+    uint32_t nStateTime = args[2].get<uint32_t>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr)
     {
@@ -1035,9 +1035,9 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
         return;
     }
 
-    int nStateCode = args[0].get<int>();
-    int nStateLevel = args[1].get<uint8_t>();
-    uint nStateTime = args[2].get<uint>();
+    int32_t nStateCode = args[0].get<int32_t>();
+    int32_t nStateLevel = args[1].get<uint8_t>();
+    uint32_t nStateTime = args[2].get<uint32_t>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     Summon *summon = player->m_pMainSummon;
 

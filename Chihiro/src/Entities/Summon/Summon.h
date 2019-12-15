@@ -24,8 +24,8 @@ class Summon : public Unit
 {
 public:
   friend class Player;
-  static Summon *AllocSummon(Player *, uint);
-  explicit Summon(uint, uint);
+  static Summon *AllocSummon(Player *, uint32_t);
+  explicit Summon(uint32_t, uint32_t);
   // Deleting the copy & assignment operators
   // Better safe than sorry
   Summon(const Summon &) = delete;
@@ -39,7 +39,7 @@ public:
   CreatureStat *GetBaseStat() const override;
   inline uint32_t GetSummonSID() const { return GetUInt32Value(UNIT_FIELD_UID); }
 
-  uint GetCreatureGroup() const override { return 9; }
+  uint32_t GetCreatureGroup() const override { return 9; }
 
   void OnAfterReadSummon();
   uint32_t GetCardHandle();
@@ -53,28 +53,28 @@ public:
 
   Player *GetMaster() const { return m_pMaster; }
 
-  void Update(uint /*diff*/) override;
+  void Update(uint32_t /*diff*/) override;
 
-  bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList) override;
+  bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList) override;
 
   float GetSize() const override;
   float GetScale() const override;
 
-  void SetSummonInfo(int);
+  void SetSummonInfo(int32_t);
   bool DoEvolution();
 
-  int m_nSummonInfo{};
-  int m_nCardUID{};
-  int m_nTransform{};
+  int32_t m_nSummonInfo{};
+  int32_t m_nCardUID{};
+  int32_t m_nTransform{};
   uint8_t m_cSlotIdx{};
   Item *m_pItem{nullptr};
 
 protected:
-  void onCantAttack(uint handle, uint t) override;
+  void onCantAttack(uint32_t handle, uint32_t t) override;
   uint16_t putonItem(ItemWearType pos, Item *pItem) override;
   uint16_t putoffItem(ItemWearType pos) override;
-  void onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level) override;
-  void processWalk(uint t);
+  void onRegisterSkill(int64_t skillUID, int32_t skill_id, int32_t prev_level, int32_t skill_level) override;
+  void processWalk(uint32_t t);
   void onExpChange() override;
   ///- Stat calculations overwriting from Unit class
   void onBeforeCalculateStat() override;
@@ -85,7 +85,7 @@ protected:
   void applyState(State &state) override;
   void applyPassiveSkillAmplifyEffect() override;
   void onModifyStatAndAttribute() override;
-  void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
+  void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio) override;
   void onCompleteCalculateStat() override;
   void applyStatByState() override;
   void onApplyStat() override;
@@ -94,5 +94,5 @@ private:
   SummonResourceTemplate *m_tSummonBase{nullptr};
   Player *m_pMaster{nullptr};
 
-  int m_nAccountID{};
+  int32_t m_nAccountID{};
 };

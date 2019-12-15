@@ -18,17 +18,17 @@
 
 constexpr int64_t MAX_GOLD_FOR_INVENTORY = 100000000000;
 constexpr int64_t MAX_GOLD_FOR_STORAGE = 100000000000;
-constexpr int MAX_OPTION_NUMBER = 4;
-constexpr int MAX_ITEM_WEAR = 24;
-constexpr int MAX_COOLTIME_GROUP = 40;
-constexpr int MAX_SOCKET_NUMBER = 4;
-constexpr int MAX_ITEM_NAME_LENGTH = 32;
-constexpr int MAX_SPARE_ITEM_WEAR{28};
+constexpr int32_t MAX_OPTION_NUMBER = 4;
+constexpr int32_t MAX_ITEM_WEAR = 24;
+constexpr int32_t MAX_COOLTIME_GROUP = 40;
+constexpr int32_t MAX_SOCKET_NUMBER = 4;
+constexpr int32_t MAX_ITEM_NAME_LENGTH = 32;
+constexpr int32_t MAX_SPARE_ITEM_WEAR{28};
 
 struct ItemPickupOrder
 {
-    uint hPlayer[3];
-    int nPartyID[3];
+    uint32_t hPlayer[3];
+    int32_t nPartyID[3];
 };
 
 enum ElementalType
@@ -47,8 +47,8 @@ enum class ITEM_EFFECT_PASSIVE
 {
     NONE = 0,
 
-    ATTACK_POINT = 11,
-    MAGIC_POINT = 12,
+    ATTACK_POint32_t = 11,
+    MAGIC_POint32_t = 12,
     ACCURACY = 13,
     ATTACK_SPEED = 14,
     DEFENCE = 15,
@@ -67,7 +67,7 @@ enum class ITEM_EFFECT_PASSIVE
     MAX_HP = 30,
     MAX_MP = 31,
     BOW_INTERVAL = 34,
-    MP_REGEN_POINT = 33,
+    MP_REGEN_POint32_t = 33,
     TAMED_ITEM = 95,
     INC_PARAMETER_A = 96,
     INC_PARAMETER_B = 97,
@@ -345,8 +345,8 @@ enum class ITEM_EFFECT_INSTANT
     ADD_STATE = 6,
     REMOVE_STATE = 7,
     TOGGLE_STATE = 8,
-    ADD_IMMORAL_POINT = 41,
-    SET_IMMORAL_POINT = 42,
+    ADD_IMMORAL_POint32_t = 41,
+    SET_IMMORAL_POint32_t = 42,
     WARP_TO_SPECIAL_POSITION = 43,
     INC_STAMINA = 80,
     SUMMON_PET = 90,
@@ -354,7 +354,7 @@ enum class ITEM_EFFECT_INSTANT
     INC_HP_PERCENT = 101,
     INC_MP_PERCENT = 102,
     INC_GOLD = 103,
-    INC_HUNTAHOLIC_POINT = 104,
+    INC_HUNTAHOLIC_POint32_t = 104,
     RECALL = 112,
     RESET_SKILL = 113,
     RESET_JOB = 118,

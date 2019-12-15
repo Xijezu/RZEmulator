@@ -49,7 +49,7 @@ struct ExpertMod
 struct DamageReduceInfo
 {
     DamageReduceInfo(unsigned char _ratio, float _physical_reduce, float _physical_skill_reduce, float _magical_skill_reduce,
-                     int _apply_creature_group_1, int _apply_creature_group_2, int _apply_creature_group_3, int _apply_creature_group_4, int _apply_creature_group_5)
+                     int32_t _apply_creature_group_1, int32_t _apply_creature_group_2, int32_t _apply_creature_group_3, int32_t _apply_creature_group_4, int32_t _apply_creature_group_5)
         : ratio(_ratio), physical_reduce(_physical_reduce), physical_skill_reduce(_physical_skill_reduce), magical_skill_reduce(_magical_skill_reduce)
     {
         apply_creature_group_list[0] = _apply_creature_group_1;
@@ -59,7 +59,7 @@ struct DamageReduceInfo
         apply_creature_group_list[4] = _apply_creature_group_5;
     }
 
-    inline bool IsAppliableCreatureGroup(int creature_group)
+    inline bool IsAppliableCreatureGroup(int32_t creature_group)
     {
         return (apply_creature_group_list[0] == 99 || apply_creature_group_list[0] == creature_group) || (apply_creature_group_list[1] == 99 || apply_creature_group_list[1] == creature_group) || (apply_creature_group_list[2] == 99 || apply_creature_group_list[2] == creature_group) || (apply_creature_group_list[3] == 99 || apply_creature_group_list[3] == creature_group) || (apply_creature_group_list[4] == 99 || apply_creature_group_list[4] == creature_group);
     }
@@ -68,7 +68,7 @@ struct DamageReduceInfo
     float physical_reduce;
     float physical_skill_reduce;
     float magical_skill_reduce;
-    int apply_creature_group_list[5];
+    int32_t apply_creature_group_list[5];
 };
 
 struct StateMod
@@ -88,9 +88,9 @@ struct StateMod
     }
 
     float fDamage;
-    int nDamage;
+    int32_t nDamage;
     float fCritical;
-    int nCritical;
+    int32_t nCritical;
     float fHate;
 };
 
@@ -121,13 +121,13 @@ struct ElementalSkillStateMod
     float fCooltime;
     float fCastingSpeed;
     float fHate;
-    int nMagicalAccuracy;
-    int nPhysicalAccuracy;
-    int nCritical;
+    int32_t nMagicalAccuracy;
+    int32_t nPhysicalAccuracy;
+    int32_t nCritical;
 
     float fMagicalDamage;
     float fPhysicalDamage;
-    int nElementalType;
+    int32_t nElementalType;
     uint32_t nCastingSpeedApplyTime;
 
     std::vector<StateCode> vExhaustiveStateCodeForDelete{};
@@ -136,7 +136,7 @@ struct ElementalSkillStateMod
 
 class CreatureStat
 {
-  public:
+public:
     CreatureStat() { Reset(0); }
 
     void Reset(int16_t);
@@ -159,7 +159,7 @@ class CreatureStat
 
 class CreatureStatAmplifier
 {
-  public:
+public:
     float stat_id;
     float strength;
     float vital;
@@ -187,7 +187,7 @@ class CreatureStatAmplifier
 
 class CreatureAttributeAmplifier
 {
-  public:
+public:
     float fCritical;
     float fCriticalPower;
     float fAttackPointRight;
@@ -267,7 +267,7 @@ class CreatureAttributeAmplifier
 
 class CreatureAtribute
 {
-  public:
+public:
     CreatureAtribute() = default;
 
     ~CreatureAtribute() = default;
@@ -301,7 +301,7 @@ class CreatureAtribute
 
 class CreatureAtributeServer : public CreatureAtribute
 {
-  public:
+public:
     CreatureAtributeServer() = default;
 
     void Reset(int16_t);
@@ -323,7 +323,7 @@ class CreatureAtributeServer : public CreatureAtribute
 
 class CreatureElementalResistAmplifier
 {
-  public:
+public:
     float fResist[7]{0};
 
     // Function       :   void CreatureElementalResistAmplifier(const struct CreatureElementalResistAmplifier &)

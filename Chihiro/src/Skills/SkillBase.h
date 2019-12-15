@@ -53,7 +53,7 @@ enum DISTRIBUTION_TYPE
 struct SkillResult
 {
     uint8_t type;
-    uint hTarget;
+    uint32_t hTarget;
 
     TS_SC_SKILL__HIT_DAMAGE hitDamage;
     TS_SC_SKILL__HIT_DAMAGE_WITH_KNOCKBACK hitDamageWithKnockBack;
@@ -91,7 +91,7 @@ enum TARGET_TYPE : int
     TARGET_CREATURE_TYPE_DARK = 207,
 };
 
-enum SKILL_UID : uint
+enum SKILL_UID : uint32_t
 {
     SKILL_INCREASE_ENERGY = 1082,
     SKILL_DUAL_SWORD_EXPERT = 1181,
@@ -508,21 +508,21 @@ enum SKILL_CATEGORY
 
 struct SkillTreeBase
 {
-    int job_id{};
-    int skill_id{};
-    int min_skill_lv{};
-    int max_skill_lv{};
-    int lv{};
-    int job_lv{};
+    int32_t job_id{};
+    int32_t skill_id{};
+    int32_t min_skill_lv{};
+    int32_t max_skill_lv{};
+    int32_t lv{};
+    int32_t job_lv{};
     float jp_ratio{};
-    int need_skill_id[3]{};
-    int need_skill_lv[3]{};
+    int32_t need_skill_id[3]{};
+    int32_t need_skill_lv[3]{};
 };
 
 struct SkillTreeGroup
 {
-    int job_id{};
-    int skill_id{};
+    int32_t job_id{};
+    int32_t skill_id{};
     std::vector<SkillTreeBase> skillTrees{};
 };
 
@@ -538,8 +538,8 @@ struct SkillBase
         USE_ENEMY,
     };
 
-    int GetID() const;
-    int GetNameID() const;
+    int32_t GetID() const;
+    int32_t GetNameID() const;
     bool IsValid() const;
     bool IsSystemSkill() const;
 
@@ -551,26 +551,26 @@ struct SkillBase
     bool IsValidToCorpse() const;
     bool IsToggle() const;
 
-    int GetCriticalBonus(int skill_lv) const;
-    int GetCastRange() const;
-    int GetValidRange() const;
+    int32_t GetCriticalBonus(int32_t skill_lv) const;
+    int32_t GetCastRange() const;
+    int32_t GetValidRange() const;
 
-    int GetToggleGroup() const;
-    int GetSkillTargetType() const;
-    int GetSkillEffectType() const;
-    int GetElementalType() const;
+    int32_t GetToggleGroup() const;
+    int32_t GetSkillTargetType() const;
+    int32_t GetSkillEffectType() const;
+    int32_t GetElementalType() const;
 
-    int32_t GetCostEXP(int skill_lv, int enhance) const;
-    int32_t GetCostJP(int skill_lv, int enhance) const;
-    int GetProbabilityOnHit(int slv) const;
+    int32_t GetCostEXP(int32_t skill_lv, int32_t enhance) const;
+    int32_t GetCostJP(int32_t skill_lv, int32_t enhance) const;
+    int32_t GetProbabilityOnHit(int32_t slv) const;
     int32_t GetCostItemCode() const;
-    int64_t GetCostItemCount(int skill_lv) const;
-    int32_t GetCostHP(int skill_lv) const;
-    float GetCostHPPercent(int skill_lv) const;
-    int32_t GetCostMP(int skill_lv, int enhance) const;
-    float GetCostMPPercent(int skill_lv) const;
-    int32_t GetCostHavoc(int skill_lv) const;
-    int32_t GetCostEnergy(int skill_lv) const;
+    int64_t GetCostItemCount(int32_t skill_lv) const;
+    int32_t GetCostHP(int32_t skill_lv) const;
+    float GetCostHPPercent(int32_t skill_lv) const;
+    int32_t GetCostMP(int32_t skill_lv, int32_t enhance) const;
+    float GetCostMPPercent(int32_t skill_lv) const;
+    int32_t GetCostHavoc(int32_t skill_lv) const;
+    int32_t GetCostEnergy(int32_t skill_lv) const;
     int32_t GetCostItem() const;
     int32_t GetNeedLevel() const;
     int32_t GetNeedHP() const;
@@ -585,29 +585,29 @@ struct SkillBase
     bool IsUseableOnMonster() const;
     bool IsUseableOnSummon() const;
 
-    int GetHatePoint(int lv, int point, int enhance) const;
+    int32_t GetHatePoint(int32_t lv, int32_t point, int32_t enhance) const;
 
     bool IsNeedShield() const;
     bool IsNeedWeapon() const;
 
-    int GetNeedJobPoint(int skill_lv);
+    int32_t GetNeedJobPoint(int32_t skill_lv);
     bool IsUseableWeapon(ItemClass cl);
-    int GetStateSecond(int skill_lv, int enhance_lv);
-    int GetStateType() const;
-    int GetHitBonus(int enhance, int level_diff) const;
-    int GetStateId() const;
-    int GetStateLevel(int skill_lv, int enhance_lv);
-    uint GetCastDelay(int skill_lv, int enhance);
+    int32_t GetStateSecond(int32_t skill_lv, int32_t enhance_lv);
+    int32_t GetStateType() const;
+    int32_t GetHitBonus(int32_t enhance, int32_t level_diff) const;
+    int32_t GetStateId() const;
+    int32_t GetStateLevel(int32_t skill_lv, int32_t enhance_lv);
+    uint32_t GetCastDelay(int32_t skill_lv, int32_t enhance);
     uint32_t GetCommonDelay() const;
-    uint GetCoolTime(int enhance) const;
+    uint32_t GetCoolTime(int32_t enhance) const;
     uint32_t GetFireRange() const;
     bool IsUsable(uint8_t nUseIndex) const;
-    int GetCostEnergy(uint8_t skill_lv) const;
+    int32_t GetCostEnergy(uint8_t skill_lv) const;
 
-    int m_need_jp[50]{};
+    int32_t m_need_jp[50]{};
 
-    int id{};
-    int text_id{};
+    int32_t id{};
+    int32_t text_id{};
     short is_valid{};
     uint8_t elemental{};
     uint8_t is_passive{};
@@ -616,37 +616,37 @@ struct SkillBase
     uint8_t is_need_target{};
     uint8_t is_corpse{};
     uint8_t is_toggle{};
-    int toggle_group{};
+    int32_t toggle_group{};
     uint8_t casting_type{};
     uint8_t casting_level{};
-    int cast_range{};
-    int valid_range{};
-    int cost_hp{};
-    int cost_hp_per_skl{};
-    int cost_mp{};
-    int cost_mp_per_skl{};
-    int cost_mp_per_enhance{};
+    int32_t cast_range{};
+    int32_t valid_range{};
+    int32_t cost_hp{};
+    int32_t cost_hp_per_skl{};
+    int32_t cost_mp{};
+    int32_t cost_mp_per_skl{};
+    int32_t cost_mp_per_enhance{};
     float cost_hp_per{};
     float cost_hp_per_skl_per{};
     float cost_mp_per{};
     float cost_mp_per_skl_per{};
-    int cost_havoc{};
-    int cost_havoc_per_skl{};
+    int32_t cost_havoc{};
+    int32_t cost_havoc_per_skl{};
     float cost_energy{};
     float cost_energy_per_skl{};
-    int cost_exp{};
-    int cost_exp_per_enhance{};
-    int cost_jp{};
-    int cost_jp_per_enhance{};
-    int cost_item{};
-    int cost_item_count{};
-    int cost_item_count_per{};
-    int need_level{};
-    int need_hp{};
-    int need_mp{};
-    int need_havoc{};
-    int need_havoc_burst{};
-    int need_state_id{};
+    int32_t cost_exp{};
+    int32_t cost_exp_per_enhance{};
+    int32_t cost_jp{};
+    int32_t cost_jp_per_enhance{};
+    int32_t cost_item{};
+    int32_t cost_item_count{};
+    int32_t cost_item_count_per{};
+    int32_t need_level{};
+    int32_t need_hp{};
+    int32_t need_mp{};
+    int32_t need_havoc{};
+    int32_t need_havoc_burst{};
+    int32_t need_state_id{};
     short need_state_level{};
     short need_state_exhaust{};
     uint8_t vf_one_hand_sword{};
@@ -673,7 +673,7 @@ struct SkillBase
     float delay_common{};
     float delay_cooltime{};
     float delay_cooltime_mode{};
-    int cool_time_group_id{};
+    int32_t cool_time_group_id{};
     uint8_t uf_self{};
     uint8_t uf_party{};
     uint8_t uf_guild{};
@@ -685,16 +685,16 @@ struct SkillBase
     uint8_t tf_monster{};
     short target{};
     short effect_type{};
-    int state_id{};
-    int state_level_base{};
+    int32_t state_id{};
+    int32_t state_level_base{};
     float state_level_per_skl{};
     float state_level_per_enhance{};
     float state_second{};
     float state_second_per_level{};
     float state_second_per_enhance{};
     uint8_t state_type{};
-    int probability_on_hit{};
-    int probability_inc_by_slv{};
+    int32_t probability_on_hit{};
+    int32_t probability_inc_by_slv{};
     short hit_bonus{};
     short hit_bonus_per_enhance{};
     short percentage{};
@@ -702,8 +702,8 @@ struct SkillBase
     short hate_basic{};
     float hate_per_skl{};
     float hate_per_enhance{};
-    int critical_bonus{};
-    int critical_bonus_per_skl{};
+    int32_t critical_bonus{};
+    int32_t critical_bonus_per_skl{};
     float var[20]{};
     short is_projectile{};
     float projectile_speed{};

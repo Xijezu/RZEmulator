@@ -23,9 +23,9 @@ WorldLocation::WorldLocation(const WorldLocation &src)
 {
     idx           = src.idx;
     location_type = src.location_type;
-    for (int x = 0; x < 7; ++x)
+    for (int32_t x = 0; x < 7; ++x)
     {
-        for (int y = 0; y < 4; ++y)
+        for (int32_t y = 0; y < 4; ++y)
         {
             weather_ratio[x][y] = src.weather_ratio[x][y];
         }
@@ -37,7 +37,7 @@ WorldLocation::WorldLocation(const WorldLocation &src)
     m_vIncludeClient    = src.m_vIncludeClient;
 }
 
-WorldLocation *WorldLocationManager::AddToLocation(uint idx, Player *player)
+WorldLocation *WorldLocationManager::AddToLocation(uint32_t idx, Player *player)
 {
     if (player->m_WorldLocation != nullptr)
         RemoveFromLocation(player);
@@ -81,7 +81,7 @@ bool WorldLocationManager::RemoveFromLocation(Player *player)
     return false;
 }
 
-void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
+void WorldLocationManager::SendWeatherInfo(uint32_t idx, Player *player)
 {
     if (player == nullptr)
         return;
@@ -100,7 +100,7 @@ void WorldLocationManager::SendWeatherInfo(uint idx, Player *player)
     }
 }
 
-int WorldLocationManager::GetShovelableItem(uint idx)
+int32_t WorldLocationManager::GetShovelableItem(uint32_t idx)
 {
     NG_SHARED_GUARD readGuard(i_lock);
 
@@ -113,12 +113,12 @@ int WorldLocationManager::GetShovelableItem(uint idx)
     return 0;
 }
 
-uint WorldLocationManager::GetShovelableMonster(uint idx)
+uint32_t WorldLocationManager::GetShovelableMonster(uint32_t idx)
 {
     return 0;
 }
 
-void WorldLocationManager::RegisterWorldLocation(uint idx, uint8_t location_type, uint time_id, uint weather_id, uint8_t ratio, uint weather_change_time, int shovelable_item)
+void WorldLocationManager::RegisterWorldLocation(uint32_t idx, uint8_t location_type, uint32_t time_id, uint32_t weather_id, uint8_t ratio, uint32_t weather_change_time, int32_t shovelable_item)
 {
 
     auto wl = std::find_if(m_vWorldLocation.begin(),
@@ -142,9 +142,9 @@ void WorldLocationManager::RegisterWorldLocation(uint idx, uint8_t location_type
     m_vWorldLocation.emplace_back(nwl);
 }
 
-void WorldLocationManager::RegisterMonsterLocation(uint idx, uint monster_id)
+void WorldLocationManager::RegisterMonsterLocation(uint32_t idx, uint32_t monster_id)
 {
-    std::vector<uint> ml{ };
+    std::vector<uint32_t> ml{ };
 
     if (m_hsMonsterID.count(idx) >= 1)
     {

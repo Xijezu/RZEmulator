@@ -25,15 +25,15 @@ namespace fs = boost::filesystem;
 
 bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileCheck)
 {
-    int   nWorldMapID          = 0;
-    int   nMapIndex            = 0;
-    int   nMapLayer            = 0;
-    int   nTileCountPerSegment = 0;
-    int   nSegmentCountPerMap  = 0;
+    int32_t   nWorldMapID          = 0;
+    int32_t   nMapIndex            = 0;
+    int32_t   nMapLayer            = 0;
+    int32_t   nTileCountPerSegment = 0;
+    int32_t   nSegmentCountPerMap  = 0;
     float fTileLength          = 0.0f;
     float pStream              = 0.0f;
-    int   nMapCountX           = 0;
-    int   nMapCountY           = 0;
+    int32_t   nMapCountX           = 0;
+    int32_t   nMapCountY           = 0;
 
     std::vector<std::string> TextLines{ };
 
@@ -117,9 +117,9 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
     return !bMapFileCheck || (nMapCountY <= 0);
 }
 
-int TerrainSeamlessWorldInfo::GetWorldID(int nMapPosX, int nMapPosY)
+int32_t TerrainSeamlessWorldInfo::GetWorldID(int32_t nMapPosX, int32_t nMapPosY)
 {
-    int nMapIndex = nMapPosX + (m_sizMapCount.width * nMapPosY);
+    int32_t nMapIndex = nMapPosX + (m_sizMapCount.width * nMapPosY);
     if (m_FileNameMap.count(nMapIndex) == 1)
         return m_FileNameMap[nMapIndex].m_nWorldID;
     return -1;
@@ -130,44 +130,44 @@ float TerrainSeamlessWorldInfo::GetFOV()
     return m_fFOV;
 }
 
-std::string TerrainSeamlessWorldInfo::GetLQWaterFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetLQWaterFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "nfw");
 }
 
-std::string TerrainSeamlessWorldInfo::GetMinimapImageFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetMinimapImageFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "bmp");
 }
 
-std::string TerrainSeamlessWorldInfo::GetFieldPropFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetFieldPropFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "qpf");
 }
 
-std::string TerrainSeamlessWorldInfo::GetAttributePolygonFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetAttributePolygonFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "nfa");
 }
 
-std::string TerrainSeamlessWorldInfo::GetLocationFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetLocationFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "nfc");
 }
 
-std::string TerrainSeamlessWorldInfo::GetScriptFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetScriptFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "nfs");
 }
 
-std::string TerrainSeamlessWorldInfo::GetMapFileName(int nMapPosX, int nMapPosY)
+std::string TerrainSeamlessWorldInfo::GetMapFileName(int32_t nMapPosX, int32_t nMapPosY)
 {
     return GetFileNameWithExt(nMapPosX, nMapPosY, "nfm");
 }
 
-std::string TerrainSeamlessWorldInfo::GetFileNameWithExt(int nMapPosX, int nMapPosY, std::string ext)
+std::string TerrainSeamlessWorldInfo::GetFileNameWithExt(int32_t nMapPosX, int32_t nMapPosY, std::string ext)
 {
-    int nMapIndex = nMapPosX + (m_sizMapCount.width * nMapPosY);
+    int32_t nMapIndex = nMapPosX + (m_sizMapCount.width * nMapPosY);
     if (m_FileNameMap.count(nMapIndex) == 0)
         return "";
     return m_FileNameMap[nMapIndex].m_strMapFileName + "."s + ext;

@@ -28,58 +28,59 @@ struct Game : public TS_SERVER_INFO
 
 class GameList
 {
-    public:
-        typedef std::map<uint, Game *> GameMap;
-        ~GameList() = default;
+public:
+    typedef std::map<uint32_t, Game *> GameMap;
+    ~GameList() = default;
 
-        static GameList &Instance()
+    static GameList &Instance()
+    {
+        static GameList instance;
+        return instance;
+    }
+
+    void AddGame(Game *pNewGame)
+    {
+        // Adds a game to the list
         {
-            static GameList instance;
-            return instance;
+            NG_UNIQUE_GUARD writeGuard(*GetGuard());
+            m_games[pNewGame->server_idx] = pNewGame;
         }
+    }
 
-        void AddGame(Game *pNewGame)
+    void RemoveGame(const uint32_t nIDX)
+    {
+        // Removes a game from the list
         {
-            // Adds a game to the list
-            {
-                NG_UNIQUE_GUARD writeGuard(*GetGuard());
-                m_games[pNewGame->server_idx] = pNewGame;
-            }
-        }
-
-        void RemoveGame(const uint nIDX)
-        {
-            // Removes a game from the list
-            {
-                NG_UNIQUE_GUARD writeGuard(*GetGuard());
-                if (m_games.count(nIDX) == 1)
-                    m_games.erase(nIDX);
-            }
-        }
-
-        NG_SHARED_MUTEX *GetGuard()
-        {
-            return &i_lock;
-        }
-
-        // You need to use the mutex while working with the map!
-        GameMap *GetMap()
-        {
-            return &m_games;
-        }
-
-        Game *GetGame(const uint nIDX)
-        {
+            NG_UNIQUE_GUARD writeGuard(*GetGuard());
             if (m_games.count(nIDX) == 1)
-                return m_games[nIDX];
-            return nullptr;
+                m_games.erase(nIDX);
         }
+    }
 
-    private:
-        NG_SHARED_MUTEX i_lock{ };
-        GameMap                                  m_games;
-    protected:
-        GameList() = default;
+    NG_SHARED_MUTEX *GetGuard()
+    {
+        return &i_lock;
+    }
+
+    // You need to use the mutex while working with the map!
+    GameMap *GetMap()
+    {
+        return &m_games;
+    }
+
+    Game *GetGame(const uint32_t nIDX)
+    {
+        if (m_games.count(nIDX) == 1)
+            return m_games[nIDX];
+        return nullptr;
+    }
+
+private:
+    NG_SHARED_MUTEX i_lock{};
+    GameMap m_games;
+
+protected:
+    GameList() = default;
 };
 
 #define sGameMapList GameList::Instance()

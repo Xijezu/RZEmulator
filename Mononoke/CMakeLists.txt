@@ -11,9 +11,11 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthClient
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Server/AuthGame
     ${SHARED_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
+    ${CONAN_INCLUDE_DIRS_BOOST}
     ${MYSQL_INCLUDE_DIR}
 )
+
+message(${CONAN_INCLUDE_DIRS_BOOST})
 
 # Lists
 file(GLOB SRC_GRP_LISTS src/Lists/*.cpp src/Lists/*.h)

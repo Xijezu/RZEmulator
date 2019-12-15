@@ -34,7 +34,7 @@ class NPC : public Unit
         void LinkQuest(QuestLink *quest_link_info);
         NPC_STATUS GetStatus() const;
         void SetStatus(NPC_STATUS status);
-        int GetNPCID() const;
+        int32_t GetNPCID() const;
 
         bool IsNPC() const override { return true; }
 
@@ -46,14 +46,14 @@ class NPC : public Unit
         void DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
         void DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
 
-        int GetQuestTextID(int code, int progress) const;
-        int GetProgressFromTextID(int code, int textId) const;
+        int32_t GetQuestTextID(int32_t code, int32_t progress) const;
+        int32_t GetProgressFromTextID(int32_t code, int32_t textId) const;
 
         NPCTemplate *m_pBase;
     private:
-        int                      m_nStatus;
+        int32_t                      m_nStatus;
         std::vector<QuestLink *> m_vQuestLink_Start{ };
         std::vector<QuestLink *> m_vQuestLink_Progress{ };
         std::vector<QuestLink *> m_vQuestLink_End{ };
-        std::vector<int>         m_vQuest{ };
+        std::vector<int32_t>         m_vQuest{ };
 };

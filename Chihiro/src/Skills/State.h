@@ -23,7 +23,7 @@
 
 struct StateDamage
 {
-  StateDamage(uint _caster, ElementalType _type, int _base_effect_id, int _code, uint16_t _level, int _damage_hp, int _damage_mp, bool _final, uint16_t _uid)
+  StateDamage(uint32_t _caster, ElementalType _type, int32_t _base_effect_id, int32_t _code, uint16_t _level, int32_t _damage_hp, int32_t _damage_mp, bool _final, uint16_t _uid)
   {
     caster = _caster;
     elementalType = _type;
@@ -36,13 +36,13 @@ struct StateDamage
     uid = _uid;
   }
 
-  uint caster;
+  uint32_t caster;
   ElementalType elementalType;
-  int base_effect_id;
-  int code;
+  int32_t base_effect_id;
+  int32_t code;
   uint16_t level;
-  int damage_hp;
-  int damage_mp;
+  int32_t damage_hp;
+  int32_t damage_mp;
   bool final;
   uint16_t uid;
 };
@@ -62,54 +62,54 @@ public:
   State(const State &) = delete;
   State &operator=(const State &) = delete;
 
-  State(StateType type, StateCode code, int uid, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue);
+  State(StateType type, StateCode code, int32_t uid, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura, int32_t nStateValue, std::string szStateValue);
 
   bool IsValid(uint32_t t) const;
   bool IsHolded();
   void ReleaseRemainDuration();
   void HoldRemainDuration();
-  bool AddState(StateType type, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura);
-  void SetLevel(int idx, uint16_t level) { m_nLevel[idx] = level; }
-  int GetEffectType() const;
-  float GetValue(int idx) const;
+  bool AddState(StateType type, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura);
+  void SetLevel(int32_t idx, uint16_t level) { m_nLevel[idx] = level; }
+  int32_t GetEffectType() const;
+  float GetValue(int32_t idx) const;
   bool IsHarmful();
   bool IsAura() const { return m_bAura; }
-  bool IsDuplicatedGroup(int nGroupID);
-  void SetState(int code, int uid, uint caster, const uint16_t levels[], const uint durations[], const int remain_times[], uint last_fire_time, const int base_damage[], int state_value, std::string szStateValue);
-  int GetTimeType() const;
+  bool IsDuplicatedGroup(int32_t nGroupID);
+  void SetState(int32_t code, int32_t uid, uint32_t caster, const uint16_t levels[], const uint32_t durations[], const int32_t remain_times[], uint32_t last_fire_time, const int32_t base_damage[], int32_t state_value, std::string szStateValue);
+  int32_t GetTimeType() const;
 
   bool ClearExpiredState(uint32_t t);
 
   inline StateCode GetCode() const { return m_nCode; }
   inline uint16_t GetUID() const { return m_nUID; }
   inline uint16_t GetLevel() const { return (m_nLevel[0] || m_nLevel[1]) ? m_nLevel[0] + m_nLevel[1] + m_nLevel[2] : 0; }
-  inline uint16_t GetLevel(int idx) const { return m_nLevel[idx]; }
+  inline uint16_t GetLevel(int32_t idx) const { return m_nLevel[idx]; }
   inline uint32_t GetStartTime() const { return (m_nStartTime[0] > m_nStartTime[1]) ? m_nStartTime[0] : m_nStartTime[1]; }
-  inline uint32_t GetStartTime(int type) const { return m_nStartTime[type]; }
+  inline uint32_t GetStartTime(int32_t type) const { return m_nStartTime[type]; }
   inline uint32_t GetEndTime() const { return (m_nEndTime[0] > m_nEndTime[1]) ? m_nEndTime[0] : m_nEndTime[1]; }
-  inline uint32_t GetEndTime(int type) const { return m_nEndTime[type]; }
+  inline uint32_t GetEndTime(int32_t type) const { return m_nEndTime[type]; }
   inline uint32_t GetRemainDuration() const { return (m_nRemainDuration[0] > m_nRemainDuration[1]) ? m_nRemainDuration[0] : m_nRemainDuration[1]; }
-  inline uint32_t GetRemainDuration(int type) const { return m_nRemainDuration[type]; }
-  inline uint32_t GetCaster(int type) const { return m_hCaster[type]; }
+  inline uint32_t GetRemainDuration(int32_t type) const { return m_nRemainDuration[type]; }
+  inline uint32_t GetCaster(int32_t type) const { return m_hCaster[type]; }
   inline uint32_t GetLastProcessedTime() const { return m_nLastProcessedTime; }
   inline uint32_t GetFireInterval() const { return m_pTemplate->fire_interval * 100; }
 
   uint16_t m_nUID;
   StateCode m_nCode;
   uint16_t m_nLevel[3]{};
-  int m_nBaseDamage[3]{};
-  uint m_hCaster[3]{};
-  uint m_nStartTime[3]{};
-  uint m_nEndTime[3]{};
-  uint m_nRemainDuration[3]{};
-  uint m_nLastProcessedTime;
+  int32_t m_nBaseDamage[3]{};
+  uint32_t m_hCaster[3]{};
+  uint32_t m_nStartTime[3]{};
+  uint32_t m_nEndTime[3]{};
+  uint32_t m_nRemainDuration[3]{};
+  uint32_t m_nLastProcessedTime;
   StateTemplate *m_pTemplate{nullptr};
-  int m_nTotalDamage;
+  int32_t m_nTotalDamage;
   bool m_bAura;
-  int m_nStateValue;
+  int32_t m_nStateValue;
   std::string m_szStateValue;
   bool m_bByEvent;
 
 protected:
-  void init(int uid, int code);
+  void init(int32_t uid, int32_t code);
 };

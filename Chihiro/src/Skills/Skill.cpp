@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Skill.h"
 #include "ClientPackets.h"
@@ -31,9 +31,10 @@
 #include "SkillProp/SkillProp.h"
 #include "World.h"
 
-constexpr int PREDICTION_AIMING_TIME = 200;
+constexpr int32_t PREDICTION_AIMING_TIME = 200;
 
-Skill::Skill(Unit *pOwner, int64_t _uid, int _id) : m_nErrorCode(0), m_nAuraRefreshTime(0)
+Skill::Skill(Unit *pOwner, int64_t _uid, int32_t _id)
+    : m_nErrorCode(0), m_nAuraRefreshTime(0)
 {
     m_nSkillUID = _uid;
     m_nSkillID = _id;
@@ -44,14 +45,16 @@ Skill::Skill(Unit *pOwner, int64_t _uid, int _id) : m_nErrorCode(0), m_nAuraRefr
     m_nSkillLevel = 0;
     m_SkillBase = sObjectMgr.GetSkillBase(m_nSkillID);
 
-    int nEffectType = GetSkillBase() != nullptr ? GetSkillBase()->GetSkillEffectType() : -1;
+    int32_t nEffectType =
+        GetSkillBase() != nullptr ? GetSkillBase()->GetSkillEffectType() : -1;
 
     if (nEffectType == EF_PHYSICAL_MULTIPLE_DAMAGE_T3 ||
         nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T1_OLD ||
         nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T2_OLD ||
         nEffectType == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD ||
         nEffectType == EF_MAGIC_MULTIPLE_REGION_DAMAGE_OLD ||
-        nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
+        nEffectType ==
+            EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
         nEffectType == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD ||
         nEffectType == EF_PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK_OLD ||
         nEffectType == EF_MAGIC_MULTIPLE_DAMAGE ||
@@ -87,24 +90,26 @@ void Skill::Init()
     m_vResultList.clear();
 }
 
-int Skill::InitError(uint16_t nErrorCode)
+int32_t Skill::InitError(uint16_t nErrorCode)
 {
     Init();
     return nErrorCode;
 }
 
-void Skill::SetRequestedSkillLevel(int nLevel)
+void Skill::SetRequestedSkillLevel(int32_t nLevel)
 {
-    int tl = m_nSkillLevel + m_nSkillLevelAdd;
+    int32_t tl = m_nSkillLevel + m_nSkillLevelAdd;
     if (nLevel <= tl)
         tl = nLevel;
     m_nRequestedSkillLevel = (uint8_t)tl;
 }
 
-void Skill::DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id, int skill_level, int cool_time)
+void Skill::DB_InsertSkill(Unit *pUnit, int64_t skillUID, int32_t skill_id,
+                           int32_t skill_level, int32_t cool_time)
 {
     auto owner_uid = pUnit->GetUInt32Value(UNIT_FIELD_UID);
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_SKILL);
+    PreparedStatement *stmt =
+        CharacterDatabase.GetPreparedStatement(CHARACTER_REP_SKILL);
     stmt->setInt64(0, skillUID);
     stmt->setInt32(1, pUnit->GetSubType() == ST_Player ? owner_uid : 0);
     stmt->setInt32(2, pUnit->GetSubType() == ST_Summon ? owner_uid : 0);
@@ -114,13 +119,16 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id, int skil
     CharacterDatabase.Execute(stmt);
 }
 
-void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type, int damageType, DamageInfo damageInfo, uint handle)
+void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
+                                 int32_t damageType, DamageInfo damageInfo,
+                                 uint32_t handle)
 {
     SkillResult skillResult{};
     skillResult.type = type;
     skillResult.hTarget = handle;
 
-    skillResult.hitDamage.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damageType);
+    skillResult.hitDamage.damage.damage_type =
+        static_cast<TS_SKILL__DAMAGE_TYPE>(damageType);
     skillResult.hitDamage.damage.flag = ATTACK_INFO__FLAG::AIF_None;
 
     if (damageInfo.bCritical)
@@ -130,7 +138,8 @@ void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
     if (damageInfo.bMiss)
         skillResult.hitDamage.damage.flag |= ATTACK_INFO__FLAG::AIF_Miss;
     if (damageInfo.bPerfectBlock)
-        skillResult.hitDamage.damage.flag |= ATTACK_INFO__FLAG::AIF_PerfectBlock;
+        skillResult.hitDamage.damage.flag |=
+            ATTACK_INFO__FLAG::AIF_PerfectBlock;
 
     skillResult.hitDamage.damage.damage = damageInfo.nDamage;
     skillResult.hitDamage.damage.target_hp = damageInfo.target_hp;
@@ -141,24 +150,31 @@ void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
     pvList.emplace_back(skillResult);
 }
 
-void Skill::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
+void Skill::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess,
+                           int32_t nSuccessType, uint32_t handle)
 {
     SkillResult skillResult{};
     skillResult.type = TS_SKILL__HIT_TYPE::SHT_RESULT;
     skillResult.hTarget = handle;
     skillResult.hitResult.bResult = bIsSuccess;
-    skillResult.hitResult.success_type = static_cast<TS_SKILL_RESULT_SUCESS_TYPE>(nSuccessType);
+    skillResult.hitResult.success_type =
+        static_cast<TS_SKILL_RESULT_SUCESS_TYPE>(nSuccessType);
     pvList.emplace_back(skillResult);
 }
 
-void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, uint8_t type, int damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time)
+void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList,
+                                              uint8_t type, int32_t damage_type,
+                                              const DamageInfo &damage_info,
+                                              uint32_t handle, float x, float y,
+                                              uint32_t knock_back_time)
 {
     SkillResult skillResult{};
 
     skillResult.type = type;
     skillResult.hTarget = handle;
 
-    skillResult.hitDamageWithKnockBack.damage.damage_type = static_cast<TS_SKILL__DAMAGE_TYPE>(damage_type);
+    skillResult.hitDamageWithKnockBack.damage.damage_type =
+        static_cast<TS_SKILL__DAMAGE_TYPE>(damage_type);
     skillResult.hitDamageWithKnockBack.damage.flag = AIF_None;
     if (damage_info.bCritical)
         skillResult.hitDamageWithKnockBack.damage.flag |= AIF_Critical;
@@ -172,21 +188,29 @@ void Skill::AddSkillDamageWithKnockBackResult(std::vector<SkillResult> &pvList, 
     skillResult.hitDamageWithKnockBack.damage.damage = damage_info.nDamage;
     skillResult.hitDamageWithKnockBack.damage.target_hp = damage_info.target_hp;
 
-    std::copy(std::begin(damage_info.elemental_damage),
-              std::end(damage_info.elemental_damage),
-              std::begin(skillResult.hitDamageWithKnockBack.damage.elemental_damage));
+    std::copy(
+        std::begin(damage_info.elemental_damage),
+        std::end(damage_info.elemental_damage),
+        std::begin(skillResult.hitDamageWithKnockBack.damage.elemental_damage));
 
     skillResult.hitDamageWithKnockBack.x = x;
     skillResult.hitDamageWithKnockBack.y = y;
     skillResult.hitDamageWithKnockBack.knock_back_time = knock_back_time;
-    skillResult.hitDamageWithKnockBack.speed = GameRule::DEFAULT_KNOCK_BACK_SPEED;
+    skillResult.hitDamageWithKnockBack.speed =
+        GameRule::DEFAULT_KNOCK_BACK_SPEED;
 
     pvList.emplace_back(skillResult);
 }
 
-int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float fEffectLength, const int nRegionType, const float fRegionProperty, const int nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int nDistributeType, const int nTargetMax, /*out*/ std::vector<Unit *> &vTargetList, bool bEnemyOnly)
+int32_t Skill::EnumSkillTargetsAndCalcDamage(
+    const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos,
+    bool bTargetOrigin, const float fEffectLength, const int32_t nRegionType,
+    const float fRegionProperty, const int32_t nOriginalDamage,
+    const bool bIncludeOriginalPos, Unit *pCaster, const int32_t nDistributeType,
+    const int32_t nTargetMax, /*out*/ std::vector<Unit *> &vTargetList,
+    bool bEnemyOnly)
 {
-    int nResult = nOriginalDamage;
+    int32_t nResult = nOriginalDamage;
 
     auto OriginalPos = bTargetOrigin ? _TargetPos : _OriginalPos;
     auto TargetPos = bTargetOrigin ? _OriginalPos : _TargetPos;
@@ -214,8 +238,8 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
 
     pTester->Init(OriginalPos, TargetPos, fRegionProperty);
 
-    int nTargetCount = 0;
-    int nAllyCount = 0;
+    int32_t nTargetCount = 0;
+    int32_t nAllyCount = 0;
 
     for (auto &handle : vList)
     {
@@ -260,15 +284,19 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
 
     if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_TARGET)
     {
-        std::sort(vTargetList.begin() + nAllyCount,
-                  vTargetList.end(),
-                  [&_TargetPos](const auto &a, const auto &b) -> bool { return _TargetPos.GetExactDist2d(a) < _TargetPos.GetExactDist2d(b); });
+        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(),
+                  [&_TargetPos](const auto &a, const auto &b) -> bool {
+                      return _TargetPos.GetExactDist2d(a) <
+                             _TargetPos.GetExactDist2d(b);
+                  });
     }
     else if (nDistributeType == DISTRIBUTION_TYPE_SEQUENTIAL_CASTER)
     {
-        std::sort(vTargetList.begin() + nAllyCount,
-                  vTargetList.end(),
-                  [&_OriginalPos](const auto &a, const auto &b) -> bool { return _OriginalPos.GetExactDist2d(a) < _OriginalPos.GetExactDist2d(b); });
+        std::sort(vTargetList.begin() + nAllyCount, vTargetList.end(),
+                  [&_OriginalPos](const auto &a, const auto &b) -> bool {
+                      return _OriginalPos.GetExactDist2d(a) <
+                             _OriginalPos.GetExactDist2d(b);
+                  });
     }
 
     if (nDistributeType == DISTRIBUTION_TYPE_RANDOM ||
@@ -288,11 +316,12 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
     return nResult;
 }
 
-int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool bIsCastedByItem)
+int32_t Skill::Cast(int32_t nSkillLevel, uint32_t handle, Position pos, uint8_t layer,
+                    bool bIsCastedByItem)
 {
     m_vResultList.clear();
     auto current_time = sWorld.GetArTime();
-    int delay = -1;
+    int32_t delay = -1;
     m_Status = SS_PRE_CAST;
 
     SetRequestedSkillLevel(std::min(nSkillLevel, GetCurrentSkillLevel()));
@@ -324,23 +353,28 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     // ************* SUMMON CHECK ************* //
     else if (GetSkillBase()->GetSkillEffectType() == EF_SUMMON)
     {
-        if (auto result = PrepareSummon(handle, pos); result != TS_RESULT_SUCCESS)
+        if (auto result = PrepareSummon(handle, pos);
+            result != TS_RESULT_SUCCESS)
             return result;
     }
     // ************* UNSUMMON CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON || GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON_AND_ADD_STATE)
+    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_UNSUMMON_AND_ADD_STATE)
     {
-        if (!m_pOwner->IsPlayer() || m_pOwner->As<Player>()->GetMainSummon() == nullptr)
+        if (!m_pOwner->IsPlayer() ||
+            m_pOwner->As<Player>()->GetMainSummon() == nullptr)
             return InitError(TS_RESULT_NOT_ACTABLE);
     }
     // ************* EF_MAGIC_SINGLE_DAMAGE_OR_DEATH CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_OR_DEATH)
+    else if (GetSkillBase()->GetSkillEffectType() ==
+             EF_MAGIC_SINGLE_DAMAGE_OR_DEATH)
     {
         auto pMonster = sMemoryPool.GetObjectInWorld<Monster>(handle);
         if (pMonster == nullptr || !pMonster->IsMonster())
             return InitError(TS_RESULT_NOT_ACTABLE);
 
-        if (GetVar(8) != static_cast<int>(pMonster->GetCreatureGroup()))
+        if (GetVar(8) != static_cast<int32_t>(pMonster->GetCreatureGroup()))
             return InitError(TS_RESULT_LIMIT_RACE);
 
         /* @TODO: Implement GetMonsterType()
@@ -348,17 +382,20 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
             return TS_RESULT_NOT_ACTABLE; */
     }
     // ************* EF_ADD_STATE_BY_TARGET_TYPE CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE)
+    else if (GetSkillBase()->GetSkillEffectType() ==
+             EF_ADD_STATE_BY_TARGET_TYPE)
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr)
             return InitError(TS_RESULT_NOT_ACTABLE);
 
-        auto nTargetCreatureGroup = static_cast<int32_t>(pUnit->GetCreatureGroup());
+        auto nTargetCreatureGroup =
+            static_cast<int32_t>(pUnit->GetCreatureGroup());
         bool bIsInvalidTarget{true};
-        for (int i = -1; i < 5; ++i)
+        for (int32_t i = -1; i < 5; ++i)
         {
-            if (nTargetCreatureGroup == GetVar(i + 7) || true /* @Todo: CREATURE_ALL */)
+            if (nTargetCreatureGroup == GetVar(i + 7) ||
+                true /* @Todo: CREATURE_ALL */)
             {
                 bIsInvalidTarget = false;
                 break;
@@ -367,17 +404,23 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         if (bIsInvalidTarget)
             return InitError(TS_RESULT_LIMIT_RACE);
     }
-    // ************* EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD)
+    // ************* EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD CHECK *************
+    // //
+    else if (GetSkillBase()->GetSkillEffectType() ==
+             EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD)
     {
         if (!m_pOwner->IsWearShield())
             return InitError(TS_RESULT_LIMIT_WEAPON);
     }
     // ************* EF_PHYSICAL_SINGLE_DAMAGE CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD ||
-             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
-             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
-             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
+    else if (GetSkillBase()->GetSkillEffectType() ==
+                 EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr)
@@ -391,11 +434,13 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         {
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD:
         case EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK:
-            nMinDistance = static_cast<int32_t>(GetVar(3) * GameRule::DEFAULT_UNIT_SIZE);
+            nMinDistance =
+                static_cast<int32_t>(GetVar(3) * GameRule::DEFAULT_UNIT_SIZE);
             break;
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
         case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
-            nMinDistance = static_cast<int32_t>(GetVar(4) * GameRule::DEFAULT_UNIT_SIZE);
+            nMinDistance =
+                static_cast<int32_t>(GetVar(4) * GameRule::DEFAULT_UNIT_SIZE);
             break;
         default:
             nMinDistance = 0;
@@ -405,13 +450,17 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         if (myPos.GetExactDist2d(&targetPos) < nMinDistance)
             return InitError(TS_RESULT_NOT_ACTABLE);
 
-        if (GameContent::CollisionToLine(myPos.GetPositionX(), myPos.GetPositionY(), targetPos.GetPositionX(), targetPos.GetPositionY()))
+        if (GameContent::CollisionToLine(
+                myPos.GetPositionX(), myPos.GetPositionY(),
+                targetPos.GetPositionX(), targetPos.GetPositionY()))
             return InitError(TS_RESULT_NOT_ACTABLE);
     }
     // ************* FIELD PROP CHECK ************* //
     else if (GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
-             GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
-             GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_REGION_HEAL_BY_FIELD_PROP ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
     {
         if (!m_pOwner->IsPlayer())
             return InitError(TS_RESULT_NOT_ACTABLE);
@@ -432,17 +481,20 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         delay = pProp->GetCastingDelay();
     }
     // ************* DISPEL CHECK ************* //
-    else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE ||
-             GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE)
+    else if (GetSkillBase()->GetSkillEffectType() ==
+                 EF_MAGIC_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE)
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr)
             return InitError(TS_RESULT_NOT_ACTABLE);
 
         bool bCastable{false};
-        for (int i = 0; i < 4; ++i)
+        for (int32_t i = 0; i < 4; ++i)
         {
-            if (pUnit->GetState(static_cast<StateCode>(static_cast<int32_t>(GetVar(i)))) != nullptr)
+            if (pUnit->GetState(static_cast<StateCode>(
+                    static_cast<int32_t>(GetVar(i)))) != nullptr)
             {
                 bCastable = true;
                 break;
@@ -460,21 +512,31 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     }
 
     // ************* SKILL COST CALCULATION ************* //
-    int nHP = m_pOwner->GetHealth();
-    int nMP = m_pOwner->GetMana();
-    int nEnergy = m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY);
-    int nCurrentHPPercentage = m_pOwner->GetMaxHealth() > 0 ? nHP * 100 / m_pOwner->GetMaxHealth() : 0;
-    int nCurrentMPPercentage = m_pOwner->GetMaxMana() > 0 ? nMP * 100 / m_pOwner->GetMaxMana() : 0;
-    int mana_cost{0};
+    int32_t nHP = m_pOwner->GetHealth();
+    int32_t nMP = m_pOwner->GetMana();
+    int32_t nEnergy = m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY);
+    int32_t nCurrentHPPercentage =
+        m_pOwner->GetMaxHealth() > 0 ? nHP * 100 / m_pOwner->GetMaxHealth() : 0;
+    int32_t nCurrentMPPercentage =
+        m_pOwner->GetMaxMana() > 0 ? nMP * 100 / m_pOwner->GetMaxMana() : 0;
+    int32_t mana_cost{0};
 
     if ((GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_AURA ||
          GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA) &&
         m_pOwner->IsActiveAura(this))
         mana_cost = 0;
     else
-        mana_cost = static_cast<int>((GetSkillBase()->GetCostMP(GetRequestedSkillLevel(), GetSkillEnhance()) + (GetSkillBase()->GetCostMPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMana() / 100)) * m_pOwner->GetManaCostRatio((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()));
+        mana_cost = static_cast<int32_t>(
+            (GetSkillBase()->GetCostMP(GetRequestedSkillLevel(),
+                                       GetSkillEnhance()) +
+             (GetSkillBase()->GetCostMPPercent(GetRequestedSkillLevel()) *
+              m_pOwner->GetMana() / 100)) *
+            m_pOwner->GetManaCostRatio(
+                (ElementalType)GetSkillBase()->GetElementalType(),
+                GetSkillBase()->IsPhysicalSkill(),
+                GetSkillBase()->IsHarmful()));
 
-    int nNeedHP = GetSkillBase()->GetNeedHP();
+    int32_t nNeedHP = GetSkillBase()->GetNeedHP();
     if (nNeedHP > 0)
     {
         if (nCurrentHPPercentage < nNeedHP)
@@ -491,7 +553,11 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
 
     // @todo: havoc
 
-    if (nHP - 1 < static_cast<int>(GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) + (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxHealth() / 100)))
+    if (nHP - 1 <
+        static_cast<int32_t>(
+            GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) +
+            (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) *
+             m_pOwner->GetMaxHealth() / 100)))
         return InitError(TS_RESULT_NOT_ENOUGH_HP);
     if (nMP < mana_cost)
         return InitError(TS_RESULT_NOT_ENOUGH_MP);
@@ -502,10 +568,13 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
 
     if (m_pOwner->GetLevel() < GetSkillBase()->GetNeedLevel())
         return InitError(TS_RESULT_NOT_ENOUGH_LEVEL);
-    if (m_pOwner->GetJP() < GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance()))
+    if (m_pOwner->GetJP() <
+        GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance()))
         return InitError(TS_RESULT_NOT_ENOUGH_JP);
     ;
-    if (int nCostEXP = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(), GetSkillEnhance()); nCostEXP > 0)
+    if (int32_t nCostEXP = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(),
+                                                      GetSkillEnhance());
+        nCostEXP > 0)
     {
         if (m_pOwner->GetEXP() < nCostEXP)
             return InitError(TS_RESULT_NOT_ENOUGH_EXP);
@@ -513,18 +582,24 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     }
 
     auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(handle);
-    if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+    if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_ADD_REGION_STATE_BY_SELF_COST)
     {
         float fCostHP{};
         float fCostSP{};
         float fCostEnergy{};
         float fCostMP{};
 
-        fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
-        fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
-        fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+        fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                  GetVar(2) * GetSkillEnhance();
+        fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                  GetVar(5) * GetSkillEnhance();
+        fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                      GetVar(8) * GetSkillEnhance();
         if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST)
-            fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+            fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() +
+                      GetVar(11) * GetSkillEnhance();
 
         if (pTarget == nullptr || !pTarget->IsSummon())
             return InitError(TS_RESULT_NOT_ACTABLE);
@@ -534,40 +609,61 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
 
         /// @Todo: SP
 
-        if (fCostEnergy > 0 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
+        if (fCostEnergy > 0 &&
+            pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
             return InitError(TS_RESULT_NOT_ENOUGH_ENERGY);
-        else if (fCostEnergy == -1 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) == 0)
+        else if (fCostEnergy == -1 &&
+                 pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) == 0)
             return InitError(TS_RESULT_NOT_ENOUGH_ENERGY);
 
         if (fCostMP && pTarget->GetMana() < fCostMP)
             return InitError(TS_RESULT_NOT_ENOUGH_MP);
     }
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD ||
+    if (GetSkillBase()->GetSkillEffectType() ==
+            EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD ||
         GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DAMAGE ||
         GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD ||
-        GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP ||
-        GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP ||
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
     {
-        if (!m_pOwner->IsPlayer() || m_pOwner->As<Player>()->GetMainSummon() == nullptr)
-            return InitError(TS_RESULT_NOT_ENOUGH_HP); // No idea why it's HP doe
+        if (!m_pOwner->IsPlayer() ||
+            m_pOwner->As<Player>()->GetMainSummon() == nullptr)
+            return InitError(
+                TS_RESULT_NOT_ENOUGH_HP); // No idea why it's HP doe
 
-        int decHP{};
-        int decMP{};
+        int32_t decHP{};
+        int32_t decMP{};
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
-            decHP = static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
+            decHP = static_cast<int32_t>(GetVar(6) +
+                                         GetVar(7) * GetRequestedSkillLevel() +
+                                         GetVar(8) * GetSkillEnhance());
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
-            decHP = static_cast<int32_t>(GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance());
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+            decHP = static_cast<int32_t>(GetVar(9) +
+                                         GetVar(10) * GetRequestedSkillLevel() +
+                                         GetVar(11) * GetSkillEnhance());
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DAMAGE)
-            decHP = static_cast<int32_t>(m_pOwner->As<Player>()->GetMainSummon()->GetMaxHealth() * GetVar(10));
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_ADD_HP_MP_BY_SUMMON_DAMAGE)
+            decHP = static_cast<int32_t>(
+                m_pOwner->As<Player>()->GetMainSummon()->GetMaxHealth() *
+                GetVar(10));
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
         {
-            decHP = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
-            decMP = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+            decHP = static_cast<int32_t>(GetVar(0) +
+                                         GetVar(1) * GetRequestedSkillLevel() +
+                                         GetVar(4) * GetSkillEnhance());
+            decMP = static_cast<int32_t>(GetVar(2) +
+                                         GetVar(3) * GetRequestedSkillLevel() +
+                                         GetVar(5) * GetSkillEnhance());
         }
 
         if (m_pOwner->As<Player>()->GetMainSummon()->GetHealth() < decHP + 1)
@@ -590,8 +686,10 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
 
     if (GetSkillBase()->GetNeedStateId())
     {
-        auto pState = m_pOwner->GetState(static_cast<StateCode>(GetSkillBase()->GetNeedStateId()));
-        if (pState == nullptr || pState->GetLevel() < GetSkillBase()->GetNeedStateLevel())
+        auto pState = m_pOwner->GetState(
+            static_cast<StateCode>(GetSkillBase()->GetNeedStateId()));
+        if (pState == nullptr ||
+            pState->GetLevel() < GetSkillBase()->GetNeedStateLevel())
             return InitError(TS_RESULT_NOT_ACTABLE);
 
         if (GetSkillBase()->NeedStateExhaust())
@@ -600,10 +698,12 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
 
     if (GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
         GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
-        GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_AREA_EFFECT_HEAL_BY_FIELD_PROP)
     {
         auto pProp = sMemoryPool.GetObjectInWorld<FieldProp>(handle);
-        if (pProp == nullptr || !pProp->IsFieldProp() || !sRegion.IsVisibleRegion(m_pOwner, pProp))
+        if (pProp == nullptr || !pProp->IsFieldProp() ||
+            !sRegion.IsVisibleRegion(m_pOwner, pProp))
             return InitError(TS_RESULT_NOT_ACTABLE);
 
         pProp->Cast();
@@ -614,11 +714,15 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     auto nOriginalCastingDelay = delay;
     if (delay == -1)
     {
-        nOriginalCastingDelay = delay = m_SkillBase->GetCastDelay(GetRequestedSkillLevel(), GetSkillEnhance());
+        nOriginalCastingDelay = delay = m_SkillBase->GetCastDelay(
+            GetRequestedSkillLevel(), GetSkillEnhance());
         if (m_nSkillUID >= 0)
         {
             delay /= (std::max(m_pOwner->GetCastingSpeed(), 1) / 100.0f);
-            delay *= m_pOwner->GetCastingMod(static_cast<ElementalType>(GetSkillBase()->GetElementalType()), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), static_cast<uint32_t>(nOriginalCastingDelay));
+            delay *= m_pOwner->GetCastingMod(
+                static_cast<ElementalType>(GetSkillBase()->GetElementalType()),
+                GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(),
+                static_cast<uint32_t>(nOriginalCastingDelay));
         }
     }
 
@@ -636,7 +740,8 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     if (GetSkillBase()->IsHarmful() && !GetSkillBase()->IsPhysicalSkill())
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
-        if (pUnit != nullptr && pUnit->IsMonster() && pUnit->As<Monster>()->IsCastRevenger())
+        if (pUnit != nullptr && pUnit->IsMonster() &&
+            pUnit->As<Monster>()->IsCastRevenger())
         {
             pUnit->As<Monster>()->AddHate(m_pOwner->GetHandle(), 1, true, true);
         }
@@ -644,7 +749,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     return TS_RESULT_SUCCESS;
 }
 
-uint16_t Skill::PrepareSummon(uint handle, Position pos)
+uint16_t Skill::PrepareSummon(uint32_t handle, Position pos)
 {
     if (!m_pOwner->IsPlayer() /* @todo: subsummon */)
         return TS_RESULT_NOT_ACTABLE;
@@ -652,7 +757,9 @@ uint16_t Skill::PrepareSummon(uint handle, Position pos)
     // @Todo: IsSummonable
 
     auto pItem = sMemoryPool.GetObjectInWorld<Item>(handle);
-    if (pItem == nullptr || pItem->m_pItemBase == nullptr || pItem->m_pItemBase->group != GROUP_SUMMONCARD || pItem->m_Instance.OwnerHandle != m_pOwner->GetHandle())
+    if (pItem == nullptr || pItem->m_pItemBase == nullptr ||
+        pItem->m_pItemBase->group != GROUP_SUMMONCARD ||
+        pItem->m_Instance.OwnerHandle != m_pOwner->GetHandle())
         return TS_RESULT_NOT_ACTABLE;
 
     auto pPlayer = m_pOwner->As<Player>();
@@ -660,9 +767,10 @@ uint16_t Skill::PrepareSummon(uint handle, Position pos)
         return TS_RESULT_NOT_ACTABLE;
 
     bool bIsSummoncardBound{false};
-    for (int j = 0; j < 6; j++)
+    for (int32_t j = 0; j < 6; j++)
     {
-        if (pPlayer->m_aBindSummonCard[j] != nullptr && pItem == pPlayer->m_aBindSummonCard[j])
+        if (pPlayer->m_aBindSummonCard[j] != nullptr &&
+            pItem == pPlayer->m_aBindSummonCard[j])
         {
             bIsSummoncardBound = true;
             break;
@@ -689,11 +797,14 @@ uint16_t Skill::PrepareSummon(uint handle, Position pos)
     {
         pSummon->AddNoise(rand32(), rand32(), 70);
         m_targetPosition = pSummon->GetCurrentPosition(sWorld.GetArTime());
-    } while ((pos.GetPositionX() == m_targetPosition.GetPositionX() && pos.GetPositionY() == m_targetPosition.GetPositionY()) || tmpPos.GetExactDist2d(&m_targetPosition) < 24.0f);
+    } while ((pos.GetPositionX() == m_targetPosition.GetPositionX() &&
+              pos.GetPositionY() == m_targetPosition.GetPositionY()) ||
+             tmpPos.GetExactDist2d(&m_targetPosition) < 24.0f);
     return TS_RESULT_SUCCESS;
 }
 
-void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int cost_mp)
+void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int32_t nType, int32_t cost_hp,
+                            int32_t cost_mp)
 {
     pSkillPct.skill_id = static_cast<uint16_t>(m_SkillBase->GetID());
     pSkillPct.skill_level = m_nRequestedSkillLevel;
@@ -706,8 +817,10 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
     pSkillPct.type = static_cast<TS_SKILL__TYPE>(nType);
     pSkillPct.hp_cost = static_cast<decltype(pSkillPct.hp_cost)>(cost_hp);
     pSkillPct.mp_cost = static_cast<decltype(pSkillPct.mp_cost)>(cost_mp);
-    pSkillPct.caster_hp = static_cast<decltype(pSkillPct.caster_hp)>(m_pOwner->GetHealth());
-    pSkillPct.caster_mp = static_cast<decltype(pSkillPct.caster_mp)>(m_pOwner->GetMana());
+    pSkillPct.caster_hp =
+        static_cast<decltype(pSkillPct.caster_hp)>(m_pOwner->GetHealth());
+    pSkillPct.caster_mp =
+        static_cast<decltype(pSkillPct.caster_mp)>(m_pOwner->GetMana());
 
     switch (pSkillPct.type)
     {
@@ -742,7 +855,8 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
             details.hitDamage = skill_result.hitDamage;
             break;
         case SHT_DAMAGE_WITH_KNOCK_BACK:
-            details.hitDamageWithKnockBack = skill_result.hitDamageWithKnockBack;
+            details.hitDamageWithKnockBack =
+                skill_result.hitDamageWithKnockBack;
             break;
         case SHT_RESULT:
             details.hitResult = skill_result.hitResult;
@@ -767,28 +881,38 @@ void Skill::assembleMessage(TS_SC_SKILL &pSkillPct, int nType, int cost_hp, int 
     }
 }
 
-void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, int nType)
+void Skill::broadcastSkillMessage(WorldObject *pUnit, int32_t cost_hp, int32_t cost_mp,
+                                  int32_t nType)
 {
     if (pUnit == nullptr)
         return;
 
-    auto rx = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto ry = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto rx = (uint32_t)(pUnit->GetPositionX() /
+                         sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto ry = (uint32_t)(pUnit->GetPositionY() /
+                         sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     uint8_t layer = pUnit->GetLayer();
     TS_SC_SKILL skillPct{};
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld.Broadcast((uint)rx, (uint)ry, layer, skillPct);
+    sWorld.Broadcast((uint32_t)rx, (uint32_t)ry, layer, skillPct);
 }
 
-void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int cost_mp, int nType)
+void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int32_t cost_hp,
+                                  int32_t cost_mp, int32_t nType)
 {
     if (pUnit1 == nullptr || pUnit2 == nullptr)
         return;
 
     TS_SC_SKILL skillPct{};
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld.Broadcast((uint)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+    sWorld.Broadcast((uint32_t)(pUnit1->GetPositionX() /
+                                sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint32_t)(pUnit1->GetPositionY() /
+                                sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint32_t)(pUnit2->GetPositionX() /
+                                sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint32_t)(pUnit2->GetPositionY() /
+                                sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                      pUnit1->GetLayer(), skillPct);
 }
 
@@ -807,10 +931,12 @@ void Skill::ProcSkill()
 
     auto pRawTarget = sMemoryPool.GetObjectInWorld<WorldObject>(m_hTarget);
     Unit *pTarget{nullptr};
-    if (m_Status != SS_COMPLETE && pRawTarget != nullptr && pRawTarget->IsUnit())
+    if (m_Status != SS_COMPLETE && pRawTarget != nullptr &&
+        pRawTarget->IsUnit())
     {
         pTarget = pRawTarget->As<Unit>();
-        if (auto tmpPos = m_pOwner->GetPosition(); pRawTarget->GetPosition().GetExactDist2d(&tmpPos) > 525.0f)
+        if (auto tmpPos = m_pOwner->GetPosition();
+            pRawTarget->GetPosition().GetExactDist2d(&tmpPos) > 525.0f)
         {
             m_pOwner->CancelSkill();
             return;
@@ -840,8 +966,10 @@ void Skill::ProcSkill()
 
     if (m_Status == SS_CAST)
     {
-        int nElementalType = GetSkillBase()->GetElementalType();
-        m_pOwner->PrepareRemoveExhaustiveSkillStateMod(GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay());
+        int32_t nElementalType = GetSkillBase()->GetElementalType();
+        m_pOwner->PrepareRemoveExhaustiveSkillStateMod(
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(),
+            nElementalType, GetOriginalCastingDelay());
         m_Status = SS_FIRE;
     }
     /// Retail locks here, please don't mind this here
@@ -855,7 +983,9 @@ void Skill::ProcSkill()
             return;
         }
     }
-    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON || GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON_AND_ADD_STATE)
+    else if (GetSkillBase()->GetSkillEffectType() == EF_UNSUMMON ||
+             GetSkillBase()->GetSkillEffectType() ==
+                 EF_UNSUMMON_AND_ADD_STATE)
     {
         if (!m_pOwner->IsPlayer())
         {
@@ -882,7 +1012,8 @@ void Skill::ProcSkill()
 
     if ((GetSkillBase()->GetSkillEffectType() == EF_ACTIVATE_FIELD_PROP ||
          GetSkillBase()->GetSkillEffectType() == EF_REGION_HEAL_BY_FIELD_PROP ||
-         GetSkillBase()->GetSkillEffectType() == EF_AREA_EFFECT_HEAL_BY_FIELD_PROP) &&
+         GetSkillBase()->GetSkillEffectType() ==
+             EF_AREA_EFFECT_HEAL_BY_FIELD_PROP) &&
         (pRawTarget != nullptr && !pRawTarget->IsInWorld()))
     {
         m_pOwner->CancelSkill();
@@ -894,10 +1025,10 @@ void Skill::ProcSkill()
     bool bSuccess{true};
     if (m_Status == SS_FIRE)
     {
-        int cost_hp{};
-        int cost_mp{};
-        int cost_exp{};
-        int cost_jp{};
+        int32_t cost_hp{};
+        int32_t cost_mp{};
+        int32_t cost_exp{};
+        int32_t cost_jp{};
 
         if (!m_bMultiple || m_nCurrentFire == 0)
         {
@@ -915,14 +1046,31 @@ void Skill::ProcSkill()
             if (pClient != nullptr)
                 Messages::SendSkillList(pClient, m_pOwner, GetSkillId());
 
-            if ((GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_AURA || GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA) && m_pOwner->IsActiveAura(this))
+            if ((GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_AURA ||
+                 GetSkillBase()->GetSkillEffectType() ==
+                     EF_TOGGLE_DIFFERENTIAL_AURA) &&
+                m_pOwner->IsActiveAura(this))
                 cost_mp = 0;
             else
-                cost_mp = static_cast<int>((GetSkillBase()->GetCostMP(GetRequestedSkillLevel(), GetSkillEnhance()) + (GetSkillBase()->GetCostMPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxMana() / 100)) * m_pOwner->GetManaCostRatio((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()));
+                cost_mp = static_cast<int32_t>(
+                    (GetSkillBase()->GetCostMP(GetRequestedSkillLevel(),
+                                               GetSkillEnhance()) +
+                     (GetSkillBase()->GetCostMPPercent(
+                          GetRequestedSkillLevel()) *
+                      m_pOwner->GetMaxMana() / 100)) *
+                    m_pOwner->GetManaCostRatio(
+                        (ElementalType)GetSkillBase()->GetElementalType(),
+                        GetSkillBase()->IsPhysicalSkill(),
+                        GetSkillBase()->IsHarmful()));
 
-            cost_hp = static_cast<int>(GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) + (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) * m_pOwner->GetMaxHealth() / 100));
-            cost_exp = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(), GetSkillEnhance());
-            cost_jp = GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance());
+            cost_hp = static_cast<int32_t>(
+                GetSkillBase()->GetCostHP(GetRequestedSkillLevel()) +
+                (GetSkillBase()->GetCostHPPercent(GetRequestedSkillLevel()) *
+                 m_pOwner->GetMaxHealth() / 100));
+            cost_exp = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(),
+                                                  GetSkillEnhance());
+            cost_jp = GetSkillBase()->GetCostJP(GetRequestedSkillLevel(),
+                                                GetSkillEnhance());
 
             if (cost_hp > 0)
                 m_pOwner->SetHealth(m_pOwner->GetHealth() - cost_hp);
@@ -934,36 +1082,47 @@ void Skill::ProcSkill()
             if (cost_jp > 0)
                 m_pOwner->SetJP(m_pOwner->GetJP() - cost_jp);
 
-            m_pOwner->RemoveEnergy(GetSkillBase()->GetCostEnergy(GetRequestedSkillLevel()));
+            m_pOwner->RemoveEnergy(
+                GetSkillBase()->GetCostEnergy(GetRequestedSkillLevel()));
 
-            if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
+            if (GetSkillBase()->GetSkillEffectType() ==
+                EF_MAGIC_MULTIPLE_DAMAGE_T1_DEAL_SUMMON_HP_OLD)
             {
-                int decHP = static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
+                int32_t decHP = static_cast<int32_t>(
+                    GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                    GetVar(8) * GetSkillEnhance());
 
                 if (m_pOwner->IsPlayer() ||
                     m_pOwner->As<Player>()->GetMainSummon() != nullptr)
                 {
                     auto pSummon = m_pOwner->As<Player>()->GetMainSummon();
 
-                    int nPrevHP = pSummon->GetHealth();
-                    pSummon->AddHealth(-std::min(pSummon->GetHealth() - 1, decHP));
+                    int32_t nPrevHP = pSummon->GetHealth();
+                    pSummon->AddHealth(
+                        -std::min(pSummon->GetHealth() - 1, decHP));
 
-                    Messages::BroadcastHPMPMessage(pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
+                    Messages::BroadcastHPMPMessage(
+                        pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
                 }
             }
-            else if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
+            else if (GetSkillBase()->GetSkillEffectType() ==
+                     EF_MAGIC_MULTIPLE_DAMAGE_DEAL_SUMMON_HP)
             {
-                int decHP = static_cast<int32_t>(GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance());
+                int32_t decHP = static_cast<int32_t>(
+                    GetVar(9) + GetVar(10) * GetRequestedSkillLevel() +
+                    GetVar(11) * GetSkillEnhance());
 
                 if (m_pOwner->IsPlayer() ||
                     m_pOwner->As<Player>()->GetMainSummon() != nullptr)
                 {
                     auto pSummon = m_pOwner->As<Player>()->GetMainSummon();
 
-                    int nPrevHP = pSummon->GetHealth();
-                    pSummon->AddHealth(-std::min(pSummon->GetHealth() - 1, decHP));
+                    int32_t nPrevHP = pSummon->GetHealth();
+                    pSummon->AddHealth(
+                        -std::min(pSummon->GetHealth() - 1, decHP));
 
-                    Messages::BroadcastHPMPMessage(pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
+                    Messages::BroadcastHPMPMessage(
+                        pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
                 }
             }
             /// @Todo: Item Cost
@@ -1536,9 +1695,8 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
     } /*
         case EF_REMOVE_STATE_GROUP:
         {
-            REMOVE_STATE_GROUP_SKILL_FUNCTOR mySkillFunctor(&m_vResultList, m_pOwner);
-            process_target(t, mySkillFunctor, pTarget);
-            break;
+            REMOVE_STATE_GROUP_SKILL_FUNCTOR mySkillFunctor(&m_vResultList,
+        m_pOwner); process_target(t, mySkillFunctor, pTarget); break;
         }*/
     case EF_CASTING_CANCEL_WITH_ADD_STATE:
     {
@@ -1596,13 +1754,17 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
 
     if (!bHandled)
     {
-        auto result = NGemity::StringFormat("Unknown skill casted - ID {}, effect_type {}", m_SkillBase->id, m_SkillBase->effect_type);
+        auto result = NGemity::StringFormat(
+            "Unknown skill casted - ID {}, effect_type {}", m_SkillBase->id,
+            m_SkillBase->effect_type);
         NG_LOG_INFO("skill", "%s", result.c_str());
         if (m_pOwner->IsPlayer())
-            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
+            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(),
+                                      result);
         else if (m_pOwner->IsSummon())
         {
-            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
+            Messages::SendChatMessage(
+                50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
         }
     }
     else
@@ -1613,20 +1775,31 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
 {
     auto t = m_nFireTime;
     std::vector<Unit *> vNeedStateList{};
-    int pt{0};
+    int32_t pt{0};
     for (const auto &sr : m_vResultList)
     {
-        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP || sr.type == TS_SKILL__HIT_TYPE::SHT_RESULT)
+        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_RESULT)
         {
             auto pDealTarget = sMemoryPool.GetObjectInWorld<Unit>(sr.hTarget);
             if (pDealTarget != nullptr && pDealTarget->GetHealth() != 0)
             {
                 if (GetSkillBase()->GetSkillEffectType() != EF_ADD_STATE &&
-                    GetSkillBase()->GetSkillEffectType() != EF_ADD_REGION_STATE &&
-                    GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD &&
-                    GetSkillBase()->GetSkillEffectType() != EF_ADD_STATE_BY_SELF_COST &&
-                    GetSkillBase()->GetSkillEffectType() != EF_ADD_REGION_STATE_BY_SELF_COST &&
-                    GetSkillBase()->GetSkillEffectType() != EF_REMOVE_STATE_GROUP &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_ADD_REGION_STATE &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_PHYSICAL_SINGLE_DAMAGE_WITH_SHIELD &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_ADD_STATE_BY_SELF_COST &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_ADD_REGION_STATE_BY_SELF_COST &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_REMOVE_STATE_GROUP &&
                     GetSkillBase()->GetStateId() != 0)
                 {
                     if (sr.hitDamage.damage.flag ^ AIF_Miss)
@@ -1635,12 +1808,19 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                     }
                 }
 
-                if (!m_pOwner->IsMonster() && GetSkillBase()->GetSkillEffectType() != EF_REMOVE_HATE && GetSkillBase()->GetSkillEffectType() != EF_REGION_REMOVE_HATE)
+                if (!m_pOwner->IsMonster() &&
+                    GetSkillBase()->GetSkillEffectType() != EF_REMOVE_HATE &&
+                    GetSkillBase()->GetSkillEffectType() !=
+                        EF_REGION_REMOVE_HATE)
                 {
                     pt = 0;
-                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
+                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE ||
+                        sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE ||
+                        sr.type ==
+                            TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
                         pt = sr.hitDamage.damage.damage;
-                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP)
+                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP ||
+                             sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP)
                         pt = sr.hitAddStat.nIncStat;
                     else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP)
                     {
@@ -1649,8 +1829,17 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                         pt += sr.hitAddHPMPSP.nIncSP;
                     }
                     /// @Todo: HateRatio
-                    int nAddHate = 1 * GetSkillBase()->GetHatePoint(GetRequestedSkillLevel(), pt, GetSkillEnhance()) * (int)m_pOwner->GetMagicalHateMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-                    auto HateMod = m_pOwner->GetHateMod((GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, GetSkillBase()->IsHarmful());
+                    int32_t nAddHate =
+                        1 *
+                        GetSkillBase()->GetHatePoint(GetRequestedSkillLevel(),
+                                                     pt, GetSkillEnhance()) *
+                        (int32_t)m_pOwner->GetMagicalHateMod(
+                            (ElementalType)GetSkillBase()->GetElementalType(),
+                            GetSkillBase()->IsPhysicalSkill(),
+                            GetSkillBase()->IsHarmful());
+                    auto HateMod = m_pOwner->GetHateMod(
+                        (GetSkillBase()->IsPhysicalSkill()) ? 1 : 2,
+                        GetSkillBase()->IsHarmful());
 
                     nAddHate += HateMod.second;
                     nAddHate *= HateMod.first;
@@ -1661,7 +1850,8 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                     if (pDealTarget->IsMonster())
                     {
                         auto pMonster = pDealTarget->As<Monster>();
-                        pMonster->AddHate(m_pOwner->GetHandle(), nAddHate, true, true);
+                        pMonster->AddHate(m_pOwner->GetHandle(), nAddHate, true,
+                                          true);
                     }
                     else if (pDealTarget->IsNPC())
                     {
@@ -1703,7 +1893,9 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
             }
         }
 
-        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
+        if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE ||
+            sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
         {
             /* @TODO
             if(sr.damage.flag ^ AIF_Critical)
@@ -1718,8 +1910,10 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
         process_target(t, myStateSkillFunctor, target);
     }
 
-    int nElementalType = GetSkillBase()->GetElementalType();
-    m_pOwner->RemoveExhaustiveSkillStateMod(GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(), nElementalType, GetOriginalCastingDelay());
+    int32_t nElementalType = GetSkillBase()->GetElementalType();
+    m_pOwner->RemoveExhaustiveSkillStateMod(
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful(),
+        nElementalType, GetOriginalCastingDelay());
 }
 
 void Skill::DO_SUMMON()
@@ -1736,7 +1930,8 @@ void Skill::DO_SUMMON()
         return;
 
     auto summon = item->m_pSummon;
-    if (summon == nullptr || summon->GetMaster()->GetHandle() != player->GetHandle())
+    if (summon == nullptr ||
+        summon->GetMaster()->GetHandle() != player->GetHandle())
         return;
 
     if (!summon->IsInWorld())
@@ -1757,7 +1952,8 @@ void Skill::DO_UNSUMMON()
         return;
 
     auto summon = item->m_pSummon;
-    if (summon == nullptr || summon->GetMaster()->GetHandle() != player->GetHandle())
+    if (summon == nullptr ||
+        summon->GetMaster()->GetHandle() != player->GetHandle())
         return;
 
     if (summon->IsInWorld())
@@ -1771,14 +1967,11 @@ bool Skill::Cancel()
     return true;
 }
 
-bool Skill::CheckCoolTime(uint t) const
-{
-    return m_nNextCoolTime < t;
-}
+bool Skill::CheckCoolTime(uint32_t t) const { return m_nNextCoolTime < t; }
 
-uint Skill::GetSkillCoolTime() const
+uint32_t Skill::GetSkillCoolTime() const
 {
-    int l{0};
+    int32_t l{0};
     if (m_SkillBase == nullptr)
         return 0;
 
@@ -1788,22 +1981,21 @@ uint Skill::GetSkillCoolTime() const
         l = m_nEnhance;
 
     auto cts = m_pOwner->GetCoolTimeSpeed();
-    auto ctm = m_pOwner->GetCoolTimeMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    auto ctm = m_pOwner->GetCoolTimeMod(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     auto ct = m_SkillBase->GetCoolTime(l);
     return static_cast<uint32_t>(cts * ctm * ct);
 }
 
-void Skill::SetRemainCoolTime(uint nTime)
+void Skill::SetRemainCoolTime(uint32_t nTime)
 {
     m_nNextCoolTime = nTime + sWorld.GetArTime();
 }
 
-uint Skill::GetSkillEnhance() const
-{
-    return m_nEnhance;
-}
+uint32_t Skill::GetSkillEnhance() const { return m_nEnhance; }
 
-uint16_t Skill::PrepareTaming(uint handle)
+uint16_t Skill::PrepareTaming(uint32_t handle)
 {
     if (!m_pOwner->IsPlayer())
         return TS_RESULT_NOT_ACTABLE;
@@ -1824,7 +2016,8 @@ uint16_t Skill::PrepareTaming(uint handle)
         return TS_RESULT_NOT_ENOUGH_HP;
 
     auto pPlayer = m_pOwner->As<Player>();
-    if (pPlayer->FindItem((uint)nTameItemCode, ITEM_FLAG_SUMMON, false) == nullptr)
+    if (pPlayer->FindItem((uint32_t)nTameItemCode, ITEM_FLAG_SUMMON, false) ==
+        nullptr)
         return TS_RESULT_NOT_ACTABLE;
 
     if (pPlayer->GetTamingTarget() != 0)
@@ -1838,7 +2031,8 @@ void Skill::CREATURE_TAMING()
     if (pTarget == nullptr || !pTarget->IsMonster() || !m_pOwner->IsPlayer())
         return;
 
-    bool bResult = sWorld.SetTamer(pTarget, m_pOwner->As<Player>(), m_nRequestedSkillLevel);
+    bool bResult = sWorld.SetTamer(pTarget, m_pOwner->As<Player>(),
+                                   m_nRequestedSkillLevel);
     if (bResult)
     {
         pTarget->AddHate(m_pOwner->GetHandle(), 1, true, true);
@@ -1850,8 +2044,10 @@ void Skill::PHYSICAL_SINGLE_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr || m_pOwner == nullptr)
         return;
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
-        GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
+    if (GetSkillBase()->GetSkillEffectType() ==
+            EF_PHYSICAL_SINGLE_DAMAGE_RUSH ||
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK)
     {
         if (m_nCurrentFire == 0)
         {
@@ -1872,14 +2068,18 @@ void Skill::PHYSICAL_SINGLE_DAMAGE(Unit *pTarget)
         }
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
 
     switch (GetSkillBase()->GetSkillEffectType())
     {
     case EF_PHYSICAL_SINGLE_DAMAGE:
-        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                   GetVar(10) * GetSkillEnhance();
+        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                   GetVar(11) * GetSkillEnhance();
         break;
     case EF_PHYSICAL_SINGLE_DAMAGE_RUSH:
     case EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK:
@@ -1887,27 +2087,43 @@ void Skill::PHYSICAL_SINGLE_DAMAGE(Unit *pTarget)
         nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
         break;
     case EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK:
-        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
-        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                   GetVar(4) * GetSkillEnhance();
+        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                   GetVar(5) * GetSkillEnhance();
         break;
     default:
         return;
     }
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK || GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK) && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock &&
+        (GetSkillBase()->GetSkillEffectType() ==
+             EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK ||
+         GetSkillBase()->GetSkillEffectType() ==
+             EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK) &&
+        !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
     {
         float fRange = GetVar(8) + GetVar(9) * GetRequestedSkillLevel();
         fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
-        uint32_t knock_back_time = static_cast<uint32_t>((GetVar(10) + GetVar(11) * GetRequestedSkillLevel()) * 100);
+        uint32_t knock_back_time = static_cast<uint32_t>(
+            (GetVar(10) + GetVar(11) * GetRequestedSkillLevel()) * 100);
 
         AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
-        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+        AddSkillDamageWithKnockBackResult(
+            m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage,
+            pTarget->GetHandle(), pTarget->GetPositionX(),
+            pTarget->GetPositionY(), knock_back_time);
     }
     else
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
@@ -1915,12 +2131,23 @@ void Skill::SINGLE_MAGICAL_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr || m_pOwner == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    int elemental_type = GetSkillBase()->GetElementalType();
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(2) * GetSkillEnhance()) +
+        GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
@@ -1928,16 +2155,31 @@ void Skill::SINGLE_MAGICAL_DAMAGE_WITH_ABSORB(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(2) * GetSkillEnhance()) +
+        GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 
-    int nAddHP = static_cast<int32_t>(Damage.nDamage * (GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance()));
-    int nAddMP = static_cast<int32_t>(Damage.nDamage * (GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance()));
+    int32_t nAddHP = static_cast<int32_t>(
+        Damage.nDamage * (GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                          GetVar(8) * GetSkillEnhance()));
+    int32_t nAddMP = static_cast<int32_t>(
+        Damage.nDamage * (GetVar(9) + GetVar(10) * GetRequestedSkillLevel() +
+                          GetVar(11) * GetSkillEnhance()));
     m_pOwner->AddHealth(nAddHP);
     m_pOwner->AddMana(nAddMP);
 
@@ -1972,7 +2214,7 @@ void Skill::TOWN_PORTAL()
         auto pPlayer = m_pOwner->As<Player>();
 
         auto pos = pPlayer->GetLastTownPosition();
-        pPlayer->PendWarp((int)pos.GetPositionX(), (int)pos.GetPositionY(), 0);
+        pPlayer->PendWarp((int32_t)pos.GetPositionX(), (int32_t)pos.GetPositionY(), 0);
         pos = pPlayer->GetCurrentPosition(sWorld.GetArTime());
         pPlayer->SetMove(pos, 0, 0);
     }
@@ -1983,12 +2225,19 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(2) * GetSkillEnhance()) +
+        GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -1996,10 +2245,15 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
     m_nFireTime += GetVar(8) * 100;
 }
 
@@ -2028,21 +2282,29 @@ void Skill::TOGGLE_AURA(Unit * /*pTarget*/)
                 return;
 
             auto pos = tag.pPlayer->GetCurrentPosition(t);
-            if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
-                AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetHandle());
+            if (m_pOwner->GetExactDist2d(&pos) <=
+                GetSkillBase()->GetValidRange())
+                AddSkillResult(m_vResultList, true, 0,
+                               tag.pPlayer->GetHandle());
 
-            if (tag.pPlayer->GetMainSummon() != nullptr && tag.pPlayer->GetMainSummon()->IsInWorld())
+            if (tag.pPlayer->GetMainSummon() != nullptr &&
+                tag.pPlayer->GetMainSummon()->IsInWorld())
             {
                 pos = tag.pPlayer->GetMainSummon()->GetCurrentPosition(t);
-                if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
-                    AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetMainSummon()->GetHandle());
+                if (m_pOwner->GetExactDist2d(&pos) <=
+                    GetSkillBase()->GetValidRange())
+                    AddSkillResult(m_vResultList, true, 0,
+                                   tag.pPlayer->GetMainSummon()->GetHandle());
             }
 
-            if (tag.pPlayer->GetSubSummon() != nullptr && tag.pPlayer->GetSubSummon()->IsInWorld())
+            if (tag.pPlayer->GetSubSummon() != nullptr &&
+                tag.pPlayer->GetSubSummon()->IsInWorld())
             {
                 pos = tag.pPlayer->GetSubSummon()->GetCurrentPosition(t);
-                if (m_pOwner->GetExactDist2d(&pos) <= GetSkillBase()->GetValidRange())
-                    AddSkillResult(m_vResultList, true, 0, tag.pPlayer->GetSubSummon()->GetHandle());
+                if (m_pOwner->GetExactDist2d(&pos) <=
+                    GetSkillBase()->GetValidRange())
+                    AddSkillResult(m_vResultList, true, 0,
+                                   tag.pPlayer->GetSubSummon()->GetHandle());
             }
         };
         sGroupManager.DoEachMemberTag(pPlayer->GetPartyID(), partyFunctor);
@@ -2060,8 +2322,10 @@ void Skill::SKILL_RESURRECTION(Unit *pTarget)
     if (pTarget == nullptr || pTarget->GetHealth() != 0)
         return;
 
-    int nIncHP = static_cast<int32_t>(pTarget->GetMaxHealth() * GetVar(0) * GetRequestedSkillLevel());
-    int nIncMP = static_cast<int32_t>(pTarget->GetMaxMana() * GetVar(1) * GetRequestedSkillLevel());
+    int32_t nIncHP = static_cast<int32_t>(pTarget->GetMaxHealth() * GetVar(0) *
+                                          GetRequestedSkillLevel());
+    int32_t nIncMP = static_cast<int32_t>(pTarget->GetMaxMana() * GetVar(1) *
+                                          GetRequestedSkillLevel());
 
     /// @todo: EXP
     pTarget->AddHealth(nIncHP);
@@ -2097,9 +2361,18 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                       GetVar(2) * GetSkillEnhance()) *
+                          m_pOwner->GetMagicPoint(
+                              (ElementalType)GetSkillBase()->GetElementalType(),
+                              GetSkillBase()->IsPhysicalSkill(),
+                              GetSkillBase()->IsHarmful()) +
+                      GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                      GetVar(5) * GetSkillEnhance();
 
     if (m_nCurrentFire == 0)
     {
@@ -2116,14 +2389,23 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     auto t = sWorld.GetArTime();
 
     std::vector<Unit *> vTargetList{};
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, GetVar(10), GetVar(11), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, GetVar(10), GetVar(11), vTargetList);
 
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 
     m_nFireTime += GetVar(8) * 100;
@@ -2134,54 +2416,87 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_USING_CORPSE)
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_MAGIC_SINGLE_REGION_DAMAGE_USING_CORPSE)
     {
         if (!pTarget->IsMonster() || pTarget->GetHealth() != 0)
             return;
         sWorld.RemoveObjectFromWorld(pTarget);
     }
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(2) * GetSkillEnhance()) +
+        GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    float effectLength = GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE ? GetVar(12) : GetVar(9);
-    int32_t distributeType = static_cast<int32_t>(GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE ? GetVar(13) : GetVar(10));
-    int32_t targetMax = static_cast<int32_t>(GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE ? GetVar(14) : GetVar(11));
+    float effectLength = GetSkillBase()->GetSkillEffectType() ==
+                                 EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE
+                             ? GetVar(12)
+                             : GetVar(9);
+    int32_t distributeType = static_cast<int32_t>(
+        GetSkillBase()->GetSkillEffectType() ==
+                EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE
+            ? GetVar(13)
+            : GetVar(10));
+    int32_t targetMax = static_cast<int32_t>(
+        GetSkillBase()->GetSkillEffectType() ==
+                EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE
+            ? GetVar(14)
+            : GetVar(11));
 
     float fEffectLength = effectLength * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
     auto t = sWorld.GetArTime();
 
     std::vector<Unit *> vTargetList{};
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, distributeType, targetMax, vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, distributeType, targetMax, vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
 void Skill::ADD_ENERGY()
 {
-    for (int nAddEnergyCount = 0; nAddEnergyCount < GetRequestedSkillLevel() && m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) < m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY); ++nAddEnergyCount)
+    for (int32_t nAddEnergyCount = 0;
+         nAddEnergyCount < GetRequestedSkillLevel() &&
+         m_pOwner->GetInt32Value(UNIT_FIELD_ENERGY) <
+             m_pOwner->GetInt32Value(UNIT_FIELD_MAX_ENERGY);
+         ++nAddEnergyCount)
         m_pOwner->AddEnergy();
 
     AddSkillResult(m_vResultList, true, 0, 0);
 }
 
-void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
+void Skill::process_target(uint32_t t, SkillTargetFunctor &fn, Unit *pTarget)
 {
     switch (GetSkillBase()->GetSkillTargetType())
     {
     case TARGET_TYPE::TARGET_TARGET:
     case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER:
     {
-        if (GetSkillBase()->GetSkillTargetType() == TARGET_TARGET_EXCEPT_CASTER && pTarget == m_pOwner)
+        if (GetSkillBase()->GetSkillTargetType() ==
+                TARGET_TARGET_EXCEPT_CASTER &&
+            pTarget == m_pOwner)
             break;
 
         if (GetSkillBase()->IsNeedTarget())
@@ -2208,11 +2523,14 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
 
         auto pPlayer = m_pOwner->As<Player>();
         auto pTargetPlayer = m_pOwner->As<Player>();
-        if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 && pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
+        if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 &&
+            pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
             break;
 
         auto partyFunctor = [&](PartyMemberTag &tag) -> bool {
-            if (tag.pPlayer == nullptr || !tag.bIsOnline || GetSkillBase()->GetFireRange() < tag.pPlayer->GetExactDist2d(m_pOwner))
+            if (tag.pPlayer == nullptr || !tag.bIsOnline ||
+                GetSkillBase()->GetFireRange() <
+                    tag.pPlayer->GetExactDist2d(m_pOwner))
                 return false;
             return fn.onCreature(this, t, m_pOwner, tag.pPlayer);
         };
@@ -2220,17 +2538,21 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         if (pPlayer->GetPartyID() == 0)
             fn.onCreature(this, t, m_pOwner, pPlayer);
         else
-            m_nTargetCount = static_cast<uint32_t>(sGroupManager.DoEachMemberTagNum(pPlayer->GetPartyID(), partyFunctor));
+            m_nTargetCount =
+                static_cast<uint32_t>(sGroupManager.DoEachMemberTagNum(
+                    pPlayer->GetPartyID(), partyFunctor));
         break;
     }
     case TARGET_TYPE::TARGET_GUILD:
     {
-        if (!m_pOwner->IsPlayer() || (pTarget == nullptr && !pTarget->IsPlayer()))
+        if (!m_pOwner->IsPlayer() ||
+            (pTarget == nullptr && !pTarget->IsPlayer()))
             break;
 
         auto pPlayer = m_pOwner->As<Player>();
         auto pTargetPlayer = m_pOwner->As<Player>();
-        if (pPlayer != pTargetPlayer && pPlayer->GetGuildID() != 0 && pPlayer->GetGuildID() != pTargetPlayer->GetGuildID())
+        if (pPlayer != pTargetPlayer && pPlayer->GetGuildID() != 0 &&
+            pPlayer->GetGuildID() != pTargetPlayer->GetGuildID())
             break;
 
         /// @GuildFunctor
@@ -2243,7 +2565,8 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
 
         auto pPlayer = m_pOwner->As<Player>();
         auto pTargetPlayer = m_pOwner->As<Player>();
-        if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 && pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
+        if (pPlayer != pTargetPlayer && pPlayer->GetPartyID() != 0 &&
+            pPlayer->GetPartyID() != pTargetPlayer->GetPartyID())
             break;
 
         /// @AttackPartyfunctor
@@ -2254,7 +2577,9 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         Summon *pSummon{nullptr};
         if (pTarget->IsSummon() && pTarget->IsInWorld())
             pSummon = pTarget->As<Summon>();
-        else if (pTarget->IsPlayer() && pTarget->As<Player>()->GetMainSummon() != nullptr && pTarget->As<Player>()->GetMainSummon()->IsInWorld())
+        else if (pTarget->IsPlayer() &&
+                 pTarget->As<Player>()->GetMainSummon() != nullptr &&
+                 pTarget->As<Player>()->GetMainSummon()->IsInWorld())
             pSummon = pTarget->As<Player>()->GetMainSummon();
 
         if (pSummon == nullptr)
@@ -2262,7 +2587,8 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
 
         auto pos = pSummon->GetPosition();
 
-        if (auto tmpPos = pTarget->GetPosition(); GetSkillBase()->GetFireRange() < pos.GetExactDist2d(&tmpPos))
+        if (auto tmpPos = pTarget->GetPosition();
+            GetSkillBase()->GetFireRange() < pos.GetExactDist2d(&tmpPos))
             break;
 
         fn.onCreature(this, t, m_pOwner, pSummon);
@@ -2278,7 +2604,8 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         Player *pTargetPlayer{nullptr};
         if (pTarget->IsPlayer())
             pTargetPlayer = pTarget->As<Player>();
-        else if (pTarget->IsSummon() && pTarget->As<Summon>()->GetMaster() != nullptr)
+        else if (pTarget->IsSummon() &&
+                 pTarget->As<Summon>()->GetMaster() != nullptr)
             pTargetPlayer = pTarget->As<Summon>()->GetMaster();
 
         if (pTargetPlayer == nullptr || !pTargetPlayer->IsInWorld())
@@ -2289,12 +2616,16 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         auto pos = m_pOwner->GetPosition();
         {
             Summon *pSummon = pTargetPlayer->GetMainSummon();
-            if (pSummon != nullptr && pSummon->IsInWorld() && pSummon->GetHealth() != 0 && GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
+            if (pSummon != nullptr && pSummon->IsInWorld() &&
+                pSummon->GetHealth() != 0 &&
+                GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
                 fn.onCreature(this, t, m_pOwner, pSummon);
         }
         {
             Summon *pSummon = pTargetPlayer->GetSubSummon();
-            if (pSummon != nullptr && pSummon->IsInWorld() && pSummon->GetHealth() != 0 && GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
+            if (pSummon != nullptr && pSummon->IsInWorld() &&
+                pSummon->GetHealth() != 0 &&
+                GetSkillBase()->GetFireRange() >= pos.GetExactDist2d(pSummon))
                 fn.onCreature(this, t, m_pOwner, pTargetPlayer->GetSubSummon());
         }
         break;
@@ -2335,12 +2666,16 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
     }
     default:
     {
-        auto result = NGemity::StringFormat("TARGET_TYPE {} in process_target not handled yet.", m_SkillBase->target);
+        auto result = NGemity::StringFormat(
+            "TARGET_TYPE {} in process_target not handled yet.",
+            m_SkillBase->target);
         if (m_pOwner->IsPlayer())
-            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
+            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(),
+                                      result);
         else if (m_pOwner->IsSummon())
         {
-            Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
+            Messages::SendChatMessage(
+                50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
         }
         NG_LOG_DEBUG("skill", "%s", result.c_str());
         break;
@@ -2353,10 +2688,10 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDecHP{0};
-    int nDecMP{0};
-    int nIncHP{0};
-    int nIncMP{0};
+    int32_t nDecHP{0};
+    int32_t nDecMP{0};
+    int32_t nIncHP{0};
+    int32_t nIncMP{0};
 
     switch (GetSkillBase()->GetSkillEffectType())
     {
@@ -2365,9 +2700,11 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
         if (!m_pOwner->IsPlayer())
             return;
         auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
-        if (pSummon == nullptr || pSummon->GetHealth() == 0 || pSummon->GetHandle() == pTarget->GetHandle())
+        if (pSummon == nullptr || pSummon->GetHealth() == 0 ||
+            pSummon->GetHandle() == pTarget->GetHandle())
         {
-            AddSkillResult(m_vResultList, false, SRST_SummonDead, pTarget->GetHandle());
+            AddSkillResult(m_vResultList, false, SRST_SummonDead,
+                           pTarget->GetHandle());
             return;
         }
         nDecHP = pSummon->GetHealth();
@@ -2375,7 +2712,9 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
         DamageInfo info{};
         info.nDamage = nDecHP;
         info.target_hp = pSummon->GetHealth();
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, ElementalType::TYPE_NONE, info, pSummon->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                             ElementalType::TYPE_NONE, info,
+                             pSummon->GetHandle());
     }
     break;
     case EF_ADD_HP_MP_BY_SUMMON_DAMAGE:
@@ -2386,7 +2725,8 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
         auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
         if (pSummon == nullptr || pSummon->GetHealth() == 0)
         {
-            AddSkillResult(m_vResultList, false, SRST_SummonDead, pTarget->GetHandle());
+            AddSkillResult(m_vResultList, false, SRST_SummonDead,
+                           pTarget->GetHandle());
             return;
         }
         nDecHP = static_cast<int32_t>(pSummon->GetMaxHealth() * GetVar(10));
@@ -2408,21 +2748,28 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
         auto pSummon = m_pOwner->As<Player>()->m_pMainSummon;
         if (pSummon == nullptr || pSummon->GetHealth() == 0)
         {
-            AddSkillResult(m_vResultList, false, SRST_SummonDead, pTarget->GetHandle());
+            AddSkillResult(m_vResultList, false, SRST_SummonDead,
+                           pTarget->GetHandle());
             return;
         }
 
-        nDecHP = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
-        nDecMP = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+        nDecHP = static_cast<int32_t>(GetVar(0) +
+                                      GetVar(1) * GetRequestedSkillLevel() +
+                                      GetVar(4) * GetSkillEnhance());
+        nDecMP = static_cast<int32_t>(GetVar(2) +
+                                      GetVar(3) * GetRequestedSkillLevel() +
+                                      GetVar(5) * GetSkillEnhance());
 
         pSummon->AddHealth(-nDecHP);
         pSummon->AddMana(-nDecMP);
 
         SkillResult skillResult{};
-        skillResult.type = static_cast<uint8_t>(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
+        skillResult.type =
+            static_cast<uint8_t>(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
         skillResult.hTarget = pSummon->GetHandle();
         skillResult.hitAddHPMPSP.target_hp = pSummon->GetHealth();
-        skillResult.hitAddHPMPSP.target_mp = static_cast<int16_t>(pSummon->GetMana());
+        skillResult.hitAddHPMPSP.target_mp =
+            static_cast<int16_t>(pSummon->GetMana());
         skillResult.hitAddHPMPSP.nIncHP = -nDecHP;
         skillResult.hitAddHPMPSP.nIncMP = -nDecMP;
         m_vResultList.emplace_back(skillResult);
@@ -2432,15 +2779,25 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
         break;
     }
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_ADD_HP_MP_BY_STEAL_SUMMON_HP_MP)
     {
-        nIncHP = static_cast<int32_t>(nDecHP * GetVar(6) + GetVar(7) * GetSkillEnhance());
-        nIncMP = static_cast<int32_t>(nDecMP * GetVar(6) + GetVar(7) * GetSkillEnhance());
+        nIncHP = static_cast<int32_t>(nDecHP * GetVar(6) +
+                                      GetVar(7) * GetSkillEnhance());
+        nIncMP = static_cast<int32_t>(nDecMP * GetVar(6) +
+                                      GetVar(7) * GetSkillEnhance());
     }
-    else if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_WITH_LIMIT_PERCENT)
+    else if (GetSkillBase()->GetSkillEffectType() ==
+             EF_ADD_HP_MP_WITH_LIMIT_PERCENT)
     {
-        int nLimitHP = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * pTarget->GetMaxHealth());
-        int nLimitMP = static_cast<int32_t>((GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance()) * pTarget->GetMaxMana());
+        int32_t nLimitHP = static_cast<int32_t>(
+            (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+             GetVar(2) * GetSkillEnhance()) *
+            pTarget->GetMaxHealth());
+        int32_t nLimitMP = static_cast<int32_t>(
+            (GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+             GetVar(5) * GetSkillEnhance()) *
+            pTarget->GetMaxMana());
 
         if (nLimitHP > pTarget->GetHealth())
             nIncHP = nLimitHP - pTarget->GetHealth();
@@ -2449,18 +2806,36 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
     }
     else
     {
-        nIncHP = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) + GetVar(2) * GetRequestedSkillLevel() + pTarget->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+        nIncHP = static_cast<int32_t>(
+            m_pOwner->GetMagicPoint(
+                (ElementalType)GetSkillBase()->GetElementalType(),
+                GetSkillBase()->IsPhysicalSkill(),
+                GetSkillBase()->IsHarmful()) *
+                (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) +
+            GetVar(2) * GetRequestedSkillLevel() +
+            pTarget->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel() +
+            GetVar(4) * GetSkillEnhance());
 
-        nIncMP = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) * (GetVar(5) + GetVar(6) * GetRequestedSkillLevel()) + GetVar(7) * GetRequestedSkillLevel() + pTarget->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+        nIncMP = static_cast<int32_t>(
+            m_pOwner->GetMagicPoint(
+                (ElementalType)GetSkillBase()->GetElementalType(),
+                GetSkillBase()->IsPhysicalSkill(),
+                GetSkillBase()->IsHarmful()) *
+                (GetVar(5) + GetVar(6) * GetRequestedSkillLevel()) +
+            GetVar(7) * GetRequestedSkillLevel() +
+            pTarget->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel() +
+            GetVar(9) * GetSkillEnhance());
 
         if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP ||
-            GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD)
+            GetSkillBase()->GetSkillEffectType() ==
+                EF_ADD_HP_MP_BY_SUMMON_DEAD)
         {
             nIncHP += GetVar(10);
             nIncMP += GetVar(11);
         }
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_ADD_HP_MP_BY_SUMMON_DEAD)
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_ADD_HP_MP_BY_SUMMON_DEAD)
         {
             nIncHP += pTarget->GetMaxHealth() * GetVar(12);
             nIncMP += pTarget->GetMaxMana() * GetVar(13);
@@ -2471,10 +2846,12 @@ void Skill::SKILL_ADD_HP_MP(Unit *pTarget)
     nIncMP = pTarget->MPHeal(nIncMP);
 
     SkillResult skillResult{};
-    skillResult.type = static_cast<uint8_t>(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
+    skillResult.type =
+        static_cast<uint8_t>(TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP);
     skillResult.hTarget = pTarget->GetHandle();
     skillResult.hitAddHPMPSP.target_hp = pTarget->GetHealth();
-    skillResult.hitAddHPMPSP.target_mp = static_cast<int16_t>(pTarget->GetMana());
+    skillResult.hitAddHPMPSP.target_mp =
+        static_cast<int16_t>(pTarget->GetMana());
     skillResult.hitAddHPMPSP.nIncHP = nIncHP;
     skillResult.hitAddHPMPSP.nIncMP = nIncMP;
 
@@ -2486,19 +2863,30 @@ void Skill::PHYSICAL_MULTIPLE_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
-    int nCount = static_cast<int32_t>(GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-        AddSkillDamageResult(m_vResultList, SRT_Damage, static_cast<ElementalType>(elemental_type), Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SRT_Damage,
+                             static_cast<ElementalType>(elemental_type), Damage,
+                             pTarget->GetHandle());
     }
 
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -2511,7 +2899,9 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
         return;
 
     auto elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
 
     int32_t nCount{0};
     bool bTargetOrigin{true};
@@ -2522,10 +2912,13 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     switch (GetSkillBase()->GetSkillEffectType())
     {
     case EF_PHYSICAL_MULTIPLE_REGION_DAMAGE:
-        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                   GetVar(10) * GetSkillEnhance();
+        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                   GetVar(11) * GetSkillEnhance();
 
-        nCount = static_cast<int32_t>(GetVar(7) + GetVar(8) * GetRequestedSkillLevel());
+        nCount = static_cast<int32_t>(GetVar(7) +
+                                      GetVar(8) * GetRequestedSkillLevel());
 
         nFireInterval = static_cast<uint32_t>(GetVar(9) * 100);
         break;
@@ -2534,9 +2927,11 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
         [[fallthrough]];
     case EF_PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE:
         nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
-        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                   GetVar(11) * GetSkillEnhance();
 
-        nCount = static_cast<int32_t>(GetVar(9) + GetVar(10) * GetRequestedSkillLevel());
+        nCount = static_cast<int32_t>(GetVar(9) +
+                                      GetVar(10) * GetRequestedSkillLevel());
 
         nFireInterval = static_cast<uint32_t>(GetVar(11) * 100);
 
@@ -2553,17 +2948,29 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength,
+        nRegionType, fRegionProperty, nDamage, true, m_pOwner,
+        static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)),
+        vTargetList);
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
-    for (int i = 0; i < nCount; i++)
+    for (int32_t i = 0; i < nCount; i++)
     {
         for (auto &target : vTargetList)
         {
             if (target->GetHealth() == 0)
                 continue;
 
-            DamageInfo Damage = target->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - target->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, (ElementalType)elemental_type, Damage, target->GetHandle());
+            DamageInfo Damage = target->DealPhysicalSkillDamage(
+                m_pOwner, nDamage, (ElementalType)elemental_type,
+                GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                            m_pOwner->GetLevel() -
+                                                target->GetLevel()),
+                GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                                 (ElementalType)elemental_type, Damage,
+                                 target->GetHandle());
         }
     }
     m_nFireCount += nFireInterval * nCount;
@@ -2574,20 +2981,28 @@ void Skill::TAUNT(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nHate = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance());
-    int nRatio = static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+    int32_t nHate =
+        static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                             GetVar(7) * GetSkillEnhance());
+    int32_t nRatio =
+        static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                             GetVar(9) * GetSkillEnhance());
 
     bool bSuccess = rand32() % 100 < nRatio;
 
     if (bSuccess && m_pOwner->IsEnemy(pTarget, false) && pTarget->IsMonster())
     {
-        std::pair<float, int> HateMod = m_pOwner->GetHateMod((GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, GetSkillBase()->IsHarmful());
+        std::pair<float, int32_t> HateMod =
+            m_pOwner->GetHateMod((GetSkillBase()->IsPhysicalSkill()) ? 1 : 2,
+                                 GetSkillBase()->IsHarmful());
 
         nHate += HateMod.second;
         nHate *= HateMod.first;
 
         ///@Todo: AddHateRatio
-        pTarget->As<Monster>()->AddHate(m_pOwner->GetHandle(), 1 /*m_pOwner->GetHateRatio()*/ * nHate, true, true);
+        pTarget->As<Monster>()->AddHate(m_pOwner->GetHandle(),
+                                        1 /*m_pOwner->GetHateRatio()*/ * nHate,
+                                        true, true);
     }
 
     AddSkillResult(m_vResultList, bSuccess, SRST_AddHate, pTarget->GetHandle());
@@ -2598,21 +3013,25 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
 
     bool bTargetOrigin{true};
-    int nRegionType{-1};
+    int32_t nRegionType{-1};
     float fRegionProperty{0.0f};
     float fKnockbackRange{0.0f};
     uint32_t nKnockbackTime{0};
-    int nCastingCancelRate{0};
+    int32_t nCastingCancelRate{0};
 
     switch (GetSkillBase()->GetSkillEffectType())
     {
     case EF_PHYSICAL_SINGLE_REGION_DAMAGE:
-        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+        nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                   GetVar(10) * GetSkillEnhance();
+        nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                   GetVar(11) * GetSkillEnhance();
         break;
     case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF:
         bTargetOrigin = false;
@@ -2620,13 +3039,17 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
     case EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK:
         nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel();
         nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
-        nRegionType = static_cast<int>(GetVar(7));
+        nRegionType = static_cast<int32_t>(GetVar(7));
         fRegionProperty = GetVar(8);
-        fKnockbackRange = (GetVar(9) + GetVar(10) * GetRequestedSkillLevel()) * GameRule::DEFAULT_UNIT_SIZE;
-        nKnockbackTime = static_cast<uint32_t>((GetVar(11) + GetVar(12) * GetRequestedSkillLevel()) * 100);
+        fKnockbackRange = (GetVar(9) + GetVar(10) * GetRequestedSkillLevel()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
+        nKnockbackTime = static_cast<uint32_t>(
+            (GetVar(11) + GetVar(12) * GetRequestedSkillLevel()) * 100);
         break;
     case EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL:
-        nCastingCancelRate = static_cast<int32_t>(GetVar(12) + GetVar(13) * GetRequestedSkillLevel() + GetVar(14) * GetSkillEnhance());
+        nCastingCancelRate = static_cast<int32_t>(
+            GetVar(12) + GetVar(13) * GetRequestedSkillLevel() +
+            GetVar(14) * GetSkillEnhance());
         break;
     default:
         return;
@@ -2637,30 +3060,49 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength,
+        nRegionType, fRegionProperty, nDamage, true, m_pOwner,
+        static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)),
+        vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
         if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock)
         {
-            if ((GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK || GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF) && !(pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster()))
+            if ((GetSkillBase()->GetSkillEffectType() ==
+                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK ||
+                 GetSkillBase()->GetSkillEffectType() ==
+                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF) &&
+                !(pDealTarget->IsMonster() &&
+                  pDealTarget->As<Monster>()->IsBossMonster()))
             {
                 // Knockback here
             }
-            else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL)
+            else if (GetSkillBase()->GetSkillEffectType() ==
+                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL)
             {
                 // Cancel skill from target here
-                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                     Damage, pDealTarget->GetHandle());
             }
             else
             {
-                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                     Damage, pDealTarget->GetHandle());
             }
         }
         else
         {
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                 Damage, pDealTarget->GetHandle());
         }
     }
 }
@@ -2670,10 +3112,14 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(13) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(13) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
     float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
@@ -2681,14 +3127,26 @@ void Skill::PHYSICAL_SINGLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength, static_cast<int32_t>(GetVar(7)), static_cast<int32_t>(GetVar(10)), nDamage, GetVar(9) != 0, m_pOwner, static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), GetVar(8) != 0, fEffectLength,
+        static_cast<int32_t>(GetVar(7)), static_cast<int32_t>(GetVar(10)),
+        nDamage, GetVar(9) != 0, m_pOwner, static_cast<int32_t>(GetVar(5)),
+        static_cast<int32_t>(GetVar(6)), vTargetList, true);
 
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, static_cast<ElementalType>(elemental_type), Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                             static_cast<ElementalType>(elemental_type), Damage,
+                             pDealTarget->GetHandle());
     }
 }
 
@@ -2699,8 +3157,9 @@ bool Skill::ProcAura()
 
     if (GetAuraMPDecTime() < t + 7500)
     {
-        float fDecMP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
-        int nDecHavoc = 0;
+        float fDecMP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                       GetVar(2) * GetSkillEnhance();
+        int32_t nDecHavoc = 0;
 
         /// @Todo: Havoc
 
@@ -2711,13 +3170,15 @@ bool Skill::ProcAura()
         SetAuraMPDecTime(t);
 
         if (m_pOwner->IsInWorld())
-            Messages::BroadcastHPMPMessage(m_pOwner, 0, m_pOwner->GetMana() - fDecMP, true);
+            Messages::BroadcastHPMPMessage(m_pOwner, 0,
+                                           m_pOwner->GetMana() - fDecMP, true);
 
         if (m_pOwner->IsSummon())
         {
             pSummon = m_pOwner->As<Summon>();
             if (pSummon->GetMaster() && pSummon->IsInWorld())
-                Messages::SendHPMPMessage(pSummon->GetMaster(), m_pOwner, 0, m_pOwner->GetMana() - fDecMP, false);
+                Messages::SendHPMPMessage(pSummon->GetMaster(), m_pOwner, 0,
+                                          m_pOwner->GetMana() - fDecMP, false);
         }
         /// @Todo: Havoc
     }
@@ -2726,7 +3187,9 @@ bool Skill::ProcAura()
         return true;
 
     std::vector<uint32_t> vList{};
-    sWorld.EnumMovableObject(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), GetSkillBase()->GetFireRange(), vList);
+    sWorld.EnumMovableObject(m_pOwner->GetCurrentPosition(t),
+                             m_pOwner->GetLayer(),
+                             GetSkillBase()->GetFireRange(), vList);
 
     if (vList.empty())
         return true;
@@ -2742,24 +3205,45 @@ bool Skill::ProcAura()
         if (pTarget == nullptr /* @TODO: IsPet */)
             continue;
 
-        if (GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA)
+        if (GetSkillBase()->GetSkillEffectType() ==
+            EF_TOGGLE_DIFFERENTIAL_AURA)
         {
             if (pSummon != nullptr)
                 pTarget = pSummon;
             else if (pTarget->IsSummon())
             {
-                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                if (m_pOwner->IsPlayer() &&
+                    m_pOwner->As<Player>() !=
+                        pTarget->As<Summon>()->GetMaster())
                     continue;
             }
             else
                 continue;
 
             if (GetVar(5) != 0)
-                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(5))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+                pTarget->AddState(
+                    SG_NORMAL,
+                    static_cast<StateCode>(static_cast<int32_t>(GetVar(5))),
+                    m_pOwner->GetHandle(),
+                    m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                               GetSkillEnhance()),
+                    t, et, true, 0, "");
             if (GetVar(6) != 0)
-                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(6))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+                pTarget->AddState(
+                    SG_NORMAL,
+                    static_cast<StateCode>(static_cast<int32_t>(GetVar(6))),
+                    m_pOwner->GetHandle(),
+                    m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                               GetSkillEnhance()),
+                    t, et, true, 0, "");
             if (GetVar(7) != 0)
-                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(7))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+                pTarget->AddState(
+                    SG_NORMAL,
+                    static_cast<StateCode>(static_cast<int32_t>(GetVar(7))),
+                    m_pOwner->GetHandle(),
+                    m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                               GetSkillEnhance()),
+                    t, et, true, 0, "");
 
             bApplySummon = true;
             break;
@@ -2771,19 +3255,35 @@ bool Skill::ProcAura()
         }
         else if (pTarget->IsSummon())
         {
-            if (nTargetType != TARGET_PARTY_SUMMON && nTargetType != TARGET_PARTY_WITH_SUMMON && nTargetType != TARGET_SUMMON && nTargetType != TARGET_CREATURE_TYPE_NONE && nTargetType != TARGET_CREATURE_TYPE_FIRE && nTargetType != TARGET_CREATURE_TYPE_WATER && nTargetType != TARGET_CREATURE_TYPE_WIND && nTargetType != TARGET_CREATURE_TYPE_EARTH && nTargetType != TARGET_CREATURE_TYPE_LIGHT && nTargetType != TARGET_CREATURE_TYPE_DARK && nTargetType != TARGET_SELF_WITH_SUMMON && nTargetType != TARGET_SELF_WITH_MASTER)
+            if (nTargetType != TARGET_PARTY_SUMMON &&
+                nTargetType != TARGET_PARTY_WITH_SUMMON &&
+                nTargetType != TARGET_SUMMON &&
+                nTargetType != TARGET_CREATURE_TYPE_NONE &&
+                nTargetType != TARGET_CREATURE_TYPE_FIRE &&
+                nTargetType != TARGET_CREATURE_TYPE_WATER &&
+                nTargetType != TARGET_CREATURE_TYPE_WIND &&
+                nTargetType != TARGET_CREATURE_TYPE_EARTH &&
+                nTargetType != TARGET_CREATURE_TYPE_LIGHT &&
+                nTargetType != TARGET_CREATURE_TYPE_DARK &&
+                nTargetType != TARGET_SELF_WITH_SUMMON &&
+                nTargetType != TARGET_SELF_WITH_MASTER)
                 continue;
 
-            if (nTargetType == TARGET_PARTY_SUMMON || nTargetType == TARGET_PARTY_WITH_SUMMON)
+            if (nTargetType == TARGET_PARTY_SUMMON ||
+                nTargetType == TARGET_PARTY_WITH_SUMMON)
             {
-                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>()->GetPartyID())
+                if (m_pOwner->IsPlayer() &&
+                    m_pOwner->As<Player>()->GetPartyID())
                 {
-                    if (m_pOwner->As<Player>()->GetPartyID() != pTarget->As<Summon>()->GetMaster()->GetPartyID())
+                    if (m_pOwner->As<Player>()->GetPartyID() !=
+                        pTarget->As<Summon>()->GetMaster()->GetPartyID())
                         continue;
                 }
                 else
                 {
-                    if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                    if (m_pOwner->IsPlayer() &&
+                        m_pOwner->As<Player>() !=
+                            pTarget->As<Summon>()->GetMaster())
                         continue;
                 }
             }
@@ -2794,7 +3294,9 @@ bool Skill::ProcAura()
             }
             else
             {
-                if (m_pOwner->IsPlayer() && m_pOwner->As<Player>() != pTarget->As<Summon>()->GetMaster())
+                if (m_pOwner->IsPlayer() &&
+                    m_pOwner->As<Player>() !=
+                        pTarget->As<Summon>()->GetMaster())
                     continue;
                 /// @TODO: SummonElementalType
             }
@@ -2808,7 +3310,8 @@ bool Skill::ProcAura()
                 nTargetType != TARGET_SELF_WITH_MASTER)
                 continue;
 
-            if (nTargetType == TARGET_PARTY || nTargetType == TARGET_PARTY_WITH_SUMMON)
+            if (nTargetType == TARGET_PARTY ||
+                nTargetType == TARGET_PARTY_WITH_SUMMON)
             {
                 Player *pOwnPlayer{nullptr};
 
@@ -2822,7 +3325,9 @@ bool Skill::ProcAura()
 
                 if (pOwnPlayer->GetPartyID() == 0 && pTarget != m_pOwner)
                     continue;
-                if (pTarget->IsPlayer() && pOwnPlayer->GetPartyID() != pTarget->As<Player>()->GetPartyID())
+                if (pTarget->IsPlayer() &&
+                    pOwnPlayer->GetPartyID() !=
+                        pTarget->As<Player>()->GetPartyID())
                     continue;
             }
             else if (nTargetType == TARGET_SELF_WITH_SUMMON)
@@ -2832,7 +3337,8 @@ bool Skill::ProcAura()
             }
             else if (nTargetType == TARGET_SELF_WITH_MASTER)
             {
-                if (m_pOwner->IsSummon() && m_pOwner->As<Summon>()->GetMaster() != pTarget)
+                if (m_pOwner->IsSummon() &&
+                    m_pOwner->As<Summon>()->GetMaster() != pTarget)
                     continue;
             }
         }
@@ -2841,13 +3347,30 @@ bool Skill::ProcAura()
             continue;
         }
 
-        pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetSkillBase()->GetStateId()), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+        pTarget->AddState(SG_NORMAL,
+                          static_cast<StateCode>(GetSkillBase()->GetStateId()),
+                          m_pOwner->GetHandle(),
+                          m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                                     GetSkillEnhance()),
+                          t, et, true, 0, "");
 
         if (GetVar(3) != 0)
-            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(3))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            pTarget->AddState(
+                SG_NORMAL,
+                static_cast<StateCode>(static_cast<int32_t>(GetVar(3))),
+                m_pOwner->GetHandle(),
+                m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                           GetSkillEnhance()),
+                t, et, true, 0, "");
 
         if (GetVar(4) != 0)
-            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(4))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            pTarget->AddState(
+                SG_NORMAL,
+                static_cast<StateCode>(static_cast<int32_t>(GetVar(4))),
+                m_pOwner->GetHandle(),
+                m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                           GetSkillEnhance()),
+                t, et, true, 0, "");
     }
 
     if (GetSkillBase()->GetSkillEffectType() == EF_TOGGLE_DIFFERENTIAL_AURA)
@@ -2861,13 +3384,30 @@ bool Skill::ProcAura()
         else
             pTarget = m_pOwner;
 
-        pTarget->AddState(SG_NORMAL, static_cast<StateCode>(GetSkillBase()->GetStateId()), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+        pTarget->AddState(SG_NORMAL,
+                          static_cast<StateCode>(GetSkillBase()->GetStateId()),
+                          m_pOwner->GetHandle(),
+                          m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                                     GetSkillEnhance()),
+                          t, et, true, 0, "");
 
         if (GetVar(3) != 0)
-            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(3))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            pTarget->AddState(
+                SG_NORMAL,
+                static_cast<StateCode>(static_cast<int32_t>(GetVar(3))),
+                m_pOwner->GetHandle(),
+                m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                           GetSkillEnhance()),
+                t, et, true, 0, "");
 
         if (GetVar(4) != 0)
-            pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(4))), m_pOwner->GetHandle(), m_SkillBase->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, et, true, 0, "");
+            pTarget->AddState(
+                SG_NORMAL,
+                static_cast<StateCode>(static_cast<int32_t>(GetVar(4))),
+                m_pOwner->GetHandle(),
+                m_SkillBase->GetStateLevel(GetRequestedSkillLevel(),
+                                           GetSkillEnhance()),
+                t, et, true, 0, "");
     }
     return true;
 }
@@ -2877,17 +3417,26 @@ void Skill::PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget)
     if (!pTarget)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
 
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                         pTarget->GetHandle());
 
-    int nAddHP = static_cast<int32_t>(Damage.nDamage * GetVar(4));
-    int nAddMP = static_cast<int32_t>(Damage.nDamage * GetVar(5));
+    int32_t nAddHP = static_cast<int32_t>(Damage.nDamage * GetVar(4));
+    int32_t nAddMP = static_cast<int32_t>(Damage.nDamage * GetVar(5));
     m_pOwner->AddHealth(nAddHP);
     m_pOwner->AddMana(nAddMP);
 
@@ -2914,13 +3463,14 @@ void Skill::ADD_REGION_STATE(Unit *pTarget)
 
     float fEffectLength = GetVar(5) * GameRule::DEFAULT_UNIT_SIZE;
 
-    int nTargetType = static_cast<int32_t>(GetVar(6));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(6));
 
     std::vector<uint32_t> vResult{};
     m_fRange = fEffectLength;
 
     StateSkillFunctor mySkillFunctor(&m_vResultList);
-    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t),
+                             pTarget->GetLayer(), fEffectLength, vResult);
 
     m_nTargetCount = 0;
 
@@ -2964,26 +3514,31 @@ void Skill::ADD_STATE_BY_SELF_COST(Unit *pTarget)
     if (pTarget == nullptr || !pTarget->IsSummon())
         return;
 
-    float fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
-    float fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
-    float fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
-    float fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    float fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                    GetVar(2) * GetSkillEnhance();
+    float fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                    GetVar(5) * GetSkillEnhance();
+    float fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                        GetVar(8) * GetSkillEnhance();
+    float fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() +
+                    GetVar(11) * GetSkillEnhance();
 
     if (pTarget->GetHealth() < fCostHP)
         return;
     ///@Todo: SP
-    if (fCostEnergy > 0 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
+    if (fCostEnergy > 0 &&
+        pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
         return;
     if (pTarget->GetMana() < fCostMP)
         return;
 
-    pTarget->AddHealth(static_cast<int>(-fCostHP));
+    pTarget->AddHealth(static_cast<int32_t>(-fCostHP));
     ///@Todo: SP
     if (fCostEnergy > 0)
-        pTarget->RemoveEnergy(static_cast<int>(fCostEnergy));
+        pTarget->RemoveEnergy(static_cast<int32_t>(fCostEnergy));
     else if (fCostEnergy == -1)
         pTarget->RemoveEnergy(pTarget->GetUInt32Value(UNIT_FIELD_ENERGY));
-    pTarget->AddMana(static_cast<int>(-fCostMP));
+    pTarget->AddMana(static_cast<int32_t>(-fCostMP));
 
     auto t = sWorld.GetArTime();
 
@@ -2996,13 +3551,16 @@ void Skill::ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget)
     if (pTarget == nullptr || !pTarget->IsSummon())
         return;
 
-    float fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
-    float fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
-    float fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
+    float fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                    GetVar(2) * GetSkillEnhance();
+    float fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                    GetVar(5) * GetSkillEnhance();
+    float fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                        GetVar(8) * GetSkillEnhance();
 
     float fEffectLength = GetVar(9) * GameRule::DEFAULT_UNIT_SIZE;
 
-    int nTargetType = static_cast<int32_t>(GetVar(10));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(10));
 
     auto t = sWorld.GetArTime();
 
@@ -3011,7 +3569,8 @@ void Skill::ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget)
 
     StateSkillFunctor mySkillFunctor{&m_vResultList};
 
-    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t),
+                             pTarget->GetLayer(), fEffectLength, vResult);
 
     m_nTargetCount = 0;
 
@@ -3019,8 +3578,10 @@ void Skill::ADD_REGION_STATE_BY_SELF_COST(Unit *pTarget)
     {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
 
-        if (!m_pOwner->IsPlayer() || pUnit == nullptr || !pUnit->IsSummon() || pUnit->As<Summon>()->GetMaster()->GetPartyID() ||
-            pUnit->As<Summon>()->GetMaster()->GetPartyID() != m_pOwner->As<Player>()->GetPartyID())
+        if (!m_pOwner->IsPlayer() || pUnit == nullptr || !pUnit->IsSummon() ||
+            pUnit->As<Summon>()->GetMaster()->GetPartyID() ||
+            pUnit->As<Summon>()->GetMaster()->GetPartyID() !=
+                m_pOwner->As<Player>()->GetPartyID())
             continue;
 
         if (nTargetType == 1)
@@ -3059,22 +3620,33 @@ void Skill::PHYSICAL_DIRECTIONAL_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = 0;
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = 0;
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                   GetVar(1) * GetRequestedSkillLevel() +
+                                   GetVar(5) * GetSkillEnhance());
 
-    int nAccAdd = 0;
+    int32_t nAccAdd = 0;
     /* @Todo
     if( m_pOwner->IsBackOf( *pTarget ) ) nAccAdd = GetVar( 2 );
     else if( m_pOwner->IsSideOf( *pTarget ) ) nAccAdd = GetVar( 3 );
     else*/
     nAccAdd = static_cast<int32_t>(GetVar(4));
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()) + nAccAdd, GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(
+            GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()) +
+            nAccAdd,
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, static_cast<ElementalType>(elemental_type), Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                         static_cast<ElementalType>(elemental_type), Damage,
+                         pTarget->GetHandle());
 
     return;
 }
@@ -3084,22 +3656,32 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_ABSORB(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = 0;
+    int32_t nDamage = 0;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                   GetVar(1) * GetRequestedSkillLevel());
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                         pTarget->GetHandle());
 
     float fHPMod = GetVar(4) * GetSkillEnhance();
     float fMPMod = GetVar(5) * GetSkillEnhance();
 
-    int nAddHP = static_cast<int32_t>(Damage.nDamage * GetVar(2) + Damage.nDamage * fHPMod);
-    int nAddMP = static_cast<int32_t>(Damage.nDamage * GetVar(3) + Damage.nDamage * fMPMod);
+    int32_t nAddHP = static_cast<int32_t>(Damage.nDamage * GetVar(2) +
+                                          Damage.nDamage * fHPMod);
+    int32_t nAddMP = static_cast<int32_t>(Damage.nDamage * GetVar(3) +
+                                          Damage.nDamage * fMPMod);
     m_pOwner->AddHealth(nAddHP);
     m_pOwner->AddMana(nAddMP);
 
@@ -3122,11 +3704,14 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = 0;
+    int32_t nDamage = 0;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD)
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD)
     {
         if (m_nCurrentFire == 0)
         {
@@ -3145,24 +3730,43 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
             ++m_nCurrentFire;
         }
     }
-    int elemental_type = GetSkillBase()->GetElementalType();
-    nDamage += nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    nDamage += nAttackPoint32_t + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(4) * GetSkillEnhance();
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD || GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD) && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock &&
+        (GetSkillBase()->GetSkillEffectType() ==
+             EF_PHYSICAL_SINGLE_DAMAGE_KNOCKBACK_OLD ||
+         GetSkillBase()->GetSkillEffectType() ==
+             EF_PHYSICAL_SINGLE_DAMAGE_RUSH_KNOCKBACK_OLD) &&
+        !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
     {
-        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                       GetVar(7) * GetSkillEnhance();
         fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
-        uint32_t knock_back_time = static_cast<uint32_t>((GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100);
+        uint32_t knock_back_time = static_cast<uint32_t>(
+            (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() +
+             GetVar(10) * GetSkillEnhance()) *
+            100);
 
         AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
-        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+        AddSkillDamageWithKnockBackResult(
+            m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage,
+            pTarget->GetHandle(), pTarget->GetPositionX(),
+            pTarget->GetPositionY(), knock_back_time);
     }
     else
     {
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, static_cast<ElementalType>(elemental_type), Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                             static_cast<ElementalType>(elemental_type), Damage,
+                             pTarget->GetHandle());
     }
 }
 
@@ -3171,20 +3775,32 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = 0;
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = 0;
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    nDamage = static_cast<int32_t>(nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance()));
-    int nMax = static_cast<int32_t>(nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    nDamage = static_cast<int32_t>(
+        nAttackPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                            GetVar(4) * GetSkillEnhance()));
+    int32_t nMax = static_cast<int32_t>(nAttackPoint32_t + GetVar(2) +
+                                        GetVar(3) * GetRequestedSkillLevel() +
+                                        GetVar(5) * GetSkillEnhance());
     nDamage = std::min(nDamage, nMax);
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, (ElementalType)elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                         (ElementalType)elemental_type, Damage,
+                         pTarget->GetHandle());
 }
 
-bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
+bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int32_t &pnAdditionalDamage)
 {
     SkillResult result{};
     result.type = TS_SKILL__HIT_TYPE::SHT_RUSH;
@@ -3204,7 +3820,8 @@ bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
         return false;
     }
 
-    pnAdditionalDamage = static_cast<int32_t>((fDistance / GameRule::DEFAULT_UNIT_SIZE) * GetVar(2));
+    pnAdditionalDamage = static_cast<int32_t>(
+        (fDistance / GameRule::DEFAULT_UNIT_SIZE) * GetVar(2));
 
     result.hitRush.bResult = true;
     result.hitRush.x = RushPos.GetPositionX();
@@ -3215,14 +3832,17 @@ bool Skill::PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int &pnAdditionalDamage)
     return true;
 }
 
-bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface)
+bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance,
+                            Position &pRushPos, float &pface)
 {
 
     auto t = sWorld.GetArTime();
     Position original_pos = m_pOwner->GetCurrentPosition(t);
     auto tmpPos = pTarget->GetCurrentPosition(t);
 
-    int nDelay = static_cast<int32_t>(original_pos.GetExactDist2d(&tmpPos) / (GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT));
+    int32_t nDelay = static_cast<int32_t>(
+        original_pos.GetExactDist2d(&tmpPos) /
+        (GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT));
     Position target_pos = pTarget->GetCurrentPosition(t + nDelay);
 
     float x{}, y{}, m{}, face{};
@@ -3244,7 +3864,8 @@ bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRus
 
     Position pos{};
 
-    pos.SetCurrentXY(original_pos.GetPositionX() + x * m, original_pos.GetPositionY() + y * m);
+    pos.SetCurrentXY(original_pos.GetPositionX() + x * m,
+                     original_pos.GetPositionY() + y * m);
 
     if (GameContent::IsBlocked(pos.GetPositionX(), pos.GetPositionY()))
         return false;
@@ -3256,12 +3877,14 @@ bool Skill::AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRus
     pRushPos = pos;
     pface = face;
 
-    m_nFireTime += m / ((float)GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT) + 20;
+    m_nFireTime +=
+        m / ((float)GameRule::DEFAULT_RUSH_SPEED / GameRule::SPEED_UNIT) + 20;
 
     return true;
 }
 
-int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time)
+int32_t Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange,
+                                 uint32_t knock_back_time)
 {
     Position caster_pos = m_pOwner->GetCurrentPosition(sWorld.GetArTime());
     Position OriginalPos = pTarget->GetCurrentPosition(sWorld.GetArTime());
@@ -3285,13 +3908,15 @@ int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_ti
     }
 
     Position pos{};
-    pos.SetCurrentXY(OriginalPos.GetPositionX() + x * fRange, OriginalPos.GetPositionY() + y * fRange);
+    pos.SetCurrentXY(OriginalPos.GetPositionX() + x * fRange,
+                     OriginalPos.GetPositionY() + y * fRange);
 
     uint32_t next_movable_time = pTarget->GetNextMovableTime();
 
     if (pTarget->IsKnockbackable())
     {
-        next_movable_time = std::max(next_movable_time, sWorld.GetArTime() + knock_back_time);
+        next_movable_time =
+            std::max(next_movable_time, sWorld.GetArTime() + knock_back_time);
 
         Position newPos = GetMovableKnockBackPosition(OriginalPos, pos);
 
@@ -3304,20 +3929,24 @@ int Skill::AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_ti
         else if (pTarget->IsSummon())
         {
             pTargetPlayer = pTarget->As<Summon>()->GetMaster();
-            if (pTargetPlayer != nullptr && pTargetPlayer->GetRideObject() != pTarget)
+            if (pTargetPlayer != nullptr &&
+                pTargetPlayer->GetRideObject() != pTarget)
                 pTargetPlayer = nullptr;
         }
 
-        if (pTargetPlayer && (pTargetPlayer->IsRiding() || pTargetPlayer->HasRidingState()))
+        if (pTargetPlayer &&
+            (pTargetPlayer->IsRiding() || pTargetPlayer->HasRidingState()))
             pTargetPlayer->UnMount(UNMOUNT_FALL, m_pOwner);
     }
 
     return next_movable_time;
 }
 
-Position Skill::GetMovableKnockBackPosition(Position &OriginalPos, Position &TargetPos)
+Position Skill::GetMovableKnockBackPosition(Position &OriginalPos,
+                                            Position &TargetPos)
 {
-    if (GameContent::IsBlocked(TargetPos.GetPositionX(), TargetPos.GetPositionY()))
+    if (GameContent::IsBlocked(TargetPos.GetPositionX(),
+                               TargetPos.GetPositionY()))
         return OriginalPos;
     return TargetPos;
 }
@@ -3340,15 +3969,19 @@ void Skill::MAKE_AREA_EFFECT_PROP_BY_FIELD_PROP(bool bIsTrap)
 
     if (bIsTrap && m_pOwner->GetTrapHandle() != 0)
     {
-        auto pTrap = sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
+        auto pTrap =
+            sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
         if (pTrap != nullptr)
             pTrap->PendRemove();
     }
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    float fHateRatio = 1; //m_pOwner->GetHateRatio();
+    int32_t nMagicPoint = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fHateRatio = 1; // m_pOwner->GetHateRatio();
 
-    auto pPtr = SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
+    auto pPtr =
+        SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
 
     if (bIsTrap && pPtr != nullptr)
         m_pOwner->SetTrapHandle(pPtr->GetHandle());
@@ -3366,16 +3999,21 @@ void Skill::MAKE_AREA_EFFECT_PROP(Unit *pTarget, bool bIsTrap)
 
     if (bIsTrap && m_pOwner->GetTrapHandle() != 0)
     {
-        auto pTrap = sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
+        auto pTrap =
+            sMemoryPool.GetObjectInWorld<SkillProp>(m_pOwner->GetTrapHandle());
         if (pTrap != nullptr)
             pTrap->PendRemove();
     }
 
-    Position pos = pTarget->GetCurrentPosition(sWorld.GetArTime() + PREDICTION_AIMING_TIME);
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    float fHateRatio = 1; //m_pOwner->GetHateRatio();
+    Position pos = pTarget->GetCurrentPosition(sWorld.GetArTime() +
+                                               PREDICTION_AIMING_TIME);
+    int32_t nMagicPoint = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    float fHateRatio = 1; // m_pOwner->GetHateRatio();
 
-    auto pPtr = SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
+    auto pPtr =
+        SkillProp::Create(m_pOwner->GetHandle(), this, nMagicPoint, fHateRatio);
 
     if (bIsTrap && pPtr != nullptr)
         m_pOwner->SetTrapHandle(pPtr->GetHandle());
@@ -3391,47 +4029,76 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(4) * GetSkillEnhance());
 
     float fEffectLength = GetVar(2) * GameRule::DEFAULT_UNIT_SIZE;
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD)
-        fEffectLength += GetVar(7) * GetSkillEnhance() * GameRule::DEFAULT_UNIT_SIZE;
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_PHYSICAL_SINGLE_REGION_DAMAGE_OLD)
+        fEffectLength +=
+            GetVar(7) * GetSkillEnhance() * GameRule::DEFAULT_UNIT_SIZE;
 
     m_fRange = fEffectLength;
     std::vector<Unit *> vTargetList{};
 
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(3)), static_cast<int32_t>(GetVar(11)), vTargetList, true);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(3)),
+        static_cast<int32_t>(GetVar(11)), vTargetList, true);
 
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
     float fRange = 0;
     uint32_t knock_back_time = 0;
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD)
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD)
     {
-        fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                 GetVar(7) * GetSkillEnhance();
         fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
-        knock_back_time = static_cast<uint32_t>((GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100);
+        knock_back_time = static_cast<uint32_t>(
+            (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() +
+             GetVar(10) * GetSkillEnhance()) *
+            100);
     }
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-        if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD && !(pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster()))
+        if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock &&
+            GetSkillBase()->GetSkillEffectType() ==
+                EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_OLD &&
+            !(pDealTarget->IsMonster() &&
+              pDealTarget->As<Monster>()->IsBossMonster()))
         {
             AFFECT_KNOCK_BACK(pDealTarget, fRange, knock_back_time);
-            AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPosition().GetPositionX(), pDealTarget->GetPosition().GetPositionY(), knock_back_time);
+            AddSkillDamageWithKnockBackResult(
+                m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type,
+                Damage, pDealTarget->GetHandle(),
+                pDealTarget->GetPosition().GetPositionX(),
+                pDealTarget->GetPosition().GetPositionY(), knock_back_time);
         }
         else
         {
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                 Damage, pDealTarget->GetHandle());
         }
     }
 }
@@ -3441,26 +4108,42 @@ void Skill::PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
-    int nCount = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
-    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(8) * GetSkillEnhance());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(6)), static_cast<int32_t>(GetVar(7)), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(6)),
+        static_cast<int32_t>(GetVar(7)), vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
         for (auto &pDealTarget : vTargetList)
         {
-            DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+                m_pOwner, nDamage, (ElementalType)elemental_type,
+                GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                            m_pOwner->GetLevel() -
+                                                pDealTarget->GetLevel()),
+                GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                 Damage, pDealTarget->GetHandle());
         }
     }
     m_nFireTime += GetVar(4) * nCount * 100;
@@ -3471,25 +4154,40 @@ void Skill::PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
-    int nCount = static_cast<int32_t>(GetVar(10) + GetVar(11) * GetRequestedSkillLevel());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel());
+    int32_t nCount = static_cast<int32_t>(GetVar(10) +
+                                          GetVar(11) * GetRequestedSkillLevel());
     float fEffectLength = GetVar(8) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength, static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0, m_pOwner, static_cast<int32_t>(GetVar(2)), static_cast<int32_t>(GetVar(3)), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength,
+        static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0,
+        m_pOwner, static_cast<int32_t>(GetVar(2)),
+        static_cast<int32_t>(GetVar(3)), vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
         for (auto &pDealTarget : vTargetList)
         {
-            DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+                m_pOwner, nDamage, (ElementalType)elemental_type,
+                GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                            m_pOwner->GetLevel() -
+                                                pDealTarget->GetLevel()),
+                GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
+                                 Damage, pDealTarget->GetHandle());
         }
     }
 
@@ -3502,23 +4200,38 @@ void Skill::PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(4) * GetSkillEnhance());
     float fEffectLength = GetVar(8) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength, static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0, m_pOwner, static_cast<int32_t>(GetVar(2)), static_cast<int32_t>(GetVar(3)), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength,
+        static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0,
+        m_pOwner, static_cast<int32_t>(GetVar(2)),
+        static_cast<int32_t>(GetVar(3)), vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pDealTarget->GetHandle());
     }
 }
 
@@ -3527,23 +4240,36 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T2_ADD_ENERGY(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage{0};
+    int32_t nDamage{0};
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    nDamage = static_cast<int32_t>(nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance()));
-    int nMax = static_cast<int32_t>(nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    nDamage = static_cast<int32_t>(
+        nAttackPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                            GetVar(4) * GetSkillEnhance()));
+    int32_t nMax = static_cast<int32_t>(nAttackPoint32_t + GetVar(2) +
+                                        GetVar(3) * GetRequestedSkillLevel() +
+                                        GetVar(5) * GetSkillEnhance());
     nDamage = std::min(nDamage, nMax);
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    int energyCount = static_cast<int>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
-    for (int i = 0; i < energyCount; ++i)
+    int32_t energyCount =
+        static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                             GetVar(8) * GetSkillEnhance());
+    for (int32_t i = 0; i < energyCount; ++i)
         m_pOwner->AddEnergy();
 
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                         pTarget->GetHandle());
 }
 
 void Skill::MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
@@ -3551,15 +4277,25 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T1(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    int nCount = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(5) * GetSkillEnhance());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
     }
     m_nFireCount = static_cast<uint32_t>(nCount);
     m_nFireTime += GetVar(4) * nCount * 100;
@@ -3570,18 +4306,30 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T2(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int nDamage = static_cast<int32_t>(nAttackPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance()));
-    int nMax = static_cast<int32_t>(nAttackPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    int32_t nDamage = static_cast<int32_t>(
+        nAttackPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                            GetVar(5) * GetSkillEnhance()));
+    int32_t nMax = static_cast<int32_t>(nAttackPoint32_t + GetVar(2) +
+                                        GetVar(3) * GetRequestedSkillLevel());
     nDamage = std::min(nDamage, nMax);
-    int nCount = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        int elemental_type = GetSkillBase()->GetElementalType();
-        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, GetSkillBase()->GetElementalType(), Damage, pTarget->GetHandle());
+        int32_t elemental_type = GetSkillBase()->GetElementalType();
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                             GetSkillBase()->GetElementalType(), Damage,
+                             pTarget->GetHandle());
     }
 
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -3593,13 +4341,18 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(5) * GetSkillEnhance());
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -3607,10 +4360,15 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                         pTarget->GetHandle());
     m_nFireTime += GetVar(4) * 100;
 }
 
@@ -3619,17 +4377,20 @@ void Skill::SKILL_ADD_REGION_HP(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nIncHP{0};
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nIncHP{0};
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
-    int nTargetType = static_cast<int32_t>(GetVar(11));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(11));
 
     std::vector<uint32_t> vResult{};
     m_fRange = fEffectLength;
 
     auto t = sWorld.GetArTime();
 
-    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t),
+                             pTarget->GetLayer(), fEffectLength, vResult);
 
     for (const auto &handle : vResult)
     {
@@ -3654,7 +4415,13 @@ void Skill::SKILL_ADD_REGION_HP(Unit *pTarget)
                 continue;
         }
 
-        nIncHP = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + pUnit->GetMaxHealth() * (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance()) + GetVar(6) * GetSkillEnhance());
+        nIncHP = static_cast<int32_t>(
+            nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) +
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+            pUnit->GetMaxHealth() *
+                (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() +
+                 GetVar(7) * GetSkillEnhance()) +
+            GetVar(6) * GetSkillEnhance());
 
         nIncHP = pUnit->Heal(nIncHP);
 
@@ -3672,11 +4439,13 @@ void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nIncHP{0};
-    int nIncMP{0};
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nIncHP{0};
+    int32_t nIncMP{0};
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
-    int nTargetType = static_cast<int32_t>(GetVar(11));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(11));
 
     std::vector<uint32_t> vResult{};
     m_fRange = fEffectLength;
@@ -3684,7 +4453,8 @@ void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
 
     auto t = sWorld.GetArTime();
 
-    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t),
+                             pTarget->GetLayer(), fEffectLength, vResult);
 
     for (auto &handle : vResult)
     {
@@ -3709,7 +4479,7 @@ void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
                 continue;
         }
 
-        switch (static_cast<int>(GetVar(12)))
+        switch (static_cast<int32_t>(GetVar(12)))
         {
         case 1:
             if (!pUnit->IsPlayer())
@@ -3727,9 +4497,17 @@ void Skill::SKILL_ADD_REGION_HP_MP(Unit *pTarget)
             return;
         }
 
-        nIncHP = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) + GetVar(2) * GetRequestedSkillLevel() + pUnit->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+        nIncHP = static_cast<int32_t>(
+            nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) +
+            GetVar(2) * GetRequestedSkillLevel() +
+            pUnit->GetMaxHealth() * GetVar(3) * GetRequestedSkillLevel() +
+            GetVar(4) * GetSkillEnhance());
 
-        nIncMP = static_cast<int32_t>(nMagicPoint * (GetVar(5) + GetVar(6) * GetRequestedSkillLevel()) + GetVar(7) * GetRequestedSkillLevel() + pUnit->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+        nIncMP = static_cast<int32_t>(
+            nMagicPoint32_t * (GetVar(5) + GetVar(6) * GetRequestedSkillLevel()) +
+            GetVar(7) * GetRequestedSkillLevel() +
+            pUnit->GetMaxMana() * GetVar(8) * GetRequestedSkillLevel() +
+            GetVar(9) * GetSkillEnhance());
 
         nIncHP = pUnit->Heal(nIncHP);
         nIncMP = pUnit->MPHeal(nIncMP);
@@ -3753,16 +4531,19 @@ void Skill::SKILL_ADD_REGION_MP(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nIncMP{0};
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nIncMP{0};
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
     float fEffectLength = GetVar(10) * GameRule::DEFAULT_UNIT_SIZE;
-    int nTargetType = static_cast<int32_t>(GetVar(11));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(11));
 
     std::vector<uint32_t> vResult{};
     m_fRange = fEffectLength;
     auto t = sWorld.GetArTime();
 
-    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t), pTarget->GetLayer(), fEffectLength, vResult);
+    sWorld.EnumMovableObject(pTarget->GetCurrentPosition(t),
+                             pTarget->GetLayer(), fEffectLength, vResult);
     m_nTargetCount = 0;
 
     for (const auto &handle : vResult)
@@ -3788,7 +4569,13 @@ void Skill::SKILL_ADD_REGION_MP(Unit *pTarget)
                 continue;
         }
 
-        nIncMP = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + pUnit->GetMaxMana() * (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance()) + GetVar(6) * GetSkillEnhance());
+        nIncMP = static_cast<int32_t>(
+            nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel()) +
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+            pUnit->GetMaxMana() *
+                (GetVar(4) + GetVar(5) * GetRequestedSkillLevel() +
+                 GetVar(7) * GetSkillEnhance()) +
+            GetVar(6) * GetSkillEnhance());
 
         nIncMP = pUnit->MPHeal(nIncMP);
 
@@ -3808,12 +4595,22 @@ void Skill::SINGLE_MAGICAL_DAMAGE_T1(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage{0};
-    nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance());
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage{0};
+    nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(2) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_DAMAGE_T2(Unit *pTarget)
@@ -3821,29 +4618,43 @@ void Skill::SINGLE_MAGICAL_DAMAGE_T2(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage{0};
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage{0};
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance()));
-    int nMax = static_cast<int32_t>(nMagicPoint + GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(4) * GetSkillEnhance()));
+    int32_t nMax = static_cast<int32_t>(nMagicPoint32_t + GetVar(2) +
+                                        GetVar(3) * GetRequestedSkillLevel() +
+                                        GetVar(5) * GetSkillEnhance());
     nDamage = std::min(nDamage, nMax);
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(Unit *pTarget)
 {
     bool bFirable{false};
-    for (int i = 0; i < 4; ++i)
+    for (int32_t i = 0; i < 4; ++i)
     {
-        if (StateCode nCode = static_cast<StateCode>(static_cast<int32_t>(GetVar(i))); pTarget->GetState(nCode))
+        if (StateCode nCode =
+                static_cast<StateCode>(static_cast<int32_t>(GetVar(i)));
+            pTarget->GetState(nCode))
         {
             if (GetVar(4) != 0)
                 pTarget->RemoveState(nCode, 255);
 
-            AddSkillResult(m_vResultList, true, SRST_RemoveState, pTarget->GetHandle());
+            AddSkillResult(m_vResultList, true, SRST_RemoveState,
+                           pTarget->GetHandle());
             bFirable = true;
             break;
         }
@@ -3851,27 +4662,50 @@ void Skill::SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE(Unit *pTarget)
 
     if (!bFirable)
     {
-        AddSkillResult(m_vResultList, false, SRST_RemoveState, pTarget->GetHandle());
+        AddSkillResult(m_vResultList, false, SRST_RemoveState,
+                       pTarget->GetHandle());
         return;
     }
 
-    ElementalType elemental_type = (ElementalType)GetSkillBase()->GetElementalType();
-    int nDamage{0};
+    ElementalType elemental_type =
+        (ElementalType)GetSkillBase()->GetElementalType();
+    int32_t nDamage{0};
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE)
-        nDamage = m_pOwner->GetAttackPointRight(elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_PHYSICAL_SINGLE_DAMAGE_BY_CONSUMING_TARGETS_STATE)
+        nDamage = m_pOwner->GetAttackPointRight(
+            elemental_type, GetSkillBase()->IsPhysicalSkill(),
+            GetSkillBase()->IsHarmful());
     else
-        nDamage = m_pOwner->GetMagicPoint(elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+        nDamage = m_pOwner->GetMagicPoint(elemental_type,
+                                          GetSkillBase()->IsPhysicalSkill(),
+                                          GetSkillBase()->IsHarmful());
 
-    nDamage = static_cast<int32_t>((GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance()) * nDamage + (GetVar(7) + GetVar(8) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()));
+    nDamage =
+        static_cast<int32_t>((GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                              GetVar(9) * GetSkillEnhance()) *
+                                 nDamage +
+                             (GetVar(7) + GetVar(8) * GetRequestedSkillLevel() +
+                              GetVar(10) * GetSkillEnhance()));
 
     DamageInfo Damage{};
     if (GetSkillBase()->IsPhysicalSkill())
-        Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
     else
-        Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        Damage = pTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, (GetSkillBase()->IsPhysicalSkill()) ? SHT_DAMAGE : SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList,
+                         (GetSkillBase()->IsPhysicalSkill()) ? SHT_DAMAGE
+                                                             : SHT_MAGIC_DAMAGE,
+                         elemental_type, Damage, pTarget->GetHandle());
 }
 
 void Skill::MULTIPLE_MAGICAL_DAMAGE_T1(Unit *pTarget)
@@ -3879,11 +4713,17 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_T1(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -3891,10 +4731,15 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_T1(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
     m_nFireTime += GetVar(4) * 100;
 }
 
@@ -3903,16 +4748,29 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_AT_ONCE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * nMagicPoint + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    int nCount = static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage =
+        static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                              GetVar(2) * GetSkillEnhance()) *
+                                 nMagicPoint32_t +
+                             GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                             GetVar(5) * GetSkillEnhance());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pTarget->GetHandle());
     }
 
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -3924,27 +4782,47 @@ void Skill::SINGLE_MAGICAL_DAMAGE_OR_DEATH(Unit *pTarget)
     if (pTarget == nullptr || !pTarget->IsMonster())
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    if (GetVar(8) != static_cast<int>(pTarget->As<Monster>()->GetCreatureGroup()))
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    if (GetVar(8) !=
+        static_cast<int32_t>(pTarget->As<Monster>()->GetCreatureGroup()))
         return;
 
     /// @todo
-    /// if( !pTarget->IsMonster() || GetVar(9) < pTarget->As<Monster>()->GetMonsterType() ) return;
+    /// if( !pTarget->IsMonster() || GetVar(9) <
+    /// pTarget->As<Monster>()->GetMonsterType() ) return;
 
-    float fDeathProbability = (GetVar(6) + GetVar(7) * GetRequestedSkillLevel()) * 100;
+    float fDeathProbability =
+        (GetVar(6) + GetVar(7) * GetRequestedSkillLevel()) * 100;
 
-    if (irand(1, 10000) < static_cast<int>(fDeathProbability))
+    if (irand(1, 10000) < static_cast<int32_t>(fDeathProbability))
     {
-        int nDamage = pTarget->GetHealth() * 2;
-        DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), IGNORE_DEFENCE | IGNORE_AVOID | IGNORE_BLOCK);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        int32_t nDamage = pTarget->GetHealth() * 2;
+        DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()),
+            IGNORE_DEFENCE | IGNORE_AVOID | IGNORE_BLOCK);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pTarget->GetHandle());
     }
     else
     {
-        int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-        int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-        DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+        int32_t nDamage = static_cast<int32_t>(
+            nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                               GetVar(2) * GetSkillEnhance()) +
+            GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+            GetVar(5) * GetSkillEnhance());
+        DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pTarget->GetHandle());
     }
 }
 
@@ -3953,8 +4831,12 @@ void Skill::ADD_HP_MP_BY_ABSORB_HP_MP(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nHPDamage = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()));
-    int nMPDamage = static_cast<int32_t>((GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance()));
+    int32_t nHPDamage =
+        static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                              GetVar(2) * GetSkillEnhance()));
+    int32_t nMPDamage =
+        static_cast<int32_t>((GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                              GetVar(5) * GetSkillEnhance()));
 
     pTarget->AddHealth(0 - nHPDamage);
     pTarget->AddMana(0 - nMPDamage);
@@ -3972,8 +4854,12 @@ void Skill::ADD_HP_MP_BY_ABSORB_HP_MP(Unit *pTarget)
     skill_result.hitAddStat.target_stat = pTarget->GetMana();
     m_vResultList.emplace_back(skill_result);
 
-    int nHPAbsorb = static_cast<int32_t>((GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance()));
-    int nMPAbsorb = static_cast<int32_t>((GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance()));
+    int32_t nHPAbsorb = static_cast<int32_t>(
+        (GetVar(9) + GetVar(10) * GetRequestedSkillLevel() +
+         GetVar(11) * GetSkillEnhance()));
+    int32_t nMPAbsorb =
+        static_cast<int32_t>((GetVar(6) + GetVar(7) * GetRequestedSkillLevel() +
+                              GetVar(8) * GetSkillEnhance()));
 
     m_pOwner->AddHealth(nHPAbsorb);
     m_pOwner->AddMana(nMPAbsorb);
@@ -3999,11 +4885,20 @@ void Skill::SINGLE_MAGICAL_TARGET_HP_PERCENT_DAMAGE(Unit *pTarget)
     if (!pTarget->IsMonster() || pTarget->As<Monster>()->IsBossMonster())
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * pTarget->GetHealth());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage =
+        static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                              GetVar(2) * GetSkillEnhance()) *
+                             pTarget->GetHealth());
 
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), IGNORE_DEFENCE | IGNORE_CRITICAL);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()),
+        IGNORE_DEFENCE | IGNORE_CRITICAL);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 }
 
 void Skill::SINGLE_MAGICAL_MANABURN(Unit *pTarget)
@@ -4011,25 +4906,38 @@ void Skill::SINGLE_MAGICAL_MANABURN(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nMPBurn = 0;
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nMPBurn = 0;
 
     switch (GetSkillBase()->GetSkillEffectType())
     {
     case EF_MAGIC_SINGLE_PERCENT_MANABURN:
-        nMPBurn = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance());
+        nMPBurn = static_cast<int32_t>(GetVar(0) +
+                                       GetVar(1) * GetRequestedSkillLevel() +
+                                       GetVar(2) * GetSkillEnhance());
         break;
     case EF_MAGIC_SINGLE_PERCENT_OF_MAX_MP_MANABURN:
-        nMPBurn = static_cast<int32_t>(pTarget->GetMaxMana() * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()));
+        nMPBurn = static_cast<int32_t>(pTarget->GetMaxMana() *
+                                       (GetVar(0) +
+                                        GetVar(1) * GetRequestedSkillLevel() +
+                                        GetVar(2) * GetSkillEnhance()));
         break;
     default:
         ASSERT(false, "SINGLE_MAGICAL_MANABURN: Default case was hit!!!");
         return;
     }
 
-    int nDamage = static_cast<int32_t>(GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), IGNORE_DEFENCE);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    int32_t nDamage =
+        static_cast<int32_t>(GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                             GetVar(5) * GetSkillEnhance());
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()),
+        IGNORE_DEFENCE);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 
     pTarget->AddMana(-nMPBurn);
 
@@ -4046,12 +4954,17 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_T2(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance()));
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(5) * GetSkillEnhance()));
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -4059,9 +4972,14 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_T2(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 
     m_nFireTime += GetVar(4) * 100;
 }
@@ -4071,14 +4989,25 @@ void Skill::MULTIPLE_MAGICAL_DAMAGE_T3(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    int nCount = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pTarget->GetHandle());
     }
     m_nFireCount = static_cast<uint32_t>(nCount);
     m_nFireTime += GetVar(4) * nCount * 100;
@@ -4089,21 +5018,36 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (!pTarget)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(5) * GetSkillEnhance());
     float fEffectLength = GetVar(2) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(3)), static_cast<int32_t>(GetVar(4)), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(3)),
+        static_cast<int32_t>(GetVar(4)), vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
@@ -4112,8 +5056,14 @@ void Skill::SKILL_RESURRECTION_WITH_RECOVER(Unit *pTarget)
     if (pTarget == nullptr || pTarget->GetHealth() != 0)
         return;
 
-    int nIncHP = static_cast<int32_t>(pTarget->GetMaxHealth() * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance()));
-    int nIncMP = static_cast<int32_t>(pTarget->GetMaxMana() * (GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()));
+    int32_t nIncHP =
+        static_cast<int32_t>(pTarget->GetMaxHealth() *
+                             (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                              GetVar(9) * GetSkillEnhance()));
+    int32_t nIncMP =
+        static_cast<int32_t>(pTarget->GetMaxMana() *
+                             (GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+                              GetVar(10) * GetSkillEnhance()));
     int64_t nRecoveryEXP{0};
 
     /// @todo: Last Decreased EXP
@@ -4151,12 +5101,17 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage{0};
+    int32_t nDamage{0};
 
-    //int nAttackPoint = m_pOwner->GetAttackPointRightWithoutWeapon((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    // int32_t nAttackPoint32_t =
+    // m_pOwner->GetAttackPointRightWithoutWeapon((ElementalType)GetSkillBase()->GetElementalType(),
+    // GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK)
+    if (GetSkillBase()->GetSkillEffectType() ==
+        EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK)
     {
         if (m_nCurrentFire == 0)
         {
@@ -4178,23 +5133,39 @@ void Skill::SINGLE_PHYSICAL_DAMAGE_T3(Unit *pTarget)
         }
     }
 
-    nDamage += nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance();
-    int elemental_type = GetSkillBase()->GetElementalType();
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    nDamage += nAttackPoint32_t + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(4) * GetSkillEnhance();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock &&
+        GetSkillBase()->GetSkillEffectType() ==
+            EF_PHYSICAL_SINGLE_DAMAGE_WITHOUT_WEAPON_RUSH_KNOCK_BACK &&
+        !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
     {
-        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
+        float fRange = GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                       GetVar(7) * GetSkillEnhance();
         fRange *= GameRule::DEFAULT_UNIT_SIZE;
 
-        uint32_t knock_back_time = static_cast<uint32_t>((GetVar(8) + GetVar(9) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance()) * 100);
+        uint32_t knock_back_time = static_cast<uint32_t>(
+            (GetVar(8) + GetVar(9) * GetRequestedSkillLevel() +
+             GetVar(10) * GetSkillEnhance()) *
+            100);
 
         AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
-        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+        AddSkillDamageWithKnockBackResult(
+            m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage,
+            pTarget->GetHandle(), pTarget->GetPositionX(),
+            pTarget->GetPositionY(), knock_back_time);
     }
     else
     {
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
     }
 }
 
@@ -4203,13 +5174,19 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nAttackPoint = m_pOwner->GetAttackPointRight((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nAttackPoint32_t = m_pOwner->GetAttackPointRight(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
 
-    int nDamage = static_cast<int32_t>(nAttackPoint + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
+    int32_t nDamage = static_cast<int32_t>(nAttackPoint32_t + GetVar(0) +
+                                           GetVar(1) * GetRequestedSkillLevel() +
+                                           GetVar(5) * GetSkillEnhance());
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = std::min(static_cast<int>(((GetRequestedSkillLevel() - 1) / GetVar(2) + 1)), 3);
+        m_nTotalFire = std::min(
+            static_cast<int32_t>(((GetRequestedSkillLevel() - 1) / GetVar(2) + 1)),
+            3);
         m_nCurrentFire = 1;
     }
     else
@@ -4217,13 +5194,18 @@ void Skill::MULTIPLE_PHYSICAL_DAMAGE_T4(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nCount = static_cast<int32_t>(GetVar(m_nCurrentFire + 5));
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nCount = static_cast<int32_t>(GetVar(m_nCurrentFire + 5));
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
     }
 
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -4240,10 +5222,13 @@ void Skill::CREATE_ITEM(Unit * /*pTarget*/, bool &pbIsSuccess)
         if (m_pOwner->IsSummon())
             pInvenPlayer = m_pOwner->As<Summon>()->GetMaster();
 
-        for (int i = 0; i < 3; ++i)
+        for (int32_t i = 0; i < 3; ++i)
         {
-            int nItemCode = static_cast<int32_t>(GetVar(4 * i) + GetVar(4 * i + 1) * GetRequestedSkillLevel());
-            auto nItemCount = static_cast<int64_t>(GetVar(4 * i + 2) + GetVar(4 * i + 3) * GetRequestedSkillLevel());
+            int32_t nItemCode = static_cast<int32_t>(
+                GetVar(4 * i) + GetVar(4 * i + 1) * GetRequestedSkillLevel());
+            auto nItemCount = static_cast<int64_t>(
+                GetVar(4 * i + 2) +
+                GetVar(4 * i + 3) * GetRequestedSkillLevel());
 
             if (nItemCode != 0)
             {
@@ -4276,11 +5261,12 @@ void Skill::REGION_HEAL_BY_FIELD_PROP()
     if (!bRet)
         return;
 
-    int nHPHeal = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
+    int32_t nHPHeal =
+        static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
     float fHPHeal = GetVar(2) + GetVar(3) * GetRequestedSkillLevel();
 
     m_fRange = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
-    int nTargetType = static_cast<int32_t>(GetVar(5));
+    int32_t nTargetType = static_cast<int32_t>(GetVar(5));
 
     std::vector<uint32_t> vResult{};
     sWorld.EnumMovableObject(posTarget, nTargetLayer, m_fRange, vResult);
@@ -4309,7 +5295,8 @@ void Skill::REGION_HEAL_BY_FIELD_PROP()
         default:
             break;
         }
-        int nIncHP = pUnit->Heal(static_cast<int32_t>(nHPHeal + fHPHeal * pUnit->GetMaxHealth()));
+        int32_t nIncHP = pUnit->Heal(
+            static_cast<int32_t>(nHPHeal + fHPHeal * pUnit->GetMaxHealth()));
 
         SkillResult skill_result{};
         skill_result.type = SHT_ADD_HP;
@@ -4336,7 +5323,7 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE_BY_SUMMON_DEAD(Unit *pTarget)
     }
 
     auto targetPos = pSummon->GetCurrentPosition(t);
-    int nSummonMaxHP = pSummon->GetMaxHealth();
+    int32_t nSummonMaxHP = pSummon->GetMaxHealth();
     pSummon->damage(m_pOwner, pSummon->GetHealth(), false);
 
     {
@@ -4344,22 +5331,39 @@ void Skill::MAGIC_SINGLE_REGION_DAMAGE_BY_SUMMON_DEAD(Unit *pTarget)
         Damage.nDamage = pSummon->GetHealth();
         Damage.target_hp = pSummon->GetHealth();
 
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, ElementalType::TYPE_NONE, Damage, pSummon->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE,
+                             ElementalType::TYPE_NONE, Damage,
+                             pSummon->GetHandle());
     }
 
-    int nDamage = static_cast<int32_t>(nSummonMaxHP * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()));
-    int elemental_type = GetSkillBase()->GetElementalType();
-    float fEffectLength = (GetVar(7) + GetVar(8) * GetRequestedSkillLevel()) * GameRule::DEFAULT_UNIT_SIZE;
+    int32_t nDamage = static_cast<int32_t>(
+        nSummonMaxHP * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                        GetVar(2) * GetSkillEnhance()));
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    float fEffectLength = (GetVar(7) + GetVar(8) * GetRequestedSkillLevel()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), targetPos, true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(9)), static_cast<int32_t>(GetVar(10) + GetVar(11) * GetRequestedSkillLevel()), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), targetPos, true,
+        fEffectLength, -1, 0, nDamage, true, m_pOwner,
+        static_cast<int32_t>(GetVar(9)),
+        static_cast<int32_t>(GetVar(10) +
+                             GetVar(11) * GetRequestedSkillLevel()),
+        vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
@@ -4368,25 +5372,35 @@ void Skill::REGION_TAUNT(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nHate = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance());
-    float fEffectLength = (GetVar(2) + GetVar(8) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
-    int nRatio = static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+    int32_t nHate =
+        static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                             GetVar(7) * GetSkillEnhance());
+    float fEffectLength = (GetVar(2) + GetVar(8) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
+    int32_t nRatio =
+        static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                             GetVar(9) * GetSkillEnhance());
     m_fRange = fEffectLength;
 
     Unit *pHateReceiver = m_pOwner;
 
-    int nPartyID = 0;
+    int32_t nPartyID = 0;
     if (m_pOwner->IsPlayer())
         nPartyID = m_pOwner->As<Player>()->GetPartyID();
     else if (m_pOwner->IsSummon())
         nPartyID = m_pOwner->As<Summon>()->GetMaster()->GetPartyID();
 
-    if (pTarget->IsPlayer() && pTarget->As<Player>()->GetPartyID() != 0 && pTarget->As<Player>()->GetPartyID() == nPartyID)
+    if (pTarget->IsPlayer() && pTarget->As<Player>()->GetPartyID() != 0 &&
+        pTarget->As<Player>()->GetPartyID() == nPartyID)
         pHateReceiver = pTarget;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
-    nHate = EnumSkillTargetsAndCalcDamage(pHateReceiver->GetCurrentPosition(t), pHateReceiver->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nHate, true, m_pOwner, static_cast<int32_t>(GetVar(3)), static_cast<int32_t>(GetVar(4)), vTargetList);
+    nHate = EnumSkillTargetsAndCalcDamage(
+        pHateReceiver->GetCurrentPosition(t), pHateReceiver->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nHate, true,
+        m_pOwner, static_cast<int32_t>(GetVar(3)),
+        static_cast<int32_t>(GetVar(4)), vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
@@ -4394,16 +5408,21 @@ void Skill::REGION_TAUNT(Unit *pTarget)
     {
         bool bSuccess = irand(0, 99) < nRatio;
 
-        if (bSuccess && pHateReceiver->IsEnemy(pDealTarget, true) && pDealTarget->IsMonster())
+        if (bSuccess && pHateReceiver->IsEnemy(pDealTarget, true) &&
+            pDealTarget->IsMonster())
         {
-            std::pair<float, int> HateMod = m_pOwner->GetHateMod((GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, GetSkillBase()->IsHarmful());
+            std::pair<float, int32_t> HateMod = m_pOwner->GetHateMod(
+                (GetSkillBase()->IsPhysicalSkill()) ? 1 : 2,
+                GetSkillBase()->IsHarmful());
             nHate += HateMod.second;
             nHate *= HateMod.first;
             /// @Todo: Hate Ratio
-            pDealTarget->As<Monster>()->AddHate(pHateReceiver->GetHandle(), 1 * nHate, true, true);
+            pDealTarget->As<Monster>()->AddHate(pHateReceiver->GetHandle(),
+                                                1 * nHate, true, true);
         }
 
-        AddSkillResult(m_vResultList, bSuccess, SRST_AddHate, pDealTarget->GetHandle());
+        AddSkillResult(m_vResultList, bSuccess, SRST_AddHate,
+                       pDealTarget->GetHandle());
     }
 }
 
@@ -4412,15 +5431,20 @@ void Skill::REMOVE_HATE(Unit *pTarget)
     if (pTarget == nullptr || !pTarget->IsMonster())
         return;
 
-    float fHateRemoveRate = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
-    int nSuccessRate = static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+    float fHateRemoveRate = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                            GetVar(7) * GetSkillEnhance();
+    int32_t nSuccessRate =
+        static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                             GetVar(9) * GetSkillEnhance());
     bool bSuccess = irand(0, 99) < nSuccessRate;
 
     if (bSuccess && m_pOwner->IsEnemy(pTarget, false))
     {
         auto pMonster = pTarget->As<Monster>();
-        int nHate = pMonster->GetHate(m_pOwner->GetHandle());
-        pMonster->RemoveHate(m_pOwner->GetHandle(), static_cast<int32_t>(nHate * fHateRemoveRate / 100.0f));
+        int32_t nHate = pMonster->GetHate(m_pOwner->GetHandle());
+        pMonster->RemoveHate(
+            m_pOwner->GetHandle(),
+            static_cast<int32_t>(nHate * fHateRemoveRate / 100.0f));
     }
 
     AddSkillResult(m_vResultList, bSuccess, SRST_AddHate, pTarget->GetHandle());
@@ -4431,14 +5455,22 @@ void Skill::REGION_REMOVE_HATE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    float fHateRemoveRate = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance();
-    float fEffectLength = (GetVar(2) + GetVar(8) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    float fHateRemoveRate = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                            GetVar(7) * GetSkillEnhance();
+    float fEffectLength = (GetVar(2) + GetVar(8) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
 
-    int nSuccessRate = static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(9) * GetSkillEnhance());
+    int32_t nSuccessRate =
+        static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() +
+                             GetVar(9) * GetSkillEnhance());
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
-    EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, 0, true, m_pOwner, static_cast<int32_t>(GetVar(3)), static_cast<int32_t>(GetVar(4)), vTargetList);
+    EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, 0, true,
+        m_pOwner, static_cast<int32_t>(GetVar(3)),
+        static_cast<int32_t>(GetVar(4)), vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
@@ -4451,11 +5483,14 @@ void Skill::REGION_REMOVE_HATE(Unit *pTarget)
         bool bSuccess = irand(0, 99) < nSuccessRate;
         if (bSuccess && m_pOwner->IsEnemy(pMonster, true))
         {
-            int nHate = pMonster->GetHate(m_pOwner->GetHandle());
-            pMonster->RemoveHate(m_pOwner->GetHandle(), static_cast<int32_t>(nHate * fHateRemoveRate / 100.0f));
+            int32_t nHate = pMonster->GetHate(m_pOwner->GetHandle());
+            pMonster->RemoveHate(
+                m_pOwner->GetHandle(),
+                static_cast<int32_t>(nHate * fHateRemoveRate / 100.0f));
         }
 
-        AddSkillResult(m_vResultList, bSuccess, SRST_AddHate, pMonster->GetHandle());
+        AddSkillResult(m_vResultList, bSuccess, SRST_AddHate,
+                       pMonster->GetHandle());
     }
 }
 
@@ -4464,11 +5499,19 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_AT_ONCE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * nMagicPoint + GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance());
-    int nCount = static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage =
+        static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                              GetVar(2) * GetSkillEnhance()) *
+                                 nMagicPoint32_t +
+                             GetVar(3) + GetVar(4) * GetRequestedSkillLevel() +
+                             GetVar(5) * GetSkillEnhance());
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(6) + GetVar(7) * GetRequestedSkillLevel());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
     float effectLength = GetVar(9);
     int32_t distributeType = static_cast<int32_t>(GetVar(10));
@@ -4480,16 +5523,26 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_AT_ONCE(Unit *pTarget)
     m_fRange = fEffectLength;
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, distributeType, targetMax, vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, distributeType, targetMax, vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
         for (auto &pDealTarget : vTargetList)
         {
-            DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-            AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+                m_pOwner, nDamage, (ElementalType)elemental_type,
+                GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                            m_pOwner->GetLevel() -
+                                                pDealTarget->GetLevel()),
+                GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE,
+                                 elemental_type, Damage,
+                                 pDealTarget->GetHandle());
         }
     }
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -4501,12 +5554,18 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(8) * GetSkillEnhance());
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -4516,17 +5575,28 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget)
 
     std::vector<Unit *> vTargetList{};
 
-    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(6)), static_cast<int32_t>(GetVar(7)), vTargetList);
-    m_nTargetCount = static_cast<int>(vTargetList.size());
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(6)),
+        static_cast<int32_t>(GetVar(7)), vTargetList);
+    m_nTargetCount = static_cast<int32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 
     m_nFireTime += GetVar(4) * 100;
@@ -4537,27 +5607,45 @@ void Skill::MAGIC_MULTIPLE_REGION_DAMAGE_T2(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(8) * GetSkillEnhance());
 
-    int nCount = static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
-    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    int32_t nCount =
+        static_cast<int32_t>(GetVar(2) + GetVar(3) * GetRequestedSkillLevel());
+    float fEffectLength = (GetVar(5) + GetVar(9) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
 
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(6)), static_cast<int32_t>(GetVar(7)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(6)),
+        static_cast<int32_t>(GetVar(7)), vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
         for (auto &pDealTarget : vTargetList)
         {
-            DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+            DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+                m_pOwner, nDamage, (ElementalType)elemental_type,
+                GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                            m_pOwner->GetLevel() -
+                                                pDealTarget->GetLevel()),
+                GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-            AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+            AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE,
+                                 elemental_type, Damage,
+                                 pDealTarget->GetHandle());
         }
     }
     m_nFireCount = static_cast<uint32_t>(nCount);
@@ -4569,8 +5657,13 @@ void Skill::MAGIC_SPECIAL_REGION_DAMAGE_OLD(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(4) * GetSkillEnhance());
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+        GetVar(4) * GetSkillEnhance());
 
     float fEffectLength = GetVar(8) * GameRule::DEFAULT_UNIT_SIZE;
     m_fRange = fEffectLength;
@@ -4578,13 +5671,24 @@ void Skill::MAGIC_SPECIAL_REGION_DAMAGE_OLD(Unit *pTarget)
 
     std::vector<Unit *> vTargetList{};
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength, static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0, m_pOwner, static_cast<int32_t>(GetVar(2)), static_cast<int32_t>(GetVar(3)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength,
+        static_cast<int32_t>(GetVar(5)), GetVar(9), nDamage, GetVar(7) != 0,
+        m_pOwner, static_cast<int32_t>(GetVar(2)),
+        static_cast<int32_t>(GetVar(3)), vTargetList);
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
@@ -4593,23 +5697,39 @@ void Skill::MAGIC_SPECIAL_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nMagicPoint = m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    int nDamage = static_cast<int32_t>(nMagicPoint * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) + GetVar(3) + GetVar(4) * GetRequestedSkillLevel());
+    int32_t nMagicPoint32_t = m_pOwner->GetMagicPoint(
+        (ElementalType)GetSkillBase()->GetElementalType(),
+        GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    int32_t nDamage = static_cast<int32_t>(
+        nMagicPoint32_t * (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+                           GetVar(2) * GetSkillEnhance()) +
+        GetVar(3) + GetVar(4) * GetRequestedSkillLevel());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
     std::vector<Unit *> vTargetList{};
     float fEffectLength = GetVar(9) * GameRule::DEFAULT_UNIT_SIZE;
 
     m_fRange = fEffectLength;
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength, static_cast<int32_t>(GetVar(5)), GetVar(8), nDamage, GetVar(7) != 0, m_pOwner, static_cast<int32_t>(GetVar(10)), static_cast<int32_t>(GetVar(11)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), GetVar(6) != 0, fEffectLength,
+        static_cast<int32_t>(GetVar(5)), GetVar(8), nDamage, GetVar(7) != 0,
+        m_pOwner, static_cast<int32_t>(GetVar(10)),
+        static_cast<int32_t>(GetVar(11)), vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
@@ -4618,8 +5738,8 @@ void Skill::MAGIC_SINGLE_REGION_PERCENT_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = 0;
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = 0;
 
     float fEffectLength = GetVar(9) * GameRule::DEFAULT_UNIT_SIZE;
 
@@ -4627,21 +5747,36 @@ void Skill::MAGIC_SINGLE_REGION_PERCENT_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(10)), static_cast<int32_t>(GetVar(11)), vTargetList);
+    EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(10)),
+        static_cast<int32_t>(GetVar(11)), vTargetList);
 
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
     for (auto &pDealTarget : vTargetList)
     {
-        if (!pDealTarget->IsMonster() || pDealTarget->As<Monster>()->IsBossMonster())
+        if (!pDealTarget->IsMonster() ||
+            pDealTarget->As<Monster>()->IsBossMonster())
         {
             --m_nTargetCount;
             continue;
         }
 
-        int nTargetDamage = static_cast<int32_t>((GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance()) * pDealTarget->GetHealth());
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nTargetDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), IGNORE_DEFENCE);
+        int32_t nTargetDamage = static_cast<int32_t>(
+            (GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+             GetVar(2) * GetSkillEnhance()) *
+            pDealTarget->GetHealth());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nTargetDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()),
+            IGNORE_DEFENCE);
 
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
     }
 }
 
@@ -4650,21 +5785,34 @@ void Skill::MAGIC_ABSORB_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nDamage = 0;
+    int32_t nDamage = 0;
 
-    nDamage = static_cast<int32_t>(m_pOwner->GetMagicPoint((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) + GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
+    nDamage = static_cast<int32_t>(
+        m_pOwner->GetMagicPoint(
+            (ElementalType)GetSkillBase()->GetElementalType(),
+            GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful()) +
+        GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nRealDamage = 0;
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nRealDamage = 0;
 
     nRealDamage = pTarget->GetHealth();
-    DamageInfo Damage = pTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealMagicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                         Damage, pTarget->GetHandle());
 
     nRealDamage = std::min(nRealDamage, Damage.nDamage);
-    int nHPAbsorb = static_cast<int32_t>(GetVar(2) * nRealDamage + GetVar(4) * Damage.nDamage * GetSkillEnhance());
-    int nMPAbsorb = static_cast<int32_t>(GetVar(3) * nRealDamage + GetVar(5) * Damage.nDamage * GetSkillEnhance());
+    int32_t nHPAbsorb =
+        static_cast<int32_t>(GetVar(2) * nRealDamage +
+                             GetVar(4) * Damage.nDamage * GetSkillEnhance());
+    int32_t nMPAbsorb =
+        static_cast<int32_t>(GetVar(3) * nRealDamage +
+                             GetVar(5) * Damage.nDamage * GetSkillEnhance());
 
     m_pOwner->AddHealth(nHPAbsorb);
     m_pOwner->AddMana(nMPAbsorb);
@@ -4688,18 +5836,28 @@ void Skill::PHYSICAL_SINGLE_DAMAGE_ADD_ENERGY(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-    int nEnergyCount = static_cast<int32_t>(GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    int32_t nEnergyCount =
+        static_cast<int32_t>(GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
 
-    for (int i = 0; i < nEnergyCount; ++i)
+    for (int32_t i = 0; i < nEnergyCount; ++i)
         m_pOwner->AddEnergy();
 
-    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+    AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                         pTarget->GetHandle());
 }
 
 void Skill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget)
@@ -4707,16 +5865,25 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int nEffectType = GetSkillBase()->GetSkillEffectType();
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t nEffectType = GetSkillBase()->GetSkillEffectType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE) ? (GetVar(10) * GetSkillEnhance()) : 0);
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE) ? (GetVar(11) * GetSkillEnhance()) : 0);
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE)
+                    ? (GetVar(10) * GetSkillEnhance())
+                    : 0);
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               ((nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE)
+                    ? (GetVar(11) * GetSkillEnhance())
+                    : 0);
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(4) + GetVar(5) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -4724,20 +5891,32 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_DAMAGE(Unit *pTarget)
         ++m_nCurrentFire;
     }
 
-    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+    DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+        m_pOwner, nDamage, (ElementalType)elemental_type,
+        GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                    m_pOwner->GetLevel() - pTarget->GetLevel()),
+        GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-    if (m_nCurrentFire == m_nTotalFire && nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK && !Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock && !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
+    if (m_nCurrentFire == m_nTotalFire &&
+        nEffectType == EF_PHYSICAL_REALTIME_MULTIPLE_DAMAGE_KNOCKBACK &&
+        !Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock &&
+        !(pTarget->IsMonster() && pTarget->As<Monster>()->IsBossMonster()))
     {
         float fRange = GetVar(8) + GetVar(9) * GetRequestedSkillLevel();
         fRange *= GameRule::DEFAULT_UNIT_SIZE;
-        uint32_t knock_back_time = static_cast<uint32_t>((GetVar(10) + GetVar(11) * GetRequestedSkillLevel()) * 100);
+        uint32_t knock_back_time = static_cast<uint32_t>(
+            (GetVar(10) + GetVar(11) * GetRequestedSkillLevel()) * 100);
 
         AFFECT_KNOCK_BACK(pTarget, fRange, knock_back_time);
-        AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pTarget->GetHandle(), pTarget->GetPositionX(), pTarget->GetPositionY(), knock_back_time);
+        AddSkillDamageWithKnockBackResult(
+            m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage,
+            pTarget->GetHandle(), pTarget->GetPositionX(),
+            pTarget->GetPositionY(), knock_back_time);
     }
     else
     {
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
     }
     m_nFireTime += GetVar(6) * 100;
 }
@@ -4747,15 +5926,20 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
     if (m_nCurrentFire == 0)
     {
-        m_nTotalFire = static_cast<int32_t>(GetVar(7) + GetVar(8) * GetRequestedSkillLevel());
+        m_nTotalFire = static_cast<int32_t>(
+            GetVar(7) + GetVar(8) * GetRequestedSkillLevel());
         m_nCurrentFire = 1;
     }
     else
@@ -4764,7 +5948,7 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     }
 
     bool bTargetOrigin = true;
-    int nRegionType = -1;
+    int32_t nRegionType = -1;
     float fRegionProperty = 0.0f;
 
     float fEffectLength = GetVar(4) * GameRule::DEFAULT_UNIT_SIZE;
@@ -4773,7 +5957,12 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength, nRegionType, fRegionProperty, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), bTargetOrigin, fEffectLength,
+        nRegionType, fRegionProperty, nDamage, true, m_pOwner,
+        static_cast<int32_t>(GetVar(5)), static_cast<int32_t>(GetVar(6)),
+        vTargetList);
     m_nTargetCount = static_cast<uint32_t>(vTargetList.size());
 
     for (auto &pDealTarget : vTargetList)
@@ -4781,8 +5970,14 @@ void Skill::PHYSICAL_REALTIME_MULTIPLE_REGION_DAMAGE(Unit *pTarget)
         if (pDealTarget->GetHealth() == 0)
             continue;
 
-        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pDealTarget->GetHandle());
     }
 
     m_nFireTime += GetVar(9) * 100;
@@ -4793,20 +5988,30 @@ void Skill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(Unit *pTarget)
     if (pTarget == nullptr)
         return;
 
-    int elemental_type = GetSkillBase()->GetElementalType();
+    int32_t elemental_type = GetSkillBase()->GetElementalType();
 
-    int nDamage = m_pOwner->GetAttackPointRight((ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(10) * GetSkillEnhance();
-    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
+    int32_t nDamage = m_pOwner->GetAttackPointRight(
+        (ElementalType)elemental_type, GetSkillBase()->IsPhysicalSkill(),
+        GetSkillBase()->IsHarmful());
+    nDamage *= GetVar(0) + GetVar(1) * GetRequestedSkillLevel() +
+               GetVar(10) * GetSkillEnhance();
+    nDamage += GetVar(2) + GetVar(3) * GetRequestedSkillLevel() +
+               GetVar(11) * GetSkillEnhance();
 
-    int nStep = std::min(static_cast<int>(((GetRequestedSkillLevel() - 1) / GetVar(4) + 1)), 3);
-    int nCount = static_cast<int32_t>(GetVar(nStep + 4));
+    int32_t nStep = std::min(
+        static_cast<int32_t>(((GetRequestedSkillLevel() - 1) / GetVar(4) + 1)), 3);
+    int32_t nCount = static_cast<int32_t>(GetVar(nStep + 4));
 
-    for (int i = 0; i < nCount; ++i)
+    for (int32_t i = 0; i < nCount; ++i)
     {
-        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        DamageInfo Damage = pTarget->DealPhysicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(
+                GetSkillEnhance(), m_pOwner->GetLevel() - pTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
 
-        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pTarget->GetHandle());
+        AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage,
+                             pTarget->GetHandle());
     }
     m_nFireCount = static_cast<uint32_t>(nCount);
     m_nFireTime += GetVar(8) * nCount * 100;
@@ -4814,13 +6019,15 @@ void Skill::PHYSICAL_MULTIPLE_DAMAGE_TRIPLE_ATTACK(Unit *pTarget)
 
 void Skill::CASTING_CANCEL_WITH_ADD_STATE(Unit *pTarget)
 {
-    int nCastingCancelRate = static_cast<int32_t>(GetVar(1) + GetVar(2) * GetRequestedSkillLevel() + GetVar(3) * GetSkillEnhance());
+    int32_t nCastingCancelRate =
+        static_cast<int32_t>(GetVar(1) + GetVar(2) * GetRequestedSkillLevel() +
+                             GetVar(3) * GetSkillEnhance());
     bool bSuccess = false;
 
     Skill *pCancelSkill = pTarget->GetCastSkill();
     if (pCancelSkill && pCancelSkill->m_Status == SS_CAST)
     {
-        switch (static_cast<int>(GetVar(0)))
+        switch (static_cast<int32_t>(GetVar(0)))
         {
         case SC_PHYSICAL:
             if (pCancelSkill->GetSkillBase()->IsPhysicalSkill())
@@ -4842,10 +6049,21 @@ void Skill::CASTING_CANCEL_WITH_ADD_STATE(Unit *pTarget)
         {
             pTarget->CancelSkill();
 
-            if (irand(0, 99) < GetVar(11) + GetVar(12) * GetRequestedSkillLevel() + GetVar(13) * GetSkillEnhance())
+            if (irand(0, 99) < GetVar(11) +
+                                   GetVar(12) * GetRequestedSkillLevel() +
+                                   GetVar(13) * GetSkillEnhance())
             {
                 auto t = sWorld.GetArTime();
-                pTarget->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int>(GetVar(4))), m_pOwner->GetHandle(), static_cast<int32_t>(GetVar(5) + GetVar(6) * GetRequestedSkillLevel() + GetVar(7) * GetSkillEnhance()), t, static_cast<uint32_t>(t + GetVar(8) + GetVar(9) * GetSkillEnhance()));
+                pTarget->AddState(
+                    SG_NORMAL,
+                    static_cast<StateCode>(static_cast<int32_t>(GetVar(4))),
+                    m_pOwner->GetHandle(),
+                    static_cast<int32_t>(GetVar(5) +
+                                         GetVar(6) * GetRequestedSkillLevel() +
+                                         GetVar(7) * GetSkillEnhance()),
+                    t,
+                    static_cast<uint32_t>(t + GetVar(8) +
+                                          GetVar(9) * GetSkillEnhance()));
             }
         }
     }
@@ -4855,13 +6073,18 @@ void Skill::CASTING_CANCEL_WITH_ADD_STATE(Unit *pTarget)
 
 void Skill::CORPSE_ABSORB(Unit *pTarget)
 {
-    if (pTarget == nullptr || !pTarget->IsMonster() || pTarget->GetHealth() != 0)
+    if (pTarget == nullptr || !pTarget->IsMonster() ||
+        pTarget->GetHealth() != 0)
         return;
 
     sWorld.RemoveObjectFromWorld(pTarget);
 
-    int nHP = static_cast<int32_t>(GetVar(0) + GetRequestedSkillLevel() * GetVar(1) + GetSkillEnhance() * GetVar(4));
-    int nMP = static_cast<int32_t>(GetVar(2) + GetRequestedSkillLevel() * GetVar(3) + GetSkillEnhance() * GetVar(5));
+    int32_t nHP =
+        static_cast<int32_t>(GetVar(0) + GetRequestedSkillLevel() * GetVar(1) +
+                             GetSkillEnhance() * GetVar(4));
+    int32_t nMP =
+        static_cast<int32_t>(GetVar(2) + GetRequestedSkillLevel() * GetVar(3) +
+                             GetSkillEnhance() * GetVar(5));
 
     Unit *pHealTarget = m_pOwner;
 
@@ -4887,27 +6110,40 @@ void Skill::CORPSE_ABSORB(Unit *pTarget)
 
 void Skill::CORPSE_EXPLOSION(Unit *pTarget)
 {
-    if (pTarget == nullptr || !pTarget->IsMonster() || pTarget->GetHealth() != 0)
+    if (pTarget == nullptr || !pTarget->IsMonster() ||
+        pTarget->GetHealth() != 0)
         return;
 
-    int elemental_type = static_cast<int32_t>(GetVar(6));
-    int nDamage = static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
-    float fEffectLength = (GetVar(2) + GetVar(5) * GetSkillEnhance()) * GameRule::DEFAULT_UNIT_SIZE;
+    int32_t elemental_type = static_cast<int32_t>(GetVar(6));
+    int32_t nDamage =
+        static_cast<int32_t>(GetVar(0) + GetVar(1) * GetRequestedSkillLevel());
+    float fEffectLength = (GetVar(2) + GetVar(5) * GetSkillEnhance()) *
+                          GameRule::DEFAULT_UNIT_SIZE;
 
     m_fRange = fEffectLength;
 
     std::vector<Unit *> vTargetList{};
     auto t = sWorld.GetArTime();
 
-    nDamage = EnumSkillTargetsAndCalcDamage(m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(), pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage, true, m_pOwner, static_cast<int32_t>(GetVar(3)), static_cast<int32_t>(GetVar(4)), vTargetList);
+    nDamage = EnumSkillTargetsAndCalcDamage(
+        m_pOwner->GetCurrentPosition(t), m_pOwner->GetLayer(),
+        pTarget->GetCurrentPosition(t), true, fEffectLength, -1, 0, nDamage,
+        true, m_pOwner, static_cast<int32_t>(GetVar(3)),
+        static_cast<int32_t>(GetVar(4)), vTargetList);
 
     sWorld.RemoveObjectFromWorld(pTarget);
     m_nTargetCount = 0;
 
     for (auto &pDealTarget : vTargetList)
     {
-        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(m_pOwner, nDamage, (ElementalType)elemental_type, GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()), GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
-        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
+        DamageInfo Damage = pDealTarget->DealMagicalSkillDamage(
+            m_pOwner, nDamage, (ElementalType)elemental_type,
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
+                                        m_pOwner->GetLevel() -
+                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
+        AddSkillDamageResult(m_vResultList, SHT_MAGIC_DAMAGE, elemental_type,
+                             Damage, pDealTarget->GetHandle());
         ++m_nTargetCount;
     }
 }
@@ -4921,7 +6157,7 @@ void Skill::UNSUMMON_AND_ADD_STATE()
     if (pMainSummon == nullptr)
         return;
 
-    int nMainSummonCode = pMainSummon->GetSummonCode();
+    int32_t nMainSummonCode = pMainSummon->GetSummonCode();
     std::string szMainSummonName = pMainSummon->GetName();
     auto pSubSummon = m_pOwner->As<Player>()->GetSubSummon();
 
@@ -4936,24 +6172,34 @@ void Skill::UNSUMMON_AND_ADD_STATE()
     auto t = sWorld.GetArTime();
     uint32_t end_time{0};
 
-    int nEndTime = GetSkillBase()->GetStateSecond(GetRequestedSkillLevel(), GetSkillEnhance());
+    int32_t nEndTime = GetSkillBase()->GetStateSecond(GetRequestedSkillLevel(),
+                                                      GetSkillEnhance());
 
     if (nEndTime < 0)
         end_time = t + 6000;
     else
         end_time = t + nEndTime;
 
-    for (int i = 0; i < 6; ++i)
+    for (int32_t i = 0; i < 6; ++i)
     {
         if (GetVar(i) == 0)
             break;
 
-        const auto pStateInfo = sObjectMgr.GetStateInfo(static_cast<int32_t>(GetVar(i)));
+        const auto pStateInfo =
+            sObjectMgr.GetStateInfo(static_cast<int32_t>(GetVar(i)));
         // @todo
         /*if (pStateInfo && pStateInfo->effect_type == EF_CHANGING_FORM)
-            m_pOwner->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(i)), m_pOwner->GetHandle(), GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, end_time, false, nMainSummonCode, szMainSummonName.c_str());
-        else */
-        m_pOwner->AddState(SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(i))), m_pOwner->GetHandle(), GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(), GetSkillEnhance()), t, end_time, false);
+            m_pOwner->AddState(SG_NORMAL, static_cast<StateCode>(GetVar(i)),
+        m_pOwner->GetHandle(),
+        GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(),
+        GetSkillEnhance()), t, end_time, false, nMainSummonCode,
+        szMainSummonName.c_str()); else */
+        m_pOwner->AddState(
+            SG_NORMAL, static_cast<StateCode>(static_cast<int32_t>(GetVar(i))),
+            m_pOwner->GetHandle(),
+            GetSkillBase()->GetStateLevel(GetRequestedSkillLevel(),
+                                          GetSkillEnhance()),
+            t, end_time, false);
     }
 }
 
@@ -4986,12 +6232,13 @@ bool Skill::RUSH(Unit *pTarget, float fSpeed)
     return true;
 }
 
-bool Skill::AFFECT_RUSH(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface, float fSpeed)
+bool Skill::AFFECT_RUSH(Unit *pTarget, float &pfRushDistance,
+                        Position &pRushPos, float &pface, float fSpeed)
 {
     auto t = sWorld.GetArTime();
     auto original_pos = m_pOwner->GetCurrentPosition(t);
     auto tmpPos = pTarget->GetCurrentPosition(t);
-    int nDelay = original_pos.GetExactDist2d(&tmpPos) / (fSpeed / 30.0f);
+    int32_t nDelay = original_pos.GetExactDist2d(&tmpPos) / (fSpeed / 30.0f);
     auto target_pos = pTarget->GetCurrentPosition(t + nDelay);
 
     float x{0.0f};
@@ -5014,7 +6261,8 @@ bool Skill::AFFECT_RUSH(Unit *pTarget, float &pfRushDistance, Position &pRushPos
     m -= (m_pOwner->GetUnitSize() + pTarget->GetUnitSize()) / 2;
 
     Position pos{};
-    pos.Relocate(original_pos.GetPositionX() + x * m, original_pos.GetPositionY() + y * m);
+    pos.Relocate(original_pos.GetPositionX() + x * m,
+                 original_pos.GetPositionY() + y * m);
 
     if (GameContent::IsBlocked(pos.GetPositionX(), pos.GetPositionY()))
         return false;
