@@ -513,16 +513,21 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResu
         nFailResult = 1;
     }
 
-    if (nFailResult == 1)
+    if (nFailResult == EnhanceInfo::RESULT_FAIL)
     {
         pItem->m_Instance.Flag = ITEM_FLAG_FAILED;
+        for(int i = 0; MAX_SOCKET_NUMBER; ++i)
+        {
+            // Implement set socket code here
+        }
+
         Messages::SendItemMessage(pPlayer, pItem);
         pItem->DBUpdate();
         return;
     }
-    else if (nFailResult == 2)
+    else if (nFailResult == EnhanceInfo::RESULT_SKILL_CARD_FAIL)
     {
-        if (pItem->m_Instance.nEnhance <= 3)
+        if (pItem->GetItemEnhance() <= 3)
         {
             pPlayer->EraseItem(pItem, 1);
             return;
@@ -535,15 +540,15 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResu
             return;
         }
     }
-    else if (nFailResult == 3)
+    else if (nFailResult == EnhanceInfo::RESULT_ACCESSORY_FAIL)
     {
-        if (pItem->m_Instance.nEnhance > 3)
+        if (pItem->m_Instance.nEnhance <= 3)
         {
-            pItem->m_Instance.nEnhance -= 3;
+            pItem->m_Instance.nEnhance = 0;
         }
         else
         {
-            pItem->m_Instance.nEnhance = 0;
+            pItem->m_Instance.nEnhance -= 3;
         }
         Messages::SendItemMessage(pPlayer, pItem);
         pItem->DBUpdate();

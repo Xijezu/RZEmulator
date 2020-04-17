@@ -52,6 +52,13 @@ struct EnhanceInfo
     uint32_t nLocalFlag;
     int32_t nNeedItemCode;
     float fPercentage[20];
+
+    enum
+    {
+        RESULT_FAIL = 1,
+        RESULT_SKILL_CARD_FAIL = 2,
+        RESULT_ACCESSORY_FAIL = 3,
+    };
 };
 
 struct MaterialInfo
