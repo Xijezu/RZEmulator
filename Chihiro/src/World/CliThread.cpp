@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018-2018 NGemity <https://ngemity.org/>
+ *  Copyright (C) 2018-2020 NGemity <https://ngemity.org/>
  *  Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *  Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
