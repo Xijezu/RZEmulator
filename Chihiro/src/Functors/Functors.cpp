@@ -118,7 +118,7 @@ void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
 
 }
 
-EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC)
+EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint32_t> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC)
         : pvResult(_pvResult), pos(_pos), range(_range), bIncludeClient(_bIncludeClient), bIncludeNPC(_bIncludeNPC)
 {
     left   = pos.GetPositionX() - range;

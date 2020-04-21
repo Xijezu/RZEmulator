@@ -22,14 +22,14 @@
 #include "Messages.h"
 #include "ObjectMgr.h"
 
-Item *Item::AllocItem(uint64_t uid, int code, int64_t cnt, GenerateCode info, int level, int enhance,
-                      int flag, int socket_0, int socket_1, int socket_2, int socket_3, int remain_time)
+Item *Item::AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info, int32_t level, int32_t enhance,
+                      int32_t flag, int32_t socket_0, int32_t socket_1, int32_t socket_2, int32_t socket_3, int32_t remain_time)
 {
     Item *item = sMemoryPool.AllocItem();
     if (item == nullptr)
         return nullptr;
 
-    item->m_pItemBase = sObjectMgr.GetItemBase((uint)code);
+    item->m_pItemBase = sObjectMgr.GetItemBase((uint32_t)code);
 
     item->m_Instance.UID = uid;
     item->m_Instance.Code = code;
@@ -124,7 +124,7 @@ void Item::DBUpdate()
     m_bIsNeedUpdateToDB = false;
 }
 
-void Item::SetOwnerInfo(uint handle, int UID, int account_id)
+void Item::SetOwnerInfo(uint32_t handle, int32_t UID, int32_t account_id)
 {
     m_Instance.OwnerHandle = handle;
     m_Instance.nOwnerUID = UID;
@@ -173,17 +173,17 @@ void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
     Messages::GetEncodedInt(pEnterPct, pItem->m_Instance.Code);
     pEnterPct << (uint64_t)pItem->m_Instance.nCount;
 
-    pEnterPct << (uint)pItem->m_nDropTime;
-    for (int i = 0; i < 3; i++)
+    pEnterPct << (uint32_t)pItem->m_nDropTime;
+    for (int32_t i = 0; i < 3; i++)
     {
-        pEnterPct << (uint)pItem->m_pPickupOrder.hPlayer[i];
-        pEnterPct << (uint)pItem->m_pPickupOrder.nPartyID[i];
+        pEnterPct << (uint32_t)pItem->m_pPickupOrder.hPlayer[i];
+        pEnterPct << (uint32_t)pItem->m_pPickupOrder.nPartyID[i];
     }
 }
 
 void Item::SetPickupOrder(const ItemPickupOrder &order)
 {
-    for (int i = 0; i < 3; i++)
+    for (int32_t i = 0; i < 3; i++)
     {
         m_pPickupOrder.hPlayer[i] = order.hPlayer[i];
         m_pPickupOrder.nPartyID[i] = order.nPartyID[i];
@@ -196,7 +196,7 @@ void Item::PendFreeItem(Item *pItem)
     pItem->DeleteThis();
 }
 
-int Item::GetLevelLimit()
+int32_t Item::GetLevelLimit()
 {
     return GameRule::GetItemLevelLimit(m_pItemBase->rank);
 }
@@ -216,14 +216,14 @@ bool Item::IsCashItem()
     return (m_pItemBase->flaglist[FLAG_CASHITEM] == 1);
 }
 
-int Item::GetItemRank() const
+int32_t Item::GetItemRank() const
 {
     return m_pItemBase->rank;
 }
 
-void Item::SetCurrentEndurance(int n)
+void Item::SetCurrentEndurance(int32_t n)
 {
-    int maxendurance = GetMaxEndurance();
+    int32_t maxendurance = GetMaxEndurance();
     m_Instance.nCurrentEndurance = n;
     if (n > maxendurance)
         m_Instance.nCurrentEndurance = maxendurance;
@@ -232,9 +232,9 @@ void Item::SetCurrentEndurance(int n)
     m_bIsNeedUpdateToDB = true;
 }
 
-int Item::GetMaxEndurance() const
+int32_t Item::GetMaxEndurance() const
 {
-    int result = 0;
+    int32_t result = 0;
 
     if (m_pItemBase == nullptr)
         return 0;
@@ -244,8 +244,8 @@ int Item::GetMaxEndurance() const
         if (m_pItemBase->socket <= 0)
             return m_pItemBase->endurance;
 
-        int total_endurance = 0;
-        for (int i = 0; i < m_pItemBase->socket; ++i)
+        int32_t total_endurance = 0;
+        for (int32_t i = 0; i < m_pItemBase->socket; ++i)
         {
             if (m_Instance.Socket[i] != 0)
             {
@@ -326,7 +326,7 @@ void Item::CopyFrom(const Item *pFrom)
     SetLayer(pFrom->GetLayer());
     m_Instance.Copy(pFrom->m_Instance);
     m_Instance.UID = 0;
-    m_Instance.nOwnerUID = (int)oldUID;
+    m_Instance.nOwnerUID = (int32_t)oldUID;
     m_Instance.OwnerHandle = oldOwner;
 }
 

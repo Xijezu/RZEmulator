@@ -20,9 +20,9 @@
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 
-State::State(StateType type, StateCode code, int uid, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura, int nStateValue, std::string szStateValue)
+State::State(StateType type, StateCode code, int32_t uid, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura, int32_t nStateValue, std::string szStateValue)
 {
-    init(uid, (int)code);
+    init(uid, (int32_t)code);
     m_nCode = code;
 
     m_nLevel[0] = m_nLevel[1] = m_nLevel[2] = 0;
@@ -81,7 +81,7 @@ void State::HoldRemainDuration()
     m_bAura = true;
 }
 
-bool State::AddState(StateType type, uint caster, uint16_t level, uint start_time, uint end_time, int base_damage, bool bIsAura)
+bool State::AddState(StateType type, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura)
 {
     if (m_nLevel[type] > level)
         return false;
@@ -97,12 +97,12 @@ bool State::AddState(StateType type, uint caster, uint16_t level, uint start_tim
     return true;
 }
 
-int State::GetEffectType() const
+int32_t State::GetEffectType() const
 {
     return m_pTemplate != nullptr ? m_pTemplate->effect_type : 0;
 }
 
-float State::GetValue(int idx) const
+float State::GetValue(int32_t idx) const
 {
     return m_pTemplate != nullptr ? m_pTemplate->value[idx] : 0;
 }
@@ -112,20 +112,20 @@ bool State::IsHarmful()
     return m_pTemplate != nullptr ? m_pTemplate->is_harmful != 0 : false;
 }
 
-bool State::IsDuplicatedGroup(int nGroupID)
+bool State::IsDuplicatedGroup(int32_t nGroupID)
 {
     if (m_pTemplate == nullptr)
         return false;
     return ((m_pTemplate->duplicate_group[0] && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] && m_pTemplate->duplicate_group[1] == nGroupID) || (m_pTemplate->duplicate_group[2] && m_pTemplate->duplicate_group[2] == nGroupID));
 }
 
-void State::SetState(int code, int uid, uint caster, const uint16_t *levels, const uint *durations, const int *remain_times, uint last_fire_time, const int *base_damage, int state_value, std::string szStateValue)
+void State::SetState(int32_t code, int32_t uid, uint32_t caster, const uint16_t *levels, const uint32_t *durations, const int32_t *remain_times, uint32_t last_fire_time, const int32_t *base_damage, int32_t state_value, std::string szStateValue)
 {
-    uint t = sWorld.GetArTime();
+    uint32_t t = sWorld.GetArTime();
     init(uid, code);
     m_nCode = (StateCode)code;
 
-    for (int i = 0; i < 3; i++)
+    for (int32_t i = 0; i < 3; i++)
     {
         m_nLevel[i] = levels[i];
         m_hCaster[i] = caster;
@@ -147,7 +147,7 @@ void State::SetState(int code, int uid, uint caster, const uint16_t *levels, con
     m_szStateValue = std::move(szStateValue);
 }
 
-int State::GetTimeType() const
+int32_t State::GetTimeType() const
 {
     return m_pTemplate != nullptr ? m_pTemplate->state_time_type : 0;
 }
@@ -185,7 +185,7 @@ bool State::IsValid(uint32_t t) const
     return false;
 }
 
-void State::init(int uid, int code)
+void State::init(int32_t uid, int32_t code)
 {
     _mainType = MT_StaticObject;
     _subType = ST_State;
@@ -202,7 +202,7 @@ void State::DB_InsertState(Unit *pOwner, State *pState)
 {
     if (pState->m_bAura)
         return;
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_REP_STATE);
     stmt->setUInt64(0, sWorld.GetStateIndex());
     auto uid = pOwner->GetUInt32Value(UNIT_FIELD_UID);
@@ -215,13 +215,13 @@ void State::DB_InsertState(Unit *pOwner, State *pState)
     if (pState->m_nEndTime[0] <= ct)
         stmt->setInt32(7, 0);
     else
-        stmt->setInt32(7, (int)(pState->m_nEndTime[0] - pState->m_nStartTime[0]));
+        stmt->setInt32(7, (int32_t)(pState->m_nEndTime[0] - pState->m_nStartTime[0]));
     stmt->setInt32(8, pState->m_nStartTime[1]);
     stmt->setInt32(9, pState->m_nStartTime[2]);
     if (pState->m_nEndTime[0] == 0xffffffff)
         stmt->setInt32(10, -1);
     else
-        stmt->setInt32(10, (int)std::max((int)(pState->m_nEndTime[0] - ct), 0));
+        stmt->setInt32(10, (int32_t)std::max((int32_t)(pState->m_nEndTime[0] - ct), 0));
     stmt->setInt32(11, pState->m_nEndTime[1]);
     stmt->setInt32(12, pState->m_nEndTime[2]);
     stmt->setInt32(13, pState->m_nBaseDamage[0]);
@@ -230,7 +230,7 @@ void State::DB_InsertState(Unit *pOwner, State *pState)
     auto si = sObjectMgr.GetStateInfo(pState->m_nCode);
     if (si == nullptr)
         return;
-    stmt->setInt32(16, (int)(pState->m_nLastProcessedTime + (100 * (uint)si->fire_interval - ct)));
+    stmt->setInt32(16, (int32_t)(pState->m_nLastProcessedTime + (100 * (uint32_t)si->fire_interval - ct)));
     stmt->setInt32(17, pState->m_nStateValue);
     stmt->setString(18, pState->m_szStateValue);
     stmt->setInt32(19, 0);

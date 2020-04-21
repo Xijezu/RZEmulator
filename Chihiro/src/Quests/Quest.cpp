@@ -22,7 +22,7 @@
 #include "DatabaseEnv.h"
 #include "Player.h"
 
-Quest *Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const int *status, QuestProgress progress, int nStartID)
+Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, const int32_t *status, QuestProgress progress, int32_t nStartID)
 {
     auto result = new Quest{ };
     if (result != nullptr)
@@ -39,7 +39,7 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const in
         result->m_Instance.nID      = nID;
         result->m_Instance.nStartID = nStartID;
         result->m_Instance.Code     = code;
-        for (int i = 0; i < MAX_QUEST_STATUS; ++i)
+        for (int32_t i = 0; i < MAX_QUEST_STATUS; ++i)
         {
             result->m_Instance.nStatus[i] = status[i];
         }
@@ -48,7 +48,7 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int nID, int code, const in
     return result;
 }
 
-bool Quest::IsRandomQuest(int code)
+bool Quest::IsRandomQuest(int32_t code)
 {
     auto      base = sObjectMgr.GetQuestBase(code);
     if (base == nullptr)
@@ -65,7 +65,7 @@ void Quest::FreeQuest()
 
 }
 
-int Quest::GetQuestCode() const
+int32_t Quest::GetQuestCode() const
 {
     return m_QuestBase->nCode;
 }
@@ -75,7 +75,7 @@ QuestInstance *Quest::GetQuestInstance()
     return &m_Instance;
 }
 
-int Quest::GetQuestID() const
+int32_t Quest::GetQuestID() const
 {
     return m_Instance.nID;
 }
@@ -93,9 +93,9 @@ void Quest::SetProgress(QuestProgress progress)
         m_Handler->onProgressChanged(this, old, progress);
 }
 
-int Quest::GetValue(int idx) const
+int32_t Quest::GetValue(int32_t idx) const
 {
-    int result{0};
+    int32_t result{0};
     if (idx > MAX_VALUE_NUMBER - 1)
     {
         NG_LOG_ERROR("quest", "Quest::GetValue - Invald Index %u", idx);
@@ -108,9 +108,9 @@ int Quest::GetValue(int idx) const
     return result;
 }
 
-int Quest::GetStatus(int idx) const
+int32_t Quest::GetStatus(int32_t idx) const
 {
-    int result{0};
+    int32_t result{0};
     if (idx > 5)
     {
         NG_LOG_ERROR("quest", "Quest::GetStatus - Invald Index %u", idx);
@@ -123,7 +123,7 @@ int Quest::GetStatus(int idx) const
     return result;
 }
 
-void Quest::UpdateStatus(int idx, int value)
+void Quest::UpdateStatus(int32_t idx, int32_t value)
 {
     if (idx > 5)
     {
@@ -131,7 +131,7 @@ void Quest::UpdateStatus(int idx, int value)
     }
     else
     {
-        int old = m_Instance.nStatus[idx];
+        int32_t old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] = value;
         if (m_Handler != nullptr)
             m_Handler->onStatusChanged(this, old, value);
@@ -139,7 +139,7 @@ void Quest::UpdateStatus(int idx, int value)
     }
 }
 
-void Quest::IncStatus(int idx, int value)
+void Quest::IncStatus(int32_t idx, int32_t value)
 {
     if (idx > 5)
     {
@@ -147,7 +147,7 @@ void Quest::IncStatus(int idx, int value)
     }
     else
     {
-        int old = m_Instance.nStatus[idx];
+        int32_t old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] += value;
         if (m_Handler != nullptr)
             m_Handler->onStatusChanged(this, old, old + value);
@@ -155,12 +155,12 @@ void Quest::IncStatus(int idx, int value)
     }
 }
 
-int Quest::GetRandomKey(int idx) const
+int32_t Quest::GetRandomKey(int32_t idx) const
 {
     return m_Instance.nRandomKey[idx];
 }
 
-int Quest::GetRandomValue(int idx) const
+int32_t Quest::GetRandomValue(int32_t idx) const
 {
     return m_Instance.nRandomValue[idx];
 }
@@ -282,6 +282,6 @@ void Quest::DB_Insert(Player *pPlayer, Quest *pQuest)
     stmt->setInt32(4, pQuest->m_Instance.nStatus[0]);
     stmt->setInt32(5, pQuest->m_Instance.nStatus[1]);
     stmt->setInt32(6, pQuest->m_Instance.nStatus[2]);
-    stmt->setInt32(7, (int)pQuest->m_Instance.nProgress);
+    stmt->setInt32(7, (int32_t)pQuest->m_Instance.nProgress);
     CharacterDatabase.Execute(stmt);
 }

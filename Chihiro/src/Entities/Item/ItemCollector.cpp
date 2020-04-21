@@ -53,7 +53,7 @@ bool ItemCollector::UnregisterItem(Item *pItem)
 void ItemCollector::Update()
 {
     NG_UNIQUE_GUARD        writeGuard(i_lock);
-    uint                   ct  = sWorld.GetArTime();
+    uint32_t                   ct  = sWorld.GetArTime();
     for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next)
     {
         next = itr;

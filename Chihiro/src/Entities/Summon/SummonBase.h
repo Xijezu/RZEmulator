@@ -27,7 +27,7 @@ enum class SUMMON_DEFAULTS : int32_t
 
 struct SummonLevelBonus
 {
-    int summon_id;
+    int32_t summon_id;
     float strength;
     float vital;
     float dexterity;
@@ -39,22 +39,22 @@ struct SummonLevelBonus
 
 struct SummonResourceTemplate
 {
-    int id;
-    int type;
-    int magic_type;
-    int rate;
-    int stat_id;
+    int32_t id;
+    int32_t type;
+    int32_t magic_type;
+    int32_t rate;
+    int32_t stat_id;
     float size;
     float scale;
-    int standard_walk_speed;
-    int standard_run_speed;
-    int walk_speed;
-    int run_speed;
+    int32_t standard_walk_speed;
+    int32_t standard_run_speed;
+    int32_t walk_speed;
+    int32_t run_speed;
     bool is_riding_only;
     float attack_range;
-    int material;
-    int weapon_type;
-    int form;
-    int evolve_target;
-    int card_id;
+    int32_t material;
+    int32_t weapon_type;
+    int32_t form;
+    int32_t evolve_target;
+    int32_t card_id;
 };

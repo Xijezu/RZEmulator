@@ -20,12 +20,12 @@
 #include "Common.h"
 #include "World.h"
 
-#if PLATFORM != PLATFORM_WINDOWS
+#if PLATFORM != PLATFORM_WINDOWS && NG_USE_CLITHREAD
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
-char *command_finder(const char *text, int state)
+char *command_finder(const char *text, int32_t state)
 {
     /*
     static size_t idx, len;
@@ -56,7 +56,7 @@ char *command_finder(const char *text, int state)
     return ((char *)NULL);
 }
 
-char **cli_completion(const char *text, int start, int /*end*/)
+char **cli_completion(const char *text, int32_t start, int32_t /*end*/)
 {
     char **matches = NULL;
 
@@ -67,7 +67,7 @@ char **cli_completion(const char *text, int start, int /*end*/)
     return matches;
 }
 
-int cli_hook_func()
+int32_t cli_hook_func()
 {
     if (World::IsStopped())
         rl_done = 1;
@@ -80,7 +80,7 @@ void utf8print(void * /*arg*/, const char *str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
-    size_t wtemp_len = 6000-1;
+    size_t wtemp_len = 6000 - 1;
     if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
         return;
 
@@ -99,14 +99,14 @@ void commandFinished(void *, bool /*success*/)
     fflush(stdout);
 }
 
-#if PLATFORM ==  PLATFORM_UNIX
+#if PLATFORM == PLATFORM_UNIX
 
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
-int kb_hit_return()
+int32_t kb_hit_return()
 {
     struct timeval tv;
-    fd_set         fds;
-    tv.tv_sec  = 0;
+    fd_set fds;
+    tv.tv_sec = 0;
     tv.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
@@ -119,14 +119,15 @@ int kb_hit_return()
 /// %Thread start
 void CliThread()
 {
+#if NG_USE_CLITHREAD
     ///- Display the list of available CLI functions then beep
     //TC_LOG_INFO("server.worldserver", "");
 #if PLATFORM != PLATFORM_WINDOWS
     rl_attempted_completion_function = cli_completion;
-    rl_event_hook                    = cli_hook_func;
+    rl_event_hook = cli_hook_func;
 #endif
 
-    // print this here the first time
+    // print32_t this here the first time
     // later it will be printed after command queue updates
     //printf("NG> ");
 
@@ -135,7 +136,7 @@ void CliThread()
     {
         fflush(stdout);
 
-        char *command_str;             // = fgets(commandbuf, sizeof(commandbuf), stdin);
+        char *command_str; // = fgets(commandbuf, sizeof(commandbuf), stdin);
 
 #if PLATFORM == PLATFORM_WINDOWS
         char commandbuf[256];
@@ -147,7 +148,7 @@ void CliThread()
 
         if (command_str != NULL)
         {
-            for (int x = 0; command_str[x]; ++x)
+            for (int32_t x = 0; command_str[x]; ++x)
                 if (command_str[x] == '\r' || command_str[x] == '\n')
                 {
                     command_str[x] = 0;
@@ -165,7 +166,7 @@ void CliThread()
             }
 
             std::string command;
-            if (!consoleToUtf8(command_str, command))         // convert from console encoding to utf8
+            if (!consoleToUtf8(command_str, command)) // convert from console encoding to utf8
             {
 #if PLATFORM == PLATFORM_WINDOWS
                 printf("NG> ");
@@ -178,7 +179,7 @@ void CliThread()
             fflush(stdout);
             if (command == "quit")
                 World::StopNow(SHUTDOWN_EXIT_CODE);
-            //sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
+                //sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
 #if PLATFORM != PLATFORM_WINDOWS
             add_history(command.c_str());
             free(command_str);
@@ -189,4 +190,5 @@ void CliThread()
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
     }
+#endif
 }

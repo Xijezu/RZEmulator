@@ -83,10 +83,10 @@ struct SendEnterMessageFunctor
 
 struct AddObjectFunctor
 {
-    explicit AddObjectFunctor(uint _x, uint _y, uint8_t _layer, WorldObject *obj)
+    explicit AddObjectFunctor(uint32_t _x, uint32_t _y, uint8_t _layer, WorldObject *obj)
         : newObj(obj), bSend(false), x(_x), y(_y), x2(0), y2(0), layer(_layer) {}
 
-    explicit AddObjectFunctor(uint _x, uint _y, uint _x2, uint _y2, uint8_t _layer, WorldObject *obj)
+    explicit AddObjectFunctor(uint32_t _x, uint32_t _y, uint32_t _x2, uint32_t _y2, uint8_t _layer, WorldObject *obj)
         : newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
 
     void Run();
@@ -95,10 +95,10 @@ struct AddObjectFunctor
     WorldObject *newObj;
 
     bool bSend;
-    uint x;
-    uint y;
-    uint x2;
-    uint y2;
+    uint32_t x;
+    uint32_t y;
+    uint32_t x2;
+    uint32_t y2;
     uint8_t layer;
 };
 
@@ -110,15 +110,15 @@ struct SendMoveMessageFunctor : public WorldObjectFunctor
 
 struct SetMoveFunctor : public RegionFunctor
 {
-    uint nCnt{0};
+    uint32_t nCnt{0};
     Unit *obj{nullptr};
     void Run(Region *region) override;
 };
 
 struct EnumMovableObjectRegionFunctor : public RegionFunctor
 {
-    std::vector<uint> &pvResult;
-    uint t;
+    std::vector<uint32_t> &pvResult;
+    uint32_t t;
     Position pos;
     float left;
     float right;
@@ -137,6 +137,6 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor
         EnumMovableObjectRegionFunctor *pParent;
     };
 
-    EnumMovableObjectRegionFunctor(std::vector<uint> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
+    EnumMovableObjectRegionFunctor(std::vector<uint32_t> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
     void Run(Region *region) override;
 };

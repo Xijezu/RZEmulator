@@ -26,7 +26,7 @@
 
 void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player * /*pPlayer*/)
 {
-    pEnterPct << (uint)pFieldProp->m_PropInfo.nPropID;
+    pEnterPct << (uint32_t)pFieldProp->m_PropInfo.nPropID;
     pEnterPct << pFieldProp->m_PropInfo.fZOffset;
     pEnterPct << pFieldProp->m_PropInfo.fRotateX;
     pEnterPct << pFieldProp->m_PropInfo.fRotateY;
@@ -38,7 +38,7 @@ void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player * 
     pEnterPct << pFieldProp->m_PropInfo.fLockHeight;
 }
 
-FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint lifeTime)
+FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime)
 {
     auto fp = new FieldProp{propDeleteHandler, pPropInfo};
     fp->nLifeTime = lifeTime;
@@ -89,7 +89,7 @@ bool FieldProp::IsUsable(Player *pPlayer) const
     if (m_pFieldPropBase->nLimitJobID != 0 && m_pFieldPropBase->nLimitJobID != pPlayer->GetCurrentJob())
         return false;
 
-    for (int x = 0; x < 2; ++x)
+    for (int32_t x = 0; x < 2; ++x)
     {
         switch (m_pFieldPropBase->nActivateID[x])
         {
@@ -129,7 +129,7 @@ bool FieldProp::Cast()
 bool FieldProp::UseProp(Player *pPlayer)
 {
     m_bIsCasting = false;
-    //int oldUseCount = m_nUseCount;
+    //int32_t oldUseCount = m_nUseCount;
     if (m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
     {
         for (auto &i : m_pFieldPropBase->drop_info)
@@ -138,8 +138,8 @@ bool FieldProp::UseProp(Player *pPlayer)
             {
                 if (irand(1, 100000000) <= i.ratio)
                 {
-                    int nItemCount = irand(i.min_count, i.max_count);
-                    int nLevel = irand(i.min_level, i.max_level + 1);
+                    int32_t nItemCount = irand(i.min_count, i.max_count);
+                    int32_t nLevel = irand(i.min_level, i.max_level + 1);
                     auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
                     auto cnt = ti->m_Instance.nCount;

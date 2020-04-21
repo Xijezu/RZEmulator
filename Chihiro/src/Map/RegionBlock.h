@@ -66,7 +66,7 @@ class RegionBlock
         RegionBlock(const RegionBlock &) = delete;
         RegionBlock &operator=(const RegionBlock &) = delete;
 
-        Region *getRegionPtr(uint rx, uint ry, uint8_t layer)
+        Region *getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer)
         {
             Region *res{nullptr};
             {
@@ -78,7 +78,7 @@ class RegionBlock
             return res;
         }
 
-        Region *getRegion(uint rx, uint ry, uint8_t layer)
+        Region *getRegion(uint32_t rx, uint32_t ry, uint8_t layer)
         {
             Region *res{nullptr};
             {

@@ -22,7 +22,7 @@
 #include "World.h"
 #include "XPacket.h"
 
-SkillProp *SkillProp::Create(uint caster, Skill *pSkill, int nMagicPoint, float fHateRatio)
+SkillProp *SkillProp::Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio)
 {
     return new SkillProp(caster, *pSkill, nMagicPoint, fHateRatio);
 }
@@ -34,7 +34,7 @@ void SkillProp::EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player * 
     pEnterPct << (uint32_t)pSkillProp->m_pSkill.GetSkillId();
 }
 
-SkillProp::SkillProp(uint caster, Skill pSkill, int nMagicPoint, float fHateRatio) : WorldObject(false), m_hCaster(caster),
+SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio) : WorldObject(false), m_hCaster(caster),
                                                                                      m_pSkill(pSkill), m_nOwnerMagicPoint(nMagicPoint),
                                                                                      m_fHateRatio(fHateRatio)
 {
@@ -94,14 +94,14 @@ SkillProp::SkillProp(uint caster, Skill pSkill, int nMagicPoint, float fHateRati
     }
 }
 
-void SkillProp::Update(uint /* diff*/)
+void SkillProp::Update(uint32_t /* diff*/)
 {
     if (m_bProcessEnded)
         return;
 
     Unit *pCaster{nullptr};
 
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
     if (ct > m_Info.m_nEndTime || m_bIsRemovePended)
     {
         m_bProcessEnded = true;
@@ -223,7 +223,7 @@ void SkillProp::INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP()
     m_Info.m_nLastFireTime = 0;
 }
 
-void SkillProp::INIT_SKILL_PROP_PARAMETER(uint nDuration, uint nInterval)
+void SkillProp::INIT_SKILL_PROP_PARAMETER(uint32_t nDuration, uint32_t nInterval)
 {
     m_Info.m_nStartTime = sWorld.GetArTime();
     m_Info.m_nEndTime = m_Info.m_nStartTime + nDuration;
@@ -238,8 +238,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
 
     float fRange = m_pSkill.GetVar(9) * 12.0f;
 
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
-    int nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
     nDamage *= m_pSkill.GetVar(10) + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
 
     nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), false, fRange, -1, 0, nDamage, true, pCaster, m_pSkill.GetVar(16), m_pSkill.GetVar(17), vResult, false);
@@ -258,7 +258,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
         if (pUnit->GetHealth() == 0)
             continue;
 
-        int flag = 0;
+        int32_t flag = 0;
         auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pUnit->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
         if (Damage.bCritical)
@@ -284,7 +284,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
         {
             if (pUnit->IsMonster())
             {
-                int nHate = Damage.nDamage;
+                int32_t nHate = Damage.nDamage;
 
                 auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
@@ -302,7 +302,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
 
                 if (nStateCode != 0)
                 {
-                    int nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
+                    int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
 
                     uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
 
@@ -319,9 +319,9 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
 {
     std::vector<uint32_t> vResult{};
     float fRange = m_pSkill.GetVar(5) * 12.0f;
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
 
-    int nDamage = m_nOwnerMagicPoint + m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(7);
+    int32_t nDamage = m_nOwnerMagicPoint + m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(7);
     nDamage *= m_pSkill.GetVar(2) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(8);
 
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
@@ -341,7 +341,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
         if (pUnit->GetHealth() == 0)
             continue;
 
-        int flag = 0;
+        int32_t flag = 0;
         auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
         if (Damage.bCritical)
@@ -367,7 +367,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
         {
             if (pUnit->IsMonster())
             {
-                int nHate = Damage.nDamage;
+                int32_t nHate = Damage.nDamage;
                 auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
                 nHate += HateMod.second;
@@ -388,9 +388,9 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
     float fRange = m_pSkill.GetVar(9) * 12.0f;
     m_pSkill.m_fRange = fRange;
 
-    int nHPHeal = m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1);
-    int nMPHeal = m_pSkill.GetVar(2) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(3);
-    int nSPHeal = m_pSkill.GetVar(4) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(5);
+    int32_t nHPHeal = m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1);
+    int32_t nMPHeal = m_pSkill.GetVar(2) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(3);
+    int32_t nSPHeal = m_pSkill.GetVar(4) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(5);
     nHPHeal *= m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance() + 1;
     nMPHeal *= m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance() + 1;
     nSPHeal *= m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance() + 1;
@@ -398,7 +398,7 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
 
     Unit *pUnit{};
-    int nTargetLimit = m_pSkill.GetVar(6);
+    int32_t nTargetLimit = m_pSkill.GetVar(6);
     SkillResult skill_result{};
 
     for (auto &handle : vResult)
@@ -447,7 +447,7 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster)
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
 
     Unit *pUnit{nullptr};
-    int nTargetLimit = m_pSkill.GetVar(6);
+    int32_t nTargetLimit = m_pSkill.GetVar(6);
     SkillResult skill_result{};
 
     for (auto &handle : vResult)
@@ -477,8 +477,8 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster)
         if (pUnit->GetHealth() == 0)
             continue;
 
-        int nHPHeal = pUnit->Heal(static_cast<int32_t>(fHPHeal * pUnit->GetMaxHealth()));
-        int nMPHeal = pUnit->MPHeal(static_cast<int32_t>(fMPHeal * pUnit->GetMaxMana()));
+        int32_t nHPHeal = pUnit->Heal(static_cast<int32_t>(fHPHeal * pUnit->GetMaxHealth()));
+        int32_t nMPHeal = pUnit->MPHeal(static_cast<int32_t>(fMPHeal * pUnit->GetMaxMana()));
 
         skill_result.type = TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP;
         skill_result.hTarget = pUnit->GetHandle();
@@ -497,11 +497,11 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
     std::vector<uint32_t> vResult{};
     float fRange = m_pSkill.GetVar(9) * 12.0f;
 
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
-    int nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2));
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2));
     nDamage *= m_pSkill.GetVar(10) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(11);
 
-    int nHPHeal = m_pSkill.GetVar(3) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(4) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(5);
+    int32_t nHPHeal = m_pSkill.GetVar(3) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(4) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(5);
 
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
 
@@ -519,7 +519,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
 
         if (pCaster->IsEnemy(pUnit, true))
         {
-            int flag = 0;
+            int32_t flag = 0;
             auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
             if (Damage.bCritical)
@@ -544,7 +544,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
             {
                 if (pUnit->IsMonster())
                 {
-                    int nHate = Damage.nDamage;
+                    int32_t nHate = Damage.nDamage;
 
                     auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
@@ -582,10 +582,10 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
     auto t = sWorld.GetArTime();
     float fRange = m_pSkill.GetVar(15) * 12.0f;
 
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
 
-    int nHPHeal = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
-    int nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(6) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(7) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(8)) + m_pSkill.GetVar(9) + m_pSkill.GetVar(10) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
+    int32_t nHPHeal = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
+    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(6) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(7) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(8)) + m_pSkill.GetVar(9) + m_pSkill.GetVar(10) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
 
     nDamage *= m_pSkill.GetVar(18) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(19);
 
@@ -601,7 +601,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
         if (pCaster->IsEnemy(pUnit, true))
         {
-            int flag = 0;
+            int32_t flag = 0;
             auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
             if (Damage.bCritical)
@@ -630,7 +630,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
                 if (nStateCode != 0)
                 {
-                    int nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
+                    int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
                     uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
                     StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());
                     pUnit->AddState(nStateType, nStateCode, pCaster->GetHandle(), nLevel, t, t + nDuration, false, 0, "");
@@ -638,7 +638,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
                 if (pUnit->IsMonster())
                 {
-                    int nHate = Damage.nDamage;
+                    int32_t nHate = Damage.nDamage;
                     auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
                     nHate += HateMod.second;
@@ -686,8 +686,8 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
     if (vTarget.empty() || it == vTarget.end())
         return;
 
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
-    int nDamage = m_pSkill.GetVar(1) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(2);
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pSkill.GetVar(1) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(2);
 
     auto t = sWorld.GetArTime();
     std::vector<Unit *> vTargetList{};
@@ -719,7 +719,7 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
 
         if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel()))
         {
-            int nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
+            int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());
             StateCode nStateCode = static_cast<StateCode>(m_pSkill.GetSkillBase()->GetStateId());
@@ -761,8 +761,8 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
         m_Info.m_nEndTime = nFireEndTime;
     }
 
-    int elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
-    int nDamage = m_pSkill.GetVar(1) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(2);
+    int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
+    int32_t nDamage = m_pSkill.GetVar(1) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(2);
     auto t = sWorld.GetArTime();
 
     std::vector<Unit *> vTargetList{};
@@ -794,7 +794,7 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
 
         if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel()))
         {
-            int nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
+            int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());
             StateCode nStateCode = static_cast<StateCode>(m_pSkill.GetSkillBase()->GetStateId());

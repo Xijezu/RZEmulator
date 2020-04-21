@@ -28,13 +28,13 @@ RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo{rh})
     lastDeadTime = 0;
 }
 
-void RespawnObject::Update(uint diff)
+void RespawnObject::Update(uint32_t diff)
 {
     /// No need to update anything
     if (info.count >= m_nMaxRespawnNum)
         return;
 
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
 
     /// Only update based on spawn rates (each X seconds after dead)
     if (lastDeadTime != 0 && lastDeadTime + info.interval > ct)
@@ -51,17 +51,17 @@ void RespawnObject::Update(uint diff)
     /// Do we need a respawn?
     if (respawn_count > 0)
     {
-        int try_cnt = 0;
-        for (int i = 0; i < respawn_count; ++i)
+        int32_t try_cnt = 0;
+        for (int32_t i = 0; i < respawn_count; ++i)
         {
             /// Generate random respawn coordinates based on a rectangle
-            int x{};
-            int y{};
+            int32_t x{};
+            int32_t y{};
 
             do
             {
-                x = irand((int)info.left, (int)info.right);
-                y = irand((int)info.top, (int)info.bottom);
+                x = irand((int32_t)info.left, (int32_t)info.right);
+                y = irand((int32_t)info.top, (int32_t)info.bottom);
 
                 if (++try_cnt > 500)
                 {

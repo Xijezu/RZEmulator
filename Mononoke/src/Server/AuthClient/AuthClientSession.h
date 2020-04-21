@@ -47,7 +47,7 @@ class AuthClientSession : public XSocket
     /// \param pctID Response to received pctID
     /// \param result TS_RESULT code
     /// \param value More informations
-    void SendResultMsg(uint16_t pctID, uint16_t result, uint value);
+    void SendResultMsg(uint16_t pctID, uint16_t result, uint32_t value);
 
     /// \brief Gets the current players AccountID, used in WorldSocket
     /// \return account id

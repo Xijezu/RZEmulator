@@ -65,8 +65,8 @@ enum StateCode
     SC_PASS_DAMAGE = 0x36BC,
     SC_PET_SHOVELING_REWARD_INC_MOVE_SPEED = 0x3A98,
     SC_PET_SHOVELING_REWARD_DEC_MOVE_SPEED = 0x3A99,
-    SC_PET_SHOVELING_REWARD_INC_STR_INT = 0x3A9A,
-    SC_PET_SHOVELING_REWARD_DEC_STR_INT = 0x3A9B,
+    SC_PET_SHOVELING_REWARD_INC_STR_int32_t = 0x3A9A,
+    SC_PET_SHOVELING_REWARD_DEC_STR_int32_t = 0x3A9B,
     SC_PET_SHOVELING_REWARD_INC_AGI_DEX = 0x3A9C,
     SC_PET_SHOVELING_REWARD_DEC_AGI_DEX = 0x3A9D,
     SC_PET_SHOVELING_REWARD_INC_VIT = 0x3A9E,
@@ -110,11 +110,11 @@ enum StateStatFlag
     FLAG_VIT = (1 << 1),
     FLAG_AGI = (1 << 2),
     FLAG_DEX = (1 << 3),
-    FLAG_INT = (1 << 4),
+    FLAG_int32_t = (1 << 4),
     FLAG_MEN = (1 << 5),
     FLAG_LUK = (1 << 6),
-    FLAG_ATTACK_POINT = (1 << 7),
-    FLAG_MAGIC_POINT = (1 << 8),
+    FLAG_ATTACK_POint32_t = (1 << 7),
+    FLAG_MAGIC_POint32_t = (1 << 8),
     FLAG_DEFENCE = (1 << 9),
     FLAG_MAGIC_DEFENCE = (1 << 10),
     FLAG_ATTACK_SPEED = (1 << 11),
@@ -293,23 +293,23 @@ enum StateTagType
 
 struct StateTemplate
 {
-    int state_id;
-    int text_id;
-    int tooltip_id;
+    int32_t state_id;
+    int32_t text_id;
+    int32_t tooltip_id;
     uint8_t is_harmful;
-    int state_time_type;
-    int state_group;
-    int duplicate_group[3]{0};
+    int32_t state_time_type;
+    int32_t state_group;
+    int32_t duplicate_group[3]{0};
     uint8_t uf_avatar;
     uint8_t uf_summon;
     uint8_t uf_monster;
-    int base_effect_id;
-    int fire_interval;
-    int elemental_type;
+    int32_t base_effect_id;
+    int32_t fire_interval;
+    int32_t elemental_type;
     float amplify_base;
     float amplify_per_skl;
-    int add_damage_base;
-    int add_damage_per_skl;
-    int effect_type;
+    int32_t add_damage_base;
+    int32_t add_damage_per_skl;
+    int32_t effect_type;
     float value[20]{0};
 };

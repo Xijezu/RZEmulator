@@ -20,33 +20,33 @@
 class GameRule
 {
 public:
-  static float GetItemLevelPenalty(int creature_level, int item_rank, int item_level);
-  static int GetItemRecommendedLevel(int item_rank, int item_level);
-  static int GetItemLevelLimit(int item_rank);
-  static int GetItemRecommendModTable(int item_rank);
-  static int GetRankLevel(int rank);
-  static int GetLocalFlag();
+  static float GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level);
+  static int32_t GetItemRecommendedLevel(int32_t item_rank, int32_t item_level);
+  static int32_t GetItemLevelLimit(int32_t item_rank);
+  static int32_t GetItemRecommendModTable(int32_t item_rank);
+  static int32_t GetRankLevel(int32_t rank);
+  static int32_t GetLocalFlag();
   static float GetItemDropRate();
   static float GetGoldDropRate();
   static float GetChaosDropRate();
   static float GetEXPRate();
-  static float GetItemValue(float, int, int, int, int);
+  static float GetItemValue(float, int, int, int, int32_t);
   static float GetPickableRange();
-  static int GetChipLevelLimit(int idx);
+  static int32_t GetChipLevelLimit(int32_t idx);
 
-  static int GetMaxLevel() { return 150; }
+  static int32_t GetMaxLevel() { return 150; }
 
-  static int GetIntValueByRandomInt(double fValue);
+  static int32_t GetIntValueByRandomInt(double fValue);
   static int64_t GetIntValueByRandomInt64(double fValue);
-  static float GetStaminaRatio(int level);
+  static float GetStaminaRatio(int32_t level);
   static float GetStaminaBonus();
-  static int nEnhanceFailType;
+  static int32_t nEnhanceFailType;
   constexpr static float DEFAULT_UNIT_SIZE{12.0f};
-  constexpr static int SKILL_CAST_COST{0};
-  constexpr static int ATTACK_RANGE_UNIT{100};
+  constexpr static int32_t SKILL_CAST_COST{0};
+  constexpr static int32_t ATTACK_RANGE_UNIT{100};
   constexpr static float MAX_ATTACK_RANGE{0.84f};
   constexpr static float REFLECT_RANGE{4.0f * DEFAULT_UNIT_SIZE};
-  constexpr static int MAX_STATE_LEVEL{65535};
+  constexpr static int32_t MAX_STATE_LEVEL{65535};
   constexpr static float UNMOUNT_PENALTY{0.05f};
   constexpr static float fPVPDamageRateForPlayer{0.2f};
   constexpr static float fPVPDamageRateForSummon{0.13f};
@@ -65,7 +65,7 @@ public:
   constexpr static int32_t DEFAULT_KNOCK_BACK_SPEED{140};
 
 private:
-  static int _chipLevelLimit[];
-  static int _modtable[];
+  static int32_t _chipLevelLimit[];
+  static int32_t _modtable[];
   static float _staminaExpRate[];
 };

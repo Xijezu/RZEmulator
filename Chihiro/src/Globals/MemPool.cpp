@@ -50,7 +50,7 @@ Player *MemoryPoolMgr::AllocPlayer()
     return player;
 }
 
-Summon *MemoryPoolMgr::AllocSummon(uint pCode)
+Summon *MemoryPoolMgr::AllocSummon(uint32_t pCode)
 {
     auto summon = new Summon{0, pCode};
     summon->SetInt32Value(UNIT_FIELD_HANDLE, m_nSummonTop++);
@@ -74,8 +74,8 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 {
     if (pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
         return nullptr;
-    Summon *s = Summon::AllocSummon(pPlayer, (uint)pItem->m_pItemBase->summon_id);
-    s->SetUInt32Value(UNIT_FIELD_UID, (uint)sWorld.GetSummonIndex());
+    Summon *s = Summon::AllocSummon(pPlayer, (uint32_t)pItem->m_pItemBase->summon_id);
+    s->SetUInt32Value(UNIT_FIELD_UID, (uint32_t)sWorld.GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
     s->CalculateStat();
@@ -91,7 +91,7 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
     return s;
 }
 
-Monster *MemoryPoolMgr::AllocMonster(uint idx)
+Monster *MemoryPoolMgr::AllocMonster(uint32_t idx)
 {
     auto mb = sObjectMgr.GetMonsterInfo(idx);
     if (mb == nullptr)
@@ -112,7 +112,7 @@ void MemoryPoolMgr::Destroy()
     _unload<Summon>();
 }
 
-void MemoryPoolMgr::Update(uint diff)
+void MemoryPoolMgr::Update(uint32_t diff)
 {
     ///- Add new update objects
     Object *sess = nullptr;

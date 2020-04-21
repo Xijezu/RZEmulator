@@ -69,7 +69,7 @@ enum eStatus
 
 typedef struct WorldSessionHandler
 {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(WorldSession *, XPacket *)> handler;
 } WorldSessionHandler;
@@ -136,7 +136,7 @@ const WorldSessionHandler worldPacketHandler[] =
         declareHandler(STATUS_AUTHED, &WorldSession::onDropQuest),
         declareHandler(STATUS_AUTHED, &WorldSession::onCancelAction),
 };
-constexpr int worldTableSize = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
+constexpr int32_t worldTableSize = (sizeof(worldPacketHandler) / sizeof(WorldSessionHandler));
 
 constexpr NGemity::Packets ignoredPackets[] =
     {
@@ -152,7 +152,7 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
     ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < worldTableSize; i++)
     {
@@ -180,7 +180,7 @@ void WorldSession::onAccountWithAuth(const TS_CS_ACCOUNT_WITH_AUTH *pGamePct)
     sAuthNetwork.SendAccountToAuth(*this, szAccount, pGamePct->one_time_key);
 }
 
-void WorldSession::_SendResultMsg(uint16_t _msg, uint16_t _result, int _value)
+void WorldSession::_SendResultMsg(uint16_t _msg, uint16_t _result, int32_t _value)
 {
     TS_SC_RESULT resultPct{};
     resultPct.request_msg_id = _msg;
@@ -208,7 +208,7 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
         do
         {
             LOBBY_CHARACTER_INFO info{};
-            int sid = (*result)[0].GetInt32();
+            int32_t sid = (*result)[0].GetInt32();
             info.name = (*result)[1].GetString();
             info.race = (*result)[2].GetInt32();
             info.sex = (*result)[3].GetInt32();
@@ -220,7 +220,7 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
             info.job = (*result)[9].GetInt32();
             info.permission = (*result)[10].GetInt32();
             info.skin_color = (*result)[11].GetUInt32();
-            for (int i = 0; i < 5; i++)
+            for (int32_t i = 0; i < 5; i++)
             {
                 info.model_id[i] = (*result)[12 + i].GetInt32();
             }
@@ -232,7 +232,7 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
             {
                 do
                 {
-                    int wear_info = (*wresult)[0].GetInt32();
+                    int32_t wear_info = (*wresult)[0].GetInt32();
                     info.wear_info[wear_info] = (*wresult)[1].GetInt32();
                     info.wear_item_enhance_info[wear_info] = (*wresult)[2].GetInt32();
                     info.wear_item_level_info[wear_info] = (*wresult)[3].GetInt32();
@@ -530,13 +530,13 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
         stmt->setUInt32(j, playerUID);
         CharacterDatabase.Query(stmt);
 
-        int m_wear_item = pRecvPct->character.wear_info[2];
-        int nDefaultBagCode = 490001;
-        int nDefaultArmorCode = 220100;
+        int32_t m_wear_item = pRecvPct->character.wear_info[2];
+        int32_t nDefaultBagCode = 490001;
+        int32_t nDefaultArmorCode = 220100;
         if (m_wear_item == 602)
             nDefaultArmorCode = 220109;
 
-        int nDefaultWeaponCode = 106100;
+        int32_t nDefaultWeaponCode = 106100;
         if (pRecvPct->character.race == 3)
         {
             nDefaultArmorCode = 240100;
@@ -839,7 +839,7 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
                     buy_count = 1;
             }
 
-            auto nTotalPrice = (int)floor(buy_count * mt.price_ratio);
+            auto nTotalPrice = (int32_t)floor(buy_count * mt.price_ratio);
             if (nTotalPrice / buy_count != mt.price_ratio || m_pPlayer->GetGold() < nTotalPrice || nTotalPrice < 0)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
@@ -875,7 +875,7 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
             }
             else
             {
-                for (int i = 0; i < buy_count; i++)
+                for (int32_t i = 0; i < buy_count; i++)
                 {
                     auto item = Item::AllocItem(0, mt.code, 1, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
                     if (item == nullptr)
@@ -918,7 +918,7 @@ void WorldSession::onChangeLocation(const TS_CS_CHANGE_LOCATION *pRecvPct)
 
 void WorldSession::onTimeSync(const TS_TIMESYNC *pRecvPct)
 {
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
     m_pPlayer->m_TS.onEcho(ct - pRecvPct->time);
     if (m_pPlayer->m_TS.m_vT.size() >= 4)
     {
@@ -973,7 +973,7 @@ void WorldSession::onJobLevelUp(const TS_CS_JOB_LEVEL_UP *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->target);
         return;
     }
-    int jp = sObjectMgr.GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), m_pPlayer->GetJobDepth());
+    int32_t jp = sObjectMgr.GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), m_pPlayer->GetJobDepth());
     if (cr->GetJP() < jp)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_JP, pRecvPct->target);
@@ -1007,9 +1007,9 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
         return;
 
     auto target = m_pPlayer->As<Unit>();
-    ushort result{};
-    int jobID{};
-    int value{};
+    uint16_t result{};
+    int32_t jobID{};
+    int32_t value{};
 
     if (m_pPlayer->GetHandle() != pRecvPct->target)
     {
@@ -1021,7 +1021,7 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
         }
         target = summon;
     }
-    int currentLevel = target->GetBaseSkillLevel(pRecvPct->skill_id) + 1;
+    int32_t currentLevel = target->GetBaseSkillLevel(pRecvPct->skill_id) + 1;
     //if(skill_level == currentLevel)
     //{
     result = GameContent::IsLearnableSkill(target, pRecvPct->skill_id, currentLevel, jobID);
@@ -1042,7 +1042,7 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
     if (false /*IsItemUseable()*/)
         return;
 
-    int nCFL = m_pPlayer->GetCurrentSkillLevel(SKILL_CREATURE_CONTROL);
+    int32_t nCFL = m_pPlayer->GetCurrentSkillLevel(SKILL_CREATURE_CONTROL);
     if (nCFL < 0)
         return;
 
@@ -1051,7 +1051,7 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
 
     Item *pItem = nullptr;
     Summon *summon = nullptr;
-    for (int i = 0; i < nCFL; ++i)
+    for (int32_t i = 0; i < nCFL; ++i)
     {
         bool bFound = false;
         pItem = nullptr;
@@ -1062,11 +1062,11 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
             {
                 if (pItem->m_pItemBase->group != 13 ||
                     m_pPlayer->GetHandle() != pItem->m_Instance.OwnerHandle ||
-                    (pItem->m_Instance.Flag & (uint)ITEM_FLAG_SUMMON) == 0)
+                    (pItem->m_Instance.Flag & (uint32_t)ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
-        for (int j = 0; j < nCFL; j++)
+        for (int32_t j = 0; j < nCFL; j++)
         {
             if (pItem != nullptr)
             {
@@ -1085,7 +1085,7 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
                     m_pPlayer->m_aBindSummonCard[i] = nullptr;
                 if (summon != nullptr && !summon->IsInWorld())
                 {
-                    for (int k = 0; k < 24; ++k)
+                    for (int32_t k = 0; k < 24; ++k)
                     {
                         if (summon->GetWornItem((ItemWearType)k) != nullptr)
                             summon->Putoff((ItemWearType)k);
@@ -1119,11 +1119,11 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
     }
     if (nCFL > 1)
     {
-        for (int i = 0; i < nCFL; ++i)
+        for (int32_t i = 0; i < nCFL; ++i)
         {
             if (m_pPlayer->m_aBindSummonCard[i] == nullptr)
             {
-                for (int x = i + 1; x < nCFL; ++x)
+                for (int32_t x = i + 1; x < nCFL; ++x)
                 {
                     if (m_pPlayer->m_aBindSummonCard[x] != nullptr)
                     {
@@ -1268,7 +1268,7 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
     if (pRecvPct->skill_level <= 0 || pRecvPct->skill_level > pSkill->GetCurrentSkillLevel())
         nSkillLv = pSkill->GetCurrentSkillLevel();
 
-    int nResult = pCaster->CastSkill(pRecvPct->skill_id, nSkillLv, pRecvPct->target, pos, pCaster->GetLayer(), false);
+    int32_t nResult = pCaster->CastSkill(pRecvPct->skill_id, nSkillLv, pRecvPct->target, pos, pCaster->GetLayer(), false);
     if (nResult != TS_RESULT_SUCCESS)
     {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, nResult);
@@ -1371,7 +1371,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
 {
     if (m_pPlayer == nullptr)
         return;
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
 
     auto item = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
     if (item == nullptr || !item->IsInWorld())
@@ -1401,9 +1401,9 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     }
 
     auto drop_duration = ct - item->m_nDropTime;
-    uint ry = 3000;
+    uint32_t ry = 3000;
 
-    for (int i = 0; i < 3; i++)
+    for (int32_t i = 0; i < 3; i++)
     {
         if (item->m_pPickupOrder.hPlayer[i] == 0 && item->m_pPickupOrder.nPartyID[i] == 0)
             break;
@@ -1437,8 +1437,8 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     TS_SC_TAKE_ITEM_RESULT resultPct{};
     resultPct.item_handle = pRecvPct->item_handle;
     resultPct.item_taker = m_pPlayer->GetHandle();
-    sWorld.Broadcast((uint)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
+    sWorld.Broadcast((uint32_t)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint32_t)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), m_pPlayer->GetLayer(), resultPct);
     if (sWorld.RemoveItemFromWorld(item))
     {
         if (m_pPlayer->GetPartyID() != 0)
@@ -1464,7 +1464,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
             }
             return;
         }
-        uint nih = sWorld.procAddItem(m_pPlayer, item, false);
+        uint32_t nih = sWorld.procAddItem(m_pPlayer, item, false);
         if (nih != 0)
         { // nih = new item handle
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, nih);
@@ -1477,7 +1477,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
 
 void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
 {
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
 
     auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_handle);
     if (item == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
@@ -1548,7 +1548,7 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
     m_pPlayer->SendPacket(resultPct);
 }
 
-bool WorldSession::Update(uint /*diff*/)
+bool WorldSession::Update(uint32_t /*diff*/)
 {
     if (_accountId != 0 && (m_nLastPing > 0 && m_nLastPing + 30000 < sWorld.GetArTime()))
     {
@@ -1688,19 +1688,19 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
     }
 
-    int nSocketCount = pItem->m_pItemBase->socket;
+    int32_t nSocketCount = pItem->m_pItemBase->socket;
     if (nSocketCount < 1 || nSocketCount > 4)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->craft_item_handle);
         return;
     }
 
-    int nMaxReplicatableCount = nSocketCount == 4 ? 2 : 1;
-    int nCraftCost = 0;
+    int32_t nMaxReplicatableCount = nSocketCount == 4 ? 2 : 1;
+    int32_t nCraftCost = 0;
     bool bIsValid = false;
     Item *pSoulStoneList[sizeof(pRecvPct->soulstone_handle)]{nullptr};
 
-    for (int i = 0; i < nSocketCount; ++i)
+    for (int32_t i = 0; i < nSocketCount; ++i)
     {
         if (pRecvPct->soulstone_handle[i] != 0)
         {
@@ -1716,8 +1716,8 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                 return;
             }
 
-            int nReplicatedCount = 0;
-            for (int k = 0; k < pItem->m_pItemBase->socket; ++k)
+            int32_t nReplicatedCount = 0;
+            for (int32_t k = 0; k < pItem->m_pItemBase->socket; ++k)
             {
                 if (pItem->m_Instance.Socket[k] != 0 && k != i)
                 {
@@ -1749,8 +1749,8 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
     }
 
-    int nEndurance = 0;
-    for (int i = 0; i < 4; ++i)
+    int32_t nEndurance = 0;
+    for (int32_t i = 0; i < 4; ++i)
     {
         if (pItem->m_Instance.Socket[i] != 0 || pSoulStoneList[i] != nullptr)
         {
@@ -2176,7 +2176,7 @@ void WorldSession::onFreezeTrade()
         m_pPlayer->CancelTrade(false);
 }
 
-void WorldSession::onConfirmTrade(uint hTradeTarget)
+void WorldSession::onConfirmTrade(uint32_t hTradeTarget)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
     if (!isValidTradeTarget(tradeTarget))

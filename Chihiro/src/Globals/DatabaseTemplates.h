@@ -18,20 +18,20 @@
 
 #include "ItemFields.h"
 
-constexpr int MAX_DROP_GROUP = 10;
+constexpr int32_t MAX_DROP_GROUP = 10;
 
 struct DropGroup
 {
-    int uid;
-    int drop_item_id[MAX_DROP_GROUP];
+    int32_t uid;
+    int32_t drop_item_id[MAX_DROP_GROUP];
     float drop_percentage[MAX_DROP_GROUP];
 };
 
 struct LevelResourceTemplate
 {
-    int level;
+    int32_t level;
     int64_t normal_exp;
-    int jlv[4];
+    int32_t jlv[4];
 };
 
 struct ItemTemplate
@@ -109,7 +109,7 @@ struct ItemTemplate
 
 struct JobLevelBonusTemplate
 {
-    int job_id;
+    int32_t job_id;
     float strength[4];
     float vital[4];
     float dexterity[4];
@@ -121,20 +121,20 @@ struct JobLevelBonusTemplate
 
 struct JobResourceTemplate
 {
-    int id;
-    int stat_id;
-    int job_class;
-    int job_depth;
-    int up_lv;
-    int up_jlv;
-    int available_job[4];
+    int32_t id;
+    int32_t stat_id;
+    int32_t job_class;
+    int32_t job_depth;
+    int32_t up_lv;
+    int32_t up_jlv;
+    int32_t available_job[4];
 };
 
 struct MarketInfo
 {
-    int sort_id;
+    int32_t sort_id;
     std::string name;
-    uint code;
+    uint32_t code;
     float price_ratio;
     float huntaholic_ratio;
 };

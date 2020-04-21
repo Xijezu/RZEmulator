@@ -89,7 +89,7 @@ void Unit::CalculateStat()
     m_MagicalSkillStatePenalty.Init();
     m_StateStatePenalty.Init();
 
-    for (int i = 0; i < ElementalType::TYPE_COUNT; ++i)
+    for (int32_t i = 0; i < ElementalType::TYPE_COUNT; ++i)
     {
         m_GoodPhysicalElementalSkillStateMod[i].Init();
         m_BadPhysicalElementalSkillStateMod[i].Init();
@@ -301,9 +301,9 @@ void Unit::applyPassiveSkillAmplifyEffect(Skill *pSkill)
     case EF_AMP_PARAM_BY_STATE:
     {
         bool exist{false};
-        for (int i = 12; i < 20; i++)
+        for (int32_t i = 12; i < 20; i++)
         {
-            StateCode stateCode = static_cast<StateCode>(pSkill->GetVar(i));
+            StateCode stateCode = static_cast<StateCode>(static_cast<int32_t>(pSkill->GetVar(i)));
 
             if (static_cast<int32_t>(stateCode) == 0)
             {
@@ -335,16 +335,16 @@ void Unit::amplifyStatByState()
     if (m_vStateList.empty())
         return;
 
-    std::vector<std::pair<int, int>> vDecreaseList{};
+    std::vector<std::pair<int, int32_t>> vDecreaseList{};
 
     for (auto &s : m_vStateList)
     {
         if (s->GetEffectType() == SEF_DECREASE_STATE_EFFECT)
         {
             auto nDecreaseLevel = static_cast<int32_t>(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
-            for (int i = 2; i < 11 && s->GetValue(i) != 0; ++i)
+            for (int32_t i = 2; i < 11 && s->GetValue(i) != 0; ++i)
             {
-                vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(i), (int)nDecreaseLevel));
+                vDecreaseList.emplace_back(std::pair<int, int32_t>((int32_t)s->GetValue(i), (int32_t)nDecreaseLevel));
             }
         }
     }
@@ -352,15 +352,15 @@ void Unit::amplifyStatByState()
     {
         uint16_t nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             nOriginalLevel[i] = s->m_nLevel[i];
 
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s->m_nCode)
+            if (rp.first == (int32_t)s->m_nCode)
             {
-                int nLevel[3] = {0, 0, 0};
-                for (int i = 2; i >= 0; --i)
+                int32_t nLevel[3] = {0, 0, 0};
+                for (int32_t i = 2; i >= 0; --i)
                 {
                     nLevel[i] = nOriginalLevel[i] - rp.second;
                     if (nLevel[i] < 0)
@@ -384,10 +384,10 @@ void Unit::amplifyStatByState()
             {
             case SEF_PARAMETER_AMP:
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                ampParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
-                ampParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
-                ampParameter((uint)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
-                ampParameter((uint)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
+                ampParameter((uint32_t)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
+                ampParameter((uint32_t)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
+                ampParameter((uint32_t)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
+                ampParameter((uint32_t)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
                 break;
             default:
                 break;
@@ -525,36 +525,36 @@ void Unit::applyState(State &state)
     case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
     }
     break;
 
     case SEF_AMP_ADDITIONAL_DAMAGE_ON_ATTACK:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
     }
     break;
 
     case SEF_ADDITIONAL_DAMAGE_ON_SKILL:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int)state.GetValue(5), (ElementalType)(int)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int)state.GetValue(5), (ElementalType)(int)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
     }
     break;
 
     case SEF_AMP_ADDTIONAL_DAMAGE_ON_SKILL:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int)state.GetValue(5), (ElementalType)(int)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int)state.GetValue(5), (ElementalType)(int)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
     }
     break;
 
@@ -574,16 +574,16 @@ void Unit::applyState(State &state)
                 break;
         }
 
-        StateCode code = (StateCode)(int)state.GetValue(0);
-        int level = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
-        int ratio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
+        StateCode code = (StateCode)(int32_t)state.GetValue(0);
+        int32_t level = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
+        int32_t ratio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
         uint32_t duration = (state.GetValue(4) + state.GetLevel() * state.GetValue(5)) * 100;
         uint32_t attack_type = (uint32_t)state.GetValue(12);
-        int cost_mp = (int)state.GetValue(13);
-        int min = (int)state.GetValue(14);
-        int max = (int)state.GetValue(15);
-        int tmin = (int)state.GetValue(16);
-        int tmax = (int)state.GetValue(17);
+        int32_t cost_mp = (int32_t)state.GetValue(13);
+        int32_t min = (int32_t)state.GetValue(14);
+        int32_t max = (int32_t)state.GetValue(15);
+        int32_t tmin = (int32_t)state.GetValue(16);
+        int32_t tmax = (int32_t)state.GetValue(17);
 
         if (state.GetEffectType() == SEF_ADD_STATE_ON_ATTACK_OLD)
         {
@@ -674,9 +674,9 @@ void Unit::applyState(State &state)
                 break;
         }
 
-        int nHPInc = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
-        int nMPInc = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
-        int nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
+        int32_t nHPInc = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
+        int32_t nMPInc = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
+        int32_t nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
 
         if (nHPInc || nMPInc)
         {
@@ -700,7 +700,7 @@ void Unit::applyState(State &state)
 
         float fHPAbsorbRatio = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
         float fMPAbsorbRatio = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
-        int nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
+        int32_t nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
 
         if (fHPAbsorbRatio || fMPAbsorbRatio)
         {
@@ -723,9 +723,9 @@ void Unit::applyState(State &state)
                 break;
         }
 
-        int nHPSteal = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
-        int nMPSteal = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
-        int nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
+        int32_t nHPSteal = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
+        int32_t nMPSteal = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
+        int32_t nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
 
         if (nHPSteal || nMPSteal)
         {
@@ -745,7 +745,7 @@ void Unit::applyState(State &state)
     case SEF_DAMAGE_REFLECT_PERCENT:
     {
         m_vDamageReflectInfo.emplace_back(DamageReflectInfo(state.GetValue(6) + state.GetLevel() * state.GetValue(7), state.GetValue(9) * GameRule::DEFAULT_UNIT_SIZE,
-                                                            (ElementalType)(int)state.GetValue(8), 0,
+                                                            (ElementalType)(int32_t)state.GetValue(8), 0,
                                                             state.GetValue(0) + state.GetLevel() * state.GetValue(1),
                                                             state.GetValue(2) + state.GetLevel() * state.GetValue(3),
                                                             state.GetValue(4) + state.GetLevel() * state.GetValue(5),
@@ -756,7 +756,7 @@ void Unit::applyState(State &state)
     case SEF_DAMAGE_REFLECT:
     {
         m_vDamageReflectInfo.emplace_back(DamageReflectInfo(state.GetValue(6) + state.GetLevel() * state.GetValue(7), GameRule::REFLECT_RANGE,
-                                                            (ElementalType)(int)state.GetValue(8), state.GetValue(0) + state.GetLevel() * state.GetValue(1),
+                                                            (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetLevel() * state.GetValue(1),
                                                             0.0f,
                                                             0.0f,
                                                             0.0f,
@@ -768,15 +768,15 @@ void Unit::applyState(State &state)
     {
         if (IsWearShield())
         {
-            m_vStateReflectInfo.emplace_back(StateReflectInfo(static_cast<StateCode>((int)state.GetValue(0)), state.GetValue(3) + state.GetLevel() * state.GetValue(4), state.GetValue(1) + state.GetLevel() * state.GetValue(2)));
+            m_vStateReflectInfo.emplace_back(StateReflectInfo(static_cast<StateCode>((int32_t)state.GetValue(0)), state.GetValue(3) + state.GetLevel() * state.GetValue(4), state.GetValue(1) + state.GetLevel() * state.GetValue(2)));
         }
     }
     break;
 
     case SEF_REGEN_ADD:
     {
-        int nHPRegenAdd = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
-        int nMPRegenAdd = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
+        int32_t nHPRegenAdd = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
+        int32_t nMPRegenAdd = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
 
         m_Attribute.nHPRegenPoint += nHPRegenAdd;
         m_Attribute.nMPRegenPoint += nMPRegenAdd;
@@ -785,7 +785,7 @@ void Unit::applyState(State &state)
 
     case SEF_AMP_RECEIVE_DAMAGE:
     {
-        int nApplyType = state.GetValue(0);
+        int32_t nApplyType = state.GetValue(0);
         if (nApplyType == 1)
         {
             m_NormalStatePenalty.fDamage += (state.GetValue(7) + state.GetLevel() * state.GetValue(8));
@@ -899,7 +899,7 @@ void Unit::applyState(State &state)
     case SEF_MP_COST_INC:
     {
         float fCostReduce = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
-        int nElementalType = state.GetValue(5);
+        int32_t nElementalType = state.GetValue(5);
 
         if (nElementalType != 99)
         {
@@ -931,7 +931,7 @@ void Unit::applyState(State &state)
         }
         else
         {
-            for (int i = 0; i < ElementalType::TYPE_COUNT; ++i)
+            for (int32_t i = 0; i < ElementalType::TYPE_COUNT; ++i)
             {
                 if (state.GetValue(10) == 99 || state.GetValue(10) == 1)
                 {
@@ -987,15 +987,15 @@ void Unit::applyState(State &state)
     {
         float fDamage = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
         float fMagicDamage = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
-        int nCritical = state.GetValue(4) * state.GetLevel();
-        int nElementalType = state.GetValue(5);
+        int32_t nCritical = state.GetValue(4) * state.GetLevel();
+        int32_t nElementalType = state.GetValue(5);
         float fHate = state.GetValue(6) * state.GetLevel();
         float fCoolTime = state.GetValue(7) * state.GetLevel();
         bool bExhaustive = state.GetValue(8);
-        int nApplySkillType = state.GetValue(9);
-        int nApplyToHarmful = state.GetValue(10);
+        int32_t nApplySkillType = state.GetValue(9);
+        int32_t nApplyToHarmful = state.GetValue(10);
         uint32_t nCastingSpeedApplyTime = state.GetValue(11) * 100;
-        int fCastingSpeed = state.GetValue(12) + state.GetValue(13) * state.GetLevel();
+        int32_t fCastingSpeed = state.GetValue(12) + state.GetValue(13) * state.GetLevel();
 
         if (nElementalType != 99)
         {
@@ -1080,7 +1080,7 @@ void Unit::applyState(State &state)
         }
         else
         {
-            for (int i = 0; i < ElementalType::TYPE_COUNT; ++i)
+            for (int32_t i = 0; i < ElementalType::TYPE_COUNT; ++i)
             {
                 if (nApplySkillType == 1 || nApplySkillType == 99)
                 {
@@ -1250,7 +1250,7 @@ void Unit::applyState(State &state)
         break;
 
     case SEF_SKILL_INTERRUPTION:
-        for (int i = 0; i < 12 && state.GetValue(i); ++i)
+        for (int32_t i = 0; i < 12 && state.GetValue(i); ++i)
             m_vInterruptedSkill.emplace_back(state.GetValue(i));
         break;
 
@@ -1266,7 +1266,7 @@ void Unit::applyState(State &state)
 
     case SEF_MANA_SHIELD:
     {
-        int nTargetType = state.GetValue(4);
+        int32_t nTargetType = state.GetValue(4);
         if (nTargetType == 1 || nTargetType == 99)
             SetFloatValue(UNIT_FIELD_PHYSICAL_MANASHIELD_ABSORB_RATIO, GetFloatValue(UNIT_FIELD_PHYSICAL_MANASHIELD_ABSORB_RATIO) + state.GetValue(0) + state.GetLevel() * state.GetValue(1));
         if (nTargetType == 2 || nTargetType == 99)
@@ -1333,7 +1333,7 @@ void Unit::applyState(State &state)
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_MORTAL);
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_ATTACKABLE);
 
-            std::set<int> allowedSkillSet{};
+            std::set<int32_t> allowedSkillSet{};
             allowedSkillSet.emplace(4001);
             allowedSkillSet.emplace(4002);
             m_vAllowedSkill.emplace_back(allowedSkillSet);
@@ -1446,15 +1446,15 @@ void Unit::applyStateEffect()
     if (m_vStateList.empty())
         return;
 
-    std::vector<std::pair<int, int>> vDecreaseList{};
+    std::vector<std::pair<int, int32_t>> vDecreaseList{};
     for (auto &s : m_vStateList)
     {
         if (s->GetEffectType() == SEF_DECREASE_STATE_EFFECT)
         {
-            auto nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
-            for (int i = 2; i < 11 && s->GetValue(i) != 0; ++i)
+            auto nDecreaseLevel = (int32_t)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
+            for (int32_t i = 2; i < 11 && s->GetValue(i) != 0; ++i)
             {
-                vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(i), (int)nDecreaseLevel));
+                vDecreaseList.emplace_back(std::pair<int, int32_t>((int32_t)s->GetValue(i), (int32_t)nDecreaseLevel));
             }
         }
     }
@@ -1463,14 +1463,14 @@ void Unit::applyStateEffect()
     {
         uint16_t nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             nOriginalLevel[i] = s->GetLevel(i);
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s->m_nCode)
+            if (rp.first == (int32_t)s->m_nCode)
             {
-                int nLevel[3] = {0, 0, 0};
-                for (int i = 2; i >= 0; --i)
+                int32_t nLevel[3] = {0, 0, 0};
+                for (int32_t i = 2; i >= 0; --i)
                 {
                     nLevel[i] = nOriginalLevel[i] - rp.second;
                     if (nLevel[i] < 0)
@@ -1490,7 +1490,7 @@ void Unit::applyStateEffect()
         if (s->GetLevel() > 0)
             applyState(*s);
 
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             s->SetLevel(i, nOriginalLevel[i]);
     }
 }
@@ -1500,15 +1500,15 @@ void Unit::applyStatByState()
     if (m_vStateList.empty())
         return;
 
-    std::vector<std::pair<int, int>> vDecreaseList{};
+    std::vector<std::pair<int, int32_t>> vDecreaseList{};
     for (auto &s : m_vStateList)
     {
         if (s->GetEffectType() == SEF_DECREASE_STATE_EFFECT)
         {
-            auto nDecreaseLevel = (int)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
-            for (int i = 2; i < 11 && s->GetValue(i) != 0; ++i)
+            auto nDecreaseLevel = (int32_t)(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
+            for (int32_t i = 2; i < 11 && s->GetValue(i) != 0; ++i)
             {
-                vDecreaseList.emplace_back(std::pair<int, int>(static_cast<int>(s->GetValue(i)), static_cast<int>(nDecreaseLevel)));
+                vDecreaseList.emplace_back(std::pair<int, int32_t>(static_cast<int32_t>(s->GetValue(i)), static_cast<int32_t>(nDecreaseLevel)));
             }
         }
     }
@@ -1516,15 +1516,15 @@ void Unit::applyStatByState()
     {
         uint16_t nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             nOriginalLevel[i] = s->GetLevel(i);
 
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s->m_nCode)
+            if (rp.first == (int32_t)s->m_nCode)
             {
-                int nLevel[3] = {0, 0, 0};
-                for (int i = 2; i >= 0; --i)
+                int32_t nLevel[3] = {0, 0, 0};
+                for (int32_t i = 2; i >= 0; --i)
                 {
                     nLevel[i] = nOriginalLevel[i] - rp.second;
                     if (nLevel[i] < 0)
@@ -1546,18 +1546,18 @@ void Unit::applyStatByState()
             if (s->GetEffectType() == SEF_PARAMETER_INC)
             {
                 // format is 0 = bitset, 1 = base, 2 = add per level
-                incParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
-                incParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
-                incParameter((uint)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
-                incParameter((uint)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) * s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) * s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(12), s->GetValue(13) + (s->GetValue(14) * s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(15), s->GetValue(16) + (s->GetValue(17) * s->GetLevel()), true);
             }
             else if (s->GetEffectType() == SEF_PARAMETER_INC_WHEN_EQUIP_SHIELD && IsWearShield())
             {
-                incParameter((uint)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) + s->GetLevel()), true);
-                incParameter((uint)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) + s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(0), s->GetValue(1) + (s->GetValue(2) + s->GetLevel()), true);
+                incParameter((uint32_t)s->GetValue(3), s->GetValue(4) + (s->GetValue(5) + s->GetLevel()), true);
             }
         }
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             s->SetLevel(i, nOriginalLevel[i]);
     }
 }
@@ -1569,9 +1569,9 @@ void Unit::applyItemEffect()
         m_Attribute.nAttackRange = curItem->m_pItemBase->range;
 
     m_nUnitExpertLevel = 0;
-    std::vector<int> ref_list{};
+    std::vector<int32_t> ref_list{};
 
-    for (int i = 0; i < MAX_ITEM_WEAR; i++)
+    for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
     {
         curItem = GetWornItem((ItemWearType)i);
         if (curItem != nullptr && curItem->m_pItemBase != nullptr)
@@ -1583,7 +1583,7 @@ void Unit::applyItemEffect()
                 if (curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
                     fItemRatio = 0.40000001f;
 
-                for (int ol = 0; ol < MAX_OPTION_NUMBER; ol++)
+                for (int32_t ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
                     if (curItem->m_pItemBase->base_type[ol] != 0)
                     {
@@ -1591,7 +1591,7 @@ void Unit::applyItemEffect()
                     }
                 }
 
-                for (int ol = 0; ol < MAX_OPTION_NUMBER; ol++)
+                for (int32_t ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
                     if (curItem->m_pItemBase->opt_type[ol] != 0)
                     {
@@ -1599,15 +1599,15 @@ void Unit::applyItemEffect()
                     }
                 }
 
-                float fAddPoint = 0.0f;
+                float fAddPoint32_t = 0.0f;
                 float fTotalPoints = 0.0f;
 
-                for (int ol = 0; ol < 2; ol++)
+                for (int32_t ol = 0; ol < 2; ol++)
                 {
                     if (curItem->m_pItemBase->enhance_id[ol] != 0)
                     {
-                        int curEnhance = curItem->m_Instance.nEnhance;
-                        int realEnhance = curEnhance;
+                        int32_t curEnhance = curItem->m_Instance.nEnhance;
+                        int32_t realEnhance = curEnhance;
 
                         if (realEnhance >= 1)
                         {
@@ -1634,7 +1634,7 @@ void Unit::applyItemEffect()
     }
 }
 
-void Unit::ampParameter2(uint nBitset, float fValue)
+void Unit::ampParameter2(uint32_t nBitset, float fValue)
 {
     if (nBitset & FLAG_ET_NONE_RESIST)
         m_ResistAmplifier.fResist[ElementalType::TYPE_NONE] += fValue;
@@ -1709,7 +1709,7 @@ void Unit::ampParameter2(uint nBitset, float fValue)
         SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
-void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
+void Unit::ampParameter(uint32_t nBitset, float fValue, bool bStat)
 {
     if (bStat)
     {
@@ -1721,7 +1721,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
             m_StatAmplifier.agility += fValue;
         if (nBitset & FLAG_DEX)
             m_StatAmplifier.dexterity += fValue;
-        if (nBitset & FLAG_INT)
+        if (nBitset & FLAG_int32_t)
             m_StatAmplifier.intelligence += fValue;
         if (nBitset & FLAG_MEN)
             m_StatAmplifier.mentality += fValue;
@@ -1730,13 +1730,13 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
     }
     else
     {
-        if (nBitset & FLAG_ATTACK_POINT)
+        if (nBitset & FLAG_ATTACK_POint32_t)
         {
             m_AttributeAmplifier.fAttackPointRight += fValue;
             if (IsUsingDoubleWeapon())
                 m_AttributeAmplifier.fAttackPointLeft += fValue;
         }
-        if (nBitset & FLAG_MAGIC_POINT)
+        if (nBitset & FLAG_MAGIC_POint32_t)
             m_AttributeAmplifier.fMagicPoint += fValue;
         if (nBitset & FLAG_DEFENCE)
             m_AttributeAmplifier.fDefence += fValue;
@@ -1816,7 +1816,7 @@ void Unit::ampParameter(uint nBitset, float fValue, bool bStat)
     }
 }
 
-void Unit::incParameter(uint nBitset, float nValue, bool bStat)
+void Unit::incParameter(uint32_t nBitset, float nValue, bool bStat)
 {
     if (bStat)
     {
@@ -1828,7 +1828,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             m_cStat.agility += nValue;
         if (nBitset & StateStatFlag::FLAG_DEX)
             m_cStat.dexterity += nValue;
-        if (nBitset & StateStatFlag::FLAG_INT)
+        if (nBitset & StateStatFlag::FLAG_int32_t)
             m_cStat.intelligence += nValue;
         if (nBitset & StateStatFlag::FLAG_MEN)
             m_cStat.mentality += nValue;
@@ -1837,7 +1837,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
     }
     else
     {
-        if (nBitset & StateStatFlag::FLAG_ATTACK_POINT)
+        if (nBitset & StateStatFlag::FLAG_ATTACK_POint32_t)
         {
             m_Attribute.nAttackPointRight += nValue;
             //m_nAttackPointRightWithoutWeapon += nValue;
@@ -1849,7 +1849,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
             }
         }
 
-        if (nBitset & StateStatFlag::FLAG_MAGIC_POINT)
+        if (nBitset & StateStatFlag::FLAG_MAGIC_POint32_t)
             m_Attribute.nMagicPoint += nValue;
 
         if (nBitset & StateStatFlag::FLAG_DEFENCE)
@@ -1930,7 +1930,7 @@ void Unit::incParameter(uint nBitset, float nValue, bool bStat)
     }
 }
 
-void Unit::incParameter2(uint nBitset, float fValue)
+void Unit::incParameter2(uint32_t nBitset, float fValue)
 {
     if (nBitset & FlagEffectType::FLAG_ET_NONE_RESIST)
         m_Resist.nResist[ElementalType::TYPE_NONE] += fValue;
@@ -2050,16 +2050,16 @@ void Unit::applyStateAmplifyEffect()
     if (m_vStateList.empty())
         return;
 
-    std::vector<std::pair<int, int>> vDecreaseList{};
+    std::vector<std::pair<int, int32_t>> vDecreaseList{};
 
     for (auto &s : m_vStateList)
     {
         if (s->GetEffectType() == SEF_DECREASE_STATE_EFFECT)
         {
             auto nDecreaseLevel = static_cast<int32_t>(s->GetValue(0) + (s->GetValue(1) * s->GetLevel()));
-            for (int i = 2; i < 11 && s->GetValue(i) != 0; ++i)
+            for (int32_t i = 2; i < 11 && s->GetValue(i) != 0; ++i)
             {
-                vDecreaseList.emplace_back(std::pair<int, int>((int)s->GetValue(i), (int)nDecreaseLevel));
+                vDecreaseList.emplace_back(std::pair<int, int32_t>((int32_t)s->GetValue(i), (int32_t)nDecreaseLevel));
             }
         }
     }
@@ -2067,15 +2067,15 @@ void Unit::applyStateAmplifyEffect()
     {
         uint16_t nOriginalLevel[3]{0};
 
-        for (int i = 0; i < 3; i++)
+        for (int32_t i = 0; i < 3; i++)
             nOriginalLevel[i] = s->m_nLevel[i];
 
         for (auto &rp : vDecreaseList)
         {
-            if (rp.first == (int)s->m_nCode)
+            if (rp.first == (int32_t)s->m_nCode)
             {
-                int nLevel[3] = {0, 0, 0};
-                for (int i = 2; i >= 0; --i)
+                int32_t nLevel[3] = {0, 0, 0};
+                for (int32_t i = 2; i >= 0; --i)
                 {
                     nLevel[i] = nOriginalLevel[i] - rp.second;
                     if (nLevel[i] < 0)
@@ -2141,14 +2141,14 @@ void Unit::applyStateAmplify(State *state)
     }
 }
 
-void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio)
+void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
 {
     float item_var_penalty = (type != IEP_ATTACK_SPEED) ? (var1 * fRatio) : var1;
 
     if (type != IEP_ATTACK_SPEED && bIsBaseVar && pItem != nullptr)
     {
         item_var_penalty += (float)(var2 * (float)(pItem->m_Instance.nLevel - 1));
-        item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int)var1, GetLevel(), pItem->GetItemRank(), pItem->m_Instance.nLevel);
+        item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int32_t)var1, GetLevel(), pItem->GetItemRank(), pItem->m_Instance.nLevel);
     }
 
     /*if(type != IEP_ATTACK_SPEED)
@@ -2383,20 +2383,20 @@ void Unit::finalizeStat()
 
 void Unit::getAmplifiedStatByAmplifier(CreatureStat &stat)
 {
-    stat.strength = (int)((m_StatAmplifier.strength * stat.strength) + stat.strength);
-    stat.vital = (int)((m_StatAmplifier.vital * stat.vital) + stat.vital);
-    stat.dexterity = (int)((m_StatAmplifier.dexterity * stat.dexterity) + stat.dexterity);
-    stat.agility = (int)((m_StatAmplifier.agility * stat.agility) + stat.agility);
-    stat.intelligence = (int)((m_StatAmplifier.intelligence * stat.intelligence) + stat.intelligence);
-    stat.mentality = (int)((m_StatAmplifier.mentality * stat.mentality) + stat.mentality);
-    stat.luck = (int)((m_StatAmplifier.luck * stat.luck) + stat.luck);
+    stat.strength = (int32_t)((m_StatAmplifier.strength * stat.strength) + stat.strength);
+    stat.vital = (int32_t)((m_StatAmplifier.vital * stat.vital) + stat.vital);
+    stat.dexterity = (int32_t)((m_StatAmplifier.dexterity * stat.dexterity) + stat.dexterity);
+    stat.agility = (int32_t)((m_StatAmplifier.agility * stat.agility) + stat.agility);
+    stat.intelligence = (int32_t)((m_StatAmplifier.intelligence * stat.intelligence) + stat.intelligence);
+    stat.mentality = (int32_t)((m_StatAmplifier.mentality * stat.mentality) + stat.mentality);
+    stat.luck = (int32_t)((m_StatAmplifier.luck * stat.luck) + stat.luck);
 }
 
 void Unit::applyStatByItem()
 {
-    std::vector<int> ref_list{};
+    std::vector<int32_t> ref_list{};
 
-    for (int i = 0; i < MAX_ITEM_WEAR; ++i)
+    for (int32_t i = 0; i < MAX_ITEM_WEAR; ++i)
     {
         if (m_anWear[i] == nullptr)
             continue;
@@ -2407,7 +2407,7 @@ void Unit::applyStatByItem()
 
         const auto base = m_anWear[i]->GetItemBase();
 
-        for (int x = 0; x < MAX_OPTION_NUMBER; ++x)
+        for (int32_t x = 0; x < MAX_OPTION_NUMBER; ++x)
         {
             if (base->opt_type[x] == 0)
                 continue;
@@ -2435,7 +2435,7 @@ void Unit::applyStatByItem()
             if (m_anWear[i]->GetCurrentEndurance() == 0)
                 continue;
 
-            for (int k = 0; k < MAX_OPTION_NUMBER; ++k)
+            for (int32_t k = 0; k < MAX_OPTION_NUMBER; ++k)
             {
                 if (SocketBase->opt_type[k] == 0)
                     continue;
@@ -2461,9 +2461,9 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
                 break;
         }
 
-        int nAP = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        int nSpeed = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        int nAccuracy = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
+        int32_t nAP = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nSpeed = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        int32_t nAccuracy = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackPointRight += nAP;
         m_Attribute.nAttackSpeedRight += nSpeed;
@@ -2483,11 +2483,11 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_BATTLE_PARAMTER_INCREASE:
     {
-        int nAP = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        int nDefence = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        int nMP = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
-        int nMD = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
-        int nAvoid = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
+        int32_t nAP = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nDefence = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        int32_t nMP = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
+        int32_t nMD = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
+        int32_t nAvoid = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackPointRight += nAP;
         //m_nAttackPointRightWithoutWeapon += nAP;
@@ -2507,8 +2507,8 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_BLOCK_INCREASE:
     {
-        int nBlockChance = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        int nBlockDefence = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        int32_t nBlockChance = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nBlockDefence = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nBlockChance += nBlockChance;
         m_Attribute.nBlockDefence += nBlockDefence;
@@ -2517,7 +2517,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_ATTACK_RANGE_INCREASE:
     {
-        int nRange = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nRange = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackRange += nRange * GameRule::ATTACK_RANGE_UNIT;
     }
@@ -2525,8 +2525,8 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_RESISTANCE_INCREASE:
     {
-        int nStunResi = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        int nMoveDecResi = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        int32_t nStunResi = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nMoveDecResi = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nStunResistance += nStunResi;
         m_Attribute.nMoveSpeedDecreaseResistance += nMoveDecResi;
@@ -2535,7 +2535,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_INCREASE_BASE_ATTRIBUTE:
     {
-        int nSkillLevel = pSkill->GetCurrentSkillLevel();
+        int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackPointRight += pSkill->GetVar(0) * nSkillLevel;
         //m_nAttackPointRightWithoutWeapon += pSkill->GetVar( 0 ) * nSkillLevel;
@@ -2571,7 +2571,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
     case EF_AMPLIFY_BASE_ATTRIBUTE_OLD:
     case EF_AMPLIFY_BASE_ATTRIBUTE:
     {
-        int nSkillLevel = pSkill->GetCurrentSkillLevel();
+        int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
         m_AttributeAmplifier.fAttackPointRight += pSkill->GetVar(0) * nSkillLevel;
         m_AttributeAmplifier.fAttackSpeedRight += pSkill->GetVar(4) * nSkillLevel;
@@ -2596,7 +2596,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_INCREASE_EXTENSION_ATTRIBUTE:
     {
-        int nSkillLevel = pSkill->GetCurrentSkillLevel();
+        int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nHPRegenPercentage += pSkill->GetVar(0) * nSkillLevel;
         m_Attribute.nHPRegenPoint += pSkill->GetVar(1) * nSkillLevel;
@@ -2613,10 +2613,10 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_MAGIC_REGISTANCE_INCREASE:
     {
-        int nElemental;
-        int nElementalInc;
+        int32_t nElemental;
+        int32_t nElementalInc;
 
-        for (int i = 0; i < 4; ++i)
+        for (int32_t i = 0; i < 4; ++i)
         {
             nElemental = pSkill->GetVar(3 * i);
             nElementalInc = pSkill->GetVar(3 * i + 1) + pSkill->GetVar(3 * i + 2) * pSkill->GetCurrentSkillLevel();
@@ -2660,9 +2660,9 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_MAGIC_TRAINING:
     {
-        int nCastSpeed = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nCastSpeed = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
         float fCoolTime = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        int nCastKeep = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
+        int32_t nCastKeep = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nCastingSpeed += nCastSpeed;
         m_Attribute.nCoolTimeSpeed -= m_Attribute.nCoolTimeSpeed * fCoolTime;
@@ -2672,7 +2672,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_HUNTING_TRAINING:
     {
-        int nCreatureType = pSkill->GetVar(0);
+        int32_t nCreatureType = pSkill->GetVar(0);
 
         float fDamage = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel();
         float fAvoid = pSkill->GetVar(3) + pSkill->GetVar(4) * pSkill->GetCurrentSkillLevel();
@@ -2687,10 +2687,10 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_INCREASE_HP_MP:
     {
-        int nMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        int nMaxMPInc = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        int nHPRegenInc = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
-        int nMPRegenInc = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
+        int32_t nMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        int32_t nMaxMPInc = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        int32_t nHPRegenInc = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
+        int32_t nMPRegenInc = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
 
         SetMaxHealth(GetMaxHealth() + nMaxHPInc);
         SetMaxMana(GetMaxMana() + nMaxMPInc);
@@ -2770,7 +2770,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_AMPLIFY_EXT_ATTRIBUTE:
     {
-        int nSkillLevel = pSkill->GetCurrentSkillLevel();
+        int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
         m_AttributeAmplifier.fHPRegenPercentage += pSkill->GetVar(0) * nSkillLevel;
         m_AttributeAmplifier.fHPRegenPoint += pSkill->GetVar(1) * nSkillLevel;
@@ -2859,7 +2859,7 @@ void Unit::applyDoubeWeaponEffect()
 
     auto pSlot0 = GetWornItem(WEAR_WEAPON);
     auto pSlot1 = GetWornItem(WEAR_SHIELD);
-    int nExpertSkillLv{1};
+    int32_t nExpertSkillLv{1};
 
     if (pSlot0 == nullptr || pSlot1 == nullptr)
         return;

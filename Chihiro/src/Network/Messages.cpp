@@ -50,7 +50,7 @@ void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
     pPlayer->SendPacket(resultPct);
 }
 
-void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float add_mp, bool display)
+void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int32_t add_hp, float add_mp, bool display)
 {
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
@@ -67,7 +67,6 @@ void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int add_hp, float a
     statPct.max_mp = pUnit->GetMaxMana();
 
     statPct.need_to_display = static_cast<uint8_t>(display ? 1 : 0);
-
 
     pPlayer->SendPacket(statPct);
 }
@@ -126,7 +125,7 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
 
     TS_EQUIP_SUMMON summonPct{};
     summonPct.open_dialog = static_cast<uint8_t>(bShowDialog ? 1 : 0);
-    for (int i = 0; i < 6; i++)
+    for (int32_t i = 0; i < 6; i++)
     {
         if (pPlayer->m_aBindSummonCard[i] != nullptr)
             summonPct.card_handle[i] = pPlayer->m_aBindSummonCard[i]->m_nHandle;
@@ -156,7 +155,7 @@ void Messages::SendPropertyMessage(Player *pPlayer, Unit *pUnit, const std::stri
     pPlayer->SendPacket(propertyPct);
 }
 
-void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type, const std::string &szTitle, const std::string &szText, const std::string &szMenu)
+void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int32_t type, const std::string &szTitle, const std::string &szText, const std::string &szMenu)
 {
     if (pPlayer == nullptr)
         return;
@@ -170,7 +169,7 @@ void Messages::SendDialogMessage(Player *pPlayer, uint32_t npc_handle, int type,
     pPlayer->SendPacket(dialogPct);
 }
 
-void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
+void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int32_t skill_id)
 {
     TS_SC_SKILL_LIST skillPct{};
     skillPct.target = pUnit->GetHandle();
@@ -207,7 +206,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int skill_id)
     pPlayer->SendPacket(skillPct);
 }
 
-void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, Player *target, const std::string &szMsg)
+void Messages::SendChatMessage(int32_t nChatType, const std::string &szSenderName, Player *target, const std::string &szMsg)
 {
     if (target == nullptr)
         return;
@@ -222,7 +221,7 @@ void Messages::SendChatMessage(int nChatType, const std::string &szSenderName, P
     }
 }
 
-void Messages::SendPartyChatMessage(int nChatType, const std::string &szSender, int nPartyID, const std::string &szMessage)
+void Messages::SendPartyChatMessage(int32_t nChatType, const std::string &szSender, int32_t nPartyID, const std::string &szMessage)
 {
     sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr)
@@ -288,8 +287,8 @@ std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
     {
         if (item->m_pSummon != nullptr)
         {
-            int slot = 1;
-            int tl = item->m_pSummon->m_nTransform;
+            int32_t slot = 1;
+            int32_t tl = item->m_pSummon->m_nTransform;
             while (slot < tl)
             {
                 itemInfo.base_info.socket[slot] = item->m_pSummon->GetPrevJobLv(slot - 1);
@@ -356,9 +355,9 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
                     do
                     {
                         if (bIsStorage)
-                            item = pPlayer->GetStorageItem((uint)lcnt);
+                            item = pPlayer->GetStorageItem((uint32_t)lcnt);
                         else
-                            item = pPlayer->GetItem((uint)lcnt);
+                            item = pPlayer->GetItem((uint32_t)lcnt);
                         auto info = fillItemInfo(item);
                         if (info.has_value())
                             inventoryPct.items.emplace_back(info.value());
@@ -396,7 +395,7 @@ void Messages::SendResult(WorldSession *worldSession, uint16_t nMsg, uint16_t nR
     worldSession->SendPacket(resultPct);
 }
 
-void Messages::SendDropResult(Player *pPlayer, uint itemHandle, bool bIsSuccess)
+void Messages::SendDropResult(Player *pPlayer, uint32_t itemHandle, bool bIsSuccess)
 {
     TS_SC_DROP_RESULT dropPct{};
     dropPct.item_handle = itemHandle;
@@ -447,9 +446,9 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 {
     TS_SC_WEAR_INFO wearPct{};
     wearPct.handle = pUnit->GetHandle();
-    for (int i = 0; i < MAX_ITEM_WEAR; i++)
+    for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
     {
-        int wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
+        int32_t wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
         if (i == 2 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 2);
         if (i == 4 && wear_info == 0)
@@ -463,7 +462,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
     pPlayer->SendPacket(wearPct);
 }
 
-void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool need_to_display)
+void Messages::BroadcastHPMPMessage(Unit *pUnit, int32_t add_hp, float add_mp, bool need_to_display)
 {
     TS_SC_HPMP hpmpPct{};
     hpmpPct.handle = pUnit->GetHandle();
@@ -475,7 +474,7 @@ void Messages::BroadcastHPMPMessage(Unit *pUnit, int add_hp, float add_mp, bool 
     hpmpPct.max_mp = pUnit->GetMaxMana();
     hpmpPct.need_to_display = static_cast<uint8_t>(need_to_display ? 1 : 0);
 
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
+    sWorld.Broadcast((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
 }
 
 void Messages::BroadcastLevelMsg(Unit *pUnit)
@@ -484,11 +483,21 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
     levelPct.handle = pUnit->GetHandle();
     levelPct.level = pUnit->GetLevel();
     levelPct.job_level = pUnit->GetCurrentJLv();
-    sWorld.Broadcast((uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
+    sWorld.Broadcast((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
 }
 
 void Messages::GetEncodedInt(XPacket &packet, uint32_t nDecoded)
 {
+    typedef unsigned long DWORD;
+    typedef unsigned short WORD;
+
+#if !defined(LOWORD)
+#define LOWORD(a) ((WORD)(a))
+#endif // #ifndef LOWORD
+#if !defined(HIWORD)
+#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
+#endif // #ifndef HIWORD
+
     packet << (int16_t)0;
     packet << (int16_t)HIWORD(nDecoded);
     packet << (int16_t)0;
@@ -528,7 +537,7 @@ void Messages::SendItemDestroyMessage(Player *pPlayer, Item *pItem)
     pPlayer->SendPacket(itemPct);
 }
 
-void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint target, uint16_t skill_id, uint8_t skill_level, Position pos, int error_code)
+void Messages::SendSkillCastFailMessage(Player *pPlayer, uint32_t caster, uint32_t target, uint16_t skill_id, uint8_t skill_level, Position pos, int32_t error_code)
 {
     if (pPlayer == nullptr)
         return;
@@ -548,7 +557,7 @@ void Messages::SendSkillCastFailMessage(Player *pPlayer, uint caster, uint targe
     pPlayer->SendPacket(skillPct);
 }
 
-void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, int reason)
+void Messages::SendCantAttackMessage(Player *pPlayer, uint32_t handle, uint32_t target, int32_t reason)
 {
     if (pPlayer == nullptr)
         return;
@@ -560,9 +569,9 @@ void Messages::SendCantAttackMessage(Player *pPlayer, uint handle, uint target, 
     pPlayer->SendPacket(atkPct);
 }
 
-uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
+uint32_t Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 {
-    uint v2{0};
+    uint32_t v2{0};
 
     switch (pObj->GetSubType())
     {
@@ -600,17 +609,17 @@ uint Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
     return v2;
 }
 
-void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int ttype)
+void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text, int32_t ttype)
 {
     std::string strButton{};
     std::string strTrigger{};
-    int i = 0;
-    int type = 3;
+    int32_t i = 0;
+    int32_t type = 3;
 
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr)
     {
-        int progress = 0;
+        int32_t progress = 0;
         if (text != 0)
         {
             progress = npc->GetProgressFromTextID(code, text);
@@ -627,7 +636,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int code, int text, int tty
                 progress = pPlayer->IsFinishableQuest(code) ? 2 : 1;
         }
         Quest *q = pPlayer->FindQuest(code);
-        int textID = text;
+        int32_t textID = text;
         if (textID == 0)
             textID = npc->GetQuestTextID(code, progress);
         if (npc == nullptr)
@@ -720,7 +729,7 @@ void Messages::SendQuestList(Player *pPlayer)
 
         if (Quest::IsRandomQuest(pQuest->m_Instance.Code))
         {
-            for (int i = 0, j = 0; i < MAX_VALUE_NUMBER / 4; i++)
+            for (int32_t i = 0, j = 0; i < MAX_VALUE_NUMBER / 4; i++)
             {
                 info.value[j++] = static_cast<uint32_t>(pQuest->GetRandomKey(i));
                 info.value[j++] = static_cast<uint32_t>(pQuest->GetRandomValue(i));
@@ -728,13 +737,13 @@ void Messages::SendQuestList(Player *pPlayer)
         }
         else
         {
-            for (int i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
+            for (int32_t i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
             {
                 info.value[i] = static_cast<uint32_t>(pQuest->m_QuestBase->nValue[i]);
             }
         }
 
-        for (int i = 0; i < MAX_QUEST_STATUS; i++)
+        for (int32_t i = 0; i < MAX_QUEST_STATUS; i++)
         {
             info.status[i] = static_cast<uint32_t>(pQuest->m_Instance.nStatus[i]);
         }
@@ -760,8 +769,8 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 obj->GetLayer(),
                                 functor,
                                 (uint8_t)RegionVisitor::ClientVisitor);
@@ -795,7 +804,7 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel)
     sWorld.Broadcast(pUnit->GetRX(), pUnit->GetRY(), pUnit->GetLayer(), statePct);
 }
 
-void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mode)
+void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int32_t mode)
 {
     if (pPlayer == nullptr || pMonster == nullptr)
         return;
@@ -804,8 +813,8 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     tamePct.mode = mode;
     tamePct.tamer_handle = pPlayer->GetHandle();
     tamePct.target_handle = pMonster->GetHandle();
-    sWorld.Broadcast((uint)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
+    sWorld.Broadcast((uint32_t)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                     (uint32_t)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
 
     std::string chatMsg{};
     switch (mode)
@@ -828,7 +837,7 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int mo
     SendChatMessage(100, "@SYSTEM", pPlayer, chatMsg);
 }
 
-void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderName, const std::string &szString, uint len)
+void Messages::SendGlobalChatMessage(int32_t chatType, const std::string &szSenderName, const std::string &szString, uint32_t len)
 {
     TS_SC_CHAT chatPct{};
     chatPct.szSender = szSenderName;
@@ -843,7 +852,7 @@ void Messages::SendGlobalChatMessage(int chatType, const std::string &szSenderNa
         Messages::SendResult(sender, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
 }
 
-void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::string &szMessage, uint len)
+void Messages::SendLocalChatMessage(int32_t nChatType, uint32_t handle, const std::string &szMessage, uint32_t len)
 {
     auto p = sMemoryPool.GetObjectInWorld<Player>(handle);
     if (p != nullptr)
@@ -853,13 +862,13 @@ void Messages::SendLocalChatMessage(int nChatType, uint handle, const std::strin
         chatPct.message = szMessage;
         chatPct.type = static_cast<uint8_t>(nChatType);
         ;
-        sWorld.Broadcast((uint)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                         (uint)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), chatPct);
+        sWorld.Broadcast((uint32_t)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                         (uint32_t)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), chatPct);
         Messages::SendResult(p, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
     }
 }
 
-void Messages::SendQuestMessage(int nChatType, Player *pTarget, const std::string &szString)
+void Messages::SendQuestMessage(int32_t nChatType, Player *pTarget, const std::string &szString)
 {
     SendChatMessage(nChatType, "@QUEST", pTarget, szString);
 }
@@ -879,8 +888,8 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint)(pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint)(pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+    sRegion.DoEachVisibleRegion((uint32_t)(pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                                (uint32_t)(pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
                                 pPlayer->GetLayer(),
                                 functor,
                                 (uint8_t)RegionVisitor::MovableVisitor);
@@ -890,7 +899,7 @@ void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {
     TS_SC_QUEST_STATUS questPct{};
     questPct.code = pQuest->m_Instance.Code;
-    for (int i = 0; i < MAX_QUEST_STATUS; i++)
+    for (int32_t i = 0; i < MAX_QUEST_STATUS; i++)
     {
         questPct.status[i] = pQuest->m_Instance.nStatus[i];
     }
@@ -902,12 +911,12 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     if (pPlayer == nullptr)
         return;
 
-    uint ct = sWorld.GetArTime();
+    uint32_t ct = sWorld.GetArTime();
     TS_SC_ITEM_COOL_TIME coolTimePct{};
 
-    for (int i = 0; i < MAX_ITEM_COOLTIME_GROUP; i++)
+    for (int32_t i = 0; i < MAX_ITEM_COOLTIME_GROUP; i++)
     {
-        int cool_time = pPlayer->m_nItemCooltime[i] - ct;
+        int32_t cool_time = pPlayer->m_nItemCooltime[i] - ct;
         if (cool_time < 0)
             cool_time = 0;
         coolTimePct.cool_time[i] = static_cast<uint32_t>(cool_time);
@@ -916,7 +925,7 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     pPlayer->SendPacket(coolTimePct);
 }
 
-void Messages::SendMixResult(Player *pPlayer, std::vector<uint> *pHandles)
+void Messages::SendMixResult(Player *pPlayer, std::vector<uint32_t> *pHandles)
 {
     if (pPlayer == nullptr)
         return;
@@ -965,21 +974,21 @@ void Messages::SendPartyInfo(Player *pPlayer)
 
     auto leader = sGroupManager.GetLeaderName(pPlayer->GetPartyID());
     auto name = sGroupManager.GetPartyName(pPlayer->GetPartyID());
-    int min_lvl = sGroupManager.GetMinLevel(pPlayer->GetPartyID());
-    int max_lvl = sGroupManager.GetMaxLevel(pPlayer->GetPartyID());
-    int share_mode = sGroupManager.GetShareMode(pPlayer->GetPartyID());
+    int32_t min_lvl = sGroupManager.GetMinLevel(pPlayer->GetPartyID());
+    int32_t max_lvl = sGroupManager.GetMaxLevel(pPlayer->GetPartyID());
+    int32_t share_mode = sGroupManager.GetShareMode(pPlayer->GetPartyID());
 
     std::string msg = NGemity::StringFormat("PINFO|{}|{}|{}|{}|{}|", name, leader, share_mode, min_lvl, max_lvl);
 
     struct PInfo
     {
-        uint handle;
-        int hp;
-        int mp;
-        int x;
-        int y;
-        int race;
-        int isOnline;
+        uint32_t handle;
+        int32_t hp;
+        int32_t mp;
+        int32_t x;
+        int32_t y;
+        int32_t race;
+        int32_t isOnline;
     };
 
     sGroupManager.DoEachMemberTag(pPlayer->GetPartyID(), [&msg](PartyMemberTag &tag) {
@@ -988,10 +997,10 @@ void Messages::SendPartyInfo(Player *pPlayer)
         if (player != nullptr)
         {
             info.handle = player->GetHandle();
-            info.hp = (int)GetPct((float)player->GetHealth(), player->GetMaxHealth());
-            info.mp = (int)GetPct((float)player->GetMana(), player->GetMaxMana());
-            info.x = (int)player->GetPositionX();
-            info.y = (int)player->GetPositionY();
+            info.hp = (int32_t)GetPct((float)player->GetHealth(), player->GetMaxHealth());
+            info.mp = (int32_t)GetPct((float)player->GetMana(), player->GetMaxMana());
+            info.x = (int32_t)player->GetPositionX();
+            info.y = (int32_t)player->GetPositionY();
             info.race = player->GetRace();
             info.isOnline = 2;
         }
@@ -1000,7 +1009,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
     SendChatMessage(100, "@PARTY", pPlayer, msg);
 }
 
-void Messages::SendRegionAckMessage(Player *pPlayer, uint rx, uint ry)
+void Messages::SendRegionAckMessage(Player *pPlayer, uint32_t rx, uint32_t ry)
 {
     if (pPlayer == nullptr)
         return;
@@ -1028,7 +1037,7 @@ void Messages::SendSkillCardInfo(Player *pPlayer, Item *pItem)
     pPlayer->SendPacket(scInfo);
 }
 
-void Messages::SendToggleInfo(Unit *pUnit, int skill_id, bool status)
+void Messages::SendToggleInfo(Unit *pUnit, int32_t skill_id, bool status)
 {
     if (pUnit == nullptr)
         return;
@@ -1063,9 +1072,9 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
     if (pClient == nullptr || pClient->GetPartyID() == 0)
         return;
 
-    int partyID = pClient->GetPartyID();
-    auto hp = (int)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
-    auto mp = (int)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
+    int32_t partyID = pClient->GetPartyID();
+    auto hp = (int32_t)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
+    auto mp = (int32_t)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
 
     auto buf = NGemity::StringFormat("MINFO|{}|{}|{}|{}|{}|{}|{}|{}|{}|",
                                      pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
@@ -1073,7 +1082,7 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
     SendPartyChatMessage(100, "@PARTY", partyID, buf);
 }
 
-void Messages::BroadcastPartyLoginStatus(int nPartyID, bool bIsOnline, const std::string &szName)
+void Messages::BroadcastPartyLoginStatus(int32_t nPartyID, bool bIsOnline, const std::string &szName)
 {
     auto partyName = sGroupManager.GetPartyName(nPartyID);
     auto szMsg = bIsOnline ? NGemity::StringFormat("LOGIN|{}|{}|", partyName, szName) : NGemity::StringFormat("LOGOUT|{}|", szName);

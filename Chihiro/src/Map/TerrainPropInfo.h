@@ -34,12 +34,12 @@ enum RenderType : int
 
 struct PropInfo
 {
-    int nLineIndex;
+    int32_t nLineIndex;
     PropType Type;
     RenderType mRenderType;
-    int nCategory;
+    int32_t nCategory;
     float fVisibleRatio;
-    int nShadowFlag;
+    int32_t nShadowFlag;
     std::string strName;
 };
 
@@ -56,7 +56,7 @@ class TerrainPropInfo
     std::vector<std::string> m_CategoryNames{};
 
   private:
-    int GetShadowFlag(std::string str);
+    int32_t GetShadowFlag(std::string str);
     bool CheckPropFileType(std::string rname, std::string szTail);
-    void SetPropInfo(int nLineIndex, uint16_t wPropNum, PropType propType, RenderType renderType, int nCategory, float fVisibleRatio, std::string rName, int nShadowFlag);
+    void SetPropInfo(int32_t nLineIndex, uint16_t wPropNum, PropType propType, RenderType renderType, int32_t nCategory, float fVisibleRatio, std::string rName, int32_t nShadowFlag);
 };

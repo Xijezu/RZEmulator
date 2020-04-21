@@ -44,9 +44,9 @@ bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
 bool GameContent::LearnAllSkill(Player *pPlayer)
 {
     auto depth = pPlayer->GetJobDepth();
-    for (int i = 0; i <= depth; ++i)
+    for (int32_t i = 0; i <= depth; ++i)
     {
-        int nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
+        int32_t nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
         auto tree = sObjectMgr.getSkillTree(nCurrJob);
         if (tree.empty())
             continue;
@@ -58,7 +58,7 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
         for (auto &s : tree)
         {
             auto currSkill = pPlayer->GetSkill(s.skill_id);
-            int currSkillLevel = 0;
+            int32_t currSkillLevel = 0;
             if (currSkill != nullptr)
                 currSkillLevel = currSkill->m_nSkillLevel;
 
@@ -67,7 +67,7 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
 
             for (currSkillLevel += 1; currSkillLevel <= s.max_skill_lv; ++currSkillLevel)
             {
-                int nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
+                int32_t nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
                 pPlayer->SetJP(nNeedJP);
                 pPlayer->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
             }
@@ -76,12 +76,12 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
     return true;
 }
 
-bool GameContent::IsInRandomPoolMonster(int group_id, int monster_id)
+bool GameContent::IsInRandomPoolMonster(int32_t group_id, int32_t monster_id)
 {
     bool result{false};
     //             ArMoveVector::MOVE_INFO *v3; // eax@11
     //             ArMoveVector::MOVE_INFO *v4; // eax@14
-    //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int> > this; // [sp+8h] [bp-18h]@5
+    //             std::_Vector_const_iterator<unsigned int,std::allocator<unsigned int32_t> > this; // [sp+8h] [bp-18h]@5
     //             std::_Vector_iterator<GameContent::RANDOM_POOL_INFO,std::allocator<GameContent::RANDOM_POOL_INFO> > itRandom; // [sp+10h] [bp-10h]@8
     //             std::_Vector_iterator<RANDOM_POOL,std::allocator<RANDOM_POOL> > it; // [sp+18h] [bp-8h]@5
 
@@ -169,7 +169,7 @@ void GameContent::AddNPCToWorld()
     }
 }
 
-bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int64_t &nItemCount)
+bool GameContent::SelectItemIDFromDropGroup(int32_t nDropGroupID, int32_t &nItemID, int64_t &nItemCount)
 {
     nItemID = 0;
     nItemCount = 1;
@@ -177,15 +177,15 @@ bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int6
     auto dg = sObjectMgr.GetDropGroupInfo(nDropGroupID);
     if (dg != nullptr)
     {
-        int cp = 0;
-        int p = irand(1, 100000000);
-        for (int i = 0; i < MAX_DROP_GROUP; ++i)
+        int32_t cp = 0;
+        int32_t p = irand(1, 100000000);
+        for (int32_t i = 0; i < MAX_DROP_GROUP; ++i)
         {
             cp += dg->drop_percentage[i];
             if (p <= cp)
             {
                 // temporary workaround for dropgroup
-                if (dg->drop_item_id[i] > 0 && sObjectMgr.GetItemBase((uint)dg->drop_item_id[i]) == nullptr)
+                if (dg->drop_item_id[i] > 0 && sObjectMgr.GetItemBase((uint32_t)dg->drop_item_id[i]) == nullptr)
                     continue;
                 nItemID = dg->drop_item_id[i];
                 nItemCount = 1;
@@ -198,11 +198,11 @@ bool GameContent::SelectItemIDFromDropGroup(int nDropGroupID, int &nItemID, int6
     return false;
 }
 
-int64_t GameContent::GetItemSellPrice(int64_t price, int rank, int lv, bool same_price_for_buying)
+int64_t GameContent::GetItemSellPrice(int64_t price, int32_t rank, int32_t lv, bool same_price_for_buying)
 {
     int64_t k;
     float f[8]{0};
-    int i;
+    int32_t i;
 
     k = price;
     if (rank <= 8)
@@ -246,9 +246,9 @@ int64_t GameContent::GetItemSellPrice(int64_t price, int rank, int lv, bool same
     return 0;
 }
 
-Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bool is_wandering, int way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
+Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
 {
-    auto mob = sMemoryPool.AllocMonster((uint)id);
+    auto mob = sMemoryPool.AllocMonster((uint32_t)id);
     if (mob != nullptr)
     {
         mob->SetCurrentXY(x, y);
@@ -264,10 +264,10 @@ Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int id, bo
     return mob;
 }
 
-ushort GameContent::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int &job_id)
+uint16_t GameContent::IsLearnableSkill(Unit *pUnit, int32_t skill_id, int32_t skill_level, int32_t &job_id)
 {
-    ushort ilsResult = TS_RESULT_ACCESS_DENIED;
-    for (int i = 0; i < 4; ++i)
+    uint16_t ilsResult = TS_RESULT_ACCESS_DENIED;
+    for (int32_t i = 0; i < 4; ++i)
     {
         if (pUnit->GetPrevJobLv(i) != 0)
         {
@@ -290,7 +290,7 @@ ushort GameContent::IsLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
     return ilsResult;
 }
 
-ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level, int nJobID, int unit_job_level)
+uint16_t GameContent::isLearnableSkill(Unit *pUnit, int32_t skill_id, int32_t skill_level, int32_t nJobID, int32_t unit_job_level)
 {
     bool bMaxLimit = false;
     bool bFound = false;
@@ -311,7 +311,7 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
                 }
                 if (stree.job_lv <= unit_job_level)
                 {
-                    for (int nsi = 0; nsi < 3; nsi++)
+                    for (int32_t nsi = 0; nsi < 3; nsi++)
                     {
                         if (stree.need_skill_id[nsi] == 0)
                             break;
@@ -324,7 +324,7 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
                     if (sb->id == 0)
                         return TS_RESULT_ACCESS_DENIED;
 
-                    if (pUnit->GetJP() < (int)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio))
+                    if (pUnit->GetJP() < (int32_t)((float)sb->GetNeedJobPoint(skill_level) * stree.jp_ratio))
                     {
                         return TS_RESULT_NOT_ENOUGH_JP;
                     }
@@ -347,10 +347,10 @@ ushort GameContent::isLearnableSkill(Unit *pUnit, int skill_id, int skill_level,
     return TS_RESULT_ACCESS_DENIED;
 }
 
-int GameContent::GetLocationID(const float x, const float y)
+int32_t GameContent::GetLocationID(const float x, const float y)
 {
-    int loc_id = 0;
-    int priority = 0x7fffffff;
+    int32_t loc_id = 0;
+    int32_t priority = 0x7fffffff;
     X2D::Pointf pt{};
     pt.x = x;
     pt.y = y;

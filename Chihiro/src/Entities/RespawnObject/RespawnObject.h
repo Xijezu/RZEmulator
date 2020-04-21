@@ -27,8 +27,8 @@ struct RespawnInfo : public MonsterRespawnInfo
         way_point_id = info.way_point_id;
     }
 
-    uint count;
-    uint prespawn_count;
+    uint32_t count;
+    uint32_t prespawn_count;
 };
 
 class RespawnObject : public MonsterDeleteHandler
@@ -43,11 +43,11 @@ class RespawnObject : public MonsterDeleteHandler
     RespawnObject &operator=(const RespawnObject &) = delete;
 
     void onMonsterDelete(Monster *mob) override;
-    void Update(uint diff);
+    void Update(uint32_t diff);
 
   private:
     RespawnInfo info;
-    uint m_nMaxRespawnNum;
-    std::vector<uint> m_vRespawnedMonster;
-    uint lastDeadTime;
+    uint32_t m_nMaxRespawnNum;
+    std::vector<uint32_t> m_vRespawnedMonster;
+    uint32_t lastDeadTime;
 };

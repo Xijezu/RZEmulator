@@ -106,7 +106,7 @@ bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
     return true;
 }
 
-Item *Inventory::Find(int code, uint flag, bool bFlag)
+Item *Inventory::Find(int32_t code, uint32_t flag, bool bFlag)
 {
     for (auto &i : m_vList)
     {
@@ -120,7 +120,7 @@ Item *Inventory::Find(int code, uint flag, bool bFlag)
     return nullptr;
 }
 
-Item *Inventory::FindByCode(int code)
+Item *Inventory::FindByCode(int32_t code)
 {
     for (auto &i : m_vList)
     {
@@ -140,7 +140,7 @@ Item *Inventory::FindBySID(int64_t uid)
     return nullptr;
 }
 
-Item *Inventory::FindByHandle(uint handle)
+Item *Inventory::FindByHandle(uint32_t handle)
 {
     for (auto &i : m_vList)
     {

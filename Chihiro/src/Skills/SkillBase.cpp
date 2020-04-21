@@ -21,7 +21,7 @@
 
 bool SkillBase::IsUseableWeapon(ItemClass cl)
 {
-    auto c = (int)cl;
+    auto c = (int32_t)cl;
 
     if (c <= 210)
     {
@@ -69,34 +69,34 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
     return false;
 }
 
-int SkillBase::GetStateSecond(int skill_lv, int enhance_lv)
+int32_t SkillBase::GetStateSecond(int32_t skill_lv, int32_t enhance_lv)
 {
-    return ((int)state_second + skill_lv * (int)state_second_per_level) + ((int)enhance_lv * (int)state_second_per_enhance);
+    return ((int32_t)state_second + skill_lv * (int32_t)state_second_per_level) + ((int32_t)enhance_lv * (int32_t)state_second_per_enhance);
 }
 
-int SkillBase::GetHitBonus(int enhance, int level_diff) const
+int32_t SkillBase::GetHitBonus(int32_t enhance, int32_t level_diff) const
 {
     return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
 }
 
-int SkillBase::GetStateLevel(int skill_lv, int enhance_lv)
+int32_t SkillBase::GetStateLevel(int32_t skill_lv, int32_t enhance_lv)
 {
-    return (int)(state_level_base + (state_level_per_enhance * enhance_lv) + (state_level_per_skl * skill_lv));
+    return (int32_t)(state_level_base + (state_level_per_enhance * enhance_lv) + (state_level_per_skl * skill_lv));
 }
 
-uint SkillBase::GetCastDelay(int skill_lv, int enhance)
+uint32_t SkillBase::GetCastDelay(int32_t skill_lv, int32_t enhance)
 {
     return static_cast<uint32_t>((delay_cast + delay_cast_per_skl * (skill_lv)) * (delay_cast_mode_per * enhance + 1.0f));
 }
 
-uint SkillBase::GetCoolTime(int enhance) const
+uint32_t SkillBase::GetCoolTime(int32_t enhance) const
 {
     return sWorld.getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : static_cast<uint32_t>(delay_cooltime * (delay_cooltime_mode * enhance + 1.0f));
 }
 
-int SkillBase::GetNeedJobPoint(int skill_lv)
+int32_t SkillBase::GetNeedJobPoint(int32_t skill_lv)
 {
-    int result;
+    int32_t result;
 
     if (skill_lv <= 50)
         result = this->m_need_jp[skill_lv - 1];
@@ -126,17 +126,17 @@ bool SkillBase::IsUsable(uint8_t nUseIndex) const
     }
 }
 
-int SkillBase::GetCostEnergy(uint8_t skill_lv) const
+int32_t SkillBase::GetCostEnergy(uint8_t skill_lv) const
 {
     return static_cast<int32_t>((cost_energy_per_skl * skill_lv) + cost_energy);
 }
 
-int SkillBase::GetID() const
+int32_t SkillBase::GetID() const
 {
     return id;
 }
 
-int SkillBase::GetNameID() const
+int32_t SkillBase::GetNameID() const
 {
     return text_id;
 }
@@ -178,32 +178,32 @@ bool SkillBase::IsToggle() const
     return is_toggle;
 }
 
-int SkillBase::GetCastRange() const
+int32_t SkillBase::GetCastRange() const
 {
     return cast_range;
 }
 
-int SkillBase::GetValidRange() const
+int32_t SkillBase::GetValidRange() const
 {
     return valid_range;
 }
 
-int SkillBase::GetToggleGroup() const
+int32_t SkillBase::GetToggleGroup() const
 {
     return toggle_group;
 }
 
-int SkillBase::GetSkillTargetType() const
+int32_t SkillBase::GetSkillTargetType() const
 {
     return target;
 }
 
-int SkillBase::GetSkillEffectType() const
+int32_t SkillBase::GetSkillEffectType() const
 {
     return effect_type;
 }
 
-int SkillBase::GetElementalType() const
+int32_t SkillBase::GetElementalType() const
 {
     return elemental;
 }
@@ -228,17 +228,17 @@ bool SkillBase::IsSystemSkill() const
     return is_valid == ST_SYSTEM;
 }
 
-int SkillBase::GetCriticalBonus(int skill_lv) const
+int32_t SkillBase::GetCriticalBonus(int32_t skill_lv) const
 {
     return critical_bonus + critical_bonus_per_skl * skill_lv;
 }
 
-int32_t SkillBase::GetCostEXP(int skill_lv, int enhance) const
+int32_t SkillBase::GetCostEXP(int32_t skill_lv, int32_t enhance) const
 {
     return cost_exp + cost_exp_per_enhance * enhance;
 }
 
-int32_t SkillBase::GetCostJP(int skill_lv, int enhance) const
+int32_t SkillBase::GetCostJP(int32_t skill_lv, int32_t enhance) const
 {
     return cost_jp + cost_jp_per_enhance * enhance;
 }
@@ -248,37 +248,37 @@ int32_t SkillBase::GetCostItemCode() const
     return cost_item;
 }
 
-int64_t SkillBase::GetCostItemCount(int skill_lv) const
+int64_t SkillBase::GetCostItemCount(int32_t skill_lv) const
 {
     return cost_item_count + (skill_lv * cost_item_count_per);
 }
 
-int32_t SkillBase::GetCostHP(int skill_lv) const
+int32_t SkillBase::GetCostHP(int32_t skill_lv) const
 {
     return cost_hp + cost_hp_per_skl * (skill_lv);
 }
 
-float SkillBase::GetCostHPPercent(int skill_lv) const
+float SkillBase::GetCostHPPercent(int32_t skill_lv) const
 {
     return cost_hp_per + cost_hp_per_skl_per * skill_lv;
 }
 
-int32_t SkillBase::GetCostMP(int skill_lv, int enhance) const
+int32_t SkillBase::GetCostMP(int32_t skill_lv, int32_t enhance) const
 {
     return cost_mp + cost_mp_per_skl * (skill_lv) + cost_mp_per_enhance * (enhance);
 }
 
-float SkillBase::GetCostMPPercent(int skill_lv) const
+float SkillBase::GetCostMPPercent(int32_t skill_lv) const
 {
     return cost_mp_per + cost_mp_per_skl_per * skill_lv;
 }
 
-int32_t SkillBase::GetCostHavoc(int skill_lv) const
+int32_t SkillBase::GetCostHavoc(int32_t skill_lv) const
 {
     return cost_havoc + cost_havoc_per_skl * (skill_lv);
 }
 
-int32_t SkillBase::GetCostEnergy(int skill_lv) const
+int32_t SkillBase::GetCostEnergy(int32_t skill_lv) const
 {
     return cost_energy + cost_energy_per_skl * (skill_lv);
 }
@@ -333,17 +333,17 @@ uint32_t SkillBase::GetFireRange() const
     return valid_range * 12;
 }
 
-int SkillBase::GetStateId() const
+int32_t SkillBase::GetStateId() const
 {
     return state_id;
 }
 
-int SkillBase::GetProbabilityOnHit(int slv) const
+int32_t SkillBase::GetProbabilityOnHit(int32_t slv) const
 {
     return probability_on_hit + slv * probability_inc_by_slv;
 }
 
-int SkillBase::GetStateType() const
+int32_t SkillBase::GetStateType() const
 {
     return state_type;
 }
@@ -363,15 +363,15 @@ bool SkillBase::IsUseableOnAvatar() const
     return tf_avatar;
 }
 
-int SkillBase::GetHatePoint(int lv, int point, int enhance) const
+int32_t SkillBase::GetHatePoint(int32_t lv, int32_t point, int32_t enhance) const
 {
     if (hate_mod == 0)
         return 0;
 
     if (hate_mod < 0)
-        return (int)(hate_basic + lv * hate_per_skl + enhance * hate_per_enhance);
+        return (int32_t)(hate_basic + lv * hate_per_skl + enhance * hate_per_enhance);
 
-    return (int)(hate_basic + point * hate_mod);
+    return (int32_t)(hate_basic + point * hate_mod);
 }
 
 uint32_t SkillBase::GetCommonDelay() const

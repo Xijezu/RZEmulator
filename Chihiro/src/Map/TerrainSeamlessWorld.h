@@ -20,30 +20,30 @@
 
 struct KRect
 {
-    int left;
-    int top;
-    int right;
-    int bottom;
+    int32_t left;
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
 };
 
 struct KPoint
 {
-    int x;
-    int y;
+    int32_t x;
+    int32_t y;
 };
 
 struct KSize
 {
-    int width;
-    int cx;
-    int height;
-    int cy;
+    int32_t width;
+    int32_t cx;
+    int32_t height;
+    int32_t cy;
 };
 
 struct FilenameMapInfo
 {
     std::string m_strMapFileName;
-    int         m_nWorldID;
+    int32_t         m_nWorldID;
 };
 
 class TerrainSeamlessWorldInfo
@@ -54,23 +54,23 @@ class TerrainSeamlessWorldInfo
 
         bool Initialize(std::string szFilename, bool bMapFileCheck);
 
-        int GetWorldID(int nMapPosX, int nMapPosY);
+        int32_t GetWorldID(int32_t nMapPosX, int32_t nMapPosY);
         float GetFOV();
-        std::string GetLQWaterFileName(int nMapPosX, int nMapPosY);
-        std::string GetMinimapImageFileName(int nMapPosX, int nMapPosY);
-        std::string GetFieldPropFileName(int nMapPosX, int nMapPosY);
-        std::string GetAttributePolygonFileName(int nMapPosX, int nMapPosY);
-        std::string GetLocationFileName(int nMapPosX, int nMapPosY);
-        std::string GetScriptFileName(int nMapPosX, int nMapPosY);
-        std::string GetMapFileName(int nMapPosX, int nMapPosY);
-        std::string GetFileNameWithExt(int nMapPosX, int nMapPosY, std::string ext);
+        std::string GetLQWaterFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetMinimapImageFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetFieldPropFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetAttributePolygonFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetLocationFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetScriptFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetMapFileName(int32_t nMapPosX, int32_t nMapPosY);
+        std::string GetFileNameWithExt(int32_t nMapPosX, int32_t nMapPosY, std::string ext);
 
-        int   m_nTileCountPerSegment{ };
-        int   m_nSegmentCountPerMap{ };
+        int32_t   m_nTileCountPerSegment{ };
+        int32_t   m_nSegmentCountPerMap{ };
         float m_fTileLength{ };
         float m_fFOV{ };
         KSize m_sizMapCount{ };
-        int   m_nMapLayer{ };
+        int32_t   m_nMapLayer{ };
 
         std::map<int, FilenameMapInfo> m_FileNameMap{ };
 };

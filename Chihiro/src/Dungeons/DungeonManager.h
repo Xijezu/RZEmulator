@@ -22,18 +22,18 @@
 
 struct DungeonTemplate
 {
-    int id;
-    int level;
+    int32_t id;
+    int32_t level;
     Position raid_start_pos;
     Position siege_start_pos;
     Position siege_defense_pos;
     Position core_pos;
     Position connector_pos;
-    int core_id;
-    int start_time;
-    int end_time;
-    int raid_start_time;
-    int raid_end_time;
+    int32_t core_id;
+    int32_t start_time;
+    int32_t end_time;
+    int32_t raid_start_time;
+    int32_t raid_end_time;
     float core_offset_x;
     float core_offset_y;
     float core_offset_z;
@@ -45,13 +45,13 @@ struct DungeonTemplate
     float core_scale_z;
     bool core_is_lock_height;
     float core_lock_height;
-    int boss_id[2];
+    int32_t boss_id[2];
     X2D::Boxf box;
-    int connector_id;
-    int owner_guild_id;
-    int raid_guild_id;
-    uint best_raid_time;
-    int original_owner_guild_id;
+    int32_t connector_id;
+    int32_t owner_guild_id;
+    int32_t raid_guild_id;
+    uint32_t best_raid_time;
+    int32_t original_owner_guild_id;
     uint64_t last_global_notice_time;
     uint64_t last_dungeon_siege_finish_time;
     uint64_t last_dungeon_raid_wrap_up_time;
@@ -60,9 +60,9 @@ struct DungeonTemplate
     bool bDungeonSiegeKicked;
     bool bDungeonSiegeNeedToDestroy;
     bool bNeedToChangePosition;
-    int max_guild_party;
-    int max_raid_party;
-    int tax_rate;
+    int32_t max_guild_party;
+    int32_t max_raid_party;
+    int32_t tax_rate;
 };
 
 class DungeonManager
@@ -79,16 +79,16 @@ class DungeonManager
     /// \brief Gets the startlocation of the dungeon (used for enter_dungeon() for example)
     /// \param nDungeonID DungeonID
     /// \return the correct position
-    Position GetRaidStartPosition(int nDungeonID);
+    Position GetRaidStartPosition(int32_t nDungeonID);
     /// \brief Gets the dungeon ID from coordinates
     /// \param x X coord
     /// \param y Y coord
     /// \return DungeonID on success, 0 on failure
-    int GetDungeonID(float x, float y);
+    int32_t GetDungeonID(float x, float y);
     /// \brief Registers our template to the list
     void RegisterDungeonTemplate(DungeonTemplate);
-    /*Position GetSiegeStartPosition(int nDungeonID);
-        Position GetSiegeDefencePosition(int nDungeonID);*/
+    /*Position GetSiegeStartPosition(int32_t nDungeonID);
+        Position GetSiegeDefencePosition(int32_t nDungeonID);*/
   private:
     std::vector<DungeonTemplate> m_vDungeonInfo{};
 

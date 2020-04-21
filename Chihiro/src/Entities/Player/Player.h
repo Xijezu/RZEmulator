@@ -28,7 +28,7 @@ class Item;
 class Summon;
 class WorldLocation;
 
-constexpr int MAX_ITEM_COOLTIME_GROUP = 20;
+constexpr int32_t MAX_ITEM_COOLTIME_GROUP = 20;
 
 enum BONUS_TYPE : int
 {
@@ -77,10 +77,10 @@ enum struct JOB_RACE : int32_t
 
 struct BonusInfo
 {
-    int type;
-    int rate;
+    int32_t type;
+    int32_t rate;
     int64_t exp;
-    int jp;
+    int32_t jp;
 };
 
 enum CONDITION_INFO : int
@@ -92,7 +92,7 @@ enum CONDITION_INFO : int
 
 class Player : public Unit, public QuestEventHandler, public InventoryEventReceiver
 {
-  public:
+public:
     friend class Messages;
     friend class Summon;
     friend class WorldSession;
@@ -118,62 +118,62 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     int32_t GetAccountID() const { return GetInt32Value(PLAYER_FIELD_ACCOUNT_ID); }
 
-    void UpdateQuestStatusByMonsterKill(int monster_id);
-    void GetQuestByMonster(int monster_id, std::vector<Quest *> &vQuest, int type);
-    void StartQuest(int code, int nStartQuestID, bool bForce);
-    void EndQuest(int code, int nRewardID, bool bForce);
+    void UpdateQuestStatusByMonsterKill(int32_t monster_id);
+    void GetQuestByMonster(int32_t monster_id, std::vector<Quest *> &vQuest, int32_t type);
+    void StartQuest(int32_t code, int32_t nStartQuestID, bool bForce);
+    void EndQuest(int32_t code, int32_t nRewardID, bool bForce);
     void UpdateQuestStatusByItemUpgrade();
-    void onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus) override;
+    void onStatusChanged(Quest *quest, int32_t nOldStatus, int32_t nNewStatus) override;
     void onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress) override;
-    int GetQuestProgress(int nQuestID);
+    int32_t GetQuestProgress(int32_t nQuestID);
 
-    int GetActiveQuestCount() const { return (int)m_QuestManager.m_vActiveQuest.size(); }
+    int32_t GetActiveQuestCount() const { return (int32_t)m_QuestManager.m_vActiveQuest.size(); }
 
-    bool IsTakeableQuestItem(int code) { return m_QuestManager.IsTakeableQuestItem(code); }
+    bool IsTakeableQuestItem(int32_t code) { return m_QuestManager.IsTakeableQuestItem(code); }
     bool IsTakeable(uint32_t nItemHandle, int64_t cnt);
 
-    bool CheckFinishableQuestAndGetQuestStruct(int code, Quest *&pQuest, bool bForce);
-    bool IsInProgressQuest(int code);
-    bool IsStartableQuest(int code, bool bForQuestMark);
-    bool IsFinishableQuest(int code);
-    bool CheckFinishableQuestAndGetQuestStruct(int code);
-    Quest *FindQuest(int code);
-    bool DropQuest(int code);
+    bool CheckFinishableQuestAndGetQuestStruct(int32_t code, Quest *&pQuest, bool bForce);
+    bool IsInProgressQuest(int32_t code);
+    bool IsStartableQuest(int32_t code, bool bForQuestMark);
+    bool IsFinishableQuest(int32_t code);
+    bool CheckFinishableQuestAndGetQuestStruct(int32_t code);
+    Quest *FindQuest(int32_t code);
+    bool DropQuest(int32_t code);
 
     Summon *GetRideObject() const;
     uint32_t GetRideHandle() const;
 
     /* ****************** QUEST END *******************/
 
-    int GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
+    int32_t GetPermission() const { return GetInt32Value(PLAYER_FIELD_PERMISSION); }
     int64_t GetGold() const { return GetUInt64Value(PLAYER_FIELD_GOLD); }
     uint32_t GetTamingTarget() const { return m_hTamingTarget; }
     Summon *GetMainSummon() const { return m_pMainSummon; }
     Summon *GetSubSummon() const { return m_pSubSummon; }
     int64_t GetTradeGold() const { return GetUInt64Value(PLAYER_FIELD_TRADE_GOLD); }
     int64_t GetStorageGold() const { return GetUInt64Value(PLAYER_FIELD_STORAGE_GOLD); }
-    int GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
-    int GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
+    int32_t GetPartyID() const { return GetInt32Value(PLAYER_FIELD_PARTY_ID); }
+    int32_t GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
     bool HasRidingState() { return GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0; }
     bool IsRiding() { return GetInt32Value(PLAYER_FIELD_RIDING_IDX) != MOUNT_NOTHING; }
     float GetWeight() const { return GetFloatValue(PLAYER_FIELD_WEIGHT); }
 
-    int AddStamina(int nStamina);
-    int GetStaminaRegenRate();
+    int32_t AddStamina(int32_t nStamina);
+    int32_t GetStaminaRegenRate();
     CONDITION_INFO GetCondition() const;
     bool IsSitdownable();
 
     bool IsSitDown() const override { return m_bSitdown; }
 
-    int GetJobDepth();
+    int32_t GetJobDepth();
 
     std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
     /* ****************** DATABASE *******************/
-    bool ReadCharacter(const std::string &, int);
-    bool ReadItemList(int);
-    bool ReadItemCoolTimeList(int);
-    bool ReadSummonList(int);
+    bool ReadCharacter(const std::string &, int32_t);
+    bool ReadItemList(int32_t);
+    bool ReadItemCoolTimeList(int32_t);
+    bool ReadSummonList(int32_t);
     bool ReadEquipItem();
     bool ReadSkillList(Unit *);
     bool ReadQuestList();
@@ -184,12 +184,12 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     /* ****************** DATABASE END *******************/
 
     // Warping
-    void PendWarp(int x, int y, uint8_t layer);
+    void PendWarp(int32_t x, int32_t y, uint8_t layer);
 
     void SetCharacterFlag(const std::string &key, const std::string &value);
 
     // Summon
-    void LogoutNow(int callerIdx);
+    void LogoutNow(int32_t callerIdx);
     void RemoveAllSummonFromWorld();
     void EnumSummonPassiveSkill(struct SkillFunctor &fn) const;
     void EnumSummonAmplifySkill(struct SkillFunctor &fn) const;
@@ -199,22 +199,22 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void SendJobInfo();
     void SendWearInfo();
 
-    Summon *GetSummon(int);
-    Summon *GetSummonByHandle(uint);
+    Summon *GetSummon(int32_t);
+    Summon *GetSummonByHandle(uint32_t);
     void AddSummon(Summon *, bool);
     void UnMount(const uint8_t flag = UNMOUNT_NORMAL, Unit *pCauser = nullptr);
 
     // Database
-    void Update(uint diff) override;
+    void Update(uint32_t diff) override;
     void OnUpdate() override;
     void Save(bool);
 
     // Item relevant
-    Item *FindItemByCode(int);
+    Item *FindItemByCode(int32_t);
     Item *FindItemBySID(int64_t);
-    Item *FindItemByHandle(uint);
-    Item *FindItem(uint code, uint flag, bool bFlag);
-    Item *FindStorageItem(int code);
+    Item *FindItemByHandle(uint32_t);
+    Item *FindItem(uint32_t code, uint32_t flag, bool bFlag);
+    Item *FindStorageItem(int32_t code);
     /* InventoryEventReceiver Start*/
     void onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
     void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) override;
@@ -222,10 +222,10 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     /* InventoryEventReceiver End*/
     Item *PushItem(Item *, int64_t, bool = false);
     Item *PopItem(Item *, int64_t, bool = false);
-    Item *GetItem(uint idx);
-    Item *GetStorageItem(uint idx);
-    uint GetItemCount() const;
-    uint GetStorageItemCount() const;
+    Item *GetItem(uint32_t idx);
+    Item *GetStorageItem(uint32_t idx);
+    uint32_t GetItemCount() const;
+    uint32_t GetStorageItemCount() const;
     bool GiveItem(Player *pTarget, uint32_t ItemHandle, int64_t count);
     Item *DropItem(Player *pTarget, Item *pItem, int64_t count);
     bool MoveStorageToInventory(Item *pItem, int64_t count);
@@ -258,7 +258,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     bool CheckTradeWeight();
     bool CheckTradeItem();
 
-    void AddEXP(int64_t exp, uint jp, bool bApplyStamina) override;
+    void AddEXP(int64_t exp, uint32_t jp, bool bApplyStamina) override;
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
     void SendItemWearInfoMessage(Item *item, Unit *u);
@@ -271,7 +271,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     void SetLastContact(const std::string &, const std::string &);
     std::string GetLastContactStr(const std::string &);
     uint32_t GetLastContactLong(const std::string &);
-    void SetDialogTitle(const std::string &, int);
+    void SetDialogTitle(const std::string &, int32_t);
     void SetDialogText(const std::string &);
     void AddDialogMenu(const std::string &, const std::string &);
     void ClearDialogMenu();
@@ -295,7 +295,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     bool IsInDungeon();
     /* ****************** WORLDLOCATION END *******************/
 
-    void onChangeProperty(std::string, int);
+    void onChangeProperty(std::string, int32_t);
     Position GetLastTownPosition();
 
     void DoSummon(Summon *pSummon, Position pPosition);
@@ -310,17 +310,17 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     bool IsPlayer() const override { return true; }
 
-    int GetMoveSpeed() override;
+    int32_t GetMoveSpeed() override;
 
-    bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int> *ItemList) override;
+    bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList) override;
 
     CreatureStat *GetBaseStat() const override;
     Inventory *GetInventory() { return &m_Inventory; }
 
-    uint GetCreatureGroup() const override { return 9; }
+    uint32_t GetCreatureGroup() const override { return 9; }
 
-    ushort ChangeGold(int64_t);
-    ushort ChangeStorageGold(int64_t);
+    uint16_t ChangeGold(int64_t);
+    uint16_t ChangeStorageGold(int64_t);
 
     uint16_t IsUseableItem(Item *pItem, Unit *pTarget);
     uint16_t UseItem(Item *pItem, Unit *pTarget, const std::string &szParameter);
@@ -349,49 +349,49 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
 
     Item *m_aBindSummonCard[6]{nullptr};
     WorldLocation *m_WorldLocation{nullptr};
-    int m_nWorldLocationId{0};
+    int32_t m_nWorldLocationId{0};
     TimeSynch m_TS{200, 2, 10};
 
     Summon *m_pMainSummon{nullptr};
     Summon *m_pSubSummon{nullptr};
-    uint m_hTamingTarget{};
-    int GetChaos() const;
-    int GetMaxChaos() const;
+    uint32_t m_hTamingTarget{};
+    int32_t GetChaos() const;
+    int32_t GetMaxChaos() const;
     inline bool IsInParty() const { return GetPartyID() != 0; }
-    void AddChaos(int chaos);
+    void AddChaos(int32_t chaos);
     bool m_bSitdown{false};
     bool m_bTrading{false};
     bool m_bTradeFreezed{false};
     bool m_bTradeAccepted{false};
 
-  protected:
+protected:
     bool isInLocationType(uint8_t nLocationType);
     void onCompleteCalculateStat() override;
     void onBeforeCalculateStat() override;
-    void onRegisterSkill(int64_t skillUID, int skill_id, int prev_level, int skill_level) override;
-    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int type, float var1, float var2, float fRatio) override;
+    void onRegisterSkill(int64_t skillUID, int32_t skill_id, int32_t prev_level, int32_t skill_level) override;
+    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio) override;
     void onExpChange() override;
     void onEnergyChange() override;
     void onJobLevelUp() override;
-    void onCantAttack(uint target, uint t) override;
+    void onCantAttack(uint32_t target, uint32_t t) override;
     void onModifyStatAndAttribute() override;
     void applyPassiveSkillEffect(Skill *skill) override;
     void applyState(State &state) override;
     void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
-    int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int nDamage, bool bCritical) override;
+    int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical) override;
 
     void onStartQuest(Quest *pQuest);
     void updateQuestStatus(Quest *pQuest);
     void onEndQuest(Quest *pQuest);
 
-  private:
+private:
     void onDropQuest(Quest *pQuest);
     void openStorage();
     void setSummonUpdate();
     Item *popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB);
 
     void applyCharm(Item *pItem);
-    void setBonusMsg(BONUS_TYPE type, int nBonusPerc, int64_t nBonusEXP, int nBonusJP);
+    void setBonusMsg(BONUS_TYPE type, int32_t nBonusPerc, int64_t nBonusEXP, int32_t nBonusJP);
     void clearPendingBonusMsg();
     void sendBonusEXPJPMsg();
 
@@ -407,7 +407,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     float m_fActiveSummonExpAmp{0.0f};
     float m_fDeactiveSummonExpAmp{0.0f};
 
-    uint m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
+    uint32_t m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 
     std::unordered_map<std::string, std::string> m_lFlagList{};
     std::unordered_map<std::string, std::string> m_hsContact{};
@@ -430,7 +430,7 @@ class Player : public Unit, public QuestEventHandler, public InventoryEventRecei
     bool m_bIsUsingStorage{false};
 
     // Dialog stuff
-    int m_nDialogType{};
+    int32_t m_nDialogType{};
     bool m_bNonNPCDialog{false};
     std::string m_szDialogTitle{};
     std::string m_szDialogText{};

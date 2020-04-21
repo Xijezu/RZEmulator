@@ -147,7 +147,7 @@ enum EPlayerFields
 class ArRegion;
 class Object
 {
-  public:
+public:
     // Deleting the copy & assignment operators
     // Better safe than sorry
     Object(const Object &) = delete;
@@ -340,7 +340,7 @@ class Object
 
     virtual bool IsSkillProp() const { return false; }
 
-  protected:
+protected:
     Object();
     void _InitValues();
     uint16_t m_updateFlag;
@@ -357,7 +357,7 @@ class Object
     ObjType _objType;
     SubType _subType;
 
-  private:
+private:
     bool m_inWorld;
     bool m_bDeleteRequest;
 
@@ -536,17 +536,17 @@ struct Position
 
 class ArMoveVector : public Position
 {
-  public:
+public:
     ArMoveVector() = default;
     ~ArMoveVector() = default;
 
-    virtual bool Step(uint current_time);
+    virtual bool Step(uint32_t current_time);
     void Copy(const ArMoveVector &);
-    virtual void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint _start_time, uint current_time);
-    virtual void SetMove(Position _to, uint8_t _speed, uint _start_time, uint current_time);
+    virtual void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
+    virtual void SetMove(Position _to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
     void SetDirection(Position pos);
     Position GetTargetPos();
-    bool IsMoving(uint t);
+    bool IsMoving(uint32_t t);
     bool IsMoving() const { return bIsMoving; };
 
     void StopMove()
@@ -557,7 +557,7 @@ class ArMoveVector : public Position
 
     struct MoveInfo
     {
-        MoveInfo(Position pos, uint t)
+        MoveInfo(Position pos, uint32_t t)
         {
             end = Position(pos);
             end_time = t;
@@ -569,18 +569,18 @@ class ArMoveVector : public Position
         }
 
         Position end{};
-        uint end_time{};
+        uint32_t end_time{};
     };
 
-  public:
+public:
     bool bIsMoving{false};
     bool bWithZMoving{false};
     uint8_t speed{};
-    uint start_time{};
-    uint proc_time{};
+    uint32_t start_time{};
+    uint32_t proc_time{};
     bool bHasDirectionChanged{false};
     Position direction{};
-    uint lastStepTime{};
+    uint32_t lastStepTime{};
 
     std::vector<MoveInfo> ends{};
 };
@@ -590,7 +590,7 @@ class Region;
 
 class WorldObject : public Object, public ArMoveVector
 {
-  public:
+public:
     // Deleting the copy & assignment operators
     // Better safe than sorry
     WorldObject(const WorldObject &) = delete;
@@ -602,7 +602,7 @@ class WorldObject : public Object, public ArMoveVector
     virtual void Update(uint32_t /*time_diff*/) {}
 
     bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
-    bool Step(uint tm) override;
+    bool Step(uint32_t tm) override;
 
     virtual float GetScale() const { return 1.0f; }
 
@@ -611,12 +611,12 @@ class WorldObject : public Object, public ArMoveVector
     float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
 
     void SendEnterMsg(Player *);
-    void AddNoise(int, int, int);
+    void AddNoise(int, int, int32_t);
 
     void AddToWorld() override;
     void RemoveFromWorld() override;
 
-    Position GetCurrentPosition(uint t);
+    Position GetCurrentPosition(uint32_t t);
 
     const char *GetName() const { return m_name.c_str(); }
 
@@ -625,10 +625,10 @@ class WorldObject : public Object, public ArMoveVector
     void SetName(const std::string &newname) { m_name = newname; }
 
     Region *pRegion{nullptr};
-    int region_index;
+    int32_t region_index;
     bool _bIsInWorld{false};
 
-  protected:
+protected:
     explicit WorldObject(bool isWorldObject); //note: here it means if it is in grid object list or world object list
     std::vector<Position> m_PendingMovePos{};
     uint8_t m_nPendingMoveSpeed{};

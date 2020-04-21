@@ -7,21 +7,17 @@ matrix:
     - addons:
         apt:
           sources:
-            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages:
-            - boost1.67
             - g++-8
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
     - addons:
         apt:
           sources:
-            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
-            - boost1.67
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
 
@@ -30,11 +26,12 @@ branches:
     - master
 
 before_install:
-  - sudo apt-get install libmysqlclient-dev libmysql++-dev
+  - sudo apt-get install xutils-dev
+  - sudo pip install conan
   - eval "${MATRIX_EVAL}"
 
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
   - make -j8

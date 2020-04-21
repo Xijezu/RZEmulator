@@ -22,15 +22,15 @@ class Quest;
 class Player;
 struct QuestEventHandler
 {
-    virtual void onStatusChanged(Quest *quest, int nOldStatus, int nNewStatus) = 0;
+    virtual void onStatusChanged(Quest *quest, int32_t nOldStatus, int32_t nNewStatus) = 0;
     virtual void onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress) = 0;
 };
 
 class Quest
 {
     public:
-        static Quest *AllocQuest(QuestEventHandler *handler, int nID, int code, const int status[], QuestProgress progress, int nStartID);
-        static bool IsRandomQuest(int code);
+        static Quest *AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, const int32_t status[], QuestProgress progress, int32_t nStartID);
+        static bool IsRandomQuest(int32_t code);
         static void DB_Insert(Player *pPlayer, Quest *pQuest);
 
         Quest() = default;
@@ -42,18 +42,18 @@ class Quest
         Quest &operator=(const Quest &) = delete;
 
         void FreeQuest();
-        int GetQuestCode() const;
+        int32_t GetQuestCode() const;
         QuestInstance *GetQuestInstance();
-        int GetQuestID() const;
+        int32_t GetQuestID() const;
         QuestType GetQuestType() const;
 
         void SetProgress(QuestProgress progress);
-        int GetValue(int idx) const;
-        int GetStatus(int idx) const;
-        void UpdateStatus(int idx, int value);
-        void IncStatus(int idx, int value);
-        int GetRandomKey(int idx) const;
-        int GetRandomValue(int idx) const;
+        int32_t GetValue(int32_t idx) const;
+        int32_t GetStatus(int32_t idx) const;
+        void UpdateStatus(int32_t idx, int32_t value);
+        void IncStatus(int32_t idx, int32_t value);
+        int32_t GetRandomKey(int32_t idx) const;
+        int32_t GetRandomValue(int32_t idx) const;
         bool IsFinishable() const;
 
         QuestBaseServer   *m_QuestBase{nullptr};

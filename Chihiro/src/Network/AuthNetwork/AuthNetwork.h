@@ -29,7 +29,7 @@
 
 class AuthNetwork
 {
-  public:
+public:
     static AuthNetwork &Instance()
     {
         static AuthNetwork instance;
@@ -120,7 +120,7 @@ class AuthNetwork
         m_pSocket->ClientLogoutToAuth(account);
     }
 
-  private:
+private:
     bool m_bClosed;
     std::shared_ptr<GameAuthSession> m_pSocket;
     std::unique_ptr<std::thread> m_pThread;
@@ -128,7 +128,7 @@ class AuthNetwork
     std::unique_ptr<NetworkThread> m_pNetworkThread;
     NG_SHARED_MUTEX _mutex;
 
-  protected:
+protected:
     AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr){};
 };
 

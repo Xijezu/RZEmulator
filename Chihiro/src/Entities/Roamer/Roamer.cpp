@@ -2,7 +2,7 @@
 #include "MemPool.h"
 #include "World.h"
 /*
-Roamer::Roamer(const int nID, const Roamer::ROAMING_TYPE eRoamingType, const int nMoveSpeed, const HATE_TYPE eHateType, const uint32_t nRespawnInterval, const int nAttributeFlag, const bool bIsRaidDungeonRoamer)
+Roamer::Roamer(const int32_t nID, const Roamer::ROAMING_TYPE eRoamingType, const int32_t nMoveSpeed, const HATE_TYPE eHateType, const uint32_t nRespawnInterval, const int32_t nAttributeFlag, const bool bIsRaidDungeonRoamer)
     : WorldObject(true), m_nID(nID), m_nMoveSpeed(nMoveSpeed), m_eRoamingType(eRoamingType), m_eHateType(eHateType), m_nRespawnInterval(nRespawnInterval), m_bIsRaidDungeonRoamer(bIsRaidDungeonRoamer), m_eCurrentRoamingDirection(ROAMING_DIRECTION_FORWARD), m_nCurrentRoamingPointIndex(0), m_eRoamingStatus(ROAMING_STATUS_IDLE), m_nNextRespawnProcTime(0), m_nLastRegenCount(0)
 {
     //m_AttributeFlag = nAttri( &nAttributeFlag );
