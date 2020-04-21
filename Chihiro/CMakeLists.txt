@@ -33,7 +33,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Server
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Skills
         ${CMAKE_CURRENT_SOURCE_DIR}/src/World
-        ${CMAKE_SOURCE_DIR}/dep/sol2/single/sol
+        ${CMAKE_SOURCE_DIR}/dep/sol2/single/include/sol
         ${CMAKE_SOURCE_DIR}/dep/liblua
         ${SHARED_INCLUDE_DIR})
 if (UNIX)

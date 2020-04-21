@@ -14,16 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "sol.hpp"
 
 class Unit;
-class XLua
-{
+class XLua {
   public:
-    static XLua &Instance()
-    {
+    static XLua &Instance() {
         static XLua instance;
         return instance;
     }
@@ -40,9 +38,7 @@ class XLua
     bool RunString(std::string);
 
   private:
-    template <typename T>
-    sol::object return_object(T &&value)
-    {
+    template <typename T> sol::object return_object(T &&value) {
         sol::stack::push(m_pState.lua_state(), std::forward<T>(value));
         sol::object r = sol::stack::pop<sol::object>(m_pState.lua_state());
         return r;
