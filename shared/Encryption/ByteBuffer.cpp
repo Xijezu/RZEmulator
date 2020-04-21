@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "ByteBuffer.h"
 #include "Common.h"
@@ -23,25 +23,23 @@
 
 #include <sstream>
 
-ByteBuffer::ByteBuffer(MessageBuffer &&buffer) : _rpos(0), _wpos(0), _curbitval(0), _storage(buffer.Move())
-{
-}
+ByteBuffer::ByteBuffer(MessageBuffer &&buffer)
+    : _rpos(0), _wpos(0), _curbitval(0), _storage(buffer.Move()) {}
 
-ByteBufferPositionException::ByteBufferPositionException(bool /*add*/, size_t pos,
-                                                         size_t size, size_t valueSize)
-{
+ByteBufferPositionException::ByteBufferPositionException(bool /*add*/,
+                                                         size_t pos,
+                                                         size_t size,
+                                                         size_t valueSize) {
     std::ostringstream ss;
 
-    ss << "Attempted to get value with size: "
-       << valueSize << " in ByteBuffer (pos: " << pos << " size: " << size
-       << ")";
+    ss << "Attempted to get value with size: " << valueSize
+       << " in ByteBuffer (pos: " << pos << " size: " << size << ")";
 
     message().assign(ss.str());
 }
 
 ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size,
-                                                     size_t valueSize)
-{
+                                                     size_t valueSize) {
     std::ostringstream ss;
 
     ss << "Attempted to put a "
@@ -51,9 +49,9 @@ ByteBufferSourceException::ByteBufferSourceException(size_t pos, size_t size,
     message().assign(ss.str());
 }
 
-void ByteBuffer::print_storage() const
-{
-    if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
+void ByteBuffer::print_storage() const {
+    if (!sLog->ShouldLog("network",
+                         LOG_LEVEL_TRACE)) // optimize disabled trace output
         return;
 
     std::ostringstream o;
@@ -65,15 +63,14 @@ void ByteBuffer::print_storage() const
     NG_LOG_TRACE("network", "%s", o.str().c_str());
 }
 
-void ByteBuffer::textlike() const
-{
-    if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
+void ByteBuffer::textlike() const {
+    if (!sLog->ShouldLog("network",
+                         LOG_LEVEL_TRACE)) // optimize disabled trace output
         return;
 
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
-    for (uint32_t i = 0; i < size(); ++i)
-    {
+    for (uint32_t i = 0; i < size(); ++i) {
         char buf[1];
         snprintf(buf, 1, "%c", read<uint8_t>(i));
         o << buf;
@@ -82,9 +79,9 @@ void ByteBuffer::textlike() const
     NG_LOG_DEBUG("network", "%s", o.str().c_str());
 }
 
-void ByteBuffer::hexlike() const
-{
-    if (!sLog->ShouldLog("network", LOG_LEVEL_TRACE)) // optimize disabled trace output
+void ByteBuffer::hexlike() const {
+    if (!sLog->ShouldLog("network",
+                         LOG_LEVEL_TRACE)) // optimize disabled trace output
         return;
 
     uint32_t j = 1, k = 1;
@@ -92,17 +89,13 @@ void ByteBuffer::hexlike() const
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
 
-    for (uint32_t i = 0; i < size(); ++i)
-    {
+    for (uint32_t i = 0; i < size(); ++i) {
         char buf[3];
         snprintf(buf, 1, "%2X ", read<uint8_t>(i));
-        if ((i == (j * 8)) && ((i != (k * 16))))
-        {
+        if ((i == (j * 8)) && ((i != (k * 16)))) {
             o << "| ";
             ++j;
-        }
-        else if (i == (k * 16))
-        {
+        } else if (i == (k * 16)) {
             o << "\n";
             ++k;
             ++j;

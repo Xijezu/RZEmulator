@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "MessageBuffer.h"
 #include "Log.h"
+#include "MessageBuffer.h"
 #include <atomic>
-#include <queue>
-#include <memory>
-#include <functional>
-#include <type_traits>
 #include <boost/asio/ip/tcp.hpp>
+#include <functional>
+#include <memory>
+#include <queue>
+#include <type_traits>
 
 using boost::asio::ip::tcp;
 
@@ -61,7 +61,7 @@ using boost::asio::ip::tcp;
 template <class T, class Stream = tcp::socket>
 class Socket : public std::enable_shared_from_this<T>
 {
-  public:
+public:
     explicit Socket(tcp::socket &&socket) : _socket(std::move(socket)), _remoteAddress(_socket.remote_endpoint().address()),
                                             _remotePort(_socket.remote_endpoint().port()), _readBuffer(), _closed(false), _closing(false), _isWritingAsync(false)
     {
@@ -155,7 +155,7 @@ class Socket : public std::enable_shared_from_this<T>
 
     MessageBuffer &GetReadBuffer() { return _readBuffer; }
 
-  protected:
+protected:
     virtual void OnClose() {}
 
     virtual void ReadHandler() = 0;
@@ -193,7 +193,7 @@ class Socket : public std::enable_shared_from_this<T>
         return _socket;
     }
 
-  private:
+private:
     void ReadHandlerInternal(boost::system::error_code error, size_t transferredBytes)
     {
         if (error)
