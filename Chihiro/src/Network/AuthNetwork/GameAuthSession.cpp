@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017-2020 NGemity <https://ngemity.org/>
+ *  Copyright (C) 2017-2019 NGemity <https://ngemity.org/>
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -28,7 +28,8 @@ GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket) : XSocke
     m_szGameName = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
     m_szGameSSU = sConfigMgr->GetStringDefault("GameServer.SSU", "about:blank");
     m_bGameIsAdultServer = sConfigMgr->GetIntDefault("GameServer.AdultServer", 0) != 0;
-    m_szGameIP = sConfigMgr->GetStringDefault("GameServer.IP", "127.0.0.1");
+    m_szGameIP = sConfigMgr->GetStringDefault("GameServer.IP", "0.0.0.0");
+    m_szExtGameIP = sConfigMgr->GetStringDefault("GameServer.External.IP", "0.0.0.0");
     m_nGamePort = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 }
 
@@ -99,6 +100,8 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 
 void GameAuthSession::AccountToAuth(WorldSession *pSession, const std::string &szLoginName, uint64_t nOneTimeKey)
 {
+	NG_LOG_DEBUG("server.authserver", "Account: %s attempting login w/ OneTimeKey: %d", szLoginName.c_str(), nOneTimeKey);
+	
     m_queue[szLoginName] = pSession;
     TS_GA_CLIENT_LOGIN loginPct{};
     loginPct.account = szLoginName;
@@ -140,12 +143,15 @@ void GameAuthSession::ClientLogoutToAuth(const std::string &szAccount)
 
 void GameAuthSession::SendGameLogin()
 {
+	NG_LOG_DEBUG("GameAuthSession::SendGameLogin()", "Sending Info to Auth...\nIDX: %d\nName: %s\nListening Address: %s:%d\nExternal IP: %s:%d", m_nGameIDX, m_szGameName.c_str(), m_szGameIP.c_str(), m_nGamePort, m_szExtGameIP.c_str(), m_nGamePort); 
+	
     TS_GA_LOGIN loginPct{};
     loginPct.server_idx = m_nGameIDX;
     loginPct.server_name = m_szGameName;
     loginPct.server_screenshot_url = m_szGameSSU;
     loginPct.is_adult_server = static_cast<uint8_t>(m_bGameIsAdultServer ? 1 : 0);
-    loginPct.server_ip = m_szGameIP;
+    loginPct.server_ip = m_szExtGameIP;
+    loginPct.server_external_ip = m_szExtGameIP;
     loginPct.server_port = m_nGamePort;
     SendPacket(loginPct);
 }

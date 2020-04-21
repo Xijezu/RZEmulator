@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017-2020 NGemity <https://ngemity.org/>
+ *  Copyright (C) 2017-2019 NGemity <https://ngemity.org/>
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -113,7 +113,7 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 }
 
 void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
-{
+{	
     std::string szPassword((char *)(pRecvPct->passwordDes.password), sConfigMgr->getCachedConfig().packetVersion >= EPIC_5_1 ? 61 : 32);
     _desCipther.Decrypt(&szPassword[0], (int)szPassword.length());
     szPassword.erase(std::remove(szPassword.begin(), szPassword.end(), '\0'), szPassword.end());
@@ -133,6 +133,8 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
         m_pPlayer->bIsBlocked = (*dbResult)[3].GetBool();
         m_pPlayer->nPermission = (*dbResult)[4].GetInt32();
         m_pPlayer->bIsInGame = false;
+        
+        NG_LOG_DEBUG("server.authserver", "Player/Client %s attempting to login...", m_pPlayer->szLoginName.c_str());
 
         std::transform(m_pPlayer->szLoginName.begin(), m_pPlayer->szLoginName.end(), m_pPlayer->szLoginName.begin(), ::tolower);
 
@@ -159,6 +161,9 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
         _isAuthed = true;
         sPlayerMapList.AddPlayer(m_pPlayer);
         SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, 1);
+          
+        NG_LOG_DEBUG("server.authserver", "Player/Client %s logged in successfully!", m_pPlayer->szLoginName.c_str());
+        
         return;
     }
     SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
@@ -176,8 +181,18 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
     TS_AC_SERVER_LIST serverList{};
     for (auto &x : *map)
     {
+		std::string extIPStr = x.second->server_external_ip;
+		if (extIPStr.compare("0.0.0.0") != 0)
+		{
+			NG_LOG_DEBUG("server.authserver", "Spoofing External Address! : %s:%d", extIPStr, x.second->server_port);
+			x.second->server_ip = extIPStr;
+		}
+				
         serverList.servers.emplace_back(*x.second);
+        NG_LOG_DEBUG("server.authserver", "Server added to serverList:\nID:%d Name:%s IP:%s Port:%d", x.second->server_idx, x.second->server_name, x.second->server_ip, x.second->server_port);
     }
+    
+    NG_LOG_DEBUG("server.authserver", "Sending serverList (count = %d) to client...", serverList.servers.size());
     SendPacket(serverList);
 }
 
@@ -192,6 +207,9 @@ void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
     resultPct.result = (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);
     resultPct.one_time_key = (bExist ? m_pPlayer->nOneTimeKey : 0);
     resultPct.pending_time = 0;
+    
+    NG_LOG_DEBUG("server.authserver", "Server Selection Result for player: %s\n%s\nOneTimeKey: %d", m_pPlayer->szLoginName ,(bExist ? "TS_RESULT_SUCCESS" : "TS_RESULT_NOT_EXIST"), resultPct.one_time_key);
+    
     SendPacket(resultPct);
 }
 
