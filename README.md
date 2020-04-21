@@ -18,4 +18,4 @@ You can find detailed guides about compiling, installation and configuring in ou
 ## Current Status
 Still alive!
 
-If you have the possibility, feel free to contribute by reporting bugs or sending in fixes/additions
+If you have the fpossibility, feel free to contribute by reporting bugs or sending in fixes/additions 
