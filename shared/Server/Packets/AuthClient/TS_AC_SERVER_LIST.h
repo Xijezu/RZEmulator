@@ -9,6 +9,7 @@
     _(simple) (uint8_t, is_adult_server, version >= EPIC_4_1, false) \
     _(string) (server_screenshot_url, 256, version >= EPIC_4_1, "about:blank") \
     _(string) (server_ip, 16) \
+    _(string) (server_external_ip, 16) \
     _(simple) (int32_t, server_port) \
     _(simple) (uint16_t, user_ratio)
 
