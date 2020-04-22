@@ -122,14 +122,18 @@ public:
     /// SKILLS
     int32_t GetCurrentSkillLevel(int32_t skill_id) const;
     int32_t GetBaseSkillLevel(int32_t skill_id) const;
-    Skill *SetSkill(int, int, int, int32_t);
+    Skill *SetSkill(int32_t skill_uid, int32_t skill_id, int32_t skill_level, int32_t remain_cool_time);
     Skill *GetSkill(int32_t skill_id) const;
+    Skill *GetSkillByEffectType(SKILL_EFFECT_TYPE nEffectTypeID) const;
     void RegisterSkill(int32_t skill_id, int32_t skill_level, uint32_t remain_cool_time, int32_t nJobID);
     void EnumPassiveSkill(struct SkillFunctor &fn);
     /// END SKILLS
 
     virtual bool StartAttack(uint32_t target, bool bNeedFastReaction);
-    bool IsUsingDoubleWeapon() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON); }
+    bool IsUsingDoubleWeapon() const
+    {
+        return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
+    }
 
     int32_t GetPrevJobId(int32_t nDepth) const
     {
@@ -149,60 +153,174 @@ public:
 
     void regenHPMP(uint32_t t);
 
-    uint32_t HasUnitTypeMask(uint32_t mask) const { return mask & m_unitTypeMask; }
+    uint32_t HasUnitTypeMask(uint32_t mask) const
+    {
+        return mask & m_unitTypeMask;
+    }
 
     /// BATTLE START
     void Attack(Unit *pTarget, uint32_t t, uint32_t attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
     void EndAttack();
 
-    uint32_t GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
+    uint32_t GetTargetHandle() const
+    {
+        return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE);
+    }
 
     virtual int32_t GetMoveSpeed();
-    inline int32_t GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
+    inline int32_t GetRealMoveSpeed()
+    {
+        return GetMoveSpeed() / 7;
+    }
     uint8_t GetRealRidingSpeed();
 
-    inline int32_t GetStrength() const { return m_cStat.strength; }
-    inline int32_t GetVital() const { return m_cStat.vital; }
-    inline int32_t GetDexterity() const { return m_cStat.dexterity; }
-    inline int32_t GetAgility() const { return m_cStat.agility; }
-    inline int32_t GetIntelligence() const { return m_cStat.intelligence; }
-    inline int32_t GetMentality() const { return m_cStat.mentality; }
-    inline int32_t GetLuck() const { return m_cStat.luck; }
+    inline int32_t GetStrength() const
+    {
+        return m_cStat.strength;
+    }
+    inline int32_t GetVital() const
+    {
+        return m_cStat.vital;
+    }
+    inline int32_t GetDexterity() const
+    {
+        return m_cStat.dexterity;
+    }
+    inline int32_t GetAgility() const
+    {
+        return m_cStat.agility;
+    }
+    inline int32_t GetIntelligence() const
+    {
+        return m_cStat.intelligence;
+    }
+    inline int32_t GetMentality() const
+    {
+        return m_cStat.mentality;
+    }
+    inline int32_t GetLuck() const
+    {
+        return m_cStat.luck;
+    }
 
-    virtual float GetFCM() const { return 1.0f; }
-    inline int32_t GetCritical() const { return m_Attribute.nCritical; }
-    inline int32_t GetCriticalPower() const { return m_Attribute.nCriticalPower; }
-    inline int32_t GetAttackPointRight() const { return m_Attribute.nAttackPointRight; }
-    inline int32_t GetAttackPointLeft() const { return m_Attribute.nAttackPointLeft; }
-    inline int32_t GetDefence() const { return m_Attribute.nDefence; }
-    inline int32_t GetMagicPoint() const { return m_Attribute.nMagicPoint; }
-    inline int32_t GetMagicDefence() const { return m_Attribute.nMagicDefence; }
-    inline int32_t GetAccuracyRight() const { return m_Attribute.nAccuracyRight; }
-    inline int32_t GetAccuracyLeft() const { return m_Attribute.nAccuracyLeft; }
-    inline int32_t GetMagicAccuracy() const { return m_Attribute.nMagicAccuracy; }
-    inline int32_t GetAvoid() const { return m_Attribute.nAvoid; }
-    inline int32_t GetMagicAvoid() const { return m_Attribute.nMagicAvoid; }
-    inline int32_t GetBlockChance() const { return m_Attribute.nBlockChance; }
-    inline int32_t GetBlockDefence() const { return m_Attribute.nBlockDefence; }
-    inline int32_t GetAttackSpeed() const { return m_Attribute.nAttackSpeed; }
-    inline int32_t GetMaxWeight() const { return m_Attribute.nMaxWeight; }
-    inline int32_t GetCastingSpeed() const { return m_Attribute.nCastingSpeed; }
+    virtual float GetFCM() const
+    {
+        return 1.0f;
+    }
+    inline int32_t GetCritical() const
+    {
+        return m_Attribute.nCritical;
+    }
+    inline int32_t GetCriticalPower() const
+    {
+        return m_Attribute.nCriticalPower;
+    }
+    inline int32_t GetAttackPointRight() const
+    {
+        return m_Attribute.nAttackPointRight;
+    }
+    inline int32_t GetAttackPointLeft() const
+    {
+        return m_Attribute.nAttackPointLeft;
+    }
+    inline int32_t GetDefence() const
+    {
+        return m_Attribute.nDefence;
+    }
+    inline int32_t GetMagicPoint() const
+    {
+        return m_Attribute.nMagicPoint;
+    }
+    inline int32_t GetMagicDefence() const
+    {
+        return m_Attribute.nMagicDefence;
+    }
+    inline int32_t GetAccuracyRight() const
+    {
+        return m_Attribute.nAccuracyRight;
+    }
+    inline int32_t GetAccuracyLeft() const
+    {
+        return m_Attribute.nAccuracyLeft;
+    }
+    inline int32_t GetMagicAccuracy() const
+    {
+        return m_Attribute.nMagicAccuracy;
+    }
+    inline int32_t GetAvoid() const
+    {
+        return m_Attribute.nAvoid;
+    }
+    inline int32_t GetMagicAvoid() const
+    {
+        return m_Attribute.nMagicAvoid;
+    }
+    inline int32_t GetBlockChance() const
+    {
+        return m_Attribute.nBlockChance;
+    }
+    inline int32_t GetBlockDefence() const
+    {
+        return m_Attribute.nBlockDefence;
+    }
+    inline int32_t GetAttackSpeed() const
+    {
+        return m_Attribute.nAttackSpeed;
+    }
+    inline int32_t GetMaxWeight() const
+    {
+        return m_Attribute.nMaxWeight;
+    }
+    inline int32_t GetCastingSpeed() const
+    {
+        return m_Attribute.nCastingSpeed;
+    }
 
-    inline CreatureAtributeServer &GetAttribute() { return m_Attribute; }
-    inline CreatureAttributeAmplifier &GetAttributeAmplifier() { return m_AttributeAmplifier; }
-    inline CreatureStat &GetCreatureStat() { return m_cStat; }
-    inline CreatureStatAmplifier &GetCreatureStatAmplifier() { return m_StatAmplifier; }
+    inline CreatureAtributeServer &GetAttribute()
+    {
+        return m_Attribute;
+    }
+    inline CreatureAttributeAmplifier &GetAttributeAmplifier()
+    {
+        return m_AttributeAmplifier;
+    }
+    inline CreatureStat &GetCreatureStat()
+    {
+        return m_cStat;
+    }
+    inline CreatureStatAmplifier &GetCreatureStatAmplifier()
+    {
+        return m_StatAmplifier;
+    }
 
-    uint32_t GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
+    uint32_t GetNextAttackableTime() const
+    {
+        return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME);
+    }
 
-    uint32_t GetTrapHandle() const { return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE); }
+    uint32_t GetTrapHandle() const
+    {
+        return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE);
+    }
 
-    void SetTrapHandle(uint32_t nHandle) { SetUInt32Value(UNIT_FIELD_TRAP_HANDLE, nHandle); }
+    void SetTrapHandle(uint32_t nHandle)
+    {
+        SetUInt32Value(UNIT_FIELD_TRAP_HANDLE, nHandle);
+    }
 
-    float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
+    float GetRealAttackRange() const
+    {
+        return (12 * m_Attribute.nAttackRange) / 100.0f;
+    }
 
-    uint32_t GetAttackInterval() const { return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
-    int32_t GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[elemental_type]; }
+    uint32_t GetAttackInterval() const
+    {
+        return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f);
+    };
+    int32_t GetElementalResist(ElementalType elemental_type) const
+    {
+        return m_Resist.nResist[elemental_type];
+    }
 
     void AddEnergy();
     void RemoveEnergy(int32_t nEnergy);
@@ -226,8 +344,14 @@ public:
     void ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE);
     int32_t damage(Unit *pFrom, int32_t nDamage, bool decreaseEXPOnDead = true);
 
-    bool IsPhysicalImmune() { return (GetState(SC_SEAL) != nullptr); }
-    bool IsMagicalImmune() { return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr); }
+    bool IsPhysicalImmune()
+    {
+        return (GetState(SC_SEAL) != nullptr);
+    }
+    bool IsMagicalImmune()
+    {
+        return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr);
+    }
 
     float GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad);
     bool ResurrectByState();
@@ -481,9 +605,15 @@ public:
     void PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
     void RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
 
-    Skill *GetCastSkill() const { return m_castingSkill; }
+    Skill *GetCastSkill() const
+    {
+        return m_castingSkill;
+    }
 
-    virtual CreatureStat *GetBaseStat() const { return nullptr; }
+    virtual CreatureStat *GetBaseStat() const
+    {
+        return nullptr;
+    }
 
     virtual bool IsUsingBow() const
     {

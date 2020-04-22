@@ -15,22 +15,20 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Common.h"
 #include "AuthNetwork.h"
-#include "SystemConfigs.h"
-#include "XSocketMgr.h"
-#include "MemPool.h"
-#include "Maploader.h"
-#include <boost/asio/signal_set.hpp>
-#include "Stacktrace.h"
 #include "CliThread.h"
-#include "ObjectMgr.h"
+#include "Common.h"
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
-#include "MySQLThreading.h"
-#include "MemPool.h"
 #include "Maploader.h"
+#include "MemPool.h"
+#include "MySQLThreading.h"
+#include "ObjectMgr.h"
+#include "Stacktrace.h"
+#include "SystemConfigs.h"
 #include "WorldSession.h"
+#include "XSocketMgr.h"
+#include <boost/asio/signal_set.hpp>
 
 #ifndef _CHIHIRO_CORE_CONFIG
 #define _CHIHIRO_CORE_CONFIG "chihiro.conf"

@@ -37,6 +37,12 @@ struct SummonLevelBonus
     float luck;
 };
 
+enum class SUMMON_RIDE_TYPE
+{
+    CANT_RIDING = 0,
+    RIDING_LENT = 1
+};
+
 struct SummonResourceTemplate
 {
     int32_t id;

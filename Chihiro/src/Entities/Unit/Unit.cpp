@@ -28,9 +28,9 @@
 #include "Skill.h"
 #include "World.h"
 #include "WorldSession.h"
+#include <chrono> // std::chrono::system_clock
 #include <limits>
 #include <random> // std::default_random_engine
-#include <chrono> // std::chrono::system_clock
 
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
@@ -3626,4 +3626,14 @@ float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_
         return m_GoodMagicalElementalSkillStateMod[type].fCastingSpeed;
 
     return 1.0f;
+}
+
+Skill *Unit::GetSkillByEffectType(SKILL_EFFECT_TYPE nEffectTypeID) const
+{
+    for (auto pSkill : m_vSkillList)
+    {
+        if (pSkill->GetSkillBase()->GetSkillEffectType() == nEffectTypeID)
+            return pSkill;
+    }
+    return nullptr;
 }

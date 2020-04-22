@@ -16,14 +16,14 @@
 */
 
 #include "Summon.h"
-#include "MemPool.h"
-#include "ObjectMgr.h"
-#include "DatabaseEnv.h"
-#include "Messages.h"
-#include "World.h"
 #include "ClientPackets.h"
+#include "DatabaseEnv.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
 #include "RegionContainer.h"
 #include "Skill.h"
+#include "World.h"
 
 // static
 void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player *pPlayer)
@@ -54,7 +54,24 @@ Summon *Summon::AllocSummon(Player *pMaster, uint32_t pCode)
 {
     Summon *summon = sMemoryPool.AllocSummon(pCode);
     summon->m_pMaster = pMaster;
+    summon->CalculateStat();
+    summon->SetHealth(summon->GetMaxHealth());
+    summon->SetMana(summon->GetMaxMana());
+    summon->SetJP(1);
+
+    if (summon->GetRidingInfo() == SUMMON_RIDE_TYPE::RIDING_LENT)
+    {
+        summon->SetSkill(static_cast<int32_t>(SKILL_UID_TYPE::SKILL_UID_SUMMON_SKILL), SKILL_UID::SKILL_CREATURE_RIDING, 1, 0);
+    }
+
     return summon;
+}
+
+SUMMON_RIDE_TYPE Summon::GetRidingInfo()
+{
+
+    return m_tSummonBase != nullptr ? static_cast<SUMMON_RIDE_TYPE>(m_tSummonBase->is_riding_only)
+                                    : SUMMON_RIDE_TYPE::CANT_RIDING;
 }
 
 void Summon::SetSummonInfo(int32_t idx)
@@ -469,67 +486,31 @@ void Summon::onModifyStatAndAttribute()
 
 void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
 {
-    /*
-   StructSummon *v7; // esi@1
-  c_fixed<10000> *v8; // eax@6
-  double v9; // st7@6
-  unsigned int32_t v10; // edi@9
-  unsigned int32_t v11; // ebx@9
-  float n; // ST1C_4@9
-  c_fixed<10000> *v13; // eax@9
-  unsigned int32_t v14; // ecx@9
-  unsigned int32_t v15; // eax@9
-  c_fixed<10000> result; // [sp+10h] [bp-8h]@6
+    if (bIsBaseVar)
+    {
+        switch (type)
+        {
+        case IEP_ATTACK_POINT:
+            var1 = var1 * m_fBaseAttackPointRatio;
+            var2 = var2 * m_fBaseAttackPointRatio;
+            break;
+        case IEP_MAGIC_POINT:
+            var1 = var1 * m_fBaseMagicPointRatio;
+            var2 = var2 * m_fBaseMagicPointRatio;
+            break;
+        case IEP_DEFENCE:
+            var1 = var1 * m_fBaseDefenceRatio;
+            var2 = var2 * m_fBaseDefenceRatio;
+            break;
+        case IEP_MAGIC_DEFENCE:
+            var1 = var1 * m_fBaseMagicDefenceRatio;
+            var2 = var2 * m_fBaseMagicDefenceRatio;
+            break;
+        default:
+            break;
+        }
+    }
 
-  v7 = this;
-  if ( !bIsBaseVar )
-    goto LABEL_15;
-  if ( type == 11 )
-  {
-    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseAttackPointRatio);
-    v9 = v7->m_fBaseAttackPointRatio;
-    goto LABEL_9;
-  }
-  if ( type == 12 )
-  {
-    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseMagicPointRatio);
-    v9 = v7->m_fBaseMagicPointRatio;
-    goto LABEL_9;
-  }
-  if ( type == 15 )
-  {
-    v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseDefenceRatio);
-    v9 = v7->m_fBaseDefenceRatio;
-    goto LABEL_9;
-  }
-  if ( type != 16 )
-  {
-LABEL_15:
-    v15 = HIDWORD(var2.value);
-    v14 = var2.value;
-    v10 = HIDWORD(var1.value);
-    v11 = var1.value;
-    goto LABEL_12;
-  }
-  v8 = c_fixed<10000>::operator*<float>(&var1, &result, this->m_fBaseMagicDefenceRatio);
-  v9 = v7->m_fBaseMagicDefenceRatio;
-LABEL_9:
-  v10 = HIDWORD(v8->value);
-  v11 = v8->value;
-  n = v9;
-  v13 = c_fixed<10000>::operator*<float>(&var2, &var1, n);
-  v14 = v13->value;
-  v15 = HIDWORD(v13->value);
-LABEL_12:
-  StructCreature::onItemWearEffect(
-    (StructCreature *)&v7->vfptr,
-    pItem,
-    bIsBaseVar,
-    type,
-    (c_fixed<10000>)__PAIR__(v10, v11),
-    (c_fixed<10000>)__PAIR__(v15, v14),
-    fRatio);
-*/
     Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
 }
 
@@ -557,11 +538,22 @@ float Summon::GetFCM() const
 
 void Summon::onBeforeCalculateStat()
 {
-    // @todo Epic > 4: Item Mastery (EffectType 10046)
-    // @todo: if ( StructState::GetEffectType((StructState *)v6) == 112 ) -> EF_PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD ???
+    m_fBaseAttackPointRatio = 0;
+    m_fBaseMagicPointRatio = 0;
+    m_fBaseDefenceRatio = 0;
+    m_fBaseMagicDefenceRatio = 0;
+
+    auto pItemExpert = GetSkillByEffectType(EF_SUMMON_ITEM_EXPERT);
+    if (pItemExpert)
+    {
+        m_fBaseAttackPointRatio = pItemExpert->GetVar(0);
+        m_fBaseMagicPointRatio = pItemExpert->GetVar(1);
+        m_fBaseDefenceRatio = pItemExpert->GetVar(2);
+        m_fBaseMagicDefenceRatio = pItemExpert->GetVar(3);
+    }
 
     if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_SPEED_FIXED))
-        m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - 120;
+        m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - GameRule::GetBaseMoveSpeed();
 }
 
 float Summon::GetSize() const

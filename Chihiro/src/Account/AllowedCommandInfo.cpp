@@ -9,21 +9,20 @@
  *  This program is distributed in the hope that it will be useful, but WITHOUT
  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- *  more details.
- *
+ *  more details *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "AllowedCommandInfo.h"
-#include "Messages.h"
-#include "Scripting/XLua.h"
-#include "MemPool.h"
 #include "GroupManager.h"
-#include "RegionContainer.h"
-#include "World.h"
-#include "Player.h"
 #include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "Player.h"
+#include "RegionContainer.h"
+#include "Scripting/XLua.h"
+#include "World.h"
 
 typedef struct AllowedCommands
 {

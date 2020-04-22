@@ -196,3 +196,8 @@ int32_t GameRule::GetLocalFlag()
 {
     return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }
+
+int32_t GameRule::GetBaseMoveSpeed()
+{
+    return 120;
+}
