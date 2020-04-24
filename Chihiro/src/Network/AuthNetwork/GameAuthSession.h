@@ -1,6 +1,6 @@
 #pragma once
 /*
- *  Copyright (C) 2017-2020 NGemity <https://ngemity.org/>
+ *  Copyright (C) 2017-2019 NGemity <https://ngemity.org/>
  *
  *  This program is free software; you can redistribute it and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -56,5 +56,6 @@ private:
   std::string m_szGameSSU;
   bool m_bGameIsAdultServer;
   std::string m_szGameIP;
+  std::string m_szExtGameIP;
   int32_t m_nGamePort;
 };

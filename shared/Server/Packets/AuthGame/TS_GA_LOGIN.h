@@ -9,6 +9,7 @@
     _(string)(server_screenshot_url, 256) \
     _(simple)(uint8_t, is_adult_server) \
     _(string)(server_ip, 16) \
+    _(string)(server_external_ip, 16) \
     _(simple)(int32_t, server_port)
 CREATE_PACKET(TS_GA_LOGIN, 20001);
 
