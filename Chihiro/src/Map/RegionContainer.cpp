@@ -205,15 +205,15 @@ void RegionContainer::DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, ui
 
 uint32_t RegionContainer::IsVisibleRegion(uint32_t rx, uint32_t ry, uint32_t _rx, uint32_t _ry)
 {
-    int32_t result = 0;
+    int32_t nx = VISIBLE_REGION_RANGE + _rx - rx;
+    int32_t ny = VISIBLE_REGION_RANGE + _ry - ry;
 
-    int32_t cx = abs((int32_t)(_rx - rx));
-    int32_t cy = abs((int32_t)(_ry - ry));
-    if (cx <= cy)
-        result = cx + 3 * cy;
-    else
-        result = cy + 3 * cx;
-    return (9 >= result) ? 1 : 0;
+    if (nx < 0 || nx >= VISIBLE_REGION_BOX_WIDTH)
+        return false;
+    if (ny < 0 || ny >= VISIBLE_REGION_BOX_WIDTH)
+        return false;
+
+    return s_Matrix[nx][ny];
 }
 
 uint32_t RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
