@@ -16,49 +16,50 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FieldProp.h"
 #include "Common.h"
+#include "FieldProp.h"
 #include "SharedMutex.h"
 
 struct FieldPropRegenInfo
 {
     FieldPropRegenInfo(uint32_t t, uint32_t lt)
     {
-        tNextRegen   = t;
-        nLifeTime    = lt;
-        pRespawnInfo = { };
+        tNextRegen = t;
+        nLifeTime = lt;
     }
 
     FieldPropRespawnInfo pRespawnInfo;
-    uint32_t                 tNextRegen;
-    uint32_t                 nLifeTime;
+    uint32_t tNextRegen;
+    uint32_t nLifeTime;
 };
 
 class FieldPropManager : public FieldPropDeleteHandler
 {
-    public:
-        static FieldPropManager &Instance()
-        {
-            static FieldPropManager instance;
-            return instance;
-        }
+public:
+    static FieldPropManager &Instance()
+    {
+        static FieldPropManager instance;
+        return instance;
+    }
 
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        FieldPropManager(const FieldPropManager &) = delete;
-        FieldPropManager &operator=(const FieldPropManager &) = delete;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    FieldPropManager(const FieldPropManager &) = delete;
+    FieldPropManager &operator=(const FieldPropManager &) = delete;
 
-        ~FieldPropManager() = default;
-        void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32_t lifeTime);
-        void RegisterFieldProp(FieldPropRespawnInfo prop);
-        void onFieldPropDelete(FieldProp *prop) override;
-        void Update(uint32_t diff);
-    private:
-        std::vector<FieldPropRespawnInfo> m_vRespawnInfo{ };
-        std::vector<FieldPropRegenInfo>   m_vRespawnList{ };
-        std::vector<FieldProp *>          m_vExpireObject{ };
-        NG_SHARED_MUTEX i_lock;
-    protected:
-        FieldPropManager() = default;
+    ~FieldPropManager() = default;
+    void SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32_t lifeTime);
+    void RegisterFieldProp(FieldPropRespawnInfo prop);
+    void onFieldPropDelete(FieldProp *prop) override;
+    void Update(uint32_t diff);
+
+private:
+    std::vector<FieldPropRespawnInfo> m_vRespawnInfo{};
+    std::vector<FieldPropRegenInfo> m_vRespawnList{};
+    std::vector<FieldProp *> m_vExpireObject{};
+    NG_SHARED_MUTEX i_lock;
+
+protected:
+    FieldPropManager() = default;
 };
 #define sFieldPropManager FieldPropManager::Instance()

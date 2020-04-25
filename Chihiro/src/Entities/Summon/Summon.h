@@ -82,8 +82,11 @@ protected:
     void applyJobLevelBonus() override;
     void onUpdateState(State *state, bool bIsExpire) override;
     void onAfterRemoveState(State *state) override;
+    using Unit::applyPassiveSkillEffect; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
     void applyPassiveSkillEffect() override;
+    using Unit::applyState; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
     void applyState(State &state) override;
+    using Unit::applyPassiveSkillAmplifyEffect; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
     void applyPassiveSkillAmplifyEffect() override;
     void onModifyStatAndAttribute() override;
     void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio) override;

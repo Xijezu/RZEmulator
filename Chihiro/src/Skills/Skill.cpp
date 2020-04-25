@@ -3072,38 +3072,33 @@ void Skill::PHYSICAL_SINGLE_REGION_DAMAGE(Unit *pTarget)
     {
         DamageInfo Damage = pDealTarget->DealPhysicalSkillDamage(
             m_pOwner, nDamage, (ElementalType)elemental_type,
-            GetSkillBase()->GetHitBonus(GetSkillEnhance(),
-                                        m_pOwner->GetLevel() -
-                                            pDealTarget->GetLevel()),
+            GetSkillBase()->GetHitBonus(GetSkillEnhance(), m_pOwner->GetLevel() - pDealTarget->GetLevel()),
             GetSkillBase()->GetCriticalBonus(GetRequestedSkillLevel()), 0);
         if (!Damage.bBlock && !Damage.bMiss && !Damage.bPerfectBlock)
         {
-            if ((GetSkillBase()->GetSkillEffectType() ==
-                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK ||
-                 GetSkillBase()->GetSkillEffectType() ==
-                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF) &&
-                !(pDealTarget->IsMonster() &&
-                  pDealTarget->As<Monster>()->IsBossMonster()))
+            if ((GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK ||
+                 GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_KNOCKBACK_SELF) &&
+                !(pDealTarget->IsMonster() && pDealTarget->As<Monster>()->IsBossMonster()))
             {
-                // Knockback here
+                AFFECT_KNOCK_BACK(pDealTarget, fKnockbackRange, nKnockbackTime);
+                AddSkillDamageWithKnockBackResult(m_vResultList, SHT_DAMAGE_WITH_KNOCK_BACK, elemental_type, Damage, pDealTarget->GetHandle(), pDealTarget->GetPositionX(), pDealTarget->GetPositionY(), nKnockbackTime);
             }
-            else if (GetSkillBase()->GetSkillEffectType() ==
-                     EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL)
+            else if (GetSkillBase()->GetSkillEffectType() == EF_PHYSICAL_SINGLE_REGION_DAMAGE_WITH_CAST_CANCEL)
             {
-                // Cancel skill from target here
-                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
-                                     Damage, pDealTarget->GetHandle());
+                auto pCancelSkill = pDealTarget->GetCastSkill();
+                if (pCancelSkill != nullptr && pCancelSkill->m_Status == SS_CAST && irand(0, 99) < nCastingCancelRate)
+                    pDealTarget->CancelSkill();
+
+                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
             }
             else
             {
-                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
-                                     Damage, pDealTarget->GetHandle());
+                AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
             }
         }
         else
         {
-            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type,
-                                 Damage, pDealTarget->GetHandle());
+            AddSkillDamageResult(m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
     }
 }
