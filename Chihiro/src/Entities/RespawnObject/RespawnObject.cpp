@@ -52,7 +52,7 @@ void RespawnObject::Update(uint32_t diff)
     if (respawn_count > 0)
     {
         int32_t try_cnt = 0;
-        for (int32_t i = 0; i < respawn_count; ++i)
+        for (uint32_t i = 0; i < respawn_count; ++i)
         {
             /// Generate random respawn coordinates based on a rectangle
             int32_t x{};

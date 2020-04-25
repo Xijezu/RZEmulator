@@ -30,7 +30,7 @@
 typedef std::unordered_map<uint32_t, Object *> UpdateMap;
 class MemoryPoolMgr
 {
-  public:
+public:
     ~MemoryPoolMgr() = default;
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -92,7 +92,7 @@ class MemoryPoolMgr
     // when using this, you must use the HashMapHolders lock!
     const HashMapHolder<Player>::MapType &GetPlayers();
 
-  private:
+private:
     template <class T>
     void _unload();
     void AddToDeleteList(Object *obj);
@@ -110,7 +110,7 @@ class MemoryPoolMgr
 #endif
     uint32_t m_nItemTop{0x00000001};
 
-  protected:
+protected:
     MemoryPoolMgr() = default;
 };
 

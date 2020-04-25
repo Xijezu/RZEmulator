@@ -1315,10 +1315,10 @@ CreatureStat *ObjectMgr::GetStatInfo(const int32_t stat_id)
     return nullptr;
 }
 
-ItemTemplate *ObjectMgr::GetItemBase(const int32_t item_id)
+std::shared_ptr<ItemTemplate> ObjectMgr::GetItemBase(const int32_t item_id)
 {
     if (_itemTemplateStore.count(item_id) == 1)
-        return _itemTemplateStore[item_id].get();
+        return _itemTemplateStore[item_id];
     return nullptr;
 }
 

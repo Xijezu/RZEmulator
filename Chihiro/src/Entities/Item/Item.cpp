@@ -38,7 +38,6 @@ Item *Item::AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info
     // Workaround for gold :^)
     if (item->m_pItemBase != nullptr)
     {
-
         if (level == -1)
             item->m_Instance.nLevel = item->m_pItemBase->level;
         else

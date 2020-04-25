@@ -18,8 +18,8 @@
 #include "MemPool.h"
 #include "FieldPropManager.h"
 #include "ItemCollector.h"
-#include "World.h"
 #include "ObjectMgr.h"
+#include "World.h"
 
 template class HashMapHolder<Player>;
 template class HashMapHolder<WorldObject>;
@@ -29,7 +29,7 @@ template class HashMapHolder<Item>;
 
 Item *MemoryPoolMgr::AllocItem()
 {
-    auto *p = new Item{ };
+    auto *p = new Item{};
     p->m_nHandle = m_nItemTop++;
     p->SetUInt32Value(UNIT_FIELD_HANDLE, p->m_nHandle);
     AddObject(p);
@@ -87,7 +87,7 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 
     pItem->m_Instance.Socket[0] = s->GetUInt32Value(UNIT_FIELD_UID);
     pItem->m_bIsNeedUpdateToDB = true;
-    pItem->m_pSummon           = s;
+    pItem->m_pSummon = s;
     return s;
 }
 
@@ -137,7 +137,7 @@ void MemoryPoolMgr::Update(uint32_t diff)
     // First deleting all things in the remove list
     while (!i_objectsToRemove.empty())
     {
-        auto   itr  = i_objectsToRemove.begin();
+        auto itr = i_objectsToRemove.begin();
         Object *obj = *itr;
 
         if (obj->IsWorldObject() && obj->IsInWorld())
@@ -145,21 +145,21 @@ void MemoryPoolMgr::Update(uint32_t diff)
 
         switch (obj->GetSubType())
         {
-            case ST_Player:
-                RemoveObject(obj->As<Player>());
-                break;
-            case ST_Mob:
-                RemoveObject(obj->As<Monster>());
-                break;
-            case ST_Summon:
-                RemoveObject(obj->As<Summon>());
-                break;
-            case ST_Object: // In this case item
-                RemoveObject(obj->As<Item>());
-                break;
-            default:
-                RemoveObject(obj);
-                break;
+        case ST_Player:
+            RemoveObject(obj->As<Player>());
+            break;
+        case ST_Mob:
+            RemoveObject(obj->As<Monster>());
+            break;
+        case ST_Summon:
+            RemoveObject(obj->As<Summon>());
+            break;
+        case ST_Object: // In this case item
+            RemoveObject(obj->As<Item>());
+            break;
+        default:
+            RemoveObject(obj);
+            break;
         }
         i_objectsToRemove.erase(itr);
         delete obj;
@@ -174,12 +174,12 @@ Item *MemoryPoolMgr::AllocGold(int64_t gold, GenerateCode gcode)
     return Item::AllocItem(0, 0, gold, gcode, -1, -1, -1, 0, 0, 0, 0, 0);
 }
 
-template<class T>
+template <class T>
 void MemoryPoolMgr::_unload()
 {
     NG_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());
-    auto            container = HashMapHolder<T>::GetContainer();
-    for (auto       &obj : container)
+    auto container = HashMapHolder<T>::GetContainer();
+    for (auto &obj : container)
     {
         container.erase(obj.second->GetHandle());
         delete obj.second;
