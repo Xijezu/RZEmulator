@@ -596,15 +596,15 @@ bool World::RemoveItemFromWorld(Item *pItem)
 uint32_t World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
 {
     uint32_t item_handle = 0;
-    int32_t code = pItem->m_Instance.Code;
+    int32_t code = pItem->GetItemInstance().GetCode();
     Item *pNewItem{nullptr};
-    if (code != 0 || (pClient->GetGold() + pItem->m_Instance.nCount) < MAX_GOLD_FOR_INVENTORY)
+    if (code != 0 || (pClient->GetGold() + pItem->GetItemInstance().GetCount()) < MAX_GOLD_FOR_INVENTORY)
     {
-        pItem->m_Instance.nIdx = 0;
+        pItem->GetItemInstance().SetIdx(0);
         pItem->m_bIsNeedUpdateToDB = true;
-        pNewItem = pClient->PushItem(pItem, pItem->m_Instance.nCount, false);
+        pNewItem = pClient->PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
     }
-    if (pNewItem != nullptr && pItem->m_Instance.Code != 0)
+    if (pNewItem != nullptr && pItem->GetItemInstance().GetCode() != 0)
         item_handle = pNewItem->GetHandle();
     else
         item_handle = pItem->GetHandle();
@@ -717,7 +717,7 @@ bool World::ProcTame(Monster *pMonster)
         return false;
     }
 
-    pItem->m_Instance.Flag = (pItem->m_Instance.Flag & 0xDFFFFFFF) | 0x80000000;
+    pItem->GetItemInstance().SetFlag((pItem->GetItemInstance().GetFlag() & 0xDFFFFFFF) | 0x80000000);
     pItem->DBUpdate();
     Messages::SendItemMessage(player, pItem);
     Messages::BroadcastTamingMessage(player, pMonster, 2);
@@ -755,7 +755,7 @@ bool World::SetTamer(Monster *pMonster, Player *pPlayer, int32_t nSkillLevel)
         {
             pMonster->SetTamer(pPlayer->GetHandle(), nSkillLevel);
             pPlayer->m_hTamingTarget = pMonster->GetHandle();
-            card->m_Instance.Flag |= ITEM_FLAG_TAMING;
+            card->GetItemInstance().SetFlag(card->GetItemInstance().GetFlag() | ITEM_FLAG_TAMING);
             Messages::BroadcastTamingMessage(pPlayer, pMonster, 0);
             return true;
         }

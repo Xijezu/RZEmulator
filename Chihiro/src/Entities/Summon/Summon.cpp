@@ -128,11 +128,11 @@ void Summon::DB_UpdateSummon(Player * /*pMaster*/, Summon *pSummon)
 void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_SUMMON);
-    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID)); // handle
-    stmt->setInt32(1, 0);                                       // account_id
-    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID)); // owner_id
-    stmt->setInt64(3, pSummon->GetSummonCode());                // summon_id
-    stmt->setInt64(4, pSummon->m_pItem->m_Instance.UID);        // card_uid
+    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID));      // handle
+    stmt->setInt32(1, 0);                                            // account_id
+    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID));      // owner_id
+    stmt->setInt64(3, pSummon->GetSummonCode());                     // summon_id
+    stmt->setInt64(4, pSummon->m_pItem->GetItemInstance().GetUID()); // card_uid
     stmt->setUInt64(5, pSummon->GetEXP());
     stmt->setInt32(6, pSummon->GetJP());
     stmt->setUInt64(7, 0); // Last Decreased EXP
@@ -220,7 +220,7 @@ void Summon::onExpChange()
         {
             uint64_t uid{0};
             if (m_pItem != nullptr)
-                uid = m_pItem->m_Instance.UID;
+                uid = m_pItem->GetItemInstance().GetUID();
             int32_t ljp{0};
             if (level <= GetLevel())
                 ljp = 0;
@@ -334,7 +334,7 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     if (!Unit::TranslateWearPosition(pos, pItem, ItemList))
         return false;
 
-    if ((pItem->m_Instance.Flag & 1) == 0)
+    if ((pItem->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_CARD) == 0)
         return false;
 
     if (pos > static_cast<ItemWearType>(MAX_ITEM_WEAR) || pos < 0)
@@ -430,7 +430,7 @@ void Summon::Update(uint32_t /*diff*/)
 uint16_t Summon::putonItem(ItemWearType pos, Item *pItem)
 {
     auto pMaster = GetMaster();
-    if (pMaster == nullptr || !pMaster->IsInWorld() || (pItem->m_Instance.Flag & 1) == 0)
+    if (pMaster == nullptr || !pMaster->IsInWorld() || (pItem->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_CARD) == 0)
         return TS_RESULT_ACCESS_DENIED;
 
     if (auto nRet = Unit::putonItem(pos, pItem); nRet != TS_RESULT_SUCCESS)

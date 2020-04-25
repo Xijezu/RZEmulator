@@ -117,7 +117,7 @@ void ObjectMgr::LoadItemResource()
         Field *fields = result->Fetch();
         auto itemTemplate = std::make_shared<ItemTemplate>();
 
-        itemTemplate->id = fields[0].GetInt32();
+        itemTemplate->nID = fields[0].GetInt32();
         itemTemplate->type = fields[1].GetInt32();
         itemTemplate->group = fields[2].GetInt32();
         itemTemplate->iclass = fields[3].GetInt32();
@@ -186,11 +186,11 @@ void ObjectMgr::LoadItemResource()
         itemTemplate->cool_time = fields[91].GetInt32();
         itemTemplate->cool_time_group = fields[92].GetInt16();
         itemTemplate->script_text = fields[93].GetString();
-        itemTemplate->name_id = fields[94].GetInt32();
+        itemTemplate->nNameID = fields[94].GetInt32();
 
         itemTemplate->SetCombinedFlags();
 
-        _itemTemplateStore[itemTemplate->id] = itemTemplate;
+        _itemTemplateStore[itemTemplate->nID] = itemTemplate;
 
         ++count;
     } while (result->NextRow());

@@ -36,8 +36,8 @@ struct LevelResourceTemplate
 
 struct ItemTemplate
 {
-    int32_t id;
-    int32_t name_id;
+    int32_t nID;
+    int32_t nNameID;
     int32_t type;
     int32_t group;
     int32_t iclass;

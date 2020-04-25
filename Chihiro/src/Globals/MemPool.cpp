@@ -62,9 +62,9 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
     item->SetUInt32Value(UNIT_FIELD_HANDLE, item->m_nHandle);
-    if (item->m_Instance.UID == 0)
+    if (item->GetItemInstance().GetUID() == 0)
     {
-        item->m_Instance.UID = sWorld.GetItemIndex();
+        item->GetItemInstance().SetUID(sWorld.GetItemIndex());
     }
     m_nMiscTop++;
     AddObject(item);
@@ -72,9 +72,9 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 
 Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
 {
-    if (pPlayer == nullptr || pItem == nullptr || pItem->m_pItemBase == nullptr)
+    if (pPlayer == nullptr || pItem == nullptr || pItem->GetItemTemplate() == nullptr)
         return nullptr;
-    Summon *s = Summon::AllocSummon(pPlayer, (uint32_t)pItem->m_pItemBase->summon_id);
+    Summon *s = Summon::AllocSummon(pPlayer, (uint32_t)pItem->GetItemTemplate()->summon_id);
     s->SetUInt32Value(UNIT_FIELD_UID, (uint32_t)sWorld.GetSummonIndex());
     s->SetLevel(1);
     s->m_pItem = pItem;
@@ -85,7 +85,7 @@ Summon *MemoryPoolMgr::AllocNewSummon(Player *pPlayer, Item *pItem)
     s->SetFullHealth();
     s->SetMana(s->GetMaxMana());
 
-    pItem->m_Instance.Socket[0] = s->GetUInt32Value(UNIT_FIELD_UID);
+    pItem->GetItemInstance().SetSocketIndex(0, s->GetUInt32Value(UNIT_FIELD_UID));
     pItem->m_bIsNeedUpdateToDB = true;
     pItem->m_pSummon = s;
     return s;

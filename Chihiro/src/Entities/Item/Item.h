@@ -18,39 +18,12 @@
 
 #include "Common.h"
 #include "DatabaseTemplates.h"
-#include "ItemFields.h"
+#include "ItemInstance.h"
 #include "Object.h"
 
 class XPacket;
 class Unit;
 class Summon;
-
-class ItemInstance
-{
-public:
-    void Copy(const ItemInstance &pFrom);
-
-    uint32_t OwnerHandle{0};     // 0x0
-    uint32_t OwnSummonHandle{0}; // 0x4
-    int64_t UID{0};              // 0x8
-    int32_t Code{0};             // 0x10
-    int32_t nIdx{0};             // 0x14
-    int32_t nLevel{0};           // 0x18
-    int32_t nEnhance{0};         // 0x1C
-    int32_t nEndurance{0};
-    int32_t nCurrentEndurance{0};
-    int32_t nOwnerUID{0};      // 0x20
-    int32_t nOwnSummonUID{0};  // 0x24
-    int32_t nAuctionID{0};     // 0x28
-    int32_t nItemKeepingID{0}; // 0x2C
-    int64_t nCount{0};         // 0x30
-    int64_t tExpire{0};        // 0x40
-    //Elemental::Type eElementalEffectType;         // 0x48
-    int32_t Flag{0};                        // 0x60
-    GenerateCode GenerateInfo = BY_UNKNOWN; // 0x64
-    ItemWearType nWearInfo{WEAR_CANTWEAR};  // 0x68
-    int32_t Socket[4]{0};
-};
 
 class Item : public WorldObject
 {
@@ -80,39 +53,42 @@ public:
     bool IsDropable();
     bool IsWearable();
 
-    inline int32_t GetItemCode() const { return m_Instance.Code; }
-    inline int64_t GetItemUID() const { return m_Instance.UID; }
-    inline int32_t GetOwnerUID() const { return m_Instance.nOwnerUID; }
-    inline ItemWearType GetWearInfo() const { return m_Instance.nWearInfo; }
-    inline std::shared_ptr<ItemTemplate> GetItemBase() const { return m_pItemBase; }
+    inline int32_t GetItemCode() const { return GetItemInstance().GetCode(); }
+    inline int64_t GetItemUID() const { return GetItemInstance().GetUID(); }
+    inline int32_t GetOwnerUID() const { return GetItemInstance().GetOwnerUID(); }
+    inline ItemWearType GetWearInfo() const { return GetItemInstance().GetItemWearType(); }
+    inline int32_t GetCurrentEndurance() const { return GetItemInstance().GetCurrentEndurance(); }
+    inline int32_t GetItemEnhance() const { return GetItemInstance().GetEnhance(); }
+    inline uint32_t GetSummonSID() const { return static_cast<uint32_t>(GetItemInstance().GetSocketIndex(0)); }
+    inline uint32_t GetOwnerHandle() const { return GetItemInstance().GetOwnerHandle(); }
+    inline int64_t GetCount() const { return GetItemInstance().GetCount(); }
+    inline int32_t GetIdx() const { return GetItemInstance().GetIndex(); }
+    inline int32_t GetOwnSummonUID() const { return GetItemInstance().GetOwnSummonUID(); }
+
     inline int32_t GetAccountID() const { return m_nAccountID; }
-    inline int32_t GetCurrentEndurance() const { return m_Instance.nCurrentEndurance; }
     inline uint32_t GetBindedCreatureHandle() const { return m_hBindedTarget; }
-    inline int32_t GetItemEnhance() const { return m_Instance.nEnhance; }
-    inline int32_t GetItemGroup() const { return m_pItemBase != nullptr ? m_pItemBase->group : 0; }
-    inline int32_t GetItemType() const { return m_pItemBase != nullptr ? m_pItemBase->type : 0; }
-    uint32_t GetSummonSID() const { return static_cast<uint32_t>(m_Instance.Socket[0]); }
+    inline int32_t GetItemGroup() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->group : 0; }
+    inline int32_t GetItemType() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->type : 0; }
+
     ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
-    inline uint32_t GetOwnerHandle() const { return m_Instance.OwnerHandle; }
-    inline int64_t GetCount() const { return m_Instance.nCount; }
-    inline int32_t GetIdx() const { return m_Instance.nIdx; }
+
     inline uint32_t GetStorageIndex() const { return m_unInventoryIndex; }
+    inline std::shared_ptr<ItemTemplate> GetItemBase() const { return m_pItemBase; }
 
     void SetStorageIndex(uint32_t idx);
     void SetSummonSID(int32_t idx);
 
     inline void SetWearInfo(ItemWearType wear_info)
     {
-        m_Instance.nWearInfo = wear_info;
+        GetItemInstance().SetWearInfo(wear_info);
         m_bIsNeedUpdateToDB = true;
     }
 
     inline void SetOwnSummonInfo(uint32_t handle, int32_t UID)
     {
-        m_Instance.OwnSummonHandle = handle;
-        m_Instance.nOwnSummonUID = UID;
+        GetItemInstance().SetOwnSummonUID(handle);
+        GetItemInstance().SetOwnSummonUID(UID);
     }
-    inline int32_t GetOwnSummonUID() const { return m_Instance.nOwnSummonUID; }
     Summon *GetSummon() const { return m_pSummon; }
     void SetBindedCreatureHandle(uint32_t target) { m_hBindedTarget = target; }
 
@@ -160,9 +136,11 @@ public:
     void SetOwnerInfo(uint32_t, int32_t, int32_t);
     void SetPickupOrder(const ItemPickupOrder &order);
 
-    // private:
-    ItemInstance m_Instance{};
-    std::shared_ptr<ItemTemplate> m_pItemBase{};
+    inline ItemInstance &GetItemInstance() { return m_Instance; }
+    inline ItemInstance const &GetItemInstance() const { return m_Instance; }
+
+    inline ItemTemplate *GetItemTemplate() const { return m_pItemBase.get(); }
+
     Summon *m_pSummon{nullptr};
     uint32_t m_nHandle{0};
     int32_t m_nAccountID{0};
@@ -174,4 +152,8 @@ public:
     bool m_bIsVirtualItem{0};
     bool m_bIsNeedUpdateToDB{false};
     ItemPickupOrder m_pPickupOrder{};
+
+private:
+    ItemInstance m_Instance{};
+    std::shared_ptr<ItemTemplate> m_pItemBase{};
 };

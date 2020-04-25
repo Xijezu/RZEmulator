@@ -17,14 +17,14 @@
 
 #include "Messages.h"
 #include "ClientPackets.h"
-#include "Skill.h"
-#include "NPC.h"
-#include "MemPool.h"
-#include "RegionContainer.h"
 #include "GroupManager.h"
+#include "MemPool.h"
+#include "NPC.h"
+#include "ObjectMgr.h"
+#include "RegionContainer.h"
+#include "Skill.h"
 #include "World.h"
 #include "WorldSession.h"
-#include "ObjectMgr.h"
 
 void Messages::SendEXPMessage(Player *pPlayer, Unit *pUnit)
 {
@@ -267,23 +267,23 @@ void Messages::SendItemMessage(Player *pPlayer, Item *pItem)
 
 std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
 {
-    if (item == nullptr || item->m_pItemBase == nullptr)
+    if (item == nullptr || item->GetItemTemplate() == nullptr)
         return {};
 
     TS_ITEM_INFO itemInfo{};
     itemInfo.base_info.handle = item->m_nHandle;
-    itemInfo.base_info.code = item->m_Instance.Code;
-    itemInfo.base_info.uid = item->m_Instance.UID;
-    itemInfo.base_info.count = item->m_Instance.nCount;
+    itemInfo.base_info.code = item->GetItemInstance().GetCode();
+    itemInfo.base_info.uid = item->GetItemInstance().GetUID();
+    itemInfo.base_info.count = item->GetItemInstance().GetCount();
 
-    itemInfo.base_info.endurance = static_cast<uint32_t>(item->m_Instance.nCurrentEndurance);
-    itemInfo.base_info.enhance = static_cast<uint8_t>(item->m_Instance.nEnhance);
-    itemInfo.base_info.level = static_cast<uint8_t>(item->m_Instance.nLevel);
-    itemInfo.base_info.flag = static_cast<uint32_t>(item->m_Instance.Flag);
+    itemInfo.base_info.endurance = static_cast<uint32_t>(item->GetItemInstance().GetCurrentEndurance());
+    itemInfo.base_info.enhance = static_cast<uint8_t>(item->GetItemInstance().GetEnhance());
+    itemInfo.base_info.level = static_cast<uint8_t>(item->GetItemInstance().GetLevel());
+    itemInfo.base_info.flag = static_cast<uint32_t>(item->GetItemInstance().GetFlag());
 
-    std::copy(std::begin(item->m_Instance.Socket), std::end(item->m_Instance.Socket), std::begin(itemInfo.base_info.socket));
+    std::copy(std::begin(item->GetItemInstance().GetSocket()), std::end(item->GetItemInstance().GetSocket()), std::begin(itemInfo.base_info.socket));
 
-    if (item->m_pItemBase->group == GROUP_SUMMONCARD)
+    if (item->GetItemTemplate()->group == GROUP_SUMMONCARD)
     {
         if (item->m_pSummon != nullptr)
         {
@@ -298,15 +298,15 @@ std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
         }
     }
 
-    itemInfo.base_info.remain_time = static_cast<int32_t>(item->m_Instance.tExpire);
+    itemInfo.base_info.remain_time = static_cast<int32_t>(item->GetItemInstance().GetExpire());
 
     if (item->IsInStorage())
         itemInfo.wear_position = -2;
     else
-        itemInfo.wear_position = item->m_Instance.nWearInfo;
+        itemInfo.wear_position = item->GetItemInstance().GetItemWearType();
 
-    itemInfo.own_summon_handle = item->m_Instance.nOwnSummonUID > 0 ? item->m_Instance.OwnSummonHandle : 0;
-    itemInfo.index = item->m_Instance.nIdx;
+    itemInfo.own_summon_handle = item->GetItemInstance().GetOwnSummonUID() > 0 ? item->GetItemInstance().GetOwnSummonHandle() : 0;
+    itemInfo.index = item->GetItemInstance().GetIndex();
 
     return itemInfo;
 }
@@ -448,7 +448,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
     wearPct.handle = pUnit->GetHandle();
     for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
     {
-        int32_t wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.Code : 0);
+        int32_t wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->GetItemInstance().GetCode() : 0);
         if (i == 2 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 2);
         if (i == 4 && wear_info == 0)
@@ -456,8 +456,8 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
         if (i == 5 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 4);
         wearPct.item_code[i] = static_cast<uint32_t>(wear_info);
-        wearPct.item_enhance[i] = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.nEnhance : 0;
-        wearPct.item_level[i] = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->m_Instance.nLevel : 0;
+        wearPct.item_enhance[i] = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->GetItemInstance().GetEnhance() : 0;
+        wearPct.item_level[i] = pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->GetItemInstance().GetLevel() : 0;
     }
     pPlayer->SendPacket(wearPct);
 }
@@ -523,7 +523,7 @@ void Messages::SendItemCountMessage(Player *pPlayer, Item *pItem)
 
     TS_SC_UPDATE_ITEM_COUNT itemPct{};
     itemPct.item_handle = pItem->GetHandle();
-    itemPct.count = pItem->m_Instance.nCount;
+    itemPct.count = pItem->GetItemInstance().GetCount();
     pPlayer->SendPacket(itemPct);
 }
 
@@ -947,8 +947,8 @@ void Messages::SendItemWearInfoMessage(Player *pPlayer, Unit *pTarget, Item *pIt
     TS_SC_ITEM_WEAR_INFO wearPct{};
     wearPct.target_handle = (pTarget != nullptr ? pTarget->GetHandle() : 0);
     wearPct.item_handle = pItem->GetHandle();
-    wearPct.wear_position = pItem->m_Instance.nWearInfo;
-    wearPct.enhance = pItem->m_Instance.nEnhance;
+    wearPct.wear_position = pItem->GetItemInstance().GetItemWearType();
+    wearPct.enhance = pItem->GetItemInstance().GetEnhance();
 
     pPlayer->SendPacket(wearPct);
 }

@@ -1565,8 +1565,8 @@ void Unit::applyStatByState()
 void Unit::applyItemEffect()
 {
     Item *curItem = GetWornItem(WEAR_WEAPON);
-    if (curItem != nullptr && curItem->m_pItemBase != nullptr)
-        m_Attribute.nAttackRange = curItem->m_pItemBase->range;
+    if (curItem != nullptr && curItem->GetItemTemplate() != nullptr)
+        m_Attribute.nAttackRange = curItem->GetItemTemplate()->range;
 
     m_nUnitExpertLevel = 0;
     std::vector<int32_t> ref_list{};
@@ -1574,7 +1574,7 @@ void Unit::applyItemEffect()
     for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
     {
         curItem = GetWornItem((ItemWearType)i);
-        if (curItem != nullptr && curItem->m_pItemBase != nullptr)
+        if (curItem != nullptr && curItem->GetItemTemplate() != nullptr)
         {
             auto iwt = (ItemWearType)i;
             if (TranslateWearPosition(iwt, curItem, &ref_list))
@@ -1585,17 +1585,17 @@ void Unit::applyItemEffect()
 
                 for (int32_t ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
-                    if (curItem->m_pItemBase->base_type[ol] != 0)
+                    if (curItem->GetItemTemplate()->base_type[ol] != 0)
                     {
-                        onItemWearEffect(curItem, true, curItem->m_pItemBase->base_type[ol], curItem->m_pItemBase->base_var[ol][0], curItem->m_pItemBase->base_var[ol][1], fItemRatio);
+                        onItemWearEffect(curItem, true, curItem->GetItemTemplate()->base_type[ol], curItem->GetItemTemplate()->base_var[ol][0], curItem->GetItemTemplate()->base_var[ol][1], fItemRatio);
                     }
                 }
 
                 for (int32_t ol = 0; ol < MAX_OPTION_NUMBER; ol++)
                 {
-                    if (curItem->m_pItemBase->opt_type[ol] != 0)
+                    if (curItem->GetItemTemplate()->opt_type[ol] != 0)
                     {
-                        onItemWearEffect(curItem, false, curItem->m_pItemBase->opt_type[ol], curItem->m_pItemBase->opt_var[ol][0], curItem->m_pItemBase->opt_var[ol][1], fItemRatio);
+                        onItemWearEffect(curItem, false, curItem->GetItemTemplate()->opt_type[ol], curItem->GetItemTemplate()->opt_var[ol][0], curItem->GetItemTemplate()->opt_var[ol][1], fItemRatio);
                     }
                 }
 
@@ -1604,28 +1604,28 @@ void Unit::applyItemEffect()
 
                 for (int32_t ol = 0; ol < 2; ol++)
                 {
-                    if (curItem->m_pItemBase->enhance_id[ol] != 0)
+                    if (curItem->GetItemTemplate()->enhance_id[ol] != 0)
                     {
-                        int32_t curEnhance = curItem->m_Instance.nEnhance;
+                        int32_t curEnhance = curItem->GetItemInstance().GetEnhance();
                         int32_t realEnhance = curEnhance;
 
                         if (realEnhance >= 1)
                         {
-                            fTotalPoints = curItem->m_pItemBase->_enhance[0][ol] * curEnhance;
+                            fTotalPoints = curItem->GetItemTemplate()->_enhance[0][ol] * curEnhance;
 
                             if (realEnhance > 4)
                             {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[1][ol] * (float)(realEnhance - 4));
+                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[1][ol] * (float)(realEnhance - 4));
                             }
                             if (realEnhance > 8)
                             {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[2][ol] * (float)(realEnhance - 8));
+                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[2][ol] * (float)(realEnhance - 8));
                             }
                             if (realEnhance > 12)
                             {
-                                fTotalPoints += (curItem->m_pItemBase->_enhance[3][ol] * (float)(realEnhance - 12));
+                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[3][ol] * (float)(realEnhance - 12));
                             }
-                            onItemWearEffect(curItem, false, curItem->m_pItemBase->enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
+                            onItemWearEffect(curItem, false, curItem->GetItemTemplate()->enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
                         }
                     }
                 }
@@ -2147,8 +2147,8 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float va
 
     if (type != IEP_ATTACK_SPEED && bIsBaseVar && pItem != nullptr)
     {
-        item_var_penalty += (float)(var2 * (float)(pItem->m_Instance.nLevel - 1));
-        item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int32_t)var1, GetLevel(), pItem->GetItemRank(), pItem->m_Instance.nLevel);
+        item_var_penalty += (float)(var2 * (float)(pItem->GetItemInstance().GetLevel() - 1));
+        item_var_penalty = GameRule::GetItemValue(item_var_penalty, (int32_t)var1, GetLevel(), pItem->GetItemRank(), pItem->GetItemInstance().GetLevel());
     }
 
     /*if(type != IEP_ATTACK_SPEED)
@@ -2420,7 +2420,7 @@ void Unit::applyStatByItem()
         if (base->socket == 0)
             return;
 
-        for (const auto &x : m_anWear[i]->m_Instance.Socket)
+        for (const auto &x : m_anWear[i]->GetItemInstance().GetSocket())
         {
             if (x == 0)
                 continue;

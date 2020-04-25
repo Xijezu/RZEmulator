@@ -649,7 +649,7 @@ int32_t XLua::SCRIPT_GetItemLevel(uint32_t handle)
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
-    return item->m_Instance.nLevel;
+    return item->GetItemInstance().GetLevel();
 }
 
 int32_t XLua::SCRIPT_GetItemEnhance(uint32_t handle)
@@ -657,7 +657,7 @@ int32_t XLua::SCRIPT_GetItemEnhance(uint32_t handle)
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
-    return item->m_Instance.nEnhance;
+    return item->GetItemInstance().GetEnhance();
 }
 
 int32_t XLua::SCRIPT_SetItemLevel(uint32_t handle, int32_t level)
@@ -667,13 +667,13 @@ int32_t XLua::SCRIPT_SetItemLevel(uint32_t handle, int32_t level)
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
-    item->m_Instance.nLevel = level;
+    item->GetItemInstance().SetLevel(level);
     item->m_bIsNeedUpdateToDB = true;
     Messages::SendItemMessage(dynamic_cast<Player *>(m_pUnit), item);
     dynamic_cast<Player *>(m_pUnit)->UpdateQuestStatusByItemUpgrade();
-    if (item->m_Instance.nWearInfo != WEAR_NONE)
+    if (item->GetItemInstance().GetItemWearType() != WEAR_NONE)
     {
-        if (item->m_Instance.OwnSummonHandle != 0)
+        if (item->GetItemInstance().GetOwnSummonHandle() != 0)
         {
             // get summon
         }
@@ -689,17 +689,17 @@ int32_t XLua::SCRIPT_SetItemLevel(uint32_t handle, int32_t level)
 int32_t XLua::SCRIPT_GetItemRank(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
-    if (item == nullptr || item->m_pItemBase == nullptr)
+    if (item == nullptr || item->GetItemTemplate() == nullptr)
         return 0;
-    return item->m_pItemBase->rank;
+    return item->GetItemTemplate()->rank;
 }
 
 int32_t XLua::SCRIPT_GetItemPrice(uint32_t handle)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
-    if (item == nullptr || item->m_pItemBase == nullptr)
+    if (item == nullptr || item->GetItemTemplate() == nullptr)
         return 0;
-    return item->m_pItemBase->price;
+    return item->GetItemTemplate()->price;
 }
 
 int32_t XLua::SCRIPT_GetItemNameID(int32_t code)
@@ -708,7 +708,7 @@ int32_t XLua::SCRIPT_GetItemNameID(int32_t code)
     if (base == nullptr)
         return 0;
     else
-        return base->name_id;
+        return base->nNameID;
 }
 
 int32_t XLua::SCRIPT_GetItemCode(uint32_t handle)
@@ -716,7 +716,7 @@ int32_t XLua::SCRIPT_GetItemCode(uint32_t handle)
     auto item = sMemoryPool.GetObjectInWorld<Item>(handle);
     if (item == nullptr)
         return 0;
-    return item->m_Instance.Code;
+    return item->GetItemInstance().GetCode();
 }
 
 int32_t XLua::SCRIPT_UpdateGoldChaos()

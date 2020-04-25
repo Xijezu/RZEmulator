@@ -22,71 +22,70 @@
 #include "Messages.h"
 #include "ObjectMgr.h"
 
-Item *Item::AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info, int32_t level, int32_t enhance,
-                      int32_t flag, int32_t socket_0, int32_t socket_1, int32_t socket_2, int32_t socket_3, int32_t remain_time)
+Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode eGenerateCode, int32_t nLevel, int32_t nEnhance,
+                      int32_t nFlag, int32_t nSocket0, int32_t nSocket1, int32_t nSocket2, int32_t nSocket3, int32_t nRemainingTime)
 {
-    Item *item = sMemoryPool.AllocItem();
-    if (item == nullptr)
+    Item *pItem = sMemoryPool.AllocItem();
+    if (pItem == nullptr)
         return nullptr;
 
-    item->m_pItemBase = sObjectMgr.GetItemBase((uint32_t)code);
+    pItem->m_pItemBase = sObjectMgr.GetItemBase((uint32_t)nCode);
 
-    item->m_Instance.UID = uid;
-    item->m_Instance.Code = code;
-    item->m_Instance.nCount = cnt;
+    pItem->GetItemInstance().SetUID(nUID);
+    pItem->GetItemInstance().SetCode(nCode);
+    pItem->GetItemInstance().SetCount(nCount);
 
-    // Workaround for gold :^)
-    if (item->m_pItemBase != nullptr)
+    // Workaround for Gold (handled as item, too)
+    // Don't set that stuff if it's gold
+    if (pItem->GetItemTemplate() != nullptr)
     {
-        if (level == -1)
-            item->m_Instance.nLevel = item->m_pItemBase->level;
+        if (nLevel == -1)
+            pItem->GetItemInstance().SetLevel(pItem->GetItemTemplate()->level);
         else
-            item->m_Instance.nLevel = level;
-        if (item->m_Instance.nLevel <= 0)
-            item->m_Instance.nLevel = 1;
+            pItem->GetItemInstance().SetLevel(nLevel);
+        if (pItem->GetItemInstance().GetLevel() <= 0)
+            pItem->GetItemInstance().SetLevel(1);
 
-        item->m_Instance.GenerateInfo = info;
-        item->m_Instance.Flag = flag;
-        item->m_Instance.nCurrentEndurance = item->m_pItemBase->endurance;
-
-        if (enhance == -1)
-            item->m_Instance.nEnhance = item->m_pItemBase->enhance;
+        if (nEnhance == -1)
+            pItem->GetItemInstance().SetEnhance(pItem->GetItemTemplate()->enhance);
         else
-            item->m_Instance.nEnhance = enhance;
+            pItem->GetItemInstance().SetEnhance(nEnhance);
+        if (pItem->GetItemTemplate()->group == ItemGroup::GROUP_SKILLCARD && pItem->GetItemInstance().GetEnhance() == 0)
+            pItem->GetItemInstance().SetEnhance(1);
 
-        if (item->m_pItemBase->group == 10 && item->m_Instance.nEnhance == 0)
-            item->m_Instance.nEnhance = 1;
-
-        if (flag == -1)
-            item->m_Instance.Flag = item->m_pItemBase->status_flag;
+        if (nFlag == -1)
+            pItem->GetItemInstance().SetFlag(pItem->GetItemTemplate()->status_flag);
         else
-            item->m_Instance.Flag = flag;
+            pItem->GetItemInstance().SetFlag(nFlag);
+
+        pItem->GetItemInstance().SetGenerateInfo(eGenerateCode);
+        pItem->GetItemInstance().SetFlag(nFlag);
+        pItem->GetItemInstance().SetCurrentEndurance(pItem->GetItemBase()->endurance);
     }
 
-    item->m_Instance.OwnerHandle = 0;
-    item->m_Instance.nOwnerUID = 0;
-    item->m_Instance.Socket[0] = socket_0;
-    item->m_Instance.Socket[1] = socket_1;
-    item->m_Instance.Socket[2] = socket_2;
-    item->m_Instance.Socket[3] = socket_3;
-    item->m_Instance.tExpire = remain_time;
+    pItem->GetItemInstance().SetOwnerHandle(0);
+    pItem->GetItemInstance().SetOwnerUID(0);
+    pItem->GetItemInstance().SetSocket({nSocket0, nSocket1, nSocket2, nSocket3});
+    pItem->GetItemInstance().SetExpire(nRemainingTime);
 
-    return item;
+    return pItem;
 }
 
 ItemWearType Item::GetWearType()
 {
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return WEAR_NONE;
-    return (ItemWearType)m_pItemBase->wear_type;
+    return (ItemWearType)GetItemTemplate()->wear_type;
 }
 
 bool Item::IsWearable()
 {
-    if (GetWearType() == WEAR_CANTWEAR)
+    if (GetWearType() == ItemWearType::WEAR_CANTWEAR)
         return false;
-    else
-        return (~((m_Instance.Flag) >> 3) & 1) != 0;
+
+    // If Flag has the bit "FLAG FAILED" set, you can't wear it
+    // @todo: Create a HasFlag function
+    return (~((GetItemInstance().GetFlag()) >> FlagBits::ITEM_FLAG_FAILED) & 1) != 0;
 }
 
 void Item::DBUpdate()
@@ -95,38 +94,35 @@ void Item::DBUpdate()
         return;*/
 
     uint8_t i = 0;
-    //PrepareStatement(CHARACTER_UPD_ITEM, "UPDATE `Item` SET owner_id = ?, account_id = ?,
-    // summon_id = ?, auction_id = ?, keeping_id = ?, idx = ?, cnt = ?, level = ?, enhance = ?,
-    // flag = ?, wear_info = ?, socket_0 = ?, socket_1 = ?, socket_2 = ?, socket_3 = ?, remain_time = ?, update_time = ? WHERE sid = ?", CONNECTION_ASYNC);
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_UPD_ITEM);
 
-    stmt->setInt32(i++, m_Instance.nOwnerUID);
+    stmt->setInt32(i++, GetItemInstance().GetOwnerUID());
     stmt->setInt32(i++, m_nAccountID);
-    stmt->setInt32(i++, m_Instance.nOwnSummonUID);
-    stmt->setInt32(i++, m_Instance.nAuctionID);
-    stmt->setInt32(i++, m_Instance.nItemKeepingID);
+    stmt->setInt32(i++, GetItemInstance().GetOwnSummonUID());
+    stmt->setInt32(i++, GetItemInstance().GetAuctionID());
+    stmt->setInt32(i++, GetItemInstance().GetItemKeepingID());
     stmt->setInt32(i++, m_unInventoryIndex);
-    stmt->setInt64(i++, m_Instance.nCount);
-    stmt->setInt32(i++, m_Instance.nLevel);
-    stmt->setInt32(i++, m_Instance.nEnhance);
-    stmt->setInt32(i++, m_Instance.Flag);
-    stmt->setInt32(i++, m_Instance.nWearInfo);
-    stmt->setInt32(i++, m_Instance.Socket[0]);
-    stmt->setInt32(i++, m_Instance.Socket[1]);
-    stmt->setInt32(i++, m_Instance.Socket[2]);
-    stmt->setInt32(i++, m_Instance.Socket[3]);
-    stmt->setInt32(i++, m_Instance.tExpire);
-    stmt->setInt32(i, m_Instance.UID);
+    stmt->setInt64(i++, GetItemInstance().GetCount());
+    stmt->setInt32(i++, GetItemInstance().GetLevel());
+    stmt->setInt32(i++, GetItemInstance().GetEnhance());
+    stmt->setInt32(i++, GetItemInstance().GetFlag());
+    stmt->setInt32(i++, GetItemInstance().GetItemWearType());
+    stmt->setInt32(i++, GetItemInstance().GetSocketIndex(0));
+    stmt->setInt32(i++, GetItemInstance().GetSocketIndex(1));
+    stmt->setInt32(i++, GetItemInstance().GetSocketIndex(2));
+    stmt->setInt32(i++, GetItemInstance().GetSocketIndex(3));
+    stmt->setInt32(i++, GetItemInstance().GetExpire());
+    stmt->setInt32(i, GetItemInstance().GetUID());
 
     CharacterDatabase.Execute(stmt);
 
     m_bIsNeedUpdateToDB = false;
 }
 
-void Item::SetOwnerInfo(uint32_t handle, int32_t UID, int32_t account_id)
+void Item::SetOwnerInfo(uint32_t hHandle, int32_t nUID, int32_t account_id)
 {
-    m_Instance.OwnerHandle = handle;
-    m_Instance.nOwnerUID = UID;
+    GetItemInstance().SetOwnerHandle(hHandle);
+    GetItemInstance().SetOwnerUID(nUID);
     m_nAccountID = account_id;
 }
 
@@ -135,32 +131,32 @@ void Item::DBInsert()
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_ITEM);
     uint8_t idx = 0;
 
-    stmt->setUInt64(idx++, m_Instance.UID);           // owner_id
-    stmt->setInt32(idx++, m_Instance.nOwnerUID);      // owner_id
-    stmt->setInt32(idx++, GetAccountID());            // account_id
-    stmt->setInt32(idx++, m_Instance.nOwnSummonUID);  // summon_id
-    stmt->setInt32(idx++, m_Instance.nAuctionID);     // auction_id
-    stmt->setInt32(idx++, m_Instance.nItemKeepingID); // keepind_id
-    stmt->setInt32(idx++, m_Instance.nIdx);           // Idx
-    stmt->setInt32(idx++, m_Instance.Code);           // code
-    stmt->setInt64(idx++, m_Instance.nCount);         // Count
-    stmt->setInt32(idx++, m_Instance.nLevel);         // level
-    stmt->setInt32(idx++, m_Instance.nEnhance);       // enhance
-    stmt->setInt32(idx++, m_Instance.nEndurance);     // Endurance
-    stmt->setInt32(idx++, m_Instance.Flag);           // Flag
-    stmt->setInt32(idx++, m_Instance.GenerateInfo);   // GCode
-    stmt->setInt32(idx++, m_Instance.nWearInfo);      // Wear Info
-    stmt->setInt32(idx++, m_Instance.Socket[0]);      // Socket_0
-    stmt->setInt32(idx++, m_Instance.Socket[1]);      // Socket_1
-    stmt->setInt32(idx++, m_Instance.Socket[2]);      // Socket_2
-    stmt->setInt32(idx++, m_Instance.Socket[3]);      // Socket_3
-    stmt->setInt32(idx++, 0);                         // Socket_4
-    stmt->setInt32(idx++, 0);                         // Socket_5
-    stmt->setInt32(idx++, m_Instance.tExpire);        // remain time
-    stmt->setInt32(idx++, 0);                         // elemental effect type
-    stmt->setInt32(idx++, 0);                         // elemental effect expire_time
-    stmt->setInt32(idx++, 0);                         // elemental effect attack point
-    stmt->setInt32(idx, 0);                           // elemental effect magic point
+    stmt->setUInt64(idx++, GetItemInstance().GetUID());          // owner_id
+    stmt->setInt32(idx++, GetItemInstance().GetOwnerUID());      // owner_id
+    stmt->setInt32(idx++, GetAccountID());                       // account_id
+    stmt->setInt32(idx++, GetItemInstance().GetOwnSummonUID());  // summon_id
+    stmt->setInt32(idx++, GetItemInstance().GetAuctionID());     // auction_id
+    stmt->setInt32(idx++, GetItemInstance().GetItemKeepingID()); // keepind_id
+    stmt->setInt32(idx++, GetItemInstance().GetIndex());         // Idx
+    stmt->setInt32(idx++, GetItemInstance().GetCode());          // code
+    stmt->setInt64(idx++, GetItemInstance().GetCount());         // Count
+    stmt->setInt32(idx++, GetItemInstance().GetLevel());         // level
+    stmt->setInt32(idx++, GetItemInstance().GetEnhance());       // enhance
+    stmt->setInt32(idx++, GetItemInstance().GetEndurance());     // Endurance
+    stmt->setInt32(idx++, GetItemInstance().GetFlag());          // Flag
+    stmt->setInt32(idx++, GetItemInstance().GetGenerateCode());  // GCode
+    stmt->setInt32(idx++, GetItemInstance().GetItemWearType());  // Wear Info
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(0));  // Socket_0
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(1));  // Socket_1
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(2));  // Socket_2
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(3));  // Socket_3
+    stmt->setInt32(idx++, 0);                                    // Socket_4
+    stmt->setInt32(idx++, 0);                                    // Socket_5
+    stmt->setInt32(idx++, GetItemInstance().GetExpire());        // remain time
+    stmt->setInt32(idx++, 0);                                    // elemental effect type
+    stmt->setInt32(idx++, 0);                                    // elemental effect expire_time
+    stmt->setInt32(idx++, 0);                                    // elemental effect attack point
+    stmt->setInt32(idx, 0);                                      // elemental effect magic point
 
     CharacterDatabase.Execute(stmt);
 
@@ -169,8 +165,8 @@ void Item::DBInsert()
 
 void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
 {
-    Messages::GetEncodedInt(pEnterPct, pItem->m_Instance.Code);
-    pEnterPct << (uint64_t)pItem->m_Instance.nCount;
+    Messages::GetEncodedInt(pEnterPct, pItem->GetItemInstance().GetCode());
+    pEnterPct << (uint64_t)pItem->GetItemInstance().GetCount();
 
     pEnterPct << (uint32_t)pItem->m_nDropTime;
     for (int32_t i = 0; i < 3; i++)
@@ -197,37 +193,39 @@ void Item::PendFreeItem(Item *pItem)
 
 int32_t Item::GetLevelLimit()
 {
-    return GameRule::GetItemLevelLimit(m_pItemBase->rank);
+    return GameRule::GetItemLevelLimit(GetItemTemplate()->rank);
 }
 
 bool Item::IsBow()
 {
-    return m_pItemBase->iclass == CLASS_HEAVY_BOW || m_pItemBase->iclass == CLASS_LIGHT_BOW;
+    return GetItemTemplate()->iclass == CLASS_HEAVY_BOW || GetItemTemplate()->iclass == CLASS_LIGHT_BOW;
 }
 
 bool Item::IsCrossBow()
 {
-    return m_pItemBase->iclass == CLASS_CROSSBOW;
+    return GetItemTemplate()->iclass == CLASS_CROSSBOW;
 }
 
 bool Item::IsCashItem()
 {
-    return (m_pItemBase->flaglist[FLAG_CASHITEM] == 1);
+    return (GetItemTemplate()->flaglist[FLAG_CASHITEM] == 1);
 }
 
 int32_t Item::GetItemRank() const
 {
-    return m_pItemBase->rank;
+    return GetItemTemplate()->rank;
 }
 
-void Item::SetCurrentEndurance(int32_t n)
+void Item::SetCurrentEndurance(int32_t nCurrentEndurance)
 {
-    int32_t maxendurance = GetMaxEndurance();
-    m_Instance.nCurrentEndurance = n;
-    if (n > maxendurance)
-        m_Instance.nCurrentEndurance = maxendurance;
-    if (m_Instance.nCurrentEndurance < 0)
-        m_Instance.nCurrentEndurance = 0;
+    int32_t nMaxEndurance = GetMaxEndurance();
+    GetItemInstance().SetCurrentEndurance(nCurrentEndurance);
+
+    if (nCurrentEndurance > nMaxEndurance)
+        GetItemInstance().SetCurrentEndurance(nMaxEndurance);
+    if (nCurrentEndurance < 0)
+        GetItemInstance().SetCurrentEndurance(0);
+
     m_bIsNeedUpdateToDB = true;
 }
 
@@ -235,66 +233,66 @@ int32_t Item::GetMaxEndurance() const
 {
     int32_t result = 0;
 
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return 0;
 
-    if (m_pItemBase->socket != 0)
+    if (GetItemTemplate()->socket != 0)
     {
-        if (m_pItemBase->socket <= 0)
-            return m_pItemBase->endurance;
+        if (GetItemTemplate()->socket <= 0)
+            return GetItemTemplate()->endurance;
 
         int32_t total_endurance = 0;
-        for (int32_t i = 0; i < m_pItemBase->socket; ++i)
+        for (int32_t i = 0; i < GetItemTemplate()->socket; ++i)
         {
-            if (m_Instance.Socket[i] != 0)
+            if (GetItemInstance().GetSocketIndex(i) != 0)
             {
-                total_endurance += sObjectMgr.GetItemBase(m_Instance.Socket[i])->endurance;
+                total_endurance += sObjectMgr.GetItemBase(GetItemInstance().GetSocketIndex(i))->endurance;
             }
         }
         if (total_endurance != 0)
             result = total_endurance;
         else
-            result = m_pItemBase->endurance;
+            result = GetItemTemplate()->endurance;
     }
     else
     {
-        result = m_pItemBase->endurance;
+        result = GetItemTemplate()->endurance;
     }
     return result;
 }
 
 bool Item::IsQuestItem() const
 {
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return false;
-    return m_pItemBase->flaglist[FLAG_QUEST] != 0;
+    return GetItemTemplate()->flaglist[FLAG_QUEST] != 0;
 }
 
 bool Item::IsJoinable() const
 {
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return false;
-    return m_pItemBase->flaglist[FLAG_DUPLICATE] != 0;
+    return GetItemTemplate()->flaglist[FLAG_DUPLICATE] != 0;
 }
 
 float Item::GetWeight() const
 {
-    return m_pItemBase->weight * (float)m_Instance.nCount;
+    return GetItemTemplate()->weight * (float)GetItemInstance().GetCount();
 }
 
 void Item::SetCount(int64_t count)
 {
-    m_Instance.nCount = count;
+    GetItemInstance().SetCount(count);
 }
 
 void Item::SetIdx(int32_t idx)
 {
-    m_Instance.nIdx = idx;
+    GetItemInstance().SetIdx(idx);
 }
 
 void Item::SetSummonSID(int32_t sid)
 {
-    m_Instance.nOwnSummonUID = sid;
+    GetItemInstance().SetOwnSummonUID(sid);
 }
 
 void Item::SetStorageIndex(uint32_t idx)
@@ -304,42 +302,42 @@ void Item::SetStorageIndex(uint32_t idx)
 
 bool Item::IsExpireItem() const
 {
-    return m_pItemBase->decrease_type == 1 || m_pItemBase->decrease_type == 2;
+    return GetItemTemplate()->decrease_type == 1 || GetItemTemplate()->decrease_type == 2;
 }
 
 bool Item::IsInInventory() const
 {
-    return m_nAccountID == 0 && m_Instance.nOwnerUID != 0;
+    return m_nAccountID == 0 && GetItemInstance().GetOwnerUID() != 0;
 }
 
 bool Item::IsInStorage() const
 {
-    return m_nAccountID != 0 && m_Instance.nOwnerUID == 0 && m_Instance.Code != 0;
+    return m_nAccountID != 0 && GetItemInstance().GetOwnerUID() == 0 && GetItemInstance().GetCode() != 0;
 }
 
 void Item::CopyFrom(const Item *pFrom)
 {
-    auto oldOwner = m_Instance.OwnerHandle;
-    auto oldUID = m_Instance.UID;
+    auto oldOwner = GetItemInstance().GetOwnerHandle();
+    auto oldUID = GetItemInstance().GetUID();
     Relocate(pFrom->GetPositionX(), pFrom->GetPositionY(), pFrom->GetPositionZ(), pFrom->GetOrientation());
     SetLayer(pFrom->GetLayer());
     m_Instance.Copy(pFrom->m_Instance);
-    m_Instance.UID = 0;
-    m_Instance.nOwnerUID = (int32_t)oldUID;
-    m_Instance.OwnerHandle = oldOwner;
+    GetItemInstance().SetUID(0);
+    GetItemInstance().SetOwnerUID((int32_t)oldUID);
+    GetItemInstance().SetOwnerHandle(oldOwner);
 }
 
 void Item::SetBindTarget(Unit *pUnit)
 {
     if (pUnit != nullptr && pUnit->IsPlayer())
-        m_Instance.Socket[0] = pUnit->GetUInt32Value(UNIT_FIELD_UID);
+        GetItemInstance().SetSocketIndex(0, pUnit->GetUInt32Value(UNIT_FIELD_UID));
     else
-        m_Instance.Socket[0] = 0;
+        GetItemInstance().SetSocketIndex(0, 0);
 
     if (pUnit != nullptr && pUnit->IsSummon())
-        m_Instance.Socket[1] = pUnit->GetUInt32Value(UNIT_FIELD_UID);
+        GetItemInstance().SetSocketIndex(1, pUnit->GetUInt32Value(UNIT_FIELD_UID));
     else
-        m_Instance.Socket[1] = 0;
+        GetItemInstance().SetSocketIndex(1, 0);
 
     if (pUnit != nullptr)
         m_hBindedTarget = pUnit->GetHandle();
@@ -361,38 +359,16 @@ Item::Item() : WorldObject(true)
 
 bool Item::IsTradable()
 {
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return false;
 
-    return m_pItemBase->flaglist[FLAG_TRADE] == 0;
+    return GetItemTemplate()->flaglist[FLAG_TRADE] == 0;
 }
 
 bool Item::IsDropable()
 {
-    if (m_pItemBase == nullptr)
+    if (GetItemTemplate() == nullptr)
         return false;
 
-    return m_pItemBase->flaglist[FLAG_DROP] == 0;
-}
-
-void ItemInstance::Copy(const ItemInstance &pFrom)
-{
-    OwnerHandle = pFrom.OwnerHandle;
-    OwnSummonHandle = pFrom.OwnSummonHandle;
-    UID = pFrom.UID;
-    Code = pFrom.Code;
-    nIdx = pFrom.nIdx;
-    nLevel = pFrom.nLevel;
-    nEnhance = pFrom.nEnhance;
-    nOwnerUID = pFrom.nOwnerUID;
-    nOwnSummonUID = pFrom.nOwnSummonUID;
-    nAuctionID = pFrom.nAuctionID;
-    nItemKeepingID = pFrom.nItemKeepingID;
-    nCount = pFrom.nCount;
-    nCurrentEndurance = pFrom.nCurrentEndurance;
-    tExpire = pFrom.tExpire;
-    Flag = pFrom.Flag;
-    GenerateInfo = pFrom.GenerateInfo;
-    nWearInfo = pFrom.nWearInfo;
-    std::copy(std::begin(pFrom.Socket), std::end(pFrom.Socket), std::begin(Socket));
+    return GetItemTemplate()->flaglist[FLAG_DROP] == 0;
 }

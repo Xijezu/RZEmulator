@@ -110,8 +110,8 @@ Item *Inventory::Find(int32_t code, uint32_t flag, bool bFlag)
 {
     for (auto &i : m_vList)
     {
-        bool isFlagged = (flag & i->m_Instance.Flag) != 0;
-        if (i->m_Instance.Code == code)
+        bool isFlagged = (flag & i->GetItemInstance().GetFlag()) != 0;
+        if (i->GetItemInstance().GetCode() == code)
         {
             if (bFlag == isFlagged)
                 return i;
@@ -124,7 +124,7 @@ Item *Inventory::FindByCode(int32_t code)
 {
     for (auto &i : m_vList)
     {
-        if (i->m_Instance.Code == code)
+        if (i->GetItemInstance().GetCode() == code)
             return i;
     }
     return nullptr;
@@ -134,7 +134,7 @@ Item *Inventory::FindBySID(int64_t uid)
 {
     for (auto &i : m_vList)
     {
-        if (i->m_Instance.UID == uid)
+        if (i->GetItemInstance().GetUID() == uid)
             return i;
     }
     return nullptr;

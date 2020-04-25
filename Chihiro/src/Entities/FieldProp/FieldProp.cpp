@@ -16,13 +16,13 @@
 */
 
 #include "FieldProp.h"
-#include "World.h"
-#include "MemPool.h"
-#include "ObjectMgr.h"
-#include "Messages.h"
-#include "Scripting/XLua.h"
 #include "Log.h"
+#include "MemPool.h"
+#include "Messages.h"
+#include "ObjectMgr.h"
 #include "Player.h"
+#include "Scripting/XLua.h"
+#include "World.h"
 
 void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player * /*pPlayer*/)
 {
@@ -96,7 +96,7 @@ bool FieldProp::IsUsable(Player *pPlayer) const
         case 1:
         {
             auto item = pPlayer->FindItemByCode(m_pFieldPropBase->nActivateValue[x][0]);
-            if (item == nullptr || item->m_Instance.nCount < m_pFieldPropBase->nActivateValue[x][1])
+            if (item == nullptr || item->GetItemInstance().GetCount() < m_pFieldPropBase->nActivateValue[x][1])
                 return false;
         }
         break;
@@ -142,7 +142,7 @@ bool FieldProp::UseProp(Player *pPlayer)
                     int32_t nLevel = irand(i.min_level, i.max_level + 1);
                     auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
-                    auto cnt = ti->m_Instance.nCount;
+                    auto cnt = ti->GetItemInstance().GetCount();
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);
 
                     if (pNewItem != nullptr)

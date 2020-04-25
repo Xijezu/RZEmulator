@@ -674,7 +674,7 @@ void WorldSession::onPutOnItem(const TS_CS_PUTON_ITEM *pRecvPct)
         auto ci = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
         if (ci != nullptr)
         {
-            if (!ci->IsWearable() || m_pPlayer->FindItemBySID(ci->m_Instance.UID) == nullptr)
+            if (!ci->IsWearable() || m_pPlayer->FindItemBySID(ci->GetItemInstance().GetUID()) == nullptr)
             {
                 Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return;
@@ -1058,11 +1058,11 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
         if (pRecvPct->card_handle[i] != 0)
         {
             pItem = m_pPlayer->FindItemByHandle(pRecvPct->card_handle[i]);
-            if (pItem != nullptr && pItem->m_pItemBase != nullptr)
+            if (pItem != nullptr && pItem->GetItemTemplate() != nullptr)
             {
-                if (pItem->m_pItemBase->group != 13 ||
-                    m_pPlayer->GetHandle() != pItem->m_Instance.OwnerHandle ||
-                    (pItem->m_Instance.Flag & (uint32_t)ITEM_FLAG_SUMMON) == 0)
+                if (pItem->GetItemTemplate()->group != 13 ||
+                    m_pPlayer->GetHandle() != pItem->GetItemInstance().GetOwnerHandle() ||
+                    (pItem->GetItemInstance().GetFlag() & (uint32_t)ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
@@ -1096,7 +1096,7 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
 
         if (pItem != nullptr)
         {
-            if ((pItem->m_Instance.Flag & ITEM_FLAG_SUMMON) != 0)
+            if ((pItem->GetItemInstance().GetFlag() & ITEM_FLAG_SUMMON) != 0)
             {
                 summon = pItem->m_pSummon;
                 if (summon == nullptr)
@@ -1143,7 +1143,7 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
         return;
 
     auto item = m_pPlayer->FindItemByHandle(pRecvPct->handle);
-    if (item == nullptr || item->m_pItemBase == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle() || !item->IsInInventory())
+    if (item == nullptr || item->GetItemTemplate() == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || !item->IsInInventory())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
         return;
@@ -1155,23 +1155,23 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
     }
     //if(!m_pPlayer.IsSelllable) @todo
 
-    auto nPrice = GameContent::GetItemSellPrice(item->m_pItemBase->price, item->m_pItemBase->rank, item->m_Instance.nLevel, item->m_Instance.Code >= 602700 && item->m_Instance.Code <= 602799);
-    auto nResultCount = item->m_Instance.nCount - pRecvPct->sell_count;
-    auto nEnhanceLevel = (item->m_Instance.nLevel + 100 * item->m_Instance.nEnhance);
+    auto nPrice = GameContent::GetItemSellPrice(item->GetItemTemplate()->price, item->GetItemTemplate()->rank, item->GetItemInstance().GetLevel(), item->GetItemInstance().GetCode() >= 602700 && item->GetItemInstance().GetCode() <= 602799);
+    auto nResultCount = item->GetItemInstance().GetCount() - pRecvPct->sell_count;
+    auto nEnhanceLevel = (item->GetItemInstance().GetLevel() + 100 * item->GetItemInstance().GetEnhance());
 
     if (!m_pPlayer->IsSellable(item) || nResultCount < 0)
     {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, item->m_Instance.Code);
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, item->GetItemInstance().GetCode());
         return;
     }
     if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice > MAX_GOLD_FOR_INVENTORY)
     {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->GetItemInstance().GetCode());
         return;
     }
     if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice < 0)
     {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->m_Instance.Code);
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->GetItemInstance().GetCode());
         return;
     }
     auto code = item->GetItemCode();
@@ -1182,7 +1182,7 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
     }
     if (m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice) != 0)
     {
-        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->m_Instance.Code);
+        Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->GetItemInstance().GetCode());
         return;
     }
 
@@ -1381,7 +1381,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     }
 
     // TODO: Weight
-    if (item->m_Instance.OwnerHandle != 0)
+    if (item->GetItemInstance().GetOwnerHandle() != 0)
     {
         NG_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
         return;
@@ -1394,7 +1394,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
         return;
     }
 
-    if (item->IsQuestItem() && !m_pPlayer->IsTakeableQuestItem(item->m_Instance.Code))
+    if (item->IsQuestItem() && !m_pPlayer->IsTakeableQuestItem(item->GetItemInstance().GetCode()))
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
@@ -1422,11 +1422,11 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
         }
     }
 
-    if (item->m_Instance.Code == 0)
+    if (item->GetItemInstance().GetCode() == 0)
     {
         if (m_pPlayer->GetPartyID() == 0)
         {
-            if (m_pPlayer->GetGold() + item->m_Instance.nCount > MAX_GOLD_FOR_INVENTORY)
+            if (m_pPlayer->GetGold() + item->GetItemInstance().GetCount() > MAX_GOLD_FOR_INVENTORY)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
                 return;
@@ -1443,7 +1443,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     {
         if (m_pPlayer->GetPartyID() != 0)
         {
-            if (item->m_Instance.Code != 0)
+            if (item->GetItemInstance().GetCode() != 0)
             {
                 ///- Actual Item
                 sWorld.procPartyShare(m_pPlayer, item);
@@ -1453,7 +1453,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
                 ///- Gold
                 std::vector<Player *> vList{};
                 sGroupManager.GetNearMember(m_pPlayer, 400.0f, vList);
-                auto incGold = (int64_t)(item->m_Instance.nCount / (!vList.empty() ? vList.size() : 1));
+                auto incGold = (int64_t)(item->GetItemInstance().GetCount() / (!vList.empty() ? vList.size() : 1));
 
                 for (auto &np : vList)
                 {
@@ -1480,19 +1480,19 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
     uint32_t ct = sWorld.GetArTime();
 
     auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_handle);
-    if (item == nullptr || item->m_Instance.OwnerHandle != m_pPlayer->GetHandle())
+    if (item == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle())
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
         return;
     }
 
-    if (item->m_pItemBase->type != TYPE_USE && false /*!item->IsUsingItem()*/)
+    if (item->GetItemTemplate()->type != TYPE_USE && false /*!item->IsUsingItem()*/)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
 
-    if ((item->m_pItemBase->flaglist[FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
+    if ((item->GetItemTemplate()->flaglist[FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->item_handle);
         return;
@@ -1513,7 +1513,7 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
         return;
     }
 
-    if (item->m_pItemBase->flaglist[FLAG_TARGET_USE] == 0)
+    if (item->GetItemTemplate()->flaglist[FLAG_TARGET_USE] == 0)
     {
         nResult = m_pPlayer->UseItem(item, nullptr, pRecvPct->szParameter);
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), nResult, pRecvPct->item_handle);
@@ -1607,7 +1607,7 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
 void WorldSession::onDropItem(const TS_CS_DROP_ITEM *pRecvPct)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->m_pItemBase->group != GROUP_SUMMONCARD || !(item->m_Instance.Flag & ITEM_FLAG_SUMMON)))
+    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->GetItemTemplate()->group != GROUP_SUMMONCARD || !(item->GetItemInstance().GetFlag() & ITEM_FLAG_SUMMON)))
     {
         m_pPlayer->DropItem(m_pPlayer, item, pRecvPct->count);
         Messages::SendDropResult(m_pPlayer, pRecvPct->item_handle, true);
@@ -1688,7 +1688,7 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
         return;
     }
 
-    int32_t nSocketCount = pItem->m_pItemBase->socket;
+    int32_t nSocketCount = pItem->GetItemTemplate()->socket;
     if (nSocketCount < 1 || nSocketCount > 4)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->craft_item_handle);
@@ -1710,19 +1710,19 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->soulstone_handle[i]);
                 return;
             }
-            if (pSoulStoneList[i]->m_pItemBase->type != TYPE_SOULSTONE || pSoulStoneList[i]->m_pItemBase->group != GROUP_SOULSTONE || pSoulStoneList[i]->m_pItemBase->iclass != CLASS_SOULSTONE)
+            if (pSoulStoneList[i]->GetItemTemplate()->type != TYPE_SOULSTONE || pSoulStoneList[i]->GetItemTemplate()->group != GROUP_SOULSTONE || pSoulStoneList[i]->GetItemTemplate()->iclass != CLASS_SOULSTONE)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->soulstone_handle[i]);
                 return;
             }
 
             int32_t nReplicatedCount = 0;
-            for (int32_t k = 0; k < pItem->m_pItemBase->socket; ++k)
+            for (int32_t k = 0; k < pItem->GetItemTemplate()->socket; ++k)
             {
-                if (pItem->m_Instance.Socket[k] != 0 && k != i)
+                if (pItem->GetItemInstance().GetSocketIndex(k) != 0 && k != i)
                 {
-                    auto ibs = sObjectMgr.GetItemBase(pItem->m_Instance.Socket[k]);
-                    if (ibs->base_type[0] == pSoulStoneList[i]->m_pItemBase->base_type[0] && ibs->base_type[1] == pSoulStoneList[i]->m_pItemBase->base_type[1] && ibs->base_type[2] == pSoulStoneList[i]->m_pItemBase->base_type[2] && ibs->base_type[3] == pSoulStoneList[i]->m_pItemBase->base_type[3] && ibs->base_var[0][0] == pSoulStoneList[i]->m_pItemBase->base_var[0][0] && ibs->base_var[1][0] == pSoulStoneList[i]->m_pItemBase->base_var[1][0] && ibs->base_var[2][0] == pSoulStoneList[i]->m_pItemBase->base_var[2][0] && ibs->base_var[3][0] == pSoulStoneList[i]->m_pItemBase->base_var[3][0] && ibs->opt_type[0] == pSoulStoneList[i]->m_pItemBase->opt_type[0] && ibs->opt_type[1] == pSoulStoneList[i]->m_pItemBase->opt_type[1] && ibs->opt_type[2] == pSoulStoneList[i]->m_pItemBase->opt_type[2] && ibs->opt_type[3] == pSoulStoneList[i]->m_pItemBase->opt_type[3] && ibs->opt_var[0][0] == pSoulStoneList[i]->m_pItemBase->opt_var[0][0] && ibs->opt_var[1][0] == pSoulStoneList[i]->m_pItemBase->opt_var[1][0] && ibs->opt_var[2][0] == pSoulStoneList[i]->m_pItemBase->opt_var[2][0] && ibs->opt_var[3][0] == pSoulStoneList[i]->m_pItemBase->opt_var[3][0])
+                    auto ibs = sObjectMgr.GetItemBase(pItem->GetItemInstance().GetSocketIndex(k));
+                    if (ibs->base_type[0] == pSoulStoneList[i]->GetItemTemplate()->base_type[0] && ibs->base_type[1] == pSoulStoneList[i]->GetItemTemplate()->base_type[1] && ibs->base_type[2] == pSoulStoneList[i]->GetItemTemplate()->base_type[2] && ibs->base_type[3] == pSoulStoneList[i]->GetItemTemplate()->base_type[3] && ibs->base_var[0][0] == pSoulStoneList[i]->GetItemTemplate()->base_var[0][0] && ibs->base_var[1][0] == pSoulStoneList[i]->GetItemTemplate()->base_var[1][0] && ibs->base_var[2][0] == pSoulStoneList[i]->GetItemTemplate()->base_var[2][0] && ibs->base_var[3][0] == pSoulStoneList[i]->GetItemTemplate()->base_var[3][0] && ibs->opt_type[0] == pSoulStoneList[i]->GetItemTemplate()->opt_type[0] && ibs->opt_type[1] == pSoulStoneList[i]->GetItemTemplate()->opt_type[1] && ibs->opt_type[2] == pSoulStoneList[i]->GetItemTemplate()->opt_type[2] && ibs->opt_type[3] == pSoulStoneList[i]->GetItemTemplate()->opt_type[3] && ibs->opt_var[0][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[0][0] && ibs->opt_var[1][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[1][0] && ibs->opt_var[2][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[2][0] && ibs->opt_var[3][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[3][0])
                     {
                         nReplicatedCount++;
                         if (nReplicatedCount >= nMaxReplicatableCount)
@@ -1733,7 +1733,7 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                     }
                 }
             }
-            nCraftCost += pSoulStoneList[i]->m_pItemBase->price / 10;
+            nCraftCost += pSoulStoneList[i]->GetItemTemplate()->price / 10;
             bIsValid = true;
         }
     }
@@ -1752,17 +1752,17 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
     int32_t nEndurance = 0;
     for (int32_t i = 0; i < 4; ++i)
     {
-        if (pItem->m_Instance.Socket[i] != 0 || pSoulStoneList[i] != nullptr)
+        if (pItem->GetItemInstance().GetSocketIndex(i) != 0 || pSoulStoneList[i] != nullptr)
         {
             if (pSoulStoneList[i] != nullptr)
             {
-                nEndurance += pSoulStoneList[i]->m_Instance.nCurrentEndurance;
-                pItem->m_Instance.Socket[i] = pSoulStoneList[i]->m_Instance.Code;
+                nEndurance += pSoulStoneList[i]->GetItemInstance().GetCurrentEndurance();
+                pItem->GetItemInstance().SetSocketIndex(i, pSoulStoneList[i]->GetItemInstance().GetCode());
                 m_pPlayer->EraseItem(pSoulStoneList[i], 1);
             }
             else
             {
-                nEndurance += pItem->m_Instance.nCurrentEndurance;
+                nEndurance += pItem->GetItemInstance().GetCurrentEndurance();
             }
         }
     }
@@ -1896,13 +1896,13 @@ void WorldSession::onBindSkillCard(const TS_CS_BIND_SKILLCARD *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != m_pPlayer->GetHandle() || pItem->m_pItemBase->group != GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemTemplate()->group != GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
 
-    auto pSkill = m_pPlayer->GetSkill(pItem->m_pItemBase->skill_id);
+    auto pSkill = m_pPlayer->GetSkill(pItem->GetItemTemplate()->skill_id);
     if (pSkill != nullptr && pSkill->GetSkillEnhance() == 0)
     {
         m_pPlayer->BindSkillCard(pItem);
@@ -1922,7 +1922,7 @@ void WorldSession::onUnBindSkilLCard(const TS_CS_UNBIND_SKILLCARD *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->m_Instance.OwnerHandle != m_pPlayer->GetHandle() || pItem->m_pItemBase->group != GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemTemplate()->group != GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
@@ -2075,10 +2075,10 @@ void WorldSession::onAddItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
         auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
-        if (item == nullptr || item->m_pItemBase == nullptr)
+        if (item == nullptr || item->GetItemTemplate() == nullptr)
             return;
 
-        if (count <= 0 || count > item->m_Instance.nCount)
+        if (count <= 0 || count > item->GetItemInstance().GetCount())
         {
             NG_LOG_ERROR("trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
@@ -2113,7 +2113,7 @@ void WorldSession::onRemoveItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
         auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
-        if (item == nullptr || item->m_pItemBase == nullptr)
+        if (item == nullptr || item->GetItemTemplate() == nullptr)
             return;
 
         if (m_pPlayer->RemoveItemFromTradeWindow(item, count))

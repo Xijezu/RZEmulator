@@ -333,7 +333,7 @@ void Player::DB_ReadStorage(bool bReload)
                 NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                 continue;
             }
-            newItem->m_Instance.Flag &= ITEM_FLAG_TAMING;
+            newItem->GetItemInstance().SetFlag(newItem->GetItemInstance().GetFlag() & ITEM_FLAG_TAMING);
             newItem->SetCurrentEndurance(endurance);
             newItem->SetOwnerInfo(GetHandle(), 0, GetAccountID());
             if (code == 0)
@@ -462,18 +462,18 @@ bool Player::ReadItemList(int32_t sid)
                 NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                 continue;
             }
-            item->m_Instance.Flag &= 0xDFFFFFFF;
+            item->GetItemInstance().SetFlag(item->GetItemInstance().GetFlag() & 0xDFFFFFFF);
             //item->SetCurrentEndurance(endurance);
 
             if (code != 0)
             {
-                item->m_Instance.nWearInfo = (ItemWearType)fields[i].GetInt32();
+                item->GetItemInstance().SetWearInfo((ItemWearType)fields[i].GetInt32());
                 item->m_unInventoryIndex = (uint32_t)unInv;
                 unInv++;
                 Inv++;
-                item->m_Instance.nIdx = Inv;
+                item->GetItemInstance().SetIdx(Inv);
                 item->m_bIsNeedUpdateToDB = idx != Inv;
-                Item *citem = PushItem(item, item->m_Instance.nCount, false);
+                Item *citem = PushItem(item, item->GetItemInstance().GetCount(), false);
                 if (item->IsJoinable() && citem->GetHandle() != item->GetHandle())
                 {
                     item->SetOwnerInfo(0, 0, 0);
@@ -718,14 +718,14 @@ bool Player::ReadEquipItem()
                     if (unit->TranslateWearPosition(iwt, item, &indices))
                     {
                         m_anWear[wear_info] = item;
-                        if (wear_info == WEAR_SHIELD && item->m_pItemBase->group == GROUP_WEAPON)
+                        if (wear_info == WEAR_SHIELD && item->GetItemTemplate()->group == GROUP_WEAPON)
                             Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
-                        item->m_Instance.nWearInfo = (ItemWearType)wear_info;
+                        item->GetItemInstance().SetWearInfo((ItemWearType)wear_info);
                         item->m_bIsNeedUpdateToDB = true;
                         if (unit->IsSummon())
                         {
-                            item->m_Instance.OwnSummonHandle = unit->GetHandle();
-                            item->m_Instance.nOwnSummonUID = (int32_t)unit->GetInt32Value(UNIT_FIELD_UID);
+                            item->GetItemInstance().SetOwnSummonHandle(unit->GetHandle());
+                            item->GetItemInstance().SetOwnSummonUID((int32_t)unit->GetInt32Value(UNIT_FIELD_UID));
                         }
                     }
                 }
@@ -797,9 +797,9 @@ bool Player::ReadSummonList(int32_t UID)
             if (card != nullptr)
             {
                 card->m_pSummon = summon;
-                card->m_Instance.Socket[0] = sid;
+                card->GetItemInstance().SetSocketIndex(0, sid);
                 card->m_bIsNeedUpdateToDB = true;
-                card->m_Instance.OwnSummonHandle = summon->GetHandle();
+                card->GetItemInstance().SetOwnSummonHandle(summon->GetHandle());
                 summon->m_pItem = card;
                 AddSummon(summon, false);
                 /*m_player.AddSummon(summon, false);
@@ -863,15 +863,15 @@ void Player::SendLoginProperties()
 
     for (auto &item : m_Inventory.m_vList)
     {
-        if (item->m_pItemBase->group == GROUP_SKILLCARD)
+        if (item->GetItemTemplate()->group == GROUP_SKILLCARD)
         {
-            if ((uint32_t)item->m_Instance.Socket[0] == GetUInt32Value(UNIT_FIELD_UID))
+            if ((uint32_t)item->GetItemInstance().GetSocketIndex(0) == GetUInt32Value(UNIT_FIELD_UID))
             {
                 BindSkillCard(item);
             }
-            else if (item->m_Instance.Socket[1] != 0)
+            else if (item->GetItemInstance().GetSocketIndex(1) != 0)
             {
-                auto summon = GetSummon(item->m_Instance.nOwnSummonUID);
+                auto summon = GetSummon(item->GetItemInstance().GetOwnSummonUID());
                 if (summon != nullptr)
                     summon->BindSkillCard(item);
             }
@@ -926,7 +926,7 @@ void Player::SendWearInfo()
     packet << GetHandle();
     for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
     {
-        int32_t wear_info = (m_anWear[i] != nullptr ? m_anWear[i]->m_Instance.Code : 0);
+        int32_t wear_info = (m_anWear[i] != nullptr ? m_anWear[i]->GetItemInstance().GetCode() : 0);
         if (i == 2 && wear_info == 0)
             wear_info = GetInt32Value(UNIT_FIELD_MODEL + 2);
         if (i == 4 && wear_info == 0)
@@ -937,11 +937,11 @@ void Player::SendWearInfo()
     }
     for (auto &i : m_anWear)
     {
-        packet << (i != nullptr ? i->m_Instance.nEnhance : 0);
+        packet << (i != nullptr ? i->GetItemInstance().GetEnhance() : 0);
     }
     for (auto &i : m_anWear)
     {
-        packet << (i != nullptr ? i->m_Instance.nLevel : 0);
+        packet << (i != nullptr ? i->GetItemInstance().GetLevel() : 0);
     }
     SendPacket(packet);
 }
@@ -1067,7 +1067,7 @@ uint16_t Player::putonItem(ItemWearType pos, Item *item)
 {
     if (pos == WEAR_SHIELD)
     {
-        if (item->m_pItemBase->group == GROUP_WEAPON)
+        if (item->GetItemTemplate()->group == GROUP_WEAPON)
             Unit::SetFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
     }
     uint16_t result = Unit::putonItem(pos, item);
@@ -1097,7 +1097,7 @@ uint16_t Player::putoffItem(ItemWearType pos)
             return TS_RESULT_ACCESS_DENIED;
         break;
     case WEAR_SHIELD:
-        if (m_anWear[1]->m_pItemBase->group == 1)
+        if (m_anWear[1]->GetItemTemplate()->group == 1)
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
         if (m_anWear[15] != nullptr)
             putoffItem(WEAR_DECO_SHIELD);
@@ -1126,9 +1126,9 @@ void Player::SendItemWearInfoMessage(Item *item, Unit *u)
 {
     XPacket packet(NGemity::Packets::TS_SC_ITEM_WEAR_INFO);
     packet << (uint32_t)item->m_nHandle;
-    packet << (int16_t)item->m_Instance.nWearInfo;
+    packet << (int16_t)item->GetItemInstance().GetItemWearType();
     packet << (uint32_t)(u != nullptr ? u->GetHandle() : 0);
-    packet << (int32_t)item->m_Instance.nEnhance;
+    packet << (int32_t)item->GetItemInstance().GetEnhance();
     SendPacket(packet);
 }
 
@@ -1248,7 +1248,7 @@ uint16_t Player::ChangeGold(int64_t nGold)
 
 void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
 {
-    int32_t oldOwner = pItem->m_Instance.nOwnerUID;
+    int32_t oldOwner = pItem->GetItemInstance().GetOwnerUID();
     int32_t oldAccount = pItem->GetAccountID();
 
     if (pInventory == &m_Inventory)
@@ -1260,7 +1260,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
             Messages::SendSkillList(this, pItem->m_pSummon, -1);
         }
 #if EPIC >= EPIC_5_1
-        else if (pItem->m_pItemBase->group == PetCage)
+        else if (pItem->GetItemTemplate()->group == PetCage)
         {
         }
 #endif
@@ -1291,7 +1291,7 @@ void Player::onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB)
             AddSummonToStorage(pItem->m_pSummon);
         }
 #if EPIC >= EPIC_5_1
-        else if (pItem->m_pItemBase->group == PetCage)
+        else if (pItem->GetItemTemplate()->group == PetCage)
         {
         }
 #endif
@@ -1374,17 +1374,17 @@ void Player::onChangeCount(Inventory * /*pInventory*/, Item *pItem, bool bSkipUp
 
 Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
 {
-    if ((uint32_t)pItem->m_Instance.nOwnerUID == GetUInt32Value(UNIT_FIELD_UID))
+    if ((uint32_t)pItem->GetItemInstance().GetOwnerUID() == GetUInt32Value(UNIT_FIELD_UID))
     {
-        NG_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->m_Instance.nOwnerUID, GetName());
+        NG_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->GetItemInstance().GetOwnerUID(), GetName());
         return nullptr;
     }
 
     // In this case gold
-    if (pItem->m_Instance.Code == 0)
+    if (pItem->GetItemInstance().GetCode() == 0)
     {
         int64_t nPrevGoldAmount = GetGold();
-        int64_t gold = GetGold() + pItem->m_Instance.nCount;
+        int64_t gold = GetGold() + pItem->GetItemInstance().GetCount();
         if (ChangeGold(gold) != TS_RESULT_SUCCESS)
         {
             NG_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
@@ -1393,26 +1393,26 @@ Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
         return nullptr;
     }
 
-    if (pItem->m_Instance.nIdx == 0)
+    if (pItem->GetItemInstance().GetIndex() == 0)
     {
         m_Inventory.m_nIndex++;
-        pItem->m_Instance.nIdx = m_Inventory.m_nIndex;
+        pItem->GetItemInstance().SetIdx(m_Inventory.m_nIndex);
         pItem->m_bIsNeedUpdateToDB = true;
     }
 
     Item *ni = m_Inventory.Push(pItem, count, bSkipUpdateToDB);
-    m_QuestManager.UpdateQuestStatusByItemCount(ni->m_Instance.Code, ni->m_Instance.nCount);
+    m_QuestManager.UpdateQuestStatusByItemCount(ni->GetItemInstance().GetCode(), ni->GetItemInstance().GetCount());
     return ni;
 }
 
 Item *Player::PopItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB)
 {
-    if (pItem != nullptr && cnt != 0 && pItem->m_Instance.nCount >= cnt && pItem->m_Instance.OwnerHandle == GetHandle() && pItem->IsInInventory())
+    if (pItem != nullptr && cnt != 0 && pItem->GetItemInstance().GetCount() >= cnt && pItem->GetItemInstance().GetOwnerHandle() == GetHandle() && pItem->IsInInventory())
     {
         Item *nc = popItem(pItem, cnt, bSkipUpdateToDB);
         if (nc != nullptr)
         {
-            nc->m_Instance.nIdx = 0;
+            nc->GetItemInstance().SetIdx(0);
             nc->m_bIsNeedUpdateToDB = true;
             if (nc->GetHandle() != pItem->GetHandle())
                 nc->SetOwnerInfo(0, 0, 0);
@@ -1424,9 +1424,9 @@ Item *Player::PopItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB)
 
 Item *Player::popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB)
 {
-    if (pItem->m_Instance.nCount >= cnt)
+    if (pItem->GetItemInstance().GetCount() >= cnt)
     {
-        m_QuestManager.UpdateQuestStatusByItemCount(pItem->m_Instance.Code, pItem->m_Instance.nCount - cnt);
+        m_QuestManager.UpdateQuestStatusByItemCount(pItem->GetItemInstance().GetCode(), pItem->GetItemInstance().GetCount() - cnt);
         return m_Inventory.Pop(pItem, cnt, bSkipUpdateToDB);
     }
     return nullptr;
@@ -1803,7 +1803,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     if (!Unit::TranslateWearPosition(pos, pItem, vpOverlappItemList))
         return false;
 
-    if ((pItem->m_Instance.Flag & 1) != 0)
+    if ((pItem->GetItemInstance().GetFlag() & 1) != 0)
         return false;
 
     bool bWearable = false;
@@ -2325,19 +2325,19 @@ void Player::onModifyStatAndAttribute()
 uint16_t Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint32_t ct = sWorld.GetArTime();
-    if (pItem->m_pItemBase->cool_time_group < 0 || pItem->m_pItemBase->cool_time_group > 40 || (pItem->m_pItemBase->cool_time_group != 0 && m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] > ct))
+    if (pItem->GetItemTemplate()->cool_time_group < 0 || pItem->GetItemTemplate()->cool_time_group > 40 || (pItem->GetItemTemplate()->cool_time_group != 0 && m_nItemCooltime[pItem->GetItemTemplate()->cool_time_group - 1] > ct))
         return TS_RESULT_COOL_TIME;
     // Ride IDX
-    if (pItem->m_pItemBase->use_max_level != 0 && pItem->m_pItemBase->use_max_level < GetLevel())
+    if (pItem->GetItemTemplate()->use_max_level != 0 && pItem->GetItemTemplate()->use_max_level < GetLevel())
         return TS_RESULT_LIMIT_MAX;
-    if (pItem->m_pItemBase->use_min_level <= GetLevel())
+    if (pItem->GetItemTemplate()->use_min_level <= GetLevel())
     {
         if (pTarget == nullptr)
             return TS_RESULT_SUCCESS;
 
-        if (pItem->m_pItemBase->target_max_level != 0 && pItem->m_pItemBase->target_max_level < pTarget->GetLevel())
+        if (pItem->GetItemTemplate()->target_max_level != 0 && pItem->GetItemTemplate()->target_max_level < pTarget->GetLevel())
             return TS_RESULT_LIMIT_MAX;
-        if (pItem->m_pItemBase->target_min_level <= pTarget->GetLevel())
+        if (pItem->GetItemTemplate()->target_min_level <= pTarget->GetLevel())
             return TS_RESULT_SUCCESS;
     }
     return TS_RESULT_LIMIT_MIN;
@@ -2348,31 +2348,31 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
     if (pTarget == nullptr)
         pTarget = this;
 
-    if (pItem->m_Instance.nCount < 1)
+    if (pItem->GetItemInstance().GetCount() < 1)
         return TS_RESULT_ACCESS_DENIED;
 
     uint16_t result{TS_RESULT_SUCCESS};
 
     for (int32_t i = 0; i < MAX_OPTION_NUMBER; ++i)
     {
-        if (pItem->m_pItemBase->base_type[i] != 0)
+        if (pItem->GetItemTemplate()->base_type[i] != 0)
         {
-            result = pTarget->onItemUseEffect(this, pItem, pItem->m_pItemBase->base_type[i], pItem->m_pItemBase->base_var[i][0], pItem->m_pItemBase->base_var[i][1], szParameter);
+            result = pTarget->onItemUseEffect(this, pItem, pItem->GetItemTemplate()->base_type[i], pItem->GetItemTemplate()->base_var[i][0], pItem->GetItemTemplate()->base_var[i][1], szParameter);
             if (result != TS_RESULT_SUCCESS)
                 return result;
         }
 
-        if (pItem->m_pItemBase->opt_type[i] != 0)
+        if (pItem->GetItemTemplate()->opt_type[i] != 0)
         {
-            result = pTarget->onItemUseEffect(this, pItem, pItem->m_pItemBase->opt_type[i], pItem->m_pItemBase->opt_var[i][0], pItem->m_pItemBase->opt_var[i][1], szParameter);
+            result = pTarget->onItemUseEffect(this, pItem, pItem->GetItemTemplate()->opt_type[i], pItem->GetItemTemplate()->opt_var[i][0], pItem->GetItemTemplate()->opt_var[i][1], szParameter);
             if (result != TS_RESULT_SUCCESS)
                 return result;
         }
     }
 
-    if (!pItem->m_pItemBase->script_text.empty() && pItem->m_pItemBase->script_text != "0")
+    if (!pItem->GetItemTemplate()->script_text.empty() && pItem->GetItemTemplate()->script_text != "0")
     {
-        std::string szOnUseItem = pItem->m_pItemBase->script_text;
+        std::string szOnUseItem = pItem->GetItemTemplate()->script_text;
 
         if (szOnUseItem.find("on_use_item") != std::string::npos)
         {
@@ -2398,7 +2398,7 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
                 nCode = pTarget->As<NPC>()->GetNPCID();
             }
 
-            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->m_Instance.Code, GetHandle(), targetType,
+            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), targetType,
                                                 (pTarget != nullptr ? pTarget->GetHandle() : 0), nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
         }
 
@@ -2408,13 +2408,13 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
         SetLastContact("npc", nNPCHandle);
     }
 
-    if (pItem->m_pItemBase->cool_time_group != 0)
+    if (pItem->GetItemTemplate()->cool_time_group != 0)
     {
-        m_nItemCooltime[pItem->m_pItemBase->cool_time_group - 1] = sWorld.GetArTime() + (pItem->m_pItemBase->cool_time * 100);
+        m_nItemCooltime[pItem->GetItemTemplate()->cool_time_group - 1] = sWorld.GetArTime() + (pItem->GetItemTemplate()->cool_time * 100);
         Messages::SendItemCoolTimeInfo(this);
     }
 
-    switch (pItem->m_Instance.Code)
+    switch (pItem->GetItemInstance().GetCode())
     {
     case FEATHER_OF_RETURN:
     case FEATHER_OF_REINSTATEMENT:
@@ -2424,7 +2424,7 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
         break;
     }
 
-    if (pItem->m_pItemBase->type != TYPE_USE)
+    if (pItem->GetItemTemplate()->type != TYPE_USE)
         EraseItem(pItem, 1);
 
     if (pItem->IsCashItem())
@@ -2562,7 +2562,7 @@ void Player::updateQuestStatus(Quest *pQuest)
                 auto item = FindItemByCode(nItemCode);
                 if (item != nullptr)
                 {
-                    m_QuestManager.UpdateQuestStatusByItemCount(nItemCode, item->m_Instance.nCount);
+                    m_QuestManager.UpdateQuestStatusByItemCount(nItemCode, item->GetItemInstance().GetCount());
                 }
             }
         }
@@ -2674,9 +2674,9 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
             auto pItem = Item::AllocItem(0, q->m_QuestBase->DefaultReward.nItemCode, (uint64_t)(q->m_QuestBase->DefaultReward.nQuantity * fMod), BY_QUEST,
                                          q->m_QuestBase->DefaultReward.nLevel < 1 ? 1 : q->m_QuestBase->DefaultReward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
-            PushItem(pItem, pItem->m_Instance.nCount, false);
+            PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
 
-            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->m_Instance.Code));
+            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->GetItemInstance().GetCode()));
         }
         if (nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
         {
@@ -2684,8 +2684,8 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
             auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64_t)(reward.nQuantity * fMod), BY_QUEST,
                                          reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
-            PushItem(pItem, pItem->m_Instance.nCount, false);
-            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->m_Instance.Code));
+            PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
+            Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->GetItemInstance().GetCode()));
         }
         //if(q->m_QuestBase->nIsMagicPointQuest != 0)
         //UpdateQuestByQuestEnd(q);
@@ -2757,8 +2757,8 @@ void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float 
         // @todo: set max beltslot
         break;
     case 27:
-        if ((pItem->m_Instance.Flag & ITEM_FLAG_NON_CHAOS_STONE) == 0)
-            SetInt32Value(PLAYER_FIELD_MAX_CHAOS, (int32_t)(var1 + pItem->m_pItemBase->level * var2));
+        if ((pItem->GetItemInstance().GetFlag() & ITEM_FLAG_NON_CHAOS_STONE) == 0)
+            SetInt32Value(PLAYER_FIELD_MAX_CHAOS, (int32_t)(var1 + pItem->GetItemTemplate()->level * var2));
         break;
     default:
         Unit::onItemWearEffect(pItem, bIsBaseVar, type, var1, var2, fRatio);
@@ -2804,7 +2804,7 @@ void Player::UpdateQuestStatusByItemUpgrade()
                     auto item = GetWornItem((ItemWearType)id);
                     if (item != nullptr)
                     {
-                        int32_t qv = item->m_Instance.nLevel;
+                        int32_t qv = item->GetItemInstance().GetLevel();
                         if (level > qv)
                             level = qv;
                         q->UpdateStatus(i / 2, level);
@@ -2882,11 +2882,11 @@ bool Player::IsUsingCrossBow() const
 bool Player::EraseBullet(int64_t count)
 {
     auto item = GetWornItem(WEAR_SHIELD);
-    if (item != nullptr && item->m_pItemBase->group == GROUP_BULLET && item->m_Instance.nCount >= count)
+    if (item != nullptr && item->GetItemTemplate()->group == GROUP_BULLET && item->GetItemInstance().GetCount() >= count)
     {
-        int64_t nc = item->m_Instance.nCount - count;
-        m_QuestManager.UpdateQuestStatusByItemCount(item->m_Instance.Code, nc);
-        if (item->m_Instance.nCount == count)
+        int64_t nc = item->GetItemInstance().GetCount() - count;
+        m_QuestManager.UpdateQuestStatusByItemCount(item->GetItemInstance().GetCode(), nc);
+        if (item->GetItemInstance().GetCount() == count)
             Putoff(WEAR_SHIELD);
 
         return EraseItem(item, count);
@@ -3187,7 +3187,7 @@ void Player::onCompleteCalculateStat()
 {
     for (auto &charm : m_vCharmList)
     {
-        if (charm->m_pItemBase->type == TYPE_CHARM)
+        if (charm->GetItemTemplate()->type == TYPE_CHARM)
         {
             applyCharm(charm);
         }
@@ -3199,17 +3199,17 @@ void Player::applyCharm(Item *pItem)
 {
     for (int32_t i = 0; i < MAX_OPTION_NUMBER; i++)
     {
-        switch (pItem->m_pItemBase->opt_type[i])
+        switch (pItem->GetItemTemplate()->opt_type[i])
         {
         case 81:
-            if (pItem->m_pItemBase->opt_var[i][0] > GetInt32Value(PLAYER_FIELD_MAX_STAMINA))
-                SetInt32Value(PLAYER_FIELD_MAX_STAMINA, (int32_t)pItem->m_pItemBase->opt_var[i][0]);
+            if (pItem->GetItemTemplate()->opt_var[i][0] > GetInt32Value(PLAYER_FIELD_MAX_STAMINA))
+                SetInt32Value(PLAYER_FIELD_MAX_STAMINA, (int32_t)pItem->GetItemTemplate()->opt_var[i][0]);
             break;
         case 82:
             m_bUsingTent = true;
             break;
         case 85:
-            SetInt32Value(PLAYER_FIELD_STAMINA_REGEN_BONUS, (int32_t)pItem->m_pItemBase->opt_var[i][0]);
+            SetInt32Value(PLAYER_FIELD_STAMINA_REGEN_BONUS, (int32_t)pItem->GetItemTemplate()->opt_var[i][0]);
             break;
         default:
             break;
@@ -3362,7 +3362,7 @@ bool Player::MoveInventoryToStorage(Item *pItem, int64_t count)
     if (pItem->GetItemBase()->flaglist[FLAG_STORAGE] != 0)
         return false;
 
-    if ((pItem->m_Instance.Flag & ITEM_FLAG_TAMING) != 0)
+    if ((pItem->GetItemInstance().GetFlag() & ITEM_FLAG_TAMING) != 0)
         return false;
 
     if (!m_bIsUsingStorage)
@@ -3482,14 +3482,14 @@ bool Player::IsErasable(Item *pItem) const
 {
     if (!pItem->IsInInventory())
         return false;
-    if (pItem->m_Instance.OwnerHandle != GetHandle())
+    if (pItem->GetItemInstance().GetOwnerHandle() != GetHandle())
         return false;
-    if (pItem->m_Instance.nWearInfo != WEAR_NONE)
+    if (pItem->GetItemInstance().GetItemWearType() != WEAR_NONE)
         return false;
-    if (pItem->m_pItemBase->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
+    if (pItem->GetItemTemplate()->group == GROUP_SKILLCARD && pItem->m_hBindedTarget != 0)
         return false;
 
-    if (pItem->m_pItemBase->group == GROUP_SUMMONCARD)
+    if (pItem->GetItemTemplate()->group == GROUP_SUMMONCARD)
     {
         for (int32_t i = 0; i < 6; i++)
         {
@@ -3505,7 +3505,7 @@ bool Player::IsErasable(Item *pItem) const
 bool Player::IsSellable(Item *pItem) const
 {
     bool result;
-    if (!Player::IsErasable(pItem) || pItem->m_Instance.Flag & ITEM_FLAG_TAMING)
+    if (!Player::IsErasable(pItem) || pItem->GetItemInstance().GetFlag() & ITEM_FLAG_TAMING)
         result = false;
     else
         result = true; //this is not 100% correct, needs to be reworked
@@ -3670,7 +3670,7 @@ bool Player::IsTradable(Item *pItem)
 
 bool Player::AddItemToTradeWindow(Item *item, int32_t count)
 {
-    if (!m_bTradeFreezed && count <= item->m_Instance.nCount)
+    if (!m_bTradeFreezed && count <= item->GetItemInstance().GetCount())
     {
         m_vTradeItemList[item->GetHandle()] = count;
         return true;
@@ -3845,7 +3845,7 @@ bool Player::CheckTradeWeight()
         if (pItem == nullptr)
             return false;
 
-        weight += pItem->m_pItemBase->weight * it.second;
+        weight += pItem->GetItemTemplate()->weight * it.second;
     }
 
     return (weight <= tradeTarget->m_Attribute.nMaxWeight - targetWeight);
@@ -3859,7 +3859,7 @@ bool Player::CheckTradeItem()
         if (pItem == nullptr)
             return false;
 
-        if (it.second > pItem->m_Instance.nCount)
+        if (it.second > pItem->GetItemInstance().GetCount())
             return false;
     }
     return true;
@@ -3872,12 +3872,12 @@ bool Player::GiveItem(Player *pTarget, uint32_t ItemHandle, int64_t count)
     if (origItem == nullptr || !IsTradable(origItem))
         return false;
 
-    if (count > origItem->m_Instance.nCount)
+    if (count > origItem->GetItemInstance().GetCount())
         return false;
 
     Item *item = popItem(origItem, count, false);
 
-    item->m_Instance.nIdx = 0;
+    item->GetItemInstance().SetIdx(0);
     item->m_bIsNeedUpdateToDB = true;
 
     Item *target_item = pTarget->PushItem(item, count, false);

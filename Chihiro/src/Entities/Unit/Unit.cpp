@@ -1712,14 +1712,14 @@ ItemClass Unit::GetWeaponClass()
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         {
             Item *itemLeft = GetWornItem(WEAR_LEFTHAND);
-            if (itemRight->m_pItemBase->iclass == CLASS_ONEHAND_SWORD && itemLeft->m_pItemBase->iclass == CLASS_ONEHAND_SWORD)
+            if (itemRight->GetItemTemplate()->iclass == CLASS_ONEHAND_SWORD && itemLeft->GetItemTemplate()->iclass == CLASS_ONEHAND_SWORD)
                 return CLASS_DOUBLE_SWORD;
-            if (itemRight->m_pItemBase->iclass == CLASS_DAGGER && itemLeft->m_pItemBase->iclass == CLASS_DAGGER)
+            if (itemRight->GetItemTemplate()->iclass == CLASS_DAGGER && itemLeft->GetItemTemplate()->iclass == CLASS_DAGGER)
                 return CLASS_DOUBLE_DAGGER;
-            if (itemRight->m_pItemBase->iclass == CLASS_ONEHAND_AXE && itemLeft->m_pItemBase->iclass == CLASS_ONEHAND_AXE)
+            if (itemRight->GetItemTemplate()->iclass == CLASS_ONEHAND_AXE && itemLeft->GetItemTemplate()->iclass == CLASS_ONEHAND_AXE)
                 return CLASS_DOUBLE_AXE;
         }
-        result = (ItemClass)itemRight->m_pItemBase->iclass;
+        result = (ItemClass)itemRight->GetItemTemplate()->iclass;
     }
     return result;
 }
@@ -1729,7 +1729,7 @@ bool Unit::IsWearShield()
     bool result{false};
     auto item = GetWornItem(WEAR_SHIELD);
     if (item != nullptr)
-        result = item->m_pItemBase->iclass == CLASS_SHIELD;
+        result = item->GetItemTemplate()->iclass == CLASS_SHIELD;
     else
         result = false;
     return result;
@@ -2040,7 +2040,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
     case ITEM_EFFECT_INSTANT::ADD_STATE:
     case ITEM_EFFECT_INSTANT::ADD_STATE_EX:
     {
-        auto eCode = static_cast<StateCode>(static_cast<int32_t>((static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->m_pItemBase->state_id : var1));
+        auto eCode = static_cast<StateCode>(static_cast<int32_t>((static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->GetItemTemplate()->state_id : var1));
 
         if (IsPlayer())
         {
@@ -2073,21 +2073,21 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
         }
 
         auto t = sWorld.GetArTime();
-        int32_t nLevel = (static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->m_pItemBase->state_level : static_cast<int32_t>(var2);
-        AddState(SG_NORMAL, eCode, pItem->m_Instance.OwnerHandle, nLevel, t, t + pItem->m_pItemBase->state_time * 100);
+        int32_t nLevel = (static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->GetItemTemplate()->state_level : static_cast<int32_t>(var2);
+        AddState(SG_NORMAL, eCode, pItem->GetItemInstance().GetOwnerHandle(), nLevel, t, t + pItem->GetItemTemplate()->state_time * 100);
         break;
     }
     case ITEM_EFFECT_INSTANT::REMOVE_STATE:
     {
-        RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+        RemoveState((StateCode)pItem->GetItemTemplate()->state_id, pItem->GetItemTemplate()->state_level);
         break;
     }
     case ITEM_EFFECT_INSTANT::TOGGLE_STATE:
     {
         auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
-        if (GetState((StateCode)pItem->m_pItemBase->state_id) != nullptr && pItem == pWornItem)
+        if (GetState((StateCode)pItem->GetItemTemplate()->state_id) != nullptr && pItem == pWornItem)
         {
-            RemoveState((StateCode)pItem->m_pItemBase->state_id, pItem->m_pItemBase->state_level);
+            RemoveState((StateCode)pItem->GetItemTemplate()->state_id, pItem->GetItemTemplate()->state_level);
             return TS_RESULT_SUCCESS;
         }
         else
@@ -2097,7 +2097,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
                 auto pPlayer = this->As<Player>();
                 if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon())
                 {
-                    const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(pItem->m_pItemBase->state_id);
+                    const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(pItem->GetItemTemplate()->state_id);
                     if (pStateInfo->effect_type == SEF_RIDING)
                     {
                         result = TS_RESULT_ACCESS_DENIED;
@@ -2121,7 +2121,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
             }
 
             auto t = sWorld.GetArTime();
-            AddState(SG_NORMAL, static_cast<StateCode>(pItem->m_pItemBase->state_id), pItem->m_Instance.OwnerHandle, pItem->m_pItemBase->state_level, t, -1, true);
+            AddState(SG_NORMAL, static_cast<StateCode>(pItem->GetItemTemplate()->state_id), pItem->GetItemInstance().GetOwnerHandle(), pItem->GetItemTemplate()->state_level, t, -1, true);
             break;
         }
         break;
@@ -2176,7 +2176,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
     }
     default:
     {
-        std::string error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->m_Instance.Code, type);
+        std::string error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->GetItemInstance().GetCode(), type);
         NG_LOG_ERROR("entites.unit", "%s", error.c_str());
         Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
         result = TS_RESULT_UNKNOWN;
@@ -2387,7 +2387,7 @@ bool Unit::IsWornByCode(int32_t code) const
 {
     for (auto &i : m_anWear)
     {
-        if (i != nullptr && i->m_pItemBase != nullptr && i->m_pItemBase->id == code)
+        if (i != nullptr && i->GetItemTemplate() != nullptr && i->GetItemTemplate()->nID == code)
             return true;
     }
     return false;
@@ -2413,9 +2413,9 @@ int32_t Unit::Heal(int32_t hp)
 int64_t Unit::GetBulletCount() const
 {
     auto item = m_anWear[WEAR_SHIELD];
-    if (item != nullptr && item->m_pItemBase->group == GROUP_BULLET)
+    if (item != nullptr && item->GetItemTemplate()->group == GROUP_BULLET)
     {
-        return item->m_Instance.nCount;
+        return item->GetItemInstance().GetCount();
     }
     else
     {
@@ -2425,7 +2425,7 @@ int64_t Unit::GetBulletCount() const
 
 int32_t Unit::GetArmorClass() const
 {
-    return m_anWear[WEAR_ARMOR] != nullptr ? m_anWear[WEAR_ARMOR]->m_pItemBase->iclass : 0;
+    return m_anWear[WEAR_ARMOR] != nullptr ? m_anWear[WEAR_ARMOR]->GetItemTemplate()->iclass : 0;
 }
 
 void Unit::procState(uint32_t t)
@@ -2868,10 +2868,10 @@ float Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
 
 void Unit::BindSkillCard(Item *pItem)
 {
-    Skill *pSkill = GetSkill(pItem->m_pItemBase->skill_id);
+    Skill *pSkill = GetSkill(pItem->GetItemTemplate()->skill_id);
     if (pSkill != nullptr)
     {
-        pSkill->m_nEnhance = (uint32_t)pItem->m_Instance.nEnhance;
+        pSkill->m_nEnhance = (uint32_t)pItem->GetItemInstance().GetEnhance();
         pItem->SetBindTarget(this);
         Messages::SendSkillCardInfo(dynamic_cast<Player *>(this), pItem);
     }
@@ -2879,7 +2879,7 @@ void Unit::BindSkillCard(Item *pItem)
 
 void Unit::UnBindSkillCard(Item *pItem)
 {
-    Skill *pSkill = GetSkill(pItem->m_pItemBase->skill_id);
+    Skill *pSkill = GetSkill(pItem->GetItemTemplate()->skill_id);
     if (pSkill != nullptr)
     {
         pSkill->m_nEnhance = 0;

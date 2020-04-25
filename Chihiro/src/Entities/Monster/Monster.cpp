@@ -601,10 +601,10 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
         ni->AddNoise(rand32(), rand32(), 9);
 
         if ((uint32_t)nFlagIndex <= 0x1F)
-            ni->m_Instance.Flag |= (uint32_t)(1 << (nFlagIndex & 0x1F));
+            ni->GetItemInstance().SetFlag(ni->GetItemInstance().GetFlag() | (uint32_t)(1 << (nFlagIndex & 0x1F)));
         if (bIsEventItem)
         {
-            ni->m_Instance.Flag |= 0x10;
+            ni->GetItemInstance().SetFlag(ni->GetItemInstance().GetFlag() | 0x10);
         }
         sWorld.MonsterDropItemToWorld(this, ni);
     }

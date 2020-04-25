@@ -64,7 +64,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
 
     if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
     {
-        if (pCube != nullptr && pCube->m_pItemBase->type == ItemType::TYPE_CUBE)
+        if (pCube != nullptr && pCube->GetItemTemplate()->type == ItemType::TYPE_CUBE)
         {
             pPowder = pSubMaterial[1];
         }
@@ -106,7 +106,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
 
     if (urand(0, 100000) <= nRandom)
     {
-        pMainMaterial->m_Instance.nEnhance = nCurrentEnhance + itemEnhance;
+        pMainMaterial->GetItemInstance().SetEnhance(nCurrentEnhance + itemEnhance);
         Messages::SendItemMessage(pPlayer, pMainMaterial);
         std::vector<uint32_t> tmpVec{};
         tmpVec.emplace_back(pMainMaterial->GetHandle());
@@ -121,7 +121,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
         }
         else
         {
-            pMainMaterial->m_Instance.nEnhance -= 1;
+            pMainMaterial->GetItemInstance().SetEnhance(pMainMaterial->GetItemInstance().GetEnhance() - 1);
             Messages::SendItemMessage(pPlayer, pMainMaterial);
         }
         Messages::SendMixResult(pPlayer, nullptr);
@@ -143,7 +143,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
 
     for (int32_t i = 0; i < nSubMaterialCount; i++)
     {
-        if (pSubMaterial[i]->m_pItemBase->group == GROUP_SKILLCARD)
+        if (pSubMaterial[i]->GetItemTemplate()->group == GROUP_SKILLCARD)
         {
             if (skillCardMain == nullptr)
                 skillCardMain = pSubMaterial[i];
@@ -151,7 +151,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
             else
                 skillCardSec = pSubMaterial[i];
         }
-        else if (pSubMaterial[i]->m_pItemBase->group == GROUP_SKILL_CUBE)
+        else if (pSubMaterial[i]->GetItemTemplate()->group == GROUP_SKILL_CUBE)
         {
             skillCube = pSubMaterial[i];
         }
@@ -160,8 +160,8 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
     EnhanceInfo *pInfo = getenhanceInfo(pMixInfo->value[0]);
     if (pInfo == nullptr ||
         skillCardSec == nullptr ||
-        skillCardMain->m_Instance.Code != skillCardSec->m_Instance.Code ||
-        skillCardMain->m_Instance.nEnhance != skillCardSec->m_Instance.nEnhance)
+        skillCardMain->GetItemInstance().GetCode() != skillCardSec->GetItemInstance().GetCode() ||
+        skillCardMain->GetItemInstance().GetEnhance() != skillCardSec->GetItemInstance().GetEnhance())
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
         return false;
@@ -169,7 +169,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
 
     pPlayer->EraseItem(skillCube, 1);
 
-    auto nRandom = (uint32_t)(pInfo->fPercentage[skillCardMain->m_Instance.nEnhance] * 100000.0f);
+    auto nRandom = (uint32_t)(pInfo->fPercentage[skillCardMain->GetItemInstance().GetEnhance()] * 100000.0f);
     if ((uint32_t)irand(0, 100000) > nRandom)
     {
         pPlayer->EraseItem(skillCardMain, 1);
@@ -179,7 +179,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
     else
     {
         pPlayer->EraseItem(skillCardSec, 1);
-        skillCardMain->m_Instance.nEnhance = skillCardMain->m_Instance.nEnhance + 1;
+        skillCardMain->GetItemInstance().SetEnhance(skillCardMain->GetItemInstance().GetEnhance() + 1);
         skillCardMain->m_bIsNeedUpdateToDB = true;
         Messages::SendItemMessage(pPlayer, skillCardMain);
         std::vector<uint32_t> handles{};
@@ -201,7 +201,7 @@ bool MixManager::MixItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMaterial
         pPlayer->EraseItem(pSubItem[i], pCountList[i]);
     }
 
-    pMainMaterial->m_Instance.Flag = pMixInfo->value[2];
+    pMainMaterial->GetItemInstance().SetFlag(pMixInfo->value[2]);
     Messages::SendItemMessage(pPlayer, pMainMaterial);
     std::vector<uint32_t> handles{};
     handles.emplace_back(pMainMaterial->GetHandle());
@@ -214,7 +214,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
 {
     if (pMainMaterial != nullptr)
     {
-        pPlayer->EraseItem(pMainMaterial, pMainMaterial->m_Instance.nCount);
+        pPlayer->EraseItem(pMainMaterial, pMainMaterial->GetItemInstance().GetCount());
     }
 
     for (int32_t i = 0; i < nSubMaterialCount; ++i)
@@ -248,7 +248,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
                 GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
             }
             pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0, 0, 0, 0, 0);
-            if (!pItem->m_pItemBase->flaglist[FLAG_DUPLICATE])
+            if (!pItem->GetItemTemplate()->flaglist[FLAG_DUPLICATE])
             {
                 //chatmsg
             }
@@ -257,7 +257,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
                 //chatmsg
             }
 
-            pPlayer->PushItem(pItem, pItem->m_Instance.nCount, false);
+            pPlayer->PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
             pItem->DBInsert();
             std::vector<uint32_t> handles{};
             handles.emplace_back(pItem->GetHandle());
@@ -367,12 +367,12 @@ Item *MixManager::check_mixable_item(Player *pPlayer, uint32_t hItem, int64_t nI
         Messages::SendResult(pPlayer, 256, TS_RESULT_ACCESS_DENIED, 0);
         return nullptr;
     }
-    if (retItem->m_Instance.nCount < nItemCount)
+    if (retItem->GetItemInstance().GetCount() < nItemCount)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_NOT_EXIST, 0);
         return nullptr;
     }
-    if ((retItem->m_pItemBase->status_flag & 4) != 0)
+    if ((retItem->GetItemTemplate()->status_flag & 4) != 0)
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_ACCESS_DENIED, 0);
         return nullptr;
@@ -419,17 +419,17 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
             break;
 
         case MixBase::CHECK_ITEM_LEVEL:
-            if (static_cast<int32_t>(pItem->m_Instance.nLevel) != info.value[i])
+            if (static_cast<int32_t>(pItem->GetItemInstance().GetLevel()) != info.value[i])
                 return false;
             break;
 
         case MixBase::CHECK_FLAG_ON:
-            if (((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) == 0)
+            if (((1 << (info.value[i] & 0x1F)) & pItem->GetItemInstance().GetFlag()) == 0)
                 return false;
             break;
 
         case MixBase::CHECK_FLAG_OFF:
-            if (((1 << (info.value[i] & 0x1F)) & pItem->m_Instance.Flag) != 0)
+            if (((1 << (info.value[i] & 0x1F)) & pItem->GetItemInstance().GetFlag()) != 0)
                 return false;
             break;
 
@@ -515,8 +515,8 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResu
 
     if (nFailResult == EnhanceInfo::RESULT_FAIL)
     {
-        pItem->m_Instance.Flag = ITEM_FLAG_FAILED;
-        for(int i = 0; MAX_SOCKET_NUMBER; ++i)
+        pItem->GetItemInstance().SetFlag(ITEM_FLAG_FAILED);
+        for (int i = 0; MAX_SOCKET_NUMBER; ++i)
         {
             // Implement set socket code here
         }
@@ -534,7 +534,7 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResu
         }
         else
         {
-            pItem->m_Instance.nEnhance -= 3;
+            pItem->GetItemInstance().SetEnhance(pItem->GetItemInstance().GetEnhance() - 3);
             Messages::SendItemMessage(pPlayer, pItem);
             pItem->DBUpdate();
             return;
@@ -542,13 +542,13 @@ void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResu
     }
     else if (nFailResult == EnhanceInfo::RESULT_ACCESSORY_FAIL)
     {
-        if (pItem->m_Instance.nEnhance <= 3)
+        if (pItem->GetItemInstance().GetEnhance() <= 3)
         {
-            pItem->m_Instance.nEnhance = 0;
+            pItem->GetItemInstance().SetEnhance(0);
         }
         else
         {
-            pItem->m_Instance.nEnhance -= 3;
+            pItem->GetItemInstance().SetEnhance(pItem->GetItemInstance().GetEnhance() - 3);
         }
         Messages::SendItemMessage(pPlayer, pItem);
         pItem->DBUpdate();
@@ -565,9 +565,9 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
 
     if (*nSubMaterialCount == 1)
     {
-        if (pItem->m_Instance.Flag % 2 == ITEM_FLAG_CARD)
+        if (pItem->GetItemInstance().GetFlag() % 2 == ITEM_FLAG_CARD)
         {
-            switch (pSubItem[0]->m_Instance.Code)
+            switch (pSubItem[0]->GetItemInstance().GetCode())
             {
             case UNIT_CARD:
                 return false;
@@ -575,9 +575,9 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
                 break;
             }
         }
-        else if (pItem->m_Instance.Flag % 2 == ITEM_FLAG_NORMAL)
+        else if (pItem->GetItemInstance().GetFlag() % 2 == ITEM_FLAG_NORMAL)
         {
-            switch (pSubItem[0]->m_Instance.Code)
+            switch (pSubItem[0]->GetItemInstance().GetCode())
             {
             case CHALK_OF_RESTORATION:
                 return false;
@@ -586,9 +586,9 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
             }
         }
 
-        if (pItem->m_Instance.Flag == ITEM_FLAG_FAILED)
+        if (pItem->GetItemInstance().GetFlag() == ITEM_FLAG_FAILED)
         {
-            return pSubItem[0]->m_Instance.Code == E_REPAIR_POWDER;
+            return pSubItem[0]->GetItemInstance().GetCode() == E_REPAIR_POWDER;
         }
     }
     return true;
@@ -599,14 +599,14 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int32_t nSubMa
     if (pPlayer == nullptr || pMainMaterial == nullptr)
         return false;
 
-    if (pMainMaterial->m_Instance.Flag == ITEM_FLAG_FAILED)
+    if (pMainMaterial->GetItemInstance().GetFlag() == ITEM_FLAG_FAILED)
     {
         for (int32_t i = 0; i < nSubMaterialCountItem; ++i)
         {
             pPlayer->EraseItem(pSubItem[i], pCountList[i]);
         }
 
-        pMainMaterial->m_Instance.Flag = ITEM_FLAG_NORMAL;
+        pMainMaterial->GetItemInstance().SetFlag(ITEM_FLAG_NORMAL);
         Messages::SendItemMessage(pPlayer, pMainMaterial);
         std::vector<uint32_t> handles{};
         handles.emplace_back(pMainMaterial->GetHandle());
