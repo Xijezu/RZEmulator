@@ -98,8 +98,8 @@ struct Roamer : public WorldObject, MonsterDeleteHandler
     };
 
   public:
-    Roamer(const int32_t nID, const ROAMING_TYPE eRoamingType, const int32_t nMoveSpeed, const HATE_TYPE eHateType, const uint32_t nRespawnInterval, const int32_t nAttributeFlag, const bool bIsRaidDungeonRoamer);
-    ~Roamer();
+    Roamer(const int32_t nID, const ROAMING_TYPE eRoamingType, const int32_t nMoveSpeed, const HATE_TYPE eHateType, const uint32_t nRespawnInterval, const int32_t nAttributeFlag, const bool
+bIsRaidDungeonRoamer); ~Roamer();
 
     virtual bool IsRoamer() const { return true; }
 

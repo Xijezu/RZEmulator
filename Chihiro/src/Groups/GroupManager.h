@@ -14,11 +14,12 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Common.h"
-#include "SharedMutex.h"
+ */
 #include <functional>
 #include <map>
+
+#include "Common.h"
+#include "SharedMutex.h"
 
 enum PARTY_TYPE : int
 {
@@ -68,7 +69,7 @@ struct PartyInfo
 class Player;
 class GroupManager
 {
-  public:
+public:
     ~GroupManager() = default;
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -114,14 +115,14 @@ class GroupManager
     bool onLogin(int32_t nPartyID, Player *pPlayer);
     bool onLogout(int32_t nPartyID, Player *pPlayer);
 
-  protected:
+protected:
     void AddGroupToDatabase(const PartyInfo &);
     void LoadPartyInfo(PartyInfo &info);
     PartyInfo *getPartyInfo(int32_t nPartyID);
     PartyInfo *getPartyInfoNC(int32_t nPartyID);
     GroupManager() = default;
 
-  private:
+private:
     uint64_t m_nMaxPartyID{0};
     std::map<int, PartyInfo> m_hshPartyID{};
     NG_SHARED_MUTEX i_lock;

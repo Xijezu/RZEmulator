@@ -13,16 +13,18 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "RespawnObject.h"
+
 #include "GameContent.h"
 #include "Log.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "World.h"
 
-RespawnObject::RespawnObject(MonsterRespawnInfo rh) : info(RespawnInfo{rh})
+RespawnObject::RespawnObject(MonsterRespawnInfo rh)
+    : info(RespawnInfo{rh})
 {
     m_nMaxRespawnNum = info.prespawn_count;
     lastDeadTime = 0;
@@ -78,7 +80,7 @@ void RespawnObject::Update(uint32_t diff)
             {
                 if (info.dungeon_id != 0)
                 {
-                    //monster.m_nDungeonId = info.dungeon_id;
+                    // monster.m_nDungeonId = info.dungeon_id;
                 }
                 m_vRespawnedMonster.emplace_back(monster->GetHandle());
                 info.count++;

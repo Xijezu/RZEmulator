@@ -14,8 +14,9 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include <Lists/PlayerList.h>
+
 #include "Common.h"
 #include "Encryption/XRc4Cipher.h"
 #include "XDes.h"
@@ -26,7 +27,7 @@ struct Player;
 // Handle the player network
 class AuthClientSession : public XSocket
 {
-  public:
+public:
     explicit AuthClientSession(boost::asio::ip::tcp::socket &&socket);
     ~AuthClientSession();
 
@@ -57,7 +58,7 @@ class AuthClientSession : public XSocket
     /// \return account name
     std::string GetAccountName() const { return m_pPlayer != nullptr ? m_pPlayer->szLoginName : "<null>"; }
 
-  private:
+private:
     XDes _desCipther{};
 
     Player *m_pPlayer{nullptr};

@@ -14,14 +14,14 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Errors.h"
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
-#include <cstdarg>
 
 /**
     @file Errors.cpp
@@ -39,8 +39,7 @@ namespace NGemity
 
     void Assert(char const *file, int line, char const *function, char const *message)
     {
-        fprintf(stderr, "\n%s:%i in %s ASSERTION FAILED:\n  %s\n",
-                file, line, function, message);
+        fprintf(stderr, "\n%s:%i in %s ASSERTION FAILED:\n  %s\n", file, line, function, message);
         *((volatile int *)NULL) = 0;
         exit(1);
     }
@@ -77,22 +76,16 @@ namespace NGemity
 
     void Error(char const *file, int line, char const *function, char const *message)
     {
-        fprintf(stderr, "\n%s:%i in %s ERROR:\n  %s\n",
-                file, line, function, message);
+        fprintf(stderr, "\n%s:%i in %s ERROR:\n  %s\n", file, line, function, message);
         *((volatile int *)NULL) = 0;
         exit(1);
     }
 
-    void Warning(char const *file, int line, char const *function, char const *message)
-    {
-        fprintf(stderr, "\n%s:%i in %s WARNING:\n  %s\n",
-                file, line, function, message);
-    }
+    void Warning(char const *file, int line, char const *function, char const *message) { fprintf(stderr, "\n%s:%i in %s WARNING:\n  %s\n", file, line, function, message); }
 
     void Abort(char const *file, int line, char const *function)
     {
-        fprintf(stderr, "\n%s:%i in %s ABORTED.\n",
-                file, line, function);
+        fprintf(stderr, "\n%s:%i in %s ABORTED.\n", file, line, function);
         *((volatile int *)NULL) = 0;
         exit(1);
     }

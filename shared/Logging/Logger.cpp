@@ -13,13 +13,18 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Logger.h"
+
 #include "Appender.h"
 #include "LogMessage.h"
 
-Logger::Logger(std::string const &_name, LogLevel _level) : name(_name), level(_level) {}
+Logger::Logger(std::string const &_name, LogLevel _level)
+    : name(_name)
+    , level(_level)
+{
+}
 
 std::string const &Logger::getName() const
 {
@@ -50,7 +55,7 @@ void Logger::write(LogMessage *message) const
 {
     if (!level || level > message->level || message->text.empty())
     {
-        //fprintf(stderr, "Logger::write: Logger %s, Level %u. Msg %s Level %u WRONG LEVEL MASK OR EMPTY MSG\n", getName().c_str(), getLogLevel(), message.text.c_str(), message.level);
+        // fprintf(stderr, "Logger::write: Logger %s, Level %u. Msg %s Level %u WRONG LEVEL MASK OR EMPTY MSG\n", getName().c_str(), getLogLevel(), message.text.c_str(), message.level);
         return;
     }
 

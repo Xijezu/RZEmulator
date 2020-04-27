@@ -13,32 +13,33 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Quest.h"
-#include "QuestBase.h"
+
+#include "DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include "DatabaseEnv.h"
 #include "Player.h"
+#include "QuestBase.h"
 
 Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, const int32_t *status, QuestProgress progress, int32_t nStartID)
 {
-    auto result = new Quest{ };
+    auto result = new Quest{};
     if (result != nullptr)
     {
-        result->m_Handler           = handler;
+        result->m_Handler = handler;
         result->m_bIsNeedUpdateToDB = false;
-        result->m_QuestBase         = sObjectMgr.GetQuestBase(code);
+        result->m_QuestBase = sObjectMgr.GetQuestBase(code);
         if (result->m_QuestBase == nullptr)
         {
             NG_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
             delete result;
             return nullptr;
         }
-        result->m_Instance.nID      = nID;
+        result->m_Instance.nID = nID;
         result->m_Instance.nStartID = nStartID;
-        result->m_Instance.Code     = code;
+        result->m_Instance.Code = code;
         for (int32_t i = 0; i < MAX_QUEST_STATUS; ++i)
         {
             result->m_Instance.nStatus[i] = status[i];
@@ -50,20 +51,17 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, 
 
 bool Quest::IsRandomQuest(int32_t code)
 {
-    auto      base = sObjectMgr.GetQuestBase(code);
+    auto base = sObjectMgr.GetQuestBase(code);
     if (base == nullptr)
     {
         NG_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
         return false;
     }
-    QuestType qt   = base->nType;
+    QuestType qt = base->nType;
     return qt == QuestType::QUEST_RANDOM_COLLECT || qt == QuestType::QUEST_RANDOM_KILL_INDIVIDUAL;
 }
 
-void Quest::FreeQuest()
-{
-
-}
+void Quest::FreeQuest() {}
 
 int32_t Quest::GetQuestCode() const
 {
@@ -169,105 +167,85 @@ bool Quest::IsFinishable() const
 {
     switch (m_QuestBase->nType)
     {
-        case QuestType::QUEST_MISC:
-            break;
+    case QuestType::QUEST_MISC:
+        break;
 
-        case QuestType::QUEST_KILL_TOTAL:
-            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1])
-                return true;
-            return false;
-
-        case QuestType::QUEST_KILL_INDIVIDUAL:
-            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
-                && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-            {
-                return true;
-            }
-            return false;
-
-        case QuestType::QUEST_COLLECT:
-            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
-                && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-                /*&& m_Instance.nStatus[3] >= m_QuestBase->nValue[7]
-                && m_Instance.nStatus[4] >= m_QuestBase->nValue[9])
-                 * For later usage
-                */
-                return true;
-            return false;
-
-        case QuestType::QUEST_HUNT_ITEM:
-        case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
-            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
-                && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-                return true;
-            return false;
-
-        case QuestType::QUEST_LEARN_SKILL:
-            if ((m_QuestBase->nValue[0] == 0 || m_Instance.nStatus[0] >= m_QuestBase->nValue[1])
-                && (m_QuestBase->nValue[2] == 0 || m_Instance.nStatus[1] >= m_QuestBase->nValue[3])
-                && (m_QuestBase->nValue[4] == 0 || m_Instance.nStatus[2] >= m_QuestBase->nValue[5]))
-                return true;
-            return false;
-
-        case QuestType::QUEST_UPGRADE_ITEM:
-            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
-                && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-                return true;
-            return false;
-
-        case QuestType::QUEST_CONTACT:
+    case QuestType::QUEST_KILL_TOTAL:
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1])
             return true;
+        return false;
 
-        case QuestType::QUEST_JOB_LEVEL:
-            if (m_Instance.nStatus[0] < m_QuestBase->nValue[0])
-                return false;
-            return m_Instance.nStatus[1] >= m_QuestBase->nValue[1];
+    case QuestType::QUEST_KILL_INDIVIDUAL:
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+        {
+            return true;
+        }
+        return false;
 
-        case QuestType::QUEST_PARAMETER:
-            if (m_QuestBase->nValue[0] == 0
-                || (m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2])
-                || (m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2])
-                || (m_QuestBase->nValue[1] == 0 && m_Instance.nStatus[0] == m_QuestBase->nValue[2])
-                || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2])
-                || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2]))
+    case QuestType::QUEST_COLLECT:
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+            /*&& m_Instance.nStatus[3] >= m_QuestBase->nValue[7]
+            && m_Instance.nStatus[4] >= m_QuestBase->nValue[9])
+             * For later usage
+            */
+            return true;
+        return false;
+
+    case QuestType::QUEST_HUNT_ITEM:
+    case QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS:
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+            return true;
+        return false;
+
+    case QuestType::QUEST_LEARN_SKILL:
+        if ((m_QuestBase->nValue[0] == 0 || m_Instance.nStatus[0] >= m_QuestBase->nValue[1]) && (m_QuestBase->nValue[2] == 0 || m_Instance.nStatus[1] >= m_QuestBase->nValue[3]) &&
+            (m_QuestBase->nValue[4] == 0 || m_Instance.nStatus[2] >= m_QuestBase->nValue[5]))
+            return true;
+        return false;
+
+    case QuestType::QUEST_UPGRADE_ITEM:
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+            return true;
+        return false;
+
+    case QuestType::QUEST_CONTACT:
+        return true;
+
+    case QuestType::QUEST_JOB_LEVEL:
+        if (m_Instance.nStatus[0] < m_QuestBase->nValue[0])
+            return false;
+        return m_Instance.nStatus[1] >= m_QuestBase->nValue[1];
+
+    case QuestType::QUEST_PARAMETER:
+        if (m_QuestBase->nValue[0] == 0 || (m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2]) ||
+            (m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2]) || (m_QuestBase->nValue[1] == 0 && m_Instance.nStatus[0] == m_QuestBase->nValue[2]) ||
+            (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2]) || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2]))
+        {
+            if (m_QuestBase->nValue[3] == 0 || (m_QuestBase->nValue[4] == 2 && m_Instance.nStatus[1] > m_QuestBase->nValue[5]) ||
+                (m_QuestBase->nValue[4] == 1 && m_Instance.nStatus[1] >= m_QuestBase->nValue[5]) || (m_QuestBase->nValue[4] == 0 && m_Instance.nStatus[1] == m_QuestBase->nValue[5]) ||
+                (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5]) || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5]))
             {
-                if (m_QuestBase->nValue[3] == 0
-                    || (m_QuestBase->nValue[4] == 2 && m_Instance.nStatus[1] > m_QuestBase->nValue[5])
-                    || (m_QuestBase->nValue[4] == 1 && m_Instance.nStatus[1] >= m_QuestBase->nValue[5])
-                    || (m_QuestBase->nValue[4] == 0 && m_Instance.nStatus[1] == m_QuestBase->nValue[5])
-                    || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5])
-                    || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5]))
+                if (m_QuestBase->nValue[6] == 0 || (m_QuestBase->nValue[7] == 2 && m_Instance.nStatus[2] > m_QuestBase->nValue[8]) ||
+                    (m_QuestBase->nValue[7] == 1 && m_Instance.nStatus[2] >= m_QuestBase->nValue[8]) || (m_QuestBase->nValue[7] == 0 && m_Instance.nStatus[2] == m_QuestBase->nValue[8]) ||
+                    (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8]) || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8]))
                 {
-                    if (m_QuestBase->nValue[6] == 0
-                        || (m_QuestBase->nValue[7] == 2 && m_Instance.nStatus[2] > m_QuestBase->nValue[8])
-                        || (m_QuestBase->nValue[7] == 1 && m_Instance.nStatus[2] >= m_QuestBase->nValue[8])
-                        || (m_QuestBase->nValue[7] == 0 && m_Instance.nStatus[2] == m_QuestBase->nValue[8])
-                        || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8])
-                        || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8]))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
-            return false;
+        }
+        return false;
 
-        case QuestType::QUEST_END_VIA_SCRIPT:
-            if (m_QuestBase->nEndType == 3)
-            {
-                if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1]
-                    && m_Instance.nStatus[1] >= m_QuestBase->nValue[3]
-                    && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-                    return true;
-            }
-            return m_QuestBase->nEndType < 2;
+    case QuestType::QUEST_END_VIA_SCRIPT:
+        if (m_QuestBase->nEndType == 3)
+        {
+            if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
+                return true;
+        }
+        return m_QuestBase->nEndType < 2;
 
-        case QuestType::QUEST_RANDOM_KILL_INDIVIDUAL:
-        case QuestType::QUEST_RANDOM_COLLECT:
-            break;
+    case QuestType::QUEST_RANDOM_KILL_INDIVIDUAL:
+    case QuestType::QUEST_RANDOM_COLLECT:
+        break;
     }
     return false;
 }

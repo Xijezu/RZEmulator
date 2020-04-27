@@ -14,26 +14,26 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-
+ */
 #include <functional>
 #include <queue>
 #include <stack>
 #include <string>
 
-template <class T>
+#include "Define.h"
+
+template<class T>
 class DatabaseWorkerPool;
 
 // A helper class to initiate all database worker pools,
 // handles updating, delays preparing of statements and cleans up on failure.
 class DatabaseLoader
 {
-  public:
+public:
     DatabaseLoader(std::string const &logger, uint32_t const defaultUpdateMask);
 
     // Register a database to the loader (lazy implemented)
-    template <class T>
+    template<class T>
     DatabaseLoader &AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name);
 
     // Load all databases
@@ -51,7 +51,7 @@ class DatabaseLoader
         DATABASE_MASK_ALL = DATABASE_LOGIN | DATABASE_CHARACTER | DATABASE_WORLD | DATABASE_HOTFIX
     };
 
-  private:
+private:
     bool OpenDatabases();
     bool PopulateDatabases();
     bool UpdateDatabases();

@@ -2,19 +2,20 @@
 #define RSACIPHER_H
 
 /*
-* Taken from glandu2s librzu: https://github.com/glandu2/librzu
-*/
+ * Taken from glandu2s librzu: https://github.com/glandu2/librzu
+ */
 
-#include "Common.h"
 #include <memory>
 #include <stdint.h>
 #include <vector>
+
+#include "Common.h"
 
 typedef struct rsa_st RSA;
 
 class RsaCipher
 {
-  public:
+public:
     RsaCipher();
     ~RsaCipher();
 
@@ -28,10 +29,10 @@ class RsaCipher
     bool privateEncrypt(const uint8_t *input, size_t input_size, std::vector<uint8_t> &output);
     bool privateDecrypt(const uint8_t *input, size_t input_size, std::vector<uint8_t> &output);
 
-  protected:
+protected:
     void printError();
 
-  private:
+private:
     std::unique_ptr<RSA, void (*)(RSA *)> rsaCipher;
 };
 

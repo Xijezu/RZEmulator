@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "Inventory.h"
 #include "Packets/MessageSerializerBuffer.h"
@@ -327,7 +327,7 @@ public:
 
     void SendPacket(const XPacket &pPacket);
 
-    template <class TS_SERIALIZABLE_PACKET>
+    template<class TS_SERIALIZABLE_PACKET>
     void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
     {
         if (m_session == nullptr)

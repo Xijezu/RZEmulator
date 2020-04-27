@@ -13,19 +13,20 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Object.h"
+
 #include "ClientPackets.h"
-#include "WorldSession.h"
-#include "World.h"
-#include "RegionContainer.h"
-#include "Messages.h"
-#include "Summon.h"
-#include "NPC.h"
-#include "Item.h"
 #include "FieldPropManager.h"
+#include "Item.h"
+#include "Messages.h"
+#include "NPC.h"
+#include "RegionContainer.h"
 #include "SkillProp/SkillProp.h"
+#include "Summon.h"
+#include "World.h"
+#include "WorldSession.h"
 
 // used for creating values for respawn for example
 #define PAIR64_HIPART(x) (uint32_t)((uint64_t(x) >> 32) & UI64LIT(0x00000000FFFFFFFF))
@@ -48,8 +49,8 @@ Object::~Object()
 {
     if (IsInWorld())
     {
-        //sLog->outCrash("Object::~Object");
-        //ASSERT(false);
+        // sLog->outCrash("Object::~Object");
+        // ASSERT(false);
         RemoveFromWorld();
     }
 
@@ -379,13 +380,18 @@ void Object::RemoveByteFlag(uint16_t index, uint8_t offset, uint8_t oldFlag)
 
 bool Object::PrintIndexError(uint32_t index, bool set) const
 {
-    //sLog->outError("Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, _valuesCount, GetTypeId(), _subType);
+    // sLog->outError("Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u", (set ? "set value to" : "get value from"), index, _valuesCount, GetTypeId(), _subType);
 
     // ASSERT must fail after function call
     return false;
 }
 
-WorldObject::WorldObject(bool isWorldObject) : pRegion(nullptr), region_index(-1), m_name(""), _isActive(false), m_isWorldObject(isWorldObject)
+WorldObject::WorldObject(bool isWorldObject)
+    : pRegion(nullptr)
+    , region_index(-1)
+    , m_name("")
+    , _isActive(false)
+    , m_isWorldObject(isWorldObject)
 {
 }
 
@@ -573,9 +579,7 @@ bool ArMoveVector::Step(uint32_t current_time)
         {
             this->ends.erase(std::remove(ends.begin(), ends.end(), info), ends.end());
         }
-        if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX &&
-                             m_positionY == (ends.back()).end.m_positionY &&
-                             m_positionZ == (ends.back()).end.m_positionZ))
+        if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX && m_positionY == (ends.back()).end.m_positionY && m_positionZ == (ends.back()).end.m_positionZ))
         {
             bIsMoving = false;
             ends.clear();

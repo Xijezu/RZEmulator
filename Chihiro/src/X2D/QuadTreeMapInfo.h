@@ -14,53 +14,58 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <map>
+
 #include "Common.h"
 #include "MapLocationInfo.h"
-#include <map>
 
 namespace X2D
 {
     class QuadTreeMapInfo
     {
+    public:
+        class FunctorAdaptor
+        {
         public:
+            FunctorAdaptor() = default;
+            ~FunctorAdaptor() = default;
+            std::vector<MapLocationInfo> pResult{};
+        };
 
-            class FunctorAdaptor
+        class Node
+        {
+        public:
+            Node()
+                : init(true)
             {
-                public:
-                    FunctorAdaptor() = default;
-                    ~FunctorAdaptor() = default;
-                    std::vector<MapLocationInfo> pResult{ };
-            };
+            }
 
-            class Node
-            {
-                public:
-                    Node() : init(true) {}
-
-                    ~Node() = default;
-                    Node(Pointf p1, Pointf p2, uint16_t depth);
-                    bool Add(MapLocationInfo u);
-                    void Enum(X2D::Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
-                    bool Collision(X2D::Pointf c);
-                    bool LooseCollision(Linef pLine);
-                private:
-                    Node getFitNode(MapLocationInfo u);
-                    void add(MapLocationInfo u);
-                    void divide();
-                    bool init{false};
-                public:
-                    std::vector<MapLocationInfo> m_vList{ };
-                    RectangleF                   m_Area{ };
-                    std::map<int, Node>          m_pNode{ };
-                    uint16_t                       m_unDepth{ };
-            };
-
-            QuadTreeMapInfo(float width, float height);
-            void Enum(Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
+            ~Node() = default;
+            Node(Pointf p1, Pointf p2, uint16_t depth);
             bool Add(MapLocationInfo u);
+            void Enum(X2D::Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
             bool Collision(X2D::Pointf c);
-            Node       m_MasterNode{ };
-            RectangleF m_Area{ };
+            bool LooseCollision(Linef pLine);
+
+        private:
+            Node getFitNode(MapLocationInfo u);
+            void add(MapLocationInfo u);
+            void divide();
+            bool init{false};
+
+        public:
+            std::vector<MapLocationInfo> m_vList{};
+            RectangleF m_Area{};
+            std::map<int, Node> m_pNode{};
+            uint16_t m_unDepth{};
+        };
+
+        QuadTreeMapInfo(float width, float height);
+        void Enum(Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
+        bool Add(MapLocationInfo u);
+        bool Collision(X2D::Pointf c);
+        Node m_MasterNode{};
+        RectangleF m_Area{};
     };
 }

@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "MemPool.h"
+
 #include "FieldPropManager.h"
 #include "ItemCollector.h"
 #include "ObjectMgr.h"
@@ -174,7 +175,7 @@ Item *MemoryPoolMgr::AllocGold(int64_t gold, GenerateCode gcode)
     return Item::AllocItem(0, 0, gold, gcode, -1, -1, -1, 0, 0, 0, 0, 0);
 }
 
-template <class T>
+template<class T>
 void MemoryPoolMgr::_unload()
 {
     NG_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());

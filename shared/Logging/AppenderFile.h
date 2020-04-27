@@ -14,13 +14,14 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Appender.h"
+ */
 #include <atomic>
+
+#include "Appender.h"
 
 class AppenderFile : public Appender
 {
-  public:
+public:
     typedef std::integral_constant<AppenderType, APPENDER_FILE>::type TypeIndex;
 
     AppenderFile(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs);
@@ -29,7 +30,7 @@ class AppenderFile : public Appender
 
     AppenderType getType() const override { return TypeIndex::value; }
 
-  private:
+private:
     void CloseFile();
     void _write(LogMessage const *message) override;
     FILE *logfile;

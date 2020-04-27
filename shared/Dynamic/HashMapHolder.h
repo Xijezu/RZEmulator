@@ -3,10 +3,10 @@
 #include "Common.h"
 #include "SharedMutex.h"
 
-template <class T>
+template<class T>
 class HashMapHolder
 {
-  public:
+public:
     typedef std::unordered_map<uint32_t, T *> MapType;
 
     static void Insert(T *o)
@@ -44,8 +44,8 @@ class HashMapHolder
         return &i_lock;
     }
 
-  private:
-    //Non instanceable only static
+private:
+    // Non instanceable only static
     HashMapHolder() = default;
     static NG_SHARED_MUTEX i_lock;
     static MapType m_objectMap;

@@ -14,9 +14,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "IoContext.h"
+ */
 #include <boost/asio/strand.hpp>
+
+#include "IoContext.h"
 
 #if BOOST_VERSION >= 106600
 
@@ -33,15 +34,18 @@ namespace NGemity
        */
         class Strand : public IoContextBaseNamespace::IoContextBase::strand
         {
-            public:
-                Strand(IoContext &ioContext) : IoContextBaseNamespace::IoContextBase::strand(ioContext) {}
+        public:
+            Strand(IoContext &ioContext)
+                : IoContextBaseNamespace::IoContextBase::strand(ioContext)
+            {
+            }
         };
 
 #if BOOST_VERSION >= 106600
         using boost::asio::bind_executor;
 #else
         template<typename T>
-        inline decltype(auto) bind_executor(Strand& strand, T&& t)
+        inline decltype(auto) bind_executor(Strand &strand, T &&t)
         {
             return strand.wrap(std::forward<T>(t));
         }

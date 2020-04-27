@@ -14,30 +14,32 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Config.h"
-#include "Log.h"
-#include "Util.h"
-#include <boost/property_tree/ini_parser.hpp>
+
 #include <algorithm>
 #include <memory>
 #include <mutex>
+
 #include <boost/filesystem.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+
+#include "Log.h"
 #include "PacketEpics.h"
+#include "Util.h"
 
 namespace bpt = boost::property_tree;
 
 namespace
 {
-std::string _filename;
-std::vector<std::string> _args;
-bpt::ptree _config;
-std::mutex _configLock;
+    std::string _filename;
+    std::vector<std::string> _args;
+    bpt::ptree _config;
+    std::mutex _configLock;
 } // namespace
 
-bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> args,
-                            std::string &error)
+bool ConfigMgr::LoadInitial(std::string const &file, std::vector<std::string> args, std::string &error)
 {
     std::lock_guard<std::mutex> lock(_configLock);
 
@@ -85,7 +87,7 @@ bool ConfigMgr::Reload(std::string &error)
     return LoadInitial(_filename, std::move(_args), error);
 }
 
-template <class T>
+template<class T>
 T ConfigMgr::GetValueDefault(std::string const &name, T def) const
 {
     try
@@ -94,19 +96,17 @@ T ConfigMgr::GetValueDefault(std::string const &name, T def) const
     }
     catch (bpt::ptree_bad_path &)
     {
-        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-                    name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
+        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file", name.c_str(), _filename.c_str(), name.c_str(), std::to_string(def).c_str());
     }
     catch (bpt::ptree_bad_data &)
     {
-        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-                     name.c_str(), _filename.c_str(), std::to_string(def).c_str());
+        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead", name.c_str(), _filename.c_str(), std::to_string(def).c_str());
     }
 
     return def;
 }
 
-template <>
+template<>
 std::string ConfigMgr::GetValueDefault<std::string>(std::string const &name, std::string def) const
 {
     try
@@ -115,13 +115,11 @@ std::string ConfigMgr::GetValueDefault<std::string>(std::string const &name, std
     }
     catch (bpt::ptree_bad_path &)
     {
-        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file",
-                    name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
+        NG_LOG_WARN("server.loading", "Missing name %s in config file %s, add \"%s = %s\" to this file", name.c_str(), _filename.c_str(), name.c_str(), def.c_str());
     }
     catch (bpt::ptree_bad_data &)
     {
-        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead",
-                     name.c_str(), _filename.c_str(), def.c_str());
+        NG_LOG_ERROR("server.loading", "Bad value defined for name %s in config file %s, going to use %s instead", name.c_str(), _filename.c_str(), def.c_str());
     }
 
     return def;

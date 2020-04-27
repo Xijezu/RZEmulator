@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "World.h"
+
 #include "ClientPackets.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -40,14 +41,13 @@ std::atomic<bool> World::m_stopEvent{false};
 std::atomic<uint32_t> World::m_worldLoopCounter{0};
 uint8_t World::m_ExitCode{SHUTDOWN_EXIT_CODE};
 
-World::World() : startTime(getMSTime())
+World::World()
+    : startTime(getMSTime())
 {
     srand((uint32_t)time(nullptr));
 }
 
-World::~World()
-{
-}
+World::~World() {}
 
 uint32_t World::GetArTime()
 {
@@ -233,8 +233,7 @@ bool World::SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> 
             SetMoveFunctor fn;
             fn.obj = pUnit;
             sRegion.DoEachVisibleRegion((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        pUnit->GetLayer(), fn);
+                (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), fn);
 
             if (pUnit->IsMonster())
             {
@@ -259,8 +258,7 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, 
             obj->SetCurrentXY(curPos.GetPositionX(), curPos.GetPositionY());
             curPos2 = obj->GetPosition();
             onMoveObject(obj, oldPos, curPos2);
-            enterProc(obj, (uint32_t)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                      (uint32_t)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
+            enterProc(obj, (uint32_t)(oldPos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(oldPos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
             obj->SetMove(newPos, speed, t);
         }
         else
@@ -271,9 +269,8 @@ bool World::SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, 
         {
             SetMoveFunctor fn;
             fn.obj = obj;
-            sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                        obj->GetLayer(), fn);
+            sRegion.DoEachVisibleRegion(
+                (uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), obj->GetLayer(), fn);
 
             if (obj->IsMonster())
             {
@@ -324,10 +321,8 @@ void World::AddObjectToWorld(WorldObject *obj)
     if (region == nullptr)
         return;
 
-    AddObjectFunctor rf((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                        (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                        obj->GetLayer(),
-                        obj);
+    AddObjectFunctor rf(
+        (uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), obj->GetLayer(), obj);
     rf.Run();
 
     if (obj->pRegion != nullptr)
@@ -360,11 +355,8 @@ void World::RemoveObjectFromWorld(WorldObject *obj)
     sRegion.GetRegion(obj)->RemoveObject(obj);
 
     // Send one to each player in visible region
-    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                obj->GetLayer(),
-                                NG_REGION_FUNCTOR(broadcastFunctor),
-                                (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        obj->GetLayer(), NG_REGION_FUNCTOR(broadcastFunctor), (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void World::step(WorldObject *obj, uint32_t tm)
@@ -395,7 +387,7 @@ void World::Update(uint32_t diff)
     for (auto &ro : m_vRespawnList)
     {
         ro->Update(diff);
-        //m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
+        // m_vRespawnList.erase(std::remove(m_vRespawnList.begin(), m_vRespawnList.end(), ro), m_vRespawnList.end());
     }
 
     for (auto &timer : m_timers)
@@ -443,9 +435,9 @@ void World::UpdateSessions(uint32_t diff)
 void World::AddSummonToWorld(Summon *pSummon)
 {
     pSummon->SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
-    //pSummon->AddToWorld();
+    // pSummon->AddToWorld();
     AddObjectToWorld(pSummon);
-    //pSummon->m_bIsSummoned = true;
+    // pSummon->m_bIsSummoned = true;
     pSummon->RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
 }
 
@@ -571,7 +563,8 @@ void World::MonsterDropItemToWorld(Unit *pUnit, Item *pItem)
     TS_SC_ITEM_DROP_INFO itemPct{};
     itemPct.item_handle = pItem->GetHandle();
     itemPct.monster_handle = pUnit->GetHandle();
-    Broadcast((uint32_t)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
+    Broadcast(
+        (uint32_t)(pItem->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pItem->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pItem->GetLayer(), itemPct);
     AddItemToWorld(pItem);
 }
 
@@ -696,7 +689,7 @@ bool World::ProcTame(Monster *pMonster)
      * However, since I'm not interested in having bs mechanics, I wont add it.
      * lPenalty = 0.05f * (float)((20 - pMonster->GetLevel()) + player->GetLevel());
      * lPenalty is multiplied with the TamePercentage here
-   */
+     */
     float fTameProbability = pMonster->GetTamePercentage();
     auto pSkill = player->GetSkill(SKILL_CREATURE_TAMING);
     if (pSkill == nullptr)
@@ -798,7 +791,8 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
             chaosPct.nBonus = 0;
             chaosPct.nBonusPercent = 0;
             chaosPct.nBonusType = 0;
-            Broadcast((uint32_t)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pCorpse->GetLayer(), chaosPct);
+            Broadcast((uint32_t)(pCorpse->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pCorpse->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+                pCorpse->GetLayer(), chaosPct);
             pPlayer->AddChaos(nChaos);
         }
     }

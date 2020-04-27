@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 
 enum PropType : int
@@ -45,7 +45,7 @@ struct PropInfo
 
 class TerrainPropInfo
 {
-  public:
+public:
     TerrainPropInfo() = default;
     ~TerrainPropInfo() = default;
 
@@ -55,7 +55,7 @@ class TerrainPropInfo
     std::vector<PropInfo> m_pPropInfo{};
     std::vector<std::string> m_CategoryNames{};
 
-  private:
+private:
     int32_t GetShadowFlag(std::string str);
     bool CheckPropFileType(std::string rname, std::string szTail);
     void SetPropInfo(int32_t nLineIndex, uint16_t wPropNum, PropType propType, RenderType renderType, int32_t nCategory, float fVisibleRatio, std::string rName, int32_t nShadowFlag);

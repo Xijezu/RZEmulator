@@ -14,15 +14,15 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 
 namespace X2D
 {
     enum CcwResult : int
     {
-        Parallelism      = 0,
-        ClockWise        = 1,
+        Parallelism = 0,
+        ClockWise = 1,
         CounterClockWise = -1,
     };
 
@@ -34,21 +34,21 @@ namespace X2D
 
     class Pointf
     {
-        public:
-            Pointf() = default;
-            ~Pointf() = default;
+    public:
+        Pointf() = default;
+        ~Pointf() = default;
 
-            Pointf(float _x, float _y);
+        Pointf(float _x, float _y);
 
-            float GetX() { return x; }
+        float GetX() { return x; }
 
-            float GetY() { return y; }
+        float GetY() { return y; }
 
-            void Set(float _x, float _y);
-            float GetAlternativeDistance(Pointf rh);
-            float GetDistance(Pointf rh);
+        void Set(float _x, float _y);
+        float GetAlternativeDistance(Pointf rh);
+        float GetDistance(Pointf rh);
 
-            float x;
-            float y;
+        float x;
+        float y;
     };
 }

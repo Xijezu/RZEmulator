@@ -1,15 +1,20 @@
 /*
-* Taken from glandu2s librzu: https://github.com/glandu2/librzu
-*/
+ * Taken from glandu2s librzu: https://github.com/glandu2/librzu
+ */
 
 #include "RSACipher.h"
+
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <string.h>
+
 #include "Log.h"
 
-RsaCipher::RsaCipher() : rsaCipher(nullptr, &RSA_free) {}
+RsaCipher::RsaCipher()
+    : rsaCipher(nullptr, &RSA_free)
+{
+}
 
 RsaCipher::~RsaCipher() {}
 

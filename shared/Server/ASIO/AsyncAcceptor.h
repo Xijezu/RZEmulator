@@ -15,13 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <atomic>
+#include <functional>
+
+#include <boost/asio/ip/tcp.hpp>
+
 #include "IoContext.h"
 #include "IpAddress.h"
 #include "Log.h"
-#include <atomic>
-#include <boost/asio/ip/tcp.hpp>
-#include <functional>
 
 using boost::asio::ip::tcp;
 
@@ -36,12 +38,12 @@ class AsyncAcceptor
     using SocketHandler = std::function<void(tcp::socket &&sock, uint32_t threadIndex)>;
 
 public:
-    //typedef void (*AcceptCallback)(tcp::socket &&newSocket, uint32_t threadIndex);
+    // typedef void (*AcceptCallback)(tcp::socket &&newSocket, uint32_t threadIndex);
 
     AsyncAcceptor(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port);
     void AsyncAccept();
 
-    //template <AcceptCallback acceptCallback>
+    // template <AcceptCallback acceptCallback>
     void AsyncAcceptWithCallback(SocketHandler handler)
     {
         tcp::socket *socket;

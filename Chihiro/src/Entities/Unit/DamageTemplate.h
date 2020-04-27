@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "ItemFields.h"
 #include "StateBase.h"
@@ -36,7 +36,8 @@ enum DamageFlag
 struct HateModifier
 {
     HateModifier(int32_t nHateModType, int32_t nHarmfulType, float _fAmpValue, int32_t _nIncValue)
-        : fAmpValue(_fAmpValue), nIncValue(_nIncValue)
+        : fAmpValue(_fAmpValue)
+        , nIncValue(_nIncValue)
     {
         bIsApplyToPhysicalSkill = false;
         bIsApplyToMagicalSkill = false;
@@ -174,7 +175,11 @@ struct AdditionalDamageInfo
 struct AddHPMPOnCriticalInfo
 {
     AddHPMPOnCriticalInfo(int32_t _nAddHP, int32_t _nAddMP, int32_t _nActivationRate)
-        : nAddHP(_nAddHP), nAddMP(_nAddMP), nActivationRate(_nActivationRate) {}
+        : nAddHP(_nAddHP)
+        , nAddMP(_nAddMP)
+        , nActivationRate(_nActivationRate)
+    {
+    }
 
     int32_t nAddHP;
     int32_t nAddMP;
@@ -183,8 +188,16 @@ struct AddHPMPOnCriticalInfo
 
 struct DamageReflectInfo
 {
-    DamageReflectInfo(uint8_t _fire_ratio, float _range, ElementalType _type, unsigned short _nReflectDamage, float _fPhysicalReflectRatio, float _fPhysicalSkillReflectRatio, float _fMagicalReflectRatio, bool _bIgnoreDefence)
-        : fire_ratio(_fire_ratio), range(_range), type(_type), nReflectDamage(_nReflectDamage), fPhysicalReflectRatio(_fPhysicalReflectRatio), fPhysicalSkillReflectRatio(_fPhysicalSkillReflectRatio), fMagicalReflectRatio(_fMagicalReflectRatio), bIgnoreDefence(_bIgnoreDefence)
+    DamageReflectInfo(uint8_t _fire_ratio, float _range, ElementalType _type, unsigned short _nReflectDamage, float _fPhysicalReflectRatio, float _fPhysicalSkillReflectRatio,
+        float _fMagicalReflectRatio, bool _bIgnoreDefence)
+        : fire_ratio(_fire_ratio)
+        , range(_range)
+        , type(_type)
+        , nReflectDamage(_nReflectDamage)
+        , fPhysicalReflectRatio(_fPhysicalReflectRatio)
+        , fPhysicalSkillReflectRatio(_fPhysicalSkillReflectRatio)
+        , fMagicalReflectRatio(_fMagicalReflectRatio)
+        , bIgnoreDefence(_bIgnoreDefence)
     {
     }
 
@@ -201,7 +214,11 @@ struct DamageReflectInfo
 struct StateReflectInfo
 {
     StateReflectInfo(StateCode _nCode, int32_t _nLevel, uint32_t _nDuration)
-        : nCode(_nCode), nLevel(_nLevel), nDuration(_nDuration) {}
+        : nCode(_nCode)
+        , nLevel(_nLevel)
+        , nDuration(_nDuration)
+    {
+    }
 
     StateCode nCode;
     int32_t nLevel;
@@ -210,7 +227,19 @@ struct StateReflectInfo
 
 struct _ADD_STATE_TAG
 {
-    _ADD_STATE_TAG(StateCode c, int32_t lv, int32_t p, uint32_t d, Target t, int32_t cm, int32_t min, int32_t max, int32_t tmin, int32_t tmax) : code(c), level(lv), percentage(p), duration(d), target(t), cost_mp(cm), min_hp(min), max_hp(max), target_min_hp(tmin), target_max_hp(tmax) {}
+    _ADD_STATE_TAG(StateCode c, int32_t lv, int32_t p, uint32_t d, Target t, int32_t cm, int32_t min, int32_t max, int32_t tmin, int32_t tmax)
+        : code(c)
+        , level(lv)
+        , percentage(p)
+        , duration(d)
+        , target(t)
+        , cost_mp(cm)
+        , min_hp(min)
+        , max_hp(max)
+        , target_min_hp(tmin)
+        , target_max_hp(tmax)
+    {
+    }
     StateCode code;
     int32_t level;
     int32_t percentage;
@@ -225,7 +254,12 @@ struct _ADD_STATE_TAG
 
 struct _HEAL_ON_ATTACK_TAG
 {
-    _HEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_inc, int32_t _mp_inc) : ratio(_ratio), hp_inc(_hp_inc), mp_inc(_mp_inc) {}
+    _HEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_inc, int32_t _mp_inc)
+        : ratio(_ratio)
+        , hp_inc(_hp_inc)
+        , mp_inc(_mp_inc)
+    {
+    }
 
     int32_t ratio;
     int32_t hp_inc;
@@ -234,7 +268,12 @@ struct _HEAL_ON_ATTACK_TAG
 
 struct _DAMAGE_ABSORB_TAG
 {
-    _DAMAGE_ABSORB_TAG(int32_t _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio) : ratio(_ratio), hp_absorb_ratio(_hp_absorb_ratio), mp_absorb_ratio(_mp_absorb_ratio) {}
+    _DAMAGE_ABSORB_TAG(int32_t _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio)
+        : ratio(_ratio)
+        , hp_absorb_ratio(_hp_absorb_ratio)
+        , mp_absorb_ratio(_mp_absorb_ratio)
+    {
+    }
 
     int32_t ratio;
     float hp_absorb_ratio;
@@ -243,7 +282,12 @@ struct _DAMAGE_ABSORB_TAG
 
 struct _STEAL_ON_ATTACK_TAG
 {
-    _STEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_steal, int32_t _mp_steal) : ratio(_ratio), hp_steal(_hp_steal), mp_steal(_mp_steal) {}
+    _STEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_steal, int32_t _mp_steal)
+        : ratio(_ratio)
+        , hp_steal(_hp_steal)
+        , mp_steal(_mp_steal)
+    {
+    }
 
     int32_t ratio;
     int32_t hp_steal;

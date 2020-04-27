@@ -16,11 +16,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifdef _WIN32
 bool WinServiceInstall();
 bool WinServiceUninstall();
 bool WinServiceRun();
-#endif                                                      // _WIN32
-
+#endif // _WIN32

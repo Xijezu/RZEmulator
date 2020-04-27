@@ -14,9 +14,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "QueryResult.h"
+
 #include "Errors.h"
 #include "Field.h"
 #include "Log.h"
@@ -121,10 +122,11 @@ DatabaseFieldTypes MysqlTypeToFieldType(enum_field_types type)
     return DatabaseFieldTypes::Null;
 }
 
-ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, uint32_t fieldCount) : _rowCount(rowCount),
-                                                                                                       _fieldCount(fieldCount),
-                                                                                                       _result(result),
-                                                                                                       _fields(fields)
+ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, uint32_t fieldCount)
+    : _rowCount(rowCount)
+    , _fieldCount(fieldCount)
+    , _result(result)
+    , _fields(fields)
 {
     _currentRow = new Field[_fieldCount];
 #ifdef NGEMITY_DEBUG
@@ -133,12 +135,13 @@ ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, 
 #endif
 }
 
-PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64_t rowCount, uint32_t fieldCount) : m_rowCount(rowCount),
-                                                                                                                    m_rowPosition(0),
-                                                                                                                    m_fieldCount(fieldCount),
-                                                                                                                    m_rBind(NULL),
-                                                                                                                    m_stmt(stmt),
-                                                                                                                    m_metadataResult(result)
+PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64_t rowCount, uint32_t fieldCount)
+    : m_rowCount(rowCount)
+    , m_rowPosition(0)
+    , m_fieldCount(fieldCount)
+    , m_rBind(NULL)
+    , m_stmt(stmt)
+    , m_metadataResult(result)
 {
     if (!m_metadataResult)
         return;
@@ -237,20 +240,14 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
                     break;
                 }
 
-                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                    buffer,
-                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                    fetched_length);
+                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(buffer, MysqlTypeToFieldType(m_rBind[fIndex].buffer_type), fetched_length);
 
                 // move buffer pointer to next part
                 m_stmt->bind[fIndex].buffer = (char *)buffer + rowSize;
             }
             else
             {
-                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(
-                    nullptr,
-                    MysqlTypeToFieldType(m_rBind[fIndex].buffer_type),
-                    *m_rBind[fIndex].length);
+                m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(nullptr, MysqlTypeToFieldType(m_rBind[fIndex].buffer_type), *m_rBind[fIndex].length);
             }
 
 #ifdef NGEMITY_DEBUG

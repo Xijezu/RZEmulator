@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_ENERGY_DEF(_) \
-	_(simple)(uint32_t, handle) \
-	_(simple)(int16_t, energy)
+#define TS_SC_ENERGY_DEF(_) _(simple)(uint32_t, handle) _(simple)(int16_t, energy)
 
 CREATE_PACKET(TS_SC_ENERGY, 515);
 

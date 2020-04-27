@@ -13,14 +13,16 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "State.h"
-#include "World.h"
+
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
+#include "World.h"
 
-State::State(StateType type, StateCode code, int32_t uid, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura, int32_t nStateValue, std::string szStateValue)
+State::State(StateType type, StateCode code, int32_t uid, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura, int32_t nStateValue,
+    std::string szStateValue)
 {
     init(uid, (int32_t)code);
     m_nCode = code;
@@ -116,10 +118,12 @@ bool State::IsDuplicatedGroup(int32_t nGroupID)
 {
     if (m_pTemplate == nullptr)
         return false;
-    return ((m_pTemplate->duplicate_group[0] && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] && m_pTemplate->duplicate_group[1] == nGroupID) || (m_pTemplate->duplicate_group[2] && m_pTemplate->duplicate_group[2] == nGroupID));
+    return ((m_pTemplate->duplicate_group[0] && m_pTemplate->duplicate_group[0] == nGroupID) || (m_pTemplate->duplicate_group[1] && m_pTemplate->duplicate_group[1] == nGroupID) ||
+        (m_pTemplate->duplicate_group[2] && m_pTemplate->duplicate_group[2] == nGroupID));
 }
 
-void State::SetState(int32_t code, int32_t uid, uint32_t caster, const uint16_t *levels, const uint32_t *durations, const int32_t *remain_times, uint32_t last_fire_time, const int32_t *base_damage, int32_t state_value, std::string szStateValue)
+void State::SetState(int32_t code, int32_t uid, uint32_t caster, const uint16_t *levels, const uint32_t *durations, const int32_t *remain_times, uint32_t last_fire_time, const int32_t *base_damage,
+    int32_t state_value, std::string szStateValue)
 {
     uint32_t t = sWorld.GetArTime();
     init(uid, code);
@@ -166,8 +170,7 @@ bool State::ClearExpiredState(uint32_t t)
         m_nLevel[1] = 0;
         bFlag = true;
     }
-    if ((m_nLevel[2] && m_nEndTime[2] < t) ||
-        (!m_nLevel[0] && !m_nLevel[1]))
+    if ((m_nLevel[2] && m_nEndTime[2] < t) || (!m_nLevel[0] && !m_nLevel[1]))
     {
         m_nLevel[2] = 0;
         bFlag = true;

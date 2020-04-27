@@ -14,23 +14,24 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include <memory>
+
+#include "Define.h"
 
 class Logger;
 struct LogMessage;
 
 class LogOperation
 {
-    public:
-        LogOperation(Logger const *_logger, std::unique_ptr<LogMessage> &&_msg);
+public:
+    LogOperation(Logger const *_logger, std::unique_ptr<LogMessage> &&_msg);
 
-        ~LogOperation();
+    ~LogOperation();
 
-        int call();
+    int call();
 
-    protected:
-        Logger const                *logger;
-        std::unique_ptr<LogMessage> msg;
+protected:
+    Logger const *logger;
+    std::unique_ptr<LogMessage> msg;
 };

@@ -14,11 +14,11 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
-#include "Skill.h"
-#include "Player.h"
 #include "GameRule.h"
+#include "Player.h"
+#include "Skill.h"
 
 struct SkillTargetFunctor
 {
@@ -27,14 +27,19 @@ struct SkillTargetFunctor
 
 struct HealingSkillFunctor : public SkillTargetFunctor
 {
-    HealingSkillFunctor(std::vector<SkillResult> *pSRList, bool bIsByItem = false) : m_pSRList(pSRList), m_bIsByItem(bIsByItem)
+    HealingSkillFunctor(std::vector<SkillResult> *pSRList, bool bIsByItem = false)
+        : m_pSRList(pSRList)
+        , m_bIsByItem(bIsByItem)
     {
     }
 
     bool onCreature(Skill *pSkill, uint32_t t, Unit *pCaster, Unit *pTarget) override
     {
         auto slv = pSkill->GetRequestedSkillLevel();
-        int32_t nResult = pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful()) * (pSkill->GetVar(0) + pSkill->GetVar(1) * slv) + pSkill->GetVar(2) + pSkill->GetVar(3) * slv + pSkill->GetVar(6) * pSkill->GetSkillEnhance() + pTarget->GetMaxHealth() * (pSkill->GetVar(4) + pSkill->GetVar(5) * slv + pSkill->GetVar(7) * pSkill->GetSkillEnhance());
+        int32_t nResult = pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful()) *
+                (pSkill->GetVar(0) + pSkill->GetVar(1) * slv) +
+            pSkill->GetVar(2) + pSkill->GetVar(3) * slv + pSkill->GetVar(6) * pSkill->GetSkillEnhance() +
+            pTarget->GetMaxHealth() * (pSkill->GetVar(4) + pSkill->GetVar(5) * slv + pSkill->GetVar(7) * pSkill->GetSkillEnhance());
 
         if (pTarget->GetHealth() == 0)
             nResult = 0;
@@ -60,7 +65,8 @@ private:
 
 struct StateSkillFunctor : public SkillTargetFunctor
 {
-    StateSkillFunctor(std::vector<SkillResult> *pResultList) : m_vResult(pResultList)
+    StateSkillFunctor(std::vector<SkillResult> *pResultList)
+        : m_vResult(pResultList)
     {
     }
 
@@ -79,13 +85,10 @@ struct StateSkillFunctor : public SkillTargetFunctor
                         bResult = false;
                 }
             }
-            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV ||
-                     pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
+            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
+                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST ||
+                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_TARGET_TYPE || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV ||
+                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATES_WITH_EACH_DIFF_LV_DURATION)
             {
                 int32_t nAccuracyBonus = pSkill->GetSkillBase()->GetHitBonus(pSkill->GetSkillEnhance(), pCaster->GetLevel() - pTarget->GetLevel());
                 if (50 + pCaster->GetMagicAccuracy() - pTarget->GetMagicAvoid() + nAccuracyBonus < irand(0, 100))
@@ -110,15 +113,12 @@ struct StateSkillFunctor : public SkillTargetFunctor
             else
                 end_time = t + nEndTime;
 
-            if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE ||
-                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
-                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
-                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+            if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE ||
+                pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
             {
                 int32_t count = 5;
 
-                if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST ||
-                    pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
+                if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || pSkill->GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST)
                     count = 0;
 
                 int32_t nLevel = pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance());
@@ -219,7 +219,8 @@ struct StateSkillFunctor : public SkillTargetFunctor
                     bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), nLevel, t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
                 }
             }
-            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE || pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE)
+            else if (pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_DAMAGE_ADD_RANDOM_STATE ||
+                pSkill->GetSkillBase()->GetSkillEffectType() == EF_MAGIC_SINGLE_REGION_DAMAGE_ADD_RANDOM_STATE)
             {
                 std::vector<int32_t> vStateID{};
                 vStateID.reserve(7);
@@ -234,23 +235,21 @@ struct StateSkillFunctor : public SkillTargetFunctor
                 {
                     StateCode code = static_cast<StateCode>(vStateID[irand(0, static_cast<int32_t>(vStateID.size()) - 1)]);
 
-                    bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(), pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()), t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                    bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), code, pCaster->GetHandle(),
+                                  pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()), t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
                 }
             }
             else
             {
-                if (pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_AURA &&
-                    pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_DIFFERENTIAL_AURA)
+                if (pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_AURA && pSkill->GetSkillBase()->GetSkillEffectType() != EF_TOGGLE_DIFFERENTIAL_AURA)
                 {
-                    if (pTarget != pCaster || (pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_ABSORB_DAMAGE &&
-                                               pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_ABSORB_DAMAGE_OLD &&
-                                               pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP &&
-                                               pSkill->GetSkillBase()->GetSkillEffectType() != EF_ADD_HP_MP_BY_ABSORB_HP_MP &&
-                                               pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_SINGLE_DAMAGE_ABSORB))
+                    if (pTarget != pCaster ||
+                        (pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_ABSORB_DAMAGE && pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_ABSORB_DAMAGE_OLD &&
+                            pSkill->GetSkillBase()->GetSkillEffectType() != EF_MAGIC_DAMAGE_WITH_ABSORB_HP_MP && pSkill->GetSkillBase()->GetSkillEffectType() != EF_ADD_HP_MP_BY_ABSORB_HP_MP &&
+                            pSkill->GetSkillBase()->GetSkillEffectType() != EF_PHYSICAL_SINGLE_DAMAGE_ABSORB))
                     {
-                        bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId()),
-                                                    pCaster->GetHandle(), pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()),
-                                                    t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
+                        bResult = pTarget->AddState(static_cast<StateType>(pSkill->GetSkillBase()->GetStateType()), static_cast<StateCode>(pSkill->GetSkillBase()->GetStateId()), pCaster->GetHandle(),
+                                      pSkill->GetSkillBase()->GetStateLevel(pSkill->GetRequestedSkillLevel(), pSkill->GetSkillEnhance()), t, end_time, false, 0, "") == TS_RESULT_SUCCESS;
                     }
                 }
             }
@@ -264,9 +263,9 @@ struct StateSkillFunctor : public SkillTargetFunctor
                 }
                 else if (pTarget->IsNPC() && pTarget->IsEnemy(pCaster, true))
                 {
-                    //auto pNPC = pTarget->As<NPC>();
+                    // auto pNPC = pTarget->As<NPC>();
 
-                    //pNPC->SetAttacker(pCaster);
+                    // pNPC->SetAttacker(pCaster);
                 }
             }
         }
@@ -282,7 +281,8 @@ private:
 
 struct RemoveBadStateSkillFunctor : public SkillTargetFunctor
 {
-    RemoveBadStateSkillFunctor(std::vector<SkillResult> *pvList) : m_vList(pvList)
+    RemoveBadStateSkillFunctor(std::vector<SkillResult> *pvList)
+        : m_vList(pvList)
     {
     }
 
@@ -307,7 +307,8 @@ private:
 
 struct RemoveGoodStateSkillFunctor : public SkillTargetFunctor
 {
-    RemoveGoodStateSkillFunctor(std::vector<SkillResult> *pvList) : m_vList(pvList)
+    RemoveGoodStateSkillFunctor(std::vector<SkillResult> *pvList)
+        : m_vList(pvList)
     {
     }
 
@@ -348,7 +349,9 @@ private:
 
 struct RecoveryMPSkillFunctor : public SkillTargetFunctor
 {
-    RecoveryMPSkillFunctor(std::vector<SkillResult> *pvList, bool bIsByItem = false) : m_vList(pvList), m_bIsByItem(bIsByItem)
+    RecoveryMPSkillFunctor(std::vector<SkillResult> *pvList, bool bIsByItem = false)
+        : m_vList(pvList)
+        , m_bIsByItem(bIsByItem)
     {
     }
 
@@ -356,9 +359,9 @@ struct RecoveryMPSkillFunctor : public SkillTargetFunctor
     {
         int32_t slv = pSkill->GetRequestedSkillLevel();
         int32_t enhance = pSkill->GetSkillEnhance();
-        nResult =
-            pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful()) * (pSkill->GetVar(0) + slv * pSkill->GetVar(1)) + pSkill->GetVar(2) + slv * pSkill->GetVar(3) + enhance * pSkill->GetVar(6) +
-            +pTarget->GetMaxMana() * (pSkill->GetVar(4) + slv * pSkill->GetVar(5) + enhance * pSkill->GetVar(7));
+        nResult = pCaster->GetMagicPoint((ElementalType)pSkill->GetSkillBase()->GetElementalType(), pSkill->GetSkillBase()->IsPhysicalSkill(), pSkill->GetSkillBase()->IsHarmful()) *
+                (pSkill->GetVar(0) + slv * pSkill->GetVar(1)) +
+            pSkill->GetVar(2) + slv * pSkill->GetVar(3) + enhance * pSkill->GetVar(6) + +pTarget->GetMaxMana() * (pSkill->GetVar(4) + slv * pSkill->GetVar(5) + enhance * pSkill->GetVar(7));
 
         if (pTarget->GetHealth() == 0)
             nResult = 0;

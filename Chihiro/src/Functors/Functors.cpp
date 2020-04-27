@@ -13,12 +13,13 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Functors.h"
-#include "RegionContainer.h"
+
 #include "Messages.h"
 #include "Monster.h"
+#include "RegionContainer.h"
 #include "World.h"
 
 void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
@@ -52,9 +53,7 @@ void AddObjectFunctor::Run()
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
 
-    sRegion.DoEachVisibleRegion(x, y, layer,
-                                NG_REGION_FUNCTOR(fn),
-                                (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion(x, y, layer, NG_REGION_FUNCTOR(fn), (uint8_t)RegionVisitor::ClientVisitor);
     if (fn.bSent)
         bSend = true;
 
@@ -62,9 +61,7 @@ void AddObjectFunctor::Run()
     {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
-        sRegion.DoEachVisibleRegion(x, y, layer,
-                                    NG_REGION_FUNCTOR(fn2),
-                                    (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
+        sRegion.DoEachVisibleRegion(x, y, layer, NG_REGION_FUNCTOR(fn2), (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 
@@ -73,11 +70,7 @@ void AddObjectFunctor::Run2()
     SendEnterMessageEachOtherFunctor fn;
     fn.obj = newObj;
 
-    sRegion.DoEachNewRegion(x, y,
-                            x2, y2,
-                            layer,
-                            NG_REGION_FUNCTOR(fn),
-                            (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachNewRegion(x, y, x2, y2, layer, NG_REGION_FUNCTOR(fn), (uint8_t)RegionVisitor::ClientVisitor);
     if (fn.bSent)
         bSend = true;
 
@@ -85,11 +78,7 @@ void AddObjectFunctor::Run2()
     {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
-        sRegion.DoEachNewRegion(x, y,
-                                x2, y2,
-                                layer,
-                                NG_REGION_FUNCTOR(fn2),
-                                (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
+        sRegion.DoEachNewRegion(x, y, x2, y2, layer, NG_REGION_FUNCTOR(fn2), (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
     }
 }
 
@@ -109,23 +98,25 @@ void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
 {
 
     auto c_pos = obj->GetCurrentPosition(pParent->t);
-    if (c_pos.GetPositionX() >= pParent->left && c_pos.GetPositionX() <= pParent->right
-        && c_pos.GetPositionY() >= pParent->top && c_pos.GetPositionY() <= pParent->bottom
-        && pParent->range > c_pos.GetExactDist2d(&pParent->pos))
+    if (c_pos.GetPositionX() >= pParent->left && c_pos.GetPositionX() <= pParent->right && c_pos.GetPositionY() >= pParent->top && c_pos.GetPositionY() <= pParent->bottom &&
+        pParent->range > c_pos.GetExactDist2d(&pParent->pos))
     {
         pParent->pvResult.emplace_back(obj->GetHandle());
     }
-
 }
 
 EnumMovableObjectRegionFunctor::EnumMovableObjectRegionFunctor(std::vector<uint32_t> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC)
-        : pvResult(_pvResult), pos(_pos), range(_range), bIncludeClient(_bIncludeClient), bIncludeNPC(_bIncludeNPC)
+    : pvResult(_pvResult)
+    , pos(_pos)
+    , range(_range)
+    , bIncludeClient(_bIncludeClient)
+    , bIncludeNPC(_bIncludeNPC)
 {
-    left   = pos.GetPositionX() - range;
-    right  = pos.GetPositionX() + range;
-    top    = pos.GetPositionY() - range;
+    left = pos.GetPositionX() - range;
+    right = pos.GetPositionX() + range;
+    top = pos.GetPositionY() - range;
     bottom = pos.GetPositionY() + range;
-    t      = sWorld.GetArTime();
+    t = sWorld.GetArTime();
 }
 
 void EnumMovableObjectRegionFunctor::Run(Region *region)
@@ -133,7 +124,7 @@ void EnumMovableObjectRegionFunctor::Run(Region *region)
     if (region == nullptr)
         return;
 
-    SubFunctor fn{ };
+    SubFunctor fn{};
     fn.pParent = this;
     if (bIncludeClient)
         region->DoEachClient(fn);

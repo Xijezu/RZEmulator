@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_ARRANGE_ITEM_DEF(_) \
-	_(simple)(bool, bIsStorage)
+#define TS_CS_ARRANGE_ITEM_DEF(_) _(simple)(bool, bIsStorage)
 
 CREATE_PACKET(TS_CS_ARRANGE_ITEM, 219);
 

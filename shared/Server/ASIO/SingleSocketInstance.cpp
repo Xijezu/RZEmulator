@@ -1,9 +1,11 @@
 #include "SingleSocketInstance.h"
-#include "XSocket.h"
-#include "NetworkThread.h"
-#include "Log.h"
 
-NGemity::SingleSocketInstance::SingleSocketInstance() : m_pNetworkThread(nullptr)
+#include "Log.h"
+#include "NetworkThread.h"
+#include "XSocket.h"
+
+NGemity::SingleSocketInstance::SingleSocketInstance()
+    : m_pNetworkThread(nullptr)
 {
 }
 

@@ -13,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Field.h"
+
 #include "Log.h"
 
 Field::Field()
@@ -283,20 +284,15 @@ bool Field::IsType(DatabaseFieldTypes type) const
 
 bool Field::IsNumeric() const
 {
-    return (data.type == DatabaseFieldTypes::Int8 ||
-            data.type == DatabaseFieldTypes::Int16 ||
-            data.type == DatabaseFieldTypes::Int32 ||
-            data.type == DatabaseFieldTypes::Int64 ||
-            data.type == DatabaseFieldTypes::Float ||
-            data.type == DatabaseFieldTypes::Double);
+    return (data.type == DatabaseFieldTypes::Int8 || data.type == DatabaseFieldTypes::Int16 || data.type == DatabaseFieldTypes::Int32 || data.type == DatabaseFieldTypes::Int64 ||
+        data.type == DatabaseFieldTypes::Float || data.type == DatabaseFieldTypes::Double);
 }
 
 #ifdef NGEMITY_DEBUG
 
 void Field::LogWrongType(char *getter) const
 {
-    NG_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.",
-                getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
+    NG_LOG_WARN("sql.sql", "Warning: %s on %s field %s.%s (%s.%s) at index %u.", getter, meta.Type, meta.TableAlias, meta.Alias, meta.TableName, meta.Name, meta.Index);
 }
 
 #ifdef _WIN32 // hack for broken mysql.h not including the correct winsock header for SOCKET definition, fixed in 5.7

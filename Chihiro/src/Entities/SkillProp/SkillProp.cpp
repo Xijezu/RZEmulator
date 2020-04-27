@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "SkillProp.h"
+
 #include "Log.h"
 #include "MemPool.h"
 #include "Skill.h"
@@ -34,9 +35,12 @@ void SkillProp::EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player * 
     pEnterPct << (uint32_t)pSkillProp->m_pSkill.GetSkillId();
 }
 
-SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio) : WorldObject(false), m_hCaster(caster),
-                                                                                     m_pSkill(pSkill), m_nOwnerMagicPoint(nMagicPoint),
-                                                                                     m_fHateRatio(fHateRatio)
+SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio)
+    : WorldObject(false)
+    , m_hCaster(caster)
+    , m_pSkill(pSkill)
+    , m_nOwnerMagicPoint(nMagicPoint)
+    , m_fHateRatio(fHateRatio)
 {
     _mainType = MT_StaticObject;
     _subType = ST_SkillProp;
@@ -239,7 +243,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
     float fRange = m_pSkill.GetVar(9) * 12.0f;
 
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
-    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
+    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) +
+        m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
     nDamage *= m_pSkill.GetVar(10) + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
 
     nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), false, fRange, -1, 0, nDamage, true, pCaster, m_pSkill.GetVar(16), m_pSkill.GetVar(17), vResult, false);
@@ -259,7 +264,9 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
             continue;
 
         int32_t flag = 0;
-        auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pUnit->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
+        auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type,
+            m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pUnit->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0,
+            nullptr, nullptr);
 
         if (Damage.bCritical)
             flag |= AIF_Critical;
@@ -342,7 +349,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
             continue;
 
         int32_t flag = 0;
-        auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
+        auto Damage =
+            pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
         if (Damage.bCritical)
             flag |= AIF_Critical;
@@ -520,7 +528,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
         if (pCaster->IsEnemy(pUnit, true))
         {
             int32_t flag = 0;
-            auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
+            auto Damage = pUnit->DealMagicalDamage(
+                m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
             if (Damage.bCritical)
                 flag |= AIF_Critical;
@@ -584,13 +593,14 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
 
-    int32_t nHPHeal = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
-    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(6) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(7) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(8)) + m_pSkill.GetVar(9) + m_pSkill.GetVar(10) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
+    int32_t nHPHeal = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) +
+        m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(5) * m_pSkill.GetSkillEnhance();
+    int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(6) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(7) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(8)) + m_pSkill.GetVar(9) +
+        m_pSkill.GetVar(10) * m_pSkill.GetRequestedSkillLevel() + m_pSkill.GetVar(11) * m_pSkill.GetSkillEnhance();
 
     nDamage *= m_pSkill.GetVar(18) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(19);
 
-    nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), false, fRange, -1, 0, nDamage,
-                                                   true, pCaster, m_pSkill.GetVar(16), m_pSkill.GetVar(17), vResult, false);
+    nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), false, fRange, -1, 0, nDamage, true, pCaster, m_pSkill.GetVar(16), m_pSkill.GetVar(17), vResult, false);
 
     SkillResult skill_result{};
 
@@ -602,7 +612,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
         if (pCaster->IsEnemy(pUnit, true))
         {
             int32_t flag = 0;
-            auto Damage = pUnit->DealMagicalDamage(m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
+            auto Damage = pUnit->DealMagicalDamage(
+                m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
 
             if (Damage.bCritical)
                 flag |= AIF_Critical;
@@ -674,8 +685,7 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
 
     std::vector<Unit *> vTarget{};
 
-    Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0,
-                                         true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
+    Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
 
     auto it = vTarget.begin();
     for (; it != vTarget.end(); ++it)
@@ -692,8 +702,8 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
     auto t = sWorld.GetArTime();
     std::vector<Unit *> vTargetList{};
 
-    nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage,
-                                                   true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, m_pSkill.GetVar(6), vTargetList, true);
+    nDamage = Skill::EnumSkillTargetsAndCalcDamage(
+        GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, m_pSkill.GetVar(6), vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {
@@ -701,13 +711,17 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
         {
         case EF_TRAP_PHYSICAL_DAMAGE:
         {
-            auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
+            auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
+                m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
+                m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
         break;
         case EF_TRAP_MAGICAL_DAMAGE:
         {
-            auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
+            auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
+                m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
+                m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
         break;
@@ -741,8 +755,7 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
     {
         std::vector<Unit *> vTarget{};
 
-        Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0,
-                                             true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
+        Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
 
         std::vector<Unit *>::iterator it{};
         for (it = vTarget.begin(); it != vTarget.end(); ++it)
@@ -767,8 +780,8 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
 
     std::vector<Unit *> vTargetList{};
 
-    nDamage = Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage,
-                                                   true, pCaster, DISTRIBUTION_TYPE_DISTRIBUTE, m_pSkill.GetVar(6), vTargetList, true);
+    nDamage = Skill::EnumSkillTargetsAndCalcDamage(
+        GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage, true, pCaster, DISTRIBUTION_TYPE_DISTRIBUTE, m_pSkill.GetVar(6), vTargetList, true);
 
     for (auto &pDealTarget : vTargetList)
     {
@@ -776,13 +789,17 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
         {
         case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
         {
-            auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
+            auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
+                m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
+                m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
         break;
         case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
         {
-            auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type, m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()), m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
+            auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
+                m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
+                m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
         }
         break;

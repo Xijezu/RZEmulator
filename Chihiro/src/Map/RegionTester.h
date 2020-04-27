@@ -14,9 +14,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Object.h"
+ */
 #include <memory>
+
+#include "Object.h"
 
 struct RegionTester
 {
@@ -27,10 +28,18 @@ struct RegionTester
 
 struct DirectionRegionTester : public RegionTester
 {
-    DirectionRegionTester() : V1x(), V1y(), ori_x(), ori_y(), dx(), dy(), c(), thickness(), denominator()
-    {
+    DirectionRegionTester()
+        : V1x()
+        , V1y()
+        , ori_x()
+        , ori_y()
+        , dx()
+        , dy()
+        , c()
+        , thickness()
+        , denominator(){
 
-    };
+          };
     ~DirectionRegionTester() = default;
     void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
     bool IsInRegion(Position pos) override;
@@ -48,9 +57,15 @@ struct DirectionRegionTester : public RegionTester
 
 struct CrossRegionTester : public RegionTester
 {
-    CrossRegionTester() : x1(), y1(), c1(), x2(), y2(), c2(), thickness(), denominator()
-    {
-    };
+    CrossRegionTester()
+        : x1()
+        , y1()
+        , c1()
+        , x2()
+        , y2()
+        , c2()
+        , thickness()
+        , denominator(){};
 
     void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
     bool IsInRegion(Position pos) override;
@@ -67,10 +82,14 @@ struct CrossRegionTester : public RegionTester
 
 struct ArcCircleRegionTester : public RegionTester
 {
-    ArcCircleRegionTester() : V1x(), V1y(), x(), y(), fCos()
-    {
+    ArcCircleRegionTester()
+        : V1x()
+        , V1y()
+        , x()
+        , y()
+        , fCos(){
 
-    };
+          };
     ~ArcCircleRegionTester() = default;
     void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
     bool IsInRegion(Position pos) override;
@@ -84,13 +103,7 @@ struct ArcCircleRegionTester : public RegionTester
 
 struct CircleRegionTester : public RegionTester
 {
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override
-    {
+    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override {}
 
-    }
-
-    bool IsInRegion(Position pos) override
-    {
-        return true;
-    }
+    bool IsInRegion(Position pos) override { return true; }
 };

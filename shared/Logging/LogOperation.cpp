@@ -13,19 +13,20 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "LogOperation.h"
-#include "Logger.h"
+
 #include "LogMessage.h"
+#include "Logger.h"
 
-LogOperation::LogOperation(Logger const *_logger, std::unique_ptr<LogMessage> &&_msg) : logger(_logger), msg(std::forward<std::unique_ptr<LogMessage>>(_msg))
+LogOperation::LogOperation(Logger const *_logger, std::unique_ptr<LogMessage> &&_msg)
+    : logger(_logger)
+    , msg(std::forward<std::unique_ptr<LogMessage>>(_msg))
 {
 }
 
-LogOperation::~LogOperation()
-{
-}
+LogOperation::~LogOperation() {}
 
 int LogOperation::call()
 {

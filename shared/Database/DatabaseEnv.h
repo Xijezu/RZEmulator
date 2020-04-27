@@ -15,16 +15,14 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "DatabaseWorkerPool.h"
 #include "Define.h"
-
+#include "Field.h"
 #include "Implementation/CharacterDatabase.h"
 #include "Implementation/GameDatabase.h"
 #include "Implementation/LogDatabase.h"
 #include "Implementation/LoginDatabase.h"
-
-#include "Field.h"
 #include "PreparedStatement.h"
 #include "QueryCallback.h"
 #include "QueryResult.h"

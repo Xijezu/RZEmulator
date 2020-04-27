@@ -14,59 +14,60 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 
 class TimeSynch
 {
-    public:
-        TimeSynch(uint32_t L, uint32_t DC, uint32_t pMAX) : m_L(L), m_DC(DC), m_MAX(pMAX) {};
-        ~TimeSynch() = default;
+public:
+    TimeSynch(uint32_t L, uint32_t DC, uint32_t pMAX)
+        : m_L(L)
+        , m_DC(DC)
+        , m_MAX(pMAX){};
+    ~TimeSynch() = default;
 
-        void onEcho(uint32_t t)
+    void onEcho(uint32_t t)
+    {
+        if (static_cast<uint32_t>(m_vT.size()) == m_MAX)
         {
-            if (static_cast<uint32_t>(m_vT.size()) == m_MAX)
-            {
-                //                 m_vT.
-//                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-//                     &thisa,
-//                     *(v2 + 1),
-//                     v2);
-//                 v3 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&thisa);
-//                 LODWORD(v3->end.x) = T;
-            }
-            else
-            {
-                m_vT.emplace_back(t);
-            }
+            //                 m_vT.
+            //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
+            //                     &thisa,
+            //                     *(v2 + 1),
+            //                     v2);
+            //                 v3 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&thisa);
+            //                 LODWORD(v3->end.x) = T;
         }
-
-        uint32_t GetInterval()
+        else
         {
-            uint32_t tc   = 0;
-            uint32_t CDC  = 0;
-            auto size = static_cast<uint32_t>(m_vT.size());
-
-            for (auto &i : m_vT)
-            {
-                if (i < m_L || CDC >= m_DC)
-                {
-                    ++size;
-                    tc += i;
-                }
-                CDC++;
-            }
-            return tc / size >> 1;
+            m_vT.emplace_back(t);
         }
+    }
 
-        uint32_t GetTestCount()
+    uint32_t GetInterval()
+    {
+        uint32_t tc = 0;
+        uint32_t CDC = 0;
+        auto size = static_cast<uint32_t>(m_vT.size());
+
+        for (auto &i : m_vT)
         {
-            return 0;
+            if (i < m_L || CDC >= m_DC)
+            {
+                ++size;
+                tc += i;
+            }
+            CDC++;
         }
+        return tc / size >> 1;
+    }
 
-        std::vector<uint32_t> m_vT{ };
-    private:
-        uint32_t m_L{ };
-        uint32_t m_DC{ };
-        uint32_t m_MAX{ };
+    uint32_t GetTestCount() { return 0; }
+
+    std::vector<uint32_t> m_vT{};
+
+private:
+    uint32_t m_L{};
+    uint32_t m_DC{};
+    uint32_t m_MAX{};
 };

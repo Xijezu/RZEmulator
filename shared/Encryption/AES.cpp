@@ -1,13 +1,17 @@
 /*
-* Taken from glandu2s librzu: https://github.com/glandu2/librzu
-*/
+ * Taken from glandu2s librzu: https://github.com/glandu2/librzu
+ */
 
 #include "AES.h"
+
 #include <openssl/evp.h>
 #include <stdlib.h>
 #include <string.h>
 
-AesPasswordCipher::AesPasswordCipher() : evpCipher(nullptr, &EVP_CIPHER_CTX_free) {}
+AesPasswordCipher::AesPasswordCipher()
+    : evpCipher(nullptr, &EVP_CIPHER_CTX_free)
+{
+}
 
 AesPasswordCipher::~AesPasswordCipher() {}
 

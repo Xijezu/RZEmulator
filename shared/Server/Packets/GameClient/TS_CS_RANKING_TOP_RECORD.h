@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_RANKING_TOP_RECORD_DEF(_) \
-	_(simple)(int8_t, ranking_type)
+#define TS_CS_RANKING_TOP_RECORD_DEF(_) _(simple)(int8_t, ranking_type)
 
 CREATE_PACKET(TS_CS_RANKING_TOP_RECORD, 5000);
 

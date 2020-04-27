@@ -14,7 +14,9 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <unordered_map>
+
 #include "Common.h"
 #include "CreatureAttribute.h"
 #include "DatabaseTemplates.h"
@@ -27,7 +29,6 @@
 #include "SkillBase.h"
 #include "StateBase.h"
 #include "SummonBase.h"
-#include <unordered_map>
 
 class Player;
 class Item;

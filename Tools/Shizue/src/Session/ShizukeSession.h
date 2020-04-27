@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "XSocket.h"
 
@@ -24,14 +24,17 @@ class XPacket;
 class ShizukeSession : public XSocket
 {
 public:
-  explicit ShizukeSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)) {}
-  ~ShizukeSession();
+    explicit ShizukeSession(boost::asio::ip::tcp::socket &&socket)
+        : XSocket(std::move(socket))
+    {
+    }
+    ~ShizukeSession();
 
-  // Network handlers
-  void OnClose() override;
-  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
-  bool IsEncrypted() const override { return true; }
+    // Network handlers
+    void OnClose() override;
+    ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+    bool IsEncrypted() const override { return true; }
 
-  // Packet handlers
-  void onResultHandler(const TS_SC_RESULT *);
+    // Packet handlers
+    void onResultHandler(const TS_SC_RESULT *);
 };

@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #pragma once
 
@@ -22,34 +22,35 @@
 class Player;
 class AllowedCommandInfo
 {
-    public:
-        static AllowedCommandInfo &Instance()
-        {
-            static AllowedCommandInfo instance;
-            return instance;
-        }
+public:
+    static AllowedCommandInfo &Instance()
+    {
+        static AllowedCommandInfo instance;
+        return instance;
+    }
 
-        ~AllowedCommandInfo() = default;
+    ~AllowedCommandInfo() = default;
 
-        void Run(Player *pClient, const std::string &szMessage);
-        void onCheatPosition(Player *pClient, const std::string &);
-        void onRunScript(Player *pClient, const std::string &pScript);
-        void onCheatSitdown(Player *pClient, const std::string &);
-        void onCheatStandup(Player *pClient, const std::string &);
-        void onBattleMode(Player *pClient, const std::string &);
-        void onCheatNotice(Player *pClient, const std::string &);
-        void onCheatParty(Player *pClient, const std::string &);
-        void onCheatSuicide(Player *pClient, const std::string &);
-        void onCheatKillAll(Player *pClient, const std::string &);
-        void onCheatRespawn(Player *pClient, const std::string &);
-        void onCheatCreateParty(Player *pClient, const std::string &);
-        void onInviteParty(Player *pClient, const std::string &);
-        void onJoinParty(Player *pClient, const std::string &);
-        void onPartyInfo(Player *pClient, const std::string &);
-        void onLeaveParty(Player *pClient, const std::string &);
-        void onPartyDestroy(Player *pClient, const std::string &);
-    protected:
-        AllowedCommandInfo() = default;
+    void Run(Player *pClient, const std::string &szMessage);
+    void onCheatPosition(Player *pClient, const std::string &);
+    void onRunScript(Player *pClient, const std::string &pScript);
+    void onCheatSitdown(Player *pClient, const std::string &);
+    void onCheatStandup(Player *pClient, const std::string &);
+    void onBattleMode(Player *pClient, const std::string &);
+    void onCheatNotice(Player *pClient, const std::string &);
+    void onCheatParty(Player *pClient, const std::string &);
+    void onCheatSuicide(Player *pClient, const std::string &);
+    void onCheatKillAll(Player *pClient, const std::string &);
+    void onCheatRespawn(Player *pClient, const std::string &);
+    void onCheatCreateParty(Player *pClient, const std::string &);
+    void onInviteParty(Player *pClient, const std::string &);
+    void onJoinParty(Player *pClient, const std::string &);
+    void onPartyInfo(Player *pClient, const std::string &);
+    void onLeaveParty(Player *pClient, const std::string &);
+    void onPartyDestroy(Player *pClient, const std::string &);
+
+protected:
+    AllowedCommandInfo() = default;
 };
 
 #define sAllowedCommandInfo AllowedCommandInfo::Instance()

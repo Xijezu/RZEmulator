@@ -14,23 +14,29 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Log.h"
+
+#include <chrono>
+#include <sstream>
+
 #include "AppenderConsole.h"
 #include "AppenderFile.h"
 #include "Common.h"
 #include "Config.h"
 #include "Errors.h"
-#include "Logger.h"
 #include "LogMessage.h"
 #include "LogOperation.h"
+#include "Logger.h"
 #include "Strand.h"
 #include "Util.h"
-#include <chrono>
-#include <sstream>
 
-Log::Log() : AppenderId(0), lowestLogLevel(LOG_LEVEL_FATAL), _ioContext(nullptr), _strand(nullptr)
+Log::Log()
+    : AppenderId(0)
+    , lowestLogLevel(LOG_LEVEL_FATAL)
+    , _ioContext(nullptr)
+    , _strand(nullptr)
 {
     m_logsTimestamp = "_" + GetTimestampStr();
     RegisterAppender<AppenderConsole>();
@@ -154,7 +160,7 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
         lowestLogLevel = level;
 
     logger = NGemity::make_unique<Logger>(name, level);
-    //fprintf(stdout, "Log::CreateLoggerFromConfig: Created Logger %s, Level %u\n", name.c_str(), level);
+    // fprintf(stdout, "Log::CreateLoggerFromConfig: Created Logger %s, Level %u\n", name.c_str(), level);
 
     std::istringstream ss(*iter);
     std::string str;
@@ -165,7 +171,7 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
         if (Appender *appender = GetAppenderByName(str))
         {
             logger->addAppender(appender->getId(), appender);
-            //fprintf(stdout, "Log::CreateLoggerFromConfig: Added Appender %s to Logger %s\n", appender->getName().c_str(), name.c_str());
+            // fprintf(stdout, "Log::CreateLoggerFromConfig: Added Appender %s to Logger %s\n", appender->getName().c_str(), name.c_str());
         }
         else
             fprintf(stderr, "Error while configuring Appender %s in Logger %s. Appender does not exist", str.c_str(), name.c_str());
@@ -189,8 +195,9 @@ void Log::ReadLoggersFromConfig()
     // Bad config configuration, creating default config
     if (loggers.find(LOGGER_ROOT) == loggers.end())
     {
-        fprintf(stderr, "Wrong Loggers configuration. Review your Logger config section.\n"
-                        "Creating default loggers [root (Error), server (Info)] to console\n");
+        fprintf(stderr,
+            "Wrong Loggers configuration. Review your Logger config section.\n"
+            "Creating default loggers [root (Error), server (Info)] to console\n");
 
         Close(); // Clean any Logger or Appender created
 
@@ -269,8 +276,7 @@ std::string Log::GetTimestampStr()
     //       SS     seconds (2 digits 00-59)
     try
     {
-        return NGemity::StringFormatTC("%04d-%02d-%02d_%02d-%02d-%02d",
-                                       aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
+        return NGemity::StringFormatTC("%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     }
     catch (std::exception const &ex)
     {
@@ -318,9 +324,7 @@ void Log::outCharDump(char const *str, uint32_t accountId, uint64_t guid, char c
         return;
 
     std::ostringstream ss;
-    ss << "== START DUMP == (account: " << accountId << " guid: " << guid << " name: " << name
-       << ")\n"
-       << str << "\n== END DUMP ==\n";
+    ss << "== START DUMP == (account: " << accountId << " guid: " << guid << " name: " << name << ")\n" << str << "\n== END DUMP ==\n";
 
     std::unique_ptr<LogMessage> msg(new LogMessage(LOG_LEVEL_INFO, "entities.player.dump", ss.str()));
     std::ostringstream param;

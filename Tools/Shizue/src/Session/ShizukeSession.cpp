@@ -13,15 +13,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+
+#include "ShizukeSession.h"
 
 #include "Common.h"
-#include "ShizukeSession.h"
 #include "Config.h"
 
-ShizukeSession::~ShizukeSession()
-{
-}
+ShizukeSession::~ShizukeSession() {}
 
 enum eStatus
 {
@@ -36,7 +35,7 @@ typedef struct
     std::function<void(ShizukeSession *, XPacket *)> handler;
 } ShizukeHandler;
 
-template <typename T>
+template<typename T>
 ShizukeHandler declareHandler(eStatus status, void (ShizukeSession::*handler)(const T *packet))
 {
     ShizukeHandler handlerData{};
@@ -50,9 +49,7 @@ ShizukeHandler declareHandler(eStatus status, void (ShizukeSession::*handler)(co
     return handlerData;
 }
 
-const ShizukeHandler shizukePacketHandler[] =
-    {
-        {declareHandler(STATUS_CONNECTED, &ShizukeSession::onResultHandler)}};
+const ShizukeHandler shizukePacketHandler[] = {{declareHandler(STATUS_CONNECTED, &ShizukeSession::onResultHandler)}};
 
 constexpr int shizukeTableSize = (sizeof(shizukePacketHandler) / sizeof(ShizukeHandler));
 

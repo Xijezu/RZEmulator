@@ -14,24 +14,24 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include "DatabaseEnvFwd.h"
+#include "Define.h"
 #include "SQLOperation.h"
 
 /*! Raw, ad-hoc query.*/
 class BasicStatementTask : public SQLOperation
 {
-    public:
-        BasicStatementTask(const char *sql, bool async = false);
-        ~BasicStatementTask();
+public:
+    BasicStatementTask(const char *sql, bool async = false);
+    ~BasicStatementTask();
 
-        bool Execute() override;
+    bool Execute() override;
 
-        QueryResultFuture GetFuture() const { return m_result->get_future(); }
+    QueryResultFuture GetFuture() const { return m_result->get_future(); }
 
-    private:
-        const char *m_sql;      //- Raw query to be executed
-        bool m_has_result;
-        QueryResultPromise *m_result;
+private:
+    const char *m_sql; //- Raw query to be executed
+    bool m_has_result;
+    QueryResultPromise *m_result;
 };

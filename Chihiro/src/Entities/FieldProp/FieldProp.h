@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "FieldPropBase.h"
@@ -31,41 +31,41 @@ class XPacket;
 
 class FieldProp : public WorldObject
 {
-        friend class Skill;
-        friend class FieldPropManager;
-    public:
-        FieldProp() = delete;
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        FieldProp(const FieldProp &) = delete;
-        FieldProp &operator=(const FieldProp &) = delete;
-        /// \brief Used to generate the TS_SC_ENTER packet for a FieldProp
-        /// \param pEnterPct Writable object
-        /// \param pFieldProp The object we're generating for
-        /// \param pPlayer the player who receives the packet
-        static void EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
-        /// \brief Creates and spawns a fieldprop
-        /// \param propDeleteHandler Always the instance of FieldPropManager, is used to delete it from its list
-        /// \param pPropInfo RespawnInfo
-        /// \param lifeTime how long the prop is on the map
-        /// \return Newly created Fieldprop on success, nullptr on failure
-        static FieldProp *Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime);
-        bool IsUsable(Player *) const;
-        bool Cast();
-        bool UseProp(Player *);
-        int32_t GetCastingDelay() const;
+    friend class Skill;
+    friend class FieldPropManager;
 
-        bool IsFieldProp() const override { return true; }
+public:
+    FieldProp() = delete;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    FieldProp(const FieldProp &) = delete;
+    FieldProp &operator=(const FieldProp &) = delete;
+    /// \brief Used to generate the TS_SC_ENTER packet for a FieldProp
+    /// \param pEnterPct Writable object
+    /// \param pFieldProp The object we're generating for
+    /// \param pPlayer the player who receives the packet
+    static void EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
+    /// \brief Creates and spawns a fieldprop
+    /// \param propDeleteHandler Always the instance of FieldPropManager, is used to delete it from its list
+    /// \param pPropInfo RespawnInfo
+    /// \param lifeTime how long the prop is on the map
+    /// \return Newly created Fieldprop on success, nullptr on failure
+    static FieldProp *Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime);
+    bool IsUsable(Player *) const;
+    bool Cast();
+    bool UseProp(Player *);
+    int32_t GetCastingDelay() const;
 
-    private:
-        FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo);
+    bool IsFieldProp() const override { return true; }
 
-        uint32_t                   m_nRegenTime;
-        FieldPropDeleteHandler *m_pDeleteHandler;
-        FieldPropTemplate      *m_pFieldPropBase;
-        FieldPropRespawnInfo   m_PropInfo;
-        int32_t                    m_nUseCount;
-        bool                   m_bIsCasting;
-        uint32_t                   nLifeTime;
+private:
+    FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo);
+
+    uint32_t m_nRegenTime;
+    FieldPropDeleteHandler *m_pDeleteHandler;
+    FieldPropTemplate *m_pFieldPropBase;
+    FieldPropRespawnInfo m_PropInfo;
+    int32_t m_nUseCount;
+    bool m_bIsCasting;
+    uint32_t nLifeTime;
 };
-

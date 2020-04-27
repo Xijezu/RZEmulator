@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_DESTROY_ITEM_DEF(_) \
-	_(simple)(uint32_t, item_handle)
+#define TS_SC_DESTROY_ITEM_DEF(_) _(simple)(uint32_t, item_handle)
 
 CREATE_PACKET(TS_SC_DESTROY_ITEM, 254);
 

@@ -13,9 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "MySQLConnection.h"
+
 #include "Common.h"
 #include "DatabaseWorker.h"
 #include "Log.h"
@@ -49,19 +50,23 @@ MySQLConnectionInfo::MySQLConnectionInfo(std::string const &infoString)
     database.assign(tokens[i++]);
 }
 
-MySQLConnection::MySQLConnection(MySQLConnectionInfo &connInfo) : m_reconnecting(false),
-                                                                  m_prepareError(false),
-                                                                  m_queue(NULL),
-                                                                  m_Mysql(NULL),
-                                                                  m_connectionInfo(connInfo),
-                                                                  m_connectionFlags(CONNECTION_SYNCH) {}
+MySQLConnection::MySQLConnection(MySQLConnectionInfo &connInfo)
+    : m_reconnecting(false)
+    , m_prepareError(false)
+    , m_queue(NULL)
+    , m_Mysql(NULL)
+    , m_connectionInfo(connInfo)
+    , m_connectionFlags(CONNECTION_SYNCH)
+{
+}
 
-MySQLConnection::MySQLConnection(ProducerConsumerQueue<SQLOperation *> *queue, MySQLConnectionInfo &connInfo) : m_reconnecting(false),
-                                                                                                                m_prepareError(false),
-                                                                                                                m_queue(queue),
-                                                                                                                m_Mysql(NULL),
-                                                                                                                m_connectionInfo(connInfo),
-                                                                                                                m_connectionFlags(CONNECTION_ASYNC)
+MySQLConnection::MySQLConnection(ProducerConsumerQueue<SQLOperation *> *queue, MySQLConnectionInfo &connInfo)
+    : m_reconnecting(false)
+    , m_prepareError(false)
+    , m_queue(queue)
+    , m_Mysql(NULL)
+    , m_connectionInfo(connInfo)
+    , m_connectionFlags(CONNECTION_ASYNC)
 {
     m_worker = NGemity::make_unique<DatabaseWorker>(m_queue, this);
 }
@@ -97,10 +102,10 @@ uint32_t MySQLConnection::Open()
 
     int port;
     char const *unix_socket;
-    //unsigned int timeout = 10;
+    // unsigned int timeout = 10;
 
     mysql_options(mysqlInit, MYSQL_SET_CHARSET_NAME, "utf8");
-    //mysql_options(mysqlInit, MYSQL_OPT_READ_TIMEOUT, (char const*)&timeout);
+    // mysql_options(mysqlInit, MYSQL_OPT_READ_TIMEOUT, (char const*)&timeout);
 #ifdef _WIN32
     if (m_connectionInfo.host == ".") // named pipe use option (Windows)
     {
@@ -130,8 +135,7 @@ uint32_t MySQLConnection::Open()
     }
 #endif
 
-    m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(),
-                                 m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0);
+    m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(), m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0);
 
     if (m_Mysql)
     {
@@ -182,7 +186,7 @@ bool MySQLConnection::Execute(const char *sql)
             NG_LOG_ERROR("sql.sql", "[%u] %s", lErrno, mysql_error(m_Mysql));
 
             if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
-                return Execute(sql);       // Try again
+                return Execute(sql); // Try again
 
             return false;
         }
@@ -201,7 +205,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
     uint32_t index = stmt->m_index;
     {
         MySQLPreparedStatement *m_mStmt = GetPreparedStatement(index);
-        ASSERT(m_mStmt);        // Can only be null if preparation failed, server side error or bad query
+        ASSERT(m_mStmt); // Can only be null if preparation failed, server side error or bad query
         m_mStmt->m_stmt = stmt; // Cross reference them for debug output
         stmt->m_stmt = m_mStmt; /// @todo Cleaner way
 
@@ -218,7 +222,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
             if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
-                return Execute(stmt);      // Try again
+                return Execute(stmt); // Try again
 
             m_mStmt->ClearParameters();
             return false;
@@ -230,7 +234,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
             if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
-                return Execute(stmt);      // Try again
+                return Execute(stmt); // Try again
 
             m_mStmt->ClearParameters();
             return false;
@@ -251,7 +255,7 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
     uint32_t index = stmt->m_index;
     {
         MySQLPreparedStatement *m_mStmt = GetPreparedStatement(index);
-        ASSERT(m_mStmt);        // Can only be null if preparation failed, server side error or bad query
+        ASSERT(m_mStmt); // Can only be null if preparation failed, server side error or bad query
         m_mStmt->m_stmt = stmt; // Cross reference them for debug output
         stmt->m_stmt = m_mStmt; /// @todo Cleaner way
 
@@ -267,7 +271,7 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
-            if (_HandleMySQLErrno(lErrno))                            // If it returns true, an error was handled successfully (i.e. reconnection)
+            if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
                 return _Query(stmt, pResult, pRowCount, pFieldCount); // Try again
 
             m_mStmt->ClearParameters();
@@ -277,10 +281,9 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
         if (mysql_stmt_execute(msql_STMT))
         {
             uint32_t lErrno = mysql_errno(m_Mysql);
-            NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s",
-                         m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
+            NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
-            if (_HandleMySQLErrno(lErrno))                            // If it returns true, an error was handled successfully (i.e. reconnection)
+            if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
                 return _Query(stmt, pResult, pRowCount, pFieldCount); // Try again
 
             m_mStmt->ClearParameters();
@@ -329,7 +332,7 @@ bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD *
             NG_LOG_INFO("sql.sql", "SQL: %s", sql);
             NG_LOG_ERROR("sql.sql", "[%u] %s", lErrno, mysql_error(m_Mysql));
 
-            if (_HandleMySQLErrno(lErrno))                                    // If it returns true, an error was handled successfully (i.e. reconnection)
+            if (_HandleMySQLErrno(lErrno)) // If it returns true, an error was handled successfully (i.e. reconnection)
                 return _Query(sql, pResult, pFields, pRowCount, pFieldCount); // We try again
 
             return false;
@@ -447,8 +450,8 @@ MySQLPreparedStatement *MySQLConnection::GetPreparedStatement(uint32_t index)
     ASSERT(index < m_stmts.size());
     MySQLPreparedStatement *ret = m_stmts[index].get();
     if (!ret)
-        NG_LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database `%s`, connection type: %s.",
-                     index, m_connectionInfo.database.c_str(), (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+        NG_LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database `%s`, connection type: %s.", index, m_connectionInfo.database.c_str(),
+            (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
     return ret;
 }
@@ -542,9 +545,8 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
                 std::abort();
             }
 
-            NG_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).",
-                        m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
-                        (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+            NG_LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).", m_connectionInfo.database.c_str(), m_connectionInfo.host.c_str(), m_connectionInfo.port_or_socket.c_str(),
+                (m_connectionFlags & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
             m_reconnecting = false;
             return true;
@@ -554,8 +556,9 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
         {
             // Shut down the server when the mysql server isn't
             // reachable for some time
-            NG_LOG_FATAL("sql.sql", "Failed to reconnect to the MySQL server, "
-                                    "terminating the server to prevent data corruption!");
+            NG_LOG_FATAL("sql.sql",
+                "Failed to reconnect to the MySQL server, "
+                "terminating the server to prevent data corruption!");
 
             // We could also initiate a shutdown through using std::raise(SIGTERM)
             std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -566,7 +569,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
             // It's possible this attempted reconnect throws 2006 at us.
             // To prevent crazy recursive calls, sleep here.
             std::this_thread::sleep_for(std::chrono::seconds(3)); // Sleep 3 seconds
-            return _HandleMySQLErrno(lErrno, attempts);           // Call self (recursive)
+            return _HandleMySQLErrno(lErrno, attempts); // Call self (recursive)
         }
     }
 

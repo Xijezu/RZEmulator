@@ -13,14 +13,16 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Maploader.h"
+
+#include <fstream>
+
 #include "FieldPropManager.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Scripting/XLua.h"
-#include <fstream>
 
 bool Maploader::LoadMapContent()
 {
@@ -333,7 +335,7 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int3
     infile.read(reinterpret_cast<char *>(&buffer[0]), size);
     infile.close();
 
-    buffer.read_skip(18);              // Sign
+    buffer.read_skip(18); // Sign
     auto version = buffer.read<int32_t>(); // Version
 
     auto total_entries = buffer.read<int32_t>();

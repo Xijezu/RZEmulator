@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <boost/predef/other/endian.h>
+
 #include "CompilerDefs.h"
 #include "PacketEpics.h"
-#include <boost/predef/other/endian.h>
 
 #define EPIC EPIC_4_1_1
 #define NGEMITY_LITTLEENDIAN 0
@@ -45,7 +46,7 @@
 #ifndef DECLSPEC_DEPRECATED
 #define DECLSPEC_DEPRECATED __declspec(deprecated)
 #endif // DECLSPEC_DEPRECATED
-#else  // PLATFORM != PLATFORM_WINDOWS
+#else // PLATFORM != PLATFORM_WINDOWS
 #define NGEMITY_PATH_MAX PATH_MAX
 #define DECLSPEC_NORETURN
 #define DECLSPEC_DEPRECATED

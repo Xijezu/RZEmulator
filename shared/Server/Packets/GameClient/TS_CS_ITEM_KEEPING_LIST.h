@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_ITEM_KEEPING_LIST_DEF(_) \
-	_(simple)(int32_t, page_num)
+#define TS_CS_ITEM_KEEPING_LIST_DEF(_) _(simple)(int32_t, page_num)
 
 CREATE_PACKET(TS_CS_ITEM_KEEPING_LIST, 1350);
 

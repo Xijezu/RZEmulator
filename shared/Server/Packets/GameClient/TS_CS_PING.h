@@ -20,8 +20,7 @@
 
 #include "Packets/PacketDeclaration.h"
 
-#define TS_CS_PING_DEF(_) \
-    _(endarray)(uint8_t, dummy)
+#define TS_CS_PING_DEF(_) _(endarray)(uint8_t, dummy)
 CREATE_PACKET(TS_CS_PING, 9999);
 
-#endif //NGEMITY_TS_CS_PING_H
+#endif // NGEMITY_TS_CS_PING_H

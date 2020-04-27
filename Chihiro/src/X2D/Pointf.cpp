@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Pointf.h"
 
@@ -28,8 +28,8 @@ float X2D::Pointf::GetAlternativeDistance(X2D::Pointf rh)
     float v2;
     float v3;
 
-    v2     = x - rh.x;
-    v3     = y - rh.y;
+    v2 = x - rh.x;
+    v3 = y - rh.y;
     if (v2 < 0)
         v2 = -v2;
     if (v3 < 0)

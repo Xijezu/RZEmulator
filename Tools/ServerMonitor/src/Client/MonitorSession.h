@@ -14,15 +14,16 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Partial implementation taken from glandu2 at https://github.com/glandu2/librzu
- * 
-*/
+ *
+ */
+#include <iostream>
+
 #include "Common.h"
 #include "MonitorStructs.h"
 #include "RSACipher.h"
 #include "XSocket.h"
-#include <iostream>
 
 class XPacket;
 struct Server;
@@ -30,21 +31,21 @@ struct Server;
 class MonitorSession : public XSocket
 {
 public:
-  explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server);
-  ~MonitorSession();
+    explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server);
+    ~MonitorSession();
 
-  // Network handlers
-  void OnClose() override;
-  ReadDataHandlerResult ProcessIncoming(XPacket *) override;
-  bool IsEncrypted() const override { return true; }
-  void DoRequest();
-  void onResultHandler(const TS_SC_RESULT *resultPct);
-  bool Finished();
+    // Network handlers
+    void OnClose() override;
+    ReadDataHandlerResult ProcessIncoming(XPacket *) override;
+    bool IsEncrypted() const override { return true; }
+    void DoRequest();
+    void onResultHandler(const TS_SC_RESULT *resultPct);
+    bool Finished();
 
 private:
-  uint32_t m_nLastUpdateTime;
-  int *pUserCount{nullptr};
-  bool *bRequesterEnabled{nullptr};
-  std::unique_ptr<RsaCipher> m_pCipher;
-  NGemity::Server m_Server;
+    uint32_t m_nLastUpdateTime;
+    int *pUserCount{nullptr};
+    bool *bRequesterEnabled{nullptr};
+    std::unique_ptr<RsaCipher> m_pCipher;
+    NGemity::Server m_Server;
 };

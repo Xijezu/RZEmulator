@@ -13,16 +13,17 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Partial implementation taken from glandu2 at https://github.com/glandu2/librzuxi
- * 
-*/
+ *
+ */
 
-#include "Common.h"
 #include "LunaSession.h"
-#include "AES.h"
 
-template <class TS_SERIALIZABLE_PACKET, class SOCKET_TYPE>
+#include "AES.h"
+#include "Common.h"
+
+template<class TS_SERIALIZABLE_PACKET, class SOCKET_TYPE>
 void SendSerializedPacket(TS_SERIALIZABLE_PACKET const &packet, SOCKET_TYPE *Socket)
 {
     XPacket output;
@@ -44,7 +45,7 @@ typedef struct
     std::function<void(LunaSession *, XPacket *)> handler;
 } LunaHandler;
 
-template <typename T>
+template<typename T>
 LunaHandler declareHandler(eStatus status, void (LunaSession::*handler)(const T *packet))
 {
     LunaHandler handlerData{};
@@ -58,13 +59,8 @@ LunaHandler declareHandler(eStatus status, void (LunaSession::*handler)(const T 
     return handlerData;
 }
 
-const LunaHandler LunaPacketHandler[] =
-    {
-        {declareHandler(STATUS_CONNECTED, &LunaSession::onResultHandler)},
-        {declareHandler(STATUS_CONNECTED, &LunaSession::onPacketServerList)},
-        {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResult)},
-        {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResultString)},
-        {declareHandler(STATUS_CONNECTED, &LunaSession::onRsaKey)}};
+const LunaHandler LunaPacketHandler[] = {{declareHandler(STATUS_CONNECTED, &LunaSession::onResultHandler)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onPacketServerList)},
+    {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResult)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResultString)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onRsaKey)}};
 
 constexpr int LunaTableSize = (sizeof(LunaPacketHandler) / sizeof(LunaHandler));
 

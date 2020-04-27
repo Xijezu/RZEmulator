@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_TAKE_ITEM_RESULT_DEF(_) \
-	_(simple)(uint32_t, item_handle) \
-	_(simple)(uint32_t, item_taker)
+#define TS_SC_TAKE_ITEM_RESULT_DEF(_) _(simple)(uint32_t, item_handle) _(simple)(uint32_t, item_taker)
 
 CREATE_PACKET(TS_SC_TAKE_ITEM_RESULT, 210);
 

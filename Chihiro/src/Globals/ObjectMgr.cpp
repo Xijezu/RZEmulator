@@ -13,9 +13,12 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "ObjectMgr.h"
+
+#include <fstream>
+
 #include "DatabaseEnv.h"
 #include "DungeonManager.h"
 #include "GameRule.h"
@@ -23,9 +26,9 @@
 #include "MixManager.h"
 #include "World.h"
 #include "WorldLocation.h"
-#include <fstream>
 
-ObjectMgr::ObjectMgr() : g_qtBlockInfo(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
+ObjectMgr::ObjectMgr()
+    : g_qtBlockInfo(sWorld.getIntConfig(CONFIG_MAP_WIDTH), sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
 {
 }
 
@@ -1602,11 +1605,7 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int32_t flag)
 
 QuestLink *ObjectMgr::GetQuestLink(int32_t code, int32_t start_id)
 {
-    auto l = std::find_if(_questLinkStore.begin(),
-                          _questLinkStore.end(),
-                          [&code, start_id](const QuestLink &ql) {
-                              return ql.code == code && (ql.nStartTextID == start_id || start_id == 0);
-                          });
+    auto l = std::find_if(_questLinkStore.begin(), _questLinkStore.end(), [&code, start_id](const QuestLink &ql) { return ql.code == code && (ql.nStartTextID == start_id || start_id == 0); });
     return l != _questLinkStore.end() ? &*l : nullptr;
 }
 

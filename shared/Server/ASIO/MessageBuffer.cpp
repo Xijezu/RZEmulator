@@ -1,21 +1,34 @@
 #include "MessageBuffer.h"
+
 #include "memory.h"
 
-MessageBuffer::MessageBuffer() : _wpos(0), _rpos(0), _storage()
+MessageBuffer::MessageBuffer()
+    : _wpos(0)
+    , _rpos(0)
+    , _storage()
 {
     _storage.resize(4096);
 }
 
-MessageBuffer::MessageBuffer(std::size_t initialSize) : _wpos(0), _rpos(0), _storage()
+MessageBuffer::MessageBuffer(std::size_t initialSize)
+    : _wpos(0)
+    , _rpos(0)
+    , _storage()
 {
     _storage.resize(initialSize);
 }
 
-MessageBuffer::MessageBuffer(MessageBuffer const &right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right._storage)
+MessageBuffer::MessageBuffer(MessageBuffer const &right)
+    : _wpos(right._wpos)
+    , _rpos(right._rpos)
+    , _storage(right._storage)
 {
 }
 
-MessageBuffer::MessageBuffer(MessageBuffer &&right) : _wpos(right._wpos), _rpos(right._rpos), _storage(right.Move())
+MessageBuffer::MessageBuffer(MessageBuffer &&right)
+    : _wpos(right._wpos)
+    , _rpos(right._rpos)
+    , _storage(right.Move())
 {
 }
 

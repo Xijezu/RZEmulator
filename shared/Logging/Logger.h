@@ -14,18 +14,19 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <string>
+#include <unordered_map>
+
 #include "Define.h"
 #include "LogCommon.h"
-#include <unordered_map>
-#include <string>
 
 class Appender;
 struct LogMessage;
 
 class Logger
 {
-  public:
+public:
     Logger(std::string const &name, LogLevel level);
 
     void addAppender(uint8_t type, Appender *appender);
@@ -36,7 +37,7 @@ class Logger
     void setLogLevel(LogLevel level);
     void write(LogMessage *message) const;
 
-  private:
+private:
     std::string name;
     LogLevel level;
     std::unordered_map<uint8_t, Appender *> appenders;

@@ -13,8 +13,13 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Unit.h"
+
+#include <chrono> // std::chrono::system_clock
+#include <limits>
+#include <random> // std::default_random_engine
+
 #include "ClientPackets.h"
 #include "GameContent.h"
 #include "GameRule.h"
@@ -28,9 +33,6 @@
 #include "Skill.h"
 #include "World.h"
 #include "WorldSession.h"
-#include <chrono> // std::chrono::system_clock
-#include <limits>
-#include <random> // std::default_random_engine
 
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
@@ -38,7 +40,9 @@
 #pragma warning(disable : 4355)
 #endif
 
-Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject), m_unitTypeMask(0)
+Unit::Unit(bool isWorldObject)
+    : WorldObject(isWorldObject)
+    , m_unitTypeMask(0)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -96,9 +100,7 @@ void Unit::RemoveFromWorld()
         WorldObject::RemoveFromWorld();
 }
 
-void Unit::CleanupsBeforeDelete(bool finalCleanup)
-{
-}
+void Unit::CleanupsBeforeDelete(bool finalCleanup) {}
 
 void Unit::Update(uint32_t p_time)
 {
@@ -137,8 +139,8 @@ void Unit::SetHealth(int32_t hp)
     if (hp < 0)
         SetHealth(0);
     // @todo
-    //if (old_hp != GetHealth())
-    //this.onHPChange(old_hp);
+    // if (old_hp != GetHealth())
+    // this.onHPChange(old_hp);
 }
 
 void Unit::SetMana(int32_t mp)
@@ -152,9 +154,7 @@ void Unit::SetMana(int32_t mp)
     /// @todo: on mana change
 }
 
-void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup)
-{
-}
+void Unit::CleanupBeforeRemoveFromMap(bool finalCleanup) {}
 
 void Unit::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time)
 {
@@ -184,7 +184,7 @@ void Unit::processPendingMove()
                 sWorld.SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
                 if (IsPlayer())
                 {
-                    //auto p = dynamic_cast<Player*>(this);
+                    // auto p = dynamic_cast<Player*>(this);
                     /*if (p.m_nRideIdx != 0)
                     {
                         Summon ro = p.GetRideObject();
@@ -269,7 +269,7 @@ void Unit::OnUpdate()
                     if (distance > 0)
                     {
                         newPos.SetCurrentXY(myPos.GetPositionX() + (pCaster->GetPositionX() - myPos.GetPositionX()) * 120 / distance,
-                                            myPos.GetPositionY() + (pCaster->GetPositionY() - myPos.GetPositionY()) * 120 / distance);
+                            myPos.GetPositionY() + (pCaster->GetPositionY() - myPos.GetPositionY()) * 120 / distance);
                     }
                 }
             }
@@ -305,7 +305,7 @@ void Unit::regenHPMP(uint32_t t)
     if (et >= 300)
     {
         float etf = (float)et / 6000.0f;
-        //prev_mp = et;
+        // prev_mp = et;
 
         if (GetHealth() != 0)
         {
@@ -376,7 +376,8 @@ void Unit::regenHPMP(uint32_t t)
                     this->m_fRegenMP = 0;
                     if (IsInWorld())
                     {
-                        sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), hpmpPct);
+                        sWorld.Broadcast(
+                            (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), hpmpPct);
                     }
                     /*if (this.IsSummon())
                     {
@@ -901,7 +902,7 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
     }
     else if (pTarget->IsNPC())
     {
-        //pTarget->As<NPC>()->SetAttacker(pTarget);
+        // pTarget->As<NPC>()->SetAttacker(pTarget);
     }
 }
 
@@ -1025,18 +1026,20 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
         }
     }
 
-    ProcessAdditionalDamage(damage_info, DT_ADDITIONAL_DAMAGE,
-                            bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage, pFrom, nDamage, elemental_type);
+    ProcessAdditionalDamage(damage_info, DT_ADDITIONAL_DAMAGE, bRange ? pFrom->m_vRangeAdditionalDamage : pFrom->m_vNormalAdditionalDamage, pFrom, nDamage, elemental_type);
 
     damage_info.target_hp = GetHealth();
     return damage_info;
 }
 
-Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, DamageType damageType, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, DamageType damageType, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty,
+    StateMod *damage_advantage)
 {
     int32_t nPrevHP = GetHealth();
 
-    Damage damage_result = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus, 1.0f + (damage_penalty != nullptr ? damage_penalty->fCritical - 1.0f : 0.0f) + (damage_advantage != nullptr ? damage_advantage->fCritical - 1.0f : 0.0f), critical_bonus + (damage_advantage != nullptr ? damage_advantage->nCritical : 0) + (damage_penalty != nullptr ? damage_penalty->nCritical : 0), nFlag);
+    Damage damage_result = pFrom->CalcDamage(this, damageType, nDamage, elemental_type, accuracy_bonus,
+        1.0f + (damage_penalty != nullptr ? damage_penalty->fCritical - 1.0f : 0.0f) + (damage_advantage != nullptr ? damage_advantage->fCritical - 1.0f : 0.0f),
+        critical_bonus + (damage_advantage != nullptr ? damage_advantage->nCritical : 0) + (damage_penalty != nullptr ? damage_penalty->nCritical : 0), nFlag);
 
     if (!damage_result.bMiss)
     {
@@ -1156,7 +1159,9 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
                 if (it.bIgnoreDefence)
                     nDamageFlag |= IGNORE_DEFENCE;
 
-                if (it.nReflectDamage != 0 && (damageType == DT_NORMAL_PHYSICAL_DAMAGE || damageType == DT_NORMAL_MAGICAL_DAMAGE || damageType == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damageType == DT_NORMAL_PHYSICAL_SKILL_DAMAGE))
+                if (it.nReflectDamage != 0 &&
+                    (damageType == DT_NORMAL_PHYSICAL_DAMAGE || damageType == DT_NORMAL_MAGICAL_DAMAGE || damageType == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE ||
+                        damageType == DT_NORMAL_PHYSICAL_SKILL_DAMAGE))
                     pFrom->DealAdditionalMagicalDamage(this, it.nReflectDamage, it.type, 0, 0, nDamageFlag);
 
                 int32_t nReflectDamage = it.fPhysicalReflectRatio * real_damage;
@@ -1191,22 +1196,26 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     return damage_result;
 }
 
-Damage Unit::DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealPhysicalDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealPhysicalLeftHandDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealAdditionalDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_ADDITIONAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealAdditionalLeftHandDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_ADDITIONAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
@@ -1216,7 +1225,8 @@ Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, i
     return DealDamage(pFrom, nDamage, type, DT_NORMAL_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealAdditionalMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealAdditionalMagicalDamage(
+    Unit *pFrom, float nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, type, DT_ADDITIONAL_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
@@ -1248,7 +1258,8 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     int32_t nFinalDamage{0};
     float fDamageAdjust{1.0f};
 
-    bool bIsPhysicalDamage = (damage_type == DT_NORMAL_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_STATE_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_SKILL_DAMAGE);
+    bool bIsPhysicalDamage =
+        (damage_type == DT_NORMAL_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_STATE_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_SKILL_DAMAGE);
     bool bIsMagicalDamage = (damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE);
     bool bIsStateDamage = (damage_type == DT_STATE_MAGICAL_DAMAGE || damage_type == DT_STATE_PHYSICAL_DAMAGE);
     bool bIsAdditionalDamage = (damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE || damage_type == DT_ADDITIONAL_MAGICAL_DAMAGE);
@@ -1494,8 +1505,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int32_t t
         attack_info.attacker_mp = arDamage[i].attacker_mp;
         pct.attack.emplace_back(attack_info);
     }
-    sWorld.Broadcast((uint32_t)GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE),
-                     (uint32_t)GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), GetLayer(), pct);
+    sWorld.Broadcast((uint32_t)GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), (uint32_t)GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), GetLayer(), pct);
 }
 
 void Unit::EndAttack()
@@ -1508,7 +1518,7 @@ void Unit::EndAttack()
     }
     if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED))
     {
-        //auto target = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(GetTargetHandle()));
+        // auto target = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(GetTargetHandle()));
         auto target = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
         if (IsPlayer() || IsSummon())
         {
@@ -1761,7 +1771,8 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
             return TS_RESULT_LIMIT_TARGET;
     }
 
-    if (code == SC_SLEEP || code == SC_NIGHTMARE || code == SC_SEAL || code == SC_SHINE_WALL || code == SC_FEAR || code == SC_STUN || stateInfo->effect_type == SEF_TRANSFORMATION || (stateInfo->effect_type == SEF_MEZZ && (stateInfo->value[0] != 0 || stateInfo->value[1] != 0 || stateInfo->value[2] != 0 || stateInfo->value[3] != 0)))
+    if (code == SC_SLEEP || code == SC_NIGHTMARE || code == SC_SEAL || code == SC_SHINE_WALL || code == SC_FEAR || code == SC_STUN || stateInfo->effect_type == SEF_TRANSFORMATION ||
+        (stateInfo->effect_type == SEF_MEZZ && (stateInfo->value[0] != 0 || stateInfo->value[1] != 0 || stateInfo->value[2] != 0 || stateInfo->value[3] != 0)))
     {
         if (IsUsingSkill())
             CancelSkill();
@@ -2188,9 +2199,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
 
 State *Unit::GetStateByEffectType(int32_t effectType) const
 {
-    auto pos = std::find_if(m_vStateList.begin(),
-                            m_vStateList.end(),
-                            [effectType](const State *state) { return state->GetEffectType() == effectType; });
+    auto pos = std::find_if(m_vStateList.begin(), m_vStateList.end(), [effectType](const State *state) { return state->GetEffectType() == effectType; });
 
     return pos != m_vStateList.end() ? *pos : nullptr;
 }
@@ -2480,8 +2489,8 @@ void Unit::procState(uint32_t t)
                 continue;
 
             std::vector<Unit *> vTargetList{};
-            Skill::EnumSkillTargetsAndCalcDamage(GetCurrentPosition(curr), GetLayer(), GetCurrentPosition(curr), true,
-                                                 fEffectLength, -1, 0, 0, true, pCaster, static_cast<int32_t>(pState->GetValue(5)), static_cast<int32_t>(pState->GetValue(6)), vTargetList);
+            Skill::EnumSkillTargetsAndCalcDamage(GetCurrentPosition(curr), GetLayer(), GetCurrentPosition(curr), true, fEffectLength, -1, 0, 0, true, pCaster,
+                static_cast<int32_t>(pState->GetValue(5)), static_cast<int32_t>(pState->GetValue(6)), vTargetList);
 
             for (auto &pTarget : vTargetList)
             {
@@ -2559,7 +2568,8 @@ void Unit::procStateDamage(uint32_t t)
             auto caster = sMemoryPool.GetObjectInWorld<Unit>(st->m_hCaster[0]);
             if (caster == nullptr)
             {
-                if (st->m_nCode != StateCode::SC_GAIA_MEMBER_SHIP && st->m_nCode != StateCode::SC_NEMESIS && st->m_nCode != StateCode::SC_NEMESIS_FOR_AUTO && st->m_nCode != StateCode::SC_FALL_FROM_SUMMON && st->IsHarmful())
+                if (st->m_nCode != StateCode::SC_GAIA_MEMBER_SHIP && st->m_nCode != StateCode::SC_NEMESIS && st->m_nCode != StateCode::SC_NEMESIS_FOR_AUTO &&
+                    st->m_nCode != StateCode::SC_FALL_FROM_SUMMON && st->IsHarmful())
                 {
                     st->AddState(StateType::SG_NORMAL, st->m_hCaster[0], (uint16_t)st->m_nLevel[0], st->m_nStartTime[0], (uint32_t)(t - 1), st->m_nBaseDamage[0], false);
                     onUpdateState(st, false);
@@ -2590,14 +2600,16 @@ void Unit::procStateDamage(uint32_t t)
             case 3:
             case 4:
             case 11:
-                nDamageHP = (int32_t)((stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
+                nDamageHP = (int32_t)(
+                    (stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
                 break;
             case 6:
                 nDamageHP = (int32_t)((st->GetValue(0) + (st->GetValue(1) * st->GetLevel())) * GetMaxHealth());
                 nDamageMP = (int32_t)((st->GetValue(2) + (st->GetValue(3) * st->GetLevel())) * GetMaxMana());
                 break;
             case 12:
-                nDamageMP = (int32_t)((stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
+                nDamageMP = (int32_t)(
+                    (stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
                 break;
             case 21:
                 nDamageHP = (stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel()));
@@ -2620,8 +2632,8 @@ void Unit::procStateDamage(uint32_t t)
             if (nDamageHP != 0 || nDamageMP != 0)
             {
                 st->m_nLastProcessedTime = nThisFireTime;
-                StateDamage sd{st->m_hCaster[0], elem, nBaseEffectID, (int32_t)st->m_nCode, st->GetLevel(), nDamageHP, nDamageMP,
-                               nThisFireTime + (100 * stateBase->fire_interval) > st->m_nEndTime[0], st->m_nUID};
+                StateDamage sd{st->m_hCaster[0], elem, nBaseEffectID, (int32_t)st->m_nCode, st->GetLevel(), nDamageHP, nDamageMP, nThisFireTime + (100 * stateBase->fire_interval) > st->m_nEndTime[0],
+                    st->m_nUID};
                 vDamageList.emplace_back(sd);
             }
         }
@@ -2688,10 +2700,7 @@ void Unit::procStateDamage(uint32_t t)
             statePct.final = (sd.final ? 1 : 0);
             statePct.total_amount = total_amount;
 
-            sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                             (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                             GetLayer(),
-                             statePct);
+            sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), statePct);
         }
         else
         {
@@ -2753,10 +2762,8 @@ void Unit::procStateDamage(uint32_t t)
                 statePct.final = (sd.final ? 1 : 0);
                 statePct.total_amount = total_amount;
 
-                sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                 (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                 GetLayer(),
-                                 statePct);
+                sWorld.Broadcast(
+                    (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), statePct);
             }
 
             if (nHealMP != 0)
@@ -2775,21 +2782,21 @@ void Unit::procStateDamage(uint32_t t)
                 statePct.final = (sd.final ? 1 : 0);
                 statePct.total_amount = df;
 
-                sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                 (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                 GetLayer(),
-                                 statePct);
+                sWorld.Broadcast(
+                    (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), statePct);
             }
         }
     }
 }
 
-Damage Unit::DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealPhysicalStateDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealMagicalStateDamage(
+    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
@@ -2809,9 +2816,7 @@ void Unit::RemoveState(StateCode code, int32_t state_level)
 
 void Unit::RemoveState(int32_t uid)
 {
-    auto state = std::find_if(m_vStateList.begin(),
-                              m_vStateList.end(),
-                              [uid](const State *s) { return s->m_nUID == uid; });
+    auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [uid](const State *s) { return s->m_nUID == uid; });
 
     if (state != m_vStateList.end())
     {
@@ -2999,7 +3004,9 @@ void Unit::ToggleAura(Skill *pSkill)
 
 bool Unit::IsActable()
 {
-    return (!IsDead() && !IsFeared() && (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACKABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_SKILL_CASTABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_MAGIC_CASTABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_ITEM_USABLE)));
+    return (!IsDead() && !IsFeared() &&
+        (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACKABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_SKILL_CASTABLE) ||
+            HasFlag(UNIT_FIELD_STATUS, STATUS_MAGIC_CASTABLE) || HasFlag(UNIT_FIELD_STATUS, STATUS_ITEM_USABLE)));
 }
 
 bool Unit::IsAttackable()
@@ -3275,7 +3282,7 @@ void Unit::RemoveStatesOnDamage()
         it = m_vStateList.erase(it);
         CalculateStat();
 
-        //onAfterRemoveState(state);
+        // onAfterRemoveState(state);
     }
 }
 
@@ -3346,14 +3353,14 @@ void Unit::removeStateByDead()
             }
             else
             {
-                //pState->Expire(this);
+                // pState->Expire(this);
                 pState->DeleteThis();
             }
         }
     }
 }
 
-template <typename COMPARER>
+template<typename COMPARER>
 void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool bByDead)
 {
     std::vector<State *> removedStates{};
@@ -3411,7 +3418,8 @@ void Unit::RestoreRemovedStateByDeath()
         else
         {
             auto time_difference = sWorld.GetArTime() - GetUInt32Value(UNIT_FIELD_DEAD_TIME);
-            AddState(StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), time_difference, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
+            AddState(
+                StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), time_difference, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
         }
         it = m_vStateListRemovedByDeath.erase(it);
     }

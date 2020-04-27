@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
@@ -8,7 +10,6 @@
 #include "ServerMonitor.h"
 #include "SingleSocketInstance.h"
 #include "XSocket.h"
-#include <iostream>
 
 bool StartDB();
 void StopDB();

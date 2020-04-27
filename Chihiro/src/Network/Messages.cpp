@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Messages.h"
+
 #include "ClientPackets.h"
 #include "GroupManager.h"
 #include "MemPool.h"
@@ -474,7 +475,8 @@ void Messages::BroadcastHPMPMessage(Unit *pUnit, int32_t add_hp, float add_mp, b
     hpmpPct.max_mp = pUnit->GetMaxMana();
     hpmpPct.need_to_display = static_cast<uint8_t>(need_to_display ? 1 : 0);
 
-    sWorld.Broadcast((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
+    sWorld.Broadcast(
+        (uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), hpmpPct);
 }
 
 void Messages::BroadcastLevelMsg(Unit *pUnit)
@@ -483,7 +485,8 @@ void Messages::BroadcastLevelMsg(Unit *pUnit)
     levelPct.handle = pUnit->GetHandle();
     levelPct.level = pUnit->GetLevel();
     levelPct.job_level = pUnit->GetCurrentJLv();
-    sWorld.Broadcast((uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
+    sWorld.Broadcast(
+        (uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit->GetLayer(), levelPct);
 }
 
 void Messages::GetEncodedInt(XPacket &packet, uint32_t nDecoded)
@@ -769,11 +772,8 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                obj->GetLayer(),
-                                functor,
-                                (uint8_t)RegionVisitor::ClientVisitor);
+    sRegion.DoEachVisibleRegion((uint32_t)(obj->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        obj->GetLayer(), functor, (uint8_t)RegionVisitor::ClientVisitor);
 }
 
 void Messages::BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel)
@@ -813,8 +813,8 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int32_
     tamePct.mode = mode;
     tamePct.tamer_handle = pPlayer->GetHandle();
     tamePct.target_handle = pMonster->GetHandle();
-    sWorld.Broadcast((uint32_t)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint32_t)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pMonster->GetLayer(), tamePct);
+    sWorld.Broadcast((uint32_t)(pMonster->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pMonster->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        pMonster->GetLayer(), tamePct);
 
     std::string chatMsg{};
     switch (mode)
@@ -844,9 +844,7 @@ void Messages::SendGlobalChatMessage(int32_t chatType, const std::string &szSend
     chatPct.type = chatType;
     chatPct.message = szString;
 
-    Player::DoEachPlayer([=](Player *pPlayer) {
-        pPlayer->SendPacket(chatPct);
-    });
+    Player::DoEachPlayer([=](Player *pPlayer) { pPlayer->SendPacket(chatPct); });
     auto sender = Player::FindPlayer(szSenderName);
     if (sender != nullptr)
         Messages::SendResult(sender, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
@@ -862,8 +860,8 @@ void Messages::SendLocalChatMessage(int32_t nChatType, uint32_t handle, const st
         chatPct.message = szMessage;
         chatPct.type = static_cast<uint8_t>(nChatType);
         ;
-        sWorld.Broadcast((uint32_t)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                         (uint32_t)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), chatPct);
+        sWorld.Broadcast(
+            (uint32_t)(p->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(p->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), p->GetLayer(), chatPct);
         Messages::SendResult(p, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);
     }
 }
@@ -888,11 +886,8 @@ void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint32_t)(pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint32_t)(pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                pPlayer->GetLayer(),
-                                functor,
-                                (uint8_t)RegionVisitor::MovableVisitor);
+    sRegion.DoEachVisibleRegion((uint32_t)(pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        pPlayer->GetLayer(), functor, (uint8_t)RegionVisitor::MovableVisitor);
 }
 
 void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
@@ -1076,8 +1071,8 @@ void Messages::BroadcastPartyMemberInfo(Player *pClient)
     auto hp = (int32_t)GetPct((float)pClient->GetHealth(), pClient->GetMaxHealth());
     auto mp = (int32_t)GetPct((float)pClient->GetMana(), pClient->GetMaxMana());
 
-    auto buf = NGemity::StringFormat("MINFO|{}|{}|{}|{}|{}|{}|{}|{}|{}|",
-                                     pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
+    auto buf = NGemity::StringFormat(
+        "MINFO|{}|{}|{}|{}|{}|{}|{}|{}|{}|", pClient->GetHandle(), pClient->GetName(), pClient->GetRace(), pClient->GetCurrentJob(), hp, mp, pClient->GetPositionX(), pClient->GetPositionY(), 2);
 
     SendPartyChatMessage(100, "@PARTY", partyID, buf);
 }

@@ -13,19 +13,17 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "QueryCallbackProcessor.h"
-#include "QueryCallback.h"
+
 #include <algorithm>
 
-QueryCallbackProcessor::QueryCallbackProcessor()
-{
-}
+#include "QueryCallback.h"
 
-QueryCallbackProcessor::~QueryCallbackProcessor()
-{
-}
+QueryCallbackProcessor::QueryCallbackProcessor() {}
+
+QueryCallbackProcessor::~QueryCallbackProcessor() {}
 
 void QueryCallbackProcessor::AddQuery(QueryCallback &&query)
 {
@@ -39,9 +37,8 @@ void QueryCallbackProcessor::ProcessReadyQueries()
 
     std::vector<QueryCallback> updateCallbacks{std::move(_callbacks)};
 
-    updateCallbacks.erase(std::remove_if(updateCallbacks.begin(), updateCallbacks.end(), [](QueryCallback &callback) {
-        return callback.InvokeIfReady() == QueryCallback::Completed;
-    }), updateCallbacks.end());
+    updateCallbacks.erase(
+        std::remove_if(updateCallbacks.begin(), updateCallbacks.end(), [](QueryCallback &callback) { return callback.InvokeIfReady() == QueryCallback::Completed; }), updateCallbacks.end());
 
     _callbacks.insert(_callbacks.end(), std::make_move_iterator(updateCallbacks.begin()), std::make_move_iterator(updateCallbacks.end()));
 }

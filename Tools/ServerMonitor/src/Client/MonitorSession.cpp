@@ -13,18 +13,20 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Partial implementation taken from glandu2 at https://github.com/glandu2/librzuxi
- * 
-*/
+ *
+ */
 
 #include "MonitorSession.h"
+
+#include <iostream>
+
 #include "Common.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "ServerMonitor.h"
 #include "cipher/XStrZlibWithSimpleCipherUtil.h"
-#include <iostream>
 
 enum eStatus
 {
@@ -39,7 +41,7 @@ typedef struct
     std::function<void(MonitorSession *, XPacket *)> handler;
 } PacketHandler;
 
-template <typename T>
+template<typename T>
 PacketHandler declareHandler(eStatus status, void (MonitorSession::*handler)(const T *packet))
 {
     PacketHandler handlerData{};
@@ -53,9 +55,7 @@ PacketHandler declareHandler(eStatus status, void (MonitorSession::*handler)(con
     return handlerData;
 }
 
-const PacketHandler _PacketHandler[] =
-    {
-        {declareHandler(STATUS_CONNECTED, &MonitorSession::onResultHandler)}};
+const PacketHandler _PacketHandler[] = {{declareHandler(STATUS_CONNECTED, &MonitorSession::onResultHandler)}};
 
 constexpr int PacketTableSize = (sizeof(_PacketHandler) / sizeof(PacketHandler));
 
@@ -84,9 +84,7 @@ ReadDataHandlerResult MonitorSession::ProcessIncoming(XPacket *pRecvPct)
     return ReadDataHandlerResult::Ok;
 }
 
-void MonitorSession::OnClose()
-{
-}
+void MonitorSession::OnClose() {}
 
 void MonitorSession::DoRequest()
 {
@@ -132,10 +130,12 @@ bool MonitorSession::Finished()
 }
 
 MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server)
-    : XSocket(std::move(socket)), m_nLastUpdateTime(sServerMonitor.GetTime()), pUserCount(ppUserCount), bRequesterEnabled(ppRequester), m_Server(server)
+    : XSocket(std::move(socket))
+    , m_nLastUpdateTime(sServerMonitor.GetTime())
+    , pUserCount(ppUserCount)
+    , bRequesterEnabled(ppRequester)
+    , m_Server(server)
 {
 }
 
-MonitorSession::~MonitorSession()
-{
-}
+MonitorSession::~MonitorSession() {}

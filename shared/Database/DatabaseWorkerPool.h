@@ -14,24 +14,25 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
-#include "StringFormat.h"
+ */
 #include <array>
 #include <string>
 #include <vector>
 
-template <typename T>
+#include "DatabaseEnvFwd.h"
+#include "Define.h"
+#include "StringFormat.h"
+
+template<typename T>
 class ProducerConsumerQueue;
 
 class SQLOperation;
 struct MySQLConnectionInfo;
 
-template <class T>
+template<class T>
 class DatabaseWorkerPool
 {
-  private:
+private:
     enum InternalIndex
     {
         IDX_ASYNC,
@@ -39,7 +40,7 @@ class DatabaseWorkerPool
         IDX_SIZE
     };
 
-  public:
+public:
     /* Activity state*/
     DatabaseWorkerPool();
 
@@ -54,10 +55,7 @@ class DatabaseWorkerPool
     //! Prepares all prepared statements
     bool PrepareStatements();
 
-    inline MySQLConnectionInfo const *GetConnectionInfo() const
-    {
-        return _connectionInfo.get();
-    }
+    inline MySQLConnectionInfo const *GetConnectionInfo() const { return _connectionInfo.get(); }
 
     /**
             Delayed one-way statement methods.
@@ -69,7 +67,7 @@ class DatabaseWorkerPool
 
     //! Enqueues a one-way SQL operation in string format -with variable args- that will be executed asynchronously.
     //! This method should only be used for queries that are only executed once, e.g during startup.
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     void PExecute(Format &&sql, Args &&... args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
@@ -92,7 +90,7 @@ class DatabaseWorkerPool
 
     //! Directly executes a one-way SQL operation in string format -with variable args-, that will block the calling thread until finished.
     //! This method should only be used for queries that are only executed once, e.g during startup.
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     void DirectPExecute(Format &&sql, Args &&... args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
@@ -115,7 +113,7 @@ class DatabaseWorkerPool
 
     //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
     //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     QueryResult PQuery(Format &&sql, T *conn, Args &&... args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
@@ -126,7 +124,7 @@ class DatabaseWorkerPool
 
     //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
     //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     QueryResult PQuery(Format &&sql, Args &&... args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
@@ -199,7 +197,7 @@ class DatabaseWorkerPool
     //! Keeps all our MySQL connections alive, prevent the server from disconnecting us.
     void KeepAlive();
 
-  private:
+private:
     uint32_t OpenConnections(InternalIndex type, uint8_t numConnections);
 
     unsigned long EscapeString(char *to, const char *from, unsigned long length);

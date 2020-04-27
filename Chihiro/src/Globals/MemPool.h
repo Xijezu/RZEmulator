@@ -14,7 +14,9 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+
+#include <unordered_map>
 
 #include "Common.h"
 #include "HashMapHolder.h"
@@ -25,7 +27,6 @@
 #include "Player.h"
 #include "SharedMutex.h"
 #include "Summon.h"
-#include <unordered_map>
 
 typedef std::unordered_map<uint32_t, Object *> UpdateMap;
 class MemoryPoolMgr
@@ -43,7 +44,7 @@ public:
         return instance;
     }
 
-    template <class T>
+    template<class T>
     T *GetObjectInWorld(uint32_t handle)
     {
         uint32_t idbase = handle & 0xE0000000;
@@ -64,13 +65,13 @@ public:
         }
     }
 
-    template <class T>
+    template<class T>
     void RemoveObject(T *object)
     {
         HashMapHolder<T>::Remove(object);
     }
 
-    template <class T>
+    template<class T>
     void AddObject(T *object)
     {
         HashMapHolder<T>::Insert(object);
@@ -93,7 +94,7 @@ public:
     const HashMapHolder<Player>::MapType &GetPlayers();
 
 private:
-    template <class T>
+    template<class T>
     void _unload();
     void AddToDeleteList(Object *obj);
     std::set<Object *> i_objectsToRemove{};

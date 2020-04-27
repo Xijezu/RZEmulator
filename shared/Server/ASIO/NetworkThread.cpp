@@ -1,7 +1,12 @@
 #include "NetworkThread.h"
 
-NetworkThread::NetworkThread() : _connections(0), _stopped(false), _thread(nullptr), _ioContext(1),
-                                 _acceptSocket(_ioContext), _updateTimer(_ioContext)
+NetworkThread::NetworkThread()
+    : _connections(0)
+    , _stopped(false)
+    , _thread(nullptr)
+    , _ioContext(1)
+    , _acceptSocket(_ioContext)
+    , _updateTimer(_ioContext)
 {
 }
 
@@ -92,19 +97,20 @@ void NetworkThread::Update()
 
     AddNewSockets();
 
-    _sockets.erase(std::remove_if(_sockets.begin(), _sockets.end(), [this](std::shared_ptr<XSocket> sock) {
-                       if (!sock->Update())
-                       {
-                           if (sock->IsOpen())
-                               sock->CloseSocket();
+    _sockets.erase(std::remove_if(_sockets.begin(), _sockets.end(),
+                       [this](std::shared_ptr<XSocket> sock) {
+                           if (!sock->Update())
+                           {
+                               if (sock->IsOpen())
+                                   sock->CloseSocket();
 
-                           this->SocketRemoved(sock);
+                               this->SocketRemoved(sock);
 
-                           --this->_connections;
-                           return true;
-                       }
+                               --this->_connections;
+                               return true;
+                           }
 
-                       return false;
-                   }),
-                   _sockets.end());
+                           return false;
+                       }),
+        _sockets.end());
 }

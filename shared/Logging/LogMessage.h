@@ -14,11 +14,12 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <ctime>
+#include <string>
+
 #include "Define.h"
 #include "LogCommon.h"
-#include <string>
-#include <ctime>
 
 struct LogMessage
 {
@@ -39,8 +40,5 @@ struct LogMessage
     time_t mtime;
 
     ///@ Returns size of the log message content in bytes
-    uint32_t Size() const
-    {
-        return static_cast<uint32_t>(prefix.size() + text.size());
-    }
+    uint32_t Size() const { return static_cast<uint32_t>(prefix.size() + text.size()); }
 };

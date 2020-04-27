@@ -13,14 +13,15 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "QuestManager.h"
+
 #include "GameContent.h"
-#include "QuestBase.h"
-#include "Quest.h"
 #include "Log.h"
 #include "ObjectMgr.h"
+#include "Quest.h"
+#include "QuestBase.h"
 
 bool QuestManager::DoEachActiveQuest(const std::function<void(Quest *)> &fn)
 {
@@ -88,24 +89,26 @@ bool QuestManager::AddQuest(Quest *quest)
         //                         (std::_Vector_const_iterator<ArObject *,std::allocator<ArObject *> > *)&v39,
         //                         (std::_Vector_const_iterator<ArObject *,std::allocator<ArObject *> > *)&thisa) )
         //                         break;
-        //                     if ( LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO> > *)&v39)->end.x) == v2 )
+        //                     if (
+        //                     LODWORD(std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO>
+        //                     > *)&v39)->end.x) == v2 )
         //                     {
         //                         v28 = 0;
         //                         do
         //                         {
-        //                             v29 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO> > *)&v39);
-        //                             StructQuest::SetRandomKey(pQuest, v28, *((_DWORD *)&v29->end.y + v28));
-        //                             v30 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO> > *)&v39);
-        //                             StructQuest::SetRandomValue(pQuest, v28, *(&v30->end_time + v28));
+        //                             v29 =
+        //                             std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO>
+        //                             > *)&v39); StructQuest::SetRandomKey(pQuest, v28, *((_DWORD *)&v29->end.y + v28)); v30 =
+        //                             std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_((std::_Vector_const_iterator<ArMoveVector::MOVE_INFO,std::allocator<ArMoveVector::MOVE_INFO>
+        //                             > *)&v39); StructQuest::SetRandomValue(pQuest, v28, *(&v30->end_time + v28));
         //                             ++v28;
         //                         }
         //                         while ( v28 < 3 );
         //                         v7 = (std::vector<unsigned int,std::allocator<unsigned int32_t> > *)v38;
         //                         break;
         //                     }
-        //                     std::_Vector_const_iterator<LuaVM::LuaScriptInfo_std::allocator<LuaVM::LuaScriptInfo>>::operator__((std::_Vector_const_iterator<StructCreature::DamageReflectInfo,std::allocator<StructCreature::DamageReflectInfo> > *)&v39);
-        //                     v35 = (std::_Container_base *)v27;
-        //                     v33 = *(unsigned int32_t **)(v27 + 8);
+        //                     std::_Vector_const_iterator<LuaVM::LuaScriptInfo_std::allocator<LuaVM::LuaScriptInfo>>::operator__((std::_Vector_const_iterator<StructCreature::DamageReflectInfo,std::allocator<StructCreature::DamageReflectInfo>
+        //                     > *)&v39); v35 = (std::_Container_base *)v27; v33 = *(unsigned int32_t **)(v27 + 8);
         //                 }
     }
     m_vActiveQuest.emplace_back(quest);
@@ -276,7 +279,10 @@ bool QuestManager::IsTakeableQuestItem(int32_t code)
 {
     for (auto &q : m_vActiveQuest)
     {
-        if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE || (q->m_QuestBase->nType != QuestType::QUEST_COLLECT && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS && q->m_QuestBase->nType != QuestType::QUEST_RANDOM_COLLECT) || q->IsFinishable())
+        if (q->m_Instance.nProgress == QuestProgress::QUEST_IS_FINISHABLE ||
+            (q->m_QuestBase->nType != QuestType::QUEST_COLLECT && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM && q->m_QuestBase->nType != QuestType::QUEST_HUNT_ITEM_FROM_ANY_MONSTERS &&
+                q->m_QuestBase->nType != QuestType::QUEST_RANDOM_COLLECT) ||
+            q->IsFinishable())
             continue;
 
         if (Quest::IsRandomQuest(q->m_QuestBase->nCode))
@@ -351,7 +357,8 @@ void QuestManager::GetRelatedQuestByMonster(int32_t nMonsterID, std::vector<Ques
         {
             if (q->m_QuestBase->nType == QuestType::QUEST_KILL_TOTAL || q->m_QuestBase->nType == QuestType::QUEST_KILL_INDIVIDUAL)
             {
-                if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID))
+                if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID) ||
+                    GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID))
                     vQuest.emplace_back(q);
             }
             else
@@ -363,7 +370,9 @@ void QuestManager::GetRelatedQuestByMonster(int32_t nMonsterID, std::vector<Ques
                 }
                 else
                 {
-                    if (GameContent::IsInRandomPoolMonster(q->GetValue(6), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(7), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(8), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(9), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(10), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(11), nMonsterID))
+                    if (GameContent::IsInRandomPoolMonster(q->GetValue(6), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(7), nMonsterID) ||
+                        GameContent::IsInRandomPoolMonster(q->GetValue(8), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(9), nMonsterID) ||
+                        GameContent::IsInRandomPoolMonster(q->GetValue(10), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(11), nMonsterID))
                         vQuest.emplace_back(q);
                 }
             }
@@ -423,7 +432,8 @@ void QuestManager::UpdateQuestStatusByMonsterKill(int32_t nMonsterID)
             switch (q->m_QuestBase->nType)
             {
             case QuestType::QUEST_KILL_TOTAL:
-                if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID) || (GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID) && q->GetStatus(0) < q->GetValue(1)))
+                if (GameContent::IsInRandomPoolMonster(q->GetValue(0), nMonsterID) || GameContent::IsInRandomPoolMonster(q->GetValue(2), nMonsterID) ||
+                    (GameContent::IsInRandomPoolMonster(q->GetValue(4), nMonsterID) && q->GetStatus(0) < q->GetValue(1)))
                 {
                     q->IncStatus(0, 1);
                 }

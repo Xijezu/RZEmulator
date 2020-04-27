@@ -13,14 +13,22 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Appender.h"
-#include "LogMessage.h"
-#include "StringFormat.h"
+
 #include <sstream>
 
-Appender::Appender(uint8_t _id, std::string const &_name, LogLevel _level /* = LOG_LEVEL_DISABLED*/, AppenderFlags _flags /* = APPENDER_FLAGS_NONE*/) : id(_id), name(_name), level(_level), flags(_flags) {}
+#include "LogMessage.h"
+#include "StringFormat.h"
+
+Appender::Appender(uint8_t _id, std::string const &_name, LogLevel _level /* = LOG_LEVEL_DISABLED*/, AppenderFlags _flags /* = APPENDER_FLAGS_NONE*/)
+    : id(_id)
+    , name(_name)
+    , level(_level)
+    , flags(_flags)
+{
+}
 
 Appender::~Appender() {}
 

@@ -14,13 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <atomic>
+
 #include "Common.h"
 #include "LockedQueue.h"
 #include "RegionContainer.h"
 #include "RespawnObject.h"
 #include "Timer.h"
-#include <atomic>
 
 enum ShutdownExitCode
 {
@@ -94,7 +95,7 @@ typedef std::unordered_map<uint32_t, WorldSession *> SessionMap;
 
 class World
 {
-  public:
+public:
     static std::atomic<uint32_t> m_worldLoopCounter;
     typedef std::atomic<uint64_t> AtomicIndex;
     ~World();
@@ -158,29 +159,22 @@ class World
 
     uint32_t GetSessionCount() const { return m_sessions.size(); }
 
-    template <typename TS_PACKET>
+    template<typename TS_PACKET>
     void Broadcast(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, TS_PACKET packet)
     {
         BroadcastFunctor<TS_PACKET> broadcastFunctor;
         broadcastFunctor.packet = packet;
 
-        sRegion.DoEachVisibleRegion(rx1, ry1,
-                                    rx2, ry2,
-                                    layer,
-                                    NG_REGION_FUNCTOR(broadcastFunctor),
-                                    (uint8_t)RegionVisitor::ClientVisitor);
+        sRegion.DoEachVisibleRegion(rx1, ry1, rx2, ry2, layer, NG_REGION_FUNCTOR(broadcastFunctor), (uint8_t)RegionVisitor::ClientVisitor);
     }
 
-    template <typename TS_PACKET>
+    template<typename TS_PACKET>
     void Broadcast(uint32_t rx, uint32_t ry, uint8_t layer, TS_PACKET packet)
     {
         BroadcastFunctor<TS_PACKET> broadcastFunctor;
         broadcastFunctor.packet = packet;
 
-        sRegion.DoEachVisibleRegion(rx, ry,
-                                    layer,
-                                    NG_REGION_FUNCTOR(broadcastFunctor),
-                                    (uint8_t)RegionVisitor::ClientVisitor);
+        sRegion.DoEachVisibleRegion(rx, ry, layer, NG_REGION_FUNCTOR(broadcastFunctor), (uint8_t)RegionVisitor::ClientVisitor);
     }
 
     uint32_t GetArTime();
@@ -219,10 +213,7 @@ class World
     }
 
     /// Get a float configuration element
-    float getFloatConfig(WorldFloatConfigs index)
-    {
-        return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f;
-    }
+    float getFloatConfig(WorldFloatConfigs index) { return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f; }
 
     /// Set a server configuration element
     void setBoolConfig(WorldBoolConfigs index, bool value)
@@ -232,10 +223,7 @@ class World
     }
 
     /// Get a server configuration element
-    bool getBoolConfig(WorldBoolConfigs index) const
-    {
-        return index < BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[index] : false;
-    }
+    bool getBoolConfig(WorldBoolConfigs index) const { return index < BOOL_CONFIG_VALUE_COUNT ? m_bool_configs[index] : false; }
 
     /// Set a server configuration element
     void setIntConfig(WorldIntConfigs index, int32_t value)
@@ -245,14 +233,11 @@ class World
     }
 
     /// Get a server configuration element
-    int32_t getIntConfig(WorldIntConfigs index) const
-    {
-        return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0;
-    }
+    int32_t getIntConfig(WorldIntConfigs index) const { return index < INT_CONFIG_VALUE_COUNT ? m_int_configs[index] : 0; }
 
     std::vector<RespawnObject *> m_vRespawnList{};
 
-  private:
+private:
     static std::atomic<bool> m_stopEvent;
 
     static uint8_t m_ExitCode;
@@ -282,7 +267,7 @@ class World
 
     IntervalTimer m_timers[WUPDATE_COUNT];
 
-  protected:
+protected:
     World();
 };
 

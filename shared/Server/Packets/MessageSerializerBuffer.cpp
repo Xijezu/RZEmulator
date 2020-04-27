@@ -1,14 +1,16 @@
 #include "MessageSerializerBuffer.h"
+
 #include <algorithm>
+
 #include "Config.h"
 
-MessageSerializerBuffer::MessageSerializerBuffer(XPacket *packet) : StructSerializer(sConfigMgr->getCachedConfig().packetVersion), packet(packet)
+MessageSerializerBuffer::MessageSerializerBuffer(XPacket *packet)
+    : StructSerializer(sConfigMgr->getCachedConfig().packetVersion)
+    , packet(packet)
 {
 }
 
-MessageSerializerBuffer::~MessageSerializerBuffer()
-{
-}
+MessageSerializerBuffer::~MessageSerializerBuffer() {}
 
 void MessageSerializerBuffer::writeString(const char *fieldName, const std::string &val, size_t maxSize)
 {
@@ -32,10 +34,7 @@ void MessageSerializerBuffer::readString(const char *fieldName, std::string &val
     val = packet->ReadString(maxSize);
 }
 
-void MessageSerializerBuffer::readDynString(const char *fieldName,
-                                            std::string &val,
-                                            uint32_t sizeToRead,
-                                            bool hasNullTerminator)
+void MessageSerializerBuffer::readDynString(const char *fieldName, std::string &val, uint32_t sizeToRead, bool hasNullTerminator)
 {
     (void)fieldName;
     if (sizeToRead > 0)

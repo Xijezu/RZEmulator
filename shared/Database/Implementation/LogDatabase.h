@@ -15,7 +15,7 @@ enum LogDatabaseStatements : uint32_t
 
 class LogDatabaseConnection : public MySQLConnection
 {
-  public:
+public:
     typedef LogDatabaseStatements Statements;
 
     //- Constructors for sync and async connections

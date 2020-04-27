@@ -16,6 +16,9 @@
  */
 
 #include "XLua.h"
+
+#include <boost/filesystem.hpp>
+
 #include "Config.h"
 #include "DungeonManager.h"
 #include "GameContent.h"
@@ -24,50 +27,39 @@
 #include "Messages.h"
 #include "ObjectMgr.h"
 #include "World.h"
-#include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
 XLua::XLua()
 {
-    m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string,
-                            sol::lib::package);
+    m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::package);
 }
 
 bool XLua::InitializeLua()
 {
 
-    auto configFile = boost::filesystem::path(
-        ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
 
     // Monster relevant
-    m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType,
-                          this);
+    m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
     m_pState.set_function("add_way_point", &XLua::SCRIPT_AddWayPoint, this);
-    m_pState.set_function("respawn_rare_mob", &XLua::SCRIPT_RespawnRareMob,
-                          this);
-    m_pState.set_function("respawn_roaming_mob",
-                          &XLua::SCRIPT_RespawnRoamingMob, this);
-    m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian,
-                          this);
+    m_pState.set_function("respawn_rare_mob", &XLua::SCRIPT_RespawnRareMob, this);
+    m_pState.set_function("respawn_roaming_mob", &XLua::SCRIPT_RespawnRoamingMob, this);
+    m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian, this);
     m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
     m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint,
-                          this); /// TODO!!!!
+        this); /// TODO!!!!
     // NPC relevant
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);
     m_pState.set_function("dlg_text", &XLua::SCRIPT_DialogText, this);
-    m_pState.set_function("dlg_text_without_quest_menu",
-                          &XLua::SCRIPT_DialogTextWithoutQuestMenu, this);
+    m_pState.set_function("dlg_text_without_quest_menu", &XLua::SCRIPT_DialogTextWithoutQuestMenu, this);
     m_pState.set_function("dlg_menu", &XLua::SCRIPT_DialogMenu, this);
     m_pState.set_function("dlg_show", &XLua::SCRIPT_DialogShow, this);
     m_pState.set_function("open_market", &XLua::SCRIPT_ShowMarket, this);
-    m_pState.set_function("get_quest_progress", &XLua::SCRIPT_GetQuestProgress,
-                          this);
-    m_pState.set_function("get_own_dungeon_id", &XLua::SCRIPT_GetOwnDungeonID,
-                          this);
-    m_pState.set_function("get_siege_dungeon_id",
-                          &XLua::SCRIPT_GetSiegeDungeonID, this);
+    m_pState.set_function("get_quest_progress", &XLua::SCRIPT_GetQuestProgress, this);
+    m_pState.set_function("get_own_dungeon_id", &XLua::SCRIPT_GetOwnDungeonID, this);
+    m_pState.set_function("get_siege_dungeon_id", &XLua::SCRIPT_GetSiegeDungeonID, this);
     // Getters
     m_pState.set_function("get_local_info", &XLua::SCRIPT_GetLocalFlag, this);
     m_pState.set_function("get_value", &XLua::SCRIPT_GetValue, this);
@@ -77,56 +69,41 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_flag", &XLua::SCRIPT_GetFlag, this);
     m_pState.set_function("set_flag", &XLua::SCRIPT_SetFlag, this);
     m_pState.set_function("get_env", &XLua::SCRIPT_GetEnv, this);
-    m_pState.set_function("get_proper_channel_num",
-                          &XLua::SCRIPT_GetProperChannelNum, this);
-    m_pState.set_function("get_layer_of_channel",
-                          &XLua::SCRIPT_GetLayerOfChannel, this);
+    m_pState.set_function("get_proper_channel_num", &XLua::SCRIPT_GetProperChannelNum, this);
+    m_pState.set_function("get_layer_of_channel", &XLua::SCRIPT_GetLayerOfChannel, this);
     m_pState.set_function("sconv", &XLua::SCRIPT_Conv, this);
     m_pState.set_function("message", &XLua::SCRIPT_Message, this);
-    m_pState.set_function("call_lc_In", &XLua::SCRIPT_SetCurrentLocationID,
-                          this);
+    m_pState.set_function("call_lc_In", &XLua::SCRIPT_SetCurrentLocationID, this);
     m_pState.set_function("warp", &XLua::SCRIPT_Warp, this);
-    m_pState.set_function("get_server_category",
-                          &XLua::SCRIPT_GetServerCategory, this);
+    m_pState.set_function("get_server_category", &XLua::SCRIPT_GetServerCategory, this);
     // Blacksmith functionality
-    m_pState.set_function("get_wear_item_handle",
-                          &XLua::SCRIPT_GetWearItemHandle, this);
+    m_pState.set_function("get_wear_item_handle", &XLua::SCRIPT_GetWearItemHandle, this);
     m_pState.set_function("get_item_level", &XLua::SCRIPT_GetItemLevel, this);
     m_pState.set_function("set_item_level", &XLua::SCRIPT_SetItemLevel, this);
-    m_pState.set_function("get_item_enhance", &XLua::SCRIPT_GetItemEnhance,
-                          this);
-    m_pState.set_function("get_item_name_id", &XLua::SCRIPT_GetItemNameID,
-                          this);
+    m_pState.set_function("get_item_enhance", &XLua::SCRIPT_GetItemEnhance, this);
+    m_pState.set_function("get_item_name_id", &XLua::SCRIPT_GetItemNameID, this);
     m_pState.set_function("get_item_code", &XLua::SCRIPT_GetItemCode, this);
-    m_pState.set_function("update_gold_chaos", &XLua::SCRIPT_UpdateGoldChaos,
-                          this);
+    m_pState.set_function("update_gold_chaos", &XLua::SCRIPT_UpdateGoldChaos, this);
     m_pState.set_function("get_item_price", &XLua::SCRIPT_GetItemPrice, this);
     m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
     m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
     m_pState.set_function("insert_item", &XLua::SCRIPT_InsertItem, this);
     m_pState.set_function("cprint", &XLua::SCRIPT_CPrint, this);
     m_pState.set_function("add_npc", &XLua::SCRIPT_AddMonster, this);
-    m_pState.set_function("get_creature_value", &XLua::SCRIPT_GetCreatureValue,
-                          this);
-    m_pState.set_function("set_creature_value", &XLua::SCRIPT_SetCreatureValue,
-                          this);
+    m_pState.set_function("get_creature_value", &XLua::SCRIPT_GetCreatureValue, this);
+    m_pState.set_function("set_creature_value", &XLua::SCRIPT_SetCreatureValue, this);
     m_pState.set_function("gcv", &XLua::SCRIPT_GetCreatureValue, this);
     m_pState.set_function("scv", &XLua::SCRIPT_SetCreatureValue, this);
-    m_pState.set_function("get_creature_handle",
-                          &XLua::SCRIPT_GetCreatureHandle, this);
-    m_pState.set_function("creature_evolution", &XLua::SCRIPT_CreatureEvolution,
-                          this);
+    m_pState.set_function("get_creature_handle", &XLua::SCRIPT_GetCreatureHandle, this);
+    m_pState.set_function("creature_evolution", &XLua::SCRIPT_CreatureEvolution, this);
     m_pState.set_function("quest_info", &XLua::SCRIPT_QuestInfo, this);
     m_pState.set_function("start_quest", &XLua::SCRIPT_StartQuest, this);
     m_pState.set_function("end_quest", &XLua::SCRIPT_EndQuest, this);
     m_pState.set_function("enter_dungeon", &XLua::SCRIPT_EnterDungeon, this);
-    m_pState.set_function("warp_to_revive_position",
-                          &XLua::SCRIPT_WarpToRevivePosition, this);
+    m_pState.set_function("warp_to_revive_position", &XLua::SCRIPT_WarpToRevivePosition, this);
     m_pState.set_function("learn_all_skill", &XLua::SCRIPT_LearnAllSkill, this);
-    m_pState.set_function("show_soulstone_craft_window",
-                          &XLua::SCRIPT_ShowSoulStoneCraftWindow, this);
-    m_pState.set_function("show_soulstone_repair_window",
-                          &XLua::SCRIPT_ShowSoulStoneRepairWindow, this);
+    m_pState.set_function("show_soulstone_craft_window", &XLua::SCRIPT_ShowSoulStoneCraftWindow, this);
+    m_pState.set_function("show_soulstone_repair_window", &XLua::SCRIPT_ShowSoulStoneRepairWindow, this);
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
@@ -174,8 +151,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     }
     catch (std::exception &ex)
     {
-        Messages::SendChatMessage(50, "@SCRIPT",
-                                  dynamic_cast<Player *>(m_pUnit), ex.what());
+        Messages::SendChatMessage(50, "@SCRIPT", dynamic_cast<Player *>(m_pUnit), ex.what());
         NG_LOG_ERROR("scripting", "%s", ex.what());
     }
     return true;
@@ -227,8 +203,7 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
     bool is_wander = args[6].get<bool>();
     int32_t wander_id = args.size() > 7 ? args[7].get<uint32_t>() : 0;
 
-    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id,
-                            max_num, max_num, is_wander, wander_id);
+    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
@@ -241,8 +216,7 @@ void XLua::SCRIPT_RespawnRoamingMob(sol::variadic_args args)
     auto nMonsterID = args[1].get<int32_t>();
     auto nAngle = args[2].get<int32_t>();
     auto nDistance = args[3].get<float>() * GameRule::DEFAULT_UNIT_SIZE;
-    uint32_t nRespawnInterval =
-        (args.size() >= 5) ? args[4].get<uint32_t>() * 100 : 0;
+    uint32_t nRespawnInterval = (args.size() >= 5) ? args[4].get<uint32_t>() * 100 : 0;
 }
 
 void XLua::SCRIPT_RespawnGuardian(int, int, int, int, int, int, int, int32_t) {}
@@ -253,8 +227,7 @@ int32_t XLua::SCRIPT_GetNPCID()
     if (player == nullptr)
         return -1;
 
-    auto t = sMemoryPool.GetObjectInWorld<WorldObject>(
-        player->GetLastContactLong("npc"));
+    auto t = sMemoryPool.GetObjectInWorld<WorldObject>(player->GetLastContactLong("npc"));
     if (t != nullptr)
     {
         return t->GetUInt32Value(UNIT_FIELD_UID);
@@ -361,8 +334,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     else if (szKey == "job_depth")
     {
         if (m_pUnit->IsPlayer())
-            return return_object(
-                dynamic_cast<Player *>(m_pUnit)->GetJobDepth());
+            return return_object(dynamic_cast<Player *>(m_pUnit)->GetJobDepth());
         else
             return return_object(""s);
     }
@@ -370,8 +342,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     {
         return return_object(m_pUnit->GetCurrentJLv());
     }
-    else if (szKey == "stamina" ||
-             szKey == "stanima")
+    else if (szKey == "stamina" || szKey == "stanima")
     { // I do that typo all the time /shrug
         return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_STAMINA));
     }
@@ -420,8 +391,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
             return return_object(player->GetInt32Value(PLAYER_FIELD_CHAOS));
         }
     }
-    NG_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s",
-                szKey.c_str());
+    NG_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
     return return_object("");
 }
 
@@ -464,8 +434,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     }
     else if (szKey == "level" || szKey == "lv")
     {
-        m_pUnit->SetEXP(
-            (uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
+        m_pUnit->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
     }
     else if (szKey == "job_level" || szKey == "jlv")
     {
@@ -479,45 +448,37 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     {
         m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int32_t>());
     }
-    else if (szKey == "stamina" ||
-             szKey == "stanima")
+    else if (szKey == "stamina" || szKey == "stanima")
     { // I do that typo all the time /shrug
         m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
     }
     else if (szKey == "jp")
     {
         m_pUnit->SetJP(args[0].get<int32_t>());
-        Messages::SendPropertyMessage(dynamic_cast<Player *>(m_pUnit), m_pUnit,
-                                      "jp", args[0].get<int32_t>());
+        Messages::SendPropertyMessage(dynamic_cast<Player *>(m_pUnit), m_pUnit, "jp", args[0].get<int32_t>());
     }
     else if (szKey == "hp")
     {
         m_pUnit->SetHealth(args[0].get<uint32_t>());
-        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint32_t>(), 0,
-                                       false);
+        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint32_t>(), 0, false);
     }
     else if (szKey == "mp")
     {
         m_pUnit->SetMana(args[0].get<uint32_t>());
-        Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint32_t>(),
-                                       false);
+        Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint32_t>(), false);
     }
     else if (szKey == "job_0")
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint32_t>());
     else if (szKey == "job_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1,
-                               args[0].get<uint32_t>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint32_t>());
     else if (szKey == "job_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2,
-                               args[0].get<uint32_t>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint32_t>());
     else if (szKey == "jlv_0")
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint32_t>());
     else if (szKey == "jlv_1")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1,
-                               args[0].get<uint32_t>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint32_t>());
     else if (szKey == "jlv_2")
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2,
-                               args[0].get<uint32_t>());
+        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint32_t>());
 
     if (m_pUnit->IsPlayer())
     {
@@ -528,8 +489,7 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
         }
         else if (szKey == "permission")
         {
-            player->SetInt32Value(PLAYER_FIELD_PERMISSION,
-                                  args[0].get<uint32_t>());
+            player->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
         }
         else if (szKey == "chaos")
         {
@@ -566,8 +526,7 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
 
     if (info != nullptr && !info->empty())
     {
-        Messages::SendMarketInfo(player, player->GetLastContactLong("npc"),
-                                 *info);
+        Messages::SendMarketInfo(player, player->GetLastContactLong("npc"), *info);
     }
 }
 
@@ -614,8 +573,7 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     int32_t x = args[0].get<int32_t>();
     int32_t y = args[1].get<int32_t>();
 
-    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f ||
-        sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y)
+    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y)
     {
         return;
     }
@@ -639,9 +597,7 @@ int32_t XLua::SCRIPT_GetWearItemHandle(int32_t index)
     if (index < 0 || index > MAX_ITEM_WEAR)
         return 0;
 
-    return m_pUnit->m_anWear[index] == nullptr
-               ? 0
-               : m_pUnit->m_anWear[index]->m_nHandle;
+    return m_pUnit->m_anWear[index] == nullptr ? 0 : m_pUnit->m_anWear[index]->m_nHandle;
 }
 
 int32_t XLua::SCRIPT_GetItemLevel(uint32_t handle)
@@ -747,15 +703,13 @@ uint32_t XLua::SCRIPT_InsertItem(sol::variadic_args args)
     int32_t nEnhance = args.size() >= 3 ? args[2].get<int32_t>() : 0;
     int32_t nLevel = args.size() >= 4 ? args[3].get<int32_t>() : 0;
     int32_t nFlag = args.size() >= 5 ? args[4].get<int32_t>() : 0;
-    auto pName = args.size() >= 6 ? args[5].get<std::string>()
-                                  : m_pUnit->GetNameAsString();
+    auto pName = args.size() >= 6 ? args[5].get<std::string>() : m_pUnit->GetNameAsString();
 
     auto player = Player::FindPlayer(pName);
     uint32_t handle = 0;
     if (player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0)
     {
-        auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel,
-                                    nEnhance, nFlag, 0, 0, 0, 0, 0);
+        auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
 
         Item *pNewItem = player->PushItem(item, nCount, false);
         if (pNewItem != nullptr)
@@ -787,8 +741,7 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
 
     assert(max_num != 0);
 
-    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id,
-                            max_num, inc, true, wander_id);
+    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
@@ -798,8 +751,7 @@ void XLua::SCRIPT_AddMonster(int32_t x, int32_t y, int32_t id, int32_t amount)
 {
     for (int32_t i = 0; i < amount; i++)
     {
-        auto mob = GameContent::RespawnMonster((float)x, (float)y, 0, id, true,
-                                               0, nullptr, false);
+        auto mob = GameContent::RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
         mob->m_bNearClient = true;
     }
 }
@@ -810,16 +762,14 @@ int32_t XLua::SCRIPT_GetCreatureHandle(int32_t idx)
         return 0;
 
     auto player = dynamic_cast<Player *>(m_pUnit);
-    if (player->m_aBindSummonCard[idx] != nullptr &&
-        player->m_aBindSummonCard[idx]->m_pSummon != nullptr)
+    if (player->m_aBindSummonCard[idx] != nullptr && player->m_aBindSummonCard[idx]->m_pSummon != nullptr)
     {
         return player->m_aBindSummonCard[idx]->m_pSummon->GetHandle();
     }
     return 0;
 }
 
-void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key,
-                                   sol::object value)
+void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key, sol::object value)
 {
     auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint32_t)handle);
     if (summon == nullptr && handle < 6 && handle > 0)
@@ -827,8 +777,7 @@ void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key,
         auto player = dynamic_cast<Player *>(m_pUnit);
         if (player != nullptr)
         {
-            if (player->m_aBindSummonCard[handle] != nullptr &&
-                player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
+            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
             {
                 summon = player->m_aBindSummonCard[handle]->m_pSummon;
             }
@@ -865,14 +814,12 @@ void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key,
         else if (key == "hp")
         {
             summon->SetHealth(value.as<float>());
-            Messages::SendHPMPMessage(dynamic_cast<Player *>(m_pUnit), summon,
-                                      summon->GetHealth(), 0, false);
+            Messages::SendHPMPMessage(dynamic_cast<Player *>(m_pUnit), summon, summon->GetHealth(), 0, false);
         }
         else if (key == "mp")
         {
             summon->SetMana(value.as<float>());
-            Messages::SendHPMPMessage(dynamic_cast<Player *>(m_pUnit), summon,
-                                      0, summon->GetMana(), false);
+            Messages::SendHPMPMessage(dynamic_cast<Player *>(m_pUnit), summon, 0, summon->GetMana(), false);
         }
     }
 }
@@ -885,8 +832,7 @@ sol::object XLua::SCRIPT_GetCreatureValue(int32_t handle, std::string key)
         auto player = dynamic_cast<Player *>(m_pUnit);
         if (player != nullptr)
         {
-            if (player->m_aBindSummonCard[handle] != nullptr &&
-                player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
+            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
             {
                 summon = player->m_aBindSummonCard[handle]->m_pSummon;
             }
@@ -967,9 +913,15 @@ int32_t XLua::SCRIPT_GetQuestProgress(int32_t quest)
     return player->GetQuestProgress(quest);
 }
 
-int32_t XLua::SCRIPT_GetOwnDungeonID() { return 0; }
+int32_t XLua::SCRIPT_GetOwnDungeonID()
+{
+    return 0;
+}
 
-int32_t XLua::SCRIPT_GetSiegeDungeonID() { return 0; }
+int32_t XLua::SCRIPT_GetSiegeDungeonID()
+{
+    return 0;
+}
 
 void XLua::SCRIPT_StartQuest(int32_t code, sol::variadic_args args)
 {
@@ -988,8 +940,7 @@ void XLua::SCRIPT_StartQuest(int32_t code, sol::variadic_args args)
     }
 }
 
-void XLua::SCRIPT_EndQuest(int32_t quest_id, int32_t reward_id,
-                           sol::variadic_args args)
+void XLua::SCRIPT_EndQuest(int32_t quest_id, int32_t reward_id, sol::variadic_args args)
 {
     auto player = dynamic_cast<Player *>(m_pUnit);
     if (player == nullptr)
@@ -1007,8 +958,7 @@ void XLua::SCRIPT_EnterDungeon(int32_t nDungeonID)
     auto pos = sDungeonManager.GetRaidStartPosition(nDungeonID);
     if (pos.GetPositionX() != 0 && pos.GetPositionY() != 0)
     {
-        dynamic_cast<Player *>(m_pUnit)->PendWarp(
-            (int32_t)pos.GetPositionX(), (int32_t)pos.GetPositionY(), 0);
+        dynamic_cast<Player *>(m_pUnit)->PendWarp((int32_t)pos.GetPositionX(), (int32_t)pos.GetPositionY(), 0);
     }
 }
 
@@ -1030,8 +980,7 @@ void XLua::SCRIPT_WarpToRevivePosition(sol::variadic_args)
 
     auto revive_pos = player->GetLastTownPosition();
 
-    player->PendWarp((int32_t)revive_pos.GetPositionX(),
-                     (int32_t)revive_pos.GetPositionY(), 0);
+    player->PendWarp((int32_t)revive_pos.GetPositionX(), (int32_t)revive_pos.GetPositionY(), 0);
     player->SetMove(player->GetCurrentPosition(sWorld.GetArTime()), 0, 0);
 }
 
@@ -1067,35 +1016,28 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     int32_t nStateCode = args[0].get<int32_t>();
     int32_t nStateLevel = args[1].get<uint8_t>();
     uint32_t nStateTime = args[2].get<uint32_t>();
-    Player *player = args.size() == 4
-                         ? Player::FindPlayer(args[3].get<std::string>())
-                         : m_pUnit->As<Player>();
+    Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr)
     {
         NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
         return;
     }
 
-    player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(),
-                     nStateLevel, sWorld.GetArTime(),
-                     sWorld.GetArTime() + nStateTime, false, 0, "");
+    player->AddState(SG_NORMAL, (StateCode)nStateCode, player->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
 }
 
 void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
 {
     if (args.size() < 3)
     {
-        NG_LOG_ERROR("scripting",
-                     "SCRIPT_AddCreatureState: Invalid Parameters");
+        NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Parameters");
         return;
     }
 
     int32_t nStateCode = args[0].get<int32_t>();
     int32_t nStateLevel = args[1].get<uint8_t>();
     uint32_t nStateTime = args[2].get<uint32_t>();
-    Player *player = args.size() == 4
-                         ? Player::FindPlayer(args[3].get<std::string>())
-                         : m_pUnit->As<Player>();
+    Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     Summon *summon = player->m_pMainSummon;
 
     if (summon == nullptr || !summon->IsInWorld())
@@ -1104,7 +1046,5 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
         return;
     }
 
-    summon->AddState(SG_NORMAL, (StateCode)nStateCode, summon->GetHandle(),
-                     nStateLevel, sWorld.GetArTime(),
-                     sWorld.GetArTime() + nStateTime, false, 0, "");
+    summon->AddState(SG_NORMAL, (StateCode)nStateCode, summon->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
 }

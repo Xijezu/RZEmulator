@@ -14,11 +14,12 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <map>
+
 #include "Common.h"
 #include "SharedMutex.h"
 #include "TS_AC_SERVER_LIST.h"
-#include <map>
 
 class AuthGameSession;
 struct Game : public TS_SERVER_INFO
@@ -57,16 +58,10 @@ public:
         }
     }
 
-    NG_SHARED_MUTEX *GetGuard()
-    {
-        return &i_lock;
-    }
+    NG_SHARED_MUTEX *GetGuard() { return &i_lock; }
 
     // You need to use the mutex while working with the map!
-    GameMap *GetMap()
-    {
-        return &m_games;
-    }
+    GameMap *GetMap() { return &m_games; }
 
     Game *GetGame(const uint32_t nIDX)
     {

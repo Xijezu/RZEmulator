@@ -13,29 +13,30 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include "Common.h"
-#include "DatabaseEnv.h"
 #include "AuthClientSession.h"
-#include "PlayerList.h"
-#include "GameList.h"
-#include "XPacket.h"
-#include "Encryption/MD5.h"
+
 #include "AuthGameSession.h"
-#include "Util.h"
+#include "Common.h"
 #include "Config.h"
+#include "DatabaseEnv.h"
+#include "Encryption/MD5.h"
+#include "GameList.h"
+#include "PlayerList.h"
+#include "Util.h"
+#include "XPacket.h"
 
 // Constructo - give it a socket
-AuthClientSession::AuthClientSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_pPlayer(nullptr)
+AuthClientSession::AuthClientSession(boost::asio::ip::tcp::socket &&socket)
+    : XSocket(std::move(socket))
+    , m_pPlayer(nullptr)
 {
     _desCipther.Init("MERONG");
 }
 
 // Close patch file descriptor before leaving
-AuthClientSession::~AuthClientSession()
-{
-}
+AuthClientSession::~AuthClientSession() {}
 
 void AuthClientSession::OnClose()
 {
@@ -62,7 +63,7 @@ typedef struct AuthHandler
     std::function<void(AuthClientSession *, XPacket *)> handler;
 } AuthHandler;
 
-template <typename T>
+template<typename T>
 AuthHandler declareHandler(eStatus status, void (AuthClientSession::*handler)(const T *packet))
 {
     AuthHandler handlerData{};

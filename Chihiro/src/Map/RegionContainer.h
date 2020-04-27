@@ -14,22 +14,21 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "RegionBlock.h"
 #include "SharedMutex.h"
 
 constexpr int32_t VISIBLE_REGION_RANGE = 3;
 constexpr int VISIBLE_REGION_BOX_WIDTH = (VISIBLE_REGION_RANGE * 2 + 1);
-constexpr int s_Matrix[VISIBLE_REGION_BOX_WIDTH][VISIBLE_REGION_BOX_WIDTH] =
-    {
-        {0, 0, 1, 1, 1, 0, 0},
-        {0, 1, 1, 1, 1, 1, 0},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {1, 1, 1, 1, 1, 1, 1},
-        {0, 1, 1, 1, 1, 1, 0},
-        {0, 0, 1, 1, 1, 0, 0},
+constexpr int s_Matrix[VISIBLE_REGION_BOX_WIDTH][VISIBLE_REGION_BOX_WIDTH] = {
+    {0, 0, 1, 1, 1, 0, 0},
+    {0, 1, 1, 1, 1, 1, 0},
+    {1, 1, 1, 1, 1, 1, 1},
+    {1, 1, 1, 1, 1, 1, 1},
+    {1, 1, 1, 1, 1, 1, 1},
+    {0, 1, 1, 1, 1, 1, 0},
+    {0, 0, 1, 1, 1, 0, 0},
 };
 
 #define NG_REGION_FUNCTOR(fn) [&fn](RegionType &pRegionType) { (fn).Run(pRegionType); }
@@ -64,7 +63,7 @@ public:
     void DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, RegionFunctor &fn);
     void DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, uint32_t pry, uint8_t layer, RegionFunctor &fn);
 
-    template <typename Visitor>
+    template<typename Visitor>
     void DoEachVisibleRegion(uint32_t rx, uint32_t ry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
     {
         int32_t tx = rx + VISIBLE_REGION_RANGE;
@@ -93,7 +92,7 @@ public:
         }
     }
 
-    template <typename Visitor>
+    template<typename Visitor>
     void DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t rx2, uint32_t ry2, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
     {
         int32_t left = std::max(0, std::min((int32_t)rx1 - VISIBLE_REGION_RANGE, (int32_t)rx2 - VISIBLE_REGION_RANGE));
@@ -123,7 +122,7 @@ public:
         }
     }
 
-    template <typename Visitor>
+    template<typename Visitor>
     void DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, uint32_t pry, uint8_t layer, Visitor &&visitor, uint8_t nBitset)
     {
         int32_t left = std::max(0, std::min((int32_t)rx - VISIBLE_REGION_RANGE, (int32_t)prx - VISIBLE_REGION_RANGE));

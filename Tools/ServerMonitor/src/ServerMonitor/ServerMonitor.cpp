@@ -13,19 +13,24 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Partial implementation taken from glandu2 at https://github.com/glandu2/librzu
- * 
-*/
+ *
+ */
 
 #include "ServerMonitor.h"
-#include "Config.h"
-#include "SingleSocketInstance.h"
+
 #include <fstream>
 #include <iostream>
+
 #include <nlohmann/json.hpp>
 
-NGemity::ServerMonitor::ServerMonitor() : _stopped(true), m_nStartTime(getMSTime())
+#include "Config.h"
+#include "SingleSocketInstance.h"
+
+NGemity::ServerMonitor::ServerMonitor()
+    : _stopped(true)
+    , m_nStartTime(getMSTime())
 {
 }
 
@@ -128,7 +133,7 @@ std::string NGemity::ServerMonitor::GetEverything()
     root["last_update"] = time(nullptr);
     for (auto &serverRegion : m_vServerRegion)
     {
-        nlohmann::json region; //Server
+        nlohmann::json region; // Server
         region["name"] = serverRegion.szRegionName;
         for (auto &server : serverRegion.vServerList)
         {

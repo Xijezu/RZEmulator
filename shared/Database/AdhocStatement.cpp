@@ -13,20 +13,22 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "AdhocStatement.h"
-#include "Errors.h"
-#include "MySQLConnection.h"
-#include "QueryResult.h"
+
 #include <cstdlib>
 #include <cstring>
 
+#include "Errors.h"
+#include "MySQLConnection.h"
+#include "QueryResult.h"
+
 /*! Basic, ad-hoc queries.*/
-BasicStatementTask::BasicStatementTask(const char *sql, bool async) :
-        m_result(nullptr)
+BasicStatementTask::BasicStatementTask(const char *sql, bool async)
+    : m_result(nullptr)
 {
-    m_sql        = strdup(sql);
+    m_sql = strdup(sql);
     m_has_result = async; // If the operation is async, then there's a result
     if (async)
         m_result = new QueryResultPromise();

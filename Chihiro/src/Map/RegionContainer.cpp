@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "RegionContainer.h"
+
 #include "World.h"
 
 #define REGION_BLOCK_COUNT 100
@@ -47,7 +48,8 @@ bool RegionContainer::IsValidRegion(uint32_t rx, uint32_t ry, uint8_t /* layer*/
 
 Region *RegionContainer::GetRegion(WorldObject *pObject)
 {
-    return GetRegion((uint32_t)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
+    return GetRegion(
+        (uint32_t)(pObject->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pObject->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pObject->GetLayer());
 }
 
 Region *RegionContainer::GetRegion(uint32_t rx, uint32_t ry, uint8_t layer)
@@ -222,7 +224,7 @@ uint32_t RegionContainer::IsVisibleRegion(WorldObject *obj1, WorldObject *obj2)
         return 0;
 
     return IsVisibleRegion((uint32_t)(obj1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                           (uint32_t)(obj2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
+        (uint32_t)(obj2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(obj2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)));
 };
 
 RegionBlock *RegionContainer::getRegionBlockPtr(uint32_t rcx, uint32_t rcy)

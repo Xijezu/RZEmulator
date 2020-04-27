@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "DungeonManager.h"
 
@@ -24,7 +24,7 @@ Position DungeonManager::GetRaidStartPosition(int32_t nDungeonID)
         if (dt.id == nDungeonID)
             return dt.raid_start_pos;
     }
-    return Position{ };
+    return Position{};
 }
 
 int32_t DungeonManager::GetDungeonID(float x, float y)

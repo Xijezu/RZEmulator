@@ -13,19 +13,22 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "AppenderConsole.h"
+
+#include <sstream>
+
 #include "LogMessage.h"
 #include "Util.h"
-#include <sstream>
 
 #if PLATFORM == PLATFORM_WINDOWS
 #include <Windows.h>
 #endif
 
 AppenderConsole::AppenderConsole(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs)
-    : Appender(id, name, level, flags), _colored(false)
+    : Appender(id, name, level, flags)
+    , _colored(false)
 {
     for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
         _colors[i] = ColorTypes(MaxColors);
@@ -66,29 +69,27 @@ void AppenderConsole::InitColors(std::string const &str)
 void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
 {
 #if PLATFORM == PLATFORM_WINDOWS
-    static WORD WinColorFG[MaxColors] =
-        {
-            0,                                                   // BLACK
-            FOREGROUND_RED,                                      // RED
-            FOREGROUND_GREEN,                                    // GREEN
-            FOREGROUND_RED | FOREGROUND_GREEN,                   // BROWN
-            FOREGROUND_BLUE,                                     // BLUE
-            FOREGROUND_RED | FOREGROUND_BLUE,                    // MAGENTA
-            FOREGROUND_GREEN | FOREGROUND_BLUE,                  // CYAN
-            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE, // WHITE
-            // YELLOW
-            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-            // RED_BOLD
-            FOREGROUND_RED | FOREGROUND_INTENSITY,
-            // GREEN_BOLD
-            FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-            FOREGROUND_BLUE | FOREGROUND_INTENSITY, // BLUE_BOLD
-            // MAGENTA_BOLD
-            FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-            // CYAN_BOLD
-            FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-            // WHITE_BOLD
-            FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY};
+    static WORD WinColorFG[MaxColors] = {0, // BLACK
+        FOREGROUND_RED, // RED
+        FOREGROUND_GREEN, // GREEN
+        FOREGROUND_RED | FOREGROUND_GREEN, // BROWN
+        FOREGROUND_BLUE, // BLUE
+        FOREGROUND_RED | FOREGROUND_BLUE, // MAGENTA
+        FOREGROUND_GREEN | FOREGROUND_BLUE, // CYAN
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE, // WHITE
+        // YELLOW
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+        // RED_BOLD
+        FOREGROUND_RED | FOREGROUND_INTENSITY,
+        // GREEN_BOLD
+        FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+        FOREGROUND_BLUE | FOREGROUND_INTENSITY, // BLUE_BOLD
+        // MAGENTA_BOLD
+        FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+        // CYAN_BOLD
+        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+        // WHITE_BOLD
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY};
 
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, WinColorFG[color]);
@@ -126,24 +127,23 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
         BG_WHITE
     };
 
-    static uint8_t UnixColorFG[MaxColors] =
-        {
-            FG_BLACK,   // BLACK
-            FG_RED,     // RED
-            FG_GREEN,   // GREEN
-            FG_BROWN,   // BROWN
-            FG_BLUE,    // BLUE
-            FG_MAGENTA, // MAGENTA
-            FG_CYAN,    // CYAN
-            FG_WHITE,   // WHITE
-            FG_YELLOW,  // YELLOW
-            FG_RED,     // LRED
-            FG_GREEN,   // LGREEN
-            FG_BLUE,    // LBLUE
-            FG_MAGENTA, // LMAGENTA
-            FG_CYAN,    // LCYAN
-            FG_WHITE    // LWHITE
-        };
+    static uint8_t UnixColorFG[MaxColors] = {
+        FG_BLACK, // BLACK
+        FG_RED, // RED
+        FG_GREEN, // GREEN
+        FG_BROWN, // BROWN
+        FG_BLUE, // BLUE
+        FG_MAGENTA, // MAGENTA
+        FG_CYAN, // CYAN
+        FG_WHITE, // WHITE
+        FG_YELLOW, // YELLOW
+        FG_RED, // LRED
+        FG_GREEN, // LGREEN
+        FG_BLUE, // LBLUE
+        FG_MAGENTA, // LMAGENTA
+        FG_CYAN, // LCYAN
+        FG_WHITE // LWHITE
+    };
 
     fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", UnixColorFG[color], (color >= YELLOW && color < MaxColors ? ";1" : ""));
 #endif

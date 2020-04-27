@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "GameList.h"
 #include "PlayerList.h"
@@ -25,7 +25,7 @@ class XPacket;
 // Handle login commands
 class AuthGameSession : public XSocket
 {
-  public:
+public:
     explicit AuthGameSession(boost::asio::ip::tcp::socket &&socket);
     ~AuthGameSession();
 
@@ -57,7 +57,7 @@ class AuthGameSession : public XSocket
     /// \return server name
     std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->server_name : "<null>"); }
 
-  private:
+private:
     Game *m_pGame;
     bool m_bIsAuthed;
 };

@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_AUCTION_CANCEL_DEF(_) \
-	_(simple)(uint32_t, auction_uid)
+#define TS_CS_AUCTION_CANCEL_DEF(_) _(simple)(uint32_t, auction_uid)
 
 CREATE_PACKET(TS_CS_AUCTION_CANCEL, 1310);
 

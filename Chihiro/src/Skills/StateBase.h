@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 
 enum AttributeFlag
@@ -95,7 +95,7 @@ enum StateGroup
     GROUP_PHYSICAL_BOMB = 0x65,
     GROUP_MAGICAL_BOMB = 0x66,
     GROUP_ASSASSIN = 0xC9,
-    //GROUP_RIDING        = 0x12D,
+    // GROUP_RIDING        = 0x12D,
     GROUP_MAGIC = 0x191,
     GROUP_SKILL = 0x192,
     GROUP_POISON = 0x193,
@@ -247,7 +247,7 @@ enum StateEffect : int
     SEF_DAMAGE_REFLECT_WHEN_EQUIP_SHIELD = 45,
     SEF_DAMAGE_REDUCE_WITH_RACE_BY_PERCENT = 46,
     SEF_DAMAGE_REDUCE_WITH_RACE_BY_VALUE = 47,
-    //SEF_DAMAGE_REDUCE						= 48,
+    // SEF_DAMAGE_REDUCE						= 48,
     SEF_MANA_SHIELD = 49,
     SEF_HEAL = 61,
     SEF_REGEN_ADD = 62,

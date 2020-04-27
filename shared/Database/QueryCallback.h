@@ -14,60 +14,61 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
+ */
 #include <functional>
 #include <future>
 #include <list>
 #include <queue>
 #include <utility>
 
+#include "DatabaseEnvFwd.h"
+#include "Define.h"
+
 class QueryCallback
 {
-    public:
-        explicit QueryCallback(QueryResultFuture &&result);
-        explicit QueryCallback(PreparedQueryResultFuture &&result);
-        QueryCallback(QueryCallback &&right);
-        QueryCallback &operator=(QueryCallback &&right);
-        ~QueryCallback();
+public:
+    explicit QueryCallback(QueryResultFuture &&result);
+    explicit QueryCallback(PreparedQueryResultFuture &&result);
+    QueryCallback(QueryCallback &&right);
+    QueryCallback &operator=(QueryCallback &&right);
+    ~QueryCallback();
 
-        QueryCallback &&WithCallback(std::function<void(QueryResult)> &&callback);
-        QueryCallback &&WithPreparedCallback(std::function<void(PreparedQueryResult)> &&callback);
+    QueryCallback &&WithCallback(std::function<void(QueryResult)> &&callback);
+    QueryCallback &&WithPreparedCallback(std::function<void(PreparedQueryResult)> &&callback);
 
-        QueryCallback &&WithChainingCallback(std::function<void(QueryCallback &, QueryResult)> &&callback);
-        QueryCallback &&WithChainingPreparedCallback(std::function<void(QueryCallback &, PreparedQueryResult)> &&callback);
+    QueryCallback &&WithChainingCallback(std::function<void(QueryCallback &, QueryResult)> &&callback);
+    QueryCallback &&WithChainingPreparedCallback(std::function<void(QueryCallback &, PreparedQueryResult)> &&callback);
 
-        // Moves std::future from next to this object
-        void SetNextQuery(QueryCallback &&next);
+    // Moves std::future from next to this object
+    void SetNextQuery(QueryCallback &&next);
 
-        enum Status
-        {
-            NotReady,
-            NextStep,
-            Completed
-        };
+    enum Status
+    {
+        NotReady,
+        NextStep,
+        Completed
+    };
 
-        Status InvokeIfReady();
+    Status InvokeIfReady();
 
-    private:
-        QueryCallback(QueryCallback const &right) = delete;
-        QueryCallback &operator=(QueryCallback const &right) = delete;
+private:
+    QueryCallback(QueryCallback const &right) = delete;
+    QueryCallback &operator=(QueryCallback const &right) = delete;
 
-        template<typename T>
-        friend void ConstructActiveMember(T *obj);
-        template<typename T>
-        friend void DestroyActiveMember(T *obj);
-        template<typename T>
-        friend void MoveFrom(T *to, T &&from);
+    template<typename T>
+    friend void ConstructActiveMember(T *obj);
+    template<typename T>
+    friend void DestroyActiveMember(T *obj);
+    template<typename T>
+    friend void MoveFrom(T *to, T &&from);
 
-        union
-        {
-            QueryResultFuture         _string;
-            PreparedQueryResultFuture _prepared;
-        };
-        bool _isPrepared;
+    union
+    {
+        QueryResultFuture _string;
+        PreparedQueryResultFuture _prepared;
+    };
+    bool _isPrepared;
 
-        struct QueryCallbackData;
-        std::queue<QueryCallbackData, std::list<QueryCallbackData>> _callbacks;
+    struct QueryCallbackData;
+    std::queue<QueryCallbackData, std::list<QueryCallbackData>> _callbacks;
 };

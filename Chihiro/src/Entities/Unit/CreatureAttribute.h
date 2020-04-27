@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "StateBase.h"
@@ -48,9 +48,12 @@ struct ExpertMod
 
 struct DamageReduceInfo
 {
-    DamageReduceInfo(unsigned char _ratio, float _physical_reduce, float _physical_skill_reduce, float _magical_skill_reduce,
-                     int32_t _apply_creature_group_1, int32_t _apply_creature_group_2, int32_t _apply_creature_group_3, int32_t _apply_creature_group_4, int32_t _apply_creature_group_5)
-        : ratio(_ratio), physical_reduce(_physical_reduce), physical_skill_reduce(_physical_skill_reduce), magical_skill_reduce(_magical_skill_reduce)
+    DamageReduceInfo(unsigned char _ratio, float _physical_reduce, float _physical_skill_reduce, float _magical_skill_reduce, int32_t _apply_creature_group_1, int32_t _apply_creature_group_2,
+        int32_t _apply_creature_group_3, int32_t _apply_creature_group_4, int32_t _apply_creature_group_5)
+        : ratio(_ratio)
+        , physical_reduce(_physical_reduce)
+        , physical_skill_reduce(_physical_skill_reduce)
+        , magical_skill_reduce(_magical_skill_reduce)
     {
         apply_creature_group_list[0] = _apply_creature_group_1;
         apply_creature_group_list[1] = _apply_creature_group_2;
@@ -61,7 +64,9 @@ struct DamageReduceInfo
 
     inline bool IsAppliableCreatureGroup(int32_t creature_group)
     {
-        return (apply_creature_group_list[0] == 99 || apply_creature_group_list[0] == creature_group) || (apply_creature_group_list[1] == 99 || apply_creature_group_list[1] == creature_group) || (apply_creature_group_list[2] == 99 || apply_creature_group_list[2] == creature_group) || (apply_creature_group_list[3] == 99 || apply_creature_group_list[3] == creature_group) || (apply_creature_group_list[4] == 99 || apply_creature_group_list[4] == creature_group);
+        return (apply_creature_group_list[0] == 99 || apply_creature_group_list[0] == creature_group) || (apply_creature_group_list[1] == 99 || apply_creature_group_list[1] == creature_group) ||
+            (apply_creature_group_list[2] == 99 || apply_creature_group_list[2] == creature_group) || (apply_creature_group_list[3] == 99 || apply_creature_group_list[3] == creature_group) ||
+            (apply_creature_group_list[4] == 99 || apply_creature_group_list[4] == creature_group);
     }
 
     unsigned char ratio;
@@ -73,10 +78,7 @@ struct DamageReduceInfo
 
 struct StateMod
 {
-    StateMod()
-    {
-        Init();
-    }
+    StateMod() { Init(); }
 
     void Init()
     {
@@ -96,10 +98,7 @@ struct StateMod
 
 struct ElementalSkillStateMod
 {
-    ElementalSkillStateMod()
-    {
-        Init();
-    }
+    ElementalSkillStateMod() { Init(); }
 
     void Init()
     {

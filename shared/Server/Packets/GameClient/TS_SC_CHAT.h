@@ -6,11 +6,7 @@
 
 // Message len include null terminator
 // Message must have null terminator
-#define TS_SC_CHAT_DEF(_) \
-	_(string)(szSender, 21) \
-	_(count)(uint16_t, message) \
-    _(simple)(uint8_t, type) \
-	_(dynstring)(message, true)
+#define TS_SC_CHAT_DEF(_) _(string)(szSender, 21) _(count)(uint16_t, message) _(simple)(uint8_t, type) _(dynstring)(message, true)
 
 CREATE_PACKET(TS_SC_CHAT, 22);
 

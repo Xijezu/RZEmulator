@@ -13,20 +13,20 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Linef.h"
 
 X2D::Linef::Linef(X2D::Pointf p1, X2D::Pointf p2)
 {
     begin = Pointf(p1.x, p1.y);
-    end   = Pointf(p2.x, p2.y);
+    end = Pointf(p2.x, p2.y);
 }
 
 X2D::CcwResult X2D::Linef::CheckClockWisef(float x1, float y1, float x2, float y2, float x3, float y3)
 {
-    CcwResult result{ };
-    float     l = ((y3 - y1) * (x2 - x1)) - ((x3 - x1) * (y2 - y1));
+    CcwResult result{};
+    float l = ((y3 - y1) * (x2 - x1)) - ((x3 - x1) * (y2 - y1));
     if (l <= 0.0f)
     {
         if (l >= 0.0f)
@@ -48,22 +48,19 @@ X2D::CcwResult X2D::Linef::CheckClockWisef(X2D::Pointf pt1, X2D::Pointf pt2, X2D
 
 X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf p2, X2D::Pointf p3, X2D::Pointf p4)
 {
-    if (std::max(p3.y, p4.y) < std::min(p1.y, p2.y)
-        || std::max(p1.y, p2.y) < std::min(p3.y, p4.y)
-        || std::max(p3.x, p4.x) < std::min(p1.x, p2.x)
-        || std::max(p1.x, p2.x) < std::min(p3.x, p4.x))
+    if (std::max(p3.y, p4.y) < std::min(p1.y, p2.y) || std::max(p1.y, p2.y) < std::min(p3.y, p4.y) || std::max(p3.x, p4.x) < std::min(p1.x, p2.x) || std::max(p1.x, p2.x) < std::min(p3.x, p4.x))
         return Seperate;
 
-    Pointf tp1{ };
-    Pointf tp2{ };
-    Pointf tp3{ };
-    Pointf tp4{ };
-    Pointf tp5{ };
-    Pointf tp6{ };
-    Pointf tp7{ };
-    Pointf tp8{ };
-    float  f1{ };
-    float  f2{ };
+    Pointf tp1{};
+    Pointf tp2{};
+    Pointf tp3{};
+    Pointf tp4{};
+    Pointf tp5{};
+    Pointf tp6{};
+    Pointf tp7{};
+    Pointf tp8{};
+    float f1{};
+    float f2{};
 
     if (p2.x >= p1.x)
     {

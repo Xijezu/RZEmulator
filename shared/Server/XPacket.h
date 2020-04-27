@@ -14,11 +14,37 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Common.h"
+ */
+#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
+#include "AuthClient/TS_AC_AES_KEY_IV.h"
+#include "AuthClient/TS_AC_RESULT.h"
+#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
+#include "AuthClient/TS_AC_SELECT_SERVER.h"
+#include "AuthClient/TS_AC_SERVER_LIST.h"
+#include "AuthClient/TS_AC_UPDATE_PENDING_TIME.h"
+#include "AuthClient/TS_CA_ACCOUNT.h"
+#include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
+#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
+#include "AuthClient/TS_CA_OTP_ACCOUNT.h"
+#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
+#include "AuthClient/TS_CA_SELECT_SERVER.h"
+#include "AuthClient/TS_CA_SERVER_LIST.h"
+#include "AuthClient/TS_CA_VERSION.h"
+#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
+#include "AuthGame/TS_AG_ITEM_PURCHASED.h"
+#include "AuthGame/TS_AG_ITEM_SUPPLIED.h"
+#include "AuthGame/TS_AG_KICK_CLIENT.h"
+#include "AuthGame/TS_AG_LOGIN_RESULT.h"
+#include "AuthGame/TS_AG_PCBANG_EXPIRE.h"
+#include "AuthGame/TS_AG_PCBANG_EXPIRE_WARNING.h"
+#include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
+#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
+#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
+#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
+#include "AuthGame/TS_GA_LOGIN.h"
+#include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
 #include "ByteBuffer.h"
-#include "TS_MESSAGE.h"
-
+#include "Common.h"
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_ANTI_HACK.h"
 #include "GameClient/TS_CS_ARRANGE_ITEM.h"
@@ -295,82 +321,64 @@
 #include "GameClient/TS_SC_XTRAP_CHECK.h"
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_TRADE.h"
-
-#include "AuthClient/TS_AC_ACCOUNT_NAME.h"
-#include "AuthClient/TS_AC_AES_KEY_IV.h"
-#include "AuthClient/TS_AC_RESULT.h"
-#include "AuthClient/TS_AC_RESULT_WITH_STRING.h"
-#include "AuthClient/TS_AC_SELECT_SERVER.h"
-#include "AuthClient/TS_AC_SERVER_LIST.h"
-#include "AuthClient/TS_AC_UPDATE_PENDING_TIME.h"
-#include "AuthClient/TS_CA_ACCOUNT.h"
-#include "AuthClient/TS_CA_DISTRIBUTION_INFO.h"
-#include "AuthClient/TS_CA_IMBC_ACCOUNT.h"
-#include "AuthClient/TS_CA_OTP_ACCOUNT.h"
-#include "AuthClient/TS_CA_RSA_PUBLIC_KEY.h"
-#include "AuthClient/TS_CA_SELECT_SERVER.h"
-#include "AuthClient/TS_CA_SERVER_LIST.h"
-#include "AuthClient/TS_CA_VERSION.h"
-
-#include "AuthGame/TS_AG_CLIENT_LOGIN.h"
-#include "AuthGame/TS_AG_ITEM_PURCHASED.h"
-#include "AuthGame/TS_AG_ITEM_SUPPLIED.h"
-#include "AuthGame/TS_AG_KICK_CLIENT.h"
-#include "AuthGame/TS_AG_LOGIN_RESULT.h"
-#include "AuthGame/TS_AG_PCBANG_EXPIRE.h"
-#include "AuthGame/TS_AG_PCBANG_EXPIRE_WARNING.h"
-#include "AuthGame/TS_AG_SECURITY_NO_CHECK.h"
-#include "AuthGame/TS_GA_CLIENT_KICK_FAILED.h"
-
-#include "AuthGame/TS_GA_CLIENT_LOGIN.h"
-#include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
-#include "AuthGame/TS_GA_LOGIN.h"
-#include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
+#include "TS_MESSAGE.h"
 
 class MessageBuffer;
 
 namespace NGemity
 {
-enum class Packets;
+    enum class Packets;
 }
 
 class XPacket : public ByteBuffer
 {
-  public:
+public:
     // just container for later use
-    XPacket() : ByteBuffer(0), m_nPacketID(0)
+    XPacket()
+        : ByteBuffer(0)
+        , m_nPacketID(0)
     {
     }
 
-    explicit XPacket(NGemity::Packets packID) : ByteBuffer(0), m_nPacketID(static_cast<uint16_t>(packID))
+    explicit XPacket(NGemity::Packets packID)
+        : ByteBuffer(0)
+        , m_nPacketID(static_cast<uint16_t>(packID))
     {
         resize(7);
         put(4, m_nPacketID);
     }
 
-    template <typename T>
+    template<typename T>
     T *getStruct()
     {
         return nullptr;
     }
 
-    explicit XPacket(uint16_t packID) : ByteBuffer(0), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID)
+        : ByteBuffer(0)
+        , m_nPacketID(packID)
     {
         resize(7);
         put(4, packID);
     }
 
-    explicit XPacket(uint16_t packID, int32_t res, char *encrypted) : ByteBuffer(res), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID, int32_t res, char *encrypted)
+        : ByteBuffer(res)
+        , m_nPacketID(packID)
     {
         append(encrypted, 7);
     }
 
     // copy constructor
-    XPacket(const XPacket &packet) : ByteBuffer(packet), m_nPacketID(packet.m_nPacketID)
+    XPacket(const XPacket &packet)
+        : ByteBuffer(packet)
+        , m_nPacketID(packet.m_nPacketID)
     {
     }
 
-    explicit XPacket(uint16_t packID, MessageBuffer &&buffer) : ByteBuffer(std::move(buffer)), m_nPacketID(packID)
+    explicit XPacket(uint16_t packID, MessageBuffer &&buffer)
+        : ByteBuffer(std::move(buffer))
+        , m_nPacketID(packID)
     {
     }
 
@@ -398,6 +406,6 @@ class XPacket : public ByteBuffer
 
     void SetPacketID(uint16_t packID) { m_nPacketID = packID; }
 
-  protected:
+protected:
     uint16_t m_nPacketID;
 };

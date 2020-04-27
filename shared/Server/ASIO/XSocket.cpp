@@ -1,6 +1,8 @@
 #include "XSocket.h"
 
-XSocket::XSocket(boost::asio::ip::tcp::socket &&socket) : Socket(std::move(socket)), _sendBufferSize(4096)
+XSocket::XSocket(boost::asio::ip::tcp::socket &&socket)
+    : Socket(std::move(socket))
+    , _sendBufferSize(4096)
 {
     _headerBuffer.Resize(HEADER_SIZE);
 }
@@ -13,7 +15,7 @@ void XSocket::Start()
         _decryption.SetKey("}h79q~B%al;k'y $E");
     }
     SetSendBufferSize(65536);
-    //AsyncReadWithCallback(&XSocket::InitializeHandler);
+    // AsyncReadWithCallback(&XSocket::InitializeHandler);
     AsyncRead();
 }
 
@@ -59,8 +61,8 @@ void XSocket::SendPacket(XPacket const &packet)
     if (!IsOpen())
         return;
 
-    //if (sPacketLog->CanLogPacket())
-    //sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
+    // if (sPacketLog->CanLogPacket())
+    // sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
 
     _bufferQueue.Enqueue(new EncryptablePacket(packet, IsEncrypted()));
 }
@@ -121,7 +123,7 @@ void XSocket::ReadHandler()
         _headerBuffer.Reset();
         if (result != ReadDataHandlerResult::Ok)
         {
-            //if (result != ReadDataHandlerResult::WaitingForQuery)
+            // if (result != ReadDataHandlerResult::WaitingForQuery)
             //    CloseSocket();
 
             return;
@@ -141,8 +143,7 @@ bool XSocket::ReadHeaderHandler()
 
     if (header->size > 4098)
     {
-        NG_LOG_ERROR("network", "XSocket::ReadHeaderHandler(): client %s sent malformed packet (size: %u, cmd: %u)",
-                     GetRemoteIpAddress().to_string().c_str(), header->size, header->id);
+        NG_LOG_ERROR("network", "XSocket::ReadHeaderHandler(): client %s sent malformed packet (size: %u, cmd: %u)", GetRemoteIpAddress().to_string().c_str(), header->size, header->id);
         return false;
     }
 

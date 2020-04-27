@@ -1,6 +1,9 @@
 #include "SocketMgr.h"
 
-SocketMgr::SocketMgr() : _acceptor(nullptr), _threads(nullptr), _threadCount(0)
+SocketMgr::SocketMgr()
+    : _acceptor(nullptr)
+    , _threads(nullptr)
+    , _threadCount(0)
 {
 }
 

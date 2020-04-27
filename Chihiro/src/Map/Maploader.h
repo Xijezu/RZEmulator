@@ -14,16 +14,16 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
-#include "TerrainSeamlessWorld.h"
-#include "TerrainPropInfo.h"
 #include "MapLocationInfo.h"
 #include "QuadTreeMapInfo.h"
+#include "TerrainPropInfo.h"
+#include "TerrainSeamlessWorld.h"
 
 struct LocationInfoHeader
 {
-    int32_t   nPriority;
+    int32_t nPriority;
     float x;
     float y;
     float z;
@@ -32,31 +32,31 @@ struct LocationInfoHeader
 
 struct NfsHeader
 {
-    std::string szSign;//Data           :   this+0x0, Member, Type: char[0x10], szSign
-    uint32_t        dwVersion;
-    uint32_t        dwEventLocationOffset;
-    uint32_t        dwEventScriptOffset;
-    uint32_t        dwPropScriptOffset;
+    std::string szSign; // Data           :   this+0x0, Member, Type: char[0x10], szSign
+    uint32_t dwVersion;
+    uint32_t dwEventLocationOffset;
+    uint32_t dwEventScriptOffset;
+    uint32_t dwPropScriptOffset;
 };
 
 struct ScriptRegion
 {
-    float       left;
-    float       top;
-    float       right;
-    float       bottom;
+    float left;
+    float top;
+    float right;
+    float bottom;
     std::string szName;
 };
 
 struct ScriptTag
 {
-    int32_t         nTrigger;
+    int32_t nTrigger;
     std::string strFunction;
 };
 
 struct ScriptRegionInfo
 {
-    int32_t                    nRegionIndex;
+    int32_t nRegionIndex;
     std::vector<ScriptTag> vInfoList;
 };
 
@@ -64,48 +64,48 @@ class ByteBuffer;
 
 class Maploader
 {
-    public:
-        static Maploader &Instance()
-        {
-            static Maploader instance;
-            return instance;
-        }
+public:
+    static Maploader &Instance()
+    {
+        static Maploader instance;
+        return instance;
+    }
 
-        ~Maploader() = default;
+    ~Maploader() = default;
 
-        /// Initial map loadig
-        bool LoadMapContent();
+    /// Initial map loadig
+    bool LoadMapContent();
 
-        void UnloadAll() { delete g_qtLocationInfo; }
+    void UnloadAll() { delete g_qtLocationInfo; }
 
-        bool InitMapInfo();
-        X2D::QuadTreeMapInfo *g_qtLocationInfo{nullptr};
+    bool InitMapInfo();
+    X2D::QuadTreeMapInfo *g_qtLocationInfo{nullptr};
 
-        std::vector<ScriptRegion>     m_vRegionList{ };
-        std::vector<ScriptRegionInfo> m_vScriptEvent{ };
-        int32_t                           nCurrentRegionIdx{0};
-    private:
-        void SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32_t LocationId);
-        void RegisterMapLocationInfo(MapLocationInfo location_info);
-        void LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-        void LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float fMapLength);
-        void LoadAttributeFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-        void LoadFieldPropFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-        void LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float fMapLength);
-        void LoadRegionScriptInfo(ByteBuffer &buffer);
+    std::vector<ScriptRegion> m_vRegionList{};
+    std::vector<ScriptRegionInfo> m_vScriptEvent{};
+    int32_t nCurrentRegionIdx{0};
 
-        TerrainSeamlessWorldInfo seamlessWorldInfo{ };
-        TerrainPropInfo          propInfo{ };
+private:
+    void SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32_t LocationId);
+    void RegisterMapLocationInfo(MapLocationInfo location_info);
+    void LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+    void LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float fMapLength);
+    void LoadAttributeFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+    void LoadFieldPropFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
+    void LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float fMapLength);
+    void LoadRegionScriptInfo(ByteBuffer &buffer);
 
-        const int32_t g_nMapWidth  = 700000;
-        const int32_t g_nMapHeight = 1000000;
+    TerrainSeamlessWorldInfo seamlessWorldInfo{};
+    TerrainPropInfo propInfo{};
 
-        float fTileSize{0};
-        float fMapLength{0};
+    const int32_t g_nMapWidth = 700000;
+    const int32_t g_nMapHeight = 1000000;
 
-    protected:
-        Maploader() = default;
+    float fTileSize{0};
+    float fMapLength{0};
 
+protected:
+    Maploader() = default;
 };
 
 #define sMapContent Maploader::Instance()

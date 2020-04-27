@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "DatabaseTemplates.h"
@@ -38,8 +38,8 @@ public:
     };
 
     static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-    static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = BY_BASIC, int32_t level = -1, int32_t enhance = -1,
-                           int32_t flag = -1, int32_t socket_0 = 0, int32_t socket_1 = 0, int32_t socket_2 = 0, int32_t socket_3 = 0, int32_t remain_time = 0);
+    static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = BY_BASIC, int32_t level = -1, int32_t enhance = -1, int32_t flag = -1, int32_t socket_0 = 0,
+        int32_t socket_1 = 0, int32_t socket_2 = 0, int32_t socket_3 = 0, int32_t remain_time = 0);
     static void PendFreeItem(Item *pItem);
 
     Item();

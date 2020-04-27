@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_ITEM_KEEPING_TAKE_DEF(_) \
-	_(simple)(int32_t, keeping_uid)
+#define TS_CS_ITEM_KEEPING_TAKE_DEF(_) _(simple)(int32_t, keeping_uid)
 
 CREATE_PACKET(TS_CS_ITEM_KEEPING_TAKE, 1352);
 

@@ -16,20 +16,20 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <algorithm>
+#include <cctype>
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "Define.h"
 #include "Errors.h"
 
-#include <algorithm>
-#include <string>
-#include <vector>
-#include <list>
-#include <memory>
-#include <cctype>
-
 class Tokenizer
 {
-  public:
+public:
     typedef std::vector<char const *> StorageType;
 
     typedef StorageType::size_type size_type;
@@ -38,7 +38,7 @@ class Tokenizer
     typedef StorageType::reference reference;
     typedef StorageType::const_reference const_reference;
 
-  public:
+public:
     Tokenizer(const std::string &src, char const sep, uint32_t vectorReserve = 0);
 
     ~Tokenizer() { delete[] m_str; }
@@ -53,7 +53,7 @@ class Tokenizer
 
     const_reference operator[](size_type i) const { return m_storage[i]; }
 
-  private:
+private:
     char *m_str;
     StorageType m_storage;
 };
@@ -69,10 +69,7 @@ std::string TimeToTimestampStr(time_t t);
 // See here: http://www.martinbroadhurst.com/case-insensitive-string-comparison-in-c.html
 struct iequal
 {
-    bool operator()(int c1, int c2) const
-    {
-        return std::toupper(c1) == std::toupper(c2);
-    }
+    bool operator()(int c1, int c2) const { return std::toupper(c1) == std::toupper(c2); }
 };
 
 inline bool iequals(const std::string &str1, const std::string &str2)
@@ -84,7 +81,7 @@ inline bool iequals(const std::string &str1, const std::string &str2)
 int32_t irand(int32_t min, int32_t max);
 
 /* Return a random number in the range min..max (inclusive). For reliable results, the difference
-* between max and min should be less than RAND32_MAX.*/
+ * between max and min should be less than RAND32_MAX.*/
 uint32_t urand(uint32_t min, uint32_t max);
 
 /* Return a random number in the range 0 .. RAND32_MAX.*/
@@ -96,13 +93,13 @@ float frand(float min, float max);
 /* Return a random double from 0.0 to 1.0 (exclusive). Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internally (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double.
-*/
+ */
 double rand_norm(void);
 
 /* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internally (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double.
-*/
+ */
 double rand_chance(void);
 
 /* Return true if a random roll fits in the specified chance (range 0-100).*/
@@ -125,31 +122,31 @@ inline void ApplyPercentModFloatVar(float &var, float val, bool apply)
 }
 
 // Percentage calculation
-template <class T, class U>
+template<class T, class U>
 inline T CalculatePct(T base, U pct)
 {
     return T(base * static_cast<float>(pct) / 100.0f);
 }
 
-template <class T, class U>
+template<class T, class U>
 inline T GetPct(T curr, U max)
 {
     return T(curr / static_cast<float>(max) * 100);
 };
 
-template <class T, class U>
+template<class T, class U>
 inline T AddPct(T &base, U pct)
 {
     return base += CalculatePct(base, pct);
 }
 
-template <class T, class U>
+template<class T, class U>
 inline T ApplyPct(T &base, U pct)
 {
     return base = CalculatePct(base, pct);
 }
 
-template <class T>
+template<class T>
 inline T RoundToInterval(T &num, T floor, T ceil)
 {
     return num = std::min(std::max(num, floor), ceil);
@@ -367,15 +364,15 @@ std::string ByteArrayToHexStr(uint8_t const *bytes, uint32_t length, bool revers
 void string_replace(std::string &str, const std::string &from, const std::string &to);
 
 // simple class for not-modifyable list
-template <typename T>
+template<typename T>
 class HookList
 {
     typedef typename std::list<T>::iterator ListIterator;
 
-  private:
+private:
     typename std::list<T> m_list;
 
-  public:
+public:
     HookList<T> &operator+=(T t)
     {
         m_list.push_back(t);
@@ -388,18 +385,9 @@ class HookList
         return *this;
     }
 
-    size_t size()
-    {
-        return m_list.size();
-    }
+    size_t size() { return m_list.size(); }
 
-    ListIterator begin()
-    {
-        return m_list.begin();
-    }
+    ListIterator begin() { return m_list.begin(); }
 
-    ListIterator end()
-    {
-        return m_list.end();
-    }
+    ListIterator end() { return m_list.end(); }
 };

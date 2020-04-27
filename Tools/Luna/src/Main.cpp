@@ -1,12 +1,11 @@
-#include "Common.h"
-#include "NGInit.h"
 #include <iostream>
 
-#include "XSocket.h"
-#include "NetworkThread.h"
+#include "Common.h"
 #include "LunaSession.h"
+#include "NGInit.h"
+#include "NetworkThread.h"
 #include "SingleSocketInstance.h"
-
+#include "XSocket.h"
 #include "cipher/XStrZlibWithSimpleCipherUtil.h"
 
 int main(int argc, char **argv)

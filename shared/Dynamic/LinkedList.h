@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 
 //============================================
@@ -23,13 +23,13 @@ class LinkedListHead;
 
 class LinkedListElement
 {
-  private:
+private:
     friend class LinkedListHead;
 
     LinkedListElement *iNext;
     LinkedListElement *iPrev;
 
-  public:
+public:
     LinkedListElement()
     {
         iNext = NULL;
@@ -104,12 +104,12 @@ class LinkedListElement
 
 class LinkedListHead
 {
-  private:
+private:
     LinkedListElement iFirst;
     LinkedListElement iLast;
     uint32_t iSize;
 
-  public:
+public:
     LinkedListHead()
     {
         // create empty list
@@ -129,15 +129,9 @@ class LinkedListHead
 
     LinkedListElement const *getLast() const { return (isEmpty() ? NULL : iLast.iPrev); }
 
-    void insertFirst(LinkedListElement *pElem)
-    {
-        iFirst.insertAfter(pElem);
-    }
+    void insertFirst(LinkedListElement *pElem) { iFirst.insertAfter(pElem); }
 
-    void insertLast(LinkedListElement *pElem)
-    {
-        iLast.insertBefore(pElem);
-    }
+    void insertLast(LinkedListElement *pElem) { iLast.insertBefore(pElem); }
 
     uint32_t getSize() const
     {
@@ -160,10 +154,10 @@ class LinkedListHead
 
     void decSize() { --iSize; }
 
-    template <class _Ty>
+    template<class _Ty>
     class Iterator
     {
-      public:
+    public:
         typedef std::bidirectional_iterator_tag iterator_category;
         typedef _Ty value_type;
         typedef ptrdiff_t difference_type;
@@ -173,18 +167,17 @@ class LinkedListHead
         typedef _Ty &reference;
         typedef _Ty const &const_reference;
 
-        Iterator() : _Ptr(0)
+        Iterator()
+            : _Ptr(0)
         { // construct with null node pointer
         }
 
-        Iterator(pointer _Pnode) : _Ptr(_Pnode)
+        Iterator(pointer _Pnode)
+            : _Ptr(_Pnode)
         { // construct with node pointer _Pnode
         }
 
-        Iterator &operator=(Iterator const &_Right)
-        {
-            return (*this) = _Right._Ptr;
-        }
+        Iterator &operator=(Iterator const &_Right) { return (*this) = _Right._Ptr; }
 
         Iterator &operator=(const_pointer const &_Right)
         {
@@ -263,7 +256,7 @@ class LinkedListHead
             return (_Ptr);
         }
 
-      protected:
+    protected:
         pointer _Ptr; // pointer to node
     };
 

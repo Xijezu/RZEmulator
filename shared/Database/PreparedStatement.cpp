@@ -13,13 +13,14 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "PreparedStatement.h"
+
 #include "Errors.h"
+#include "Log.h"
 #include "MySQLConnection.h"
 #include "QueryResult.h"
-#include "Log.h"
 
 #ifdef _WIN32 // hack for broken mysql.h not including the correct winsock header for SOCKET definition, fixed in 5.7
 #include <winsock2.h>
@@ -28,8 +29,11 @@
 #include <mysql.h>
 #include <sstream>
 
-PreparedStatement::PreparedStatement(uint32_t index) : m_stmt(NULL),
-                                                       m_index(index) {}
+PreparedStatement::PreparedStatement(uint32_t index)
+    : m_stmt(NULL)
+    , m_index(index)
+{
+}
 
 PreparedStatement::~PreparedStatement() {}
 
@@ -219,9 +223,10 @@ void PreparedStatement::setNull(const uint8_t index)
     statement_data[index].type = TYPE_NULL;
 }
 
-MySQLPreparedStatement::MySQLPreparedStatement(MYSQL_STMT *stmt) : m_stmt(NULL),
-                                                                   m_Mstmt(stmt),
-                                                                   m_bind(NULL)
+MySQLPreparedStatement::MySQLPreparedStatement(MYSQL_STMT *stmt)
+    : m_stmt(NULL)
+    , m_Mstmt(stmt)
+    , m_bind(NULL)
 {
     /// Initialize variable parameters
     m_paramCount = mysql_stmt_param_count(stmt);
@@ -260,7 +265,8 @@ void MySQLPreparedStatement::ClearParameters()
 
 static bool ParamenterIndexAssertFail(uint32_t stmtIndex, uint8_t index, uint32_t paramCount)
 {
-    NG_LOG_ERROR("sql.driver", "Attempted to bind parameter %u%s on a PreparedStatement %u (statement has only %u parameters)", uint32_t(index) + 1, (index == 1 ? "st" : (index == 2 ? "nd" : (index == 3 ? "rd" : "nd"))), stmtIndex, paramCount);
+    NG_LOG_ERROR("sql.driver", "Attempted to bind parameter %u%s on a PreparedStatement %u (statement has only %u parameters)", uint32_t(index) + 1,
+        (index == 1 ? "st" : (index == 2 ? "nd" : (index == 3 ? "rd" : "nd"))), stmtIndex, paramCount);
     return false;
 }
 
@@ -472,7 +478,9 @@ std::string MySQLPreparedStatement::getQueryString(std::string const &sqlPattern
 }
 
 //- Execution
-PreparedStatementTask::PreparedStatementTask(PreparedStatement *stmt, bool async) : m_stmt(stmt), m_result(nullptr)
+PreparedStatementTask::PreparedStatementTask(PreparedStatement *stmt, bool async)
+    : m_stmt(stmt)
+    , m_result(nullptr)
 {
     m_has_result = async; // If it's async, then there's a result
     if (async)

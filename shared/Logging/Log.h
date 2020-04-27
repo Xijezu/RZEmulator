@@ -15,14 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-#include "AsioHacksFwd.h"
-#include "LogCommon.h"
-#include "StringFormat.h"
+ */
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "AsioHacksFwd.h"
+#include "Define.h"
+#include "LogCommon.h"
+#include "StringFormat.h"
 
 class Appender;
 class Logger;
@@ -30,17 +31,17 @@ struct LogMessage;
 
 namespace NGemity
 {
-namespace Asio
-{
-class IoContext;
-}
+    namespace Asio
+    {
+        class IoContext;
+    }
 } // namespace NGemity
 
 #define LOGGER_ROOT "root"
 
 typedef Appender *(*AppenderCreatorFn)(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> &&extraArgs);
 
-template <class AppenderImpl>
+template<class AppenderImpl>
 Appender *CreateAppender(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> &&extraArgs)
 {
     return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const *>>(extraArgs));
@@ -66,13 +67,13 @@ public:
     bool ShouldLog(std::string const &type, LogLevel level) const;
     bool SetLogLevel(std::string const &name, char const *level, bool isLogger = true);
 
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     inline void outMessage(std::string const &filter, LogLevel const level, Format &&fmt, Args &&... args)
     {
         outMessage(filter, level, NGemity::StringFormatTC(std::forward<Format>(fmt), std::forward<Args>(args)...));
     }
 
-    template <typename Format, typename... Args>
+    template<typename Format, typename... Args>
     void outCommand(uint32_t account, Format &&fmt, Args &&... args)
     {
         if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
@@ -85,7 +86,7 @@ public:
 
     void SetRealmId(uint32_t id);
 
-    template <class AppenderImpl>
+    template<class AppenderImpl>
     void RegisterAppender()
     {
         using Index = typename AppenderImpl::TypeIndex;
@@ -126,17 +127,16 @@ private:
 
 #define sLog Log::instance()
 
-#define LOG_EXCEPTION_FREE(filterType__, level__, ...)                                          \
-    {                                                                                           \
-        try                                                                                     \
-        {                                                                                       \
-            sLog->outMessage(filterType__, level__, __VA_ARGS__);                               \
-        }                                                                                       \
-        catch (std::exception & e)                                                              \
-        {                                                                                       \
-            sLog->outMessage("server", LOG_LEVEL_ERROR, "Wrong format occurred (%s) at %s:%u.", \
-                             e.what(), __FILE__, __LINE__);                                     \
-        }                                                                                       \
+#define LOG_EXCEPTION_FREE(filterType__, level__, ...)                                                                         \
+    {                                                                                                                          \
+        try                                                                                                                    \
+        {                                                                                                                      \
+            sLog->outMessage(filterType__, level__, __VA_ARGS__);                                                              \
+        }                                                                                                                      \
+        catch (std::exception & e)                                                                                             \
+        {                                                                                                                      \
+            sLog->outMessage("server", LOG_LEVEL_ERROR, "Wrong format occurred (%s) at %s:%u.", e.what(), __FILE__, __LINE__); \
+        }                                                                                                                      \
     }
 
 #if PLATFORM != PLATFORM_WINDOWS
@@ -157,8 +157,7 @@ void check_args(std::string const &, ...);
     } while (0)
 #else
 #define NG_LOG_MESSAGE_BODY(filterType__, level__, ...)             \
-    __pragma(warning(push))                                         \
-        __pragma(warning(disable : 4127)) do                        \
+    __pragma(warning(push)) __pragma(warning(disable : 4127)) do    \
     {                                                               \
         if (sLog->ShouldLog(filterType__, level__))                 \
             LOG_EXCEPTION_FREE(filterType__, level__, __VA_ARGS__); \
@@ -167,22 +166,16 @@ void check_args(std::string const &, ...);
     __pragma(warning(pop))
 #endif
 
-#define NG_LOG_TRACE(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
+#define NG_LOG_TRACE(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_TRACE, __VA_ARGS__)
 
-#define NG_LOG_DEBUG(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define NG_LOG_DEBUG(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_DEBUG, __VA_ARGS__)
 
-#define NG_LOG_INFO(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
+#define NG_LOG_INFO(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_INFO, __VA_ARGS__)
 
-#define NG_LOG_WARN(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
+#define NG_LOG_WARN(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_WARN, __VA_ARGS__)
 
-#define NG_LOG_ERROR(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
+#define NG_LOG_ERROR(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
-#define NG_LOG_FATAL(filterType__, ...) \
-    NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
+#define NG_LOG_FATAL(filterType__, ...) NG_LOG_MESSAGE_BODY(filterType__, LOG_LEVEL_FATAL, __VA_ARGS__)
 
 ////////////////////////////////////////////////////////////////////

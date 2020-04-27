@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "FieldPropManager.h"
+
 #include "ObjectMgr.h"
 #include "World.h"
 
@@ -58,15 +59,13 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
  * Do **not** delete the pointer here, this function is called
  * before the fieldprop gets deleted by the MemoryPool class!!!
  *
-*/
+ */
 void FieldPropManager::onFieldPropDelete(FieldProp *prop)
 {
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
 
-        auto pos = std::find_if(m_vExpireObject.begin(),
-                                m_vExpireObject.end(),
-                                [&prop](const FieldProp *fp) { return fp->GetHandle() == prop->GetHandle(); });
+        auto pos = std::find_if(m_vExpireObject.begin(), m_vExpireObject.end(), [&prop](const FieldProp *fp) { return fp->GetHandle() == prop->GetHandle(); });
         if (pos != m_vExpireObject.end())
         {
             m_vExpireObject.erase(pos);

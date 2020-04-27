@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_COMPETE_ANSWER_DEF(_) \
-	_(simple)(int8_t, compete_type) \
-	_(simple)(int8_t, answer_type)
+#define TS_CS_COMPETE_ANSWER_DEF(_) _(simple)(int8_t, compete_type) _(simple)(int8_t, answer_type)
 
 CREATE_PACKET(TS_CS_COMPETE_ANSWER, 4502);
 

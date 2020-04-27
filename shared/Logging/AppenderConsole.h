@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Appender.h"
 
 enum ColorTypes
@@ -40,7 +40,7 @@ const uint8_t MaxColors = uint8_t(WHITE) + 1;
 
 class AppenderConsole : public Appender
 {
-  public:
+public:
     typedef std::integral_constant<AppenderType, APPENDER_CONSOLE>::type TypeIndex;
 
     AppenderConsole(uint8_t _id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs);
@@ -48,7 +48,7 @@ class AppenderConsole : public Appender
 
     AppenderType getType() const override { return TypeIndex::value; }
 
-  private:
+private:
     void SetColor(bool stdout_stream, ColorTypes color);
     void ResetColor(bool stdout_stream);
     void _write(LogMessage const *message) override;

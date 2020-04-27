@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_UNSUMMON_DEF(_) \
-	_(simple)(uint32_t, summon_handle)
+#define TS_SC_UNSUMMON_DEF(_) _(simple)(uint32_t, summon_handle)
 
 CREATE_PACKET(TS_SC_UNSUMMON, 305);
 

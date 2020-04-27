@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "Skill.h"
@@ -22,7 +22,7 @@
 
 class SkillProp : public WorldObject
 {
-  public:
+public:
     static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio);
     static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
     SkillProp() = delete;
@@ -36,7 +36,7 @@ class SkillProp : public WorldObject
     bool IsSkillProp() const override;
     void PendRemove();
 
-  protected:
+protected:
     void INIT_AREA_EFFECT_MAGIC_DAMAGE();
     void INIT_AREA_EFFECT_HEAL();
     void INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP();
@@ -54,7 +54,7 @@ class SkillProp : public WorldObject
     void FIRE_TRAP_DAMAGE(Unit *pCaster);
     void FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster);
 
-  private:
+private:
     explicit SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio);
 
     struct _SKILL_PROP_INFO

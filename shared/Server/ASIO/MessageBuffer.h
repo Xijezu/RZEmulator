@@ -14,16 +14,16 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class MessageBuffer
 {
     typedef std::vector<uint8_t>::size_type size_type;
 
-  public:
+public:
     MessageBuffer();
     ~MessageBuffer() = default;
 
@@ -77,7 +77,7 @@ class MessageBuffer
         return *this;
     }
 
-  private:
+private:
     size_type _wpos;
     size_type _rpos;
     std::vector<uint8_t> _storage;

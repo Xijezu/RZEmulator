@@ -13,18 +13,19 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "DatabaseWorker.h"
-#include "SQLOperation.h"
+
 #include "ProducerConsumerQueue.h"
+#include "SQLOperation.h"
 
 DatabaseWorker::DatabaseWorker(ProducerConsumerQueue<SQLOperation *> *newQueue, MySQLConnection *connection)
 {
-    _connection       = connection;
-    _queue            = newQueue;
+    _connection = connection;
+    _queue = newQueue;
     _cancelationToken = false;
-    _workerThread     = std::thread(&DatabaseWorker::WorkerThread, this);
+    _workerThread = std::thread(&DatabaseWorker::WorkerThread, this);
 }
 
 DatabaseWorker::~DatabaseWorker()

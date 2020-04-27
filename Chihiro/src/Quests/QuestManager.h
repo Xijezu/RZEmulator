@@ -14,54 +14,55 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Common.h"
-#include "Quest.h"
+ */
 #include <functional>
 #include <map>
 
+#include "Common.h"
+#include "Quest.h"
+
 class QuestManager
 {
-    public:
-        friend class Player;
-        QuestManager() = default;
-        ~QuestManager() = default;
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        QuestManager(const QuestManager &) = delete;
-        QuestManager &operator=(const QuestManager &) = delete;
+public:
+    friend class Player;
+    QuestManager() = default;
+    ~QuestManager() = default;
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    QuestManager(const QuestManager &) = delete;
+    QuestManager &operator=(const QuestManager &) = delete;
 
-        bool DoEachActiveQuest(const std::function<void(Quest *)> &fn);
-        void SetMaxQuestID(int32_t id);
-        bool AddQuest(Quest *quest);
+    bool DoEachActiveQuest(const std::function<void(Quest *)> &fn);
+    void SetMaxQuestID(int32_t id);
+    bool AddQuest(Quest *quest);
 
-        void AddRandomQuestInfo(int32_t code, int32_t key[], int32_t value[], bool is_dropped) {};
-        bool StartQuest(int32_t code, int32_t nStartID);
-        bool EndQuest(Quest *pQuest);
-        Quest *FindQuest(int32_t code);
-        bool IsFinishedQuest(int32_t code);
-        bool IsTakeableQuestItem(int32_t code);
-        void GetRelatedQuest(std::vector<Quest *> &vQuestList, int32_t flag);
-        void GetRelatedQuestByItem(int32_t code, std::vector<Quest *> &vQuest, int32_t flag);
-        void GetRelatedQuestByMonster(int32_t nMonsterID, std::vector<Quest *> &vQuest, int32_t flag);
-        void UpdateQuestStatusByItemCount(int32_t code, int64_t count);
-        void UpdateQuestStatusByMonsterKill(int32_t nMonsterID);
-        void UpdateQuestStatusBySkillLevel(int32_t nSkillID, int32_t nSkillLevel);
-        void UpdateQuestStatusByJobLevel(int32_t nJobDepth, int32_t nJobLevel);
-        void UpdateQuestStatusByParameter(int32_t parameter_id, int32_t value);
-        void PopFromActiveQuest(Quest *pQuest);
-        bool IsStartableQuest(int32_t code);
-        void SetDropFlagToRandomQuestInfo(int32_t code);
-        bool HasRandomQuestInfo(int32_t code);
+    void AddRandomQuestInfo(int32_t code, int32_t key[], int32_t value[], bool is_dropped){};
+    bool StartQuest(int32_t code, int32_t nStartID);
+    bool EndQuest(Quest *pQuest);
+    Quest *FindQuest(int32_t code);
+    bool IsFinishedQuest(int32_t code);
+    bool IsTakeableQuestItem(int32_t code);
+    void GetRelatedQuest(std::vector<Quest *> &vQuestList, int32_t flag);
+    void GetRelatedQuestByItem(int32_t code, std::vector<Quest *> &vQuest, int32_t flag);
+    void GetRelatedQuestByMonster(int32_t nMonsterID, std::vector<Quest *> &vQuest, int32_t flag);
+    void UpdateQuestStatusByItemCount(int32_t code, int64_t count);
+    void UpdateQuestStatusByMonsterKill(int32_t nMonsterID);
+    void UpdateQuestStatusBySkillLevel(int32_t nSkillID, int32_t nSkillLevel);
+    void UpdateQuestStatusByJobLevel(int32_t nJobDepth, int32_t nJobLevel);
+    void UpdateQuestStatusByParameter(int32_t parameter_id, int32_t value);
+    void PopFromActiveQuest(Quest *pQuest);
+    bool IsStartableQuest(int32_t code);
+    void SetDropFlagToRandomQuestInfo(int32_t code);
+    bool HasRandomQuestInfo(int32_t code);
 
-        QuestEventHandler *m_pHandler{nullptr};
+    QuestEventHandler *m_pHandler{nullptr};
 
-    private:
-        std::map<int, bool>          m_hsFinishedQuest{ };
-        std::vector<Quest *>         m_vActiveQuest{ };
-        int32_t                          m_QuestIndex{0};
-        std::vector<RandomQuestInfo> m_vRandomQuestInfo{ };
+private:
+    std::map<int, bool> m_hsFinishedQuest{};
+    std::vector<Quest *> m_vActiveQuest{};
+    int32_t m_QuestIndex{0};
+    std::vector<RandomQuestInfo> m_vRandomQuestInfo{};
 
-    protected:
-        int32_t allocQuestID();
+protected:
+    int32_t allocQuestID();
 };

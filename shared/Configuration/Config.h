@@ -15,51 +15,52 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include <string>
 #include <vector>
 
+#include "Define.h"
+
 class ConfigMgr
 {
-  ConfigMgr() = default;
-  ConfigMgr(ConfigMgr const &) = delete;
-  ConfigMgr &operator=(ConfigMgr const &) = delete;
-  ~ConfigMgr() = default;
+    ConfigMgr() = default;
+    ConfigMgr(ConfigMgr const &) = delete;
+    ConfigMgr &operator=(ConfigMgr const &) = delete;
+    ~ConfigMgr() = default;
 
 public:
-  struct CachedConfig
-  {
-    int packetVersion;
-  };
+    struct CachedConfig
+    {
+        int packetVersion;
+    };
 
 public:
-  /// Method used only for loading main configuration files (bnetserver.conf and worldserver.conf)
-  bool LoadInitial(std::string const &file, std::vector<std::string> args, std::string &error);
+    /// Method used only for loading main configuration files (bnetserver.conf and worldserver.conf)
+    bool LoadInitial(std::string const &file, std::vector<std::string> args, std::string &error);
 
-  static ConfigMgr *instance();
+    static ConfigMgr *instance();
 
-  bool Reload(std::string &error);
+    bool Reload(std::string &error);
 
-  std::string GetStringDefault(std::string const &name, const std::string &def) const;
-  bool GetBoolDefault(std::string const &name, bool def) const;
-  int GetIntDefault(std::string const &name, int def) const;
-  float GetFloatDefault(std::string const &name, float def) const;
-  void SetPacketVersion(int packetVersion) { cachedConfig.packetVersion = packetVersion; }
-  int GetPacketVersion() const { return cachedConfig.packetVersion; }
+    std::string GetStringDefault(std::string const &name, const std::string &def) const;
+    bool GetBoolDefault(std::string const &name, bool def) const;
+    int GetIntDefault(std::string const &name, int def) const;
+    float GetFloatDefault(std::string const &name, float def) const;
+    void SetPacketVersion(int packetVersion) { cachedConfig.packetVersion = packetVersion; }
+    int GetPacketVersion() const { return cachedConfig.packetVersion; }
 
-  std::string const &GetFilename();
-  std::vector<std::string> const &GetArguments() const;
-  std::vector<std::string> GetKeysByString(std::string const &name);
-  std::string GetCorrectPath(std::string path);
+    std::string const &GetFilename();
+    std::vector<std::string> const &GetArguments() const;
+    std::vector<std::string> GetKeysByString(std::string const &name);
+    std::string GetCorrectPath(std::string path);
 
-  const CachedConfig &getCachedConfig() { return cachedConfig; }
+    const CachedConfig &getCachedConfig() { return cachedConfig; }
 
 private:
-  template <class T>
-  T GetValueDefault(std::string const &name, T def) const;
+    template<class T>
+    T GetValueDefault(std::string const &name, T def) const;
 
-  CachedConfig cachedConfig;
+    CachedConfig cachedConfig;
 };
 
 #define sConfigMgr ConfigMgr::instance()

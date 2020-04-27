@@ -14,94 +14,101 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
-#include <atomic>
 #include <type_traits>
 
 template<typename T>
 class ProducerConsumerQueue
 {
-    private:
-        std::mutex              _queueLock;
-        std::queue<T>           _queue;
-        std::condition_variable _condition;
-        std::atomic<bool>       _shutdown;
+private:
+    std::mutex _queueLock;
+    std::queue<T> _queue;
+    std::condition_variable _condition;
+    std::atomic<bool> _shutdown;
 
-    public:
+public:
+    ProducerConsumerQueue<T>()
+        : _shutdown(false)
+    {
+    }
 
-        ProducerConsumerQueue<T>() : _shutdown(false) {}
+    void Push(const T &value)
+    {
+        std::lock_guard<std::mutex> lock(_queueLock);
+        _queue.push(std::move(value));
 
-        void Push(const T &value)
+        _condition.notify_one();
+    }
+
+    bool Empty()
+    {
+        std::lock_guard<std::mutex> lock(_queueLock);
+
+        return _queue.empty();
+    }
+
+    bool Pop(T &value)
+    {
+        std::lock_guard<std::mutex> lock(_queueLock);
+
+        if (_queue.empty() || _shutdown)
+            return false;
+
+        value = _queue.front();
+
+        _queue.pop();
+
+        return true;
+    }
+
+    void WaitAndPop(T &value)
+    {
+        std::unique_lock<std::mutex> lock(_queueLock);
+
+        // we could be using .wait(lock, predicate) overload here but it is broken
+        // https://connect.microsoft.com/VisualStudio/feedback/details/1098841
+        while (_queue.empty() && !_shutdown)
+            _condition.wait(lock);
+
+        if (_queue.empty() || _shutdown)
+            return;
+
+        value = _queue.front();
+
+        _queue.pop();
+    }
+
+    void Cancel()
+    {
+        std::unique_lock<std::mutex> lock(_queueLock);
+
+        while (!_queue.empty())
         {
-            std::lock_guard<std::mutex> lock(_queueLock);
-            _queue.push(std::move(value));
+            T &value = _queue.front();
 
-            _condition.notify_one();
-        }
-
-        bool Empty()
-        {
-            std::lock_guard<std::mutex> lock(_queueLock);
-
-            return _queue.empty();
-        }
-
-        bool Pop(T &value)
-        {
-            std::lock_guard<std::mutex> lock(_queueLock);
-
-            if (_queue.empty() || _shutdown)
-                return false;
-
-            value = _queue.front();
+            DeleteQueuedObject(value);
 
             _queue.pop();
-
-            return true;
         }
 
-        void WaitAndPop(T &value)
-        {
-            std::unique_lock<std::mutex> lock(_queueLock);
+        _shutdown = true;
 
-            // we could be using .wait(lock, predicate) overload here but it is broken
-            // https://connect.microsoft.com/VisualStudio/feedback/details/1098841
-            while (_queue.empty() && !_shutdown)
-                _condition.wait(lock);
+        _condition.notify_all();
+    }
 
-            if (_queue.empty() || _shutdown)
-                return;
+private:
+    template<typename E = T>
+    typename std::enable_if<std::is_pointer<E>::value>::type DeleteQueuedObject(E &obj)
+    {
+        delete obj;
+    }
 
-            value = _queue.front();
-
-            _queue.pop();
-        }
-
-        void Cancel()
-        {
-            std::unique_lock<std::mutex> lock(_queueLock);
-
-            while (!_queue.empty())
-            {
-                T &value = _queue.front();
-
-                DeleteQueuedObject(value);
-
-                _queue.pop();
-            }
-
-            _shutdown = true;
-
-            _condition.notify_all();
-        }
-
-    private:
-        template<typename E = T>
-        typename std::enable_if<std::is_pointer<E>::value>::type DeleteQueuedObject(E &obj) { delete obj; }
-
-        template<typename E = T>
-        typename std::enable_if<!std::is_pointer<E>::value>::type DeleteQueuedObject(E const & /*packet*/) {}
+    template<typename E = T>
+    typename std::enable_if<!std::is_pointer<E>::value>::type DeleteQueuedObject(E const & /*packet*/)
+    {
+    }
 };

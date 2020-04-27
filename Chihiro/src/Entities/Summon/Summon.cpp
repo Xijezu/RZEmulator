@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Summon.h"
+
 #include "ClientPackets.h"
 #include "DatabaseEnv.h"
 #include "MemPool.h"
@@ -34,7 +35,8 @@ void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player *pPlayer)
     pEnterPct.fill(pSummon->GetName(), 19);
 };
 
-Summon::Summon(uint32_t pHandle, uint32_t pIdx) : Unit(true)
+Summon::Summon(uint32_t pHandle, uint32_t pIdx)
+    : Unit(true)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -70,8 +72,7 @@ Summon *Summon::AllocSummon(Player *pMaster, uint32_t pCode)
 SUMMON_RIDE_TYPE Summon::GetRidingInfo()
 {
 
-    return m_tSummonBase != nullptr ? static_cast<SUMMON_RIDE_TYPE>(m_tSummonBase->is_riding_only)
-                                    : SUMMON_RIDE_TYPE::CANT_RIDING;
+    return m_tSummonBase != nullptr ? static_cast<SUMMON_RIDE_TYPE>(m_tSummonBase->is_riding_only) : SUMMON_RIDE_TYPE::CANT_RIDING;
 }
 
 void Summon::SetSummonInfo(int32_t idx)
@@ -128,10 +129,10 @@ void Summon::DB_UpdateSummon(Player * /*pMaster*/, Summon *pSummon)
 void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_SUMMON);
-    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID));      // handle
-    stmt->setInt32(1, 0);                                            // account_id
-    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID));      // owner_id
-    stmt->setInt64(3, pSummon->GetSummonCode());                     // summon_id
+    stmt->setInt32(0, pSummon->GetUInt32Value(UNIT_FIELD_UID)); // handle
+    stmt->setInt32(1, 0); // account_id
+    stmt->setInt32(2, pMaster->GetUInt32Value(UNIT_FIELD_UID)); // owner_id
+    stmt->setInt64(3, pSummon->GetSummonCode()); // summon_id
     stmt->setInt64(4, pSummon->m_pItem->GetItemInstance().GetUID()); // card_uid
     stmt->setUInt64(5, pSummon->GetEXP());
     stmt->setInt32(6, pSummon->GetJP());
@@ -158,8 +159,7 @@ void Summon::processWalk(uint32_t t)
     ArMoveVector tmp_mv{*dynamic_cast<ArMoveVector *>(this)};
     tmp_mv.Step(t);
     if ((tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
-        (tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
-        !tmp_mv.bIsMoving)
+        (tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || !tmp_mv.bIsMoving)
     {
         if (bIsMoving && IsInWorld())
         {
@@ -168,9 +168,7 @@ void Summon::processWalk(uint32_t t)
     }
 }
 
-void Summon::OnAfterReadSummon()
-{
-}
+void Summon::OnAfterReadSummon() {}
 
 void Summon::onExpChange()
 {
@@ -296,7 +294,8 @@ bool Summon::DoEvolution()
             evoPct.code = m_tSummonBase->id;
             if (IsInWorld())
             {
-                sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
+                sWorld.Broadcast(
+                    (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
             }
             else
             {
@@ -596,7 +595,8 @@ void Summon::onUpdateState(State *state, bool bIsExpire)
 
 struct applyPassiveSkillEffectFunctor : SkillFunctor
 {
-    applyPassiveSkillEffectFunctor(Summon *pSummon) : m_pSummon(pSummon)
+    applyPassiveSkillEffectFunctor(Summon *pSummon)
+        : m_pSummon(pSummon)
     {
     }
 
@@ -608,10 +608,10 @@ struct applyPassiveSkillEffectFunctor : SkillFunctor
         {
             int32_t nMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
             int32_t nMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
-            //int32_t nMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            // int32_t nMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
             int32_t nHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
             int32_t nMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
-            //int32_t nSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+            // int32_t nSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
 
             m_pSummon->SetMaxHealth(m_pSummon->GetMaxHealth() + nMaxHPInc);
             m_pSummon->SetMaxMana(m_pSummon->GetMaxMana() + nMaxMPInc);
@@ -640,7 +640,8 @@ void Summon::applyPassiveSkillEffect()
 
 struct applyPassiveSkillAmplifyEffectFunctor : SkillFunctor
 {
-    applyPassiveSkillAmplifyEffectFunctor(Summon *pSummon) : m_pSummon(pSummon)
+    applyPassiveSkillAmplifyEffectFunctor(Summon *pSummon)
+        : m_pSummon(pSummon)
     {
     }
 
@@ -652,10 +653,10 @@ struct applyPassiveSkillAmplifyEffectFunctor : SkillFunctor
         {
             float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
             float fMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
-            //float fMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            // float fMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
             float fHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
             float fMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
-            //float fSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+            // float fSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
 
             m_pSummon->SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + fMaxHPInc);
             m_pSummon->SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + fMaxMPInc);
@@ -696,7 +697,8 @@ void Summon::applyStatByState()
 
 struct onApplyStatFunctor : SkillFunctor
 {
-    onApplyStatFunctor(Summon *pSummon) : m_pSummon(pSummon)
+    onApplyStatFunctor(Summon *pSummon)
+        : m_pSummon(pSummon)
     {
     }
 

@@ -13,11 +13,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "TerrainSeamlessWorld.h"
+
 #include <fstream>
+
 #include <boost/filesystem.hpp>
+
 #include "Config.h"
 #include "Util.h"
 
@@ -25,22 +28,22 @@ namespace fs = boost::filesystem;
 
 bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileCheck)
 {
-    int32_t   nWorldMapID          = 0;
-    int32_t   nMapIndex            = 0;
-    int32_t   nMapLayer            = 0;
-    int32_t   nTileCountPerSegment = 0;
-    int32_t   nSegmentCountPerMap  = 0;
-    float fTileLength          = 0.0f;
-    float pStream              = 0.0f;
-    int32_t   nMapCountX           = 0;
-    int32_t   nMapCountY           = 0;
+    int32_t nWorldMapID = 0;
+    int32_t nMapIndex = 0;
+    int32_t nMapLayer = 0;
+    int32_t nTileCountPerSegment = 0;
+    int32_t nSegmentCountPerMap = 0;
+    float fTileLength = 0.0f;
+    float pStream = 0.0f;
+    int32_t nMapCountX = 0;
+    int32_t nMapCountY = 0;
 
-    std::vector<std::string> TextLines{ };
+    std::vector<std::string> TextLines{};
 
-    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/"+szFilename));
+    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/NewMap/" + szFilename));
 
     std::ifstream ifstream(configFile.c_str(), std::ios::in);
-    std::string   row;
+    std::string row;
     while (std::getline(ifstream, row))
     {
         if (!row.empty() || row[0] == ';')
@@ -92,10 +95,10 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
                 return false;
 
             nWorldMapID = std::stoi(vars[4]);
-            nMapLayer   = std::stoi(vars[2]);
-            nMapIndex   = std::stoi(vars[0]) + (nMapCountX * std::stoi(vars[1]));
-            FilenameMapInfo fnmi{ };
-            fnmi.m_nWorldID       = nWorldMapID;
+            nMapLayer = std::stoi(vars[2]);
+            nMapIndex = std::stoi(vars[0]) + (nMapCountX * std::stoi(vars[1]));
+            FilenameMapInfo fnmi{};
+            fnmi.m_nWorldID = nWorldMapID;
             fnmi.m_strMapFileName = std::string(vars[3]);
             if (!m_FileNameMap.count(nMapIndex))
                 m_FileNameMap.emplace(nMapIndex, fnmi);
@@ -105,11 +108,11 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
     if (fTileLength <= 0.0f || nTileCountPerSegment <= 0 || nSegmentCountPerMap <= 0 || m_FileNameMap.empty())
         return false;
 
-    m_fTileLength          = fTileLength;
+    m_fTileLength = fTileLength;
     m_nTileCountPerSegment = nTileCountPerSegment;
-    m_nSegmentCountPerMap  = nSegmentCountPerMap;
-    m_nMapLayer            = nMapLayer;
-    m_sizMapCount.width  = nMapCountX;
+    m_nSegmentCountPerMap = nSegmentCountPerMap;
+    m_nMapLayer = nMapLayer;
+    m_sizMapCount.width = nMapCountX;
     m_sizMapCount.height = nMapCountY;
     if (pStream > 0.0f)
         m_fFOV = pStream;

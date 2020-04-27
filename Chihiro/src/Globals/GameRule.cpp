@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "GameRule.h"
+
 #include "World.h"
 
 int32_t GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
@@ -29,8 +30,8 @@ float GameRule::GetItemValue(float item_current_value, int32_t item_rank_value, 
     //-,*,+
     float v8 = (item_current_value - item_rank_value) * ilp;
     return v8 + item_rank_value;
-    //float f1 = item_current_value * item_rank_value;
-    //return f1 * ilp;
+    // float f1 = item_current_value * item_rank_value;
+    // return f1 * ilp;
 }
 
 /*
@@ -39,7 +40,7 @@ float GameRule::GetItemValue(float item_current_value, int32_t item_rank_value, 
  * but for some odd reasons I always got odd results
  * finally I tried to reconstruct it more or less 1:1 and this is the result
  * I fricking hate IDAs pseudocode plugin...
-*/
+ */
 float GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level)
 {
     float result = 0;
@@ -54,7 +55,7 @@ float GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, i
     {
         int64_t B = 500ll;
 
-        int64_t n = 10000ll * (recommended - limit);                // 0
+        int64_t n = 10000ll * (recommended - limit); // 0
         int64_t resulta = 10000ll * (recommended - creature_level); // 0
         resulta /= n;
 

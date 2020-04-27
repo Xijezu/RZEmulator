@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_BIND_SKILLCARD_DEF(_) \
-	_(simple)(uint32_t, item_handle) \
-	_(simple)(uint32_t, target_handle)
+#define TS_CS_BIND_SKILLCARD_DEF(_) _(simple)(uint32_t, item_handle) _(simple)(uint32_t, target_handle)
 
 CREATE_PACKET(TS_CS_BIND_SKILLCARD, 284);
 

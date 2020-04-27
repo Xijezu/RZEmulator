@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "ItemFields.h"
@@ -29,7 +29,11 @@ struct PARTY_DAMAGE
         nLevel = 0;
     }
 
-    PARTY_DAMAGE(int32_t _damage, int32_t _level) : nDamage(_damage), nLevel(_level) {}
+    PARTY_DAMAGE(int32_t _damage, int32_t _level)
+        : nDamage(_damage)
+        , nLevel(_level)
+    {
+    }
     int32_t nDamage;
     int32_t nLevel;
 };
@@ -149,7 +153,13 @@ struct takePriority
 
 struct HateTag
 {
-    HateTag(uint32_t _uid, uint32_t _time, int32_t _hate) : uid(_uid), nTime(_time), nHate(_hate), bIsActive(true), nBadAttackCount(0), nLastMaxHate(0)
+    HateTag(uint32_t _uid, uint32_t _time, int32_t _hate)
+        : uid(_uid)
+        , nTime(_time)
+        , nHate(_hate)
+        , bIsActive(true)
+        , nBadAttackCount(0)
+        , nLastMaxHate(0)
     {
     }
 
@@ -217,7 +227,8 @@ struct MonsterRespawnInfo
 
     MonsterRespawnInfo() = default;
 
-    MonsterRespawnInfo(uint32_t _id, uint32_t _interval, float _left, float _top, float _right, float _bottom, uint32_t _monster_id, uint32_t _max_num, uint32_t _inc, bool _is_wandering, int32_t _way_point_id)
+    MonsterRespawnInfo(
+        uint32_t _id, uint32_t _interval, float _left, float _top, float _right, float _bottom, uint32_t _monster_id, uint32_t _max_num, uint32_t _inc, bool _is_wandering, int32_t _way_point_id)
     {
         id = _id;
         interval = _interval;

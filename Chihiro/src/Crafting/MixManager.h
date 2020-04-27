@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #pragma once
 
@@ -25,21 +25,21 @@ constexpr int32_t MAX_SUB_MATERIAL_COUNT = 9;
 
 enum MIX_TYPE
 {
-    MIX_ENHANCE = 101,                        //0x65
-    MIX_ENHANCE_SKILL_CARD = 102,             //0x66
-    MIX_ENHANCE_WITHOUT_FAIL = 103,           //0x67
-    MIX_SET_LEVEL = 201,                      //0xC9
-    MIX_SET_LEVEL_CREATE_ITEM = 202,          //0xCA
-    MIX_SET_LEVEL_SET_FLAG = 211,             //0xD3
-    MIX_SET_LEVEL_SET_FLAG_CREATE_ITEM = 212, //0xD4
-    MIX_ADD_LEVEL = 301,                      //0x12D
-    MIX_ADD_LEVEL_CREATE_ITEM = 302,          //0x12E
-    MIX_ADD_LEVEL_SET_FLAG = 311,             //0x137
-    MIX_ADD_LEVEL_SET_FLAG_CREATE_ITEM = 312, //0x138
-    MIX_RECYCLE = 401,                        //0x191
-    MIX_RECYCLE_ENHANCE = 402,                //0x192
-    MIX_RESTORE_ENHANCE_SET_FLAG = 501,       //0x1F5
-    MIX_CREATE_ITEM = 601,                    //0x259
+    MIX_ENHANCE = 101, // 0x65
+    MIX_ENHANCE_SKILL_CARD = 102, // 0x66
+    MIX_ENHANCE_WITHOUT_FAIL = 103, // 0x67
+    MIX_SET_LEVEL = 201, // 0xC9
+    MIX_SET_LEVEL_CREATE_ITEM = 202, // 0xCA
+    MIX_SET_LEVEL_SET_FLAG = 211, // 0xD3
+    MIX_SET_LEVEL_SET_FLAG_CREATE_ITEM = 212, // 0xD4
+    MIX_ADD_LEVEL = 301, // 0x12D
+    MIX_ADD_LEVEL_CREATE_ITEM = 302, // 0x12E
+    MIX_ADD_LEVEL_SET_FLAG = 311, // 0x137
+    MIX_ADD_LEVEL_SET_FLAG_CREATE_ITEM = 312, // 0x138
+    MIX_RECYCLE = 401, // 0x191
+    MIX_RECYCLE_ENHANCE = 402, // 0x192
+    MIX_RESTORE_ENHANCE_SET_FLAG = 501, // 0x1F5
+    MIX_CREATE_ITEM = 601, // 0x259
 };
 
 struct EnhanceInfo
@@ -197,7 +197,8 @@ private:
     std::vector<EnhanceInfo> m_vEnhanceInfo{};
     /// \brief Check if a mix makes sense
     bool CompatibilityCheck(const int32_t *nSubMaterialCount, std::vector<Item *> &pSubItem, Item *pItem);
-    bool post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount);
+    bool post_arrange_check_material_info(
+        MaterialInfo &info, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount);
 
 protected:
     MixManager() = default;

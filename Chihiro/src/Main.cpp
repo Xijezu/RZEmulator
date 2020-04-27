@@ -13,7 +13,9 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+
+#include <boost/asio/signal_set.hpp>
 
 #include "AuthNetwork.h"
 #include "CliThread.h"
@@ -28,7 +30,6 @@
 #include "SystemConfigs.h"
 #include "WorldSession.h"
 #include "XSocketMgr.h"
-#include <boost/asio/signal_set.hpp>
 
 #ifndef _CHIHIRO_CORE_CONFIG
 #define _CHIHIRO_CORE_CONFIG "chihiro.conf"
@@ -185,8 +186,7 @@ bool StartDB()
     MySQL::Library_Init();
 
     DatabaseLoader loader("server.worldserver", DatabaseLoader::DATABASE_NONE);
-    loader.AddDatabase(GameDatabase, "Game")
-        .AddDatabase(CharacterDatabase, "Character");
+    loader.AddDatabase(GameDatabase, "Game").AddDatabase(CharacterDatabase, "Character");
 
     if (!loader.Load())
     {
@@ -244,8 +244,8 @@ void ShutdownCLIThread(std::thread *cliThread)
             if (errorCode != ERROR_NOT_FOUND)
             {
                 LPSTR errorBuffer;
-                DWORD numCharsWritten = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                                      nullptr, errorCode, 0, (LPTSTR)&errorBuffer, 0, nullptr);
+                DWORD numCharsWritten =
+                    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, errorCode, 0, (LPTSTR)&errorBuffer, 0, nullptr);
                 if (!numCharsWritten)
                     errorBuffer = "Unknown error";
 

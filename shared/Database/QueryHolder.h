@@ -14,38 +14,43 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "SQLOperation.h"
 
 class SQLQueryHolder
 {
-        friend class SQLQueryHolderTask;
-    private:
-        std::vector<std::pair<PreparedStatement *, PreparedQueryResult>> m_queries;
-    public:
-        SQLQueryHolder() {}
+    friend class SQLQueryHolderTask;
 
-        virtual ~SQLQueryHolder();
-        bool SetPreparedQuery(size_t index, PreparedStatement *stmt);
-        void SetSize(size_t size);
-        PreparedQueryResult GetPreparedResult(size_t index);
-        void SetPreparedResult(size_t index, PreparedResultSet *result);
+private:
+    std::vector<std::pair<PreparedStatement *, PreparedQueryResult>> m_queries;
+
+public:
+    SQLQueryHolder() {}
+
+    virtual ~SQLQueryHolder();
+    bool SetPreparedQuery(size_t index, PreparedStatement *stmt);
+    void SetSize(size_t size);
+    PreparedQueryResult GetPreparedResult(size_t index);
+    void SetPreparedResult(size_t index, PreparedResultSet *result);
 };
 
 class SQLQueryHolderTask : public SQLOperation
 {
-    private:
-        SQLQueryHolder *m_holder;
-        QueryResultHolderPromise m_result;
-        bool                     m_executed;
+private:
+    SQLQueryHolder *m_holder;
+    QueryResultHolderPromise m_result;
+    bool m_executed;
 
-    public:
-        SQLQueryHolderTask(SQLQueryHolder *holder)
-                : m_holder(holder), m_executed(false) {}
+public:
+    SQLQueryHolderTask(SQLQueryHolder *holder)
+        : m_holder(holder)
+        , m_executed(false)
+    {
+    }
 
-        ~SQLQueryHolderTask();
+    ~SQLQueryHolderTask();
 
-        bool Execute() override;
+    bool Execute() override;
 
-        QueryResultHolderFuture GetFuture() { return m_result.get_future(); }
+    QueryResultHolderFuture GetFuture() { return m_result.get_future(); }
 };

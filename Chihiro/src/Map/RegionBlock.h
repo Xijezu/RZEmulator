@@ -14,17 +14,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
-#include "SharedMutex.h"
 #include "Region.h"
+#include "SharedMutex.h"
 
 struct RegionBase
 {
-    RegionBase()
-    {
-        m_Regions = std::vector<Region *>(100 * 100, nullptr);
-    }
+    RegionBase() { m_Regions = std::vector<Region *>(100 * 100, nullptr); }
 
     ~RegionBase()
     {
@@ -46,63 +43,60 @@ struct RegionBase
 
 class RegionBlock
 {
-    public:
-        RegionBlock()
-        {
-            m_RegionBases = std::vector<RegionBase *>(256, nullptr);
-        }
+public:
+    RegionBlock() { m_RegionBases = std::vector<RegionBase *>(256, nullptr); }
 
-        ~RegionBlock()
+    ~RegionBlock()
+    {
+        for (auto &x : m_RegionBases)
         {
-            for (auto &x : m_RegionBases)
+            delete x;
+            x = nullptr;
+        }
+    }
+
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    RegionBlock(const RegionBlock &) = delete;
+    RegionBlock &operator=(const RegionBlock &) = delete;
+
+    Region *getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer)
+    {
+        Region *res{nullptr};
+        {
+            NG_UNIQUE_GUARD writeGuard(i_lock);
+            RegionBase *rb = m_RegionBases[layer];
+            if (rb != nullptr)
+                res = rb->m_Regions[ry + (100 * rx)];
+        }
+        return res;
+    }
+
+    Region *getRegion(uint32_t rx, uint32_t ry, uint8_t layer)
+    {
+        Region *res{nullptr};
+        {
+            NG_UNIQUE_GUARD writeGuard(i_lock);
+            RegionBase *rb = m_RegionBases[layer];
+            if (rb == nullptr)
             {
-                delete x;
-                x = nullptr;
+                rb = new RegionBase{};
+                m_RegionBases[layer] = rb;
+            }
+            res = rb->m_Regions[rx + (100 * ry)];
+            if (res == nullptr)
+            {
+                res = new Region{};
+                res->x = rx;
+                res->y = ry;
+                res->layer = layer;
+                rb->m_Regions[rx + (100 * ry)] = res;
             }
         }
+        return res;
+    }
 
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        RegionBlock(const RegionBlock &) = delete;
-        RegionBlock &operator=(const RegionBlock &) = delete;
-
-        Region *getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer)
-        {
-            Region *res{nullptr};
-            {
-                NG_UNIQUE_GUARD writeGuard(i_lock);
-                RegionBase      *rb = m_RegionBases[layer];
-                if (rb != nullptr)
-                    res = rb->m_Regions[ry + (100 * rx)];
-            }
-            return res;
-        }
-
-        Region *getRegion(uint32_t rx, uint32_t ry, uint8_t layer)
-        {
-            Region *res{nullptr};
-            {
-                NG_UNIQUE_GUARD writeGuard(i_lock);
-                RegionBase      *rb = m_RegionBases[layer];
-                if (rb == nullptr)
-                {
-                    rb = new RegionBase{ };
-                    m_RegionBases[layer] = rb;
-                }
-                res = rb->m_Regions[rx + (100 * ry)];
-                if (res == nullptr)
-                {
-                    res = new Region{ };
-                    res->x     = rx;
-                    res->y     = ry;
-                    res->layer = layer;
-                    rb->m_Regions[rx + (100 * ry)] = res;
-                }
-            }
-            return res;
-        }
-
-    private:
-        NG_SHARED_MUTEX           i_lock;
-        std::vector<RegionBase *> m_RegionBases;
+private:
+    NG_SHARED_MUTEX i_lock;
+    std::vector<RegionBase *> m_RegionBases;
 };

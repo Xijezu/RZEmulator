@@ -14,10 +14,11 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include <atomic>
 #include <thread>
+
+#include "Define.h"
 
 template<typename T>
 class ProducerConsumerQueue;
@@ -27,19 +28,19 @@ class SQLOperation;
 
 class DatabaseWorker
 {
-    public:
-        DatabaseWorker(ProducerConsumerQueue<SQLOperation *> *newQueue, MySQLConnection *connection);
-        ~DatabaseWorker();
+public:
+    DatabaseWorker(ProducerConsumerQueue<SQLOperation *> *newQueue, MySQLConnection *connection);
+    ~DatabaseWorker();
 
-    private:
-        ProducerConsumerQueue<SQLOperation *> *_queue;
-        MySQLConnection *_connection;
+private:
+    ProducerConsumerQueue<SQLOperation *> *_queue;
+    MySQLConnection *_connection;
 
-        void WorkerThread();
-        std::thread     _workerThread;
+    void WorkerThread();
+    std::thread _workerThread;
 
-        std::atomic<bool> _cancelationToken;
+    std::atomic<bool> _cancelationToken;
 
-        DatabaseWorker(DatabaseWorker const &right) = delete;
-        DatabaseWorker &operator=(DatabaseWorker const &right) = delete;
+    DatabaseWorker(DatabaseWorker const &right) = delete;
+    DatabaseWorker &operator=(DatabaseWorker const &right) = delete;
 };

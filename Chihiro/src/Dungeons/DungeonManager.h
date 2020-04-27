@@ -14,11 +14,11 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include "X2D/Boxf.h"
 #include "Common.h"
 #include "Object.h"
+#include "X2D/Boxf.h"
 
 struct DungeonTemplate
 {
@@ -67,7 +67,7 @@ struct DungeonTemplate
 
 class DungeonManager
 {
-  public:
+public:
     static DungeonManager &Instance()
     {
         static DungeonManager instance;
@@ -89,10 +89,10 @@ class DungeonManager
     void RegisterDungeonTemplate(DungeonTemplate);
     /*Position GetSiegeStartPosition(int32_t nDungeonID);
         Position GetSiegeDefencePosition(int32_t nDungeonID);*/
-  private:
+private:
     std::vector<DungeonTemplate> m_vDungeonInfo{};
 
-  protected:
+protected:
     DungeonManager() = default;
 };
 

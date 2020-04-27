@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "ItemCollector.h"
+
 #include "Item.h"
 #include "World.h"
 
@@ -52,8 +53,8 @@ bool ItemCollector::UnregisterItem(Item *pItem)
 
 void ItemCollector::Update()
 {
-    NG_UNIQUE_GUARD        writeGuard(i_lock);
-    uint32_t                   ct  = sWorld.GetArTime();
+    NG_UNIQUE_GUARD writeGuard(i_lock);
+    uint32_t ct = sWorld.GetArTime();
     for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next)
     {
         next = itr;

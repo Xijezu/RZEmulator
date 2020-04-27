@@ -14,38 +14,40 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <atomic>
+#include <memory>
+
+#include <boost/asio/ip/tcp.hpp>
+
 #include "AsyncAcceptor.h"
 #include "Errors.h"
 #include "NetworkThread.h"
-#include <boost/asio/ip/tcp.hpp>
-#include <memory>
-#include <atomic>
 
 using boost::asio::ip::tcp;
 
 class SocketMgr
 {
 public:
-  virtual ~SocketMgr();
+    virtual ~SocketMgr();
 
-  virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port, int threadCount);
-  virtual void StopNetwork();
+    virtual bool StartNetwork(NGemity::Asio::IoContext &ioContext, std::string const &bindIp, uint16_t port, int threadCount);
+    virtual void StopNetwork();
 
-  void Wait();
+    void Wait();
 
-  virtual void OnSocketOpen(tcp::socket &&sock, uint32_t nThreadIndex);
+    virtual void OnSocketOpen(tcp::socket &&sock, uint32_t nThreadIndex);
 
-  int32_t GetNetworkThreadCount() const { return _threadCount; }
-  uint32_t SelectThreadWithMinConnections() const;
-  std::pair<tcp::socket *, uint32_t> GetSocketForAccept();
+    int32_t GetNetworkThreadCount() const { return _threadCount; }
+    uint32_t SelectThreadWithMinConnections() const;
+    std::pair<tcp::socket *, uint32_t> GetSocketForAccept();
 
 protected:
-  SocketMgr();
-  virtual NetworkThread *CreateThreads() const = 0;
+    SocketMgr();
+    virtual NetworkThread *CreateThreads() const = 0;
 
-  AsyncAcceptor *_acceptor;
-  NetworkThread *_threads;
-  int32_t _threadCount;
-  uint32_t m_nSocketMgrIdx;
+    AsyncAcceptor *_acceptor;
+    NetworkThread *_threads;
+    int32_t _threadCount;
+    uint32_t m_nSocketMgrIdx;
 };

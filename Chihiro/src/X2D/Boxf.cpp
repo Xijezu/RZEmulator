@@ -13,16 +13,13 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Boxf.h"
 
 bool X2D::Boxf::IsInclude(float x, float y)
 {
-    return x >= begin.x
-           && x <= end.x
-           && y >= begin.y
-           && y <= end.y;
+    return x >= begin.x && x <= end.x && y >= begin.y && y <= end.y;
 }
 
 void X2D::Boxf::SetLeft(float x)
@@ -31,7 +28,7 @@ void X2D::Boxf::SetLeft(float x)
     if (end.x < x)
     {
         begin.x = end.x;
-        end.x   = x;
+        end.x = x;
     }
 }
 
@@ -41,7 +38,7 @@ void X2D::Boxf::SetTop(float y)
     if (end.y < y)
     {
         begin.y = end.y;
-        end.y   = y;
+        end.y = y;
     }
 }
 
@@ -50,7 +47,7 @@ void X2D::Boxf::SetRight(float x)
     end.x = x;
     if (x < begin.x)
     {
-        end.x   = begin.x;
+        end.x = begin.x;
         begin.x = x;
     }
 }
@@ -60,7 +57,7 @@ void X2D::Boxf::SetBottom(float y)
     end.y = y;
     if (y < begin.y)
     {
-        end.y   = begin.y;
+        end.y = begin.y;
         begin.y = y;
     }
 }
@@ -69,8 +66,8 @@ void X2D::Boxf::Set(X2D::Pointf _begin, X2D::Pointf _end)
 {
     begin.x = _begin.x;
     begin.y = _begin.y;
-    end.x   = _end.x;
-    end.y   = _end.y;
+    end.x = _end.x;
+    end.y = _end.y;
     this->normalize();
 }
 
@@ -82,12 +79,12 @@ void X2D::Boxf::normalize()
     {
         t = begin.x;
         begin.x = end.x;
-        end.x   = t;
+        end.x = t;
     }
     if (end.y < begin.y)
     {
         t = begin.y;
         begin.y = end.y;
-        end.y   = t;
+        end.y = t;
     }
 }

@@ -13,18 +13,19 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "GameContent.h"
-#include "RegionTester.h"
-#include "MemPool.h"
+
 #include "FieldPropManager.h"
-#include "Skill.h"
 #include "Maploader.h"
+#include "MemPool.h"
 #include "NPC.h"
-#include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "RegionTester.h"
+#include "Skill.h"
+#include "World.h"
 
 bool GameContent::IsBlocked(float x, float y)
 {
@@ -37,8 +38,7 @@ bool GameContent::IsBlocked(float x, float y)
 
 bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
 {
-    return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1},
-                                                                 {x2, y2}});
+    return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1}, {x2, y2}});
 }
 
 bool GameContent::LearnAllSkill(Player *pPlayer)

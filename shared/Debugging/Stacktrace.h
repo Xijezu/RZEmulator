@@ -9,7 +9,7 @@
 
 class Stacktrace
 {
-    public:
-        static void enableStacktracing();
-        static void signalHandler(int signum);
+public:
+    static void enableStacktracing();
+    static void signalHandler(int signum);
 };

@@ -14,46 +14,48 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Unit.h"
+ */
+#include <functional>
+
 #include "NPCBase.h"
 #include "Quest.h"
-#include <functional>
+#include "Unit.h"
 
 class NPC : public Unit
 {
-    public:
-        explicit NPC(NPCTemplate *base);
-        // Deleting the copy & assignment operators
-        // Better safe than sorry
-        NPC(const NPC &) = delete;
-        NPC &operator=(const NPC &) = delete;
+public:
+    explicit NPC(NPCTemplate *base);
+    // Deleting the copy & assignment operators
+    // Better safe than sorry
+    NPC(const NPC &) = delete;
+    NPC &operator=(const NPC &) = delete;
 
-        static void EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer);
+    static void EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer);
 
-        void LinkQuest(QuestLink *quest_link_info);
-        NPC_STATUS GetStatus() const;
-        void SetStatus(NPC_STATUS status);
-        int32_t GetNPCID() const;
+    void LinkQuest(QuestLink *quest_link_info);
+    NPC_STATUS GetStatus() const;
+    void SetStatus(NPC_STATUS status);
+    int32_t GetNPCID() const;
 
-        bool IsNPC() const override { return true; }
+    bool IsNPC() const override { return true; }
 
-        bool HasStartableQuest(Player *player);
-        bool HasFinishableQuest(Player *player);
-        bool HasInProgressQuest(Player *player);
+    bool HasStartableQuest(Player *player);
+    bool HasFinishableQuest(Player *player);
+    bool HasInProgressQuest(Player *player);
 
-        void DoEachStartableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
-        void DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
-        void DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+    void DoEachStartableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+    void DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
+    void DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn);
 
-        int32_t GetQuestTextID(int32_t code, int32_t progress) const;
-        int32_t GetProgressFromTextID(int32_t code, int32_t textId) const;
+    int32_t GetQuestTextID(int32_t code, int32_t progress) const;
+    int32_t GetProgressFromTextID(int32_t code, int32_t textId) const;
 
-        NPCTemplate *m_pBase;
-    private:
-        int32_t                      m_nStatus;
-        std::vector<QuestLink *> m_vQuestLink_Start{ };
-        std::vector<QuestLink *> m_vQuestLink_Progress{ };
-        std::vector<QuestLink *> m_vQuestLink_End{ };
-        std::vector<int32_t>         m_vQuest{ };
+    NPCTemplate *m_pBase;
+
+private:
+    int32_t m_nStatus;
+    std::vector<QuestLink *> m_vQuestLink_Start{};
+    std::vector<QuestLink *> m_vQuestLink_Progress{};
+    std::vector<QuestLink *> m_vQuestLink_End{};
+    std::vector<int32_t> m_vQuest{};
 };

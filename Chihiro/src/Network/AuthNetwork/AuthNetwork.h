@@ -14,18 +14,19 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Common.h"
-#include "SharedMutex.h"
-#include "ClientPackets.h"
-#include "Configuration/Config.h"
-#include "IoContext.h"
-#include "XSocket.h"
-#include "GameAuthSession.h"
-#include "Encryption/ByteBuffer.h"
+ */
 #include <boost/asio/deadline_timer.hpp>
+
+#include "ClientPackets.h"
+#include "Common.h"
+#include "Configuration/Config.h"
+#include "Encryption/ByteBuffer.h"
+#include "GameAuthSession.h"
+#include "IoContext.h"
 #include "NetworkThread.h"
+#include "SharedMutex.h"
 #include "World.h"
+#include "XSocket.h"
 
 class AuthNetwork
 {
@@ -129,7 +130,12 @@ private:
     NG_SHARED_MUTEX _mutex;
 
 protected:
-    AuthNetwork() : m_bClosed(false), m_pSocket(nullptr), m_pThread(nullptr), m_nLastPingTime(0), m_pNetworkThread(nullptr){};
+    AuthNetwork()
+        : m_bClosed(false)
+        , m_pSocket(nullptr)
+        , m_pThread(nullptr)
+        , m_nLastPingTime(0)
+        , m_pNetworkThread(nullptr){};
 };
 
 #define sAuthNetwork AuthNetwork::Instance()

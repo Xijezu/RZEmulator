@@ -14,14 +14,16 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "GameRule.h"
 #include "Monster.h"
 
 struct RespawnInfo : public MonsterRespawnInfo
 {
-    explicit RespawnInfo(MonsterRespawnInfo info) : MonsterRespawnInfo(info), count(0)
+    explicit RespawnInfo(MonsterRespawnInfo info)
+        : MonsterRespawnInfo(info)
+        , count(0)
     {
         prespawn_count = (!info.dungeon_id && !info.way_point_id && (info.max_num * GameRule::MONSTER_PRESPAWN_RATE >= 1.0f)) ? (info.max_num * GameRule::MONSTER_PRESPAWN_RATE) : info.max_num;
         way_point_id = info.way_point_id;
@@ -33,7 +35,7 @@ struct RespawnInfo : public MonsterRespawnInfo
 
 class RespawnObject : public MonsterDeleteHandler
 {
-  public:
+public:
     explicit RespawnObject(MonsterRespawnInfo rh);
     ~RespawnObject() = default;
 
@@ -45,7 +47,7 @@ class RespawnObject : public MonsterDeleteHandler
     void onMonsterDelete(Monster *mob) override;
     void Update(uint32_t diff);
 
-  private:
+private:
     RespawnInfo info;
     uint32_t m_nMaxRespawnNum;
     std::vector<uint32_t> m_vRespawnedMonster;

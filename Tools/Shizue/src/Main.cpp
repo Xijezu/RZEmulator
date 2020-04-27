@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Common.h"
 #include "Config.h"
 #include "IoContext.h"
@@ -9,14 +11,14 @@
 #include "XPacket.h"
 #include "XRc4Cipher.h"
 #include "XSocket.h"
-#include <iostream>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     // Making sure the args are there
 
-    auto [bSuccess, ioContext] =
-        NGemity::InitFramework("luna.conf", "Luna", argc, argv);
-    if (!bSuccess) {
+    auto [bSuccess, ioContext] = NGemity::InitFramework("luna.conf", "Luna", argc, argv);
+    if (!bSuccess)
+    {
         return -1;
     }
 
@@ -39,8 +41,7 @@ int main(int argc, char **argv) {
     std::cout << str.str();
 
     NGemity::SingleSocketInstance::Instance().InitializeSingleSocketInstance();
-    auto socket = NGemity::GetXSocket<ShizukeSession>(*(ioContext), argv[1],
-                                                      std::atoi(argv[2]));
+    auto socket = NGemity::GetXSocket<ShizukeSession>(*(ioContext), argv[1], std::atoi(argv[2]));
     NGemity::SingleSocketInstance::Instance().AddSocket(socket);
 
     auto threadPool = NGemity::GetThreadPool(ioContext);

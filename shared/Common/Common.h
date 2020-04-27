@@ -18,9 +18,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "Define.h"
-#include "StringFormat.h"
-#include "Timer.h"
 #include <cmath>
 #include <memory>
 #include <optional>
@@ -30,6 +27,10 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "Define.h"
+#include "StringFormat.h"
+#include "Timer.h"
 
 #if PLATFORM == PLATFORM_WINDOWS
 #if COMPILER == COMPILER_INTEL
@@ -61,25 +62,25 @@
 
 inline unsigned long atoul(char const *str)
 {
-  return strtoul(str, nullptr, 10);
+    return strtoul(str, nullptr, 10);
 }
 
 inline unsigned long long atoull(char const *str)
 {
-  return strtoull(str, nullptr, 10);
+    return strtoull(str, nullptr, 10);
 }
 
 #define STRINGIZE(a) #a
 
 enum TimeConstants
 {
-  MINUTE = 60,
-  HOUR = MINUTE * 60,
-  DAY = HOUR * 24,
-  WEEK = DAY * 7,
-  MONTH = DAY * 30,
-  YEAR = MONTH * 12,
-  IN_MILLISECONDS = 1000
+    MINUTE = 60,
+    HOUR = MINUTE * 60,
+    DAY = HOUR * 24,
+    WEEK = DAY * 7,
+    MONTH = DAY * 30,
+    YEAR = MONTH * 12,
+    IN_MILLISECONDS = 1000
 };
 
 using namespace std::literals::string_literals;
@@ -102,5 +103,5 @@ using namespace std::literals::string_literals;
 
 namespace NGemity
 {
-using std::make_unique;
+    using std::make_unique;
 }

@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 constexpr int64_t MAX_GOLD_FOR_INVENTORY = 100000000000;
 constexpr int64_t MAX_GOLD_FOR_STORAGE = 100000000000;

@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "GameRule.h"
 #include "Item.h"
@@ -525,36 +525,44 @@ void Unit::applyState(State &state)
     case SEF_ADDITIONAL_DAMAGE_ON_ATTACK:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8),
+                state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8),
+                state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
     }
     break;
 
     case SEF_AMP_ADDITIONAL_DAMAGE_ON_ATTACK:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8),
+                0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8), 0,
+                state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
     }
     break;
 
     case SEF_ADDITIONAL_DAMAGE_ON_SKILL:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5),
+                (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
+            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5),
+                (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
     }
     break;
 
     case SEF_AMP_ADDTIONAL_DAMAGE_ON_SKILL:
     {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vPhysicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5),
+                (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5), (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
+            m_vMagicalSkillAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), (ElementalType)(int32_t)state.GetValue(5),
+                (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
     }
     break;
 
@@ -745,22 +753,15 @@ void Unit::applyState(State &state)
     case SEF_DAMAGE_REFLECT_PERCENT:
     {
         m_vDamageReflectInfo.emplace_back(DamageReflectInfo(state.GetValue(6) + state.GetLevel() * state.GetValue(7), state.GetValue(9) * GameRule::DEFAULT_UNIT_SIZE,
-                                                            (ElementalType)(int32_t)state.GetValue(8), 0,
-                                                            state.GetValue(0) + state.GetLevel() * state.GetValue(1),
-                                                            state.GetValue(2) + state.GetLevel() * state.GetValue(3),
-                                                            state.GetValue(4) + state.GetLevel() * state.GetValue(5),
-                                                            state.GetValue(10)));
+            (ElementalType)(int32_t)state.GetValue(8), 0, state.GetValue(0) + state.GetLevel() * state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3),
+            state.GetValue(4) + state.GetLevel() * state.GetValue(5), state.GetValue(10)));
     }
     break;
 
     case SEF_DAMAGE_REFLECT:
     {
-        m_vDamageReflectInfo.emplace_back(DamageReflectInfo(state.GetValue(6) + state.GetLevel() * state.GetValue(7), GameRule::REFLECT_RANGE,
-                                                            (ElementalType)(int32_t)state.GetValue(8), state.GetValue(0) + state.GetLevel() * state.GetValue(1),
-                                                            0.0f,
-                                                            0.0f,
-                                                            0.0f,
-                                                            state.GetValue(9)));
+        m_vDamageReflectInfo.emplace_back(DamageReflectInfo(state.GetValue(6) + state.GetLevel() * state.GetValue(7), GameRule::REFLECT_RANGE, (ElementalType)(int32_t)state.GetValue(8),
+            state.GetValue(0) + state.GetLevel() * state.GetValue(1), 0.0f, 0.0f, 0.0f, state.GetValue(9)));
     }
     break;
 
@@ -768,7 +769,8 @@ void Unit::applyState(State &state)
     {
         if (IsWearShield())
         {
-            m_vStateReflectInfo.emplace_back(StateReflectInfo(static_cast<StateCode>((int32_t)state.GetValue(0)), state.GetValue(3) + state.GetLevel() * state.GetValue(4), state.GetValue(1) + state.GetLevel() * state.GetValue(2)));
+            m_vStateReflectInfo.emplace_back(StateReflectInfo(
+                static_cast<StateCode>((int32_t)state.GetValue(0)), state.GetValue(3) + state.GetLevel() * state.GetValue(4), state.GetValue(1) + state.GetLevel() * state.GetValue(2)));
         }
     }
     break;
@@ -813,10 +815,8 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
@@ -830,10 +830,8 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
@@ -1009,7 +1007,8 @@ void Unit::applyState(State &state)
                     m_BadPhysicalElementalSkillStateMod[nElementalType].fHate += fHate;
                     m_BadPhysicalElementalSkillStateMod[nElementalType].fCooltime += fCoolTime;
 
-                    if (!m_BadPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime || m_BadPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
+                    if (!m_BadPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime ||
+                        m_BadPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
                     {
                         m_BadPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime = nCastingSpeedApplyTime;
                     }
@@ -1027,7 +1026,8 @@ void Unit::applyState(State &state)
                     m_GoodPhysicalElementalSkillStateMod[nElementalType].fHate += fHate;
                     m_GoodPhysicalElementalSkillStateMod[nElementalType].fCooltime += fCoolTime;
 
-                    if (!m_GoodPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime || m_GoodPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
+                    if (!m_GoodPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime ||
+                        m_GoodPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
                     {
                         m_GoodPhysicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime = nCastingSpeedApplyTime;
                     }
@@ -1048,7 +1048,8 @@ void Unit::applyState(State &state)
                     m_BadMagicalElementalSkillStateMod[nElementalType].fHate += fHate;
                     m_BadMagicalElementalSkillStateMod[nElementalType].fCooltime += fCoolTime;
 
-                    if (!m_BadMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime || m_BadMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
+                    if (!m_BadMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime ||
+                        m_BadMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
                     {
                         m_BadMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime = nCastingSpeedApplyTime;
                     }
@@ -1066,7 +1067,8 @@ void Unit::applyState(State &state)
                     m_GoodMagicalElementalSkillStateMod[nElementalType].fHate += fHate;
                     m_GoodMagicalElementalSkillStateMod[nElementalType].fCooltime += fCoolTime;
 
-                    if (!m_GoodMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime || m_GoodMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
+                    if (!m_GoodMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime ||
+                        m_GoodMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime > nCastingSpeedApplyTime)
                     {
                         m_GoodMagicalElementalSkillStateMod[nElementalType].nCastingSpeedApplyTime = nCastingSpeedApplyTime;
                     }
@@ -1190,10 +1192,10 @@ void Unit::applyState(State &state)
         if (state.GetValue(5) != 0)
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_MORTAL);
 
-        //m_fMaxHPAmplifier -= state.GetValue(8) + state.GetValue(9) * state.GetLevel();
+        // m_fMaxHPAmplifier -= state.GetValue(8) + state.GetValue(9) * state.GetLevel();
         SetMaxHealth(GetMaxHealth() - state.GetValue(6) + state.GetValue(7) * state.GetLevel());
 
-        //m_fMaxMPAmplifier -= state.GetValue(12) + state.GetValue(13) * state.GetLevel();
+        // m_fMaxMPAmplifier -= state.GetValue(12) + state.GetValue(13) * state.GetLevel();
         SetMaxMana(GetMaxMana() - state.GetValue(10) + state.GetValue(11) * state.GetLevel());
 
         break;
@@ -1229,7 +1231,8 @@ void Unit::applyState(State &state)
         break;
 
     case SEF_ADD_HP_MP_ON_CRITICAL:
-        m_vAddHPMPOnCritical.emplace_back(AddHPMPOnCriticalInfo(state.GetValue(0) + state.GetValue(1) * state.GetLevel(), state.GetValue(2) + state.GetValue(3) * state.GetLevel(), state.GetValue(4) + state.GetValue(5) * state.GetLevel()));
+        m_vAddHPMPOnCritical.emplace_back(AddHPMPOnCriticalInfo(
+            state.GetValue(0) + state.GetValue(1) * state.GetLevel(), state.GetValue(2) + state.GetValue(3) * state.GetLevel(), state.GetValue(4) + state.GetValue(5) * state.GetLevel()));
         break;
 
     case SEF_HEALING_AMPLIFY:
@@ -1256,12 +1259,12 @@ void Unit::applyState(State &state)
 
     case SEF_DAMAGE_REDUCE_WITH_RACE_BY_PERCENT:
         m_vDamageReducePercentInfo.emplace_back(DamageReduceInfo(state.GetValue(6), state.GetValue(0) + state.GetLevel() * state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3),
-                                                                 state.GetValue(4) + state.GetLevel() * state.GetValue(5), state.GetValue(7), state.GetValue(8), state.GetValue(9), state.GetValue(10), state.GetValue(11)));
+            state.GetValue(4) + state.GetLevel() * state.GetValue(5), state.GetValue(7), state.GetValue(8), state.GetValue(9), state.GetValue(10), state.GetValue(11)));
         break;
 
     case SEF_DAMAGE_REDUCE_WITH_RACE_BY_VALUE:
         m_vDamageReduceValueInfo.emplace_back(DamageReduceInfo(state.GetValue(6), state.GetValue(0) + state.GetLevel() * state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3),
-                                                               state.GetValue(4) + state.GetLevel() * state.GetValue(5), state.GetValue(7), state.GetValue(8), state.GetValue(9), state.GetValue(10), state.GetValue(11)));
+            state.GetValue(4) + state.GetLevel() * state.GetValue(5), state.GetValue(7), state.GetValue(8), state.GetValue(9), state.GetValue(10), state.GetValue(11)));
         break;
 
     case SEF_MANA_SHIELD:
@@ -1340,7 +1343,7 @@ void Unit::applyState(State &state)
         }
         break;
         case SC_HUNTING_CREATURE_CARD:
-            //m_fCreatureCardChance += fValue1;
+            // m_fCreatureCardChance += fValue1;
             NG_LOG_INFO("server.worldserver", "SC_HUNTING_CREATURE_CARD not implemented.");
             break;
         case SC_INC_BLOCK_CHANCE:
@@ -1356,7 +1359,7 @@ void Unit::applyState(State &state)
         case SC_HAVOC_BURST:
         {
             SetFlag(UNIT_FIELD_STATUS, STATUS_HAVOC_BURST);
-            //m_nLastHavocUpdateTime = GetArTime();
+            // m_nLastHavocUpdateTime = GetArTime();
 
             m_AttributeAmplifier.fAttackSpeedRight += fValue1;
             if (IsUsingDoubleWeapon())
@@ -1403,7 +1406,7 @@ void Unit::applyState(State &state)
                 m_AttributeAmplifier.fAccuracyRight += fValue1;
 
             m_AttributeAmplifier.fCastingSpeed += fValue2;
-            //m_fMaxHPAmplifier += fValue3;
+            // m_fMaxHPAmplifier += fValue3;
             SetFloatValue(UNIT_FIELD_HATE_RATIO, GetFloatValue(UNIT_FIELD_HATE_RATIO) + fValue4);
             break;
         }
@@ -1422,15 +1425,15 @@ void Unit::applyState(State &state)
         case SC_LIGHTNING_FORCE_CONGESTION:
         {
             m_AttributeAmplifier.fAttackPointRight += fValue1;
-            //m_nAttackPointRightWithoutWeapon *= fValue1;
+            // m_nAttackPointRightWithoutWeapon *= fValue1;
             m_AttributeAmplifier.fAttackSpeedRight += fValue2;
             if (IsUsingDoubleWeapon())
             {
                 m_AttributeAmplifier.fAttackPointLeft += fValue1;
-                //m_nAttackPointLeftWithoutWeapon *= fValue1;
+                // m_nAttackPointLeftWithoutWeapon *= fValue1;
                 m_AttributeAmplifier.fAttackSpeedLeft += fValue2;
             }
-            //m_fResistHarmfulState += fValue3;
+            // m_fResistHarmfulState += fValue3;
 
             break;
         }
@@ -1587,7 +1590,8 @@ void Unit::applyItemEffect()
                 {
                     if (curItem->GetItemTemplate()->base_type[ol] != 0)
                     {
-                        onItemWearEffect(curItem, true, curItem->GetItemTemplate()->base_type[ol], curItem->GetItemTemplate()->base_var[ol][0], curItem->GetItemTemplate()->base_var[ol][1], fItemRatio);
+                        onItemWearEffect(
+                            curItem, true, curItem->GetItemTemplate()->base_type[ol], curItem->GetItemTemplate()->base_var[ol][0], curItem->GetItemTemplate()->base_var[ol][1], fItemRatio);
                     }
                 }
 
@@ -1780,11 +1784,11 @@ void Unit::ampParameter(uint32_t nBitset, float fValue, bool bStat)
         if (nBitset & FLAG_MAGIC_RESISTANCE)
             m_AttributeAmplifier.fMagicAvoid += fValue;
 
-        //if (nBitset & FLAG_MAX_HP)
-        //m_fMaxHPAmplifier += fValue;
+        // if (nBitset & FLAG_MAX_HP)
+        // m_fMaxHPAmplifier += fValue;
 
-        //if (nBitset & FLAG_MAX_MP)
-        //m_fMaxMPAmplifier += fValue;
+        // if (nBitset & FLAG_MAX_MP)
+        // m_fMaxMPAmplifier += fValue;
 
         if (nBitset & FLAG_MAX_SP)
         {
@@ -1840,12 +1844,12 @@ void Unit::incParameter(uint32_t nBitset, float nValue, bool bStat)
         if (nBitset & StateStatFlag::FLAG_ATTACK_POint32_t)
         {
             m_Attribute.nAttackPointRight += nValue;
-            //m_nAttackPointRightWithoutWeapon += nValue;
+            // m_nAttackPointRightWithoutWeapon += nValue;
 
             if (IsUsingDoubleWeapon())
             {
                 m_Attribute.nAttackPointLeft += nValue;
-                //m_nAttackPointLeftWithoutWeapon += nValue;
+                // m_nAttackPointLeftWithoutWeapon += nValue;
             }
         }
 
@@ -2490,12 +2494,12 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         int32_t nAvoid = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackPointRight += nAP;
-        //m_nAttackPointRightWithoutWeapon += nAP;
+        // m_nAttackPointRightWithoutWeapon += nAP;
 
         if (IsUsingDoubleWeapon())
         {
             m_Attribute.nAttackPointLeft += nAP;
-            //m_nAttackPointLeftWithoutWeapon += nAP;
+            // m_nAttackPointLeftWithoutWeapon += nAP;
         }
 
         m_Attribute.nDefence += nDefence;
@@ -2538,7 +2542,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         int32_t nSkillLevel = pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nAttackPointRight += pSkill->GetVar(0) * nSkillLevel;
-        //m_nAttackPointRightWithoutWeapon += pSkill->GetVar( 0 ) * nSkillLevel;
+        // m_nAttackPointRightWithoutWeapon += pSkill->GetVar( 0 ) * nSkillLevel;
         if (IsUsingDoubleWeapon())
         {
             m_Attribute.nAttackPointLeft += pSkill->GetVar(0) * nSkillLevel;
@@ -2652,9 +2656,9 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         m_AttributeAmplifier.fCritical += pSkill->GetVar(3) + pSkill->GetVar(4) * pSkill->GetCurrentSkillLevel();
 
         /*m_fMaxHPAmplifier += pSkill->GetVar( 5 ) + pSkill->GetVar( 6 ) * pSkill->GetCurrentSkillLevel();
-			m_fMaxMPAmplifier += pSkill->GetVar( 11 ) + pSkill->GetVar( 12 ) * pSkill->GetCurrentSkillLevel();
-			m_AttributeAmplifier.fHPRegenPercentage += pSkill->GetVar( 7 ) + pSkill->GetVar( 8 ) * pSkill->GetCurrentSkillLevel();
-			m_AttributeAmplifier.fMPRegenPercentage += pSkill->GetVar( 9 ) + pSkill->GetVar( 10 ) * pSkill->GetCurrentSkillLevel();*/
+            m_fMaxMPAmplifier += pSkill->GetVar( 11 ) + pSkill->GetVar( 12 ) * pSkill->GetCurrentSkillLevel();
+            m_AttributeAmplifier.fHPRegenPercentage += pSkill->GetVar( 7 ) + pSkill->GetVar( 8 ) * pSkill->GetCurrentSkillLevel();
+            m_AttributeAmplifier.fMPRegenPercentage += pSkill->GetVar( 9 ) + pSkill->GetVar( 10 ) * pSkill->GetCurrentSkillLevel();*/
     }
     break;
 
@@ -2666,7 +2670,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
         m_Attribute.nCastingSpeed += nCastSpeed;
         m_Attribute.nCoolTimeSpeed -= m_Attribute.nCoolTimeSpeed * fCoolTime;
-        //m_nCastKeep += nCastKeep;
+        // m_nCastKeep += nCastKeep;
     }
     break;
 
@@ -2782,7 +2786,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         m_AttributeAmplifier.fCriticalPower += pSkill->GetVar(7) * nSkillLevel;
         m_AttributeAmplifier.fCastingSpeed += pSkill->GetVar(8) * nSkillLevel;
         m_AttributeAmplifier.fCoolTimeSpeed += pSkill->GetVar(9) * nSkillLevel;
-        //m_nCastKeep *= pSkill->GetVar(10) * nSkillLevel;
+        // m_nCastKeep *= pSkill->GetVar(10) * nSkillLevel;
     }
     break;
 
@@ -2864,8 +2868,7 @@ void Unit::applyDoubeWeaponEffect()
     if (pSlot0 == nullptr || pSlot1 == nullptr)
         return;
 
-    if (pSlot0->GetItemClass() == CLASS_ONEHAND_SWORD &&
-        pSlot1->GetItemClass() == CLASS_ONEHAND_SWORD)
+    if (pSlot0->GetItemClass() == CLASS_ONEHAND_SWORD && pSlot1->GetItemClass() == CLASS_ONEHAND_SWORD)
     {
         pSkill = GetSkill(SKILL_DUAL_SWORD_EXPERT);
         if (pSkill == nullptr)
@@ -2873,15 +2876,13 @@ void Unit::applyDoubeWeaponEffect()
         if (pSkill != nullptr)
             nExpertSkillLv = pSkill->GetCurrentSkillLevel();
     }
-    else if (pSlot0->GetItemClass() == CLASS_DAGGER &&
-             pSlot1->GetItemClass() == CLASS_DAGGER)
+    else if (pSlot0->GetItemClass() == CLASS_DAGGER && pSlot1->GetItemClass() == CLASS_DAGGER)
     {
         pSkill = GetSkill(SKILL_TWIN_BLADE_EXPERT);
         if (pSkill != nullptr)
             nExpertSkillLv = pSkill->GetCurrentSkillLevel();
     }
-    else if (pSlot0->GetItemClass() == CLASS_ONEHAND_AXE &&
-             pSlot1->GetItemClass() == CLASS_ONEHAND_AXE)
+    else if (pSlot0->GetItemClass() == CLASS_ONEHAND_AXE && pSlot1->GetItemClass() == CLASS_ONEHAND_AXE)
     {
         pSkill = GetSkill(SKILL_TWIN_AXE_EXPERT);
         if (pSkill != nullptr)
@@ -2909,12 +2910,12 @@ void Unit::applyDoubeWeaponEffect()
     m_Attribute.nAttackPointRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackPointRight;
     m_AttributeByState.nAttackPointRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackPointRight;
     //@todo
-    //m_fAttackPointRightWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointRightWithoutWeapon;
+    // m_fAttackPointRightWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointRightWithoutWeapon;
 
     fBase = 0.44f;
     fAddPerLevel = 0.02f;
     m_Attribute.nAttackPointLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackPointLeft;
     m_AttributeByState.nAttackPointLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_AttributeByState.nAttackPointLeft;
     //@todo
-    //m_fAttackPointLeftWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointLeftWithoutWeapon;
+    // m_fAttackPointLeftWithoutWeapon = (fBase + fAddPerLevel * nExpertSkillLevel) * m_fAttackPointLeftWithoutWeapon;
 }

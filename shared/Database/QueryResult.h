@@ -15,14 +15,15 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
+ */
 #include <vector>
+
+#include "DatabaseEnvFwd.h"
+#include "Define.h"
 
 class ResultSet
 {
-  public:
+public:
     ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, uint32_t fieldCount);
     ~ResultSet();
 
@@ -36,12 +37,12 @@ class ResultSet
 
     Field const &operator[](std::size_t index) const;
 
-  protected:
+protected:
     uint64_t _rowCount;
     Field *_currentRow;
     uint32_t _fieldCount;
 
-  private:
+private:
     void CleanUp();
     MYSQL_RES *_result;
     MYSQL_FIELD *_fields;
@@ -52,7 +53,7 @@ class ResultSet
 
 class PreparedResultSet
 {
-  public:
+public:
     PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64_t rowCount, uint32_t fieldCount);
     ~PreparedResultSet();
 
@@ -65,13 +66,13 @@ class PreparedResultSet
     Field *Fetch() const;
     Field const &operator[](std::size_t index) const;
 
-  protected:
+protected:
     std::vector<Field> m_rows;
     uint64_t m_rowCount;
     uint64_t m_rowPosition;
     uint32_t m_fieldCount;
 
-  private:
+private:
     MYSQL_BIND *m_rBind;
     MYSQL_STMT *m_stmt;
     MYSQL_RES *m_metadataResult; ///< Field metadata, returned by mysql_stmt_result_metadata

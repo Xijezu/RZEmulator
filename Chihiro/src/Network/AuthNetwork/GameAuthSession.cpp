@@ -13,16 +13,18 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#include "Common.h"
 #include "GameAuthSession.h"
-#include "AuthNetwork.h"
-#include "Player.h"
-#include "WorldSession.h"
-#include "World.h"
 
-GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket))
+#include "AuthNetwork.h"
+#include "Common.h"
+#include "Player.h"
+#include "World.h"
+#include "WorldSession.h"
+
+GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket)
+    : XSocket(std::move(socket))
 {
     m_nGameIDX = (uint16_t)sConfigMgr->GetIntDefault("GameServer.Index", 1);
     m_szGameName = sConfigMgr->GetStringDefault("GameServer.Name", "Testserver");
@@ -32,9 +34,7 @@ GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket) : XSocke
     m_nGamePort = sConfigMgr->GetIntDefault("GameServer.Port", 4514);
 }
 
-GameAuthSession::~GameAuthSession()
-{
-}
+GameAuthSession::~GameAuthSession() {}
 
 typedef struct AuthHandler
 {
@@ -42,12 +42,8 @@ typedef struct AuthHandler
     void (GameAuthSession::*handler)(XPacket *);
 } AuthHandler;
 
-constexpr AuthHandler authPacketHandler[] =
-    {
-        {NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult},
-        {NGemity::Packets::TS_AG_KICK_CLIENT, &GameAuthSession::HandleClientKick},
-        {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult},
-        {NGemity::Packets::TS_CS_PING, &GameAuthSession::HandleNullPacket}};
+constexpr AuthHandler authPacketHandler[] = {{NGemity::Packets::TS_AG_LOGIN_RESULT, &GameAuthSession::HandleGameLoginResult}, {NGemity::Packets::TS_AG_KICK_CLIENT, &GameAuthSession::HandleClientKick},
+    {NGemity::Packets::TS_AG_CLIENT_LOGIN, &GameAuthSession::HandleClientLoginResult}, {NGemity::Packets::TS_CS_PING, &GameAuthSession::HandleNullPacket}};
 
 constexpr int32_t authTableSize = (sizeof(authPacketHandler) / sizeof(AuthHandler));
 
@@ -150,6 +146,4 @@ void GameAuthSession::SendGameLogin()
     SendPacket(loginPct);
 }
 
-void GameAuthSession::HandleNullPacket(XPacket *)
-{
-}
+void GameAuthSession::HandleNullPacket(XPacket *) {}

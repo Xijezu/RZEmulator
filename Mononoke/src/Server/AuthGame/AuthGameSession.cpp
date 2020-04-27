@@ -1,28 +1,31 @@
 /*
-  *  Copyright (C) 2017-2017 Xijezu <http://xijezu.com/>
-  *
-  *  This program is free software; you can redistribute it and/or modify it
-  *  under the terms of the GNU General Public License as published by the
-  *  Free Software Foundation; either version 3 of the License, or (at your
-  *  option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful, but WITHOUT
-  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-  *  more details.
-  *
-  *  You should have received a copy of the GNU General Public License along
-  *  with this program. If not, see <http://www.gnu.org/licenses/>.
+ *  Copyright (C) 2017-2017 Xijezu <http://xijezu.com/>
+ *
+ *  This program is free software; you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation; either version 3 of the License, or (at your
+ *  option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include "AuthGame/AuthGameSession.h"
 
 #include "GameList.h"
 #include "PlayerList.h"
 #include "XPacket.h"
 
-#include "AuthGame/AuthGameSession.h"
-
 // Constructor - set the default server name to <null>, also give it a socket
-AuthGameSession::AuthGameSession(boost::asio::ip::tcp::socket &&socket) : XSocket(std::move(socket)), m_pGame(new Game{}), m_bIsAuthed(false)
+AuthGameSession::AuthGameSession(boost::asio::ip::tcp::socket &&socket)
+    : XSocket(std::move(socket))
+    , m_pGame(new Game{})
+    , m_bIsAuthed(false)
 {
     m_pGame->server_idx = 255;
     m_pGame->server_name = "<null>";
@@ -82,7 +85,7 @@ typedef struct GameHandler
     std::function<void(AuthGameSession *, XPacket *)> handler;
 } GameHandler;
 
-template <typename T>
+template<typename T>
 GameHandler declareHandler(eStatus status, void (AuthGameSession::*handler)(const T *packet))
 {
     GameHandler handlerData{};
@@ -98,13 +101,9 @@ GameHandler declareHandler(eStatus status, void (AuthGameSession::*handler)(cons
     return handlerData;
 }
 
-const GameHandler packetHandler[] =
-    {
-        declareHandler(STATUS_CONNECTED, &AuthGameSession::HandleGameLogin),
-        declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogin),
-        declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout),
-        declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
-        declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)};
+const GameHandler packetHandler[] = {declareHandler(STATUS_CONNECTED, &AuthGameSession::HandleGameLogin), declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogin),
+    declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout), declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
+    declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)};
 
 constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
@@ -151,20 +150,14 @@ void AuthGameSession::HandleGameLogin(const TS_GA_LOGIN *pGamePct)
     {
         m_bIsAuthed = true;
         sGameMapList.AddGame(m_pGame);
-        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->server_name.c_str(),
-                    m_pGame->server_idx,
-                    m_pGame->server_ip.c_str(),
-                    m_pGame->server_port);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->server_name.c_str(), m_pGame->server_idx, m_pGame->server_ip.c_str(), m_pGame->server_port);
         resultPct.result = TS_RESULT_SUCCESS;
         SendPacket(resultPct);
     }
     else
     {
         m_bIsAuthed = false;
-        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->server_name.c_str(),
-                    m_pGame->server_idx,
-                    m_pGame->server_ip.c_str(),
-                    m_pGame->server_port);
+        NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->server_name.c_str(), m_pGame->server_idx, m_pGame->server_ip.c_str(), m_pGame->server_port);
         resultPct.result = TS_RESULT_ACCESS_DENIED;
         SendPacket(resultPct);
         CloseSocket();

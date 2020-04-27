@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_REQUEST_REMOVE_STATE_DEF(_) \
-	_(simple)(uint32_t, target) \
-	_(simple)(int32_t, state_code)
+#define TS_CS_REQUEST_REMOVE_STATE_DEF(_) _(simple)(uint32_t, target) _(simple)(int32_t, state_code)
 
 CREATE_PACKET(TS_CS_REQUEST_REMOVE_STATE, 408);
 

@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_BOOTH_CLOSED_DEF(_) \
-	_(simple)(uint32_t, target)
+#define TS_SC_BOOTH_CLOSED_DEF(_) _(simple)(uint32_t, target)
 
 CREATE_PACKET(TS_SC_BOOTH_CLOSED, 709);
 

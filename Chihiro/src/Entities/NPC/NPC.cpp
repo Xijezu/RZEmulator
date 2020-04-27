@@ -13,19 +13,21 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "NPC/NPC.h"
-#include "XPacket.h"
+
 #include "MemPool.h"
 #include "ObjectMgr.h"
+#include "XPacket.h"
 // we can disable this warning for this since it only
 // causes undefined behavior when passed to the base class constructor
 #ifdef _MSC_VER
 #pragma warning(disable : 4355)
 #endif
 
-NPC::NPC(NPCTemplate *base) : Unit(true)
+NPC::NPC(NPCTemplate *base)
+    : Unit(true)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -52,8 +54,8 @@ NPC::NPC(NPCTemplate *base) : Unit(true)
 
 void NPC::EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer)
 {
-typedef unsigned long DWORD;
-typedef unsigned short WORD;
+    typedef unsigned long DWORD;
+    typedef unsigned short WORD;
 
 #if !defined(LOWORD)
 #define LOWORD(a) ((WORD)(a))

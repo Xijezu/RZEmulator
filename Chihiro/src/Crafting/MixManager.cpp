@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "MixManager.h"
+
 #include "GameContent.h"
 #include "GameRule.h"
 #include "Item.h"
@@ -158,9 +159,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
     }
 
     EnhanceInfo *pInfo = getenhanceInfo(pMixInfo->value[0]);
-    if (pInfo == nullptr ||
-        skillCardSec == nullptr ||
-        skillCardMain->GetItemInstance().GetCode() != skillCardSec->GetItemInstance().GetCode() ||
+    if (pInfo == nullptr || skillCardSec == nullptr || skillCardMain->GetItemInstance().GetCode() != skillCardSec->GetItemInstance().GetCode() ||
         skillCardMain->GetItemInstance().GetEnhance() != skillCardSec->GetItemInstance().GetEnhance())
     {
         Messages::SendResult(pPlayer, 256, TS_RESULT_INVALID_ARGUMENT, 0);
@@ -250,11 +249,11 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
             pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0, 0, 0, 0, 0);
             if (!pItem->GetItemTemplate()->flaglist[FLAG_DUPLICATE])
             {
-                //chatmsg
+                // chatmsg
             }
             else
             {
-                //chatmsg
+                // chatmsg
             }
 
             pPlayer->PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
@@ -318,7 +317,7 @@ MixBase *MixManager::GetProperMixInfo(Item *pMainMaterial, int32_t nSubMaterialC
         for (int32_t nMaterialInfoIdx = 0; nMaterialInfoIdx < nSubMaterialCount; ++nMaterialInfoIdx)
         {
             if (!post_arrange_check_material_info((*it).sub_material[nMaterialInfoIdx], pMainMaterial, nSubMaterialCount, pSubMaterialArrangeBuffer, pSubMaterialArrangeCountList,
-                                                  pSubMaterialArrangeBuffer[nMaterialInfoIdx], pSubMaterialArrangeCountList[nMaterialInfoIdx]))
+                    pSubMaterialArrangeBuffer[nMaterialInfoIdx], pSubMaterialArrangeCountList[nMaterialInfoIdx]))
             {
                 bSuccess = false;
                 break;
@@ -497,16 +496,14 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
 
 EnhanceInfo *MixManager::getenhanceInfo(int32_t sid)
 {
-    auto info = std::find_if(m_vEnhanceInfo.begin(),
-                             m_vEnhanceInfo.end(),
-                             [sid](const EnhanceInfo &res) { return sid == res.nSID; });
+    auto info = std::find_if(m_vEnhanceInfo.begin(), m_vEnhanceInfo.end(), [sid](const EnhanceInfo &res) { return sid == res.nSID; });
 
     return info != m_vEnhanceInfo.end() ? &*info : nullptr;
 }
 
 void MixManager::procEnhanceFail(Player *pPlayer, Item *pItem, int32_t nFailResult)
 {
-    //nFailResult is not calculated correctly atm so this needs to be done
+    // nFailResult is not calculated correctly atm so this needs to be done
     // Note: nFailResult is part of the settings actually
     if (nFailResult == 0)
     {
@@ -616,8 +613,8 @@ bool MixManager::RepairItem(Player *pPlayer, Item *pMainMaterial, int32_t nSubMa
     return true;
 }
 
-bool MixManager::post_arrange_check_material_info(MaterialInfo &info, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial,
-                                                  std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount)
+bool MixManager::post_arrange_check_material_info(
+    MaterialInfo &info, Item *pMainMaterial, int32_t nSubMaterialCount, std::vector<Item *> pArrangedSubMaterial, std::vector<uint16_t> pArrangedCountList, Item *pItem, uint16_t pItemCount)
 {
     for (int32_t i = 0; i < MATERIAL_INFO_COUNT; ++i)
     {

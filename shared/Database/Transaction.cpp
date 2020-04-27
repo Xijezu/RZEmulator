@@ -13,12 +13,14 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Transaction.h"
+
+#include <mysqld_error.h>
+
 #include "MySQLConnection.h"
 #include "PreparedStatement.h"
-#include <mysqld_error.h>
 
 std::mutex TransactionTask::_deadlockLock;
 

@@ -12,9 +12,10 @@
  *  more details *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "AllowedCommandInfo.h"
+
 #include "GroupManager.h"
 #include "Log.h"
 #include "MemPool.h"
@@ -31,23 +32,12 @@ typedef struct AllowedCommands
     void (AllowedCommandInfo::*handler)(Player *, const std::string &);
 } GameHandler;
 
-const AllowedCommands commandHandler[] =
-    {
-        {"/run", true, &AllowedCommandInfo::onRunScript},
-        {"/sitdown", false, &AllowedCommandInfo::onCheatSitdown},
-        {"/standup", false, &AllowedCommandInfo::onCheatStandup},
-        {"/position", false, &AllowedCommandInfo::onCheatPosition},
-        {"/battle", false, &AllowedCommandInfo::onBattleMode},
-        {"/notice", true, &AllowedCommandInfo::onCheatNotice},
-        {"/suicide", true, &AllowedCommandInfo::onCheatSuicide},
-        {"/doit", true, &AllowedCommandInfo::onCheatKillAll},
-        {"/pcreate", false, &AllowedCommandInfo::onCheatCreateParty},
-        {"/regenerate", true, &AllowedCommandInfo::onCheatRespawn},
-        {"/pinvite", false, &AllowedCommandInfo::onInviteParty},
-        {"/pjoin", false, &AllowedCommandInfo::onJoinParty},
-        {"/plist", false, &AllowedCommandInfo::onPartyInfo},
-        {"/pdestroy", false, &AllowedCommandInfo::onPartyDestroy},
-        {"/pleave", false, &AllowedCommandInfo::onLeaveParty}};
+const AllowedCommands commandHandler[] = {{"/run", true, &AllowedCommandInfo::onRunScript}, {"/sitdown", false, &AllowedCommandInfo::onCheatSitdown},
+    {"/standup", false, &AllowedCommandInfo::onCheatStandup}, {"/position", false, &AllowedCommandInfo::onCheatPosition}, {"/battle", false, &AllowedCommandInfo::onBattleMode},
+    {"/notice", true, &AllowedCommandInfo::onCheatNotice}, {"/suicide", true, &AllowedCommandInfo::onCheatSuicide}, {"/doit", true, &AllowedCommandInfo::onCheatKillAll},
+    {"/pcreate", false, &AllowedCommandInfo::onCheatCreateParty}, {"/regenerate", true, &AllowedCommandInfo::onCheatRespawn}, {"/pinvite", false, &AllowedCommandInfo::onInviteParty},
+    {"/pjoin", false, &AllowedCommandInfo::onJoinParty}, {"/plist", false, &AllowedCommandInfo::onPartyInfo}, {"/pdestroy", false, &AllowedCommandInfo::onPartyDestroy},
+    {"/pleave", false, &AllowedCommandInfo::onLeaveParty}};
 
 constexpr int32_t tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
@@ -80,13 +70,9 @@ void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string &tokens
         Messages::BroadcastStatusMessage(unit);
 }
 
-void AllowedCommandInfo::onCheatNotice(Player *pClient, const std::string &)
-{
-}
+void AllowedCommandInfo::onCheatNotice(Player *pClient, const std::string &) {}
 
-void AllowedCommandInfo::onCheatParty(Player *pClient, const std::string &)
-{
-}
+void AllowedCommandInfo::onCheatParty(Player *pClient, const std::string &) {}
 
 void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
 {
@@ -119,11 +105,8 @@ void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
         }
     };
 
-    sRegion.DoEachVisibleRegion((uint32_t)pClient->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE),
-                                (uint32_t)(pClient->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                pClient->GetLayer(),
-                                functor,
-                                (uint8_t)RegionVisitor::MovableVisitor);
+    sRegion.DoEachVisibleRegion((uint32_t)pClient->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE), (uint32_t)(pClient->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        pClient->GetLayer(), functor, (uint8_t)RegionVisitor::MovableVisitor);
 }
 
 void AllowedCommandInfo::onCheatRespawn(Player *pClient, const std::string &str)

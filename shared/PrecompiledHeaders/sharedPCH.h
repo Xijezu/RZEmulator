@@ -15,17 +15,10 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-//add here most rarely modified headers to speed up debug build compilation
+// add here most rarely modified headers to speed up debug build compilation
 
-#include "Common.h"
-#include "Config.h"
-#include "Define.h"
-#include "Errors.h"
-#include "Log.h"
-#include "LogMessage.h"
-#include "Util.h"
 #include <algorithm>
 #include <cstring>
 #include <memory>
@@ -35,3 +28,11 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "Common.h"
+#include "Config.h"
+#include "Define.h"
+#include "Errors.h"
+#include "Log.h"
+#include "LogMessage.h"
+#include "Util.h"

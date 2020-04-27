@@ -13,18 +13,26 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "LogMessage.h"
+
 #include "Util.h"
 
 LogMessage::LogMessage(LogLevel _level, std::string const &_type, std::string &&_text)
-        : level(_level), type(_type), text(std::forward<std::string>(_text)), mtime(time(nullptr))
+    : level(_level)
+    , type(_type)
+    , text(std::forward<std::string>(_text))
+    , mtime(time(nullptr))
 {
 }
 
 LogMessage::LogMessage(LogLevel _level, std::string const &_type, std::string &&_text, std::string &&_param1)
-        : level(_level), type(_type), text(std::forward<std::string>(_text)), param1(std::forward<std::string>(_param1)), mtime(time(nullptr))
+    : level(_level)
+    , type(_type)
+    , text(std::forward<std::string>(_text))
+    , param1(std::forward<std::string>(_param1))
+    , mtime(time(nullptr))
 {
 }
 

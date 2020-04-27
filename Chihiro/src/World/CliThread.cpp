@@ -22,8 +22,8 @@
 
 #if PLATFORM != PLATFORM_WINDOWS && NG_USE_CLITHREAD
 
-#include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/readline.h>
 
 char *command_finder(const char *text, int32_t state)
 {
@@ -121,7 +121,7 @@ void CliThread()
 {
 #if NG_USE_CLITHREAD
     ///- Display the list of available CLI functions then beep
-    //TC_LOG_INFO("server.worldserver", "");
+    // TC_LOG_INFO("server.worldserver", "");
 #if PLATFORM != PLATFORM_WINDOWS
     rl_attempted_completion_function = cli_completion;
     rl_event_hook = cli_hook_func;
@@ -129,7 +129,7 @@ void CliThread()
 
     // print32_t this here the first time
     // later it will be printed after command queue updates
-    //printf("NG> ");
+    // printf("NG> ");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::IsStopped())
@@ -179,7 +179,7 @@ void CliThread()
             fflush(stdout);
             if (command == "quit")
                 World::StopNow(SHUTDOWN_EXIT_CODE);
-                //sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
+                // sWorld->QueueCliCommand(new CliCommandHolder(NULL, command.c_str(), &utf8print, &commandFinished));
 #if PLATFORM != PLATFORM_WINDOWS
             add_history(command.c_str());
             free(command_str);

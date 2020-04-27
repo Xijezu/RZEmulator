@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_CHANGE_SUMMON_NAME_DEF(_) \
-	_(string)(szName, 19)
+#define TS_CS_CHANGE_SUMMON_NAME_DEF(_) _(string)(szName, 19)
 
 CREATE_PACKET(TS_CS_CHANGE_SUMMON_NAME, 323);
 

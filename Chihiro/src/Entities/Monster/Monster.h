@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "MonsterBase.h"
@@ -44,15 +44,9 @@ struct VirtualParty
         bTamer = false;
     }
 
-    static bool GreaterByDamage(VirtualParty lh, VirtualParty rh)
-    {
-        return lh.nDamage > rh.nDamage;
-    }
+    static bool GreaterByDamage(VirtualParty lh, VirtualParty rh) { return lh.nDamage > rh.nDamage; }
 
-    static bool GreaterByContribute(VirtualParty lh, VirtualParty rh)
-    {
-        return lh.fContribute > rh.fContribute;
-    }
+    static bool GreaterByContribute(VirtualParty lh, VirtualParty rh) { return lh.fContribute > rh.fContribute; }
 
     int32_t nPartyID;
     uint32_t hPlayer;
@@ -82,7 +76,7 @@ class Monster : public Unit
     friend class World;
     friend class GameContent;
 
-  public:
+public:
     static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
     explicit Monster(uint32_t handle, MonsterBase *mb);
     ~Monster() = default;
@@ -118,7 +112,7 @@ class Monster : public Unit
 
     bool IsAttackable() override;
     bool IsMovable() override;
-    //bool IsKnockbackable() override;
+    // bool IsKnockbackable() override;
 
     bool IsMonster() const override { return true; }
 
@@ -148,7 +142,7 @@ class Monster : public Unit
     MonsterDeleteHandler *m_pDeleteHandler{nullptr};
     bool m_bNearClient;
 
-  protected:
+protected:
     HateTag *getHateTag(uint32_t handle, uint32_t t);
     HateTag *addHate(uint32_t handle, int32_t nHate);
     bool removeFromHateList(uint32_t handle);
@@ -166,8 +160,8 @@ class Monster : public Unit
     void comeBackHome(bool bInvincible);
     int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical) override;
     void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
-    void processDead(uint32_t t); //override;
-  private:
+    void processDead(uint32_t t); // override;
+private:
     void findNextEnemy();
     void AI_processAttack(uint32_t t);
     void AI_processAttack(Unit *pEnemy, uint32_t t);

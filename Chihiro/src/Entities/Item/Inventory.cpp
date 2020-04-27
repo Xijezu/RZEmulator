@@ -13,14 +13,19 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Inventory.h"
+
 #include "Item.h"
 
-Inventory::Inventory() : m_pEventReceiver(nullptr), m_fWeight(0),
-                         m_fWeightModifier(0), m_vList(),
-                         m_vExpireItemList(), m_nIndex(0)
+Inventory::Inventory()
+    : m_pEventReceiver(nullptr)
+    , m_fWeight(0)
+    , m_fWeightModifier(0)
+    , m_vList()
+    , m_vExpireItemList()
+    , m_nIndex(0)
 {
 }
 

@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "QuadTreeMapInfo.h"
 
@@ -26,7 +26,7 @@ X2D::QuadTreeMapInfo::Node::Node(X2D::Pointf p1, X2D::Pointf p2, uint16_t depth)
 bool X2D::QuadTreeMapInfo::Node::Add(MapLocationInfo u)
 {
     bool result;
-    Node nn{ };
+    Node nn{};
     nn.init = false;
 
     result = u.IsCollision(this->m_Area);
@@ -73,11 +73,7 @@ bool X2D::QuadTreeMapInfo::Node::Collision(X2D::Pointf c)
                 return true;
         }
 
-        if (this->m_pNode.count(0) != 0
-            && (this->m_pNode[0].Collision(c)
-                || this->m_pNode[1].Collision(c)
-                || this->m_pNode[2].Collision(c)
-                || this->m_pNode[3].Collision(c)))
+        if (this->m_pNode.count(0) != 0 && (this->m_pNode[0].Collision(c) || this->m_pNode[1].Collision(c) || this->m_pNode[2].Collision(c) || this->m_pNode[3].Collision(c)))
             return true;
     }
     return false;
@@ -93,11 +89,8 @@ bool X2D::QuadTreeMapInfo::Node::LooseCollision(X2D::Linef pLine)
                 return true;
         }
 
-        if (this->m_pNode.count(0) != 0
-            && (this->m_pNode[0].LooseCollision(pLine)
-                || this->m_pNode[1].LooseCollision(pLine)
-                || this->m_pNode[2].LooseCollision(pLine)
-                || this->m_pNode[3].LooseCollision(pLine)))
+        if (this->m_pNode.count(0) != 0 &&
+            (this->m_pNode[0].LooseCollision(pLine) || this->m_pNode[1].LooseCollision(pLine) || this->m_pNode[2].LooseCollision(pLine) || this->m_pNode[3].LooseCollision(pLine)))
             return true;
     }
     return false;
@@ -113,7 +106,7 @@ X2D::QuadTreeMapInfo::Node X2D::QuadTreeMapInfo::Node::getFitNode(MapLocationInf
         return this->m_pNode[2];
     if (u.IsIn(this->m_pNode[3].m_Area))
         return this->m_pNode[3];
-    Node node{ };
+    Node node{};
     node.init = false;
     return node;
 }
@@ -132,12 +125,12 @@ void X2D::QuadTreeMapInfo::Node::divide()
 {
     if (this->m_pNode.count(0) == 0)
     {
-        Pointf p1{ };
-        Pointf p2{ };
+        Pointf p1{};
+        Pointf p2{};
 
-        float easx      = ((this->m_Area.m_BottomRight.x - this->m_Area.m_TopLeft.x) * 0.5f) + this->m_Area.m_TopLeft.x;
-        float easy      = ((this->m_Area.m_BottomRight.y - this->m_Area.m_TopLeft.y) * 0.5f) + this->m_Area.m_TopLeft.y;
-        auto  new_depth = (uint16_t)(this->m_unDepth + 1);
+        float easx = ((this->m_Area.m_BottomRight.x - this->m_Area.m_TopLeft.x) * 0.5f) + this->m_Area.m_TopLeft.x;
+        float easy = ((this->m_Area.m_BottomRight.y - this->m_Area.m_TopLeft.y) * 0.5f) + this->m_Area.m_TopLeft.y;
+        auto new_depth = (uint16_t)(this->m_unDepth + 1);
 
         p1 = Pointf(this->m_Area.m_TopLeft.x, this->m_Area.m_TopLeft.y);
         p2 = Pointf(this->m_Area.m_TopLeft.x + easx, this->m_Area.m_TopLeft.y + easy);
@@ -155,9 +148,9 @@ void X2D::QuadTreeMapInfo::Node::divide()
         p2 = Pointf(this->m_Area.m_BottomRight.x, this->m_Area.m_BottomRight.y);
         this->m_pNode[3] = Node(p1, p2, new_depth);
 
-        std::vector<MapLocationInfo> nl{ };
+        std::vector<MapLocationInfo> nl{};
 
-        for (auto &info: this->m_vList)
+        for (auto &info : this->m_vList)
         {
             Node fn = this->getFitNode(info);
             if (fn.init)
@@ -179,7 +172,7 @@ X2D::QuadTreeMapInfo::QuadTreeMapInfo(float width, float height)
 {
     Pointf p1 = Pointf(0, 0);
     Pointf p2 = Pointf(width, height);
-    m_Area       = RectangleF(p1, p2);
+    m_Area = RectangleF(p1, p2);
     m_MasterNode = Node(p1, p2, 0);
 }
 

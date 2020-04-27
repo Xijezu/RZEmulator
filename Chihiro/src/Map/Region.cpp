@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Region.h"
 
@@ -22,17 +22,17 @@ void Region::AddObject(WorldObject *obj)
     RegionType *lbo{nullptr};
     switch (obj->GetObjType())
     {
-        case OBJ_CLIENT:
-            lbo = &m_vClientObjects;
-            break;
-        case OBJ_MOVABLE:
-            lbo = &m_vMovableObjects;
-            break;
-        case OBJ_STATIC:
-            lbo = &m_vStaticObjects;
-            break;
-        default:
-            return;
+    case OBJ_CLIENT:
+        lbo = &m_vClientObjects;
+        break;
+    case OBJ_MOVABLE:
+        lbo = &m_vMovableObjects;
+        break;
+    case OBJ_STATIC:
+        lbo = &m_vStaticObjects;
+        break;
+    default:
+        return;
     }
     addObject(obj, lbo);
 }
@@ -42,17 +42,17 @@ void Region::RemoveObject(WorldObject *obj)
     RegionType *lbo{nullptr};
     switch (obj->GetObjType())
     {
-        case OBJ_CLIENT:
-            lbo = &m_vClientObjects;
-            break;
-        case OBJ_MOVABLE:
-            lbo = &m_vMovableObjects;
-            break;
-        case OBJ_STATIC:
-            lbo = &m_vStaticObjects;
-            break;
-        default:
-            return;
+    case OBJ_CLIENT:
+        lbo = &m_vClientObjects;
+        break;
+    case OBJ_MOVABLE:
+        lbo = &m_vMovableObjects;
+        break;
+    case OBJ_STATIC:
+        lbo = &m_vStaticObjects;
+        break;
+    default:
+        return;
     }
     removeObject(obj, lbo);
 }
@@ -60,7 +60,7 @@ void Region::RemoveObject(WorldObject *obj)
 uint32_t Region::DoEachClient(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto       &obj : m_vClientObjects)
+    for (auto &obj : m_vClientObjects)
     {
         fn.Run(obj);
     }
@@ -70,7 +70,7 @@ uint32_t Region::DoEachClient(WorldObjectFunctor &fn)
 uint32_t Region::DoEachStaticObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto       &obj : m_vStaticObjects)
+    for (auto &obj : m_vStaticObjects)
     {
         fn.Run(obj);
     }
@@ -80,7 +80,7 @@ uint32_t Region::DoEachStaticObject(WorldObjectFunctor &fn)
 uint32_t Region::DoEachMovableObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto       &obj : m_vMovableObjects)
+    for (auto &obj : m_vMovableObjects)
     {
         fn.Run(obj);
     }
@@ -96,10 +96,10 @@ void Region::addObject(WorldObject *obj, std::vector<WorldObject *> *v)
     // If this ASSERT fails, fix your fricking code
     // Having invalid region pointers
     // is an absolute no go
-            ASSERT(obj->pRegion == nullptr);
+    ASSERT(obj->pRegion == nullptr);
     v->emplace_back(obj);
     obj->AddToWorld();
-    obj->pRegion      = this;
+    obj->pRegion = this;
     obj->region_index = (int32_t)(v->size() - 1);
 }
 
@@ -112,9 +112,9 @@ void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
     // If this ASSERT fails, fix your fricking code
     // Having invalid region pointers
     // is an absolute no go
-            ASSERT(!v->empty());
-            ASSERT((*v)[obj->region_index]->GetHandle() == obj->GetHandle());
-            ASSERT(obj->pRegion == this);
+    ASSERT(!v->empty());
+    ASSERT((*v)[obj->region_index]->GetHandle() == obj->GetHandle());
+    ASSERT(obj->pRegion == this);
 
     if (v->back()->GetHandle() != obj->GetHandle())
     {
@@ -124,6 +124,6 @@ void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
     }
     v->erase(v->end() - 1);
     obj->region_index = -1;
-    obj->pRegion      = nullptr;
+    obj->pRegion = nullptr;
     obj->RemoveFromWorld();
 }

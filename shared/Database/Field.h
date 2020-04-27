@@ -14,10 +14,11 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
-#include "DatabaseEnvFwd.h"
+ */
 #include <vector>
+
+#include "DatabaseEnvFwd.h"
+#include "Define.h"
 
 enum class DatabaseFieldTypes : uint8_t
 {
@@ -68,7 +69,7 @@ class Field
     friend class ResultSet;
     friend class PreparedResultSet;
 
-  public:
+public:
     Field();
     ~Field();
 
@@ -91,10 +92,7 @@ class Field
     std::string GetString() const;
     std::vector<uint8_t> GetBinary() const;
 
-    bool IsNull() const
-    {
-        return data.value == NULL;
-    }
+    bool IsNull() const { return data.value == NULL; }
 
     struct Metadata
     {
@@ -106,14 +104,14 @@ class Field
         uint32_t Index;
     };
 
-  protected:
+protected:
 #pragma pack(push, 1)
     struct
     {
-        uint32_t length;         // Length (prepared strings only)
-        void *value;             // Actual data in memory
+        uint32_t length; // Length (prepared strings only)
+        void *value; // Actual data in memory
         DatabaseFieldTypes type; // Field type
-        bool raw;                // Raw bytes? (Prepared statement or ad hoc)
+        bool raw; // Raw bytes? (Prepared statement or ad hoc)
     } data;
 #pragma pack(pop)
 
@@ -132,7 +130,7 @@ class Field
 
     bool IsNumeric() const;
 
-  private:
+private:
 #ifdef NGEMITY_DEBUG
     void LogWrongType(char *getter) const;
     void SetMetadata(MYSQL_FIELD *field, uint32_t fieldIndex);

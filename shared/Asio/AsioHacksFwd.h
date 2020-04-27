@@ -20,28 +20,36 @@
 /**
   Collection of forward declarations to improve compile time
 */
-namespace boost {
-namespace posix_time {
-class ptime;
-}
+namespace boost
+{
+    namespace posix_time
+    {
+        class ptime;
+    }
 
-namespace asio {
-template <typename Time> struct time_traits;
+    namespace asio
+    {
+        template<typename Time>
+        struct time_traits;
 
-namespace ip {
-class address;
+        namespace ip
+        {
+            class address;
 
-class tcp;
+            class tcp;
 
-template <typename InternetProtocol> class basic_endpoint;
+            template<typename InternetProtocol>
+            class basic_endpoint;
 
-typedef basic_endpoint<tcp> tcp_endpoint;
-} // namespace ip
-} // namespace asio
+            typedef basic_endpoint<tcp> tcp_endpoint;
+        } // namespace ip
+    } // namespace asio
 } // namespace boost
 
-namespace NGemity {
-namespace Asio {
-class Strand;
-}
+namespace NGemity
+{
+    namespace Asio
+    {
+        class Strand;
+    }
 } // namespace NGemity

@@ -14,15 +14,15 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include "DatabaseEnvFwd.h"
+#include "Define.h"
 
 //- Union that holds element data
 union SQLElementUnion
 {
     PreparedStatement *stmt;
-    const char        *query;
+    const char *query;
 };
 
 //- Type specifier of our element data
@@ -35,7 +35,7 @@ enum SQLElementDataType
 //- The element
 struct SQLElementData
 {
-    SQLElementUnion    element;
+    SQLElementUnion element;
     SQLElementDataType type;
 };
 
@@ -43,31 +43,34 @@ struct SQLElementData
 union SQLResultSetUnion
 {
     PreparedResultSet *presult;
-    ResultSet         *qresult;
+    ResultSet *qresult;
 };
 
 class MySQLConnection;
 
 class SQLOperation
 {
-    public:
-        SQLOperation() : m_conn(NULL) {}
+public:
+    SQLOperation()
+        : m_conn(NULL)
+    {
+    }
 
-        virtual ~SQLOperation() {}
+    virtual ~SQLOperation() {}
 
-        virtual int call()
-        {
-            Execute();
-            return 0;
-        }
+    virtual int call()
+    {
+        Execute();
+        return 0;
+    }
 
-        virtual bool Execute() = 0;
+    virtual bool Execute() = 0;
 
-        virtual void SetConnection(MySQLConnection *con) { m_conn = con; }
+    virtual void SetConnection(MySQLConnection *con) { m_conn = con; }
 
-        MySQLConnection *m_conn;
+    MySQLConnection *m_conn;
 
-    private:
-        SQLOperation(SQLOperation const &right) = delete;
-        SQLOperation &operator=(SQLOperation const &right) = delete;
+private:
+    SQLOperation(SQLOperation const &right) = delete;
+    SQLOperation &operator=(SQLOperation const &right) = delete;
 };

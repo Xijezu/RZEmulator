@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "Common.h"
 #include "Object.h"
 #include "Player.h"
@@ -34,7 +34,7 @@ class Skill;
  *
  * However, some day this needs a revamp. How? I don't know.
  * But it is annoying.
-*/
+ */
 
 struct WorldObjectFunctor
 {
@@ -51,7 +51,7 @@ struct SkillFunctor
     virtual void onSkill(const Skill *pSkill) {}
 };
 
-template <typename T>
+template<typename T>
 struct BroadcastFunctor
 {
     T packet;
@@ -84,10 +84,26 @@ struct SendEnterMessageFunctor
 struct AddObjectFunctor
 {
     explicit AddObjectFunctor(uint32_t _x, uint32_t _y, uint8_t _layer, WorldObject *obj)
-        : newObj(obj), bSend(false), x(_x), y(_y), x2(0), y2(0), layer(_layer) {}
+        : newObj(obj)
+        , bSend(false)
+        , x(_x)
+        , y(_y)
+        , x2(0)
+        , y2(0)
+        , layer(_layer)
+    {
+    }
 
     explicit AddObjectFunctor(uint32_t _x, uint32_t _y, uint32_t _x2, uint32_t _y2, uint8_t _layer, WorldObject *obj)
-        : newObj(obj), bSend(false), x(_x), y(_y), x2(_x2), y2(_y2), layer(_layer) {}
+        : newObj(obj)
+        , bSend(false)
+        , x(_x)
+        , y(_y)
+        , x2(_x2)
+        , y2(_y2)
+        , layer(_layer)
+    {
+    }
 
     void Run();
     void Run2();
@@ -130,7 +146,10 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor
 
     struct SubFunctor : public WorldObjectFunctor
     {
-        SubFunctor() : pParent(nullptr) {}
+        SubFunctor()
+            : pParent(nullptr)
+        {
+        }
 
         void Run(WorldObject *obj) override;
 

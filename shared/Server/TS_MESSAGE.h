@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #include "ClientPackets.h"
 
 enum TS_ResultCode
@@ -91,7 +91,7 @@ enum TS_ResultCode
     TS_RESULT_ALREADY_TAMING = 0x46,
     TS_RESULT_GAMETIME_LIMITED = 0x47,
     TS_RESULT_ERROR_MAX = 0x48,
-    //Client side errors
+    // Client side errors
     TS_RESULT_CLIENT_SIDE_ERROR = 0xFFFF
 };
 

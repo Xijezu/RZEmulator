@@ -3,9 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_HIDE_EQUIP_INFO_DEF(_) \
-	_(simple)(uint32_t, hPlayer) \
-	_(simple)(uint32_t, nHideEquipFlag)
+#define TS_SC_HIDE_EQUIP_INFO_DEF(_) _(simple)(uint32_t, hPlayer) _(simple)(uint32_t, nHideEquipFlag)
 
 CREATE_PACKET(TS_SC_HIDE_EQUIP_INFO, 222);
 

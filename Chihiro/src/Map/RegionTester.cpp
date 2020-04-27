@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "RegionTester.h"
 
@@ -72,7 +72,8 @@ void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float Reg
 
 bool CrossRegionTester::IsInRegion(Position pos)
 {
-    return (thickness > (std::abs(x1 * pos.GetPositionX() + y1 * pos.GetPositionY() + c1) / denominator)) || (thickness > (std::abs(x2 * pos.GetPositionX() + y2 * pos.GetPositionY() + c2) / denominator));
+    return (thickness > (std::abs(x1 * pos.GetPositionX() + y1 * pos.GetPositionY() + c1) / denominator)) ||
+        (thickness > (std::abs(x2 * pos.GetPositionX() + y2 * pos.GetPositionY() + c2) / denominator));
 }
 
 void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)

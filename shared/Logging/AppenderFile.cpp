@@ -13,19 +13,22 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "AppenderFile.h"
+
+#include <algorithm>
+
 #include "Log.h"
 #include "LogMessage.h"
-#include <algorithm>
 #include "StringFormat.h"
 
-AppenderFile::AppenderFile(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs) : Appender(id, name, level, flags),
-                                                                                                                                            logfile(NULL),
-                                                                                                                                            _logDir(sLog->GetLogsDir()),
-                                                                                                                                            _maxFileSize(0),
-                                                                                                                                            _fileSize(0)
+AppenderFile::AppenderFile(uint8_t id, std::string const &name, LogLevel level, AppenderFlags flags, std::vector<char const *> extraArgs)
+    : Appender(id, name, level, flags)
+    , logfile(NULL)
+    , _logDir(sLog->GetLogsDir())
+    , _maxFileSize(0)
+    , _fileSize(0)
 {
     if (extraArgs.empty())
         throw InvalidAppenderArgsException(NGemity::StringFormatTC("Log::CreateAppenderFromConfig: Missing file name for appender %s\n", name.c_str()));

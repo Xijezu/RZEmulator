@@ -16,78 +16,83 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Common.h"
-#include "MessageBuffer.h"
-#include "Socket.h"
+ */
 #include <chrono>
 #include <functional>
-#include "XRc4Cipher.h"
-#include "MPSCQueue.h"
-#include "XPacket.h"
 #include <mutex>
+
+#include "Common.h"
+#include "MPSCQueue.h"
+#include "MessageBuffer.h"
 #include "Packets/MessageSerializerBuffer.h"
+#include "Socket.h"
+#include "XPacket.h"
+#include "XRc4Cipher.h"
 
 class EncryptablePacket : public XPacket
 {
 public:
-  EncryptablePacket(XPacket const &packet, bool encrypt) : XPacket(packet), _encrypt(encrypt) {}
-  bool NeedsEncryption() const { return _encrypt; }
+    EncryptablePacket(XPacket const &packet, bool encrypt)
+        : XPacket(packet)
+        , _encrypt(encrypt)
+    {
+    }
+    bool NeedsEncryption() const { return _encrypt; }
 
 private:
-  bool _encrypt;
+    bool _encrypt;
 };
 
 constexpr int HEADER_SIZE = sizeof(TS_MESSAGE);
 class XSocket : public Socket<XSocket>
 {
-  typedef Socket<XSocket> BaseSocket;
+    typedef Socket<XSocket> BaseSocket;
 
 public:
-  explicit XSocket(boost::asio::ip::tcp::socket &&socket);
-  XSocket(XSocket const &right) = delete;
-  XSocket &operator=(XSocket const &right) = delete;
+    explicit XSocket(boost::asio::ip::tcp::socket &&socket);
+    XSocket(XSocket const &right) = delete;
+    XSocket &operator=(XSocket const &right) = delete;
 
-  // Overrides
-  virtual ReadDataHandlerResult ProcessIncoming(XPacket *) { return ReadDataHandlerResult::Error; };
-  virtual bool IsEncrypted() const { return true; }
-  virtual ~XSocket() = default;
+    // Overrides
+    virtual ReadDataHandlerResult ProcessIncoming(XPacket *) { return ReadDataHandlerResult::Error; };
+    virtual bool IsEncrypted() const { return true; }
+    virtual ~XSocket() = default;
 
-  void Start() override;
-  bool Update() override;
+    void Start() override;
+    bool Update() override;
 
-  void SendPacket(XPacket const &packet);
+    void SendPacket(XPacket const &packet);
 
-  template <class TS_SERIALIZABLE_PACKET>
-  void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
-  {
-    if (!IsOpen())
-      return;
+    template<class TS_SERIALIZABLE_PACKET>
+    void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
+    {
+        if (!IsOpen())
+            return;
 
-    XPacket output;
-    MessageSerializerBuffer serializer(&output);
-    packet.serialize(&serializer);
-    SendPacket(*serializer.getFinalizedPacket());
-  }
+        XPacket output;
+        MessageSerializerBuffer serializer(&output);
+        packet.serialize(&serializer);
+        SendPacket(*serializer.getFinalizedPacket());
+    }
 
-  void SetSendBufferSize(std::size_t sendBufferSize);
+    void SetSendBufferSize(std::size_t sendBufferSize);
 
 protected:
-  virtual void OnClose() {}
+    virtual void OnClose() {}
 
-  void ReadHandler() override;
-  bool ReadHeaderHandler();
-  ReadDataHandlerResult ReadDataHandler();
+    void ReadHandler() override;
+    bool ReadHeaderHandler();
+    ReadDataHandlerResult ReadDataHandler();
 
-  virtual void InitSocket() {}
+    virtual void InitSocket() {}
 
 private:
-  void WritePacketToBuffer(EncryptablePacket const &packet, MessageBuffer &buffer);
+    void WritePacketToBuffer(EncryptablePacket const &packet, MessageBuffer &buffer);
 
-  XRC4Cipher _encryption, _decryption;
+    XRC4Cipher _encryption, _decryption;
 
-  MPSCQueue<EncryptablePacket> _bufferQueue;
-  MessageBuffer _headerBuffer;
-  MessageBuffer _packetBuffer;
-  std::size_t _sendBufferSize;
+    MPSCQueue<EncryptablePacket> _bufferQueue;
+    MessageBuffer _headerBuffer;
+    MessageBuffer _packetBuffer;
+    std::size_t _sendBufferSize;
 };

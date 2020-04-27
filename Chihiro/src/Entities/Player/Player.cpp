@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Player.h"
+
 #include "ClientPackets.h"
 #include "DatabaseEnv.h"
 #include "DungeonManager.h"
@@ -39,7 +40,10 @@
 #pragma warning(disable : 4355)
 #endif
 
-Player::Player(uint32_t handle) : Unit(true), m_TS(TimeSynch(200, 2, 10)), m_session(nullptr)
+Player::Player(uint32_t handle)
+    : Unit(true)
+    , m_TS(TimeSynch(200, 2, 10))
+    , m_session(nullptr)
 {
 #ifdef _MSC_VER
 #pragma warning(default : 4355)
@@ -244,9 +248,9 @@ bool Player::ReadCharacter(const std::string &_name, int32_t _race)
                 auto pSummon = GetSummon(GetInt32Value(PLAYER_FIELD_SUMMON + i));
                 if (pSummon != nullptr)
                 {
-                    //nSummonHP[nSummonIdx] = pSummon.m_nHP;
+                    // nSummonHP[nSummonIdx] = pSummon.m_nHP;
                     pSummon->m_cSlotIdx = (uint8_t)nSummonIdx;
-                    //nSummonMP[nSummonIdx] = pSummon.m_fMP;
+                    // nSummonMP[nSummonIdx] = pSummon.m_fMP;
                     pSummon->CalculateStat();
                     m_aBindSummonCard[nSummonIdx] = pSummon->m_pItem;
                     nSummonIdx++;
@@ -265,7 +269,7 @@ bool Player::ReadCharacter(const std::string &_name, int32_t _race)
 
         CalculateStat();
         Messages::SendHPMPMessage(this, this, GetHealth(), GetMana(), true);
-        //Messages::sendEnterMessage(this, this, false);
+        // Messages::sendEnterMessage(this, this, false);
     }
     else
     {
@@ -455,15 +459,14 @@ bool Player::ReadItemList(int32_t sid)
             int32_t socket_3 = fields[i++].GetInt32();
             int32_t remain_time = fields[i++].GetInt32();
 
-            auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag,
-                                        socket_0, socket_1, socket_2, socket_3, remain_time);
+            auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
             if (item == nullptr)
             {
                 NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
                 continue;
             }
             item->GetItemInstance().SetFlag(item->GetItemInstance().GetFlag() & 0xDFFFFFFF);
-            //item->SetCurrentEndurance(endurance);
+            // item->SetCurrentEndurance(endurance);
 
             if (code != 0)
             {
@@ -530,7 +533,8 @@ bool Player::ReadStateList(Unit *pUnit)
             State *state = new State{};
             auto si = sObjectMgr.GetStateInfo(code);
             m_nCurrentStateUID++;
-            state->SetState(code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint32_t)(sWorld.GetArTime() + remain_fire_time - 100 * si->fire_interval), base_damage, 0, "");
+            state->SetState(
+                code, m_nCurrentStateUID, pUnit->GetHandle(), levels, duration, remain_times, (uint32_t)(sWorld.GetArTime() + remain_fire_time - 100 * si->fire_interval), base_damage, 0, "");
             sMemoryPool.AllocMiscHandle(state);
             pUnit->m_vStateList.emplace_back(state);
         } while (result->NextRow());
@@ -746,7 +750,7 @@ bool Player::ReadSummonList(int32_t UID)
         {
             Field *fields = result->Fetch();
             int32_t i = 0;
-            //PrepareStatement(CHARACTER_GET_SUMMONLIST, "SELECT sid, account_id, code, card_uid, exp, jp,
+            // PrepareStatement(CHARACTER_GET_SUMMONLIST, "SELECT sid, account_id, code, card_uid, exp, jp,
             // last_decreased_exp, name, transform, lv, jlv, max_level, fp, prev_level_01, prev_level_02,
             // prev_id_01, prev_id_02, sp, hp, mp FROM Summon WHERE owner_id = ?", CONNECTION_SYNCH);
             uint32_t sid = fields[i++].GetUInt32();
@@ -993,7 +997,7 @@ void Player::Save(bool bOnlyPlayer)
     {
         for (auto &item : m_Inventory.m_vList)
         {
-            //if (item->m_bIsNeedUpdateToDB)
+            // if (item->m_bIsNeedUpdateToDB)
             item->DBUpdate();
         }
 
@@ -1039,7 +1043,7 @@ void Player::applyJobLevelBonus()
             jobs[i] = GetPrevJobId(i);
             levels[i] = GetPrevJobLv(i);
         }
-        //i++;
+        // i++;
 
         jobs[i] = GetCurrentJob();
         levels[i] = GetCurrentJLv();
@@ -1549,9 +1553,7 @@ void Player::onRegisterSkill(int64_t skillUID, int32_t skill_id, int32_t prev_le
 
     int32_t skill_type = sb->GetSkillEffectType();
 
-    if (skill_id == SKILL_CREATURE_MASTERY ||
-        skill_type == EF_INCREASE_SUMMON_HP_MP_SP ||
-        skill_type == EF_AMPLIFY_SUMMON_HP_MP_SP)
+    if (skill_id == SKILL_CREATURE_MASTERY || skill_type == EF_INCREASE_SUMMON_HP_MP_SP || skill_type == EF_AMPLIFY_SUMMON_HP_MP_SP)
     {
         setSummonUpdate();
     }
@@ -1635,7 +1637,7 @@ void Player::onChangeProperty(std::string key, int32_t value)
     else if (key == "job")
     {
         this->CalculateStat();
-        //return;
+        // return;
     }
     else if (key == "jlvl" || key == "jlv" || key == "job_level")
     {
@@ -1711,8 +1713,8 @@ void Player::LogoutNow(int32_t /*callerIdx*/)
 {
     if (IsInWorld())
     {
-        //RemoveAllSummonFromWorld();
-        //sWorld.RemoveObjectFromWorld(this);
+        // RemoveAllSummonFromWorld();
+        // sWorld.RemoveObjectFromWorld(this);
     }
     Save(false);
 }
@@ -1774,9 +1776,10 @@ void Player::DoUnSummon(Summon *pSummon)
 
     TS_SC_UNSUMMON usPct{};
     usPct.summon_handle = pSummon->GetHandle();
-    sWorld.Broadcast((uint32_t)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pSummon->GetLayer(), usPct);
+    sWorld.Broadcast((uint32_t)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        pSummon->GetLayer(), usPct);
     if (sRegion.IsVisibleRegion((uint32_t)(pSummon->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pSummon->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                                (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))) == 0)
+            (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE))) == 0)
     {
         SendPacket(usPct);
     }
@@ -1835,8 +1838,7 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
         if (m_anWear[ItemWearType::WEAR_RIGHTHAND] == nullptr)
             return false;
 
-        if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_CROSSBOW &&
-            m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_LIGHT_BOW &&
+        if (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_CROSSBOW && m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_LIGHT_BOW &&
             m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_HEAVY_BOW)
         {
             return false;
@@ -1901,31 +1903,20 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
 
     if (pos == ItemWearType::WEAR_DECO_SHIELD)
     {
-        if (pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_SWORD ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SWORD ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_DAGGER ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SPEAR ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_AXE ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_MACE ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_MACE ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_HEAVY_BOW ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_LIGHT_BOW ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_CROSSBOW ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_STAFF ||
-            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_STAFF ||
+        if (pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_SWORD || pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SWORD || pItem->GetItemClass() == ItemClass::CLASS_DECO_DAGGER ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_SPEAR || pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_AXE || pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_MACE ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_MACE || pItem->GetItemClass() == ItemClass::CLASS_DECO_HEAVY_BOW || pItem->GetItemClass() == ItemClass::CLASS_DECO_LIGHT_BOW ||
+            pItem->GetItemClass() == ItemClass::CLASS_DECO_CROSSBOW || pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_STAFF || pItem->GetItemClass() == ItemClass::CLASS_DECO_TWOHAND_STAFF ||
             pItem->GetItemClass() == ItemClass::CLASS_DECO_ONEHAND_AXE)
         {
-            if (m_anWear[ItemWearType::WEAR_LEFTHAND] != nullptr &&
-                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD &&
-                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER &&
-                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE)
+            if (m_anWear[ItemWearType::WEAR_LEFTHAND] != nullptr && m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD &&
+                m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER && m_anWear[ItemWearType::WEAR_LEFTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE)
             {
                 pos = ItemWearType::WEAR_DECO_WEAPON;
             }
             else if (m_anWear[ItemWearType::WEAR_RIGHTHAND] == nullptr ||
-                     (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD &&
-                      m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER &&
-                      m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE))
+                (m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_SWORD && m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_DAGGER &&
+                    m_anWear[ItemWearType::WEAR_RIGHTHAND]->GetItemClass() != ItemClass::CLASS_ONEHAND_AXE))
             {
                 pos = ItemWearType::WEAR_DECO_WEAPON;
             }
@@ -2081,30 +2072,26 @@ bool Player::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
 
         if (pos == ItemWearType::WEAR_SHIELD)
         {
-            if (pItem->GetItemClass() == ItemClass::CLASS_SHIELD && m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr && m_anWear[ItemWearType::WEAR_DECO_SHIELD]->GetItemClass() != ItemClass::CLASS_DECO_SHIELD)
+            if (pItem->GetItemClass() == ItemClass::CLASS_SHIELD && m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr &&
+                m_anWear[ItemWearType::WEAR_DECO_SHIELD]->GetItemClass() != ItemClass::CLASS_DECO_SHIELD)
                 vpOverlappItemList->emplace_back(ItemWearType::WEAR_DECO_SHIELD);
 
             if (m_anWear[ItemWearType::WEAR_DECO_SHIELD] != nullptr && m_anWear[ItemWearType::WEAR_DECO_SHIELD]->GetItemClass() == ItemClass::CLASS_DECO_SHIELD)
                 vpOverlappItemList->emplace_back(ItemWearType::WEAR_DECO_SHIELD);
         }
 
-        if (m_anWear[ItemWearType::WEAR_WEAPON] != nullptr &&
-            m_anWear[ItemWearType::WEAR_WEAPON]->IsTwoHandItem() &&
-            pos == ItemWearType::WEAR_LEFTHAND)
+        if (m_anWear[ItemWearType::WEAR_WEAPON] != nullptr && m_anWear[ItemWearType::WEAR_WEAPON]->IsTwoHandItem() && pos == ItemWearType::WEAR_LEFTHAND)
         {
             if ((!m_anWear[ItemWearType::WEAR_WEAPON]->IsBow() && !m_anWear[ItemWearType::WEAR_WEAPON]->IsCrossBow()) || !pItem->IsBullet())
                 vpOverlappItemList->emplace_back(ItemWearType::WEAR_RIGHTHAND);
         }
 
-        if (m_anWear[ItemWearType::WEAR_SECOND_RING] != nullptr &&
-            pItem->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING)
+        if (m_anWear[ItemWearType::WEAR_SECOND_RING] != nullptr && pItem->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING)
         {
             vpOverlappItemList->emplace_back(ItemWearType::WEAR_SECOND_RING);
         }
 
-        if (m_anWear[ItemWearType::WEAR_RING] != nullptr &&
-            m_anWear[ItemWearType::WEAR_RING]->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING &&
-            pItem->GetWearType() == ItemWearType::WEAR_RING)
+        if (m_anWear[ItemWearType::WEAR_RING] != nullptr && m_anWear[ItemWearType::WEAR_RING]->GetWearType() == ItemWearType::WEAR_TWOFINGER_RING && pItem->GetWearType() == ItemWearType::WEAR_RING)
         {
             vpOverlappItemList->emplace_back(ItemWearType::WEAR_RING);
         }
@@ -2248,7 +2235,8 @@ bool Player::IsStartableQuest(int32_t code, bool bForQuestMark)
     }
     else
     {
-        if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0) && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0) && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0) && (!IsSummoner() || (qbs->LimitFlag & 0x80) == 0))
+        if ((!IsHunter() || (qbs->LimitFlag & 0x20) == 0) && (!IsFighter() || (qbs->LimitFlag & 0x10) == 0) && (!IsMagician() || (qbs->LimitFlag & 0x40) == 0) &&
+            (!IsSummoner() || (qbs->LimitFlag & 0x80) == 0))
             return false;
     }
     if ((GetRace() != 3 || (qbs->LimitFlag & 8) == 0) && (GetRace() != 4 || (qbs->LimitFlag & 2) == 0) && (GetRace() != 5 || (qbs->LimitFlag & 4) == 0))
@@ -2284,7 +2272,7 @@ void Player::onStatusChanged(Quest *quest, int32_t nOldStatus, int32_t nNewStatu
     {
         if (quest->m_QuestBase->nEndType == 2)
         {
-            //EndQuest(quest->m_QuestBase->nCode, 0, false);
+            // EndQuest(quest->m_QuestBase->nCode, 0, false);
         }
 
         Messages::SendNPCStatusInVisibleRange(this);
@@ -2292,9 +2280,7 @@ void Player::onStatusChanged(Quest *quest, int32_t nOldStatus, int32_t nNewStatu
     Messages::SendQuestStatus(this, quest);
 }
 
-void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress)
-{
-}
+void Player::onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress) {}
 
 Quest *Player::FindQuest(int32_t code)
 {
@@ -2325,7 +2311,8 @@ void Player::onModifyStatAndAttribute()
 uint16_t Player::IsUseableItem(Item *pItem, Unit *pTarget)
 {
     uint32_t ct = sWorld.GetArTime();
-    if (pItem->GetItemTemplate()->cool_time_group < 0 || pItem->GetItemTemplate()->cool_time_group > 40 || (pItem->GetItemTemplate()->cool_time_group != 0 && m_nItemCooltime[pItem->GetItemTemplate()->cool_time_group - 1] > ct))
+    if (pItem->GetItemTemplate()->cool_time_group < 0 || pItem->GetItemTemplate()->cool_time_group > 40 ||
+        (pItem->GetItemTemplate()->cool_time_group != 0 && m_nItemCooltime[pItem->GetItemTemplate()->cool_time_group - 1] > ct))
         return TS_RESULT_COOL_TIME;
     // Ride IDX
     if (pItem->GetItemTemplate()->use_max_level != 0 && pItem->GetItemTemplate()->use_max_level < GetLevel())
@@ -2398,8 +2385,8 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
                 nCode = pTarget->As<NPC>()->GetNPCID();
             }
 
-            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), targetType,
-                                                (pTarget != nullptr ? pTarget->GetHandle() : 0), nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
+            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), targetType, (pTarget != nullptr ? pTarget->GetHandle() : 0),
+                nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
         }
 
         auto nNPCHandle = GetLastContactLong("npc");
@@ -2463,9 +2450,7 @@ Player *Player::FindPlayer(const std::string &szName)
     NG_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     auto const &m = sMemoryPool.GetPlayers();
 
-    auto pos = std::find_if(m.begin(),
-                            m.end(),
-                            [&szName](const auto &player) { return iequals(szName, player.second->GetNameAsString()); });
+    auto pos = std::find_if(m.begin(), m.end(), [&szName](const auto &player) { return iequals(szName, player.second->GetNameAsString()); });
 
     return pos == m.end() ? nullptr : pos->second;
 }
@@ -2672,7 +2657,7 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
         if (q->m_QuestBase->DefaultReward.nItemCode != 0)
         {
             auto pItem = Item::AllocItem(0, q->m_QuestBase->DefaultReward.nItemCode, (uint64_t)(q->m_QuestBase->DefaultReward.nQuantity * fMod), BY_QUEST,
-                                         q->m_QuestBase->DefaultReward.nLevel < 1 ? 1 : q->m_QuestBase->DefaultReward.nLevel, -1, -1, 0, 0, 0, 0, 0);
+                q->m_QuestBase->DefaultReward.nLevel < 1 ? 1 : q->m_QuestBase->DefaultReward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
 
@@ -2681,14 +2666,13 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
         if (nRewardID >= 0 && nRewardID < MAX_OPTIONAL_REWARD && q->m_QuestBase->OptionalReward[nRewardID].nItemCode != 0)
         {
             auto reward = q->m_QuestBase->OptionalReward[nRewardID];
-            auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64_t)(reward.nQuantity * fMod), BY_QUEST,
-                                         reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
+            auto pItem = Item::AllocItem(0, reward.nItemCode, (uint64_t)(reward.nQuantity * fMod), BY_QUEST, reward.nLevel < 1 ? 1 : reward.nLevel, -1, -1, 0, 0, 0, 0, 0);
 
             PushItem(pItem, pItem->GetItemInstance().GetCount(), false);
             Messages::SendQuestMessage(120, this, NGemity::StringFormat("END|REWARD|{}", pItem->GetItemInstance().GetCode()));
         }
-        //if(q->m_QuestBase->nIsMagicPointQuest != 0)
-        //UpdateQuestByQuestEnd(q);
+        // if(q->m_QuestBase->nIsMagicPointQuest != 0)
+        // UpdateQuestByQuestEnd(q);
 
         // DB_Insert is a "REPLACE INSERT", it acts like an Update in this case
         Quest::DB_Insert(this, q);
@@ -3508,7 +3492,7 @@ bool Player::IsSellable(Item *pItem) const
     if (!Player::IsErasable(pItem) || pItem->GetItemInstance().GetFlag() & ITEM_FLAG_TAMING)
         result = false;
     else
-        result = true; //this is not 100% correct, needs to be reworked
+        result = true; // this is not 100% correct, needs to be reworked
     return result;
 }
 
@@ -3778,7 +3762,7 @@ uint16_t Player::processTradeGold()
         if (tradeGold < 0)
         {
             NG_LOG_ERROR("trade", "Player::processTradeGold(): Gold cannot be negative value");
-            //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
+            // GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
             return TS_RESULT_ACCESS_DENIED;
         }
 
@@ -3797,7 +3781,7 @@ uint16_t Player::processTradeGold()
     else
     {
         NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
-        //GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
+        // GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
         return TS_RESULT_NOT_EXIST;
     }
 
@@ -3918,10 +3902,7 @@ void Player::onEnergyChange()
     TS_SC_ENERGY energyPct{};
     energyPct.handle = GetHandle();
     energyPct.energy = static_cast<uint16_t>(GetInt32Value(UNIT_FIELD_ENERGY));
-    sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-                     GetLayer(),
-                     energyPct);
+    sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), energyPct);
 }
 
 Summon *Player::GetRideObject() const

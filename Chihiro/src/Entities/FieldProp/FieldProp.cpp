@@ -13,9 +13,10 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "FieldProp.h"
+
 #include "Log.h"
 #include "MemPool.h"
 #include "Messages.h"
@@ -109,7 +110,8 @@ bool FieldProp::IsUsable(Player *pPlayer) const
                 return false;
             break;
         case 4:
-            if ((m_pFieldPropBase->nActivateValue[x][0] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][0])) || (m_pFieldPropBase->nActivateValue[x][1] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][1])))
+            if ((m_pFieldPropBase->nActivateValue[x][0] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][0])) ||
+                (m_pFieldPropBase->nActivateValue[x][1] != 0 && !pPlayer->IsWornByCode(m_pFieldPropBase->nActivateValue[x][1])))
                 return false;
             break;
         default:
@@ -129,7 +131,7 @@ bool FieldProp::Cast()
 bool FieldProp::UseProp(Player *pPlayer)
 {
     m_bIsCasting = false;
-    //int32_t oldUseCount = m_nUseCount;
+    // int32_t oldUseCount = m_nUseCount;
     if (m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
     {
         for (auto &i : m_pFieldPropBase->drop_info)
@@ -179,7 +181,8 @@ int32_t FieldProp::GetCastingDelay() const
     return m_pFieldPropBase != nullptr ? static_cast<int32_t>(m_pFieldPropBase->nCastingTime) : 0;
 }
 
-FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo) : WorldObject(true)
+FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo)
+    : WorldObject(true)
 {
     _mainType = MT_StaticObject;
     _subType = ST_FieldProp;

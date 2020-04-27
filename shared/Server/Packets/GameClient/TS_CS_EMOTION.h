@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_EMOTION_DEF(_) \
-	_(simple)(int32_t, emotion)
+#define TS_CS_EMOTION_DEF(_) _(simple)(int32_t, emotion)
 
 CREATE_PACKET(TS_CS_EMOTION, 1202);
 

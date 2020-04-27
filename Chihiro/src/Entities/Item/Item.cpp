@@ -13,17 +13,18 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Item.h"
+
 #include "DatabaseEnv.h"
 #include "GameRule.h"
 #include "MemPool.h"
 #include "Messages.h"
 #include "ObjectMgr.h"
 
-Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode eGenerateCode, int32_t nLevel, int32_t nEnhance,
-                      int32_t nFlag, int32_t nSocket0, int32_t nSocket1, int32_t nSocket2, int32_t nSocket3, int32_t nRemainingTime)
+Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode eGenerateCode, int32_t nLevel, int32_t nEnhance, int32_t nFlag, int32_t nSocket0, int32_t nSocket1, int32_t nSocket2,
+    int32_t nSocket3, int32_t nRemainingTime)
 {
     Item *pItem = sMemoryPool.AllocItem();
     if (pItem == nullptr)
@@ -131,32 +132,32 @@ void Item::DBInsert()
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_ITEM);
     uint8_t idx = 0;
 
-    stmt->setUInt64(idx++, GetItemInstance().GetUID());          // owner_id
-    stmt->setInt32(idx++, GetItemInstance().GetOwnerUID());      // owner_id
-    stmt->setInt32(idx++, GetAccountID());                       // account_id
-    stmt->setInt32(idx++, GetItemInstance().GetOwnSummonUID());  // summon_id
-    stmt->setInt32(idx++, GetItemInstance().GetAuctionID());     // auction_id
+    stmt->setUInt64(idx++, GetItemInstance().GetUID()); // owner_id
+    stmt->setInt32(idx++, GetItemInstance().GetOwnerUID()); // owner_id
+    stmt->setInt32(idx++, GetAccountID()); // account_id
+    stmt->setInt32(idx++, GetItemInstance().GetOwnSummonUID()); // summon_id
+    stmt->setInt32(idx++, GetItemInstance().GetAuctionID()); // auction_id
     stmt->setInt32(idx++, GetItemInstance().GetItemKeepingID()); // keepind_id
-    stmt->setInt32(idx++, GetItemInstance().GetIndex());         // Idx
-    stmt->setInt32(idx++, GetItemInstance().GetCode());          // code
-    stmt->setInt64(idx++, GetItemInstance().GetCount());         // Count
-    stmt->setInt32(idx++, GetItemInstance().GetLevel());         // level
-    stmt->setInt32(idx++, GetItemInstance().GetEnhance());       // enhance
-    stmt->setInt32(idx++, GetItemInstance().GetEndurance());     // Endurance
-    stmt->setInt32(idx++, GetItemInstance().GetFlag());          // Flag
-    stmt->setInt32(idx++, GetItemInstance().GetGenerateCode());  // GCode
-    stmt->setInt32(idx++, GetItemInstance().GetItemWearType());  // Wear Info
-    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(0));  // Socket_0
-    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(1));  // Socket_1
-    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(2));  // Socket_2
-    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(3));  // Socket_3
-    stmt->setInt32(idx++, 0);                                    // Socket_4
-    stmt->setInt32(idx++, 0);                                    // Socket_5
-    stmt->setInt32(idx++, GetItemInstance().GetExpire());        // remain time
-    stmt->setInt32(idx++, 0);                                    // elemental effect type
-    stmt->setInt32(idx++, 0);                                    // elemental effect expire_time
-    stmt->setInt32(idx++, 0);                                    // elemental effect attack point
-    stmt->setInt32(idx, 0);                                      // elemental effect magic point
+    stmt->setInt32(idx++, GetItemInstance().GetIndex()); // Idx
+    stmt->setInt32(idx++, GetItemInstance().GetCode()); // code
+    stmt->setInt64(idx++, GetItemInstance().GetCount()); // Count
+    stmt->setInt32(idx++, GetItemInstance().GetLevel()); // level
+    stmt->setInt32(idx++, GetItemInstance().GetEnhance()); // enhance
+    stmt->setInt32(idx++, GetItemInstance().GetEndurance()); // Endurance
+    stmt->setInt32(idx++, GetItemInstance().GetFlag()); // Flag
+    stmt->setInt32(idx++, GetItemInstance().GetGenerateCode()); // GCode
+    stmt->setInt32(idx++, GetItemInstance().GetItemWearType()); // Wear Info
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(0)); // Socket_0
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(1)); // Socket_1
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(2)); // Socket_2
+    stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(3)); // Socket_3
+    stmt->setInt32(idx++, 0); // Socket_4
+    stmt->setInt32(idx++, 0); // Socket_5
+    stmt->setInt32(idx++, GetItemInstance().GetExpire()); // remain time
+    stmt->setInt32(idx++, 0); // elemental effect type
+    stmt->setInt32(idx++, 0); // elemental effect expire_time
+    stmt->setInt32(idx++, 0); // elemental effect attack point
+    stmt->setInt32(idx, 0); // elemental effect magic point
 
     CharacterDatabase.Execute(stmt);
 
@@ -187,7 +188,7 @@ void Item::SetPickupOrder(const ItemPickupOrder &order)
 
 void Item::PendFreeItem(Item *pItem)
 {
-    //sMemoryPool.RemoveObject(pItem, true);
+    // sMemoryPool.RemoveObject(pItem, true);
     pItem->DeleteThis();
 }
 
@@ -347,7 +348,8 @@ void Item::SetBindTarget(Unit *pUnit)
     m_bIsNeedUpdateToDB = true;
 }
 
-Item::Item() : WorldObject(true)
+Item::Item()
+    : WorldObject(true)
 {
     _mainType = MT_StaticObject;
     _subType = ST_Object;

@@ -13,24 +13,27 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "DatabaseLoader.h"
+
+#include <mysqld_error.h>
+
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 
-#include <mysqld_error.h>
-
 DatabaseLoader::DatabaseLoader(std::string const &logger, uint32_t const /*defaultUpdateMask*/)
-    : _logger(logger), _autoSetup(false), _updateFlags(false)
+    : _logger(logger)
+    , _autoSetup(false)
+    , _updateFlags(false)
 {
 }
 
-template <class T>
+template<class T>
 DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::string const &name)
 {
-    //bool constexpr updatesEnabledForThis = false;
+    // bool constexpr updatesEnabledForThis = false;
 
     _open.push([this, name, &pool]() -> bool {
         std::string const dbString = sConfigMgr->GetStringDefault((name + "Database.CString").c_str(), "");
@@ -43,9 +46,10 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
         uint8_t const asyncThreads = uint8_t(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
         if (asyncThreads < 1 || asyncThreads > 32)
         {
-            NG_LOG_ERROR(_logger, "%s database: invalid number of worker threads specified. "
-                                  "Please pick a value between 1 and 32.",
-                         name.c_str());
+            NG_LOG_ERROR(_logger,
+                "%s database: invalid number of worker threads specified. "
+                "Please pick a value between 1 and 32.",
+                name.c_str());
             return false;
         }
 
@@ -54,16 +58,15 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
         pool.SetConnectionInfo(dbString, asyncThreads, synchThreads);
         if (auto error = pool.Open() != 0)
         {
-            NG_LOG_ERROR("sql.driver", "\nDatabasePool %s NOT opened. There were errors opening the MySQL connections. Check your SQLDriverLogFile "
-                                       "for specific errors. Read wiki at https://www.trinitycore.info/display/tc/TrinityCore+Home",
-                         name.c_str());
+            NG_LOG_ERROR("sql.driver",
+                "\nDatabasePool %s NOT opened. There were errors opening the MySQL connections. Check your SQLDriverLogFile "
+                "for specific errors. Read wiki at https://www.trinitycore.info/display/tc/TrinityCore+Home",
+                name.c_str());
 
             return false;
         }
         // Add the close operation
-        _close.push([&pool] {
-            pool.Close();
-        });
+        _close.push([&pool] { pool.Close(); });
         return true;
     });
 

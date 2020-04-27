@@ -22,4 +22,4 @@
 
 void CliThread();
 
-#endif //NGEMITY_CLITHREAD_H
+#endif // NGEMITY_CLITHREAD_H

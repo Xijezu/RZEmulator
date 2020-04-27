@@ -1,4 +1,5 @@
 #include "XRc4Cipher.h"
+
 #include "rc4_cipher.h"
 
 struct XRC4Cipher::TImpl : public RC4Cipher
@@ -33,7 +34,7 @@ void XRC4Cipher::tryCipher(const void *pSource, void *pTarget, unsigned len)
 
 void XRC4Cipher::doCipher(const void *pSource, void *pTarget, unsigned len)
 {
-    m_pImpl->code(reinterpret_cast< const unsigned char * >( pSource ), reinterpret_cast< unsigned char * >( pTarget ), len);
+    m_pImpl->code(reinterpret_cast<const unsigned char *>(pSource), reinterpret_cast<unsigned char *>(pTarget), len);
 }
 
 void XRC4Cipher::Encode(const void *pSource, void *pTarget, unsigned len, bool bIsPeek)
@@ -56,4 +57,3 @@ void XRC4Cipher::Clear()
 {
     m_pImpl->init("Neat & Simple", 0);
 }
-

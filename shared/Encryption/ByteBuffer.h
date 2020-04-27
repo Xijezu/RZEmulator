@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 #ifndef MX_TIMEZONE
 #if _MSC_VER >= 1900
 #define MX_TIMEZONE _timezone
@@ -25,37 +25,37 @@
 #endif
 #endif
 
-#include "Common.h"
-#include "ByteConverter.h"
-
-#include "Errors.h"
+#include <cstring>
 #include <exception>
 #include <list>
 #include <map>
 #include <string>
-#include <vector>
-#include <cstring>
 #include <time.h>
+#include <vector>
+
+#include "ByteConverter.h"
+#include "Common.h"
+#include "Errors.h"
 #include "MessageBuffer.h"
 
 // Root of ByteBuffer exception hierarchy
 class ByteBufferException : public std::exception
 {
-  public:
+public:
     ~ByteBufferException() throw() {}
 
     char const *what() const throw() { return msg_.c_str(); }
 
-  protected:
+protected:
     std::string &message() throw() { return msg_; }
 
-  private:
+private:
     std::string msg_;
 };
 
 class ByteBufferPositionException : public ByteBufferException
 {
-  public:
+public:
     ByteBufferPositionException(bool add, size_t pos, size_t size, size_t valueSize);
 
     ~ByteBufferPositionException() throw() {}
@@ -63,7 +63,7 @@ class ByteBufferPositionException : public ByteBufferException
 
 class ByteBufferSourceException : public ByteBufferException
 {
-  public:
+public:
     ByteBufferSourceException(size_t pos, size_t size, size_t valueSize);
 
     ~ByteBufferSourceException() throw() {}
@@ -71,23 +71,35 @@ class ByteBufferSourceException : public ByteBufferException
 
 class ByteBuffer
 {
-  public:
+public:
     constexpr static size_t DEFAULT_SIZE = 0x1000;
 
     // constructor
-    ByteBuffer() : _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
+    ByteBuffer()
+        : _rpos(0)
+        , _wpos(0)
+        , _bitpos(8)
+        , _curbitval(0)
     {
         _storage.reserve(DEFAULT_SIZE);
     }
 
-    explicit ByteBuffer(size_t reserve) : _rpos(0), _wpos(0), _bitpos(8), _curbitval(0)
+    explicit ByteBuffer(size_t reserve)
+        : _rpos(0)
+        , _wpos(0)
+        , _bitpos(8)
+        , _curbitval(0)
     {
         _storage.reserve(reserve);
     }
 
     // copy constructor
-    explicit ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
-                                                 _bitpos(buf._bitpos), _curbitval(buf._curbitval), _storage(buf._storage)
+    explicit ByteBuffer(const ByteBuffer &buf)
+        : _rpos(buf._rpos)
+        , _wpos(buf._wpos)
+        , _bitpos(buf._bitpos)
+        , _curbitval(buf._curbitval)
+        , _storage(buf._storage)
     {
     }
 
@@ -99,7 +111,7 @@ class ByteBuffer
         _rpos = _wpos = 0;
     }
 
-    template <typename T>
+    template<typename T>
     void append(T value)
     {
         FlushBits();
@@ -117,7 +129,7 @@ class ByteBuffer
         _bitpos = 8;
     }
 
-    template <typename T>
+    template<typename T>
     void put(size_t pos, T value)
     {
         EndianConvert(value);
@@ -136,7 +148,7 @@ class ByteBuffer
         * @param  value Data to write.
         * @param  bitCount Number of bits to store the value on.
        */
-    template <typename T>
+    template<typename T>
     void PutBits(size_t pos, T value, uint32_t bitCount)
     {
         if (!bitCount)
@@ -157,7 +169,7 @@ class ByteBuffer
     }
 
     // Writing start
-    template <typename T>
+    template<typename T>
     ByteBuffer &operator<<(T value)
     {
         append<T>(value);
@@ -181,7 +193,7 @@ class ByteBuffer
     }
 
     // Reading start
-    template <typename T>
+    template<typename T>
     ByteBuffer &operator>>(T &value)
     {
         value = read<T>();
@@ -223,10 +235,7 @@ class ByteBuffer
         return _rpos;
     }
 
-    void rfinish()
-    {
-        _rpos = wpos();
-    }
+    void rfinish() { _rpos = wpos(); }
 
     size_t wpos() const { return _wpos; }
 
@@ -236,8 +245,11 @@ class ByteBuffer
         return _wpos;
     }
 
-    template <typename T>
-    void read_skip() { read_skip(sizeof(T)); }
+    template<typename T>
+    void read_skip()
+    {
+        read_skip(sizeof(T));
+    }
 
     void read_skip(size_t skip)
     {
@@ -246,7 +258,7 @@ class ByteBuffer
         _rpos += skip;
     }
 
-    template <typename T>
+    template<typename T>
     T read()
     {
         auto r = read<T>(_rpos);
@@ -254,7 +266,7 @@ class ByteBuffer
         return r;
     }
 
-    template <typename T>
+    template<typename T>
     T read(size_t pos) const
     {
         if (pos + sizeof(T) > size())
@@ -325,12 +337,9 @@ class ByteBuffer
             _storage.reserve(ressize);
     }
 
-    void append(const char *src, size_t cnt)
-    {
-        return append((const uint8_t *)src, cnt);
-    }
+    void append(const char *src, size_t cnt) { return append((const uint8_t *)src, cnt); }
 
-    template <class T>
+    template<class T>
     void append(const T *src, size_t cnt)
     {
         return append((const uint8_t *)src, cnt * sizeof(T));
@@ -340,11 +349,11 @@ class ByteBuffer
     {
         if (!cnt)
             return;
-        //throw ByteBufferSourceException(_wpos, size(), cnt);
+        // throw ByteBufferSourceException(_wpos, size(), cnt);
 
         if (!src)
             return;
-        //throw ByteBufferSourceException(_wpos, size(), cnt);
+        // throw ByteBufferSourceException(_wpos, size(), cnt);
 
         ASSERT(size() < 10000000, "Size too big");
 
@@ -375,13 +384,13 @@ class ByteBuffer
     void textlike() const;
     void hexlike() const;
 
-  protected:
+protected:
     size_t _rpos, _wpos, _bitpos;
     uint8_t _curbitval;
     std::vector<uint8_t> _storage;
 };
 
-template <typename T>
+template<typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {
     b << (uint32_t)v.size();
@@ -392,7 +401,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
     return b;
 }
 
-template <typename T>
+template<typename T>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 {
     uint32_t vsize;
@@ -407,7 +416,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
     return b;
 }
 
-template <typename T>
+template<typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 {
     b << (uint32_t)v.size();
@@ -418,7 +427,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
     return b;
 }
 
-template <typename T>
+template<typename T>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
 {
     uint32_t vsize;
@@ -433,7 +442,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
     return b;
 }
 
-template <typename K, typename V>
+template<typename K, typename V>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 {
     b << (uint32_t)m.size();
@@ -444,7 +453,7 @@ inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
     return b;
 }
 
-template <typename K, typename V>
+template<typename K, typename V>
 inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
 {
     uint32_t msize;
@@ -461,7 +470,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
 }
 
 /// @todo Make a ByteBuffer.cpp and move all this inlining to it.
-template <>
+template<>
 inline std::string ByteBuffer::read<std::string>()
 {
     std::string tmp;
@@ -469,20 +478,20 @@ inline std::string ByteBuffer::read<std::string>()
     return tmp;
 }
 
-template <>
+template<>
 inline void ByteBuffer::read_skip<char *>()
 {
     std::string temp;
     *this >> temp;
 }
 
-template <>
+template<>
 inline void ByteBuffer::read_skip<char const *>()
 {
     read_skip<char *>();
 }
 
-template <>
+template<>
 inline void ByteBuffer::read_skip<std::string>()
 {
     read_skip<char *>();

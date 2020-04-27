@@ -14,24 +14,25 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-#include "Define.h"
+ */
 #include <vector>
+
+#include "Define.h"
 
 class QueryCallback;
 
 class QueryCallbackProcessor
 {
-    public:
-        QueryCallbackProcessor();
-        ~QueryCallbackProcessor();
+public:
+    QueryCallbackProcessor();
+    ~QueryCallbackProcessor();
 
-        void AddQuery(QueryCallback &&query);
-        void ProcessReadyQueries();
+    void AddQuery(QueryCallback &&query);
+    void ProcessReadyQueries();
 
-    private:
-        QueryCallbackProcessor(QueryCallbackProcessor const &) = delete;
-        QueryCallbackProcessor &operator=(QueryCallbackProcessor const &) = delete;
+private:
+    QueryCallbackProcessor(QueryCallbackProcessor const &) = delete;
+    QueryCallbackProcessor &operator=(QueryCallbackProcessor const &) = delete;
 
-        std::vector<QueryCallback> _callbacks;
+    std::vector<QueryCallback> _callbacks;
 };

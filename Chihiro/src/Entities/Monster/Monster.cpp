@@ -13,9 +13,12 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Monster.h"
+
+#include <algorithm>
+
 #include "EncodingScrambled.h"
 #include "GameContent.h"
 #include "GameRule.h"
@@ -30,9 +33,9 @@
 #include "Summon.h"
 #include "World.h"
 #include "XPacket.h"
-#include <algorithm>
 
-Monster::Monster(uint32_t handle, MonsterBase *mb) : Unit(true)
+Monster::Monster(uint32_t handle, MonsterBase *mb)
+    : Unit(true)
 {
     _mainType = MT_NPC;
     _subType = ST_Mob;
@@ -457,8 +460,8 @@ void Monster::Update(uint32_t diff)
 
             if (GetHealth() == 0)
                 return;
-            //if(GetHealth() == GetMaxHealth())
-            //clearHateList();
+            // if(GetHealth() == GetMaxHealth())
+            // clearHateList();
         }
         if (IsInWorld() && IsActable() && (/* m_bIsDungeonRaidMonster &&*/ !m_bComeBackHome))
             processFirstAttack(ct);
@@ -476,7 +479,7 @@ void Monster::Update(uint32_t diff)
         if (m_nLastHateUpdateTime < ct + 6000)
         {
             m_nLastHateUpdateTime = ct;
-            //updateHate();
+            // updateHate();
         }
         if (m_nTamedTime + 30000 < static_cast<int32_t>(ct))
         {
@@ -504,7 +507,7 @@ void Monster::processDead(uint32_t t)
     {
         if (IsInWorld())
             sWorld.RemoveObjectFromWorld(this);
-        //sMemoryPool.RemoveObject(this, true);
+        // sMemoryPool.RemoveObject(this, true);
         DeleteThis();
     }
 }
@@ -513,8 +516,8 @@ void Monster::SetStatus(MONSTER_STATUS status)
 {
     if (m_nStatus != STATUS_DEAD)
     {
-        //if((int32_t)status != m_nStatus && (int32_t)status != 4 && (int32_t)status != 0 && m_nStatus == 0)
-        //ResetTriggerCondition();
+        // if((int32_t)status != m_nStatus && (int32_t)status != 4 && (int32_t)status != 0 && m_nStatus == 0)
+        // ResetTriggerCondition();
         if (m_nStatus != status)
         {
             m_nStatus = status;
@@ -835,7 +838,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
     if (ht != nullptr && ht->nTime + 2500 < t)
         m_bNeedToFindEnemy = true;
 
-    if (/*!IsDungeonRaidMonster() &&*/ ((m_bNeedToFindEnemy && pEnemy->IsMoving() && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME) || (m_nLastEnemyDistance != 0 && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME && enemy_distance > m_nLastEnemyDistance)))
+    if (/*!IsDungeonRaidMonster() &&*/ ((m_bNeedToFindEnemy && pEnemy->IsMoving() && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME) ||
+        (m_nLastEnemyDistance != 0 && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME && enemy_distance > m_nLastEnemyDistance)))
     {
         auto pHateTag = getHateTag(pEnemy->GetHandle(), t);
         if (pHateTag != nullptr)
@@ -1068,9 +1072,7 @@ int32_t Monster::GetRace() const
 
 bool Monster::IsMovable()
 {
-    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR ||
-        m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP ||
-        m_Base->fight_type == MonsterBase::FIGHT_TYPE_TRAP ||
+    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR || m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP || m_Base->fight_type == MonsterBase::FIGHT_TYPE_TRAP ||
         m_Base->fight_type == MonsterBase::FIGHT_TYPE_NOT_MOVABLE)
         return false;
 
@@ -1079,9 +1081,7 @@ bool Monster::IsMovable()
 
 bool Monster::IsAttackable()
 {
-    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_ENVIRONMENT ||
-        m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR ||
-        m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP ||
+    if (m_Base->fight_type == MonsterBase::FIGHT_TYPE_ENVIRONMENT || m_Base->fight_type == MonsterBase::FIGHT_TYPE_DUNGEON_CONNECTOR || m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP ||
         m_Base->fight_type == MonsterBase::FIGHT_TYPE_TRAP)
         return false;
 
@@ -1123,9 +1123,7 @@ int32_t Monster::AddHate(uint32_t handle, int32_t pt, bool bBroadcast, bool bPro
 
 HateTag *Monster::getHateTag(uint32_t handle, uint32_t t)
 {
-    auto pos = std::find_if(m_vHateList.begin(),
-                            m_vHateList.end(),
-                            [handle](const HateTag &ht) { return ht.uid == handle; });
+    auto pos = std::find_if(m_vHateList.begin(), m_vHateList.end(), [handle](const HateTag &ht) { return ht.uid == handle; });
 
     if (pos != m_vHateList.end())
     {
@@ -1234,7 +1232,8 @@ void Monster::processWalk(uint32_t t)
         m_nWayPointIdx = wpi;
     }
 
-    if ((uint32_t)(tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || (uint32_t)(tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || !tmp_mv.bIsMoving)
+    if ((uint32_t)(tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
+        (uint32_t)(tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || !tmp_mv.bIsMoving)
     {
         if (!IsInWorld())
             return;
@@ -1526,7 +1525,7 @@ void Monster::procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyCont
         float fSharedChaos = vp.fContribute * chaos;
         if (vp.hPlayer == 0)
         {
-            //sWorld.addChaos(this, vp.nPartyID, fSharedChaos);
+            // sWorld.addChaos(this, vp.nPartyID, fSharedChaos);
         }
         else
         {

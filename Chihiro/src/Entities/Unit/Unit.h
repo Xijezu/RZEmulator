@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "Common.h"
 #include "CreatureAttribute.h"
@@ -130,10 +130,7 @@ public:
     /// END SKILLS
 
     virtual bool StartAttack(uint32_t target, bool bNeedFastReaction);
-    bool IsUsingDoubleWeapon() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON);
-    }
+    bool IsUsingDoubleWeapon() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON); }
 
     int32_t GetPrevJobId(int32_t nDepth) const
     {
@@ -153,174 +150,60 @@ public:
 
     void regenHPMP(uint32_t t);
 
-    uint32_t HasUnitTypeMask(uint32_t mask) const
-    {
-        return mask & m_unitTypeMask;
-    }
+    uint32_t HasUnitTypeMask(uint32_t mask) const { return mask & m_unitTypeMask; }
 
     /// BATTLE START
     void Attack(Unit *pTarget, uint32_t t, uint32_t attack_interval, AttackInfo *arDamage, bool &bIsDoubleAttack);
     void EndAttack();
 
-    uint32_t GetTargetHandle() const
-    {
-        return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE);
-    }
+    uint32_t GetTargetHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
     virtual int32_t GetMoveSpeed();
-    inline int32_t GetRealMoveSpeed()
-    {
-        return GetMoveSpeed() / 7;
-    }
+    inline int32_t GetRealMoveSpeed() { return GetMoveSpeed() / 7; }
     uint8_t GetRealRidingSpeed();
 
-    inline int32_t GetStrength() const
-    {
-        return m_cStat.strength;
-    }
-    inline int32_t GetVital() const
-    {
-        return m_cStat.vital;
-    }
-    inline int32_t GetDexterity() const
-    {
-        return m_cStat.dexterity;
-    }
-    inline int32_t GetAgility() const
-    {
-        return m_cStat.agility;
-    }
-    inline int32_t GetIntelligence() const
-    {
-        return m_cStat.intelligence;
-    }
-    inline int32_t GetMentality() const
-    {
-        return m_cStat.mentality;
-    }
-    inline int32_t GetLuck() const
-    {
-        return m_cStat.luck;
-    }
+    inline int32_t GetStrength() const { return m_cStat.strength; }
+    inline int32_t GetVital() const { return m_cStat.vital; }
+    inline int32_t GetDexterity() const { return m_cStat.dexterity; }
+    inline int32_t GetAgility() const { return m_cStat.agility; }
+    inline int32_t GetIntelligence() const { return m_cStat.intelligence; }
+    inline int32_t GetMentality() const { return m_cStat.mentality; }
+    inline int32_t GetLuck() const { return m_cStat.luck; }
 
-    virtual float GetFCM() const
-    {
-        return 1.0f;
-    }
-    inline int32_t GetCritical() const
-    {
-        return m_Attribute.nCritical;
-    }
-    inline int32_t GetCriticalPower() const
-    {
-        return m_Attribute.nCriticalPower;
-    }
-    inline int32_t GetAttackPointRight() const
-    {
-        return m_Attribute.nAttackPointRight;
-    }
-    inline int32_t GetAttackPointLeft() const
-    {
-        return m_Attribute.nAttackPointLeft;
-    }
-    inline int32_t GetDefence() const
-    {
-        return m_Attribute.nDefence;
-    }
-    inline int32_t GetMagicPoint() const
-    {
-        return m_Attribute.nMagicPoint;
-    }
-    inline int32_t GetMagicDefence() const
-    {
-        return m_Attribute.nMagicDefence;
-    }
-    inline int32_t GetAccuracyRight() const
-    {
-        return m_Attribute.nAccuracyRight;
-    }
-    inline int32_t GetAccuracyLeft() const
-    {
-        return m_Attribute.nAccuracyLeft;
-    }
-    inline int32_t GetMagicAccuracy() const
-    {
-        return m_Attribute.nMagicAccuracy;
-    }
-    inline int32_t GetAvoid() const
-    {
-        return m_Attribute.nAvoid;
-    }
-    inline int32_t GetMagicAvoid() const
-    {
-        return m_Attribute.nMagicAvoid;
-    }
-    inline int32_t GetBlockChance() const
-    {
-        return m_Attribute.nBlockChance;
-    }
-    inline int32_t GetBlockDefence() const
-    {
-        return m_Attribute.nBlockDefence;
-    }
-    inline int32_t GetAttackSpeed() const
-    {
-        return m_Attribute.nAttackSpeed;
-    }
-    inline int32_t GetMaxWeight() const
-    {
-        return m_Attribute.nMaxWeight;
-    }
-    inline int32_t GetCastingSpeed() const
-    {
-        return m_Attribute.nCastingSpeed;
-    }
+    virtual float GetFCM() const { return 1.0f; }
+    inline int32_t GetCritical() const { return m_Attribute.nCritical; }
+    inline int32_t GetCriticalPower() const { return m_Attribute.nCriticalPower; }
+    inline int32_t GetAttackPointRight() const { return m_Attribute.nAttackPointRight; }
+    inline int32_t GetAttackPointLeft() const { return m_Attribute.nAttackPointLeft; }
+    inline int32_t GetDefence() const { return m_Attribute.nDefence; }
+    inline int32_t GetMagicPoint() const { return m_Attribute.nMagicPoint; }
+    inline int32_t GetMagicDefence() const { return m_Attribute.nMagicDefence; }
+    inline int32_t GetAccuracyRight() const { return m_Attribute.nAccuracyRight; }
+    inline int32_t GetAccuracyLeft() const { return m_Attribute.nAccuracyLeft; }
+    inline int32_t GetMagicAccuracy() const { return m_Attribute.nMagicAccuracy; }
+    inline int32_t GetAvoid() const { return m_Attribute.nAvoid; }
+    inline int32_t GetMagicAvoid() const { return m_Attribute.nMagicAvoid; }
+    inline int32_t GetBlockChance() const { return m_Attribute.nBlockChance; }
+    inline int32_t GetBlockDefence() const { return m_Attribute.nBlockDefence; }
+    inline int32_t GetAttackSpeed() const { return m_Attribute.nAttackSpeed; }
+    inline int32_t GetMaxWeight() const { return m_Attribute.nMaxWeight; }
+    inline int32_t GetCastingSpeed() const { return m_Attribute.nCastingSpeed; }
 
-    inline CreatureAtributeServer &GetAttribute()
-    {
-        return m_Attribute;
-    }
-    inline CreatureAttributeAmplifier &GetAttributeAmplifier()
-    {
-        return m_AttributeAmplifier;
-    }
-    inline CreatureStat &GetCreatureStat()
-    {
-        return m_cStat;
-    }
-    inline CreatureStatAmplifier &GetCreatureStatAmplifier()
-    {
-        return m_StatAmplifier;
-    }
+    inline CreatureAtributeServer &GetAttribute() { return m_Attribute; }
+    inline CreatureAttributeAmplifier &GetAttributeAmplifier() { return m_AttributeAmplifier; }
+    inline CreatureStat &GetCreatureStat() { return m_cStat; }
+    inline CreatureStatAmplifier &GetCreatureStatAmplifier() { return m_StatAmplifier; }
 
-    uint32_t GetNextAttackableTime() const
-    {
-        return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME);
-    }
+    uint32_t GetNextAttackableTime() const { return GetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME); }
 
-    uint32_t GetTrapHandle() const
-    {
-        return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE);
-    }
+    uint32_t GetTrapHandle() const { return GetUInt32Value(UNIT_FIELD_TRAP_HANDLE); }
 
-    void SetTrapHandle(uint32_t nHandle)
-    {
-        SetUInt32Value(UNIT_FIELD_TRAP_HANDLE, nHandle);
-    }
+    void SetTrapHandle(uint32_t nHandle) { SetUInt32Value(UNIT_FIELD_TRAP_HANDLE, nHandle); }
 
-    float GetRealAttackRange() const
-    {
-        return (12 * m_Attribute.nAttackRange) / 100.0f;
-    }
+    float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
-    uint32_t GetAttackInterval() const
-    {
-        return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f);
-    };
-    int32_t GetElementalResist(ElementalType elemental_type) const
-    {
-        return m_Resist.nResist[elemental_type];
-    }
+    uint32_t GetAttackInterval() const { return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
+    int32_t GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[elemental_type]; }
 
     void AddEnergy();
     void RemoveEnergy(int32_t nEnergy);
@@ -328,30 +211,35 @@ public:
     State *GetState(StateCode code);
     Damage CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, float critical_amp, int32_t critical_bonus, int32_t nFlag);
     DamageInfo DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0);
-    DamageInfo DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0);
-    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealAdditionalMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
-    Damage DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0, StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    DamageInfo DealPhysicalNormalLeftHandDamage(
+        Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0);
+    Damage DealDamage(Unit *pFrom, float nDamage, ElementalType type, DamageType damageType, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealAdditionalMagicalDamage(Unit *pFrom, float nDamage, ElementalType type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealPhysicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
+    Damage DealMagicalStateDamage(Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE, int32_t accuracy_bonus = 0, int32_t critical_bonus = 0, int32_t nFlag = 0,
+        StateMod *damage_penalty = nullptr, StateMod *damage_advantage = nullptr);
 
     DamageInfo DealMagicalSkillDamage(Unit *pFrom, int32_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag);
     DamageInfo DealPhysicalSkillDamage(Unit *pFrom, int32_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag);
-    void ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type = ElementalType::TYPE_NONE);
+    void ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage,
+        ElementalType elemental_type = ElementalType::TYPE_NONE);
     int32_t damage(Unit *pFrom, int32_t nDamage, bool decreaseEXPOnDead = true);
 
-    bool IsPhysicalImmune()
-    {
-        return (GetState(SC_SEAL) != nullptr);
-    }
-    bool IsMagicalImmune()
-    {
-        return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr);
-    }
+    bool IsPhysicalImmune() { return (GetState(SC_SEAL) != nullptr); }
+    bool IsMagicalImmune() { return (GetState(SC_SEAL) != nullptr || GetState(SC_SHINE_WALL) != nullptr); }
 
     float GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad);
     bool ResurrectByState();
@@ -369,15 +257,9 @@ public:
     void RemoveGoodState(int32_t state_level);
 
     // Setters
-    void SetLevel(uint8_t lvl)
-    {
-        SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int32_t>(lvl));
-    }
+    void SetLevel(uint8_t lvl) { SetInt32Value(UNIT_FIELD_LEVEL, static_cast<int32_t>(lvl)); }
 
-    void SetCurrentJob(uint32_t job)
-    {
-        SetInt32Value(UNIT_FIELD_JOB, job);
-    }
+    void SetCurrentJob(uint32_t job) { SetInt32Value(UNIT_FIELD_JOB, job); }
 
     void SetJP(int32_t jp);
     void SetCurrentJLv(int32_t jlv);
@@ -390,193 +272,91 @@ public:
     virtual bool IsAlly(const Unit *pTarget);
     bool IsVisible(const Unit *pTarget);
 
-    bool IsDead() const
-    {
-        return GetHealth() == 0;
-    }
-    bool IsAlive() const
-    {
-        return !IsDead();
-    }
+    bool IsDead() const { return GetHealth() == 0; }
+    bool IsAlive() const { return !IsDead(); }
 
-    bool IsAttacking() const
-    {
-        return GetEnemyHandle() != 0;
-    }
-    uint32_t GetEnemyHandle() const
-    {
-        return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE);
-    }
+    bool IsAttacking() const { return GetEnemyHandle() != 0; }
+    uint32_t GetEnemyHandle() const { return GetUInt32Value(BATTLE_FIELD_TARGET_HANDLE); }
 
-    bool IsFeared() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED);
-    }
-    bool IsHavocBurst() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_HAVOC_BURST);
-    }
-    bool IsProcessingReflectDamage() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_PROCESSING_REFELCT);
-    }
-    bool IsFormChanged() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED);
-    }
-    bool IsHiding() const
-    {
-        return HasFlag(UNIT_FIELD_STATUS, STATUS_HIDING);
-    }
-    bool IsUsingSkill() const
-    {
-        return m_castingSkill != nullptr;
-    }
+    bool IsFeared() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED); }
+    bool IsHavocBurst() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_HAVOC_BURST); }
+    bool IsProcessingReflectDamage() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_PROCESSING_REFELCT); }
+    bool IsFormChanged() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED); }
+    bool IsHiding() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_HIDING); }
+    bool IsUsingSkill() const { return m_castingSkill != nullptr; }
 
     virtual bool IsActable();
     virtual bool IsAttackable();
     virtual bool IsMovable();
     virtual bool IsSkillCastable();
     virtual bool IsMagicCastable();
-    virtual bool IsSitDown() const
-    {
-        return false;
-    }
+    virtual bool IsSitDown() const { return false; }
 
-    void SetMaxHealth(uint32_t val)
-    {
-        SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val);
-    };
+    void SetMaxHealth(uint32_t val) { SetUInt32Value(UNIT_FIELD_MAX_HEALTH, val); };
 
-    void SetMaxMana(uint32_t val)
-    {
-        SetUInt32Value(UNIT_FIELD_MAX_MANA, val);
-    };
+    void SetMaxMana(uint32_t val) { SetUInt32Value(UNIT_FIELD_MAX_MANA, val); };
 
-    void SetFullHealth()
-    {
-        SetHealth(GetMaxHealth());
-    }
+    void SetFullHealth() { SetHealth(GetMaxHealth()); }
 
     void SetEXP(int64_t exp);
 
     int32_t GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad);
 
-    float GetCoolTimeSpeed() const
-    {
-        return m_Attribute.nCoolTimeSpeed / 100.0f;
-    }
+    float GetCoolTimeSpeed() const { return m_Attribute.nCoolTimeSpeed / 100.0f; }
 
     float GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const;
 
     uint32_t GetRemainCoolTime(int32_t skill_id) const;
     uint32_t GetTotalCoolTime(int32_t skill_id) const;
 
-    uint32_t GetBowAttackInterval()
-    {
-        return (uint32_t)((float)GetAttackInterval() * (1.0f - m_fBowInterval));
-    }
+    uint32_t GetBowAttackInterval() { return (uint32_t)((float)GetAttackInterval() * (1.0f - m_fBowInterval)); }
 
-    uint32_t GetBowInterval()
-    {
-        return (uint32_t)((float)GetAttackInterval() * m_fBowInterval);
-    }
+    uint32_t GetBowInterval() { return (uint32_t)((float)GetAttackInterval() * m_fBowInterval); }
 
     // Getters
-    int32_t GetLevel() const
-    {
-        return GetInt32Value(UNIT_FIELD_LEVEL);
-    }
+    int32_t GetLevel() const { return GetInt32Value(UNIT_FIELD_LEVEL); }
 
-    virtual int32_t GetRace() const
-    {
-        return GetInt32Value(UNIT_FIELD_RACE);
-    }
+    virtual int32_t GetRace() const { return GetInt32Value(UNIT_FIELD_RACE); }
 
     int32_t GetMagicPoint(ElementalType type, bool bPhysical, bool bBad);
 
     /// @Todo: Implement correctly
-    bool IsKnockbackable() const
-    {
-        return true;
-    }
+    bool IsKnockbackable() const { return true; }
 
-    uint32_t GetNextMovableTime() const
-    {
-        return m_nMovableTime;
-    }
+    uint32_t GetNextMovableTime() const { return m_nMovableTime; }
 
-    void SetNextMovableTime(uint32_t t)
-    {
-        m_nMovableTime = t;
-    }
+    void SetNextMovableTime(uint32_t t) { m_nMovableTime = t; }
 
     float GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad);
 
-    int32_t GetHealth() const
-    {
-        return GetInt32Value(UNIT_FIELD_HEALTH);
-    }
+    int32_t GetHealth() const { return GetInt32Value(UNIT_FIELD_HEALTH); }
 
-    int32_t GetMaxHealth() const
-    {
-        return GetInt32Value(UNIT_FIELD_MAX_HEALTH);
-    }
+    int32_t GetMaxHealth() const { return GetInt32Value(UNIT_FIELD_MAX_HEALTH); }
 
-    int32_t GetMana() const
-    {
-        return GetInt32Value(UNIT_FIELD_MANA);
-    }
+    int32_t GetMana() const { return GetInt32Value(UNIT_FIELD_MANA); }
 
-    int32_t GetMaxMana() const
-    {
-        return GetInt32Value(UNIT_FIELD_MAX_MANA);
-    }
+    int32_t GetMaxMana() const { return GetInt32Value(UNIT_FIELD_MAX_MANA); }
 
-    int32_t GetCurrentJob() const
-    {
-        return GetInt32Value(UNIT_FIELD_JOB);
-    };
+    int32_t GetCurrentJob() const { return GetInt32Value(UNIT_FIELD_JOB); };
 
-    int32_t GetCurrentJLv() const
-    {
-        return GetInt32Value(UNIT_FIELD_JLV);
-    }
+    int32_t GetCurrentJLv() const { return GetInt32Value(UNIT_FIELD_JLV); }
 
-    int32_t GetStamina() const
-    {
-        return GetInt32Value(UNIT_FIELD_STAMINA);
-    }
+    int32_t GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
 
-    int32_t GetJP() const
-    {
-        return GetInt32Value(UNIT_FIELD_JOBPOINT);
-    }
+    int32_t GetJP() const { return GetInt32Value(UNIT_FIELD_JOBPOINT); }
 
-    uint32_t GetTotalJP() const
-    {
-        return GetUInt32Value(UNIT_FIELD_JOBPOINT);
-    }
+    uint32_t GetTotalJP() const { return GetUInt32Value(UNIT_FIELD_JOBPOINT); }
 
     float GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_t nOriginalCoolTime) const;
     float GetItemChance() const;
 
-    int64_t GetEXP() const
-    {
-        return static_cast<int64_t>(GetUInt64Value(UNIT_FIELD_EXP));
-    }
+    int64_t GetEXP() const { return static_cast<int64_t>(GetUInt64Value(UNIT_FIELD_EXP)); }
 
     virtual uint32_t GetCreatureGroup() const;
 
-    void AddHealth(int32_t hp)
-    {
-        SetHealth(GetHealth() + hp);
-    }
+    void AddHealth(int32_t hp) { SetHealth(GetHealth() + hp); }
 
-    void AddMana(int32_t mp)
-    {
-        SetMana(GetMana() + mp);
-    }
+    void AddMana(int32_t mp) { SetMana(GetMana() + mp); }
 
     void RestoreRemovedStateByDeath();
     void ClearRemovedStateByDeath();
@@ -605,30 +385,15 @@ public:
     void PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
     void RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay);
 
-    Skill *GetCastSkill() const
-    {
-        return m_castingSkill;
-    }
+    Skill *GetCastSkill() const { return m_castingSkill; }
 
-    virtual CreatureStat *GetBaseStat() const
-    {
-        return nullptr;
-    }
+    virtual CreatureStat *GetBaseStat() const { return nullptr; }
 
-    virtual bool IsUsingBow() const
-    {
-        return false;
-    }
+    virtual bool IsUsingBow() const { return false; }
 
-    virtual bool IsUsingCrossBow() const
-    {
-        return false;
-    }
+    virtual bool IsUsingCrossBow() const { return false; }
 
-    bool IsUnit() const override
-    {
-        return true;
-    }
+    bool IsUnit() const override { return true; }
 
     bool TurnOnAura(Skill *pSkill);
     bool TurnOffAura(Skill *pSkill);
@@ -637,7 +402,8 @@ public:
 
     void CalculateStat();
 
-    uint16_t AddState(StateType type, StateCode code, uint32_t caster, int32_t level, uint32_t start_time, uint32_t end_time, bool bIsAura = false, int32_t nStateValue = 0, std::string szStateValue = "");
+    uint16_t AddState(
+        StateType type, StateCode code, uint32_t caster, int32_t level, uint32_t start_time, uint32_t end_time, bool bIsAura = false, int32_t nStateValue = 0, std::string szStateValue = "");
 
 protected:
     uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float var1, float var2, const std::string &szParameter);
@@ -664,10 +430,7 @@ protected:
     virtual uint16_t putoffItem(ItemWearType);
 
     // Overwritten in Monster
-    virtual int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical)
-    {
-        return nDamage;
-    }
+    virtual int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical) { return nDamage; }
 
     virtual void onDead(Unit *pFrom, bool decreaseEXPOnDead);
     void removeStateByDead();
@@ -802,6 +565,6 @@ private:
     void AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, bool bIsPhysicalSkill, bool bIsHarmful);
     void RemoveStatesOnDamage();
     int32_t GetCriticalDamage(int32_t damage, float critical_amp, int32_t critical_bonus);
-    template <typename COMPARER>
+    template<typename COMPARER>
     void RemoveStateIf(COMPARER comparer, std::vector<State *> *result = nullptr, bool bByDead = false);
 };

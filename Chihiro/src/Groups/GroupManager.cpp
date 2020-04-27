@@ -13,13 +13,14 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "GroupManager.h"
-#include "Messages.h"
+
 #include "DatabaseEnv.h"
-#include "Player.h"
 #include "Log.h"
+#include "Messages.h"
+#include "Player.h"
 
 int32_t GroupManager::GetAttackTeamLeadPartyID(int32_t nPartyID)
 {
@@ -46,7 +47,7 @@ PARTY_TYPE GroupManager::GetPartyType(int32_t nPartyID)
 
 bool GroupManager::DestroyParty(int32_t nPartyID)
 {
-    auto              name  = GetPartyName(nPartyID);
+    auto name = GetPartyName(nPartyID);
     DoEachMemberTag(nPartyID, [&name](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr)
         {
@@ -89,15 +90,9 @@ bool GroupManager::IsLeader(int32_t nPartyID, const std::string &szPlayerName)
     return false;
 }
 
-void GroupManager::OnChangeCharacterLevel(int32_t nPartyID, const std::string &szName, int32_t nLevel)
-{
+void GroupManager::OnChangeCharacterLevel(int32_t nPartyID, const std::string &szName, int32_t nLevel) {}
 
-}
-
-void GroupManager::OnChangeCharacterJob(int32_t nPartyID, const std::string &szName, int32_t nJobID)
-{
-
-}
+void GroupManager::OnChangeCharacterJob(int32_t nPartyID, const std::string &szName, int32_t nJobID) {}
 
 std::string GroupManager::GetLeaderName(int32_t nPartyID)
 {
@@ -141,7 +136,7 @@ bool GroupManager::onLogin(int32_t nPartyID, Player *pPlayer)
     bool result = false;
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        auto            info = getPartyInfoNC(nPartyID);
+        auto info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
         for (auto &tag : info->vMemberNameList)
@@ -149,9 +144,9 @@ bool GroupManager::onLogin(int32_t nPartyID, Player *pPlayer)
             if (iequals(tag.strName, pPlayer->GetNameAsString()))
             {
                 tag.bIsOnline = true;
-                tag.pPlayer   = pPlayer;
-                tag.nLevel    = pPlayer->GetLevel();
-                tag.nJobID    = pPlayer->GetCurrentJob();
+                tag.pPlayer = pPlayer;
+                tag.nLevel = pPlayer->GetLevel();
+                tag.nJobID = pPlayer->GetCurrentJob();
                 result = true;
             }
         }
@@ -169,7 +164,7 @@ bool GroupManager::onLogout(int32_t nPartyID, Player *pPlayer)
     bool result = false;
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        auto            info = getPartyInfoNC(nPartyID);
+        auto info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
         for (auto &tag : info->vMemberNameList)
@@ -177,7 +172,7 @@ bool GroupManager::onLogout(int32_t nPartyID, Player *pPlayer)
             if (iequals(tag.strName, pPlayer->GetNameAsString()))
             {
                 tag.bIsOnline = false;
-                tag.pPlayer   = nullptr;
+                tag.pPlayer = nullptr;
                 result = true;
             }
         }
@@ -228,10 +223,10 @@ PartyInfo *GroupManager::getPartyInfoNC(int32_t nPartyID)
 
 int32_t GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PARTY_TYPE partyType)
 {
-    PartyInfo partyInfo{ };
+    PartyInfo partyInfo{};
     {
         NG_UNIQUE_GUARD writeLock(i_lock);
-        for (auto       &party : m_hshPartyID)
+        for (auto &party : m_hshPartyID)
         {
             if (party.second.strPartyName == szName)
             {
@@ -239,15 +234,15 @@ int32_t GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PA
             }
         }
 
-        partyInfo.strPartyName         = szName;
-        partyInfo.strLeaderName        = pPlayer->GetName();
-        partyInfo.ePartyType           = partyType;
-        partyInfo.nPartyID             = (int32_t)++m_nMaxPartyID;
-        partyInfo.eShareMode           = ITEM_SHARE_RANDOM;
+        partyInfo.strPartyName = szName;
+        partyInfo.strLeaderName = pPlayer->GetName();
+        partyInfo.ePartyType = partyType;
+        partyInfo.nPartyID = (int32_t)++m_nMaxPartyID;
+        partyInfo.eShareMode = ITEM_SHARE_RANDOM;
         partyInfo.nLastItemAcquirerIdx = 0;
-        partyInfo.nLeaderSID           = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
-        partyInfo.nLeaderJobID         = pPlayer->GetCurrentJob();
-        partyInfo.nPartyPassword       = (uint32_t)rand32();
+        partyInfo.nLeaderSID = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
+        partyInfo.nLeaderJobID = pPlayer->GetCurrentJob();
+        partyInfo.nPartyPassword = (uint32_t)rand32();
         m_hshPartyID[partyInfo.nPartyID] = partyInfo;
     }
     JoinParty(partyInfo.nPartyID, pPlayer, partyInfo.nPartyPassword);
@@ -258,17 +253,17 @@ int32_t GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PA
 bool GroupManager::JoinParty(int32_t nPartyID, Player *pPlayer, uint32_t nPass)
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
-    auto            info = getPartyInfoNC(nPartyID);
+    auto info = getPartyInfoNC(nPartyID);
     if (info == nullptr || info->vMemberNameList.size() >= 8 || nPass != info->nPartyPassword)
         return false;
 
-    PartyMemberTag tag{ };
-    tag.nLevel    = pPlayer->GetLevel();
-    tag.sid       = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
+    PartyMemberTag tag{};
+    tag.nLevel = pPlayer->GetLevel();
+    tag.sid = pPlayer->GetUInt32Value(UNIT_FIELD_UID);
     tag.bIsOnline = true;
-    tag.pPlayer   = pPlayer;
-    tag.nJobID    = pPlayer->GetCurrentJob();
-    tag.strName   = pPlayer->GetName();
+    tag.pPlayer = pPlayer;
+    tag.nJobID = pPlayer->GetCurrentJob();
+    tag.strName = pPlayer->GetName();
     info->vMemberNameList.emplace_back(tag);
     pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, nPartyID);
     return true;
@@ -278,7 +273,7 @@ void GroupManager::DoEachMemberTag(int32_t nPartyID, std::function<void(PartyMem
 {
     {
         NG_SHARED_GUARD readGuard(i_lock);
-        auto            info = getPartyInfoNC(nPartyID);
+        auto info = getPartyInfoNC(nPartyID);
         if (info != nullptr)
         {
             for (auto &tag : info->vMemberNameList)
@@ -293,8 +288,8 @@ int32_t GroupManager::DoEachMemberTagNum(int32_t nPartyID, std::function<bool(Pa
 {
     {
         NG_SHARED_GUARD readGuard(i_lock);
-        auto            info = getPartyInfoNC(nPartyID);
-        int32_t             nCnt{0};
+        auto info = getPartyInfoNC(nPartyID);
+        int32_t nCnt{0};
         if (info != nullptr)
         {
             for (auto &tag : info->vMemberNameList)
@@ -358,13 +353,13 @@ void GroupManager::InitGroupSystem()
     uint32_t count = 0;
     do
     {
-        uint32_t      idx    = 0;
-        Field     *field = result->Fetch();
-        PartyInfo info{ };
-        info.nPartyID     = field[idx++].GetInt32();
+        uint32_t idx = 0;
+        Field *field = result->Fetch();
+        PartyInfo info{};
+        info.nPartyID = field[idx++].GetInt32();
         info.strPartyName = field[idx++].GetString();
-        info.nLeaderSID   = field[idx++].GetInt32();
-        info.eShareMode   = (ITEM_SHARE_MODE)field[idx].GetInt32();
+        info.nLeaderSID = field[idx++].GetInt32();
+        info.eShareMode = (ITEM_SHARE_MODE)field[idx].GetInt32();
         LoadPartyInfo(info);
         m_hshPartyID[info.nPartyID] = info;
         count++;
@@ -396,19 +391,19 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
 
     do
     {
-        uint32_t         idx    = 0;
-        Field          *field = result->Fetch();
-        PartyMemberTag tag{ };
-        tag.sid       = field[idx++].GetInt32();
-        tag.strName   = field[idx++].GetString();
-        tag.nJobID    = field[idx++].GetInt32();
-        tag.nLevel    = field[idx].GetInt32();
+        uint32_t idx = 0;
+        Field *field = result->Fetch();
+        PartyMemberTag tag{};
+        tag.sid = field[idx++].GetInt32();
+        tag.strName = field[idx++].GetString();
+        tag.nJobID = field[idx++].GetInt32();
+        tag.nLevel = field[idx].GetInt32();
         tag.bIsOnline = 0;
-        tag.pPlayer   = nullptr;
+        tag.pPlayer = nullptr;
         if (tag.sid == info.nLeaderSID)
         {
             info.strLeaderName = tag.strName;
-            info.nLeaderJobID  = tag.nJobID;
+            info.nLeaderJobID = tag.nJobID;
         }
         info.vMemberNameList.emplace_back(tag);
     } while (result->NextRow());

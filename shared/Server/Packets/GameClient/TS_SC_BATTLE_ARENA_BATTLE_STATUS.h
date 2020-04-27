@@ -3,8 +3,7 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_BATTLE_ARENA_BATTLE_STATUS_DEF(_) \
-	_(simple)(int32_t, nStatus)
+#define TS_SC_BATTLE_ARENA_BATTLE_STATUS_DEF(_) _(simple)(int32_t, nStatus)
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_SC_BATTLE_ARENA_BATTLE_STATUS, 4711);

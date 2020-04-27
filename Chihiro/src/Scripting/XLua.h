@@ -19,9 +19,11 @@
 #include "sol.hpp"
 
 class Unit;
-class XLua {
-  public:
-    static XLua &Instance() {
+class XLua
+{
+public:
+    static XLua &Instance()
+    {
         static XLua instance;
         return instance;
     }
@@ -37,8 +39,10 @@ class XLua {
     bool RunString(Unit *, std::string);
     bool RunString(std::string);
 
-  private:
-    template <typename T> sol::object return_object(T &&value) {
+private:
+    template<typename T>
+    sol::object return_object(T &&value)
+    {
         sol::stack::push(m_pState.lua_state(), std::forward<T>(value));
         sol::object r = sol::stack::pop<sol::object>(m_pState.lua_state());
         return r;
@@ -126,7 +130,7 @@ class XLua {
     Unit *m_pUnit{nullptr};
     sol::state m_pState{};
 
-  protected:
+protected:
     XLua();
 };
 

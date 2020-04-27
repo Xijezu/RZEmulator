@@ -14,18 +14,26 @@
  *
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
+#include <map>
+
 #include "Common.h"
 #include "SharedMutex.h"
-#include <map>
 
 class AuthClientSession;
 // Storage object for a player
 struct Player
 {
-    Player() : nAccountID(0), szLoginName(), bIsBlocked(false), nLastServerIDX(0),
-               bIsInGame(false), bKickNextLogin(false), nOneTimeKey(0), nGameIDX(-1),
-               nPermission(0)
+    Player()
+        : nAccountID(0)
+        , szLoginName()
+        , bIsBlocked(false)
+        , nLastServerIDX(0)
+        , bIsInGame(false)
+        , bKickNextLogin(false)
+        , nOneTimeKey(0)
+        , nGameIDX(-1)
+        , nPermission(0)
     {
     }
 
@@ -43,7 +51,7 @@ struct Player
 /// Storage object for the list of players on the server
 class PlayerList
 {
-  public:
+public:
     typedef std::map<std::string, Player *> PlayerMap;
     ~PlayerList() = default;
 
@@ -72,16 +80,10 @@ class PlayerList
         }
     }
 
-    NG_SHARED_MUTEX *GetGuard()
-    {
-        return &i_lock;
-    }
+    NG_SHARED_MUTEX *GetGuard() { return &i_lock; }
 
     // You need to use the mutex while working with the map!
-    PlayerMap *GetMap()
-    {
-        return &m_players;
-    }
+    PlayerMap *GetMap() { return &m_players; }
 
     Player *GetPlayer(const std::string &szAccount)
     {
@@ -90,10 +92,10 @@ class PlayerList
         return nullptr;
     }
 
-  private:
+private:
     NG_SHARED_MUTEX i_lock;
     PlayerMap m_players; ///< Internal map of players
-  protected:
+protected:
     PlayerList() = default;
 };
 
