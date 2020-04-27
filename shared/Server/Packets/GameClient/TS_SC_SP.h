@@ -3,7 +3,10 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_SP_DEF(_) _(simple)(uint32_t, handle) _(simple)(int16_t, sp) _(simple)(int16_t, max_sp)
+#define TS_SC_SP_DEF(_) \
+	_(simple)(uint32_t, handle) \
+	_(simple)(int16_t, sp) \
+	_(simple)(int16_t, max_sp)
 
 CREATE_PACKET(TS_SC_SP, 514);
 

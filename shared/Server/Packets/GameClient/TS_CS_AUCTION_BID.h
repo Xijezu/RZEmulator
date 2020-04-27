@@ -3,7 +3,9 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_AUCTION_BID_DEF(_) _(simple)(int32_t, auction_uid) _(simple)(int64_t, price)
+#define TS_CS_AUCTION_BID_DEF(_) \
+	_(simple)(int32_t, auction_uid) \
+	_(simple)(int64_t, price)
 
 CREATE_PACKET(TS_CS_AUCTION_BID, 1306);
 

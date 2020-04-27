@@ -3,7 +3,10 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_SELL_TO_BOOTH_DEF(_) _(simple)(uint32_t, target) _(simple)(uint32_t, item_handle) _(simple)(int32_t, cnt)
+#define TS_CS_SELL_TO_BOOTH_DEF(_) \
+	_(simple)(uint32_t, target) \
+	_(simple)(uint32_t, item_handle) \
+	_(simple)(int32_t, cnt)
 
 CREATE_PACKET(TS_CS_SELL_TO_BOOTH, 706);
 

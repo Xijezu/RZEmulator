@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_SHOW_SUMMON_NAME_CHANGE_DEF(_) _(simple)(uint32_t, handle)
+#define TS_SC_SHOW_SUMMON_NAME_CHANGE_DEF(_) \
+	_(simple)(uint32_t, handle)
 
 CREATE_PACKET(TS_SC_SHOW_SUMMON_NAME_CHANGE, 322);
 

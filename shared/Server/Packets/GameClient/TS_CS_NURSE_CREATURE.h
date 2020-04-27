@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_NURSE_CREATURE_DEF(_) _(simple)(uint32_t, creature_card_handle)
+#define TS_CS_NURSE_CREATURE_DEF(_) \
+	_(simple)(uint32_t, creature_card_handle)
 
 // Since EPIC_7_3
 CREATE_PACKET(TS_CS_NURSE_CREATURE, 6006);

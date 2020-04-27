@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_WATCH_BOOTH_DEF(_) _(simple)(uint32_t, target)
+#define TS_CS_WATCH_BOOTH_DEF(_) \
+	_(simple)(uint32_t , target)
 
 CREATE_PACKET(TS_CS_WATCH_BOOTH, 702);
 

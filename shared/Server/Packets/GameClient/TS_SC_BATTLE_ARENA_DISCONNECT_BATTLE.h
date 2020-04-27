@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_BATTLE_ARENA_DISCONNECT_BATTLE_DEF(_) _(simple)(uint32_t, handle)
+#define TS_SC_BATTLE_ARENA_DISCONNECT_BATTLE_DEF(_) \
+	_(simple)(uint32_t, handle)
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_SC_BATTLE_ARENA_DISCONNECT_BATTLE, 4714);

@@ -3,7 +3,9 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_CS_ATTACK_REQUEST_DEF(_) _(simple)(uint32_t, handle) _(simple)(uint32_t, target_handle)
+#define TS_CS_ATTACK_REQUEST_DEF(_) \
+	_(simple)(uint32_t, handle) \
+	_(simple)(uint32_t, target_handle)
 
 CREATE_PACKET(TS_CS_ATTACK_REQUEST, 100);
 

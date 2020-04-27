@@ -4,7 +4,10 @@
 #include "Server/Packets/PacketDeclaration.h"
 
 #define TS_CS_LEARN_SKILL_DEF(_) \
-    _(simple)(uint32_t, target) _(simple)(int32_t, skill_id) _(simple)(uint32_t, base_random_skill_id, version >= EPIC_8_2) _(simple)(int16_t, skill_level, version >= EPIC_4_1_1) // not in epic 4.0
+	_(simple)(uint32_t, target) \
+	_(simple)(int32_t, skill_id) \
+	_(simple)(uint32_t, base_random_skill_id, version >= EPIC_8_2) \
+	_(simple)(int16_t, skill_level, version >= EPIC_4_1_1) // not in epic 4.0
 
 CREATE_PACKET(TS_CS_LEARN_SKILL, 402);
 

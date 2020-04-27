@@ -3,7 +3,12 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_MOUNT_SUMMON_DEF(_) _(simple)(uint32_t, handle) _(simple)(uint32_t, summon_handle) _(simple)(float, x) _(simple)(float, y) _(simple)(bool, success)
+#define TS_SC_MOUNT_SUMMON_DEF(_) \
+	_(simple)(uint32_t, handle) \
+	_(simple)(uint32_t, summon_handle) \
+	_(simple)(float, x) \
+	_(simple)(float, y) \
+	_(simple)(bool, success)
 
 CREATE_PACKET(TS_SC_MOUNT_SUMMON, 320);
 

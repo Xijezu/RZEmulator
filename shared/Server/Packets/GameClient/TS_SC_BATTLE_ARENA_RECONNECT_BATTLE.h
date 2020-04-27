@@ -3,7 +3,9 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_BATTLE_ARENA_RECONNECT_BATTLE_DEF(_) _(string)(szName, 19) _(simple)(uint32_t, newHandle)
+#define TS_SC_BATTLE_ARENA_RECONNECT_BATTLE_DEF(_) \
+	_(string)(szName, 19) \
+	_(simple)(uint32_t, newHandle)
 
 // Since EPIC_8_1
 CREATE_PACKET(TS_SC_BATTLE_ARENA_RECONNECT_BATTLE, 4715);

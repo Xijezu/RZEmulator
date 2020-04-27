@@ -23,12 +23,12 @@
 #define EPIC_9_3 0x090300
 #define EPIC_9_4 0x090400
 #define EPIC_9_4_AR 0x090401
-#define EPIC_9_4_2 0x090402 // newer login packet id
+#define EPIC_9_4_2 0x090402  // newer login packet id
 #define EPIC_9_5 0x090500
-#define EPIC_9_5_1 0x090501 // 2017/09/26
-#define EPIC_9_5_2 0x090502 // GS Version packet modified, 2018 02 27
+#define EPIC_9_5_1 0x090501  // 2017/09/26
+#define EPIC_9_5_2 0x090502  // GS Version packet modified, 2018 02 27
 
 // Latest released epic
 #define EPIC_LATEST EPIC_9_5_2
 
-#endif // PACKETS_EPICS_H
+#endif  // PACKETS_EPICS_H

@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_UNSUMMON_PET_DEF(_) _(simple)(uint32_t, handle)
+#define TS_SC_UNSUMMON_PET_DEF(_) \
+	_(simple)(uint32_t, handle)
 
 CREATE_PACKET(TS_SC_UNSUMMON_PET, 350);
 

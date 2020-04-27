@@ -3,7 +3,8 @@
 
 #include "Packets/PacketDeclaration.h"
 
-#define TS_AG_LOGIN_RESULT_DEF(_) _(simple)(uint16_t, result)
+#define TS_AG_LOGIN_RESULT_DEF(_) \
+    _(simple)(uint16_t, result)
 
 CREATE_PACKET(TS_AG_LOGIN_RESULT, 20002);
 

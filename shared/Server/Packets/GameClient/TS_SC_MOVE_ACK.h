@@ -3,7 +3,9 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_SC_MOVE_ACK_DEF(_) _(simple)(uint32_t, time) _(simple)(int8_t, speed)
+#define TS_SC_MOVE_ACK_DEF(_) \
+	_(simple)(uint32_t, time) \
+	_(simple)(int8_t, speed)
 
 CREATE_PACKET(TS_SC_MOVE_ACK, 6);
 

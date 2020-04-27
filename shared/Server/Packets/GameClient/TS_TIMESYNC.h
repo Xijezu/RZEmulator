@@ -3,7 +3,8 @@
 
 #include "Server/Packets/PacketDeclaration.h"
 
-#define TS_TIMESYNC_DEF(_) _(simple)(uint32_t, time)
+#define TS_TIMESYNC_DEF(_) \
+	_(simple) (uint32_t, time)
 
 CREATE_PACKET(TS_TIMESYNC, 2);
 
