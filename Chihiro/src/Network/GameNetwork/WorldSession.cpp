@@ -1058,8 +1058,8 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
             pItem = m_pPlayer->FindItemByHandle(pRecvPct->card_handle[i]);
             if (pItem != nullptr && pItem->GetItemTemplate() != nullptr)
             {
-                if (pItem->GetItemTemplate()->group != 13 || m_pPlayer->GetHandle() != pItem->GetItemInstance().GetOwnerHandle() ||
-                    (pItem->GetItemInstance().GetFlag() & (uint32_t)ITEM_FLAG_SUMMON) == 0)
+                if (pItem->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || m_pPlayer->GetHandle() != pItem->GetItemInstance().GetOwnerHandle() ||
+                    (pItem->GetItemInstance().GetFlag() & (uint32_t)FlagBits::ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
@@ -1484,13 +1484,13 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
         return;
     }
 
-    if (item->GetItemTemplate()->type != TYPE_USE && false /*!item->IsUsingItem()*/)
+    if (item->GetItemTemplate()->eType != ItemType::TYPE_USE && false /*!item->IsUsingItem()*/)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
 
-    if ((item->GetItemTemplate()->flaglist[FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
+    if ((item->GetItemTemplate()->flaglist[ItemFlag::FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->item_handle);
         return;
@@ -1605,7 +1605,7 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
 void WorldSession::onDropItem(const TS_CS_DROP_ITEM *pRecvPct)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->GetItemTemplate()->group != GROUP_SUMMONCARD || !(item->GetItemInstance().GetFlag() & ITEM_FLAG_SUMMON)))
+    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || !(item->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_SUMMON)))
     {
         m_pPlayer->DropItem(m_pPlayer, item, pRecvPct->count);
         Messages::SendDropResult(m_pPlayer, pRecvPct->item_handle, true);
@@ -1708,8 +1708,8 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->soulstone_handle[i]);
                 return;
             }
-            if (pSoulStoneList[i]->GetItemTemplate()->type != TYPE_SOULSTONE || pSoulStoneList[i]->GetItemTemplate()->group != GROUP_SOULSTONE ||
-                pSoulStoneList[i]->GetItemTemplate()->iclass != CLASS_SOULSTONE)
+            if (pSoulStoneList[i]->GetItemTemplate()->eType != ItemType::TYPE_SOULSTONE || pSoulStoneList[i]->GetItemGroup() != ItemGroup::GROUP_SOULSTONE ||
+                pSoulStoneList[i]->GetItemTemplate()->eClass != ItemClass::CLASS_SOULSTONE)
             {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->soulstone_handle[i]);
                 return;
@@ -1902,7 +1902,7 @@ void WorldSession::onBindSkillCard(const TS_CS_BIND_SKILLCARD *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemTemplate()->group != GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
@@ -1928,7 +1928,7 @@ void WorldSession::onUnBindSkilLCard(const TS_CS_UNBIND_SKILLCARD *pRecvPct)
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemTemplate()->group != GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
     {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;

@@ -615,7 +615,7 @@ bool World::checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float fDr
     float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0)
     {
-        if (sObjectMgr.GetItemBase(code)->group == GROUP_SUMMONCARD)
+        if (sObjectMgr.GetItemBase(code)->eGroup == ItemGroup::GROUP_SUMMONCARD)
             fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway?*/
     }
 

@@ -51,7 +51,7 @@ Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode
             pItem->GetItemInstance().SetEnhance(pItem->GetItemTemplate()->enhance);
         else
             pItem->GetItemInstance().SetEnhance(nEnhance);
-        if (pItem->GetItemTemplate()->group == ItemGroup::GROUP_SKILLCARD && pItem->GetItemInstance().GetEnhance() == 0)
+        if (pItem->GetItemGroup() == ItemGroup::GROUP_SKILLCARD && pItem->GetItemInstance().GetEnhance() == 0)
             pItem->GetItemInstance().SetEnhance(1);
 
         if (nFlag == -1)
@@ -75,8 +75,8 @@ Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode
 ItemWearType Item::GetWearType()
 {
     if (GetItemTemplate() == nullptr)
-        return WEAR_NONE;
-    return (ItemWearType)GetItemTemplate()->wear_type;
+        return ItemWearType::WEAR_NONE;
+    return GetItemTemplate()->eWearType;
 }
 
 bool Item::IsWearable()
@@ -107,7 +107,7 @@ void Item::DBUpdate()
     stmt->setInt32(i++, GetItemInstance().GetLevel());
     stmt->setInt32(i++, GetItemInstance().GetEnhance());
     stmt->setInt32(i++, GetItemInstance().GetFlag());
-    stmt->setInt32(i++, GetItemInstance().GetItemWearType());
+    stmt->setInt32(i++, static_cast<int32_t>(GetItemInstance().GetItemWearType()));
     stmt->setInt32(i++, GetItemInstance().GetSocketIndex(0));
     stmt->setInt32(i++, GetItemInstance().GetSocketIndex(1));
     stmt->setInt32(i++, GetItemInstance().GetSocketIndex(2));
@@ -145,8 +145,8 @@ void Item::DBInsert()
     stmt->setInt32(idx++, GetItemInstance().GetEnhance()); // enhance
     stmt->setInt32(idx++, GetItemInstance().GetEndurance()); // Endurance
     stmt->setInt32(idx++, GetItemInstance().GetFlag()); // Flag
-    stmt->setInt32(idx++, GetItemInstance().GetGenerateCode()); // GCode
-    stmt->setInt32(idx++, GetItemInstance().GetItemWearType()); // Wear Info
+    stmt->setInt32(idx++, static_cast<int32_t>(GetItemInstance().GetGenerateCode())); // GCode
+    stmt->setInt32(idx++, static_cast<int32_t>(GetItemInstance().GetItemWearType())); // Wear Info
     stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(0)); // Socket_0
     stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(1)); // Socket_1
     stmt->setInt32(idx++, GetItemInstance().GetSocketIndex(2)); // Socket_2
@@ -199,12 +199,12 @@ int32_t Item::GetLevelLimit()
 
 bool Item::IsBow()
 {
-    return GetItemTemplate()->iclass == CLASS_HEAVY_BOW || GetItemTemplate()->iclass == CLASS_LIGHT_BOW;
+    return GetItemTemplate()->eClass == ItemClass::CLASS_HEAVY_BOW || GetItemTemplate()->eClass == ItemClass::CLASS_LIGHT_BOW;
 }
 
 bool Item::IsCrossBow()
 {
-    return GetItemTemplate()->iclass == CLASS_CROSSBOW;
+    return GetItemTemplate()->eClass == ItemClass::CLASS_CROSSBOW;
 }
 
 bool Item::IsCashItem()

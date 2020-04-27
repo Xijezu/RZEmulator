@@ -284,7 +284,7 @@ std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
 
     std::copy(std::begin(item->GetItemInstance().GetSocket()), std::end(item->GetItemInstance().GetSocket()), std::begin(itemInfo.base_info.socket));
 
-    if (item->GetItemTemplate()->group == GROUP_SUMMONCARD)
+    if (item->GetItemGroup() == ItemGroup::GROUP_SUMMONCARD)
     {
         if (item->m_pSummon != nullptr)
         {

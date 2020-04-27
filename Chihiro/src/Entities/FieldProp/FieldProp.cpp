@@ -142,7 +142,7 @@ bool FieldProp::UseProp(Player *pPlayer)
                 {
                     int32_t nItemCount = irand(i.min_count, i.max_count);
                     int32_t nLevel = irand(i.min_level, i.max_level + 1);
-                    auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
+                    auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, GenerateCode::BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
 
                     auto cnt = ti->GetItemInstance().GetCount();
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);

@@ -20,7 +20,7 @@
 #include "GameContent.h"
 #include "GameRule.h"
 #include "Item.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 #include "Log.h"
 #include "MemPool.h"
 #include "Messages.h"
@@ -65,7 +65,7 @@ bool MixManager::EnhanceItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMate
 
     if (pMixInfo->type == MIX_TYPE::MIX_ENHANCE_WITHOUT_FAIL)
     {
-        if (pCube != nullptr && pCube->GetItemTemplate()->type == ItemType::TYPE_CUBE)
+        if (pCube != nullptr && pCube->GetItemTemplate()->eType == ItemType::TYPE_CUBE)
         {
             pPowder = pSubMaterial[1];
         }
@@ -144,7 +144,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
 
     for (int32_t i = 0; i < nSubMaterialCount; i++)
     {
-        if (pSubMaterial[i]->GetItemTemplate()->group == GROUP_SKILLCARD)
+        if (pSubMaterial[i]->GetItemGroup() == ItemGroup::GROUP_SKILLCARD)
         {
             if (skillCardMain == nullptr)
                 skillCardMain = pSubMaterial[i];
@@ -152,7 +152,7 @@ bool MixManager::EnhanceSkillCard(MixBase *pMixInfo, Player *pPlayer, int32_t nS
             else
                 skillCardSec = pSubMaterial[i];
         }
-        else if (pSubMaterial[i]->GetItemTemplate()->group == GROUP_SKILL_CUBE)
+        else if (pSubMaterial[i]->GetItemGroup() == ItemGroup::GROUP_SKILL_CUBE)
         {
             skillCube = pSubMaterial[i];
         }
@@ -246,7 +246,7 @@ bool MixManager::CreateItem(MixBase *pMixInfo, Player *pPlayer, Item *pMainMater
             {
                 GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
             }
-            pItem = Item::AllocItem(0, nItemID, nItemCount, BY_MIX, pMixInfo->value[1], -1, -1, 0, 0, 0, 0, 0);
+            pItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::BY_MIX, pMixInfo->value[1], -1, -1, 0, 0, 0, 0, 0);
             if (!pItem->GetItemTemplate()->flaglist[FLAG_DUPLICATE])
             {
                 // chatmsg
@@ -399,7 +399,7 @@ bool MixManager::check_material_info(const MaterialInfo &info, Item *pItem, uint
         switch (info.type[i])
         {
         case MixBase::CHECK_ITEM_GROUP:
-            if (pItem->GetItemGroup() != info.value[i])
+            if (static_cast<int32_t>(pItem->GetItemGroup()) != info.value[i])
                 return false;
             break;
 

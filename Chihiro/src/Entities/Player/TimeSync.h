@@ -23,25 +23,19 @@ public:
     TimeSynch(uint32_t L, uint32_t DC, uint32_t pMAX)
         : m_L(L)
         , m_DC(DC)
-        , m_MAX(pMAX){};
+        , m_MAX(pMAX)
+    {
+        m_vT.reserve(m_MAX);
+    };
+
     ~TimeSynch() = default;
 
     void onEcho(uint32_t t)
     {
         if (static_cast<uint32_t>(m_vT.size()) == m_MAX)
-        {
-            //                 m_vT.
-            //                 std::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>::_Vector_const_iterator<StateDamage_std::allocator<StateDamage>>(
-            //                     &thisa,
-            //                     *(v2 + 1),
-            //                     v2);
-            //                 v3 = std::_Vector_const_iterator<PartyManager::PartyInfo___std::allocator<PartyManager::PartyInfo__>>::operator_(&thisa);
-            //                 LODWORD(v3->end.x) = T;
-        }
+            *m_vT.begin() = t;
         else
-        {
             m_vT.emplace_back(t);
-        }
     }
 
     uint32_t GetInterval()

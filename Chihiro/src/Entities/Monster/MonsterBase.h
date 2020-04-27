@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 
 class Monster;
 

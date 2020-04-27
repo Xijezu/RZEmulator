@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 
 class ItemInstance
 {
@@ -105,7 +105,7 @@ private:
     int64_t m_nCount{0};
     int64_t m_nExpire{0};
     int32_t m_nFlag{0};
-    GenerateCode m_eGenerateInfo = BY_UNKNOWN;
-    ItemWearType m_nWearInfo{WEAR_CANTWEAR};
+    GenerateCode m_eGenerateInfo = GenerateCode::BY_UNKNOWN;
+    ItemWearType m_nWearInfo{ItemWearType::WEAR_CANTWEAR};
     std::array<int32_t, 4> m_pSocket{0};
 };

@@ -634,7 +634,7 @@ uint16_t Skill::PrepareSummon(uint handle, Position pos)
     // @Todo: IsSummonable
 
     auto pItem = sMemoryPool.GetObjectInWorld<Item>(handle);
-    if (pItem == nullptr || pItem->GetItemTemplate() == nullptr || pItem->GetItemTemplate()->group != GROUP_SUMMONCARD || pItem->GetItemInstance().GetOwnerHandle() != m_pOwner->GetHandle())
+    if (pItem == nullptr || pItem->GetItemTemplate() == nullptr || pItem->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || pItem->GetItemInstance().GetOwnerHandle() != m_pOwner->GetHandle())
         return TS_RESULT_NOT_ACTABLE;
 
     auto pPlayer = m_pOwner->As<Player>();
@@ -1709,7 +1709,7 @@ void Skill::DO_SUMMON()
     if (item == nullptr)
         return;
 
-    if (item->GetItemTemplate()->group != GROUP_SUMMONCARD)
+    if (item->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD)
         return;
 
     auto summon = item->m_pSummon;
@@ -1730,7 +1730,7 @@ void Skill::DO_UNSUMMON()
     if (item == nullptr)
         return;
 
-    if (item->GetItemTemplate()->group != GROUP_SUMMONCARD)
+    if (item->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD)
         return;
 
     auto summon = item->m_pSummon;

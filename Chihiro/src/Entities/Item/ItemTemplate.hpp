@@ -1,4 +1,15 @@
 #pragma once
+#include "Common.h"
+
+constexpr int64_t MAX_GOLD_FOR_INVENTORY = 100000000000;
+constexpr int64_t MAX_GOLD_FOR_STORAGE = 100000000000;
+constexpr int32_t MAX_OPTION_NUMBER = 4;
+constexpr int32_t MAX_ITEM_WEAR = 24;
+constexpr int32_t MAX_COOLTIME_GROUP = 40;
+constexpr int32_t MAX_SOCKET_NUMBER = 4;
+constexpr int32_t MAX_ITEM_NAME_LENGTH = 32;
+constexpr int32_t MAX_SPARE_ITEM_WEAR{28};
+
 /*
  *  Copyright (C) 2017-2020 NGemity <https://ngemity.org/>
  *
@@ -16,32 +27,12 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-constexpr int64_t MAX_GOLD_FOR_INVENTORY = 100000000000;
-constexpr int64_t MAX_GOLD_FOR_STORAGE = 100000000000;
-constexpr int32_t MAX_OPTION_NUMBER = 4;
-constexpr int32_t MAX_ITEM_WEAR = 24;
-constexpr int32_t MAX_COOLTIME_GROUP = 40;
-constexpr int32_t MAX_SOCKET_NUMBER = 4;
-constexpr int32_t MAX_ITEM_NAME_LENGTH = 32;
-constexpr int32_t MAX_SPARE_ITEM_WEAR{28};
-
 struct ItemPickupOrder
 {
     uint32_t hPlayer[3];
     int32_t nPartyID[3];
 };
 
-enum ElementalType
-{
-    TYPE_NONE = 0,
-    TYPE_FIRE = 1,
-    TYPE_WATER = 2,
-    TYPE_WIND = 3,
-    TYPE_EARTH = 4,
-    TYPE_LIGHT = 5,
-    TYPE_DARK = 6,
-    TYPE_COUNT = 7
-};
 
 enum class ITEM_EFFECT_PASSIVE
 {
@@ -73,6 +64,94 @@ enum class ITEM_EFFECT_PASSIVE
     INC_PARAMETER_B = 97,
     AMP_PARAMETER_A = 98,
     AMP_PARAMETER_B = 99,
+};
+
+enum ItemCode : int32_t
+{
+    CHALK_OF_RESTORATION = 800000,
+    UNIT_CARD = 800001,
+    FEATHER_OF_RETURN = 910006,
+    FEATHER_OF_REINSTATEMENT = 910009,
+    E_REPAIR_POWDER = 950021,
+    FEATHER_OF_RETURN_EVENT = 2902104
+};
+
+enum
+{
+    IEP_NONE = 0,
+    IEP_ATTACK_POINT = 11,
+    IEP_MAGIC_POINT = 12,
+    IEP_ACCURACY = 13,
+    IEP_ATTACK_SPEED = 14,
+    IEP_DEFENCE = 15,
+    IEP_MAGIC_DEFENCE = 16,
+    IEP_AVOID = 17,
+    IEP_MOVE_SPEED = 18,
+    IEP_BLOCK_CHANCE = 19,
+    IEP_CARRY_WEIGHT = 20,
+    IEP_BLOCK_DEFENCE = 21,
+    IEP_CASTING_SPEED = 22,
+    IEP_MAGIC_ACCURACY = 23,
+    IEP_MAGIC_AVOID = 24,
+    IEP_COOLTIME_SPEED = 25,
+    IEP_BELT_SLOT = 26,
+    IEP_MAX_CHAOS = 27,
+    IEP_MAX_HP = 30,
+    IEP_MAX_MP = 31,
+    IEP_BOW_INTERVAL = 34,
+    IEP_MP_REGEN_POINT = 33,
+    IEP_TAMED_ITEM = 95,
+    IEP_INC_PARAMETER_A = 96,
+    IEP_INC_PARAMETER_B = 97,
+    IEP_AMP_PARAMETER_A = 98,
+    IEP_AMP_PARAMETER_B = 99,
+};
+
+enum class ITEM_EFFECT_INSTANT
+{
+    NONE = 0,
+
+    INC_HP = 1,
+    INC_MP = 2,
+    WARP = 3,
+    RESURECTION = 4,
+    SKILL = 5,
+    ADD_STATE = 6,
+    REMOVE_STATE = 7,
+    TOGGLE_STATE = 8,
+    ADD_IMMORAL_POint32_t = 41,
+    SET_IMMORAL_POint32_t = 42,
+    WARP_TO_SPECIAL_POSITION = 43,
+    INC_STAMINA = 80,
+    SUMMON_PET = 90,
+    GENERATE_ITEM = 94,
+    INC_HP_PERCENT = 101,
+    INC_MP_PERCENT = 102,
+    INC_GOLD = 103,
+    INC_HUNTAHOLIC_POint32_t = 104,
+    RECALL = 112,
+    RESET_SKILL = 113,
+    RESET_JOB = 118,
+    RENAME_SUMMON = 115,
+    RESET_SUMMON_SKILL = 116,
+    WARP_TO_PLAYER = 117,
+    RENAME_CHARACTER = 119,
+    RENAME_PET = 120,
+    ADD_CASH = 121,
+    ADD_STATE_EX = 124,
+};
+
+enum ElementalType : int32_t
+{
+    TYPE_NONE = 0,
+    TYPE_FIRE = 1,
+    TYPE_WATER = 2,
+    TYPE_WIND = 3,
+    TYPE_EARTH = 4,
+    TYPE_LIGHT = 5,
+    TYPE_DARK = 6,
+    TYPE_COUNT = 7,
+    TYPE_UNKN = 99
 };
 
 enum FlagBits : uint32_t
@@ -113,6 +192,7 @@ enum ItemFlag : int32_t
     FLAG_EVENTMAP = 17,
     FLAG_HUNTAHOLIC = 18
 };
+
 
 enum GenerateCode : int32_t
 {
@@ -280,7 +360,7 @@ enum ItemGroup : int32_t
     GROUP_BOSSCARD = 140,
 };
 
-enum class LIMIT_FLAG : int32_t
+enum LIMIT_FLAG : int32_t
 {
     LIMIT_DEVA = (1 << 2),
     LIMIT_ASURA = (1 << 3),
@@ -292,77 +372,75 @@ enum class LIMIT_FLAG : int32_t
     LIMIT_SUMMONER = (1 << 13),
 };
 
-enum ItemCode : int32_t
+struct ItemTemplate
 {
-    CHALK_OF_RESTORATION = 800000,
-    UNIT_CARD = 800001,
-    FEATHER_OF_RETURN = 910006,
-    FEATHER_OF_REINSTATEMENT = 910009,
-    E_REPAIR_POWDER = 950021,
-    FEATHER_OF_RETURN_EVENT = 2902104
-};
+    int32_t nID;
+    int32_t nNameID;
+    ItemType eType;
+    ItemGroup eGroup;
+    ItemClass eClass;
+    ItemWearType eWearType;
+    int32_t set_id;
+    int32_t set_part_flag;
+    int32_t rank;
+    int32_t level;
+    int32_t enhance;
+    int32_t socket;
+    int32_t status_flag;
+    int32_t limit_deva;
+    int32_t limit_asura;
+    int32_t limit_gaia;
+    int32_t limit_fighter;
+    int32_t limit_hunter;
+    int32_t limit_magician;
+    int32_t limit_summoner;
+    int32_t nLimit;
+    int32_t use_min_level;
+    int32_t use_max_level;
+    int32_t target_min_level;
+    int32_t target_max_level;
+    float range;
+    float weight;
+    int32_t price;
+    int32_t endurance;
+    int32_t material;
+    int32_t summon_id;
+    int8_t flaglist[19];
+    int32_t available_period;
+    int16_t decrease_type;
+    float throw_range;
+    int8_t distribute_type;
+    int16_t base_type[4];
+    float base_var[4][2];
+    int16_t opt_type[4];
+    float opt_var[4][2];
+    int16_t enhance_id[2];
+    float _enhance[2][4];
+    int32_t skill_id;
+    int32_t state_id;
+    int32_t state_level;
+    int32_t state_time;
+    int32_t state_type;
+    int32_t cool_time;
+    int16_t cool_time_group;
+    std::string script_text;
 
-enum
-{
-    IEP_NONE = 0,
-    IEP_ATTACK_POINT = 11,
-    IEP_MAGIC_POINT = 12,
-    IEP_ACCURACY = 13,
-    IEP_ATTACK_SPEED = 14,
-    IEP_DEFENCE = 15,
-    IEP_MAGIC_DEFENCE = 16,
-    IEP_AVOID = 17,
-    IEP_MOVE_SPEED = 18,
-    IEP_BLOCK_CHANCE = 19,
-    IEP_CARRY_WEIGHT = 20,
-    IEP_BLOCK_DEFENCE = 21,
-    IEP_CASTING_SPEED = 22,
-    IEP_MAGIC_ACCURACY = 23,
-    IEP_MAGIC_AVOID = 24,
-    IEP_COOLTIME_SPEED = 25,
-    IEP_BELT_SLOT = 26,
-    IEP_MAX_CHAOS = 27,
-    IEP_MAX_HP = 30,
-    IEP_MAX_MP = 31,
-    IEP_BOW_INTERVAL = 34,
-    IEP_MP_REGEN_POINT = 33,
-    IEP_TAMED_ITEM = 95,
-    IEP_INC_PARAMETER_A = 96,
-    IEP_INC_PARAMETER_B = 97,
-    IEP_AMP_PARAMETER_A = 98,
-    IEP_AMP_PARAMETER_B = 99,
-};
+    void SetCombinedFlags()
+    {
+        if (limit_asura != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_ASURA);
+        if (limit_gaia != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_GAIA);
+        if (limit_deva != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_DEVA);
 
-enum class ITEM_EFFECT_INSTANT
-{
-    NONE = 0,
-
-    INC_HP = 1,
-    INC_MP = 2,
-    WARP = 3,
-    RESURECTION = 4,
-    SKILL = 5,
-    ADD_STATE = 6,
-    REMOVE_STATE = 7,
-    TOGGLE_STATE = 8,
-    ADD_IMMORAL_POint32_t = 41,
-    SET_IMMORAL_POint32_t = 42,
-    WARP_TO_SPECIAL_POSITION = 43,
-    INC_STAMINA = 80,
-    SUMMON_PET = 90,
-    GENERATE_ITEM = 94,
-    INC_HP_PERCENT = 101,
-    INC_MP_PERCENT = 102,
-    INC_GOLD = 103,
-    INC_HUNTAHOLIC_POint32_t = 104,
-    RECALL = 112,
-    RESET_SKILL = 113,
-    RESET_JOB = 118,
-    RENAME_SUMMON = 115,
-    RESET_SUMMON_SKILL = 116,
-    WARP_TO_PLAYER = 117,
-    RENAME_CHARACTER = 119,
-    RENAME_PET = 120,
-    ADD_CASH = 121,
-    ADD_STATE_EX = 124,
+        if (limit_hunter != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_HUNTER);
+        if (limit_fighter != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_FIGHTER);
+        if (limit_magician != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_MAGICIAN);
+        if (limit_summoner != 0)
+            nLimit |= static_cast<int32_t>(LIMIT_FLAG::LIMIT_SUMMONER);
+    }
 };

@@ -38,7 +38,7 @@ public:
     };
 
     static void EnterPacket(XPacket &pEnterPct, Item *pItem);
-    static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = BY_BASIC, int32_t level = -1, int32_t enhance = -1, int32_t flag = -1, int32_t socket_0 = 0,
+    static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = GenerateCode::BY_BASIC, int32_t level = -1, int32_t enhance = -1, int32_t flag = -1, int32_t socket_0 = 0,
         int32_t socket_1 = 0, int32_t socket_2 = 0, int32_t socket_3 = 0, int32_t remain_time = 0);
     static void PendFreeItem(Item *pItem);
 
@@ -67,10 +67,10 @@ public:
 
     inline int32_t GetAccountID() const { return m_nAccountID; }
     inline uint32_t GetBindedCreatureHandle() const { return m_hBindedTarget; }
-    inline int32_t GetItemGroup() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->group : 0; }
-    inline int32_t GetItemType() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->type : 0; }
+    inline ItemGroup GetItemGroup() const { return GetItemTemplate() != nullptr ? GetItemGroup() : ItemGroup::GROUP_ETC; }
+    inline ItemType GetItemType() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->eType : ItemType::TYPE_ETC; }
 
-    ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? static_cast<ItemClass>(GetItemBase()->iclass) : ItemClass::CLASS_ETC); }
+    ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? GetItemBase()->eClass : ItemClass::CLASS_ETC); }
 
     inline uint32_t GetStorageIndex() const { return m_unInventoryIndex; }
     inline std::shared_ptr<ItemTemplate> GetItemBase() const { return m_pItemBase; }
@@ -113,7 +113,7 @@ public:
     inline bool IsArtifact() const { return GetItemGroup() == ItemGroup::GROUP_ARTIFACT; }
     inline bool IsCharm() const { return GetItemType() == ItemType::TYPE_CHARM; }
 
-    inline bool IsTwoHandItem() const { return GetItemBase()->wear_type == ItemWearType::WEAR_TWOHAND; }
+    inline bool IsTwoHandItem() const { return GetItemBase()->eWearType == ItemWearType::WEAR_TWOHAND; }
 
     bool IsInInventory() const;
     bool IsInStorage() const;

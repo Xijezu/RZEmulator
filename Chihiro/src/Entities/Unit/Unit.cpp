@@ -125,9 +125,9 @@ void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player *pPlayer)
 
 Item *Unit::GetWornItem(ItemWearType idx)
 {
-    if ((uint32_t)idx >= MAX_ITEM_WEAR || idx < 0)
+    if ((idx) >= MAX_ITEM_WEAR || (idx) < 0)
         return nullptr;
-    return m_anWear[idx];
+    return m_anWear[(idx)];
 }
 
 void Unit::SetHealth(int32_t hp)
@@ -950,7 +950,7 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
                     damage = it.fDamage * damage_info.nDamage;
 
                 damage = DealAdditionalLeftHandDamage(pFrom, damage, it.type).nDamage;
-                damage_info.elemental_damage[it.type] += damage;
+                damage_info.elemental_damage[(it.type)] += damage;
                 damage_info.nDamage += damage;
             }
         }
@@ -1020,7 +1020,7 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
                     damage = it.fDamage * damage_info.nDamage;
 
                 damage = DealAdditionalDamage(pFrom, damage, it.type).nDamage;
-                damage_info.elemental_damage[it.type] += damage;
+                damage_info.elemental_damage[(it.type)] += damage;
                 damage_info.nDamage += damage;
             }
         }
@@ -1611,7 +1611,7 @@ uint16_t Unit::Puton(ItemWearType pos, Item *pItem, bool bIsTranslated)
     if (!pItem->IsInInventory())
         return TS_RESULT_ACCESS_DENIED;
 
-    if (pItem->GetWearInfo() != WEAR_NONE)
+    if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
         return TS_RESULT_NOT_ACTABLE;
 
     std::vector<int32_t> vOverlappedItemList{};
@@ -1631,22 +1631,22 @@ uint16_t Unit::Puton(ItemWearType pos, Item *pItem, bool bIsTranslated)
 
 uint16_t Unit::putonItem(ItemWearType pos, Item *pItem)
 {
-    ASSERT(pos < MAX_SPARE_ITEM_WEAR, "putonItem: Position invalid!!");
-    ASSERT(m_anWear[pos] == nullptr, "putonItem: m_anWear[pos] is empty!!");
+    ASSERT((pos) < MAX_SPARE_ITEM_WEAR, "putonItem: Position invalid!!");
+    ASSERT(m_anWear[(pos)] == nullptr, "putonItem: m_anWear[pos] is empty!!");
 
-    m_anWear[pos] = pItem;
+    m_anWear[(pos)] = pItem;
 
     pItem->SetWearInfo(pos);
     pItem->SetBindedCreatureHandle(GetHandle());
     pItem->m_bIsNeedUpdateToDB = true;
 
-    if ((pItem->IsBow() || pItem->IsCrossBow()) && pos < MAX_ITEM_WEAR)
+    if ((pItem->IsBow() || pItem->IsCrossBow()) && (pos) < MAX_ITEM_WEAR)
         m_nNextAttackMode = static_cast<int32_t>(NEXT_ATTACK_MODE::AM_AIMING);
 
     if (IsPlayer())
-        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[pos]);
+        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[(pos)]);
     else if (IsSummon())
-        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[pos]);
+        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[(pos)]);
 
     return TS_RESULT_SUCCESS;
 }
@@ -1659,11 +1659,11 @@ uint16_t Unit::Putoff(ItemWearType pos)
     if (pos == ItemWearType::WEAR_TWOFINGER_RING)
         pos = ItemWearType::WEAR_RING;
 
-    if ((pos >= MAX_SPARE_ITEM_WEAR && pos != ItemWearType::WEAR_TWOHAND) || pos < 0)
+    if (((pos) >= MAX_SPARE_ITEM_WEAR && pos != ItemWearType::WEAR_TWOHAND) || (pos) < 0)
         return TS_RESULT_NOT_ACTABLE;
 
     ItemWearType absolute_pos = GetAbsoluteWearPos(pos);
-    if (absolute_pos == WEAR_CANTWEAR)
+    if (absolute_pos == ItemWearType::WEAR_CANTWEAR)
         return TS_RESULT_NOT_ACTABLE;
 
     if (pos == ItemWearType::WEAR_BAG_SLOT)
@@ -1671,7 +1671,7 @@ uint16_t Unit::Putoff(ItemWearType pos)
         if (GetMaxWeight() < GetFloatValue(PLAYER_FIELD_WEIGHT))
             return TS_RESULT_TOO_HEAVY;
 
-        const auto &current_bag_base = m_anWear[absolute_pos]->GetItemBase();
+        const auto &current_bag_base = m_anWear[(absolute_pos)]->GetItemBase();
         float current_bag_capacity{0};
         for (int32_t i = 0; i < MAX_OPTION_NUMBER; ++i)
         {
@@ -1690,46 +1690,46 @@ uint16_t Unit::Putoff(ItemWearType pos)
 
 uint16_t Unit::putoffItem(ItemWearType pos)
 {
-    ASSERT(pos < MAX_SPARE_ITEM_WEAR, "ItemWearType position is invald!!");
+    ASSERT((pos) < MAX_SPARE_ITEM_WEAR, "ItemWearType position is invald!!");
 
-    m_anWear[pos]->SetWearInfo(WEAR_NONE);
-    m_anWear[pos]->SetBindTarget(nullptr);
+    m_anWear[(pos)]->SetWearInfo(ItemWearType::WEAR_NONE);
+    m_anWear[(pos)]->SetBindTarget(nullptr);
 
     if (IsPlayer())
-        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[pos]);
+        Messages::SendItemWearInfoMessage(this->As<Player>(), this, m_anWear[(pos)]);
     else if (IsSummon())
-        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[pos]);
+        Messages::SendItemWearInfoMessage(this->As<Summon>()->GetMaster(), this, m_anWear[(pos)]);
 
-    m_anWear[pos] = nullptr;
+    m_anWear[(pos)] = nullptr;
     return TS_RESULT_SUCCESS;
 }
 
 ItemWearType Unit::GetAbsoluteWearPos(ItemWearType pos)
 {
     ItemWearType result = pos;
-    if (m_anWear[pos] == nullptr)
-        result = WEAR_CANTWEAR;
+    if (m_anWear[(pos)] == nullptr)
+        result = ItemWearType::WEAR_CANTWEAR;
     return result;
 }
 
 ItemClass Unit::GetWeaponClass()
 {
-    ItemClass result = CLASS_ETC;
-    auto itemRight = GetWornItem(WEAR_RIGHTHAND);
+    ItemClass result = ItemClass::CLASS_ETC;
+    auto itemRight = GetWornItem(ItemWearType::WEAR_RIGHTHAND);
 
     if (itemRight != nullptr)
     {
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
         {
-            Item *itemLeft = GetWornItem(WEAR_LEFTHAND);
-            if (itemRight->GetItemTemplate()->iclass == CLASS_ONEHAND_SWORD && itemLeft->GetItemTemplate()->iclass == CLASS_ONEHAND_SWORD)
-                return CLASS_DOUBLE_SWORD;
-            if (itemRight->GetItemTemplate()->iclass == CLASS_DAGGER && itemLeft->GetItemTemplate()->iclass == CLASS_DAGGER)
-                return CLASS_DOUBLE_DAGGER;
-            if (itemRight->GetItemTemplate()->iclass == CLASS_ONEHAND_AXE && itemLeft->GetItemTemplate()->iclass == CLASS_ONEHAND_AXE)
-                return CLASS_DOUBLE_AXE;
+            Item *itemLeft = GetWornItem(ItemWearType::WEAR_LEFTHAND);
+            if (itemRight->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_SWORD && itemLeft->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_SWORD)
+                return ItemClass::CLASS_DOUBLE_SWORD;
+            if (itemRight->GetItemTemplate()->eClass == ItemClass::CLASS_DAGGER && itemLeft->GetItemTemplate()->eClass == ItemClass::CLASS_DAGGER)
+                return ItemClass::CLASS_DOUBLE_DAGGER;
+            if (itemRight->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_AXE && itemLeft->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_AXE)
+                return ItemClass::CLASS_DOUBLE_AXE;
         }
-        result = (ItemClass)itemRight->GetItemTemplate()->iclass;
+        result = itemRight->GetItemTemplate()->eClass;
     }
     return result;
 }
@@ -1737,9 +1737,9 @@ ItemClass Unit::GetWeaponClass()
 bool Unit::IsWearShield()
 {
     bool result{false};
-    auto item = GetWornItem(WEAR_SHIELD);
+    auto item = GetWornItem(ItemWearType::WEAR_SHIELD);
     if (item != nullptr)
-        result = item->GetItemTemplate()->iclass == CLASS_SHIELD;
+        result = item->GetItemTemplate()->eClass == ItemClass::CLASS_SHIELD;
     else
         result = false;
     return result;
@@ -2118,13 +2118,13 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
 
                 if (pWornItem != nullptr)
                 {
-                    if (pWornItem != pItem && (pPlayer->Putoff(WEAR_RIDE_ITEM) != TS_RESULT_SUCCESS || pPlayer->Puton(WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS))
+                    if (pWornItem != pItem && (pPlayer->Putoff(ItemWearType::WEAR_RIDE_ITEM) != TS_RESULT_SUCCESS || pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS))
                     {
                         result = TS_RESULT_ACCESS_DENIED;
                         break;
                     }
                 }
-                else if (pPlayer->Puton(WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS)
+                else if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS)
                 {
                     result = TS_RESULT_ACCESS_DENIED;
                     break;
@@ -2326,7 +2326,7 @@ void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additiona
 
     for (auto &additional : vAdditionalDamage)
     {
-        if ((additional.require_type == 99 || additional.require_type == elemental_type) && additional.ratio > urand(1, 100))
+        if ((additional.require_type == ElementalType::TYPE_UNKN || additional.require_type == elemental_type) && additional.ratio > urand(1, 100))
         {
             int32_t damage{0};
             if (additional.nDamage != 0)
@@ -2335,8 +2335,8 @@ void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additiona
                 damage = additional.fDamage * damage_info.nDamage;
 
             damage = DealDamage(pFrom, damage, additional.type, additionalDamage).nDamage;
-            if (additional.type >= 0 && additional.type < ElementalType::TYPE_COUNT)
-                damage_info.elemental_damage[additional.type] += damage;
+            if ((additional.type) >= 0 && additional.type < ElementalType::TYPE_COUNT)
+                damage_info.elemental_damage[(additional.type)] += damage;
             damage_info.nDamage += nDamage;
         }
     }
@@ -2365,15 +2365,15 @@ float Unit::GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
     if (bPhysical)
     {
         if (bBad)
-            return m_BadPhysicalElementalSkillStateMod[type].fCooltime;
+            return m_BadPhysicalElementalSkillStateMod[(type)].fCooltime;
 
-        return m_GoodPhysicalElementalSkillStateMod[type].fCooltime;
+        return m_GoodPhysicalElementalSkillStateMod[(type)].fCooltime;
     }
 
     if (bBad)
-        return m_BadMagicalElementalSkillStateMod[type].fCooltime;
+        return m_BadMagicalElementalSkillStateMod[(type)].fCooltime;
 
-    return m_GoodMagicalElementalSkillStateMod[type].fCooltime;
+    return m_GoodMagicalElementalSkillStateMod[(type)].fCooltime;
 }
 
 void Unit::SetJP(int32_t jp)
@@ -2421,8 +2421,8 @@ int32_t Unit::Heal(int32_t hp)
 
 int64_t Unit::GetBulletCount() const
 {
-    auto item = m_anWear[WEAR_SHIELD];
-    if (item != nullptr && item->GetItemTemplate()->group == GROUP_BULLET)
+    auto item = m_anWear[(ItemWearType::WEAR_SHIELD)];
+    if (item != nullptr && item->GetItemGroup() == ItemGroup::GROUP_BULLET)
     {
         return item->GetItemInstance().GetCount();
     }
@@ -2432,9 +2432,9 @@ int64_t Unit::GetBulletCount() const
     }
 }
 
-int32_t Unit::GetArmorClass() const
+ItemClass Unit::GetArmorClass() const
 {
-    return m_anWear[WEAR_ARMOR] != nullptr ? m_anWear[WEAR_ARMOR]->GetItemTemplate()->iclass : 0;
+    return m_anWear[(ItemWearType::WEAR_ARMOR)] != nullptr ? m_anWear[(ItemWearType::WEAR_ARMOR)]->GetItemClass() : ItemClass::CLASS_ETC;
 }
 
 void Unit::procState(uint32_t t)
@@ -3101,15 +3101,15 @@ int32_t Unit::GetMagicPoint(ElementalType type, bool bPhysical, bool bBad)
     if (bPhysical)
     {
         if (bBad)
-            return m_Attribute.nMagicPoint * m_BadPhysicalElementalSkillStateMod[type].fMagicalDamage;
+            return m_Attribute.nMagicPoint * m_BadPhysicalElementalSkillStateMod[(type)].fMagicalDamage;
 
-        return m_Attribute.nMagicPoint * m_GoodPhysicalElementalSkillStateMod[type].fMagicalDamage;
+        return m_Attribute.nMagicPoint * m_GoodPhysicalElementalSkillStateMod[(type)].fMagicalDamage;
     }
 
     if (bBad)
-        return m_Attribute.nMagicPoint * m_BadMagicalElementalSkillStateMod[type].fMagicalDamage;
+        return m_Attribute.nMagicPoint * m_BadMagicalElementalSkillStateMod[(type)].fMagicalDamage;
 
-    return m_Attribute.nMagicPoint * m_GoodMagicalElementalSkillStateMod[type].fMagicalDamage;
+    return m_Attribute.nMagicPoint * m_GoodMagicalElementalSkillStateMod[(type)].fMagicalDamage;
 }
 
 bool Unit::onProcAura(Skill *pSkill, int32_t nRequestedLevel)
@@ -3610,28 +3610,28 @@ float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_
     {
         if (bBad)
         {
-            if (m_BadPhysicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
-                return m_BadPhysicalElementalSkillStateMod[type].fCastingSpeed;
+            if (m_BadPhysicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
+                return m_BadPhysicalElementalSkillStateMod[(type)].fCastingSpeed;
             else
                 return 1.0f;
         }
 
-        if (m_GoodPhysicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
-            return m_GoodPhysicalElementalSkillStateMod[type].fCastingSpeed;
+        if (m_GoodPhysicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
+            return m_GoodPhysicalElementalSkillStateMod[(type)].fCastingSpeed;
         else
             return 1.0f;
     }
 
     if (bBad)
     {
-        if (m_BadMagicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
-            return m_BadMagicalElementalSkillStateMod[type].fCastingSpeed;
+        if (m_BadMagicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
+            return m_BadMagicalElementalSkillStateMod[(type)].fCastingSpeed;
         else
             return 1.0f;
     }
 
-    if (m_GoodMagicalElementalSkillStateMod[type].nCastingSpeedApplyTime >= nOriginalCoolTime)
-        return m_GoodMagicalElementalSkillStateMod[type].fCastingSpeed;
+    if (m_GoodMagicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
+        return m_GoodMagicalElementalSkillStateMod[(type)].fCastingSpeed;
 
     return 1.0f;
 }

@@ -16,7 +16,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Common.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 #include "StateBase.h"
 
 enum Target

@@ -21,7 +21,7 @@
 #include "Common.h"
 #include "HashMapHolder.h"
 #include "Item.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 #include "LockedQueue.h"
 #include "Monster.h"
 #include "Player.h"

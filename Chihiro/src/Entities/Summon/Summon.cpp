@@ -336,10 +336,10 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     if ((pItem->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_CARD) == 0)
         return false;
 
-    if (pos > static_cast<ItemWearType>(MAX_ITEM_WEAR) || pos < 0)
+    if ((pos) > MAX_ITEM_WEAR || (pos) < 0)
         return false;
 
-    if (pos == static_cast<ItemWearType>(MAX_ITEM_WEAR))
+    if (pos == (MAX_ITEM_WEAR))
     {
         int32_t startPos{0};
         int32_t endPos{static_cast<int32_t>(SUMMON_DEFAULTS::SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR)};
@@ -355,20 +355,20 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
             if (pWornItem == pItem)
                 return false;
 
-            if (pWornItem != nullptr && pos == MAX_ITEM_WEAR)
+            if (pWornItem != nullptr && (pos) == MAX_ITEM_WEAR)
                 pos = static_cast<ItemWearType>(i);
         }
 
-        if (pos == MAX_ITEM_WEAR)
+        if ((pos) == MAX_ITEM_WEAR)
             return false;
     }
-    else if (pos >= static_cast<int32_t>(SUMMON_DEFAULTS::SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR)) ///- Replace with m_nMaxItemWear w/ staged pets
+    else if ((pos) >= static_cast<int32_t>(SUMMON_DEFAULTS::SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR)) ///- Replace with m_nMaxItemWear w/ staged pets
     {
         return false;
     }
     else if (ItemList != nullptr)
     {
-        if (m_anWear[pos] != nullptr)
+        if (m_anWear[(pos)] != nullptr)
             ItemList->emplace_back(pos);
     }
 
@@ -438,7 +438,7 @@ uint16_t Summon::putonItem(ItemWearType pos, Item *pItem)
     pItem->SetOwnSummonInfo(GetHandle(), GetUInt32Value(UNIT_FIELD_UID));
 
     ///- @todo: Item on_equip_item
-    if (m_anWear[pos] == pItem)
+    if (m_anWear[(pos)] == pItem)
         pMaster->GetInventory()->AddWeightModifier(-pItem->GetWeight());
 
     pMaster->UpdateWeightWithInventory();
@@ -453,14 +453,14 @@ uint16_t Summon::putoffItem(ItemWearType pos)
     if (pMaster == nullptr || !pMaster->IsInWorld())
         return TS_RESULT_ACCESS_DENIED;
 
-    if (m_anWear[pos] == nullptr)
+    if (m_anWear[(pos)] == nullptr)
         return TS_RESULT_NOT_EXIST;
 
-    auto pItem = m_anWear[pos];
+    auto pItem = m_anWear[(pos)];
     pItem->SetOwnSummonInfo(0, 0);
     auto nRet = Unit::putoffItem(pos);
 
-    if (m_anWear[pos] == nullptr)
+    if (m_anWear[(pos)] == nullptr)
         pMaster->GetInventory()->AddWeightModifier(pItem->GetWeight());
 
     pMaster->UpdateWeightWithInventory();

@@ -203,7 +203,7 @@ public:
     float GetRealAttackRange() const { return (12 * m_Attribute.nAttackRange) / 100.0f; }
 
     uint32_t GetAttackInterval() const { return (uint32_t)(100.0f / m_Attribute.nAttackSpeed * 115.0f); };
-    int32_t GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[elemental_type]; }
+    int32_t GetElementalResist(ElementalType elemental_type) const { return m_Resist.nResist[(elemental_type)]; }
 
     void AddEnergy();
     void RemoveEnergy(int32_t nEnergy);
@@ -371,7 +371,7 @@ public:
     bool OnCompleteSkill();
     void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time);
     void SetMove(Position _to, uint8_t _speed, uint32_t _start_time);
-    int32_t GetArmorClass() const;
+    ItemClass GetArmorClass() const;
     // Event handler
     bool IsWornByCode(int32_t code) const;
     virtual bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList);
@@ -502,10 +502,10 @@ protected:
     StateMod m_StateStatePenalty{};
 
     ///- ElementalSkillStateMods
-    ElementalSkillStateMod m_GoodPhysicalElementalSkillStateMod[ElementalType::TYPE_COUNT];
-    ElementalSkillStateMod m_BadPhysicalElementalSkillStateMod[ElementalType::TYPE_COUNT];
-    ElementalSkillStateMod m_GoodMagicalElementalSkillStateMod[ElementalType::TYPE_COUNT];
-    ElementalSkillStateMod m_BadMagicalElementalSkillStateMod[ElementalType::TYPE_COUNT];
+    ElementalSkillStateMod m_GoodPhysicalElementalSkillStateMod[(ElementalType::TYPE_COUNT)];
+    ElementalSkillStateMod m_BadPhysicalElementalSkillStateMod[(ElementalType::TYPE_COUNT)];
+    ElementalSkillStateMod m_GoodMagicalElementalSkillStateMod[(ElementalType::TYPE_COUNT)];
+    ElementalSkillStateMod m_BadMagicalElementalSkillStateMod[(ElementalType::TYPE_COUNT)];
 
     ///- Additional Damage
     std::vector<AdditionalDamageInfo> m_vNormalAdditionalDamage{};

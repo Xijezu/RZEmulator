@@ -121,10 +121,10 @@ void ObjectMgr::LoadItemResource()
         auto itemTemplate = std::make_shared<ItemTemplate>();
 
         itemTemplate->nID = fields[0].GetInt32();
-        itemTemplate->type = fields[1].GetInt32();
-        itemTemplate->group = fields[2].GetInt32();
-        itemTemplate->iclass = fields[3].GetInt32();
-        itemTemplate->wear_type = fields[4].GetInt32();
+        itemTemplate->eType = static_cast<ItemType>(fields[1].GetInt32());
+        itemTemplate->eGroup = static_cast<ItemGroup>(fields[2].GetInt32());
+        itemTemplate->eClass = static_cast<ItemClass>(fields[3].GetInt32());
+        itemTemplate->eWearType = static_cast<ItemWearType>(fields[4].GetInt32());
         itemTemplate->set_id = fields[5].GetInt32();
         itemTemplate->set_part_flag = fields[6].GetInt32();
         itemTemplate->rank = fields[7].GetInt32();

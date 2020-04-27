@@ -16,7 +16,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Common.h"
-#include "ItemFields.h"
+#include "ItemTemplate.hpp"
 #include "TS_SC_SKILL.h"
 
 enum SKILL_TYPE : int16_t

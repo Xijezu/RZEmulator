@@ -595,7 +595,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 
     if (player != nullptr && player->IsInWorld())
     {
-        auto ni = Item::AllocItem(0, code, count, BY_MONSTER, level, -1, -1, 0, 0, 0, 0, 0);
+        auto ni = Item::AllocItem(0, code, count, GenerateCode::BY_MONSTER, level, -1, -1, 0, 0, 0, 0, 0);
         if (ni == nullptr)
             return;
         ni->SetPickupOrder(pPriority.PickupOrder);
@@ -642,7 +642,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
 
 void Monster::ForceKill(Player *byPlayer)
 {
-    auto dmg = onDamage(byPlayer, TYPE_NONE, DT_NORMAL_PHYSICAL_DAMAGE, GetHealth(), false);
+    auto dmg = onDamage(byPlayer, ElementalType::TYPE_NONE, DT_NORMAL_PHYSICAL_DAMAGE, GetHealth(), false);
     damage(byPlayer, dmg, false);
     Messages::SendHPMPMessage(byPlayer, this, 0, 0, true);
 }
@@ -663,7 +663,7 @@ void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, 
 
     if (gold > 1000000)
         gold = 1000000;
-    auto gi = sMemoryPool.AllocGold(gold, BY_MONSTER);
+    auto gi = sMemoryPool.AllocGold(gold, GenerateCode::BY_MONSTER);
     gi->SetCurrentXY(pos.GetPositionX(), pos.GetPositionY());
     gi->SetLayer(GetLayer());
 

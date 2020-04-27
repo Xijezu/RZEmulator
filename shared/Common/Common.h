@@ -24,6 +24,7 @@
 #include <set>
 #include <stdint.h>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -69,7 +70,6 @@ inline unsigned long long atoull(char const *str)
 {
     return strtoull(str, nullptr, 10);
 }
-
 #define STRINGIZE(a) #a
 
 enum TimeConstants
