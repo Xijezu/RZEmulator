@@ -16,6 +16,6 @@ We used it to get a proper base for networking & database, see /shared/README.md
 You can find detailed guides about compiling, installation and configuring in our [forum](https://www.ngemity.org/viewforum.php?f=12), make sure to check it out!
 
 ## Current Status
-Still alive!
+Not alive :(
 
 If you have the fpossibility, feel free to contribute by reporting bugs or sending in fixes/additions 
