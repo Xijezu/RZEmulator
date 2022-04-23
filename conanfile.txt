@@ -1,11 +1,12 @@
 [requires]
-OpenSSL/1.0.2l@conan/stable
-boost/1.71.0@conan/stable
-fmt/4.0.0@bincrafters/stable
-mysql-connector-c/6.1.11@bincrafters/stable
+openssl/1.0.2u
+fmt/6.0.0
+zlib/1.2.12
+mysql-connector-c/6.1.11
+boost/1.74.0
 
 [options]
-OpenSSL:shared=True
+openssl:shared=True
 
 [generators]
 cmake

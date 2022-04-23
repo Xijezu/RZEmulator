@@ -87,7 +87,7 @@ link_directories(${CONAN_LIB_DIRS_OPENSSL})
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 target_include_directories(${LIBRARY_NAME} SYSTEM PRIVATE $ENV{INCLUDE})
-target_link_libraries(${LIBRARY_NAME} CONAN_PKG::mysql-connector-c CONAN_PKG::fmt CONAN_PKG::boost CONAN_PKG::OpenSSL)
+target_link_libraries(${LIBRARY_NAME} CONAN_PKG::mysql-connector-c CONAN_PKG::fmt CONAN_PKG::boost CONAN_PKG::openssl)
 if(WITH_PCH)
         add_cxx_pch(${LIBRARY_NAME} ${sharedPCH})
 endif()
