@@ -4,6 +4,7 @@ fmt/6.0.0
 zlib/1.2.12
 mysql-connector-c/6.1.11
 boost/1.74.0
+nlohmann_json/3.10.5
 
 [options]
 openssl:shared=True
