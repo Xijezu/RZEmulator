@@ -3,19 +3,14 @@ cmake_minimum_required(VERSION 3.10)
 
 ########## CONAN ##########
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-   file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.14/conan.cmake"
-                 "${CMAKE_BINARY_DIR}/conan.cmake")
+  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
+                "${CMAKE_BINARY_DIR}/conan.cmake"
+                TLS_VERIFY ON)
 endif()
 
 include(${CMAKE_BINARY_DIR}/conan.cmake)
-conan_check(VERSION 1.0.0 REQUIRED)
-
-conan_add_remote(NAME bincrafters URL https://api.bintray.com/conan/bincrafters/public-conan) # Add bincrafters repo
-conan_add_remote(NAME conan URL https://api.bintray.com/conan/conan-community/conan) # add (default?) conan repo
-
-conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP BUILD missing) # run conan setup
-conan_basic_setup(TARGETS)
+conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing) # run conan setup
 ######## END CONAN ########
 
 # set macro-directory
@@ -25,10 +20,6 @@ if(CMAKE_COMPILER_IS_GNUCXX AND NOT MINGW)
     add_definitions(-fno-delete-null-pointer-checks)
 endif()
 
-# build in Release-mode by default if not explicitly set
-if( NOT CMAKE_BUILD_TYPE )
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(DEBUG 1)
 endif()

@@ -42,6 +42,8 @@
 
 #define MIN_MYSQL_SERVER_VERSION 50100u
 #define MIN_MYSQL_CLIENT_VERSION 50100u
+#define MIN_MARIADB_SERVER_VERSION 100804u
+#define MIN_MARIADB_CLIENT_VERSION 30303u
 
 class PingOperation : public SQLOperation
 {
@@ -60,9 +62,15 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
     , _synch_threads(0)
 {
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
+#ifdef NG_MARIADB
+    WPFatal(mysql_get_client_version() >= MIN_MARIADB_CLIENT_VERSION, "RZEmulator does not support MariaDB versions below 5.1");
+    WPFatal(
+        mysql_get_client_version() == MARIADB_PACKAGE_VERSION_ID, "Used MariaDB library version (%s) does not match the version used to compile RZEmulator (%s).", mysql_get_client_info(), "MYSQL_SERVER_VERSION");
+#else // NG_MARIADB
     WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "RZEmulator does not support MySQL versions below 5.1");
     WPFatal(
         mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile RZEmulator (%s).", mysql_get_client_info(), "MYSQL_SERVER_VERSION");
+#endif // NG_MARIADB
 }
 
 template<class T>

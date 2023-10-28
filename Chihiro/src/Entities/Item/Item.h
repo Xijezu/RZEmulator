@@ -67,7 +67,7 @@ public:
 
     inline int32_t GetAccountID() const { return m_nAccountID; }
     inline uint32_t GetBindedCreatureHandle() const { return m_hBindedTarget; }
-    inline ItemGroup GetItemGroup() const { return GetItemTemplate() != nullptr ? GetItemGroup() : ItemGroup::GROUP_ETC; }
+    inline ItemGroup GetItemGroup() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->eGroup : ItemGroup::GROUP_ETC; }
     inline ItemType GetItemType() const { return GetItemTemplate() != nullptr ? GetItemTemplate()->eType : ItemType::TYPE_ETC; }
 
     ItemClass GetItemClass() const { return ((GetItemBase() != nullptr) ? GetItemBase()->eClass : ItemClass::CLASS_ETC); }

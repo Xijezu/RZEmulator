@@ -12,3 +12,4 @@ Mononoke.log
 debug/
 shared/Utilities/.directory
 compile_commands.json
+/EmuRunningDir/

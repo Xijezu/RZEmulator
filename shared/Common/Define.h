@@ -73,3 +73,5 @@
 #define SI64LIT(N) INT64_C(N)
 
 #define SZFMTD "%" PRIuPTR
+
+#define NG_MARIADB
