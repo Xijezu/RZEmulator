@@ -8,14 +8,15 @@ We used it to get a proper base for networking & database, see /shared/README.md
 
 ## Dependencies
 * Platform: Linux, Windows or Mac
-* Boost 1.67 (latest stable recommended)
+* Boost 1.74 (latest stable recommended)
 * MySQL >= 5.6.36 (Windows / Linux)
 * A C++17 Compiler
 
 ## Installation Guide
-You can find detailed guides about compiling, installation and configuring in our [forum](https://www.ngemity.org/viewforum.php?f=12), make sure to check it out!
+Install conan version 1.x (Version 2.X is not supported)
+Run CMake, enjoy. :)
 
 ## Current Status
 Not alive :(
 
-If you have the fpossibility, feel free to contribute by reporting bugs or sending in fixes/additions 
+If you have the possibility, feel free to contribute by reporting bugs or sending in fixes/additions 
