@@ -114,6 +114,8 @@ private:
     sol::object SCRIPT_GetEnv(std::string);
     void SCRIPT_ShowMarket(std::string);
 
+    void SCRIPT_InsertGold(sol::variadic_args);
+
     int32_t SCRIPT_GetProperChannelNum(int32_t) { return 0; }
 
     int32_t SCRIPT_GetLayerOfChannel(int, int32_t) { return 0; }
