@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential ninja-build cmake python3-pip
-          pip3 install conan
+          pip3 install conan==1.*
 
       # Runs a set of commands using the runners shell
       - name: Build
