@@ -21,8 +21,7 @@
 //============================================
 class LinkedListHead;
 
-class LinkedListElement
-{
+class LinkedListElement {
 private:
     friend class LinkedListHead;
 
@@ -74,8 +73,7 @@ public:
 
     void delink()
     {
-        if (isInList())
-        {
+        if (isInList()) {
             iNext->iPrev = iPrev;
             iPrev->iNext = iNext;
             iNext = NULL;
@@ -102,8 +100,7 @@ public:
 
 //============================================
 
-class LinkedListHead
-{
+class LinkedListHead {
 private:
     LinkedListElement iFirst;
     LinkedListElement iLast;
@@ -135,12 +132,10 @@ public:
 
     uint32_t getSize() const
     {
-        if (!iSize)
-        {
+        if (!iSize) {
             uint32_t result = 0;
             LinkedListElement const *e = getFirst();
-            while (e)
-            {
+            while (e) {
                 ++result;
                 e = e->next();
             }
@@ -155,8 +150,7 @@ public:
     void decSize() { --iSize; }
 
     template<class _Ty>
-    class Iterator
-    {
+    class Iterator {
     public:
         typedef std::bidirectional_iterator_tag iterator_category;
         typedef _Ty value_type;

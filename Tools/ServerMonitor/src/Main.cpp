@@ -18,8 +18,7 @@ void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingT
 int main(int argc, char **argv)
 {
     auto [bSuccess, ioContext] = NGemity::InitFramework("servermonitor.conf", "ServerMonitor", argc, argv);
-    if (!bSuccess)
-    {
+    if (!bSuccess) {
         return -1;
     }
 
@@ -55,8 +54,7 @@ bool StartDB()
 
     DatabaseLoader loader("server.authserver", DatabaseLoader::DATABASE_NONE);
     loader.AddDatabase(LogDatabase, "Log");
-    if (!loader.Load())
-    {
+    if (!loader.Load()) {
         NG_LOG_ERROR("sql.sql", "Cannot connect to database");
         return false;
     }
@@ -72,10 +70,8 @@ void StopDB()
 
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32_t dbPingInterval, boost::system::error_code const &error)
 {
-    if (!error)
-    {
-        if (std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = dbPingTimerRef.lock())
-        {
+    if (!error) {
+        if (std::shared_ptr<boost::asio::deadline_timer> dbPingTimer = dbPingTimerRef.lock()) {
             NG_LOG_INFO("server.authserver", "Ping MySQL to keep connection alive");
             LoginDatabase.KeepAlive();
 

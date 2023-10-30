@@ -20,8 +20,7 @@
 #include "MonsterBase.h"
 #include "Unit.h"
 
-struct VirtualParty
-{
+struct VirtualParty {
     VirtualParty() = default;
 
     VirtualParty(int32_t id, int32_t d, int32_t lv)
@@ -56,8 +55,7 @@ struct VirtualParty
     int32_t nLevel;
 };
 
-struct DamageTag
-{
+struct DamageTag {
     DamageTag(uint32_t _uid, uint32_t _time, int32_t _damage)
     {
         uid = _uid;
@@ -71,8 +69,7 @@ struct DamageTag
 };
 
 struct WayPointInfo;
-class Monster : public Unit
-{
+class Monster : public Unit {
     friend class World;
     friend class GameContent;
 

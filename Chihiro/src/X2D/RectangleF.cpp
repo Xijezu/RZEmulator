@@ -46,13 +46,11 @@ X2D::RectangleF::RectangleF(X2D::Pointf p1, X2D::Pointf p2)
 {
     m_TopLeft = Pointf(p1.x, p1.y);
     m_BottomRight = Pointf(p2.x, p2.y);
-    if (p2.x < p1.x)
-    {
+    if (p2.x < p1.x) {
         m_TopLeft.x = p2.x;
         m_BottomRight.x = p1.x;
     }
-    if (p2.y < p1.y)
-    {
+    if (p2.y < p1.y) {
         m_TopLeft.y = p2.y;
         m_BottomRight.y = p1.y;
     }
@@ -64,8 +62,7 @@ X2D::RectangleF::RectangleF(std::vector<X2D::Pointf> points)
     m_TopLeft = Pointf(p1.x, p1.y);
     Pointf p2 = points.back();
     m_BottomRight = Pointf(p2.x, p2.y);
-    for (auto &p : points)
-    {
+    for (auto &p : points) {
         if (p.x < m_TopLeft.x)
             m_TopLeft.x = p.x;
         if (p.y < m_TopLeft.y)
@@ -114,14 +111,11 @@ bool X2D::RectangleF::IsCollision(X2D::Linef line)
     //             Touch = 0,
 
     if (topResult == Linef::IntersectResult::Intersect || bottomResult == Linef::IntersectResult::Intersect || leftResult == Linef::IntersectResult::Intersect ||
-        rightResult == Linef::IntersectResult::Intersect)
-    {
+        rightResult == Linef::IntersectResult::Intersect) {
         return true;
     }
-    if (leftResult != Linef::IntersectResult::Touch)
-    {
-        if (topResult == Linef::IntersectResult::Touch)
-        {
+    if (leftResult != Linef::IntersectResult::Touch) {
+        if (topResult == Linef::IntersectResult::Touch) {
             return rightResult != Linef::IntersectResult::Touch;
         }
         return false;

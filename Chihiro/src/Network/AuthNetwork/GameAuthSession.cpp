@@ -36,8 +36,7 @@ GameAuthSession::GameAuthSession(boost::asio::ip::tcp::socket &&socket)
 
 GameAuthSession::~GameAuthSession() {}
 
-typedef struct AuthHandler
-{
+typedef struct AuthHandler {
     NGemity::Packets cmd;
     void (GameAuthSession::*handler)(XPacket *);
 } AuthHandler;
@@ -54,18 +53,15 @@ ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
     auto _cmd = pGamePct->GetPacketID();
     int32_t i = 0;
 
-    for (i = 0; i < authTableSize; i++)
-    {
-        if ((uint16_t)authPacketHandler[i].cmd == _cmd)
-        {
+    for (i = 0; i < authTableSize; i++) {
+        if ((uint16_t)authPacketHandler[i].cmd == _cmd) {
             (*this.*authPacketHandler[i].handler)(pGamePct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == authTableSize)
-    {
+    if (i == authTableSize) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
@@ -76,8 +72,7 @@ void GameAuthSession::HandleClientLoginResult(XPacket *pRecvPct)
 {
     auto szAccount = pRecvPct->ReadString(61);
     pRecvPct->rpos(0);
-    if (m_queue.count(szAccount) == 1)
-    {
+    if (m_queue.count(szAccount) == 1) {
         m_queue[szAccount]->ProcessIncoming(pRecvPct);
         m_queue.erase(szAccount);
     }
@@ -87,8 +82,7 @@ void GameAuthSession::HandleClientKick(XPacket *pRecvPct)
 {
     auto szPlayer = pRecvPct->ReadString(61);
     auto player = Player::FindPlayer(szPlayer);
-    if (player != nullptr)
-    {
+    if (player != nullptr) {
         player->GetSession().KickPlayer();
     }
 }
@@ -120,8 +114,7 @@ void GameAuthSession::OnClose()
 void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 {
     auto result = pRecvPct->read<uint16_t>();
-    if (result != TS_RESULT_SUCCESS)
-    {
+    if (result != TS_RESULT_SUCCESS) {
         NG_LOG_ERROR("network", "Authserver refused login! Shutting down...");
         World::StopNow(ERROR_EXIT_CODE);
     }

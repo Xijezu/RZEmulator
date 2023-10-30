@@ -32,8 +32,7 @@ class State;
 class Quest;
 struct TS_ITEM_INFO;
 
-class Messages
-{
+class Messages {
 public:
     static void GetEncodedInt(XPacket &, uint32_t);
     static uint32_t GetStatusCode(WorldObject *pObj, Player *pClient);

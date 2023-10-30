@@ -25,8 +25,7 @@ bool RsaCipher::loadKey(const std::vector<uint8_t> &pemKey)
     bio.reset(BIO_new_mem_buf(const_cast<uint8_t *>(pemKey.data()), (int)pemKey.size()));
     rsaCipher.reset(PEM_read_bio_RSA_PUBKEY(bio.get(), NULL, NULL, NULL));
 
-    if (!rsaCipher)
-    {
+    if (!rsaCipher) {
         printError();
         return false;
     }
@@ -36,11 +35,9 @@ bool RsaCipher::loadKey(const std::vector<uint8_t> &pemKey)
 
 bool RsaCipher::getPemPublicKey(std::vector<uint8_t> &outKey)
 {
-    if (rsaCipher)
-    {
+    if (rsaCipher) {
         std::unique_ptr<BIO, decltype(&::BIO_free)> b(BIO_new(BIO_s_mem()), ::BIO_free);
-        if (!PEM_write_bio_RSA_PUBKEY(b.get(), rsaCipher.get()))
-        {
+        if (!PEM_write_bio_RSA_PUBKEY(b.get(), rsaCipher.get())) {
             printError();
             return false;
         }
@@ -76,8 +73,7 @@ bool RsaCipher::publicEncrypt(const uint8_t *input, size_t input_size, std::vect
 {
     output.resize(RSA_size(rsaCipher.get()));
     int result = RSA_public_encrypt(input_size, input, output.data(), rsaCipher.get(), RSA_PKCS1_PADDING);
-    if (result < 0)
-    {
+    if (result < 0) {
         output.clear();
         printError();
         return false;
@@ -91,8 +87,7 @@ bool RsaCipher::publicDecrypt(const uint8_t *input, size_t input_size, std::vect
 {
     output.resize(RSA_size(rsaCipher.get()));
     int result = RSA_public_decrypt(input_size, input, output.data(), rsaCipher.get(), RSA_PKCS1_PADDING);
-    if (result < 0)
-    {
+    if (result < 0) {
         output.clear();
         printError();
         return false;
@@ -106,8 +101,7 @@ bool RsaCipher::privateEncrypt(const uint8_t *input, size_t input_size, std::vec
 {
     output.resize(RSA_size(rsaCipher.get()));
     int result = RSA_private_encrypt(input_size, input, output.data(), rsaCipher.get(), RSA_PKCS1_PADDING);
-    if (result < 0)
-    {
+    if (result < 0) {
         output.clear();
         printError();
         return false;
@@ -121,8 +115,7 @@ bool RsaCipher::privateDecrypt(const uint8_t *input, size_t input_size, std::vec
 {
     output.resize(RSA_size(rsaCipher.get()));
     int result = RSA_private_decrypt(input_size, input, output.data(), rsaCipher.get(), RSA_PKCS1_PADDING);
-    if (result < 0)
-    {
+    if (result < 0) {
         output.clear();
         printError();
         return false;

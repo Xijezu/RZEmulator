@@ -17,8 +17,7 @@
  */
 #include "ClientPackets.h"
 
-enum TS_ResultCode
-{
+enum TS_ResultCode {
     TS_RESULT_SUCCESS = 0x0,
     TS_RESULT_NOT_EXIST = 0x1,
     TS_RESULT_TOO_FAR = 0x2,
@@ -102,8 +101,7 @@ enum TS_ResultCode
 #pragma pack(push, 1)
 #endif
 
-struct TS_MESSAGE
-{
+struct TS_MESSAGE {
     uint32_t size;
     uint16_t id;
     uint8_t msg_check_sum;
@@ -143,9 +141,4 @@ struct TS_MESSAGE
 #pragma pack(pop)
 #endif
 
-enum class ReadDataHandlerResult
-{
-    Ok = 0,
-    Error = 1,
-    WaitingForQuery = 2
-};
+enum class ReadDataHandlerResult { Ok = 0, Error = 1, WaitingForQuery = 2 };

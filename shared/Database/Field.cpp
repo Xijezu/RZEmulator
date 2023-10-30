@@ -38,8 +38,7 @@ uint8_t Field::GetUInt8() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int8))
-    {
+    if (!IsType(DatabaseFieldTypes::Int8)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -56,8 +55,7 @@ int8_t Field::GetInt8() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int8))
-    {
+    if (!IsType(DatabaseFieldTypes::Int8)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -74,8 +72,7 @@ uint16_t Field::GetUInt16() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int16))
-    {
+    if (!IsType(DatabaseFieldTypes::Int16)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -92,8 +89,7 @@ int16_t Field::GetInt16() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int16))
-    {
+    if (!IsType(DatabaseFieldTypes::Int16)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -110,8 +106,7 @@ uint32_t Field::GetUInt32() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int32))
-    {
+    if (!IsType(DatabaseFieldTypes::Int32)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -128,8 +123,7 @@ int32_t Field::GetInt32() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Int32))
-    {
+    if (!IsType(DatabaseFieldTypes::Int32)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -146,8 +140,7 @@ uint64_t Field::GetUInt64() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::int64_t))
-    {
+    if (!IsType(DatabaseFieldTypes::int64_t)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -164,8 +157,7 @@ int64_t Field::GetInt64() const
         return 0;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::int64_t))
-    {
+    if (!IsType(DatabaseFieldTypes::int64_t)) {
         LogWrongType(__FUNCTION__);
         return 0;
     }
@@ -182,8 +174,7 @@ float Field::GetFloat() const
         return 0.0f;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Float))
-    {
+    if (!IsType(DatabaseFieldTypes::Float)) {
         LogWrongType(__FUNCTION__);
         return 0.0f;
     }
@@ -200,8 +191,7 @@ double Field::GetDouble() const
         return 0.0f;
 
 #ifdef NGEMITY_DEBUG
-    if (!IsType(DatabaseFieldTypes::Double) && !IsType(DatabaseFieldTypes::Decimal))
-    {
+    if (!IsType(DatabaseFieldTypes::Double) && !IsType(DatabaseFieldTypes::Decimal)) {
         LogWrongType(__FUNCTION__);
         return 0.0f;
     }
@@ -218,8 +208,7 @@ char const *Field::GetCString() const
         return NULL;
 
 #ifdef NGEMITY_DEBUG
-    if (IsNumeric() && data.raw)
-    {
+    if (IsNumeric() && data.raw) {
         LogWrongType(__FUNCTION__);
         return NULL;
     }
@@ -265,8 +254,7 @@ void Field::SetStructuredValue(char *newValue, DatabaseFieldTypes newType, uint3
         CleanUp();
 
     // This value stores somewhat structured data that needs function style casting
-    if (newValue)
-    {
+    if (newValue) {
         data.value = new char[length + 1];
         memcpy(data.value, newValue, length);
         *(reinterpret_cast<char *>(data.value) + length) = '\0';
@@ -302,8 +290,7 @@ void Field::LogWrongType(char *getter) const
 
 static char const *FieldTypeToString(enum_field_types type)
 {
-    switch (type)
-    {
+    switch (type) {
     case MYSQL_TYPE_BIT:
         return "BIT";
     case MYSQL_TYPE_BLOB:

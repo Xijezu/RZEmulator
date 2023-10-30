@@ -20,22 +20,15 @@
 #include "Common.h"
 #include "Util.h"
 
-enum ObjType : int
-{
+enum ObjType : int {
     OBJ_STATIC = 0, // Player (Pyrok)
     OBJ_MOVABLE = 1, // NPC (Pyrok)
     OBJ_CLIENT = 2 // Static (Pyrok)
 };
 
-enum MainType : int
-{
-    MT_Player = 0,
-    MT_NPC = 1,
-    MT_StaticObject = 2
-};
+enum MainType : int { MT_Player = 0, MT_NPC = 1, MT_StaticObject = 2 };
 
-enum SubType : int
-{
+enum SubType : int {
     ST_Player = 0,
     ST_NPC = 1,
     ST_Object = 2, // Also Item
@@ -47,8 +40,7 @@ enum SubType : int
     ST_State = 8 // Workaround
 };
 
-enum EUnitFields
-{
+enum EUnitFields {
     UNIT_FIELD_HANDLE = 0x0000, // Size: 1
     UNIT_FIELD_UID = 0x0001, // Size: 1
     UNIT_FIELD_LEVEL = 0x0002, // Size: 1
@@ -100,16 +92,14 @@ enum EUnitFields
     UNIT_END = 0x0043
 };
 
-enum EBattleFields
-{
+enum EBattleFields {
     BATTLE_FIELD_TARGET_HANDLE = UNIT_END + 0x0000, // Size: 1
     BATTLE_FIELD_NEXT_ATTACKABLE_TIME = UNIT_END + 0x0001, // Size: 1
     BATTLE_FIELD_CRIT_COUNT = UNIT_END + 0x0002, // Size: 1
     BATTLE_FIELD_END = UNIT_END + 0x0003
 };
 
-enum EPlayerFields
-{
+enum EPlayerFields {
     PLAYER_FIELD_ACCOUNT_ID = BATTLE_FIELD_END + 0x0001, // Size: 1
     PLAYER_FIELD_PERMISSION = BATTLE_FIELD_END + 0x0002, // Size: 1
     PLAYER_FIELD_PARTY_ID = BATTLE_FIELD_END + 0x0003, // Size: 1
@@ -145,8 +135,7 @@ enum EPlayerFields
 };
 
 class ArRegion;
-class Object
-{
+class Object {
 public:
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -347,8 +336,7 @@ protected:
     Object();
     void _InitValues();
     uint16_t m_updateFlag;
-    union
-    {
+    union {
         int32_t *m_int32Values;
         uint32_t *_uint32Values;
         float *m_floatValues;
@@ -369,8 +357,7 @@ private:
     bool PrintIndexError(uint32_t index, bool set) const;
 };
 
-struct Position
-{
+struct Position {
     float m_positionX{};
     float m_positionY{};
     float m_positionZ{};
@@ -517,8 +504,7 @@ struct Position
     std::string ToString() const { return NGemity::StringFormat("<BR>X: {}, Y: {}, Layer: {}<BR>", GetPositionX(), GetPositionY(), GetLayer()); }
 };
 
-class ArMoveVector : public Position
-{
+class ArMoveVector : public Position {
 public:
     ArMoveVector() = default;
     ~ArMoveVector() = default;
@@ -538,8 +524,7 @@ public:
         bIsMoving = false;
     }
 
-    struct MoveInfo
-    {
+    struct MoveInfo {
         MoveInfo(Position pos, uint32_t t)
         {
             end = Position(pos);
@@ -568,8 +553,7 @@ public:
 class Player;
 class Region;
 
-class WorldObject : public Object, public ArMoveVector
-{
+class WorldObject : public Object, public ArMoveVector {
 public:
     // Deleting the copy & assignment operators
     // Better safe than sorry

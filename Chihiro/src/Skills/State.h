@@ -21,8 +21,7 @@
 #include "StateBase.h"
 #include "Unit.h"
 
-struct StateDamage
-{
+struct StateDamage {
     StateDamage(uint32_t _caster, ElementalType _type, int32_t _base_effect_id, int32_t _code, uint16_t _level, int32_t _damage_hp, int32_t _damage_mp, bool _final, uint16_t _uid)
     {
         caster = _caster;
@@ -48,8 +47,7 @@ struct StateDamage
 };
 
 class Unit;
-class State : public Object
-{
+class State : public Object {
 public:
     static void DB_ClearState(Unit *pOwner);
     static void DB_InsertState(Unit *pOwner, State *pState);

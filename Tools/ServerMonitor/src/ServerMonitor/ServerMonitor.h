@@ -26,10 +26,8 @@
 #include "MonitorStructs.h"
 #include "NetworkThread.h"
 
-namespace NGemity
-{
-    class ServerMonitor
-    {
+namespace NGemity {
+    class ServerMonitor {
     public:
         static ServerMonitor &Instance()
         {

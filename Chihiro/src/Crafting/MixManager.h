@@ -23,8 +23,7 @@ constexpr int32_t MATERIAL_INFO_COUNT = 5;
 constexpr int32_t MIX_VALUE_COUNT = 6;
 constexpr int32_t MAX_SUB_MATERIAL_COUNT = 9;
 
-enum MIX_TYPE
-{
+enum MIX_TYPE {
     MIX_ENHANCE = 101, // 0x65
     MIX_ENHANCE_SKILL_CARD = 102, // 0x66
     MIX_ENHANCE_WITHOUT_FAIL = 103, // 0x67
@@ -42,8 +41,7 @@ enum MIX_TYPE
     MIX_CREATE_ITEM = 601, // 0x259
 };
 
-struct EnhanceInfo
-{
+struct EnhanceInfo {
     int32_t nSID;
     uint32_t Flag;
     int32_t nRank;
@@ -53,22 +51,19 @@ struct EnhanceInfo
     int32_t nNeedItemCode;
     float fPercentage[20];
 
-    enum
-    {
+    enum {
         RESULT_FAIL = 1,
         RESULT_SKILL_CARD_FAIL = 2,
         RESULT_ACCESSORY_FAIL = 3,
     };
 };
 
-struct MaterialInfo
-{
+struct MaterialInfo {
     int32_t type[MATERIAL_INFO_COUNT];
     int32_t value[MATERIAL_INFO_COUNT];
 };
 
-struct MixBase
-{
+struct MixBase {
     int32_t id;
     int32_t type;
     int32_t value[MIX_VALUE_COUNT];
@@ -76,8 +71,7 @@ struct MixBase
     MaterialInfo main_material;
     MaterialInfo sub_material[MAX_SUB_MATERIAL_COUNT];
 
-    enum
-    {
+    enum {
         CHECK_ITEM_GROUP = 1,
         CHECK_ITEM_CLASS = 2,
         CHECK_ITEM_ID = 3,
@@ -106,8 +100,7 @@ struct MixBase
 
 class Player;
 class Item;
-class MixManager
-{
+class MixManager {
 public:
     static MixManager &Instance()
     {

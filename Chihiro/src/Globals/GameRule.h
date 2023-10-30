@@ -17,8 +17,7 @@
  */
 #include "Common.h"
 
-class GameRule
-{
+class GameRule {
 public:
     static float GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level);
     static int32_t GetItemRecommendedLevel(int32_t item_rank, int32_t item_level);

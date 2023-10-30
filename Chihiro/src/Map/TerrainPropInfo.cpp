@@ -36,8 +36,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
 
     std::ifstream inStream(configFile.c_str(), std::ios::in);
     std::string row{};
-    while (std::getline(inStream, row))
-    {
+    while (std::getline(inStream, row)) {
         if (!row.empty() || row[0] == ';')
             TextLines.push_back(row);
     }
@@ -53,43 +52,35 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
     int32_t line_num = 0;
     int32_t nCurrentCategory = 0;
 
-    for (const auto &s : TextLines)
-    {
+    for (const auto &s : TextLines) {
         Tokenizer lines(s, '=');
         if (lines.size() < 2)
             continue;
-        if (lines[0] == "CATEGORY"s)
-        {
+        if (lines[0] == "CATEGORY"s) {
             nCurrentCategory = -1;
-            for (std::size_t i = 0; i < m_CategoryNames.size(); ++i)
-            {
-                if (m_CategoryNames[i] == lines[1])
-                {
+            for (std::size_t i = 0; i < m_CategoryNames.size(); ++i) {
+                if (m_CategoryNames[i] == lines[1]) {
                     nCurrentCategory = static_cast<int32_t>(i);
                     break;
                 }
             }
-            if (nCurrentCategory == -1)
-            {
+            if (nCurrentCategory == -1) {
                 nCurrentCategory = (int32_t)m_CategoryNames.size();
                 m_CategoryNames.emplace_back(lines[1]);
             }
         }
-        else if (lines[0] == "VISIBLE_RATIO"s)
-        {
+        else if (lines[0] == "VISIBLE_RATIO"s) {
             fCurrentVisibleRatio = std::stof(lines[1]);
             if (fCurrentVisibleRatio == 0.0f)
                 fCurrentVisibleRatio = 1.0f;
         }
-        else if (lines[0] == "RENDERTYPE"s)
-        {
+        else if (lines[0] == "RENDERTYPE"s) {
             if (lines[1] == "general"s)
                 rtype = 0;
             else if (lines[1] == "building"s)
                 rtype = 1;
         }
-        else if (lines[0] == "PROPNAME"s)
-        {
+        else if (lines[0] == "PROPNAME"s) {
             Tokenizer vars(lines[1], ',');
             if (vars.size() < 2)
                 continue;
@@ -109,8 +100,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
                 ptype = 1;
             else if (CheckPropFileType(strPropName, ".spt"))
                 ptype = 3;
-            else
-            {
+            else {
                 if (!CheckPropFileType(strPropName, ".cob"))
                     continue;
                 ptype = 4;

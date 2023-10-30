@@ -120,8 +120,7 @@ void permute(char *inblock, char perm[16][16][8], char *outblock)
     for (i = 0, ob = outblock; i < 8; i++)
         *ob++ = 0; /* clear output block          */
     ib = inblock;
-    for (j = 0; j < 16; j += 2, ib++)
-    { /* for each input nibble       */
+    for (j = 0; j < 16; j += 2, ib++) { /* for each input nibble       */
         ob = outblock;
         p = perm[j][(*ib >> 4) & 0x0f];
         q = perm[j + 1][*ib & 0x0f];
@@ -144,8 +143,7 @@ void XDes::perm32(char *inblock, char *outblock) /* 32-bit permutation at end   
     *ob++ = 0;
     *ob++ = 0;
     ib = inblock; /* ptr to 1st byte of input    */
-    for (j = 0; j < 4; j++, ib++)
-    { /* for each input byte         */
+    for (j = 0; j < 4; j++, ib++) { /* for each input byte         */
         q = m_p32[j][*ib & 0xff];
         ob = outblock; /* and each output byte        */
         *ob++ |= *q++; /* OR the 16 masks together    */
@@ -284,26 +282,22 @@ void XDes::kinit(char *key64bit) /* initialize key schedule array*/
     char pc1m[56]; /* place to modify pc1 into    */
     char pcr[56]; /* place to rotate pc1 into    */
 
-    for (j = 0; j < 56; j++)
-    { /* convert pc1 to bits of key  */
+    for (j = 0; j < 56; j++) { /* convert pc1 to bits of key  */
         l = pc1[j] - 1; /* integer bit location        */
         m = l & 07; /* find bit                    */
         pc1m[j] = ((key64bit[l >> 3] & bytebit[m]) ? 1 : 0);
         /* find which key byte l is in and which bit of that byte and store 1-bit result */
     }
-    for (i = 0; i < 16; i++)
-    { /* for each key sched section  */
+    for (i = 0; i < 16; i++) { /* for each key sched section  */
         for (j = 0; j < 6; j++) /* and each byte of the kn     */
             m_kn[i][j] = 0; /* clear it for accumulation   */
     }
-    for (i = 0; i < 16; i++)
-    { /* key chunk for each iteration*/
+    for (i = 0; i < 16; i++) { /* key chunk for each iteration*/
         for (j = 0; j < 56; j++) /* rotate pc1 the right amount */
             pcr[j] = pc1m[(l = j + totrot[i]) < (j < 28 ? 28 : 56) ? l : l - 28];
         /* rotate left and right halves independently  */
         for (j = 0; j < 48; j++) /* select bits individually    */
-            if (pcr[pc2[j] - 1])
-            { /* check bit that goes to m_kn[j]*/
+            if (pcr[pc2[j] - 1]) { /* check bit that goes to m_kn[j]*/
                 l = j & 07;
                 m_kn[i][j >> 3] |= bytebit[l];
             } /* mask it in if it's there    */
@@ -321,8 +315,7 @@ void XDes::p32init(void)
                 m_p32[i][j][k] = 0; /* clear permutation array     */
     for (i = 0; i < 4; i++) /* each input byte position    */
         for (j = 0; j < 256; j++) /* each possible input byte    */
-            for (k = 0; k < 32; k++)
-            { /* each output bit position    */
+            for (k = 0; k < 32; k++) { /* each output bit position    */
                 l = p32i[k] - 1; /* invert this bit (0-31)      */
                 if ((l >> 3) != i) /* does it come from input posn?*/
                     continue; /* if not, bit k is 0          */
@@ -346,8 +339,7 @@ void perminit(char perm[16][16][8], const char p[64]) /* initialize a perm array
                 perm[i][j][k] = 0; /* clear permutation array     */
     for (i = 0; i < 16; i++) /* each input nibble position  */
         for (j = 0; j < 16; j++) /* each possible input nibble  */
-            for (k = 0; k < 64; k++)
-            { /* each output bit position    */
+            for (k = 0; k < 64; k++) { /* each output bit position    */
                 l = p[k] - 1; /* where does this bit come from*/
                 if ((l >> 2) != i) /* does it come from input posn?*/
                     continue; /* if not, bit k is 0          */
@@ -414,14 +406,11 @@ void XDes::DesMem(void *buf, int mlen, int isencrypting)
 { // process the file
     char *b;
 
-    for (b = (char *)buf; mlen > 0; mlen -= 8, b += 8)
-    { /* encrypt/decrypt 1 buffer-full 8-byte blocks*/
-        if (isencrypting)
-        {
+    for (b = (char *)buf; mlen > 0; mlen -= 8, b += 8) { /* encrypt/decrypt 1 buffer-full 8-byte blocks*/
+        if (isencrypting) {
             endes(b, b); /* don't need diff input, output*/
         }
-        else
-        { /* decrypting                  */
+        else { /* decrypting                  */
             dedes(b, b); /* decrypt and output block    */
         }
     }
@@ -456,8 +445,7 @@ void XDes::Init(const char *password)
     memset(key64bit, 0, sizeof(key64bit));
 
     key = key64bit;
-    for (i = 0; *password && i < 40; i++)
-    {
+    for (i = 0; *password && i < 40; i++) {
         key[i % 8] ^= *password;
         password++;
     }

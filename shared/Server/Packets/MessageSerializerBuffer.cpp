@@ -1,14 +1,16 @@
 #include "MessageSerializerBuffer.h"
+
 #include <algorithm>
+
 #include "Config.h"
 
-MessageSerializerBuffer::MessageSerializerBuffer(XPacket *packet) : StructSerializer(sConfigMgr->getCachedConfig().packetVersion), packet(packet)
+MessageSerializerBuffer::MessageSerializerBuffer(XPacket *packet)
+    : StructSerializer(sConfigMgr->getCachedConfig().packetVersion)
+    , packet(packet)
 {
 }
 
-MessageSerializerBuffer::~MessageSerializerBuffer()
-{
-}
+MessageSerializerBuffer::~MessageSerializerBuffer() {}
 
 void MessageSerializerBuffer::writeString(const char *fieldName, const std::string &val, size_t maxSize)
 {
@@ -32,22 +34,17 @@ void MessageSerializerBuffer::readString(const char *fieldName, std::string &val
     val = packet->ReadString(maxSize);
 }
 
-void MessageSerializerBuffer::readDynString(const char *fieldName,
-                                            std::string &val,
-                                            uint32_t sizeToRead,
-                                            bool hasNullTerminator)
+void MessageSerializerBuffer::readDynString(const char *fieldName, std::string &val, uint32_t sizeToRead, bool hasNullTerminator)
 {
     (void)fieldName;
-    if (sizeToRead > 0)
-    {
+    if (sizeToRead > 0) {
         // don't include the null terminator in std::string, else ::size() will be wrong
         val.resize(sizeToRead - hasNullTerminator);
         packet->read((uint8_t *)val.data(), val.size());
         if (hasNullTerminator)
             packet->read_skip(1);
     }
-    else
-    {
+    else {
         val.clear();
     }
 }
@@ -56,8 +53,7 @@ void MessageSerializerBuffer::readEndString(const char *fieldName, std::string &
 {
     (void)fieldName;
     size_t remainingSize = packet->size() - packet->rpos();
-    if (remainingSize > 0)
-    {
+    if (remainingSize > 0) {
         val.resize(remainingSize - hasNullTerminator);
         packet->read((uint8_t *)val.data(), val.size());
         if (hasNullTerminator)

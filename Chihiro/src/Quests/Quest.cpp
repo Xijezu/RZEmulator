@@ -26,13 +26,11 @@
 Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, const int32_t *status, QuestProgress progress, int32_t nStartID)
 {
     auto result = new Quest{};
-    if (result != nullptr)
-    {
+    if (result != nullptr) {
         result->m_Handler = handler;
         result->m_bIsNeedUpdateToDB = false;
         result->m_QuestBase = sObjectMgr.GetQuestBase(code);
-        if (result->m_QuestBase == nullptr)
-        {
+        if (result->m_QuestBase == nullptr) {
             NG_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
             delete result;
             return nullptr;
@@ -40,8 +38,7 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, 
         result->m_Instance.nID = nID;
         result->m_Instance.nStartID = nStartID;
         result->m_Instance.Code = code;
-        for (int32_t i = 0; i < MAX_QUEST_STATUS; ++i)
-        {
+        for (int32_t i = 0; i < MAX_QUEST_STATUS; ++i) {
             result->m_Instance.nStatus[i] = status[i];
         }
         result->m_Instance.nProgress = progress;
@@ -52,8 +49,7 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, 
 bool Quest::IsRandomQuest(int32_t code)
 {
     auto base = sObjectMgr.GetQuestBase(code);
-    if (base == nullptr)
-    {
+    if (base == nullptr) {
         NG_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
         return false;
     }
@@ -94,13 +90,11 @@ void Quest::SetProgress(QuestProgress progress)
 int32_t Quest::GetValue(int32_t idx) const
 {
     int32_t result{0};
-    if (idx > MAX_VALUE_NUMBER - 1)
-    {
+    if (idx > MAX_VALUE_NUMBER - 1) {
         NG_LOG_ERROR("quest", "Quest::GetValue - Invald Index %u", idx);
         result = 0;
     }
-    else
-    {
+    else {
         result = m_QuestBase->nValue[idx];
     }
     return result;
@@ -109,13 +103,11 @@ int32_t Quest::GetValue(int32_t idx) const
 int32_t Quest::GetStatus(int32_t idx) const
 {
     int32_t result{0};
-    if (idx > 5)
-    {
+    if (idx > 5) {
         NG_LOG_ERROR("quest", "Quest::GetStatus - Invald Index %u", idx);
         result = 0;
     }
-    else
-    {
+    else {
         result = m_Instance.nStatus[idx];
     }
     return result;
@@ -123,12 +115,10 @@ int32_t Quest::GetStatus(int32_t idx) const
 
 void Quest::UpdateStatus(int32_t idx, int32_t value)
 {
-    if (idx > 5)
-    {
+    if (idx > 5) {
         NG_LOG_ERROR("quest", "Quest::UpdateStatus - Invald Index %u", idx);
     }
-    else
-    {
+    else {
         int32_t old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] = value;
         if (m_Handler != nullptr)
@@ -139,12 +129,10 @@ void Quest::UpdateStatus(int32_t idx, int32_t value)
 
 void Quest::IncStatus(int32_t idx, int32_t value)
 {
-    if (idx > 5)
-    {
+    if (idx > 5) {
         NG_LOG_ERROR("quest", "Quest::IncStatus - Invald Index %u", idx);
     }
-    else
-    {
+    else {
         int32_t old = m_Instance.nStatus[idx];
         m_Instance.nStatus[idx] += value;
         if (m_Handler != nullptr)
@@ -165,8 +153,7 @@ int32_t Quest::GetRandomValue(int32_t idx) const
 
 bool Quest::IsFinishable() const
 {
-    switch (m_QuestBase->nType)
-    {
+    switch (m_QuestBase->nType) {
     case QuestType::QUEST_MISC:
         break;
 
@@ -176,8 +163,7 @@ bool Quest::IsFinishable() const
         return false;
 
     case QuestType::QUEST_KILL_INDIVIDUAL:
-        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
-        {
+        if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5]) {
             return true;
         }
         return false;
@@ -219,16 +205,13 @@ bool Quest::IsFinishable() const
     case QuestType::QUEST_PARAMETER:
         if (m_QuestBase->nValue[0] == 0 || (m_QuestBase->nValue[1] == 2 && m_Instance.nStatus[0] > m_QuestBase->nValue[2]) ||
             (m_QuestBase->nValue[1] == 1 && m_Instance.nStatus[0] >= m_QuestBase->nValue[2]) || (m_QuestBase->nValue[1] == 0 && m_Instance.nStatus[0] == m_QuestBase->nValue[2]) ||
-            (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2]) || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2]))
-        {
+            (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] <= m_QuestBase->nValue[2]) || (m_QuestBase->nValue[1] == -1 && m_Instance.nStatus[0] < m_QuestBase->nValue[2])) {
             if (m_QuestBase->nValue[3] == 0 || (m_QuestBase->nValue[4] == 2 && m_Instance.nStatus[1] > m_QuestBase->nValue[5]) ||
                 (m_QuestBase->nValue[4] == 1 && m_Instance.nStatus[1] >= m_QuestBase->nValue[5]) || (m_QuestBase->nValue[4] == 0 && m_Instance.nStatus[1] == m_QuestBase->nValue[5]) ||
-                (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5]) || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5]))
-            {
+                (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] <= m_QuestBase->nValue[5]) || (m_QuestBase->nValue[4] == -1 && m_Instance.nStatus[1] < m_QuestBase->nValue[5])) {
                 if (m_QuestBase->nValue[6] == 0 || (m_QuestBase->nValue[7] == 2 && m_Instance.nStatus[2] > m_QuestBase->nValue[8]) ||
                     (m_QuestBase->nValue[7] == 1 && m_Instance.nStatus[2] >= m_QuestBase->nValue[8]) || (m_QuestBase->nValue[7] == 0 && m_Instance.nStatus[2] == m_QuestBase->nValue[8]) ||
-                    (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8]) || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8]))
-                {
+                    (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] <= m_QuestBase->nValue[8]) || (m_QuestBase->nValue[7] == -1 && m_Instance.nStatus[2] < m_QuestBase->nValue[8])) {
                     return true;
                 }
             }
@@ -236,8 +219,7 @@ bool Quest::IsFinishable() const
         return false;
 
     case QuestType::QUEST_END_VIA_SCRIPT:
-        if (m_QuestBase->nEndType == 3)
-        {
+        if (m_QuestBase->nEndType == 3) {
             if (m_Instance.nStatus[0] >= m_QuestBase->nValue[1] && m_Instance.nStatus[1] >= m_QuestBase->nValue[3] && m_Instance.nStatus[2] >= m_QuestBase->nValue[5])
                 return true;
         }

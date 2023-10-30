@@ -20,10 +20,8 @@
  */
 #include "Common.h"
 
-namespace NGemity
-{
-    struct Server
-    {
+namespace NGemity {
+    struct Server {
         std::string szName;
         std::string szIPAddress;
         int32_t nPlayerCount;
@@ -31,8 +29,7 @@ namespace NGemity
         bool bRequesterEnabled;
     };
 
-    struct ServerRegion
-    {
+    struct ServerRegion {
         std::string szRegionName;
         std::string szAuthIPAddress;
         std::vector<Server> vServerList;

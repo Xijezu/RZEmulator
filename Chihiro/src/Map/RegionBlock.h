@@ -19,14 +19,12 @@
 #include "Region.h"
 #include "SharedMutex.h"
 
-struct RegionBase
-{
+struct RegionBase {
     RegionBase() { m_Regions = std::vector<Region *>(100 * 100, nullptr); }
 
     ~RegionBase()
     {
-        for (auto &x : m_Regions)
-        {
+        for (auto &x : m_Regions) {
             delete x;
             x = nullptr;
         }
@@ -41,15 +39,13 @@ struct RegionBase
     std::vector<Region *> m_Regions;
 };
 
-class RegionBlock
-{
+class RegionBlock {
 public:
     RegionBlock() { m_RegionBases = std::vector<RegionBase *>(256, nullptr); }
 
     ~RegionBlock()
     {
-        for (auto &x : m_RegionBases)
-        {
+        for (auto &x : m_RegionBases) {
             delete x;
             x = nullptr;
         }
@@ -78,14 +74,12 @@ public:
         {
             NG_UNIQUE_GUARD writeGuard(i_lock);
             RegionBase *rb = m_RegionBases[layer];
-            if (rb == nullptr)
-            {
+            if (rb == nullptr) {
                 rb = new RegionBase{};
                 m_RegionBases[layer] = rb;
             }
             res = rb->m_Regions[rx + (100 * ry)];
-            if (res == nullptr)
-            {
+            if (res == nullptr) {
                 res = new Region{};
                 res->x = rx;
                 res->y = ry;

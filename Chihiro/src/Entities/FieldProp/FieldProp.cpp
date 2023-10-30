@@ -90,17 +90,13 @@ bool FieldProp::IsUsable(Player *pPlayer) const
     if (m_pFieldPropBase->nLimitJobID != 0 && m_pFieldPropBase->nLimitJobID != pPlayer->GetCurrentJob())
         return false;
 
-    for (int32_t x = 0; x < 2; ++x)
-    {
-        switch (m_pFieldPropBase->nActivateID[x])
-        {
-        case 1:
-        {
+    for (int32_t x = 0; x < 2; ++x) {
+        switch (m_pFieldPropBase->nActivateID[x]) {
+        case 1: {
             auto item = pPlayer->FindItemByCode(m_pFieldPropBase->nActivateValue[x][0]);
             if (item == nullptr || item->GetItemInstance().GetCount() < m_pFieldPropBase->nActivateValue[x][1])
                 return false;
-        }
-        break;
+        } break;
         case 2:
             if (pPlayer->GetQuestProgress(m_pFieldPropBase->nActivateValue[x][0]) != m_pFieldPropBase->nActivateValue[x][1])
                 return false;
@@ -132,14 +128,10 @@ bool FieldProp::UseProp(Player *pPlayer)
 {
     m_bIsCasting = false;
     // int32_t oldUseCount = m_nUseCount;
-    if (m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0)
-    {
-        for (auto &i : m_pFieldPropBase->drop_info)
-        {
-            if (i.code != 0)
-            {
-                if (irand(1, 100000000) <= i.ratio)
-                {
+    if (m_pFieldPropBase->nUseCount == 0 || m_nUseCount-- >= 0) {
+        for (auto &i : m_pFieldPropBase->drop_info) {
+            if (i.code != 0) {
+                if (irand(1, 100000000) <= i.ratio) {
                     int32_t nItemCount = irand(i.min_count, i.max_count);
                     int32_t nLevel = irand(i.min_level, i.max_level + 1);
                     auto ti = Item::AllocItem(0, i.code, (uint64_t)nItemCount, GenerateCode::BY_FIELD_PROP, nLevel, -1, -1, 0, 0, 0, 0, 0);
@@ -147,8 +139,7 @@ bool FieldProp::UseProp(Player *pPlayer)
                     auto cnt = ti->GetItemInstance().GetCount();
                     Item *pNewItem = pPlayer->PushItem(ti, cnt, false);
 
-                    if (pNewItem != nullptr)
-                    {
+                    if (pNewItem != nullptr) {
                         Messages::SendResult(pPlayer, 0xCC, 0, ti->GetHandle());
                     }
                     if (pNewItem != nullptr && pNewItem->GetHandle() != ti->GetHandle())
@@ -156,12 +147,10 @@ bool FieldProp::UseProp(Player *pPlayer)
                 }
             }
         }
-        if (!m_pFieldPropBase->strScript.empty() && m_pFieldPropBase->strScript.length() > 2)
-        {
+        if (!m_pFieldPropBase->strScript.empty() && m_pFieldPropBase->strScript.length() > 2) {
             sScriptingMgr.RunString(pPlayer, m_pFieldPropBase->strScript);
         }
-        if (m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0)
-        {
+        if (m_pFieldPropBase->nUseCount != 0 && m_nUseCount == 0) {
             sWorld.RemoveObjectFromWorld(this);
             if (m_pDeleteHandler != nullptr)
                 m_pDeleteHandler->onFieldPropDelete(this);
@@ -169,8 +158,7 @@ bool FieldProp::UseProp(Player *pPlayer)
         }
         return true;
     }
-    else
-    {
+    else {
         m_nUseCount++;
         return false;
     }

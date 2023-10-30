@@ -23,8 +23,7 @@
 
 // Note. All times are in milliseconds here.
 
-class BasicEvent
-{
+class BasicEvent {
 public:
     BasicEvent() { to_Abort = false; }
 
@@ -49,8 +48,7 @@ public:
 
 typedef std::multimap<uint64_t, BasicEvent *> EventList;
 
-class EventProcessor
-{
+class EventProcessor {
 public:
     EventProcessor();
     ~EventProcessor();

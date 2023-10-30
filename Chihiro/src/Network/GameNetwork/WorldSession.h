@@ -20,8 +20,7 @@
 #include "Log.h"
 #include "XSocket.h"
 
-enum STORAGE_MODE : int
-{
+enum STORAGE_MODE : int {
     ITEM_INVENTORY_TO_STORAGE = 0x0,
     ITEM_STORAGE_TO_INVENTORY = 0x1,
     GOLD_INVENTORY_TO_STORAGE = 0x2,
@@ -32,8 +31,7 @@ enum STORAGE_MODE : int
 class Player;
 
 // Handle the player network
-class WorldSession : public XSocket
-{
+class WorldSession : public XSocket {
 public:
     friend class Player;
     friend class World;

@@ -21,16 +21,14 @@
 
 #include "Define.h"
 
-class ConfigMgr
-{
+class ConfigMgr {
     ConfigMgr() = default;
     ConfigMgr(ConfigMgr const &) = delete;
     ConfigMgr &operator=(ConfigMgr const &) = delete;
     ~ConfigMgr() = default;
 
 public:
-    struct CachedConfig
-    {
+    struct CachedConfig {
         int packetVersion;
     };
 

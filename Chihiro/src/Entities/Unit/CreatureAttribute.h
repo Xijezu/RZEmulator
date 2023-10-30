@@ -21,21 +21,18 @@
 
 struct TS_SC_STAT_INFO;
 
-struct CreatureElementalResist
-{
+struct CreatureElementalResist {
     uint16_t nResist[7];
 
     void Reset(uint16_t v)
     {
-        for (unsigned short &i : nResist)
-        {
+        for (unsigned short &i : nResist) {
             i = v;
         }
     }
 };
 
-struct ExpertMod
-{
+struct ExpertMod {
     float fAvoid;
     float fDamage;
 
@@ -46,8 +43,7 @@ struct ExpertMod
     }
 };
 
-struct DamageReduceInfo
-{
+struct DamageReduceInfo {
     DamageReduceInfo(unsigned char _ratio, float _physical_reduce, float _physical_skill_reduce, float _magical_skill_reduce, int32_t _apply_creature_group_1, int32_t _apply_creature_group_2,
         int32_t _apply_creature_group_3, int32_t _apply_creature_group_4, int32_t _apply_creature_group_5)
         : ratio(_ratio)
@@ -76,8 +72,7 @@ struct DamageReduceInfo
     int32_t apply_creature_group_list[5];
 };
 
-struct StateMod
-{
+struct StateMod {
     StateMod() { Init(); }
 
     void Init()
@@ -96,8 +91,7 @@ struct StateMod
     float fHate;
 };
 
-struct ElementalSkillStateMod
-{
+struct ElementalSkillStateMod {
     ElementalSkillStateMod() { Init(); }
 
     void Init()
@@ -133,8 +127,7 @@ struct ElementalSkillStateMod
     std::vector<StateCode> vExhaustiveStateCode{};
 };
 
-class CreatureStat
-{
+class CreatureStat {
 public:
     CreatureStat() { Reset(0); }
 
@@ -156,8 +149,7 @@ public:
     float luck;
 };
 
-class CreatureStatAmplifier
-{
+class CreatureStatAmplifier {
 public:
     float stat_id;
     float strength;
@@ -184,8 +176,7 @@ public:
     }
 };
 
-class CreatureAttributeAmplifier
-{
+class CreatureAttributeAmplifier {
 public:
     float fCritical;
     float fCriticalPower;
@@ -264,8 +255,7 @@ public:
     }
 };
 
-class CreatureAtribute
-{
+class CreatureAtribute {
 public:
     CreatureAtribute() = default;
 
@@ -298,8 +288,7 @@ public:
     float nMPRegenPoint;
 };
 
-class CreatureAtributeServer : public CreatureAtribute
-{
+class CreatureAtributeServer : public CreatureAtribute {
 public:
     CreatureAtributeServer() = default;
 
@@ -320,8 +309,7 @@ public:
     float nMPAddByItem;
 };
 
-class CreatureElementalResistAmplifier
-{
+class CreatureElementalResistAmplifier {
 public:
     float fResist[7]{0};
 
@@ -330,8 +318,7 @@ public:
     // Function       :   struct CreatureElementalResistAmplifier & operator=(const struct CreatureElementalResistAmplifier &)
     void Reset(float v)
     {
-        for (float &i : fResist)
-        {
+        for (float &i : fResist) {
             i = v;
         }
     }

@@ -18,8 +18,7 @@
  */
 #include "Define.h"
 
-namespace NGemity
-{
+namespace NGemity {
     DECLSPEC_NORETURN void Assert(char const *file, int line, char const *function, char const *message) ATTR_NORETURN;
     DECLSPEC_NORETURN void Assert(char const *file, int line, char const *function, char const *message, char const *format, ...) ATTR_NORETURN ATTR_PRINTF(5, 6);
 
@@ -75,9 +74,12 @@ namespace NGemity
     }                                                                  \
     while (0)                                                          \
     ASSERT_END
-#define WPAbort()                                                         \
-    ASSERT_BEGIN do { NGemity::Abort(__FILE__, __LINE__, __FUNCTION__); } \
-    while (0)                                                             \
+#define WPAbort()                                         \
+    ASSERT_BEGIN do                                       \
+    {                                                     \
+        NGemity::Abort(__FILE__, __LINE__, __FUNCTION__); \
+    }                                                     \
+    while (0)                                             \
     ASSERT_END
 
 #define ASSERT WPAssert

@@ -17,23 +17,11 @@
  */
 #include "Common.h"
 
-enum PropType : int
-{
-    PT_Unused = 0,
-    PT_UseNAF = 1,
-    PT_UseNX3 = 2,
-    PT_SpeedTree = 3,
-    PT_NPC = 4
-};
+enum PropType : int { PT_Unused = 0, PT_UseNAF = 1, PT_UseNX3 = 2, PT_SpeedTree = 3, PT_NPC = 4 };
 
-enum RenderType : int
-{
-    RT_General = 0,
-    RT_Building = 1
-};
+enum RenderType : int { RT_General = 0, RT_Building = 1 };
 
-struct PropInfo
-{
+struct PropInfo {
     int32_t nLineIndex;
     PropType Type;
     RenderType mRenderType;
@@ -43,8 +31,7 @@ struct PropInfo
     std::string strName;
 };
 
-class TerrainPropInfo
-{
+class TerrainPropInfo {
 public:
     TerrainPropInfo() = default;
     ~TerrainPropInfo() = default;

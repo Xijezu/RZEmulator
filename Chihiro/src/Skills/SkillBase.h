@@ -19,30 +19,26 @@
 #include "ItemTemplate.hpp"
 #include "TS_SC_SKILL.h"
 
-enum SKILL_TYPE : int16_t
-{
+enum SKILL_TYPE : int16_t {
     ST_INVALID = 0,
     ST_VALID = 1,
     ST_SYSTEM = 2,
 };
 
-enum SKILL_EFFECT_TARGET_LIMIT : int
-{
+enum SKILL_EFFECT_TARGET_LIMIT : int {
     SKILL_EFFECT_TARGET_LIMIT_ANY_BODY = 0,
     SKILL_EFFECT_TARGET_LIMIT_NOT_ENEMY = 1,
     SKILL_EFFECT_TARGET_LIMIT_ONLY_ALLY = 2,
     SKILL_EFFECT_TARGET_LIMIT_ONLY_ENEMY = 3,
 };
 
-enum REGION_TYPE
-{
+enum REGION_TYPE {
     REGION_TYPE_DIRECTION = 0,
     REGION_TYPE_ARC_CIRCLE = 1,
     REGION_TYPE_CROSS = 2,
 };
 
-enum DISTRIBUTION_TYPE
-{
+enum DISTRIBUTION_TYPE {
     DISTRIBUTION_TYPE_NO_LIMIT = 0,
     DISTRIBUTION_TYPE_DISTRIBUTE = 1,
     DISTRIBUTION_TYPE_RANDOM = 2,
@@ -50,8 +46,7 @@ enum DISTRIBUTION_TYPE
     DISTRIBUTION_TYPE_SEQUENTIAL_CASTER = 4,
 };
 
-struct SkillResult
-{
+struct SkillResult {
     uint8_t type;
     uint32_t hTarget;
 
@@ -64,8 +59,7 @@ struct SkillResult
     TS_SC_SKILL__HIT_RUSH hitRush;
 };
 
-enum TARGET_TYPE : int
-{
+enum TARGET_TYPE : int {
     TARGET_MISC = 0,
     TARGET_TARGET = 1,
     TARGET_REGION_WITH_TARGET = 2,
@@ -91,8 +85,7 @@ enum TARGET_TYPE : int
     TARGET_CREATURE_TYPE_DARK = 207,
 };
 
-enum class SKILL_UID_TYPE : int32_t
-{
+enum class SKILL_UID_TYPE : int32_t {
     SKILL_UID_ITEM_SKILL = -1,
     SKILL_UID_PROP_SKILL = -2,
     SKILL_UID_MONSTER_SKILL = -3,
@@ -101,8 +94,7 @@ enum class SKILL_UID_TYPE : int32_t
     SKILL_UID_SYSTEM_SKILL = -6
 };
 
-enum SKILL_UID : uint32_t
-{
+enum SKILL_UID : uint32_t {
     SKILL_INCREASE_ENERGY = 1082,
     SKILL_DUAL_SWORD_EXPERT = 1181,
     SKILL_ARMOR_MASTERY = 1201,
@@ -233,8 +225,7 @@ enum SKILL_UID : uint32_t
     SKILL_INSTANCE_GAME_EXIT = 64827,
 };
 
-enum SKILL_EFFECT_TYPE : int
-{
+enum SKILL_EFFECT_TYPE : int {
     EF_MISC = 0,
 
     EF_RESPAWN_MONSTER_NEAR = 2,
@@ -509,15 +500,13 @@ enum SKILL_EFFECT_TYPE : int
     EF_INC_PARAM_BASED_SUMMON_PARAM = 32304,
 };
 
-enum SKILL_CATEGORY
-{
+enum SKILL_CATEGORY {
     SC_PHYSICAL = 1,
     SC_MAGICAL = 2,
     SC_EVERY = 99,
 };
 
-struct SkillTreeBase
-{
+struct SkillTreeBase {
     int32_t job_id{};
     int32_t skill_id{};
     int32_t min_skill_lv{};
@@ -529,17 +518,14 @@ struct SkillTreeBase
     int32_t need_skill_lv[3]{};
 };
 
-struct SkillTreeGroup
-{
+struct SkillTreeGroup {
     int32_t job_id{};
     int32_t skill_id{};
     std::vector<SkillTreeBase> skillTrees{};
 };
 
-struct SkillBase
-{
-    enum
-    {
+struct SkillBase {
+    enum {
         USE_SELF = 0,
         USE_ALLY,
         USE_GUILD,

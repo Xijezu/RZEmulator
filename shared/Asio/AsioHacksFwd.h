@@ -20,20 +20,16 @@
 /**
   Collection of forward declarations to improve compile time
 */
-namespace boost
-{
-    namespace posix_time
-    {
+namespace boost {
+    namespace posix_time {
         class ptime;
     }
 
-    namespace asio
-    {
+    namespace asio {
         template<typename Time>
         struct time_traits;
 
-        namespace ip
-        {
+        namespace ip {
             class address;
 
             class tcp;
@@ -46,10 +42,8 @@ namespace boost
     } // namespace asio
 } // namespace boost
 
-namespace NGemity
-{
-    namespace Asio
-    {
+namespace NGemity {
+    namespace Asio {
         class Strand;
     }
 } // namespace NGemity

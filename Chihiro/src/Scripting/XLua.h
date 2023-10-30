@@ -19,8 +19,7 @@
 #include "sol.hpp"
 
 class Unit;
-class XLua
-{
+class XLua {
 public:
     static XLua &Instance()
     {

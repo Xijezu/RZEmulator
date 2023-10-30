@@ -30,8 +30,7 @@
 
 static uint32_t SizeForType(MYSQL_FIELD *field)
 {
-    switch (field->type)
-    {
+    switch (field->type) {
     case MYSQL_TYPE_NULL:
         return 0;
     case MYSQL_TYPE_TINY:
@@ -80,8 +79,7 @@ static uint32_t SizeForType(MYSQL_FIELD *field)
 
 DatabaseFieldTypes MysqlTypeToFieldType(enum_field_types type)
 {
-    switch (type)
-    {
+    switch (type) {
     case MYSQL_TYPE_NULL:
         return DatabaseFieldTypes::Null;
     case MYSQL_TYPE_TINY:
@@ -146,8 +144,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     if (!m_metadataResult)
         return;
 
-    if (m_stmt->bind_result_done)
-    {
+    if (m_stmt->bind_result_done) {
         delete[] m_stmt->bind->length;
         delete[] m_stmt->bind->is_null;
     }
@@ -165,8 +162,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     memset(m_length, 0, sizeof(unsigned long) * m_fieldCount);
 
     //- This is where we store the (entire) resultset
-    if (mysql_stmt_store_result(m_stmt))
-    {
+    if (mysql_stmt_store_result(m_stmt)) {
         NG_LOG_WARN("sql.sql", "%s:mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
         delete[] m_rBind;
         delete[] m_isNull;
@@ -179,8 +175,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     //- This is where we prepare the buffer based on metadata
     MYSQL_FIELD *field = mysql_fetch_fields(m_metadataResult);
     std::size_t rowSize = 0;
-    for (uint32_t i = 0; i < m_fieldCount; ++i)
-    {
+    for (uint32_t i = 0; i < m_fieldCount; ++i) {
         uint32_t size = SizeForType(&field[i]);
         rowSize += size;
 
@@ -193,15 +188,13 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     }
 
     char *dataBuffer = new char[rowSize * m_rowCount];
-    for (uint32_t i = 0, offset = 0; i < m_fieldCount; ++i)
-    {
+    for (uint32_t i = 0, offset = 0; i < m_fieldCount; ++i) {
         m_rBind[i].buffer = dataBuffer + offset;
         offset += m_rBind[i].buffer_length;
     }
 
     //- This is where we bind the bind the buffer to the statement
-    if (mysql_stmt_bind_result(m_stmt, m_rBind))
-    {
+    if (mysql_stmt_bind_result(m_stmt, m_rBind)) {
         NG_LOG_WARN("sql.sql", "%s:mysql_stmt_bind_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_stmt));
         mysql_stmt_free_result(m_stmt);
         CleanUp();
@@ -211,17 +204,13 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
     }
 
     m_rows.resize(uint32_t(m_rowCount) * m_fieldCount);
-    while (_NextRow())
-    {
-        for (uint32_t fIndex = 0; fIndex < m_fieldCount; ++fIndex)
-        {
+    while (_NextRow()) {
+        for (uint32_t fIndex = 0; fIndex < m_fieldCount; ++fIndex) {
             unsigned long buffer_length = m_rBind[fIndex].buffer_length;
             unsigned long fetched_length = *m_rBind[fIndex].length;
-            if (!*m_rBind[fIndex].is_null)
-            {
+            if (!*m_rBind[fIndex].is_null) {
                 void *buffer = m_stmt->bind[fIndex].buffer;
-                switch (m_rBind[fIndex].buffer_type)
-                {
+                switch (m_rBind[fIndex].buffer_type) {
                 case MYSQL_TYPE_TINY_BLOB:
                 case MYSQL_TYPE_MEDIUM_BLOB:
                 case MYSQL_TYPE_LONG_BLOB:
@@ -245,8 +234,7 @@ PreparedResultSet::PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64
                 // move buffer pointer to next part
                 m_stmt->bind[fIndex].buffer = (char *)buffer + rowSize;
             }
-            else
-            {
+            else {
                 m_rows[uint32_t(m_rowPosition) * m_fieldCount + fIndex].SetByteValue(nullptr, MysqlTypeToFieldType(m_rBind[fIndex].buffer_type), *m_rBind[fIndex].length);
             }
 
@@ -280,15 +268,13 @@ bool ResultSet::NextRow()
         return false;
 
     row = mysql_fetch_row(_result);
-    if (!row)
-    {
+    if (!row) {
         CleanUp();
         return false;
     }
 
     unsigned long *lengths = mysql_fetch_lengths(_result);
-    if (!lengths)
-    {
+    if (!lengths) {
         NG_LOG_WARN("sql.sql", "%s:mysql_fetch_lengths, cannot retrieve value lengths. Error %s.", __FUNCTION__, mysql_error(_result->handle));
         CleanUp();
         return false;
@@ -323,14 +309,12 @@ bool PreparedResultSet::_NextRow()
 
 void ResultSet::CleanUp()
 {
-    if (_currentRow)
-    {
+    if (_currentRow) {
         delete[] _currentRow;
         _currentRow = NULL;
     }
 
-    if (_result)
-    {
+    if (_result) {
         mysql_free_result(_result);
         _result = NULL;
     }
@@ -341,9 +325,8 @@ void PreparedResultSet::CleanUp()
     if (m_metadataResult)
         mysql_free_result(m_metadataResult);
 
-    if (m_rBind)
-    {
-        delete[](char *) m_rBind->buffer;
+    if (m_rBind) {
+        delete[] (char *)m_rBind->buffer;
         delete[] m_rBind;
         m_rBind = nullptr;
     }

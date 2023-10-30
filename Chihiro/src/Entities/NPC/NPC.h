@@ -21,8 +21,7 @@
 #include "Quest.h"
 #include "Unit.h"
 
-class NPC : public Unit
-{
+class NPC : public Unit {
 public:
     explicit NPC(NPCTemplate *base);
     // Deleting the copy & assignment operators

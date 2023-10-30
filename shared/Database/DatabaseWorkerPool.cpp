@@ -45,8 +45,7 @@
 #define MIN_MARIADB_SERVER_VERSION 100804u
 #define MIN_MARIADB_CLIENT_VERSION 30303u
 
-class PingOperation : public SQLOperation
-{
+class PingOperation : public SQLOperation {
     //! Operation for idle delaythreads
     bool Execute() override
     {
@@ -64,8 +63,8 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
 #ifdef NG_MARIADB
     WPFatal(mysql_get_client_version() >= MIN_MARIADB_CLIENT_VERSION, "RZEmulator does not support MariaDB versions below 5.1");
-    WPFatal(
-        mysql_get_client_version() == MARIADB_PACKAGE_VERSION_ID, "Used MariaDB library version (%s) does not match the version used to compile RZEmulator (%s).", mysql_get_client_info(), "MYSQL_SERVER_VERSION");
+    WPFatal(mysql_get_client_version() == MARIADB_PACKAGE_VERSION_ID, "Used MariaDB library version (%s) does not match the version used to compile RZEmulator (%s).", mysql_get_client_info(),
+        "MYSQL_SERVER_VERSION");
 #else // NG_MARIADB
     WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "RZEmulator does not support MySQL versions below 5.1");
     WPFatal(
@@ -105,8 +104,7 @@ uint32_t DatabaseWorkerPool<T>::Open()
 
     error = OpenConnections(IDX_SYNCH, _synch_threads);
 
-    if (!error)
-    {
+    if (!error) {
         NG_LOG_INFO("sql.driver", "DatabasePool '%s' opened successfully. " SZFMTD " total connections running.", GetDatabaseName(), (_connections[IDX_SYNCH].size() + _connections[IDX_ASYNC].size()));
     }
 
@@ -139,11 +137,9 @@ template<class T>
 bool DatabaseWorkerPool<T>::PrepareStatements()
 {
     for (auto &connections : _connections)
-        for (auto &connection : connections)
-        {
+        for (auto &connection : connections) {
             connection->LockIfReady();
-            if (!connection->PrepareStatements())
-            {
+            if (!connection->PrepareStatements()) {
                 connection->Unlock();
                 Close();
                 return false;
@@ -163,8 +159,7 @@ QueryResult DatabaseWorkerPool<T>::Query(const char *sql, T *connection /*= null
 
     ResultSet *result = connection->Query(sql);
     connection->Unlock();
-    if (!result || !result->GetRowCount() || !result->NextRow())
-    {
+    if (!result || !result->GetRowCount() || !result->NextRow()) {
         delete result;
         return QueryResult(NULL);
     }
@@ -182,8 +177,7 @@ PreparedQueryResult DatabaseWorkerPool<T>::Query(PreparedStatement *stmt)
     //! Delete proxy-class. Not needed anymore
     delete stmt;
 
-    if (!ret || !ret->GetRowCount())
-    {
+    if (!ret || !ret->GetRowCount()) {
         delete ret;
         return PreparedQueryResult(NULL);
     }
@@ -234,8 +228,7 @@ void DatabaseWorkerPool<T>::CommitTransaction(SQLTransaction transaction)
     //! Only analyze transaction weaknesses in Debug mode.
     //! Ideally we catch the faults in Debug mode and then correct them,
     //! so there's no need to waste these CPU cycles in Release mode.
-    switch (transaction->GetSize())
-    {
+    switch (transaction->GetSize()) {
     case 0:
         NG_LOG_DEBUG("sql.driver", "Transaction contains 0 queries. Not executing.");
         return;
@@ -255,19 +248,16 @@ void DatabaseWorkerPool<T>::DirectCommitTransaction(SQLTransaction &transaction)
 {
     T *connection = GetFreeConnection();
     int errorCode = connection->ExecuteTransaction(transaction);
-    if (!errorCode)
-    {
+    if (!errorCode) {
         connection->Unlock(); // OK, operation succesful
         return;
     }
 
     //! Handle MySQL Errno 1213 without extending deadlock to the core itself
     /// @todo More elegant way
-    if (errorCode == ER_LOCK_DEADLOCK)
-    {
+    if (errorCode == ER_LOCK_DEADLOCK) {
         uint8_t loopBreaker = 5;
-        for (uint8_t i = 0; i < loopBreaker; ++i)
-        {
+        for (uint8_t i = 0; i < loopBreaker; ++i) {
             if (!connection->ExecuteTransaction(transaction))
                 break;
         }
@@ -301,10 +291,8 @@ template<class T>
 void DatabaseWorkerPool<T>::KeepAlive()
 {
     //! Ping synchronous connections
-    for (auto &connection : _connections[IDX_SYNCH])
-    {
-        if (connection->LockIfReady())
-        {
+    for (auto &connection : _connections[IDX_SYNCH]) {
+        if (connection->LockIfReady()) {
             connection->Ping();
             connection->Unlock();
         }
@@ -321,12 +309,10 @@ void DatabaseWorkerPool<T>::KeepAlive()
 template<class T>
 uint32_t DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8_t numConnections)
 {
-    for (uint8_t i = 0; i < numConnections; ++i)
-    {
+    for (uint8_t i = 0; i < numConnections; ++i) {
         // Create the connection
         auto connection = [&] {
-            switch (type)
-            {
+            switch (type) {
             case IDX_ASYNC:
                 return NGemity::make_unique<T>(_queue.get(), *_connectionInfo);
             case IDX_SYNCH:
@@ -336,19 +322,16 @@ uint32_t DatabaseWorkerPool<T>::OpenConnections(InternalIndex type, uint8_t numC
             }
         }();
 
-        if (uint32_t error = connection->Open())
-        {
+        if (uint32_t error = connection->Open()) {
             // Failed to open a connection or invalid version, abort and cleanup
             _connections[type].clear();
             return error;
         }
-        else if (mysql_get_server_version(connection->GetHandle()) < MIN_MYSQL_SERVER_VERSION)
-        {
+        else if (mysql_get_server_version(connection->GetHandle()) < MIN_MYSQL_SERVER_VERSION) {
             NG_LOG_ERROR("sql.driver", "RZEmulator does not support MySQL versions below 5.1");
             return 1;
         }
-        else
-        {
+        else {
             _connections[type].push_back(std::move(connection));
         }
     }
@@ -379,8 +362,7 @@ T *DatabaseWorkerPool<T>::GetFreeConnection()
     auto const num_cons = _connections[IDX_SYNCH].size();
     T *connection = nullptr;
     //! Block forever until a connection is free
-    for (;;)
-    {
+    for (;;) {
         connection = _connections[IDX_SYNCH][i++ % num_cons].get();
         //! Must be matched with t->Unlock() or you will get deadlocks
         if (connection->LockIfReady())

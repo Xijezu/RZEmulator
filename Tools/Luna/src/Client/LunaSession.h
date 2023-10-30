@@ -25,8 +25,7 @@
 class XPacket;
 
 // Handle login commands
-class LunaSession : public XSocket
-{
+class LunaSession : public XSocket {
 public:
     explicit LunaSession(boost::asio::ip::tcp::socket &&socket)
         : XSocket(std::move(socket))

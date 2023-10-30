@@ -126,8 +126,7 @@ void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
 
     TS_EQUIP_SUMMON summonPct{};
     summonPct.open_dialog = static_cast<uint8_t>(bShowDialog ? 1 : 0);
-    for (int32_t i = 0; i < 6; i++)
-    {
+    for (int32_t i = 0; i < 6; i++) {
         if (pPlayer->m_aBindSummonCard[i] != nullptr)
             summonPct.card_handle[i] = pPlayer->m_aBindSummonCard[i]->m_nHandle;
         else
@@ -175,11 +174,9 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int32_t skill_id)
     TS_SC_SKILL_LIST skillPct{};
     skillPct.target = pUnit->GetHandle();
     skillPct.modification_type = 0; // reset | modification_type ?
-    if (skill_id < 0)
-    {
+    if (skill_id < 0) {
 
-        for (const auto &t : pUnit->m_vSkillList)
-        {
+        for (const auto &t : pUnit->m_vSkillList) {
             if (t->m_nSkillUID < 0)
                 continue;
             TS_SKILL_INFO skill_info{};
@@ -191,8 +188,7 @@ void Messages::SendSkillList(Player *pPlayer, Unit *pUnit, int32_t skill_id)
             skillPct.skills.emplace_back(skill_info);
         }
     }
-    else
-    {
+    else {
         auto skill = pUnit->GetSkill(skill_id);
         if (skill == nullptr)
             return;
@@ -212,8 +208,7 @@ void Messages::SendChatMessage(int32_t nChatType, const std::string &szSenderNam
     if (target == nullptr)
         return;
 
-    if (szMsg.length() <= 30000)
-    {
+    if (szMsg.length() <= 30000) {
         TS_SC_CHAT chatPct{};
         chatPct.szSender = szSenderName;
         chatPct.type = static_cast<uint8_t>(nChatType);
@@ -225,8 +220,7 @@ void Messages::SendChatMessage(int32_t nChatType, const std::string &szSenderNam
 void Messages::SendPartyChatMessage(int32_t nChatType, const std::string &szSender, int32_t nPartyID, const std::string &szMessage)
 {
     sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
-        if (tag.bIsOnline && tag.pPlayer != nullptr)
-        {
+        if (tag.bIsOnline && tag.pPlayer != nullptr) {
             Messages::SendChatMessage(nChatType, szSender, tag.pPlayer, szMessage);
         }
     });
@@ -241,8 +235,7 @@ void Messages::SendMarketInfo(Player *pPlayer, uint32_t npc_handle, const std::v
     pPlayer->SetLastContact("market", pMarket[0].name);
 
     marketPct.npc_handle = npc_handle;
-    for (const auto &info : pMarket)
-    {
+    for (const auto &info : pMarket) {
         TS_MARKET_ITEM_INFO item_info{};
         item_info.code = info.code;
         item_info.arena_point = 0; // @ Epic 9
@@ -284,14 +277,11 @@ std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
 
     std::copy(std::begin(item->GetItemInstance().GetSocket()), std::end(item->GetItemInstance().GetSocket()), std::begin(itemInfo.base_info.socket));
 
-    if (item->GetItemGroup() == ItemGroup::GROUP_SUMMONCARD)
-    {
-        if (item->m_pSummon != nullptr)
-        {
+    if (item->GetItemGroup() == ItemGroup::GROUP_SUMMONCARD) {
+        if (item->m_pSummon != nullptr) {
             int32_t slot = 1;
             int32_t tl = item->m_pSummon->m_nTransform;
-            while (slot < tl)
-            {
+            while (slot < tl) {
                 itemInfo.base_info.socket[slot] = item->m_pSummon->GetPrevJobLv(slot - 1);
                 ++slot;
             }
@@ -336,14 +326,11 @@ void Messages::SendGameTime(Player *pPlayer)
 void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
 {
     Item *item{nullptr};
-    if (pPlayer->GetItemCount() > 0)
-    {
+    if (pPlayer->GetItemCount() > 0) {
         int64_t count = bIsStorage ? pPlayer->GetStorageItemCount() : pPlayer->GetItemCount();
         int64_t idx = 0;
-        if (count != 0)
-        {
-            do
-            {
+        if (count != 0) {
+            do {
                 TS_SC_INVENTORY inventoryPct{};
                 auto lcnt = idx;
                 int64_t mcount = 200;
@@ -351,10 +338,8 @@ void Messages::SendItemList(Player *pPlayer, bool bIsStorage)
                     mcount = count - idx;
 
                 auto ltotal = idx + mcount;
-                if (idx < ltotal)
-                {
-                    do
-                    {
+                if (idx < ltotal) {
+                    do {
                         if (bIsStorage)
                             item = pPlayer->GetStorageItem((uint32_t)lcnt);
                         else
@@ -409,8 +394,7 @@ void Messages::sendEnterMessage(Player *pPlayer, WorldObject *pObj, bool /* bAbs
     if (pObj == nullptr || pPlayer == nullptr)
         return;
 
-    if (pObj->IsMonster())
-    {
+    if (pObj->IsMonster()) {
         pObj->As<Monster>()->m_bNearClient = true;
     }
 
@@ -425,15 +409,13 @@ void Messages::SendMoveMessage(Player *pPlayer, Unit *pUnit)
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
 
-    if (pUnit->ends.size() < 2000)
-    {
+    if (pUnit->ends.size() < 2000) {
         TS_SC_MOVE movePct{};
         movePct.start_time = pUnit->lastStepTime;
         movePct.handle = pUnit->GetHandle();
         movePct.tlayer = pUnit->GetLayer();
         movePct.speed = pUnit->speed;
-        for (const auto &pos : pUnit->ends)
-        {
+        for (const auto &pos : pUnit->ends) {
             MOVE_INFO move_info{};
             move_info.tx = pos.end.GetPositionX();
             move_info.ty = pos.end.GetPositionY();
@@ -447,8 +429,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
 {
     TS_SC_WEAR_INFO wearPct{};
     wearPct.handle = pUnit->GetHandle();
-    for (int32_t i = 0; i < MAX_ITEM_WEAR; i++)
-    {
+    for (int32_t i = 0; i < MAX_ITEM_WEAR; i++) {
         int32_t wear_info = (pUnit->m_anWear[i] != nullptr ? pUnit->m_anWear[i]->GetItemInstance().GetCode() : 0);
         if (i == 2 && wear_info == 0)
             wear_info = pUnit->GetInt32Value(UNIT_FIELD_MODEL + 2);
@@ -576,10 +557,8 @@ uint32_t Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 {
     uint32_t v2{0};
 
-    switch (pObj->GetSubType())
-    {
-    case ST_NPC:
-    {
+    switch (pObj->GetSubType()) {
+    case ST_NPC: {
         auto npc = dynamic_cast<NPC *>(pObj);
         if (npc->HasFinishableQuest(pClient))
             v2 |= 0x400;
@@ -587,24 +566,19 @@ uint32_t Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
             v2 |= 0x100;
         else if (npc->HasInProgressQuest(pClient))
             v2 |= 0x200;
-    }
-    break;
-    case ST_Mob:
-    {
+    } break;
+    case ST_Mob: {
         auto monster = dynamic_cast<Monster *>(pObj);
         if (monster->GetStatus() == 4)
             v2 |= 0x100;
-    }
-    break;
-    case ST_Player:
-    {
+    } break;
+    case ST_Player: {
         auto player = dynamic_cast<Player *>(pObj);
         if (player->IsSitDown())
             v2 |= 0x100;
         if (player->GetPermission() >= 100)
             v2 |= 0x4000;
-    }
-    break;
+    } break;
     default:
         break;
     }
@@ -620,19 +594,16 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
     int32_t type = 3;
 
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
-    if (npc != nullptr)
-    {
+    if (npc != nullptr) {
         int32_t progress = 0;
-        if (text != 0)
-        {
+        if (text != 0) {
             progress = npc->GetProgressFromTextID(code, text);
             if (progress == 1)
                 type = 7;
             if (progress == 2)
                 type = 8;
         }
-        else
-        {
+        else {
             if (pPlayer->IsStartableQuest(code, false))
                 progress = 0;
             else
@@ -642,15 +613,12 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
         int32_t textID = text;
         if (textID == 0)
             textID = npc->GetQuestTextID(code, progress);
-        if (npc == nullptr)
-        {
-            if (q->m_QuestBase->nEndType != 1 || progress != 2)
-            {
+        if (npc == nullptr) {
+            if (q->m_QuestBase->nEndType != 1 || progress != 2) {
                 type = 7;
                 progress = 1;
             }
-            else
-            {
+            else {
                 QuestLink *l = sObjectMgr.GetQuestLink(code, q->m_Instance.nStartID);
                 if (l != nullptr && l->nEndTextID != 0)
                     textID = l->nEndTextID;
@@ -668,25 +636,20 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
 
         auto rQuestBase = sObjectMgr.GetQuestBase(code);
 
-        if (progress != 0)
-        {
-            if (pPlayer->IsFinishableQuest(code))
-            {
-                for (i = 0; i < MAX_OPTIONAL_REWARD; i++)
-                {
+        if (progress != 0) {
+            if (pPlayer->IsFinishableQuest(code)) {
+                for (i = 0; i < MAX_OPTIONAL_REWARD; i++) {
                     if (rQuestBase->OptionalReward[i].nItemCode == 0)
                         break;
 
                     strTrigger = NGemity::StringFormat("end_quest( {}, {} )", code, i);
                     pPlayer->AddDialogMenu("NULL", strTrigger);
                 }
-                if (i != 0)
-                {
+                if (i != 0) {
                     strButton = "REWARD";
                     strTrigger = std::to_string(rQuestBase->nCode);
                 }
-                else
-                {
+                else {
 #if EPIC <= EPIC_4_1_1
                     ///- Hack for epic 4, use proper workaround instead
                     pPlayer->AddDialogMenu("Confirm", NGemity::StringFormat("end_quest({}, -1)", code));
@@ -699,14 +662,12 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
 #endif
                 }
             }
-            else
-            {
+            else {
                 strButton = "OK";
                 strTrigger = "";
             }
         }
-        else
-        {
+        else {
             // /run function get_quest_progress() return 0 end
             strTrigger = NGemity::StringFormat("start_quest( {}, {} )", code, textID);
             pPlayer->AddDialogMenu("START", strTrigger);
@@ -730,24 +691,19 @@ void Messages::SendQuestList(Player *pPlayer)
         info.code = static_cast<uint32_t>(pQuest->m_Instance.Code);
         info.startID = static_cast<uint32_t>(pQuest->m_Instance.nStartID);
 
-        if (Quest::IsRandomQuest(pQuest->m_Instance.Code))
-        {
-            for (int32_t i = 0, j = 0; i < MAX_VALUE_NUMBER / 4; i++)
-            {
+        if (Quest::IsRandomQuest(pQuest->m_Instance.Code)) {
+            for (int32_t i = 0, j = 0; i < MAX_VALUE_NUMBER / 4; i++) {
                 info.value[j++] = static_cast<uint32_t>(pQuest->GetRandomKey(i));
                 info.value[j++] = static_cast<uint32_t>(pQuest->GetRandomValue(i));
             }
         }
-        else
-        {
-            for (int32_t i = 0; i < MAX_VALUE_NUMBER / 2; ++i)
-            {
+        else {
+            for (int32_t i = 0; i < MAX_VALUE_NUMBER / 2; ++i) {
                 info.value[i] = static_cast<uint32_t>(pQuest->m_QuestBase->nValue[i]);
             }
         }
 
-        for (int32_t i = 0; i < MAX_QUEST_STATUS; i++)
-        {
+        for (int32_t i = 0; i < MAX_QUEST_STATUS; i++) {
             info.status[i] = static_cast<uint32_t>(pQuest->m_Instance.nStatus[i]);
         }
         questPct.activeQuests.emplace_back(info);
@@ -763,8 +719,7 @@ void Messages::BroadcastStatusMessage(WorldObject *obj)
         return;
 
     auto functor = [&obj](RegionType &list) -> void {
-        for (auto &pObject : list)
-        {
+        for (auto &pObject : list) {
             TS_SC_STATUS_CHANGE statusMsg{};
             statusMsg.handle = obj->GetHandle();
             statusMsg.status = Messages::GetStatusCode(obj, pObject->As<Player>());
@@ -783,16 +738,13 @@ void Messages::BroadcastStateMessage(Unit *pUnit, State *pState, bool bIsCancel)
     statePct.state_handle = pState->GetUID();
     statePct.state_code = pState->GetCode();
 
-    if (!bIsCancel)
-    {
+    if (!bIsCancel) {
         statePct.state_level = pState->GetLevel();
 
-        if (pState->IsAura())
-        {
+        if (pState->IsAura()) {
             statePct.end_time = -1;
         }
-        else
-        {
+        else {
             statePct.end_time = pState->GetEndTime();
         }
         statePct.start_time = pState->GetStartTime();
@@ -817,8 +769,7 @@ void Messages::BroadcastTamingMessage(Player *pPlayer, Monster *pMonster, int32_
         pMonster->GetLayer(), tamePct);
 
     std::string chatMsg{};
-    switch (mode)
-    {
+    switch (mode) {
     case 0:
         chatMsg = NGemity::StringFormat("TAMING_START|{}|", pMonster->GetNameAsString());
         break;
@@ -853,8 +804,7 @@ void Messages::SendGlobalChatMessage(int32_t chatType, const std::string &szSend
 void Messages::SendLocalChatMessage(int32_t nChatType, uint32_t handle, const std::string &szMessage, uint32_t len)
 {
     auto p = sMemoryPool.GetObjectInWorld<Player>(handle);
-    if (p != nullptr)
-    {
+    if (p != nullptr) {
         TS_SC_CHAT_LOCAL chatPct{};
         chatPct.handle = handle;
         chatPct.message = szMessage;
@@ -874,10 +824,8 @@ void Messages::SendQuestMessage(int32_t nChatType, Player *pTarget, const std::s
 void Messages::SendNPCStatusInVisibleRange(Player *pPlayer)
 {
     auto functor = [&pPlayer](RegionType &regionType) -> void {
-        for (const auto &obj : regionType)
-        {
-            if (obj != nullptr && obj->IsNPC())
-            {
+        for (const auto &obj : regionType) {
+            if (obj != nullptr && obj->IsNPC()) {
                 TS_SC_STATUS_CHANGE statusMsg{};
                 statusMsg.handle = obj->GetHandle();
                 statusMsg.status = Messages::GetStatusCode(obj, pPlayer);
@@ -894,8 +842,7 @@ void Messages::SendQuestStatus(Player *pPlayer, Quest *pQuest)
 {
     TS_SC_QUEST_STATUS questPct{};
     questPct.code = pQuest->m_Instance.Code;
-    for (int32_t i = 0; i < MAX_QUEST_STATUS; i++)
-    {
+    for (int32_t i = 0; i < MAX_QUEST_STATUS; i++) {
         questPct.status[i] = pQuest->m_Instance.nStatus[i];
     }
     pPlayer->SendPacket(questPct);
@@ -909,8 +856,7 @@ void Messages::SendItemCoolTimeInfo(Player *pPlayer)
     uint32_t ct = sWorld.GetArTime();
     TS_SC_ITEM_COOL_TIME coolTimePct{};
 
-    for (int32_t i = 0; i < MAX_ITEM_COOLTIME_GROUP; i++)
-    {
+    for (int32_t i = 0; i < MAX_ITEM_COOLTIME_GROUP; i++) {
         int32_t cool_time = pPlayer->m_nItemCooltime[i] - ct;
         if (cool_time < 0)
             cool_time = 0;
@@ -926,10 +872,8 @@ void Messages::SendMixResult(Player *pPlayer, std::vector<uint32_t> *pHandles)
         return;
 
     TS_SC_MIX_RESULT mixPct{};
-    if (pHandles != nullptr && !pHandles->empty())
-    {
-        for (const auto &pHandle : *pHandles)
-        {
+    if (pHandles != nullptr && !pHandles->empty()) {
+        for (const auto &pHandle : *pHandles) {
             mixPct.handles.emplace_back(pHandle);
         }
     }
@@ -975,8 +919,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
 
     std::string msg = NGemity::StringFormat("PINFO|{}|{}|{}|{}|{}|", name, leader, share_mode, min_lvl, max_lvl);
 
-    struct PInfo
-    {
+    struct PInfo {
         uint32_t handle;
         int32_t hp;
         int32_t mp;
@@ -989,8 +932,7 @@ void Messages::SendPartyInfo(Player *pPlayer)
     sGroupManager.DoEachMemberTag(pPlayer->GetPartyID(), [&msg](PartyMemberTag &tag) {
         PInfo info{};
         auto player = Player::FindPlayer(tag.strName);
-        if (player != nullptr)
-        {
+        if (player != nullptr) {
             info.handle = player->GetHandle();
             info.hp = (int32_t)GetPct((float)player->GetHealth(), player->GetMaxHealth());
             info.mp = (int32_t)GetPct((float)player->GetMana(), player->GetMaxMana());
@@ -1129,8 +1071,7 @@ void Messages::SendStateMessage(Player *pPlayer, uint32_t handle, State *pState,
     stateMsg.state_value = pState->m_nStateValue;
     stateMsg.state_string_value = pState->m_szStateValue;
 
-    if (!bIsCancel)
-    {
+    if (!bIsCancel) {
         stateMsg.state_level = pState->GetLevel();
         if (pState->IsAura())
             stateMsg.end_time = -1;

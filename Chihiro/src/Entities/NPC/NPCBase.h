@@ -17,8 +17,7 @@
  */
 #include "Common.h"
 
-struct NPCTemplate
-{
+struct NPCTemplate {
     int32_t id;
     float x;
     float y;
@@ -29,17 +28,9 @@ struct NPCTemplate
     std::string contact_script;
 };
 
-enum NPC_STATUS
-{
-    NPC_STATUS_NORMAL = 0x0,
-    NPC_STATUS_TRACKING = 0x1,
-    NPC_STATUS_FIND_ATTACK_POS = 0x2,
-    NPC_STATUS_ATTACK = 0x3,
-    NPC_STATUS_DEAD = 0x4
-};
+enum NPC_STATUS { NPC_STATUS_NORMAL = 0x0, NPC_STATUS_TRACKING = 0x1, NPC_STATUS_FIND_ATTACK_POS = 0x2, NPC_STATUS_ATTACK = 0x3, NPC_STATUS_DEAD = 0x4 };
 
-enum NPC_SpawnType : int
-{
+enum NPC_SpawnType : int {
     SPAWN_NORMAL = 0,
     SPAWN_SIEGE_DUNGEON = 1,
     SPAWN_NORMAL_DUNGEON = 2,

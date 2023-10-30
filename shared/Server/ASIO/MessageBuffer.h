@@ -19,8 +19,7 @@
 #include <string>
 #include <vector>
 
-class MessageBuffer
-{
+class MessageBuffer {
     typedef std::vector<uint8_t>::size_type size_type;
 
 public:
@@ -55,8 +54,7 @@ public:
 
     MessageBuffer &operator=(MessageBuffer const &right)
     {
-        if (this != &right)
-        {
+        if (this != &right) {
             _wpos = right._wpos;
             _rpos = right._rpos;
             _storage = right._storage;
@@ -67,8 +65,7 @@ public:
 
     MessageBuffer &operator=(MessageBuffer &&right)
     {
-        if (this != &right)
-        {
+        if (this != &right) {
             _wpos = right._wpos;
             _rpos = right._rpos;
             _storage = right.Move();

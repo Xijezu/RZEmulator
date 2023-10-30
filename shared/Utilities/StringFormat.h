@@ -18,24 +18,29 @@
  */
 #include "fmt/printf.h"
 
-namespace NGemity
-{
+namespace NGemity {
     /// Default NG string format function.
     template<typename Format, typename... Args>
-    inline std::string StringFormat(Format &&fmt, Args &&... args)
+    inline std::string StringFormat(Format &&fmt, Args &&...args)
     {
         return fmt::format(std::forward<Format>(fmt), std::forward<Args>(args)...);
     }
 
     /// Default TC string format function.
     template<typename Format, typename... Args>
-    inline std::string StringFormatTC(Format &&fmt, Args &&... args)
+    inline std::string StringFormatTC(Format &&fmt, Args &&...args)
     {
         return fmt::sprintf(std::forward<Format>(fmt), std::forward<Args>(args)...);
     }
     /// Returns true if the given char pointer is null.
-    inline bool IsFormatEmptyOrNull(const char *fmt) { return fmt == nullptr; }
+    inline bool IsFormatEmptyOrNull(const char *fmt)
+    {
+        return fmt == nullptr;
+    }
 
     /// Returns true if the given std::string is empty.
-    inline bool IsFormatEmptyOrNull(std::string const &fmt) { return fmt.empty(); }
+    inline bool IsFormatEmptyOrNull(std::string const &fmt)
+    {
+        return fmt.empty();
+    }
 } // namespace NGemity

@@ -20,21 +20,17 @@
 #include "Common.h"
 #include "MapLocationInfo.h"
 
-namespace X2D
-{
-    class QuadTreeMapInfo
-    {
+namespace X2D {
+    class QuadTreeMapInfo {
     public:
-        class FunctorAdaptor
-        {
+        class FunctorAdaptor {
         public:
             FunctorAdaptor() = default;
             ~FunctorAdaptor() = default;
             std::vector<MapLocationInfo> pResult{};
         };
 
-        class Node
-        {
+        class Node {
         public:
             Node()
                 : init(true)

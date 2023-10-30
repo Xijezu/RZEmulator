@@ -44,8 +44,7 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
 
     std::ifstream ifstream(configFile.c_str(), std::ios::in);
     std::string row;
-    while (std::getline(ifstream, row))
-    {
+    while (std::getline(ifstream, row)) {
         if (!row.empty() || row[0] == ';')
             TextLines.push_back(row);
     }
@@ -54,42 +53,34 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
     if (TextLines.empty())
         return false;
 
-    for (auto &s : TextLines)
-    {
+    for (auto &s : TextLines) {
         Tokenizer lines(s, '=');
         if (lines.size() < 2)
             continue;
 
-        if (lines[0] == "TILE_LENGTH"s)
-        {
+        if (lines[0] == "TILE_LENGTH"s) {
             fTileLength = std::stof(lines[1]);
         }
-        else if (lines[0] == "TILECOUNT_PER_SEGMENT"s)
-        {
+        else if (lines[0] == "TILECOUNT_PER_SEGMENT"s) {
             nTileCountPerSegment = std::stoi(lines[1]);
         }
-        else if (lines[0] == "SEGMENTCOUNT_PER_MAP"s)
-        {
+        else if (lines[0] == "SEGMENTCOUNT_PER_MAP"s) {
             nSegmentCountPerMap = std::stoi(lines[1]);
         }
-        else if (lines[0] == "SETFOV"s)
-        {
+        else if (lines[0] == "SETFOV"s) {
             pStream = std::stof(lines[1]);
         }
-        else if (lines[0] == "MAPLAYER"s)
-        {
+        else if (lines[0] == "MAPLAYER"s) {
             nMapLayer = std::stoi(lines[1]);
         }
-        else if (lines[0] == "MAPSIZE"s)
-        {
+        else if (lines[0] == "MAPSIZE"s) {
             Tokenizer tokens(std::string(lines[1]), ',');
             if (tokens.size() != 2)
                 return false;
             nMapCountX = std::stoi(tokens[0]);
             nMapCountY = std::stoi(tokens[1]);
         }
-        else if (lines[0] == "MAPFILE"s)
-        {
+        else if (lines[0] == "MAPFILE"s) {
             Tokenizer vars(std::string(lines[1]), ',');
             if (vars.size() != 5)
                 return false;

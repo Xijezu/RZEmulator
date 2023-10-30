@@ -35,13 +35,11 @@ void SetProcessPriority(std::string const &logChannel, uint32_t affinity, bool h
 #ifdef _WIN32 // Windows
 
     HANDLE hProcess = GetCurrentProcess();
-    if (affinity > 0)
-    {
+    if (affinity > 0) {
         ULONG_PTR appAff;
         ULONG_PTR sysAff;
 
-        if (GetProcessAffinityMask(hProcess, &appAff, &sysAff))
-        {
+        if (GetProcessAffinityMask(hProcess, &appAff, &sysAff)) {
             // remove non accessible processors
             ULONG_PTR currentAffinity = affinity & appAff;
 
@@ -54,8 +52,7 @@ void SetProcessPriority(std::string const &logChannel, uint32_t affinity, bool h
         }
     }
 
-    if (highPriority)
-    {
+    if (highPriority) {
         if (SetPriorityClass(hProcess, HIGH_PRIORITY_CLASS))
             NG_LOG_INFO(logChannel, "Process priority class set to HIGH");
         else
@@ -64,8 +61,7 @@ void SetProcessPriority(std::string const &logChannel, uint32_t affinity, bool h
 
 #elif defined(__linux__) // Linux
 
-    if (affinity > 0)
-    {
+    if (affinity > 0) {
         cpu_set_t mask;
         CPU_ZERO(&mask);
 
@@ -75,16 +71,14 @@ void SetProcessPriority(std::string const &logChannel, uint32_t affinity, bool h
 
         if (sched_setaffinity(0, sizeof(mask), &mask))
             NG_LOG_ERROR(logChannel, "Can't set used processors (hex): %x, error: %s", affinity, strerror(errno));
-        else
-        {
+        else {
             CPU_ZERO(&mask);
             sched_getaffinity(0, sizeof(mask), &mask);
             NG_LOG_INFO(logChannel, "Using processors (bitmask, hex): %lx", *(__cpu_mask *)(&mask));
         }
     }
 
-    if (highPriority)
-    {
+    if (highPriority) {
         if (setpriority(PRIO_PROCESS, 0, PROCESS_HIGH_PRIORITY))
             NG_LOG_ERROR(logChannel, "Can't set process priority class, error: %s", strerror(errno));
         else

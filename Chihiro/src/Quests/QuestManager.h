@@ -21,8 +21,7 @@
 #include "Common.h"
 #include "Quest.h"
 
-class QuestManager
-{
+class QuestManager {
 public:
     friend class Player;
     QuestManager() = default;

@@ -19,22 +19,19 @@
 #include "ItemTemplate.hpp"
 #include "StateBase.h"
 
-enum Target
-{
+enum Target {
     ATTACKER = 0,
     ATTACKEE = 1,
 };
 
-enum DamageFlag
-{
+enum DamageFlag {
     IGNORE_AVOID = 0x2,
     IGNORE_DEFENCE = 0x4,
     IGNORE_BLOCK = 0x8,
     IGNORE_CRITICAL = 0x10,
 };
 
-struct HateModifier
-{
+struct HateModifier {
     HateModifier(int32_t nHateModType, int32_t nHarmfulType, float _fAmpValue, int32_t _nIncValue)
         : fAmpValue(_fAmpValue)
         , nIncValue(_nIncValue)
@@ -46,8 +43,7 @@ struct HateModifier
         bIsApplyToHarmful = false;
         bIsApplyToHelpful = false;
 
-        switch (nHateModType)
-        {
+        switch (nHateModType) {
         case 1:
             bIsApplyToPhysicalSkill = true;
             break;
@@ -67,8 +63,7 @@ struct HateModifier
         bIsApplyToHarmful = false;
         bIsApplyToHelpful = false;
 
-        switch (nHarmfulType)
-        {
+        switch (nHarmfulType) {
         case 0:
             bIsApplyToHelpful = true;
             break;
@@ -93,8 +88,7 @@ struct HateModifier
     int32_t nIncValue;
 };
 
-struct Damage
-{
+struct Damage {
     // UserDefinedType:   _DAMAGE
     // Function       :     public void _DAMAGE()
     int32_t nDamage;
@@ -106,8 +100,7 @@ struct Damage
     int32_t target_hp;
 };
 
-struct DamageInfo : public Damage
-{
+struct DamageInfo : public Damage {
     // Function       :     public void StructCreature::_DAMAGE_INFO::_DAMAGE_INFO()
     void SetDamage(const Damage &damage)
     {
@@ -122,8 +115,7 @@ struct DamageInfo : public Damage
     uint16_t elemental_damage[7];
 };
 
-struct AttackInfo : public DamageInfo
-{
+struct AttackInfo : public DamageInfo {
     // Function       :     public void StructCreature::_ATTACK_INFO::_ATTACK_INFO()
     void SetDamageInfo(const DamageInfo &damage_info)
     {
@@ -145,8 +137,7 @@ struct AttackInfo : public DamageInfo
     uint16_t attacker_mp;
 };
 
-struct AdditionalDamageInfo
-{
+struct AdditionalDamageInfo {
     AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, uint16_t _nDamage, float _fDamage)
     {
         ratio = _ratio;
@@ -172,8 +163,7 @@ struct AdditionalDamageInfo
     float fDamage;
 };
 
-struct AddHPMPOnCriticalInfo
-{
+struct AddHPMPOnCriticalInfo {
     AddHPMPOnCriticalInfo(int32_t _nAddHP, int32_t _nAddMP, int32_t _nActivationRate)
         : nAddHP(_nAddHP)
         , nAddMP(_nAddMP)
@@ -186,8 +176,7 @@ struct AddHPMPOnCriticalInfo
     int32_t nActivationRate;
 };
 
-struct DamageReflectInfo
-{
+struct DamageReflectInfo {
     DamageReflectInfo(uint8_t _fire_ratio, float _range, ElementalType _type, unsigned short _nReflectDamage, float _fPhysicalReflectRatio, float _fPhysicalSkillReflectRatio,
         float _fMagicalReflectRatio, bool _bIgnoreDefence)
         : fire_ratio(_fire_ratio)
@@ -211,8 +200,7 @@ struct DamageReflectInfo
     bool bIgnoreDefence;
 };
 
-struct StateReflectInfo
-{
+struct StateReflectInfo {
     StateReflectInfo(StateCode _nCode, int32_t _nLevel, uint32_t _nDuration)
         : nCode(_nCode)
         , nLevel(_nLevel)
@@ -225,8 +213,7 @@ struct StateReflectInfo
     uint32_t nDuration;
 };
 
-struct _ADD_STATE_TAG
-{
+struct _ADD_STATE_TAG {
     _ADD_STATE_TAG(StateCode c, int32_t lv, int32_t p, uint32_t d, Target t, int32_t cm, int32_t min, int32_t max, int32_t tmin, int32_t tmax)
         : code(c)
         , level(lv)
@@ -252,8 +239,7 @@ struct _ADD_STATE_TAG
     int32_t target_max_hp;
 };
 
-struct _HEAL_ON_ATTACK_TAG
-{
+struct _HEAL_ON_ATTACK_TAG {
     _HEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_inc, int32_t _mp_inc)
         : ratio(_ratio)
         , hp_inc(_hp_inc)
@@ -266,8 +252,7 @@ struct _HEAL_ON_ATTACK_TAG
     int32_t mp_inc;
 };
 
-struct _DAMAGE_ABSORB_TAG
-{
+struct _DAMAGE_ABSORB_TAG {
     _DAMAGE_ABSORB_TAG(int32_t _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio)
         : ratio(_ratio)
         , hp_absorb_ratio(_hp_absorb_ratio)
@@ -280,8 +265,7 @@ struct _DAMAGE_ABSORB_TAG
     float mp_absorb_ratio;
 };
 
-struct _STEAL_ON_ATTACK_TAG
-{
+struct _STEAL_ON_ATTACK_TAG {
     _STEAL_ON_ATTACK_TAG(int32_t _ratio, int32_t _hp_steal, int32_t _mp_steal)
         : ratio(_ratio)
         , hp_steal(_hp_steal)

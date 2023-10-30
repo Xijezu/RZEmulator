@@ -39,8 +39,7 @@ AppenderFile::AppenderFile(uint8_t id, std::string const &name, LogLevel level, 
     if (extraArgs.size() > 1)
         mode = extraArgs[1];
 
-    if (flags & APPENDER_FLAGS_USE_TIMESTAMP)
-    {
+    if (flags & APPENDER_FLAGS_USE_TIMESTAMP) {
         size_t dot_pos = _fileName.find_last_of(".");
         if (dot_pos != std::string::npos)
             _fileName.insert(dot_pos, sLog->GetLogsTimestamp());
@@ -67,8 +66,7 @@ void AppenderFile::_write(LogMessage const *message)
 {
     bool exceedMaxSize = _maxFileSize > 0 && (_fileSize.load() + message->Size()) > _maxFileSize;
 
-    if (_dynamicName)
-    {
+    if (_dynamicName) {
         char namebuf[NGEMITY_PATH_MAX];
         snprintf(namebuf, NGEMITY_PATH_MAX, _fileName.c_str(), message->param1.c_str());
         // always use "a" with dynamic name otherwise it could delete the log we wrote in last _write() call
@@ -95,8 +93,7 @@ void AppenderFile::_write(LogMessage const *message)
 FILE *AppenderFile::OpenFile(std::string const &filename, std::string const &mode, bool backup)
 {
     std::string fullName(_logDir + filename);
-    if (backup)
-    {
+    if (backup) {
         CloseFile();
         std::string newName(fullName);
         newName.push_back('.');
@@ -105,8 +102,7 @@ FILE *AppenderFile::OpenFile(std::string const &filename, std::string const &mod
         rename(fullName.c_str(), newName.c_str()); // no error handling... if we couldn't make a backup, just ignore
     }
 
-    if (FILE *ret = fopen(fullName.c_str(), mode.c_str()))
-    {
+    if (FILE *ret = fopen(fullName.c_str(), mode.c_str())) {
         _fileSize = ftell(ret);
         return ret;
     }
@@ -116,8 +112,7 @@ FILE *AppenderFile::OpenFile(std::string const &filename, std::string const &mod
 
 void AppenderFile::CloseFile()
 {
-    if (logfile)
-    {
+    if (logfile) {
         fclose(logfile);
         logfile = NULL;
     }

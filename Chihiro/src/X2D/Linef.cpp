@@ -27,15 +27,13 @@ X2D::CcwResult X2D::Linef::CheckClockWisef(float x1, float y1, float x2, float y
 {
     CcwResult result{};
     float l = ((y3 - y1) * (x2 - x1)) - ((x3 - x1) * (y2 - y1));
-    if (l <= 0.0f)
-    {
+    if (l <= 0.0f) {
         if (l >= 0.0f)
             result = Parallelism;
         else
             result = CounterClockWise;
     }
-    else
-    {
+    else {
         result = ClockWise;
     }
     return result;
@@ -62,23 +60,19 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
     float f1{};
     float f2{};
 
-    if (p2.x >= p1.x)
-    {
+    if (p2.x >= p1.x) {
         tp1 = p1;
         tp2 = p2;
     }
-    else
-    {
+    else {
         tp1 = p2;
         tp2 = p1;
     }
-    if (p2.x >= p3.x)
-    {
+    if (p2.x >= p3.x) {
         tp3 = p3;
         tp4 = p4;
     }
-    else
-    {
+    else {
         tp3 = p4;
         tp4 = p3;
     }
@@ -89,29 +83,24 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
 
     if ((int32_t)ccw123 * (int32_t)ccw124 < 0 && (int32_t)ccw341 * (int32_t)ccw342 < 0)
         return Intersect;
-    if (ccw123 != Parallelism || ccw124 != Parallelism)
-    {
+    if (ccw123 != Parallelism || ccw124 != Parallelism) {
         if (ccw123 != Parallelism && ccw124 != Parallelism && ccw341 != Parallelism && ccw342 != Parallelism)
             return Seperate;
 
         tp5 = tp2;
-        if (tp2.y >= tp1.y)
-        {
+        if (tp2.y >= tp1.y) {
             tp6 = tp1;
         }
-        else
-        {
+        else {
             tp6 = tp2;
             tp2 = tp1;
         }
-        if (ccw123 != Parallelism)
-        {
+        if (ccw123 != Parallelism) {
             if (tp3.x < tp1.x || tp5.x < tp3.x)
                 return Seperate;
             if (tp1.x != tp3.x || tp5.x != tp1.x)
                 return Touch;
-            if (tp3.y >= tp6.y)
-            {
+            if (tp3.y >= tp6.y) {
                 f1 = tp2.y;
                 f2 = tp3.y;
                 if (f2 <= f1)
@@ -119,20 +108,16 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
             }
             return Seperate;
         }
-        if (ccw124 != Parallelism)
-        {
-            if (tp3.y >= tp4.y)
-            {
+        if (ccw124 != Parallelism) {
+            if (tp3.y >= tp4.y) {
                 tp7 = tp3;
                 tp8 = tp4;
             }
-            else
-            {
+            else {
                 tp7 = tp4;
                 tp8 = tp3;
             }
-            if (ccw341 != Parallelism)
-            {
+            if (ccw341 != Parallelism) {
                 if (ccw342 != Parallelism || tp5.x < tp3.x || tp4.x < tp5.x)
                     return Seperate;
                 if (tp3.x != tp5.x || tp4.x != tp3.x)
@@ -142,8 +127,7 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
                 f1 = tp8.y;
                 f2 = tp5.y;
             }
-            else
-            {
+            else {
                 if (tp1.x < tp3.x || tp4.x < tp1.x)
                     return Seperate;
                 if (tp3.x != tp1.x || tp4.x != tp3.x)
@@ -154,8 +138,7 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
                 f2 = tp1.y;
             }
         }
-        else
-        {
+        else {
             if (tp4.x < tp1.x || tp5.x < tp4.x)
                 return Seperate;
             if (tp1.x != tp4.x || tp5.x != tp1.x)

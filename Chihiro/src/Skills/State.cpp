@@ -129,19 +129,16 @@ void State::SetState(int32_t code, int32_t uid, uint32_t caster, const uint16_t 
     init(uid, code);
     m_nCode = (StateCode)code;
 
-    for (int32_t i = 0; i < 3; i++)
-    {
+    for (int32_t i = 0; i < 3; i++) {
         m_nLevel[i] = levels[i];
         m_hCaster[i] = caster;
         m_nBaseDamage[i] = base_damage[i];
 
-        if (durations[i])
-        {
+        if (durations[i]) {
             m_nStartTime[i] = t > (durations[i] - remain_times[i]) ? t - (durations[i] - remain_times[i]) : 0;
             m_nEndTime[i] = remain_times[i] == -1 ? -1 : t + remain_times[i];
         }
-        else
-        {
+        else {
             m_nStartTime[i] = m_nEndTime[i] = 0;
         }
     }
@@ -160,18 +157,15 @@ bool State::ClearExpiredState(uint32_t t)
 {
     bool bFlag = false;
 
-    if (m_nLevel[0] && m_nEndTime[0] < t)
-    {
+    if (m_nLevel[0] && m_nEndTime[0] < t) {
         m_nLevel[0] = 0;
         bFlag = true;
     }
-    if (m_nLevel[1] && m_nEndTime[1] < t)
-    {
+    if (m_nLevel[1] && m_nEndTime[1] < t) {
         m_nLevel[1] = 0;
         bFlag = true;
     }
-    if ((m_nLevel[2] && m_nEndTime[2] < t) || (!m_nLevel[0] && !m_nLevel[1]))
-    {
+    if ((m_nLevel[2] && m_nEndTime[2] < t) || (!m_nLevel[0] && !m_nLevel[1])) {
         m_nLevel[2] = 0;
         bFlag = true;
     }

@@ -23,22 +23,11 @@
 #include "RespawnObject.h"
 #include "Timer.h"
 
-enum ShutdownExitCode
-{
-    SHUTDOWN_EXIT_CODE = 0,
-    ERROR_EXIT_CODE = 1,
-    RESTART_EXIT_CODE = 2
-};
+enum ShutdownExitCode { SHUTDOWN_EXIT_CODE = 0, ERROR_EXIT_CODE = 1, RESTART_EXIT_CODE = 2 };
 
-enum WorldTimers : int
-{
-    WUPDATE_WORLDLOCATION,
-    WUPDATE_PINGDB,
-    WUPDATE_COUNT
-};
+enum WorldTimers : int { WUPDATE_WORLDLOCATION, WUPDATE_PINGDB, WUPDATE_COUNT };
 
-enum WorldBoolConfigs : int
-{
+enum WorldBoolConfigs : int {
     CONFIG_PK_SERVER = 0,
     CONFIG_DISABLE_TRADE,
     CONFIG_MONSTER_WANDERING,
@@ -51,14 +40,9 @@ enum WorldBoolConfigs : int
     BOOL_CONFIG_VALUE_COUNT
 };
 
-enum WorldFloatConfigs
-{
-    CONFIG_MAP_LENGTH = 0,
-    FLOAT_CONFIG_VALUE_COUNT
-};
+enum WorldFloatConfigs { CONFIG_MAP_LENGTH = 0, FLOAT_CONFIG_VALUE_COUNT };
 
-enum WorldIntConfigs
-{
+enum WorldIntConfigs {
     CONFIG_MAP_WIDTH = 0,
     CONFIG_MAP_HEIGHT,
     CONFIG_MAP_REGION_SIZE,
@@ -72,18 +56,7 @@ enum WorldIntConfigs
     INT_CONFIG_VALUE_COUNT
 };
 
-enum Rates
-{
-    RATES_EXP = 0,
-    RATES_ITEM_DROP,
-    RATES_CREATURE_DROP,
-    RATES_CHAOS_DROP,
-    RATES_GOLD_DROP,
-    RATES_PVP_DAMAGE_FOR_PLAYER,
-    RATES_PVP_DAMAGE_FOR_SUMMON,
-    RATES_STAMINA_BONUS,
-    MAX_RATES
-};
+enum Rates { RATES_EXP = 0, RATES_ITEM_DROP, RATES_CREATURE_DROP, RATES_CHAOS_DROP, RATES_GOLD_DROP, RATES_PVP_DAMAGE_FOR_PLAYER, RATES_PVP_DAMAGE_FOR_SUMMON, RATES_STAMINA_BONUS, MAX_RATES };
 
 class WorldSession;
 class Unit;
@@ -93,8 +66,7 @@ class XPacket;
 
 typedef std::unordered_map<uint32_t, WorldSession *> SessionMap;
 
-class World
-{
+class World {
 public:
     static std::atomic<uint32_t> m_worldLoopCounter;
     typedef std::atomic<uint64_t> AtomicIndex;

@@ -73,8 +73,7 @@ void ByteBuffer::textlike() const
 
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
-    for (uint32_t i = 0; i < size(); ++i)
-    {
+    for (uint32_t i = 0; i < size(); ++i) {
         char buf[1];
         snprintf(buf, 1, "%c", read<uint8_t>(i));
         o << buf;
@@ -94,17 +93,14 @@ void ByteBuffer::hexlike() const
     std::ostringstream o;
     o << "STORAGE_SIZE: " << size();
 
-    for (uint32_t i = 0; i < size(); ++i)
-    {
+    for (uint32_t i = 0; i < size(); ++i) {
         char buf[3];
         snprintf(buf, 1, "%2X ", read<uint8_t>(i));
-        if ((i == (j * 8)) && ((i != (k * 16))))
-        {
+        if ((i == (j * 8)) && ((i != (k * 16)))) {
             o << "| ";
             ++j;
         }
-        else if (i == (k * 16))
-        {
+        else if (i == (k * 16)) {
             o << "\n";
             ++k;
             ++j;

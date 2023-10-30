@@ -2,8 +2,7 @@
 
 #include <string.h>
 
-class RC4Cipher
-{
+class RC4Cipher {
 public:
     bool init(const char *pKey, int keyLen = 0) { return prepareKey(m_state, pKey, keyLen); }
 
@@ -13,8 +12,7 @@ public:
 
     void decode(const unsigned char *pSrc, unsigned char *pDst, int len) { codeBlock(m_state, pSrc, pDst, len); }
 
-    struct State
-    {
+    struct State {
         int x, y;
         unsigned char s[256];
     };
@@ -39,16 +37,14 @@ private:
         unsigned char key[256];
 
         j = 0;
-        for (i = 0; i < 256; i++)
-        {
+        for (i = 0; i < 256; i++) {
             key[i] = pKey[j++];
             if (j >= keyLen)
                 j = 0;
         }
 
         j = 0;
-        for (i = 0; i < 256; i++)
-        {
+        for (i = 0; i < 256; i++) {
             (j += m_state.s[j] + key[j]) &= 0xff;
             swapByte(m_state.s[i], m_state.s[j]);
         }
@@ -63,8 +59,7 @@ private:
     {
         int x = m_state.x, y = m_state.y;
 
-        while (len--)
-        {
+        while (len--) {
             (++x) &= 0xff;
             int sx = m_state.s[x];
             (y += sx) &= 0xff;
@@ -79,8 +74,7 @@ private:
     {
         int x = m_state.x, y = m_state.y;
 
-        while (len--)
-        {
+        while (len--) {
             (++x) &= 0xff;
             int sx = m_state.s[x];
             (y += sx) &= 0xff;

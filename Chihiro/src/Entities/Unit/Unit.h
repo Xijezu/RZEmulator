@@ -29,8 +29,7 @@ class Item;
 class World;
 class Skill;
 
-enum CREATURE_STATUS : uint32_t
-{
+enum CREATURE_STATUS : uint32_t {
     STATUS_LOGIN_COMPLETE = 0x01,
     STATUS_FIRST_ENTER = 0x02,
     STATUS_ATTACK_STARTED = 0x04,
@@ -58,8 +57,7 @@ enum CREATURE_STATUS : uint32_t
     STATUS_USING_DOUBLE_WEAPON = 0x2000000,
 };
 
-enum DamageType : int
-{
+enum DamageType : int {
     DT_NORMAL_PHYSICAL_DAMAGE = 0,
     DT_NORMAL_MAGICAL_DAMAGE = 1,
     DT_NORMAL_PHYSICAL_SKILL_DAMAGE = 2,
@@ -71,14 +69,12 @@ enum DamageType : int
     DT_STATE_PHYSICAL_DAMAGE = 8,
 };
 
-enum class NEXT_ATTACK_MODE : int32_t
-{
+enum class NEXT_ATTACK_MODE : int32_t {
     AM_ATTACK = 0,
     AM_AIMING = 1,
 };
 
-enum _CHARACTER_RESURRECTION_TYPE
-{
+enum _CHARACTER_RESURRECTION_TYPE {
     CRT_NORMAL = 0,
     CRT_BATTLE = 1,
     CRT_COMPETE = 2,
@@ -91,8 +87,7 @@ enum _CHARACTER_RESURRECTION_TYPE
     CRT_BATTLE_ARENA = 9,
 };
 
-class Unit : public WorldObject
-{
+class Unit : public WorldObject {
 public:
     friend class Messages;
     friend class Skill;

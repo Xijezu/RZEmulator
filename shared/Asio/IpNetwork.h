@@ -27,10 +27,8 @@
 
 #endif
 
-namespace NGemity
-{
-    namespace Net
-    {
+namespace NGemity {
+    namespace Net {
         inline bool IsInNetwork(boost::asio::ip::address_v4 const &networkAddress, boost::asio::ip::address_v4 const &mask, boost::asio::ip::address_v4 const &clientAddress)
         {
 #if BOOST_VERSION >= 106600

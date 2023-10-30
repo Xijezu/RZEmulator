@@ -3,8 +3,7 @@
 // ��𼱰� �ܾ�� des ��ȣȭ �˰���.
 // 8byte ���ϴ� encrypt �ȵ�.
 
-class XDes
-{
+class XDes {
 public:
     XDes(const char *password = NULL);
     virtual ~XDes();

@@ -21,8 +21,7 @@
 
 class QueryCallback;
 
-class QueryCallbackProcessor
-{
+class QueryCallbackProcessor {
 public:
     QueryCallbackProcessor();
     ~QueryCallbackProcessor();

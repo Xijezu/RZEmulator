@@ -43,11 +43,9 @@ BasicStatementTask::~BasicStatementTask()
 
 bool BasicStatementTask::Execute()
 {
-    if (m_has_result)
-    {
+    if (m_has_result) {
         ResultSet *result = m_conn->Query(m_sql);
-        if (!result || !result->GetRowCount() || !result->NextRow())
-        {
+        if (!result || !result->GetRowCount() || !result->NextRow()) {
             delete result;
             m_result->set_value(QueryResult(NULL));
             return false;

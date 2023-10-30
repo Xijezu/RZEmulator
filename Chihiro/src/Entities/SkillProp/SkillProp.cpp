@@ -55,31 +55,25 @@ SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float f
     m_bProcessEnded = false;
     m_bIsRemovePended = false;
 
-    switch (m_pSkill.GetSkillBase()->GetSkillEffectType())
-    {
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
-    {
+    switch (m_pSkill.GetSkillBase()->GetSkillEffectType()) {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD: {
         INIT_AREA_EFFECT_MAGIC_DAMAGE();
         break;
     }
-    case EF_AREA_EFFECT_HEAL:
-    {
+    case EF_AREA_EFFECT_HEAL: {
         INIT_AREA_EFFECT_HEAL();
         break;
     }
-    case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
-    {
+    case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP: {
         INIT_AREA_EFFECT_HEAL_BY_FIELD_PROP();
         break;
     }
     case EF_AREA_EFFECT_MAGIC_DAMAGE:
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
-    {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL: {
         INIT_SKILL_PROP_PARAMETER((m_pSkill.GetVar(6) + m_pSkill.GetVar(7) * m_pSkill.GetRequestedSkillLevel()) * 100, m_pSkill.GetVar(8) * 100);
         break;
     }
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2:
-    {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2: {
         INIT_SKILL_PROP_PARAMETER((m_pSkill.GetVar(12) + m_pSkill.GetVar(13) * m_pSkill.GetRequestedSkillLevel()) * 100, m_pSkill.GetVar(14) * 100);
         break;
     }
@@ -87,8 +81,7 @@ SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float f
     case EF_TRAP_PHYSICAL_DAMAGE:
     case EF_TRAP_MAGICAL_DAMAGE:
     case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
-    case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
-    {
+    case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE: {
         INIT_SKILL_PROP_PARAMETER((m_pSkill.GetVar(3) + m_pSkill.GetVar(4) * m_pSkill.GetRequestedSkillLevel()) * 100, 30);
         break;
     }
@@ -106,8 +99,7 @@ void SkillProp::Update(uint32_t /* diff*/)
     Unit *pCaster{nullptr};
 
     uint32_t ct = sWorld.GetArTime();
-    if (ct > m_Info.m_nEndTime || m_bIsRemovePended)
-    {
+    if (ct > m_Info.m_nEndTime || m_bIsRemovePended) {
         m_bProcessEnded = true;
 
         pCaster = sMemoryPool.GetObjectInWorld<Unit>(m_hCaster);
@@ -125,8 +117,7 @@ void SkillProp::Update(uint32_t /* diff*/)
     m_Info.m_nLastFireTime = ct;
 
     pCaster = sMemoryPool.GetObjectInWorld<Unit>(m_hCaster);
-    if (pCaster == nullptr)
-    {
+    if (pCaster == nullptr) {
         m_bProcessEnded = true;
         sWorld.RemoveObjectFromWorld(this);
         DeleteThis();
@@ -137,47 +128,38 @@ void SkillProp::Update(uint32_t /* diff*/)
     m_pSkill.m_vResultList.clear();
     m_pSkill.m_nTargetCount = 0;
 
-    switch (m_pSkill.GetSkillBase()->GetSkillEffectType())
-    {
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD:
-    {
+    switch (m_pSkill.GetSkillBase()->GetSkillEffectType()) {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_OLD: {
         FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(pCaster);
         break;
     }
-    case EF_AREA_EFFECT_HEAL:
-    {
+    case EF_AREA_EFFECT_HEAL: {
         FIRE_AREA_EFFECT_HEAL(pCaster);
         break;
     }
-    case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP:
-    {
+    case EF_AREA_EFFECT_HEAL_BY_FIELD_PROP: {
         FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(pCaster);
         break;
     }
-    case EF_AREA_EFFECT_MAGIC_DAMAGE:
-    {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE: {
         FIRE_AREA_EFFECT_MAGIC_DAMAGE(pCaster);
         break;
     }
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL:
-    {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL: {
         FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(pCaster);
         break;
     }
-    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2:
-    {
+    case EF_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2: {
         FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(pCaster);
         break;
     }
     case EF_TRAP_PHYSICAL_DAMAGE:
-    case EF_TRAP_MAGICAL_DAMAGE:
-    {
+    case EF_TRAP_MAGICAL_DAMAGE: {
         FIRE_TRAP_DAMAGE(pCaster);
         break;
     }
     case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
-    case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
-    {
+    case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE: {
         FIRE_TRAP_MULTIPLE_DAMAGE(pCaster);
         break;
     }
@@ -197,8 +179,7 @@ bool SkillProp::IsSkillProp() const
 
 void SkillProp::PendRemove()
 {
-    if (!m_bProcessEnded && !m_bIsRemovePended)
-    {
+    if (!m_bProcessEnded && !m_bIsRemovePended) {
         m_bIsRemovePended = true;
     }
 }
@@ -252,8 +233,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
     SkillResult skill_result{};
     auto t = sWorld.GetArTime();
 
-    for (auto &pUnit : vResult)
-    {
+    for (auto &pUnit : vResult) {
         if (pUnit == nullptr /* IsPet() */)
             continue;
 
@@ -287,10 +267,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
 
         ++m_pSkill.m_nTargetCount;
 
-        if (!Damage.bMiss)
-        {
-            if (pUnit->IsMonster())
-            {
+        if (!Damage.bMiss) {
+            if (pUnit->IsMonster()) {
                 int32_t nHate = Damage.nDamage;
 
                 auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
@@ -303,12 +281,10 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
             else if (pUnit->IsNPC())
                 pUnit->As<NPC>()->SetAttacker(m_pSkill.m_pOwner); */
 
-            if (!Damage.bMiss && !pUnit->IsDead())
-            {
+            if (!Damage.bMiss && !pUnit->IsDead()) {
                 StateCode nStateCode = static_cast<StateCode>(m_pSkill.GetSkillBase()->GetStateId());
 
-                if (nStateCode != 0)
-                {
+                if (nStateCode != 0) {
                     int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
 
                     uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
@@ -336,8 +312,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
     SkillResult skill_result{};
     Unit *pUnit{nullptr};
 
-    for (auto &handle : vResult)
-    {
+    for (auto &handle : vResult) {
         pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr /* IsPet */)
             continue;
@@ -371,10 +346,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
 
         ++m_pSkill.m_nTargetCount;
 
-        if (!Damage.bMiss && m_pSkill.m_pOwner->GetPosition().GetExactDist2d(this) <= 525.0f)
-        {
-            if (pUnit->IsMonster())
-            {
+        if (!Damage.bMiss && m_pSkill.m_pOwner->GetPosition().GetExactDist2d(this) <= 525.0f) {
+            if (pUnit->IsMonster()) {
                 int32_t nHate = Damage.nDamage;
                 auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
@@ -409,8 +382,7 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
     int32_t nTargetLimit = m_pSkill.GetVar(6);
     SkillResult skill_result{};
 
-    for (auto &handle : vResult)
-    {
+    for (auto &handle : vResult) {
         pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr /* IsPet() */)
             continue;
@@ -458,14 +430,12 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster)
     int32_t nTargetLimit = m_pSkill.GetVar(6);
     SkillResult skill_result{};
 
-    for (auto &handle : vResult)
-    {
+    for (auto &handle : vResult) {
         pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr /* IsPet() */)
             continue;
 
-        switch (nTargetLimit)
-        {
+        switch (nTargetLimit) {
         case SKILL_EFFECT_TARGET_LIMIT_NOT_ENEMY:
             if (pCaster->IsEnemy(pUnit, true))
                 continue;
@@ -516,8 +486,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
     Unit *pUnit{nullptr};
     SkillResult skill_result{};
 
-    for (auto &handle : vResult)
-    {
+    for (auto &handle : vResult) {
         pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr /* IsPet() */)
             continue;
@@ -525,8 +494,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
         if (pUnit->GetHealth() == 0)
             continue;
 
-        if (pCaster->IsEnemy(pUnit, true))
-        {
+        if (pCaster->IsEnemy(pUnit, true)) {
             int32_t flag = 0;
             auto Damage = pUnit->DealMagicalDamage(
                 m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
@@ -549,10 +517,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
             m_pSkill.m_vResultList.emplace_back(skill_result);
             ++m_pSkill.m_nTargetCount;
 
-            if (!Damage.bMiss)
-            {
-                if (pUnit->IsMonster())
-                {
+            if (!Damage.bMiss) {
+                if (pUnit->IsMonster()) {
                     int32_t nHate = Damage.nDamage;
 
                     auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
@@ -566,8 +532,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
                     pUnit->As<NPC>()->SetAttacker(m_pSkill.m_pOwner);*/
             }
         }
-        else if (pCaster->IsAlly(pUnit))
-        {
+        else if (pCaster->IsAlly(pUnit)) {
             nHPHeal = pUnit->Heal(nHPHeal);
 
             skill_result.type = TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP;
@@ -604,13 +569,11 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
     SkillResult skill_result{};
 
-    for (auto &pUnit : vResult)
-    {
+    for (auto &pUnit : vResult) {
         if (pUnit->GetHealth() == 0)
             continue;
 
-        if (pCaster->IsEnemy(pUnit, true))
-        {
+        if (pCaster->IsEnemy(pUnit, true)) {
             int32_t flag = 0;
             auto Damage = pUnit->DealMagicalDamage(
                 m_pSkill.m_pOwner, nDamage, (ElementalType)elemental_type, 0, m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0, nullptr, nullptr);
@@ -635,20 +598,17 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
             ++m_pSkill.m_nTargetCount;
 
-            if (!Damage.bMiss && pUnit->GetHealth() != 0)
-            {
+            if (!Damage.bMiss && pUnit->GetHealth() != 0) {
                 StateCode nStateCode = static_cast<StateCode>(m_pSkill.GetSkillBase()->GetStateId());
 
-                if (nStateCode != 0)
-                {
+                if (nStateCode != 0) {
                     int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
                     uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
                     StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());
                     pUnit->AddState(nStateType, nStateCode, pCaster->GetHandle(), nLevel, t, t + nDuration, false, 0, "");
                 }
 
-                if (pUnit->IsMonster())
-                {
+                if (pUnit->IsMonster()) {
                     int32_t nHate = Damage.nDamage;
                     auto HateMod = pCaster->GetHateMod((m_pSkill.GetSkillBase()->IsPhysicalSkill()) ? 1 : 2, m_pSkill.GetSkillBase()->IsHarmful());
 
@@ -661,8 +621,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
                     pUnit->As<NPC>()->SetAttacker(m_pSkill.m_pOwner);*/
             }
         }
-        else if (pCaster->IsAlly(pUnit))
-        {
+        else if (pCaster->IsAlly(pUnit)) {
             nHPHeal = pUnit->Heal(nHPHeal);
 
             skill_result.type = TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP;
@@ -688,8 +647,7 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
     Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
 
     auto it = vTarget.begin();
-    for (; it != vTarget.end(); ++it)
-    {
+    for (; it != vTarget.end(); ++it) {
         if (*it != nullptr && pCaster->IsEnemy(*it, true))
             break;
     }
@@ -705,34 +663,27 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
     nDamage = Skill::EnumSkillTargetsAndCalcDamage(
         GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, m_pSkill.GetVar(6), vTargetList, true);
 
-    for (auto &pDealTarget : vTargetList)
-    {
-        switch (m_pSkill.GetSkillBase()->GetSkillEffectType())
-        {
-        case EF_TRAP_PHYSICAL_DAMAGE:
-        {
+    for (auto &pDealTarget : vTargetList) {
+        switch (m_pSkill.GetSkillBase()->GetSkillEffectType()) {
+        case EF_TRAP_PHYSICAL_DAMAGE: {
             auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
                 m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
                 m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
-        }
-        break;
-        case EF_TRAP_MAGICAL_DAMAGE:
-        {
+        } break;
+        case EF_TRAP_MAGICAL_DAMAGE: {
             auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
                 m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
                 m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
-        }
-        break;
+        } break;
         default:
             break;
         }
 
         ++m_pSkill.m_nTargetCount;
 
-        if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel()))
-        {
+        if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel())) {
             int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());
@@ -751,15 +702,13 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
     float fFireRange = m_pSkill.GetVar(0) * 12.0f;
     float fDamageRange = m_pSkill.GetVar(5) * 12.0f;
 
-    if (!m_bFired)
-    {
+    if (!m_bFired) {
         std::vector<Unit *> vTarget{};
 
         Skill::EnumSkillTargetsAndCalcDamage(GetPosition(), GetLayer(), GetPosition(), true, fFireRange, -1, 0, 0, true, pCaster, DISTRIBUTION_TYPE_NO_LIMIT, 0, vTarget, true);
 
         std::vector<Unit *>::iterator it{};
-        for (it = vTarget.begin(); it != vTarget.end(); ++it)
-        {
+        for (it = vTarget.begin(); it != vTarget.end(); ++it) {
             if ((*it) && pCaster->IsEnemy(*it, true))
                 break;
         }
@@ -783,34 +732,27 @@ void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
     nDamage = Skill::EnumSkillTargetsAndCalcDamage(
         GetPosition(), GetLayer(), GetPosition(), true, fDamageRange, -1, 0, nDamage, true, pCaster, DISTRIBUTION_TYPE_DISTRIBUTE, m_pSkill.GetVar(6), vTargetList, true);
 
-    for (auto &pDealTarget : vTargetList)
-    {
-        switch (m_pSkill.GetSkillBase()->GetSkillEffectType())
-        {
-        case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE:
-        {
+    for (auto &pDealTarget : vTargetList) {
+        switch (m_pSkill.GetSkillBase()->GetSkillEffectType()) {
+        case EF_TRAP_MULTIPLE_PHYSICAL_DAMAGE: {
             auto Damage = pDealTarget->DealPhysicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
                 m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
                 m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
-        }
-        break;
-        case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE:
-        {
+        } break;
+        case EF_TRAP_MULTIPLE_MAGICAL_DAMAGE: {
             auto Damage = pDealTarget->DealMagicalSkillDamage(pCaster, nDamage, (ElementalType)elemental_type,
                 m_pSkill.GetSkillBase()->GetHitBonus(m_pSkill.GetSkillEnhance(), pCaster->GetLevel() - pDealTarget->GetLevel()),
                 m_pSkill.GetSkillBase()->GetCriticalBonus(m_pSkill.GetRequestedSkillLevel()), 0);
             Skill::AddSkillDamageResult(m_pSkill.m_vResultList, SHT_MAGIC_DAMAGE, elemental_type, Damage, pDealTarget->GetHandle());
-        }
-        break;
+        } break;
         default:
             break;
         }
 
         ++m_pSkill.m_nTargetCount;
 
-        if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel()))
-        {
+        if (irand(0, 99) < m_pSkill.GetSkillBase()->GetProbabilityOnHit(m_pSkill.GetRequestedSkillLevel())) {
             int32_t nLevel = m_pSkill.GetSkillBase()->GetStateLevel(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             uint32_t nDuration = m_pSkill.GetSkillBase()->GetStateSecond(m_pSkill.GetRequestedSkillLevel(), m_pSkill.GetSkillEnhance());
             StateType nStateType = static_cast<StateType>(m_pSkill.GetSkillBase()->GetStateType());

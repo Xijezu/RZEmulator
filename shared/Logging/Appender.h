@@ -24,8 +24,7 @@
 
 struct LogMessage;
 
-class Appender
-{
+class Appender {
 public:
     Appender(uint8_t _id, std::string const &name, LogLevel level = LOG_LEVEL_DISABLED, AppenderFlags flags = APPENDER_FLAGS_NONE);
     virtual ~Appender();
@@ -51,8 +50,7 @@ private:
     AppenderFlags flags;
 };
 
-class InvalidAppenderArgsException : public std::length_error
-{
+class InvalidAppenderArgsException : public std::length_error {
 public:
     explicit InvalidAppenderArgsException(std::string const &message)
         : std::length_error(message)

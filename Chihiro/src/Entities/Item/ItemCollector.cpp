@@ -23,8 +23,7 @@
 ItemCollector::~ItemCollector()
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);
-    for (auto &item : m_vItemList)
-    {
+    for (auto &item : m_vItemList) {
         Item::PendFreeItem(item.second);
     }
 }
@@ -55,13 +54,11 @@ void ItemCollector::Update()
 {
     NG_UNIQUE_GUARD writeGuard(i_lock);
     uint32_t ct = sWorld.GetArTime();
-    for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next)
-    {
+    for (ItemMap::iterator itr = m_vItemList.begin(), next; itr != m_vItemList.end(); itr = next) {
         next = itr;
         ++next;
 
-        if (itr->second->m_nDropTime + sWorld.getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct)
-        {
+        if (itr->second->m_nDropTime + sWorld.getIntConfig(CONFIG_ITEM_HOLD_TIME) <= ct) {
             if (itr->second->IsInWorld())
                 sWorld.RemoveObjectFromWorld(itr->second);
             m_vItemList.erase(itr);

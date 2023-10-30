@@ -21,8 +21,7 @@
 class XPacket;
 
 // Handle login commands
-class ShizukeSession : public XSocket
-{
+class ShizukeSession : public XSocket {
 public:
     explicit ShizukeSession(boost::asio::ip::tcp::socket &&socket)
         : XSocket(std::move(socket))

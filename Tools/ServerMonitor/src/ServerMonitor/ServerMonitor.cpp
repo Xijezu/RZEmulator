@@ -41,13 +41,11 @@ void NGemity::ServerMonitor::InitializeServerMonitor()
     json j = json::parse(inFile);
     inFile.close();
 
-    for (auto &region : j["region"])
-    {
+    for (auto &region : j["region"]) {
         ServerRegion serverRegion{};
         serverRegion.szRegionName = region["name"].get<std::string>();
         serverRegion.szAuthIPAddress = region["auth"].get<std::string>();
-        for (auto &vServer : region["servers"])
-        {
+        for (auto &vServer : region["servers"]) {
             Server server{};
             server.szIPAddress = vServer["ip"].get<std::string>();
             server.szName = vServer["name"].get<std::string>();
@@ -83,31 +81,26 @@ void NGemity::ServerMonitor::Update()
     outFile.close();
 
     // Remove finished sockets
-    for (auto it = std::begin(vSockets); it != std::end(vSockets);)
-    {
+    for (auto it = std::begin(vSockets); it != std::end(vSockets);) {
         if (it->second->Finished())
             it = vSockets.erase(it);
         else
             ++it;
     }
 
-    for (auto &serverRegion : m_vServerRegion)
-    {
-        for (auto &server : serverRegion.vServerList)
-        {
+    for (auto &serverRegion : m_vServerRegion) {
+        for (auto &server : serverRegion.vServerList) {
 
             if (vSockets.count(server.szName) != 0)
                 continue;
 
             boost::asio::ip::tcp_endpoint endpoint(NGemity::Net::make_address_v4(server.szIPAddress), server.nPort);
             boost::asio::ip::tcp::socket socket(*(_ioContext.get()));
-            try
-            {
+            try {
                 socket.connect(endpoint);
                 socket.set_option(boost::asio::ip::tcp::no_delay(true));
             }
-            catch (std::exception &)
-            {
+            catch (std::exception &) {
                 NG_LOG_ERROR("network", "Cannot connect to game server at %s:%d", server.szIPAddress.c_str(), server.nPort);
                 continue;
             }
@@ -131,12 +124,10 @@ std::string NGemity::ServerMonitor::GetEverything()
     std::string szResult{};
     nlohmann::json root; // ServerList
     root["last_update"] = time(nullptr);
-    for (auto &serverRegion : m_vServerRegion)
-    {
+    for (auto &serverRegion : m_vServerRegion) {
         nlohmann::json region; // Server
         region["name"] = serverRegion.szRegionName;
-        for (auto &server : serverRegion.vServerList)
-        {
+        for (auto &server : serverRegion.vServerList) {
             nlohmann::json region_server;
             region_server["name"] = server.szName;
             region_server["usercount"] = server.nPlayerCount;

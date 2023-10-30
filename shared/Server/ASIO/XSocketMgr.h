@@ -30,8 +30,7 @@
 /// Manages all sockets connected to peers and network threads
 
 template<class SOCKET_TYPE>
-class XSocketMgr : public SocketMgr
-{
+class XSocketMgr : public SocketMgr {
 public:
     XSocketMgr()
         : SocketMgr()
@@ -49,14 +48,13 @@ public:
         _tcpNoDelay = sConfigMgr->GetBoolDefault("Network.TcpNodelay", true);
 
         int const max_connections = NGEMITY_MAX_LISTEN_CONNECTIONS;
-        NG_LOG_DEBUG("misc", "Max allowed socket connections %d", max_connections);
+        NG_LOG_DEBUG("network", "Max allowed socket connections %d", max_connections);
 
         _socketSystemSendBufferSize = sConfigMgr->GetIntDefault("Network.OutKBuff", -1);
         _socketApplicationSendBufferSize = sConfigMgr->GetIntDefault("Network.OutUBuff", 65536);
 
-        if (_socketApplicationSendBufferSize <= 0)
-        {
-            NG_LOG_ERROR("misc", "Network.OutUBuff is wrong in your config file");
+        if (_socketApplicationSendBufferSize <= 0) {
+            NG_LOG_ERROR("network", "Network.OutUBuff is wrong in your config file");
             return false;
         }
 
@@ -65,6 +63,7 @@ public:
 
         _acceptor->SetSocketFactory(std::bind(&SocketMgr::GetSocketForAccept, this));
         _acceptor->AsyncAcceptWithCallback(std::bind(&XSocketMgr<SOCKET_TYPE>::OnSocketOpen, this, std::placeholders::_1, std::placeholders::_2));
+        NG_LOG_INFO("network", "Server listening at %s:%d with %d threads", bindIp.c_str(), port, threadCount);
 
         return true;
     }
@@ -75,24 +74,20 @@ public:
     void OnSocketOpen(tcp::socket &&sock, uint32_t threadIndex) override
     {
         // set some options here
-        if (_socketSystemSendBufferSize >= 0)
-        {
+        if (_socketSystemSendBufferSize >= 0) {
             boost::system::error_code err;
             sock.set_option(boost::asio::socket_base::send_buffer_size(_socketSystemSendBufferSize), err);
-            if (err && err != boost::system::errc::not_supported)
-            {
+            if (err && err != boost::system::errc::not_supported) {
                 NG_LOG_ERROR("network", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::socket_base::send_buffer_size) err = %s", err.message().c_str());
                 return;
             }
         }
 
         // Set TCP_NODELAY.
-        if (_tcpNoDelay)
-        {
+        if (_tcpNoDelay) {
             boost::system::error_code err;
             sock.set_option(boost::asio::ip::tcp::no_delay(true), err);
-            if (err)
-            {
+            if (err) {
                 NG_LOG_ERROR("misc", "WorldSocketMgr::OnSocketOpen sock.set_option(boost::asio::ip::tcp::no_delay) err = %s", err.message().c_str());
                 return;
             }
@@ -100,13 +95,11 @@ public:
         // By default, we're bypassing this function because we dont want a default XSocket, we want a child class
         // SocketMgr::OnSocketOpen(std::forward<tcp::socket>(sock), threadIndex);
 
-        try
-        {
+        try {
             std::shared_ptr<SOCKET_TYPE> newSocket = std::make_shared<SOCKET_TYPE>(std::move(sock));
             _threads[threadIndex].AddSocket(newSocket);
         }
-        catch (boost::system::system_error const &err)
-        {
+        catch (boost::system::system_error const &err) {
             NG_LOG_WARN("network", "Failed to retrieve client's remote address %s", err.what());
         }
     }

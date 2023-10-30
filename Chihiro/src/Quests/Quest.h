@@ -20,14 +20,12 @@
 
 class Quest;
 class Player;
-struct QuestEventHandler
-{
+struct QuestEventHandler {
     virtual void onStatusChanged(Quest *quest, int32_t nOldStatus, int32_t nNewStatus) = 0;
     virtual void onProgressChanged(Quest *quest, QuestProgress oldProgress, QuestProgress newProgress) = 0;
 };
 
-class Quest
-{
+class Quest {
 public:
     static Quest *AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, const int32_t status[], QuestProgress progress, int32_t nStartID);
     static bool IsRandomQuest(int32_t code);

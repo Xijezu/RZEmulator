@@ -24,8 +24,7 @@
 class Appender;
 struct LogMessage;
 
-class Logger
-{
+class Logger {
 public:
     Logger(std::string const &name, LogLevel level);
 

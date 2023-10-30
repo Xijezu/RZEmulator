@@ -25,17 +25,9 @@ class XPacket;
 class Unit;
 class Summon;
 
-class Item : public WorldObject
-{
+class Item : public WorldObject {
 public:
-    enum _TARGET_TYPE
-    {
-        TARGET_TYPE_PLAYER = 0,
-        TARGET_TYPE_SUMMON = 1,
-        TARGET_TYPE_MONSTER = 2,
-        TARGET_TYPE_NPC = 3,
-        TARGET_TYPE_UNKNOWN = 4
-    };
+    enum _TARGET_TYPE { TARGET_TYPE_PLAYER = 0, TARGET_TYPE_SUMMON = 1, TARGET_TYPE_MONSTER = 2, TARGET_TYPE_NPC = 3, TARGET_TYPE_UNKNOWN = 4 };
 
     static void EnterPacket(XPacket &pEnterPct, Item *pItem);
     static Item *AllocItem(uint64_t uid, int32_t code, int64_t cnt, GenerateCode info = GenerateCode::BY_BASIC, int32_t level = -1, int32_t enhance = -1, int32_t flag = -1, int32_t socket_0 = 0,

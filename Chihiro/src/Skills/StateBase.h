@@ -17,8 +17,7 @@
  */
 #include "Common.h"
 
-enum AttributeFlag
-{
+enum AttributeFlag {
     AF_ERASE_ON_DEAD = 0x1,
     AF_ERASE_ON_LOGOUT = 0x2,
     AF_TIME_DECREASE_ON_LOGOUT = 0x4,
@@ -29,8 +28,7 @@ enum AttributeFlag
     AF_ERASE_ON_RESURRECT = 0x80,
 };
 
-enum StateCode
-{
+enum StateCode {
     SC_NONE = 0x000,
     SC_INC_ITEM_CHANCE = 0x3FC,
     SC_INC_BLOCK_CHANCE = 0x3FD,
@@ -82,15 +80,13 @@ enum StateCode
     SC_TRACE_OF_FUGITIVE = 201084,
 };
 
-enum StateType
-{
+enum StateType {
     SG_NORMAL = 0x0,
     SG_DUPLICATE = 0x1,
     SG_DEPENDENCE = 0x2,
 };
 
-enum StateGroup
-{
+enum StateGroup {
     GROUP_NONE = 0x0,
     GROUP_PHYSICAL_BOMB = 0x65,
     GROUP_MAGICAL_BOMB = 0x66,
@@ -104,8 +100,7 @@ enum StateGroup
     GROUP_WOUND = 0x196,
 };
 
-enum StateStatFlag
-{
+enum StateStatFlag {
     FLAG_STR = (1 << 0),
     FLAG_VIT = (1 << 1),
     FLAG_AGI = (1 << 2),
@@ -138,8 +133,7 @@ enum StateStatFlag
     FLAG_MAX_WEIGHT = (1 << 30),
 };
 
-enum StateEquipFlag
-{
+enum StateEquipFlag {
     FLAG_EQUIP_ONEHAND_SWORD = (1 << 0),
     FLAG_EQUIP_TWOHAND_SWORD = (1 << 1),
     FLAG_EQUIP_DAGGER = (1 << 2),
@@ -156,8 +150,7 @@ enum StateEquipFlag
     FLAG_EQUIP_DOUBLE_DAGGER = (1 << 13),
 };
 
-enum FlagEffectType
-{
+enum FlagEffectType {
     FLAG_ET_NONE_RESIST = (1 << 0),
     FLAG_ET_FIRE_RESIST = (1 << 1),
     FLAG_ET_WATER_RESIST = (1 << 2),
@@ -191,8 +184,7 @@ enum FlagEffectType
     FLAG_MP_REGEN_STOP = (1 << 30),
 };
 
-enum StateBaseEffect
-{
+enum StateBaseEffect {
     BEF_NONE = 0,
     BEF_PHYSICAL_STATE_DAMAGE = 1,
     BEF_PHYSICAL_IGNORE_DEFENCE_STATE_DAMAGE = 2,
@@ -216,8 +208,7 @@ enum StateBaseEffect
     BEF_SERIOUS_BLOODY = 54,
 };
 
-enum StateEffect : int
-{
+enum StateEffect : int {
     SEF_MISC = 0,
     SEF_PARAMETER_INC = 1,
     SEF_PARAMETER_AMP = 2,
@@ -282,8 +273,7 @@ enum StateEffect : int
     SEF_AMP_AND_INC_ITEM_CHANCE = 201,
 };
 
-enum StateTagType
-{
+enum StateTagType {
     STT_NORMAL_ATTACK = 1 << 0,
     STT_PHYSICAL_SKILL = 1 << 1,
     STT_MAGICAL_SKILL = 1 << 2,
@@ -291,8 +281,7 @@ enum StateTagType
     STT_HARMFUL = 1 << 4,
 };
 
-struct StateTemplate
-{
+struct StateTemplate {
     int32_t state_id;
     int32_t text_id;
     int32_t tooltip_id;

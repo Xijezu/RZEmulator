@@ -20,8 +20,7 @@
 #include "Common.h"
 
 class Player;
-class AllowedCommandInfo
-{
+class AllowedCommandInfo {
 public:
     static AllowedCommandInfo &Instance()
     {

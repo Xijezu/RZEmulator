@@ -45,8 +45,7 @@ void MessageBuffer::Resize(size_type bytes)
 
 void MessageBuffer::Normalize()
 {
-    if (_rpos)
-    {
+    if (_rpos) {
         if (_rpos != _wpos)
             memmove(GetBasePointer(), GetReadPointer(), GetActiveSize());
         _wpos -= _rpos;
@@ -63,8 +62,7 @@ void MessageBuffer::EnsureFreeSpace()
 
 void MessageBuffer::Write(void const *data, std::size_t size)
 {
-    if (size)
-    {
+    if (size) {
         memcpy(GetWritePointer(), data, size);
         WriteCompleted(size);
     }

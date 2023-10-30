@@ -18,13 +18,10 @@
 #include "Common.h"
 #include "Pointf.h"
 
-namespace X2D
-{
-    class Linef
-    {
+namespace X2D {
+    class Linef {
     public:
-        enum IntersectResult : int
-        {
+        enum IntersectResult : int {
             None = 157,
             Intersect = 1,
             Seperate = -1,

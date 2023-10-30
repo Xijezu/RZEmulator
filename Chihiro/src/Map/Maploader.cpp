@@ -26,14 +26,12 @@
 
 bool Maploader::LoadMapContent()
 {
-    if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false))
-    {
+    if (!seamlessWorldInfo.Initialize("terrainseamlessworld.cfg", false)) {
         NG_LOG_FATAL("server.worldserver", "TerrainSeamlessWorld.cfg read error !");
         return false;
     }
 
-    if (!propInfo.Initialize("terrainpropinfo.cfg"))
-    {
+    if (!propInfo.Initialize("terrainpropinfo.cfg")) {
         NG_LOG_FATAL("server.worldserver", "TerrainPropInfo.cfg read error !");
         return false;
     }
@@ -41,17 +39,13 @@ bool Maploader::LoadMapContent()
     int32_t y = 0;
     fTileSize = seamlessWorldInfo.m_fTileLength;
     fMapLength = seamlessWorldInfo.m_nSegmentCountPerMap * seamlessWorldInfo.m_fTileLength * seamlessWorldInfo.m_nTileCountPerSegment;
-    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y)
-    {
-        for (int32_t i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i)
-        {
+    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y) {
+        for (int32_t i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i) {
             std::string strLocationFileName = seamlessWorldInfo.GetLocationFileName(i, y);
 
-            if (strLocationFileName.length() != 0)
-            {
+            if (strLocationFileName.length() != 0) {
                 int32_t wid = seamlessWorldInfo.GetWorldID(i, y);
-                if (wid != -1)
-                {
+                if (wid != -1) {
                     SetDefaultLocation(i, y, fMapLength, wid);
                 }
 
@@ -59,23 +53,20 @@ bool Maploader::LoadMapContent()
                 LoadLocationFile(("Resource/NewMap/"s + strLocationFileName), i, y, fAttrLen, fMapLength);
 
                 std::string strScriptFileName = seamlessWorldInfo.GetScriptFileName(i, y);
-                if (!strScriptFileName.empty())
-                {
+                if (!strScriptFileName.empty()) {
                     std::transform(strScriptFileName.begin(), strScriptFileName.end(), strScriptFileName.begin(), tolower);
                     LoadScriptFile(("Resource/NewMap/"s + strScriptFileName), i, y, fMapLength);
 
                     std::string strAttributeFileName = seamlessWorldInfo.GetAttributePolygonFileName(i, y);
 
-                    if (!strAttributeFileName.empty())
-                    {
+                    if (!strAttributeFileName.empty()) {
                         std::transform(strAttributeFileName.begin(), strAttributeFileName.end(), strAttributeFileName.begin(), tolower);
                         LoadAttributeFile(("Resource/NewMap/"s + strAttributeFileName), i, y, fAttrLen, fMapLength);
                     }
                 }
 
                 std::string strPropFileName = seamlessWorldInfo.GetFieldPropFileName(i, y);
-                if (!strPropFileName.empty())
-                {
+                if (!strPropFileName.empty()) {
                     std::transform(strPropFileName.begin(), strPropFileName.end(), strPropFileName.begin(), tolower);
                     LoadFieldPropFile(("Resource/NewMap/"s + strPropFileName), i, y, fAttrLen, fMapLength);
                 }
@@ -100,8 +91,7 @@ void Maploader::SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32
 
 void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
 {
-    if (g_qtLocationInfo == nullptr)
-    {
+    if (g_qtLocationInfo == nullptr) {
         g_qtLocationInfo = new X2D::QuadTreeMapInfo(g_nMapWidth, g_nMapHeight);
     }
     g_qtLocationInfo->Add(std::move(location_info));
@@ -126,8 +116,7 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
     infile.close();
 
     auto total_entries = buffer.read<int32_t>();
-    for (int32_t i = 0; i < total_entries; ++i)
-    {
+    for (int32_t i = 0; i < total_entries; ++i) {
         lih.nPriority = buffer.read<int32_t>();
         lih.x = buffer.read<float>();
         lih.y = buffer.read<float>();
@@ -135,8 +124,7 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
         lih.fRadius = buffer.read<float>();
 
         nCharSize = buffer.read<int32_t>();
-        if (nCharSize > 1)
-        {
+        if (nCharSize > 1) {
             buffer.read_skip((size_t)nCharSize);
         }
         nCharSize = buffer.read<int32_t>();
@@ -150,15 +138,13 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
             continue;
 
         nPolygonCount = buffer.read<int32_t>();
-        for (int32_t cp = 0; cp < nPolygonCount; ++cp)
-        {
+        for (int32_t cp = 0; cp < nPolygonCount; ++cp) {
             nPointCount = buffer.read<int32_t>();
             float sx = x * fMapLength;
             float sy = y * fMapLength;
             std::vector<X2D::Pointf> points{};
 
-            for (int32_t p = 0; p < nPointCount; ++p)
-            {
+            for (int32_t p = 0; p < nPointCount; ++p) {
                 X2D::Pointf pt{};
                 pt.x = sx + ((float)buffer.read<int32_t>() * fAttrLen);
                 pt.x = sy + ((float)buffer.read<int32_t>() * fAttrLen);
@@ -188,13 +174,11 @@ void Maploader::LoadAttributeFile(const std::string &szFilename, int32_t x, int3
     float sx = x * fMapLength;
     float sy = y * fMapLength;
 
-    for (int32_t i = 0; i < total_entries; ++i)
-    {
+    for (int32_t i = 0; i < total_entries; ++i) {
         auto nPointCount = buffer.read<int32_t>();
 
         std::vector<X2D::Pointf> points{};
-        for (int32_t p = 0; p < nPointCount; ++p)
-        {
+        for (int32_t p = 0; p < nPointCount; ++p) {
             X2D::Pointf pt{};
             pt.x = sx + ((float)buffer.read<int32_t>() * fAttrLen);
             pt.y = sy + ((float)buffer.read<int32_t>() * fAttrLen);
@@ -226,13 +210,11 @@ void Maploader::LoadScriptFile(const std::string &szFilename, int32_t x, int32_t
     header.dwEventScriptOffset = buffer.read<uint32_t>();
     header.dwPropScriptOffset = buffer.read<uint32_t>();
 
-    if (header.szSign != "nFlavor Script"s)
-    {
+    if (header.szSign != "nFlavor Script"s) {
         NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Sign: %s", szFilename.c_str(), header.szSign.c_str());
         return;
     }
-    if (header.dwVersion != 2)
-    {
+    if (header.dwVersion != 2) {
         NG_LOG_ERROR("server.worldserver", "[%s] Invalid Script Header: Version: %d", szFilename.c_str(), header.dwVersion);
         return;
     }
@@ -250,8 +232,7 @@ void Maploader::LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float f
     float sx = x * fMapLength;
     float sy = y * fMapLength;
 
-    for (int32_t i = 0; i < nLocationCount; ++i)
-    {
+    for (int32_t i = 0; i < nLocationCount; ++i) {
         ScriptRegion sr{};
         sr.left = (fTileSize * (float)buffer.read<int32_t>()) + sx;
         sr.top = (fTileSize * (float)buffer.read<int32_t>()) + sy;
@@ -268,8 +249,7 @@ void Maploader::LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float f
 void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
 {
     auto nScriptCount = buffer.read<int32_t>();
-    for (int32_t i = 0; i < nScriptCount; ++i)
-    {
+    for (int32_t i = 0; i < nScriptCount; ++i) {
         std::string szBox{};
         std::string szRight{};
         std::string szTop{};
@@ -286,13 +266,11 @@ void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
         szBottom = std::to_string(sr.bottom);
         szBox = NGemity::StringFormat("{},{},{},{}", szLeft, szTop, szRight, szBottom);
         auto nFunctionCount = buffer.read<int32_t>();
-        for (int32_t x = 0; x < nFunctionCount; ++x)
-        {
+        for (int32_t x = 0; x < nFunctionCount; ++x) {
             ScriptTag nt{};
             nt.nTrigger = buffer.read<int32_t>();
             auto cc = buffer.read<int32_t>();
-            if (cc > 0)
-            {
+            if (cc > 0) {
                 nt.strFunction = buffer.ReadString((uint32_t)cc);
                 string_replace(nt.strFunction, "#LEFT", szLeft);
                 string_replace(nt.strFunction, "#TOP", szTop);
@@ -309,12 +287,9 @@ void Maploader::LoadRegionScriptInfo(ByteBuffer &buffer)
 
 bool Maploader::InitMapInfo()
 {
-    for (auto &ri : m_vScriptEvent)
-    {
-        for (auto &tag : ri.vInfoList)
-        {
-            if (tag.nTrigger == 0)
-            {
+    for (auto &ri : m_vScriptEvent) {
+        for (auto &tag : ri.vInfoList) {
+            if (tag.nTrigger == 0) {
                 sScriptingMgr.RunString(tag.strFunction);
             }
         }
@@ -342,8 +317,7 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int3
     float rx = x * fMapLength;
     float ry = y * fMapLength;
 
-    for (int32_t i = 0; i < total_entries; ++i)
-    {
+    for (int32_t i = 0; i < total_entries; ++i) {
         FieldPropRespawnInfo sr{};
         sr.nPropID = buffer.read<int32_t>();
         sr.x = buffer.read<float>() + rx;

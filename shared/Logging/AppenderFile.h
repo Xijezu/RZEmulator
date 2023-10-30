@@ -19,8 +19,7 @@
 
 #include "Appender.h"
 
-class AppenderFile : public Appender
-{
+class AppenderFile : public Appender {
 public:
     typedef std::integral_constant<AppenderType, APPENDER_FILE>::type TypeIndex;
 

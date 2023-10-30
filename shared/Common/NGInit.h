@@ -7,8 +7,7 @@
 #include "Stacktrace.h"
 #include "SystemConfigs.h"
 
-namespace NGemity
-{
+namespace NGemity {
     using NGInitTuple = std::tuple<bool, std::shared_ptr<NGemity::Asio::IoContext>>;
 
     static std::shared_ptr<std::vector<std::thread>> GetThreadPool(std::shared_ptr<NGemity::Asio::IoContext> ioContext)
@@ -36,8 +35,7 @@ namespace NGemity
         Stacktrace::enableStacktracing();
 
         std::string configError;
-        if (!sConfigMgr->LoadInitial(szLogfile, std::vector<std::string>(argv, argv + argc), configError))
-        {
+        if (!sConfigMgr->LoadInitial(szLogfile, std::vector<std::string>(argv, argv + argc), configError)) {
             printf("Error in config file or file not found: %s\n", configError.c_str());
             return NGInitTuple(false, nullptr);
         }
@@ -55,7 +53,7 @@ namespace NGemity
         NG_LOG_INFO("server.authserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
         NG_LOG_INFO("server.authserver", "                                          __/ |");
         NG_LOG_INFO("server.authserver", "                                         |___/");
-        NG_LOG_INFO("server.authserver", "           NGemity (c) 2020 - For Rappelz");
+        NG_LOG_INFO("server.authserver", "           NGemity (c) 2023 - For Rappelz");
         NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
         return NGInitTuple(true, ioContext);

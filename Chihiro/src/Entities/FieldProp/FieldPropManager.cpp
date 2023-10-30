@@ -66,13 +66,11 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
         NG_UNIQUE_GUARD writeGuard(i_lock);
 
         auto pos = std::find_if(m_vExpireObject.begin(), m_vExpireObject.end(), [&prop](const FieldProp *fp) { return fp->GetHandle() == prop->GetHandle(); });
-        if (pos != m_vExpireObject.end())
-        {
+        if (pos != m_vExpireObject.end()) {
             m_vExpireObject.erase(pos);
         }
 
-        if (!prop->m_PropInfo.bOnce)
-        {
+        if (!prop->m_PropInfo.bOnce) {
             FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld.GetArTime(), prop->nLifeTime};
             ri.pRespawnInfo = prop->m_PropInfo;
             m_vRespawnList.emplace_back(ri);
@@ -89,43 +87,33 @@ void FieldPropManager::Update(uint32_t /* diff*/)
     // "Critical section" for lock (yeah, I prefer those)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        for (auto it = m_vRespawnList.begin(); it != m_vRespawnList.end();)
-        {
-            if (it->tNextRegen < ct)
-            {
+        for (auto it = m_vRespawnList.begin(); it != m_vRespawnList.end();) {
+            if (it->tNextRegen < ct) {
                 vRegenInfo.emplace_back(*it);
                 it = m_vRespawnList.erase(it);
             }
-            else
-            {
+            else {
                 ++it;
             }
         }
 
-        if (!vRegenInfo.empty())
-        {
-            for (auto &rg : vRegenInfo)
-            {
+        if (!vRegenInfo.empty()) {
+            for (auto &rg : vRegenInfo) {
                 FieldProp *pProp = FieldProp::Create(this, rg.pRespawnInfo, rg.nLifeTime);
-                if (pProp->nLifeTime != 0)
-                {
+                if (pProp->nLifeTime != 0) {
                     m_vExpireObject.emplace_back(pProp);
                 }
             }
         }
 
-        for (auto &fp : m_vExpireObject)
-        {
+        for (auto &fp : m_vExpireObject) {
             if (fp->m_nRegenTime + fp->nLifeTime < ct)
                 vDeleteList.emplace_back(fp);
         }
 
-        if (!vDeleteList.empty())
-        {
-            for (auto &fp : vDeleteList)
-            {
-                if (fp->IsInWorld() && !fp->IsDeleteRequested())
-                {
+        if (!vDeleteList.empty()) {
+            for (auto &fp : vDeleteList) {
+                if (fp->IsInWorld() && !fp->IsDeleteRequested()) {
                     sWorld.RemoveObjectFromWorld(fp);
                     fp->DeleteThis();
                 }

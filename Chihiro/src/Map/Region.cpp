@@ -20,8 +20,7 @@
 void Region::AddObject(WorldObject *obj)
 {
     RegionType *lbo{nullptr};
-    switch (obj->GetObjType())
-    {
+    switch (obj->GetObjType()) {
     case OBJ_CLIENT:
         lbo = &m_vClientObjects;
         break;
@@ -40,8 +39,7 @@ void Region::AddObject(WorldObject *obj)
 void Region::RemoveObject(WorldObject *obj)
 {
     RegionType *lbo{nullptr};
-    switch (obj->GetObjType())
-    {
+    switch (obj->GetObjType()) {
     case OBJ_CLIENT:
         lbo = &m_vClientObjects;
         break;
@@ -60,8 +58,7 @@ void Region::RemoveObject(WorldObject *obj)
 uint32_t Region::DoEachClient(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto &obj : m_vClientObjects)
-    {
+    for (auto &obj : m_vClientObjects) {
         fn.Run(obj);
     }
     return (uint32_t)m_vClientObjects.size();
@@ -70,8 +67,7 @@ uint32_t Region::DoEachClient(WorldObjectFunctor &fn)
 uint32_t Region::DoEachStaticObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto &obj : m_vStaticObjects)
-    {
+    for (auto &obj : m_vStaticObjects) {
         fn.Run(obj);
     }
     return (uint32_t)m_vStaticObjects.size();
@@ -80,8 +76,7 @@ uint32_t Region::DoEachStaticObject(WorldObjectFunctor &fn)
 uint32_t Region::DoEachMovableObject(WorldObjectFunctor &fn)
 {
     NG_UNIQUE_GUARD lock(i_lock);
-    for (auto &obj : m_vMovableObjects)
-    {
+    for (auto &obj : m_vMovableObjects) {
         fn.Run(obj);
     }
     return (uint32_t)m_vMovableObjects.size();
@@ -116,8 +111,7 @@ void Region::removeObject(WorldObject *obj, std::vector<WorldObject *> *v)
     ASSERT((*v)[obj->region_index]->GetHandle() == obj->GetHandle());
     ASSERT(obj->pRegion == this);
 
-    if (v->back()->GetHandle() != obj->GetHandle())
-    {
+    if (v->back()->GetHandle() != obj->GetHandle()) {
         auto lbo = v->back();
         (*v)[obj->region_index] = lbo;
         lbo->region_index = obj->region_index;

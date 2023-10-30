@@ -79,8 +79,7 @@ void Log::CreateAppenderFromConfig(std::string const &appenderName)
     size_t size = tokens.size();
     std::string name = appenderName.substr(9);
 
-    if (size < 2)
-    {
+    if (size < 2) {
         fprintf(stderr, "Log::CreateAppenderFromConfig: Wrong configuration for appender %s. Config line: %s\n", name.c_str(), options.c_str());
         return;
     }
@@ -89,8 +88,7 @@ void Log::CreateAppenderFromConfig(std::string const &appenderName)
     AppenderType type = AppenderType(atoi(*iter++));
     LogLevel level = LogLevel(atoi(*iter++));
 
-    if (level > LOG_LEVEL_FATAL)
-    {
+    if (level > LOG_LEVEL_FATAL) {
         fprintf(stderr, "Log::CreateAppenderFromConfig: Wrong Log Level %d for appender %s\n", level, name.c_str());
         return;
     }
@@ -99,19 +97,16 @@ void Log::CreateAppenderFromConfig(std::string const &appenderName)
         flags = AppenderFlags(atoi(*iter++));
 
     auto factoryFunction = appenderFactory.find(type);
-    if (factoryFunction == appenderFactory.end())
-    {
+    if (factoryFunction == appenderFactory.end()) {
         fprintf(stderr, "Log::CreateAppenderFromConfig: Unknown type %d for appender %s\n", type, name.c_str());
         return;
     }
 
-    try
-    {
+    try {
         Appender *appender = factoryFunction->second(NextAppenderId(), name, level, flags, std::vector<char const *>(iter, tokens.end()));
         appenders[appender->getId()].reset(appender);
     }
-    catch (InvalidAppenderArgsException const &iaae)
-    {
+    catch (InvalidAppenderArgsException const &iaae) {
         fprintf(stderr, "%s", iaae.what());
     }
 }
@@ -127,8 +122,7 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
     std::string options = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
     std::string name = appenderName.substr(7);
 
-    if (options.empty())
-    {
+    if (options.empty()) {
         fprintf(stderr, "Log::CreateLoggerFromConfig: Missing config option Logger.%s\n", name.c_str());
         return;
     }
@@ -136,22 +130,19 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
     Tokenizer tokens(options, ',');
     Tokenizer::const_iterator iter = tokens.begin();
 
-    if (tokens.size() != 2)
-    {
+    if (tokens.size() != 2) {
         fprintf(stderr, "Log::CreateLoggerFromConfig: Wrong config option Logger.%s=%s\n", name.c_str(), options.c_str());
         return;
     }
 
     std::unique_ptr<Logger> &logger = loggers[name];
-    if (logger)
-    {
+    if (logger) {
         fprintf(stderr, "Error while configuring Logger %s. Already defined\n", name.c_str());
         return;
     }
 
     level = LogLevel(atoi(*iter++));
-    if (level > LOG_LEVEL_FATAL)
-    {
+    if (level > LOG_LEVEL_FATAL) {
         fprintf(stderr, "Log::CreateLoggerFromConfig: Wrong Log Level %u for logger %s\n", type, name.c_str());
         return;
     }
@@ -166,10 +157,8 @@ void Log::CreateLoggerFromConfig(std::string const &appenderName)
     std::string str;
 
     ss >> str;
-    while (ss)
-    {
-        if (Appender *appender = GetAppenderByName(str))
-        {
+    while (ss) {
+        if (Appender *appender = GetAppenderByName(str)) {
             logger->addAppender(appender->getId(), appender);
             // fprintf(stdout, "Log::CreateLoggerFromConfig: Added Appender %s to Logger %s\n", appender->getName().c_str(), name.c_str());
         }
@@ -193,8 +182,7 @@ void Log::ReadLoggersFromConfig()
         CreateLoggerFromConfig(loggerName);
 
     // Bad config configuration, creating default config
-    if (loggers.find(LOGGER_ROOT) == loggers.end())
-    {
+    if (loggers.find(LOGGER_ROOT) == loggers.end()) {
         fprintf(stderr,
             "Wrong Loggers configuration. Review your Logger config section.\n"
             "Creating default loggers [root (Error), server (Info)] to console\n");
@@ -235,8 +223,7 @@ void Log::write(std::unique_ptr<LogMessage> &&msg) const
 {
     Logger const *logger = GetLoggerByType(msg->type);
 
-    if (_ioContext)
-    {
+    if (_ioContext) {
         std::shared_ptr<LogOperation> logOperation = std::make_shared<LogOperation>(logger, std::move(msg));
         NGemity::Asio::post(*_ioContext, NGemity::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
     }
@@ -274,12 +261,10 @@ std::string Log::GetTimestampStr()
     //       HH     hour (2 digits 00-23)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
-    try
-    {
+    try {
         return NGemity::StringFormatTC("%04d-%02d-%02d_%02d-%02d-%02d", aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
     }
-    catch (std::exception const &ex)
-    {
+    catch (std::exception const &ex) {
         fprintf(stderr, "Failed to initialize timestamp part of log filename! %s", ex.what());
         fflush(stderr);
         ABORT();
@@ -292,8 +277,7 @@ bool Log::SetLogLevel(std::string const &name, const char *newLevelc, bool isLog
     if (newLevel < 0)
         return false;
 
-    if (isLogger)
-    {
+    if (isLogger) {
         auto it = loggers.begin();
         while (it != loggers.end() && it->second->getName() != name)
             ++it;
@@ -306,8 +290,7 @@ bool Log::SetLogLevel(std::string const &name, const char *newLevelc, bool isLog
         if (newLevel != LOG_LEVEL_DISABLED && newLevel < lowestLogLevel)
             lowestLogLevel = newLevel;
     }
-    else
-    {
+    else {
         Appender *appender = GetAppenderByName(name);
         if (!appender)
             return false;
@@ -373,8 +356,7 @@ Log *Log::instance()
 
 void Log::Initialize(NGemity::Asio::IoContext *ioContext)
 {
-    if (ioContext)
-    {
+    if (ioContext) {
         _ioContext = ioContext;
         _strand = new NGemity::Asio::Strand(*ioContext);
     }

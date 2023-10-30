@@ -39,8 +39,7 @@ AppenderConsole::AppenderConsole(uint8_t id, std::string const &name, LogLevel l
 
 void AppenderConsole::InitColors(std::string const &str)
 {
-    if (str.empty())
-    {
+    if (str.empty()) {
         _colored = false;
         return;
     }
@@ -49,8 +48,7 @@ void AppenderConsole::InitColors(std::string const &str)
 
     std::istringstream ss(str);
 
-    for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
-    {
+    for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i) {
         ss >> color[i];
 
         if (!ss)
@@ -94,38 +92,11 @@ void AppenderConsole::SetColor(bool stdout_stream, ColorTypes color)
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     SetConsoleTextAttribute(hConsole, WinColorFG[color]);
 #else
-    enum ANSITextAttr
-    {
-        TA_NORMAL = 0,
-        TA_BOLD = 1,
-        TA_BLINK = 5,
-        TA_REVERSE = 7
-    };
+    enum ANSITextAttr { TA_NORMAL = 0, TA_BOLD = 1, TA_BLINK = 5, TA_REVERSE = 7 };
 
-    enum ANSIFgTextAttr
-    {
-        FG_BLACK = 30,
-        FG_RED,
-        FG_GREEN,
-        FG_BROWN,
-        FG_BLUE,
-        FG_MAGENTA,
-        FG_CYAN,
-        FG_WHITE,
-        FG_YELLOW
-    };
+    enum ANSIFgTextAttr { FG_BLACK = 30, FG_RED, FG_GREEN, FG_BROWN, FG_BLUE, FG_MAGENTA, FG_CYAN, FG_WHITE, FG_YELLOW };
 
-    enum ANSIBgTextAttr
-    {
-        BG_BLACK = 40,
-        BG_RED,
-        BG_GREEN,
-        BG_BROWN,
-        BG_BLUE,
-        BG_MAGENTA,
-        BG_CYAN,
-        BG_WHITE
-    };
+    enum ANSIBgTextAttr { BG_BLACK = 40, BG_RED, BG_GREEN, BG_BROWN, BG_BLUE, BG_MAGENTA, BG_CYAN, BG_WHITE };
 
     static uint8_t UnixColorFG[MaxColors] = {
         FG_BLACK, // BLACK
@@ -163,11 +134,9 @@ void AppenderConsole::_write(LogMessage const *message)
 {
     bool stdout_stream = !(message->level == LOG_LEVEL_ERROR || message->level == LOG_LEVEL_FATAL);
 
-    if (_colored)
-    {
+    if (_colored) {
         uint8_t index;
-        switch (message->level)
-        {
+        switch (message->level) {
         case LOG_LEVEL_TRACE:
             index = 5;
             break;

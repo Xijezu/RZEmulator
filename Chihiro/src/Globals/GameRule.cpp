@@ -47,12 +47,10 @@ float GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, i
     int32_t recommended = GetItemRecommendedLevel(item_rank, item_level);
     int32_t limit = GetItemLevelLimit(item_rank);
 
-    if (item_level == 1 || creature_level < limit || creature_level >= recommended)
-    {
+    if (item_level == 1 || creature_level < limit || creature_level >= recommended) {
         result = 10000;
     }
-    else
-    {
+    else {
         int64_t B = 500ll;
 
         int64_t n = 10000ll * (recommended - limit); // 0
@@ -86,8 +84,7 @@ int32_t GameRule::GetRankLevel(int32_t rank)
     if (idx > 8)
         idx = 8;
 
-    switch (idx)
-    {
+    switch (idx) {
     case 1:
         return 0;
     case 2:
@@ -117,12 +114,10 @@ int32_t GameRule::GetItemLevelLimit(int32_t item_rank)
 int32_t GameRule::GetItemRecommendedLevel(int32_t item_rank, int32_t item_level)
 {
     int32_t result;
-    if (item_rank > 1)
-    {
+    if (item_rank > 1) {
         result = (GetItemRecommendModTable(item_rank) * (item_level - 1)) + GetItemLevelLimit(item_rank);
     }
-    else
-    {
+    else {
         result = 0;
     }
     return result;
@@ -180,8 +175,7 @@ float GameRule::GetStaminaRatio(int32_t level)
         level = 1;
     if (level > 300)
         level = 300;
-    if (_staminaExpRate[level] == 0.0f)
-    {
+    if (_staminaExpRate[level] == 0.0f) {
         double v2 = pow(level, 1.46) + (double)level * 2.4;
         _staminaExpRate[level] = (float)((pow(level, 2) * 0.1 + v2 + 2.0f) * 0.00055f);
     }

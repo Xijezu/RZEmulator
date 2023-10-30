@@ -19,36 +19,31 @@
 
 #include "Common.h"
 
-struct KRect
-{
+struct KRect {
     int32_t left;
     int32_t top;
     int32_t right;
     int32_t bottom;
 };
 
-struct KPoint
-{
+struct KPoint {
     int32_t x;
     int32_t y;
 };
 
-struct KSize
-{
+struct KSize {
     int32_t width;
     int32_t cx;
     int32_t height;
     int32_t cy;
 };
 
-struct FilenameMapInfo
-{
+struct FilenameMapInfo {
     std::string m_strMapFileName;
     int32_t m_nWorldID;
 };
 
-class TerrainSeamlessWorldInfo
-{
+class TerrainSeamlessWorldInfo {
 public:
     TerrainSeamlessWorldInfo() = default;
     ~TerrainSeamlessWorldInfo() = default;

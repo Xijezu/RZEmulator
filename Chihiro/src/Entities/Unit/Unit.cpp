@@ -57,16 +57,14 @@ Unit::~Unit()
 {
     uint32_t ct = sWorld.GetArTime();
 
-    for (auto &skill : m_vSkillList)
-    {
+    for (auto &skill : m_vSkillList) {
         Skill::DB_InsertSkill(this, skill->m_nSkillUID, skill->m_nSkillID, skill->m_nSkillLevel, std::max(0, static_cast<int32_t>(skill->m_nNextCoolTime - ct)));
         delete skill;
         skill = nullptr;
     }
     m_vSkillList.clear();
 
-    for (auto &pState : m_vStateList)
-    {
+    for (auto &pState : m_vStateList) {
         pState->DeleteThis();
     }
     m_vStateList.clear();
@@ -85,8 +83,7 @@ void Unit::_InitTimerFieldsAndStatus()
 
 void Unit::AddToWorld()
 {
-    if (!IsInWorld())
-    {
+    if (!IsInWorld()) {
         WorldObject::AddToWorld();
     }
 }
@@ -173,17 +170,13 @@ void Unit::processPendingMove()
     uint32_t ct = sWorld.GetArTime();
     Position pos{}; //             = ArPosition ptr -10h
 
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-    {
-        if (m_nMovableTime < ct)
-        {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
+        if (m_nMovableTime < ct) {
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
-            if (IsActable() && IsMovable())
-            {
+            if (IsActable() && IsMovable()) {
                 pos = GetCurrentPosition(ct);
                 sWorld.SetMultipleMove(this, pos, m_PendingMovePos, m_nPendingMoveSpeed, true, ct, true);
-                if (IsPlayer())
-                {
+                if (IsPlayer()) {
                     // auto p = dynamic_cast<Player*>(this);
                     /*if (p.m_nRideIdx != 0)
                     {
@@ -199,21 +192,16 @@ void Unit::processPendingMove()
 void Unit::OnUpdate()
 {
     uint32_t ct = sWorld.GetArTime();
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT))
-    {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT)) {
         CalculateStat();
         RemoveFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
     }
     this->regenHPMP(ct);
 
-    if (!m_vAura.empty())
-    {
-        for (auto it = m_vAura.begin(); it != m_vAura.end();)
-        {
-            if ((*it).first->GetAuraRefreshTime() + 500 <= ct)
-            {
-                if (!onProcAura((*it).first, (*it).second))
-                {
+    if (!m_vAura.empty()) {
+        for (auto it = m_vAura.begin(); it != m_vAura.end();) {
+            if ((*it).first->GetAuraRefreshTime() + 500 <= ct) {
+                if (!onProcAura((*it).first, (*it).second)) {
                     TS_SC_AURA auraMsg{};
                     auraMsg.caster = GetHandle();
                     auraMsg.skill_id = (*it).first->GetSkillId();
@@ -236,46 +224,38 @@ void Unit::OnUpdate()
     if (!IsInWorld())
         return;
 
-    if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct)
-    {
+    if (!m_vStateList.empty() && GetUInt32Value(UNIT_LAST_STATE_PROC_TIME) + 100 < ct) {
         procStateDamage(ct);
         procState(ct);
-        if (ClearExpiredState(ct))
-        {
+        if (ClearExpiredState(ct)) {
             CalculateStat();
         }
         SetUInt32Value(UNIT_LAST_STATE_PROC_TIME, ct);
     }
 
-    if (IsFeared() && (!IsMoving(sWorld.GetArTime()) || !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR)))
-    {
+    if (IsFeared() && (!IsMoving(sWorld.GetArTime()) || !HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR))) {
         auto pState = GetState(StateCode::SC_FEAR);
-        if (pState != nullptr)
-        {
+        if (pState != nullptr) {
             int32_t nMoveSpeedAdd = pState->GetValue(1);
             Position newPos{};
             float theta = static_cast<float>(irand(1, 628)) / 100.0f;
             newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
 
-            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR))
-            {
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR)) {
                 SetFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR);
                 auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(pState->GetCaster(SG_NORMAL));
-                if (pCaster != nullptr)
-                {
+                if (pCaster != nullptr) {
                     auto myPos = GetCurrentPosition(sWorld.GetArTime());
                     auto distance = myPos.GetExactDist2d(pCaster);
 
-                    if (distance > 0)
-                    {
+                    if (distance > 0) {
                         newPos.SetCurrentXY(myPos.GetPositionX() + (pCaster->GetPositionX() - myPos.GetPositionX()) * 120 / distance,
                             myPos.GetPositionY() + (pCaster->GetPositionY() - myPos.GetPositionY()) * 120 / distance);
                     }
                 }
             }
             int32_t try_cnt{10};
-            while (--try_cnt > 0 && GameContent::IsBlocked(newPos.GetPositionX(), newPos.GetPositionY()))
-            {
+            while (--try_cnt > 0 && GameContent::IsBlocked(newPos.GetPositionX(), newPos.GetPositionY())) {
                 float theta = static_cast<float>(irand(1, 628)) / 100.0f;
                 newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
             }
@@ -302,22 +282,18 @@ void Unit::regenHPMP(uint32_t t)
     float pt;
 
     uint32_t et = t - GetUInt32Value(UNIT_LAST_UPDATE_TIME);
-    if (et >= 300)
-    {
+    if (et >= 300) {
         float etf = (float)et / 6000.0f;
         // prev_mp = et;
 
-        if (GetHealth() != 0)
-        {
+        if (GetHealth() != 0) {
             prev_mp = GetHealth();
             prev_hp = GetMana();
-            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED))
-            {
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_HP_REGEN_STOPPED)) {
                 pt = GetMaxHealth() * m_Attribute.nHPRegenPercentage;
                 pt = pt * 0.01f * etf; // + 0.0;
                 pt = pt + m_Attribute.nHPRegenPoint * etf;
-                if (IsSitDown())
-                {
+                if (IsSitDown()) {
                     pt *= 2.0f;
                 }
                 /*if (this.IsSitDown()) {
@@ -328,8 +304,7 @@ void Unit::regenHPMP(uint32_t t)
                     pt = 1.0f;
                 pt *= GetFloatValue(UNIT_FIELD_HP_REGEN_MOD);
                 auto pti = static_cast<int32_t>(pt);
-                if (pti != 0.0)
-                {
+                if (pti != 0.0) {
                     AddHealth(pti);
                 }
                 /*this.m_nHPDecPart = (int32_t) ((pt - (double) pti) * 100.0 + (double) this.m_nHPDecPart);
@@ -339,14 +314,12 @@ void Unit::regenHPMP(uint32_t t)
                     this.m_nHPDecPart = this.m_nHPDecPart % 100;
                 }*/
             }
-            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED))
-            {
+            if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED)) {
                 pt = GetMaxMana() * m_Attribute.nMPRegenPercentage;
                 pt = pt * 0.01f * etf; // +0.0;
                 pt = pt + m_Attribute.nMPRegenPoint * etf;
 
-                if (IsSitDown())
-                {
+                if (IsSitDown()) {
                     pt *= 2.0f;
                 }
 
@@ -359,12 +332,10 @@ void Unit::regenHPMP(uint32_t t)
                 if (pt != 0.0)
                     AddMana((int32_t)pt);
             }
-            if (prev_hp != GetHealth() || prev_mp != GetMana())
-            {
+            if (prev_hp != GetHealth() || prev_mp != GetMana()) {
                 this->m_fRegenMP += (GetMana() - prev_mp);
                 this->m_nRegenHP += GetHealth() - prev_hp;
-                if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3)
-                {
+                if (GetMaxHealth() == GetHealth() || GetMaxMana() == GetMana() || 100 * m_nRegenHP / GetMaxHealth() > 3 || 100 * m_fRegenMP / GetMaxMana() > 3) {
                     TS_SC_REGEN_HPMP hpmpPct{};
                     hpmpPct.handle = GetHandle();
                     hpmpPct.hp_regen = m_nRegenHP;
@@ -374,8 +345,7 @@ void Unit::regenHPMP(uint32_t t)
 
                     this->m_nRegenHP = 0;
                     this->m_fRegenMP = 0;
-                    if (IsInWorld())
-                    {
+                    if (IsInWorld()) {
                         sWorld.Broadcast(
                             (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), hpmpPct);
                     }
@@ -407,8 +377,7 @@ int32_t Unit::GetBaseSkillLevel(int32_t skill_id) const
 
 Skill *Unit::GetSkill(int32_t skill_id) const
 {
-    for (auto &s : m_vSkillList)
-    {
+    for (auto &s : m_vSkillList) {
         if (s->m_nSkillID == skill_id)
             return s;
     }
@@ -458,8 +427,7 @@ Skill *Unit::SetSkill(int32_t skill_uid, int32_t skill_id, int32_t skill_level, 
         return nullptr;
 
     auto pSkill = GetSkill(skill_id);
-    if (pSkill == nullptr)
-    {
+    if (pSkill == nullptr) {
         pSkill = new Skill{this, skill_uid, skill_id};
         m_vSkillList.emplace_back(pSkill);
         if (pSkill->GetSkillBase()->IsPassive())
@@ -494,26 +462,21 @@ int32_t Unit::CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_h
     if (pObj != nullptr && pObj->IsUnit())
         pSkillTarget = pObj->As<Unit>();
 
-    switch (pSkill->GetSkillBase()->GetSkillTargetType())
-    {
-    case TARGET_TYPE::TARGET_MASTER:
-    {
+    switch (pSkill->GetSkillBase()->GetSkillTargetType()) {
+    case TARGET_TYPE::TARGET_MASTER: {
         if (!IsSummon())
             return TS_RESULT_NOT_ACTABLE;
         auto pSummon = As<Summon>();
         if (pSummon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
             return TS_RESULT_NOT_ACTABLE;
-    }
-    break;
-    case TARGET_TYPE::TARGET_SELF_WITH_MASTER:
-    {
+    } break;
+    case TARGET_TYPE::TARGET_SELF_WITH_MASTER: {
         if (!IsSummon())
             return TS_RESULT_NOT_ACTABLE;
         auto pSummon = As<Summon>();
         if (pSkillTarget->GetHandle() != GetHandle() && pSummon->GetMaster()->GetHandle() != pSkillTarget->GetHandle())
             return TS_RESULT_NOT_ACTABLE;
-    }
-    break;
+    } break;
     case TARGET_TYPE::TARGET_TARGET_EXCEPT_CASTER:
         if (pSkillTarget == this)
             return TS_RESULT_NOT_ACTABLE;
@@ -522,13 +485,11 @@ int32_t Unit::CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_h
         break;
     }
 
-    if (pSkillTarget == nullptr)
-    {
+    if (pSkillTarget == nullptr) {
         if (nSkillID == SKILL_RETURN_FEATHER && IsPlayer() /* && IsInSiegeOrRaidDungeon*/)
             return TS_RESULT_NOT_ACTABLE;
     }
-    else
-    {
+    else {
         if (!pSkillTarget->IsInWorld())
             return TS_RESULT_NOT_ACTABLE;
 
@@ -542,36 +503,30 @@ int32_t Unit::CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_h
         if (pSkillTarget->IsMoving())
             range_mod = 1.5f;
 
-        if (pSkill->GetSkillBase()->GetCastRange() == -1)
-        {
+        if (pSkill->GetSkillBase()->GetCastRange() == -1) {
             if (distance > GetRealAttackRange() * range_mod)
                 return TS_RESULT_TOO_FAR;
         }
-        else if (distance > pSkill->GetSkillBase()->GetCastRange() * GameRule::DEFAULT_UNIT_SIZE * range_mod)
-        {
+        else if (distance > pSkill->GetSkillBase()->GetCastRange() * GameRule::DEFAULT_UNIT_SIZE * range_mod) {
             return TS_RESULT_TOO_FAR;
         }
 
         if (pSkill->GetSkillBase()->IsValidToCorpse() != 0 && !pSkillTarget->IsDead())
             return TS_RESULT_NOT_ACTABLE;
 
-        if (pSkillTarget == this || (pSkillTarget->IsSummon() && pSkillTarget->As<Summon>()->GetMaster() == this))
-        {
+        if (pSkillTarget == this || (pSkillTarget->IsSummon() && pSkillTarget->As<Summon>()->GetMaster() == this)) {
             if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_SELF))
                 return TS_RESULT_NOT_ACTABLE;
         }
-        else if (IsAlly(pSkillTarget))
-        {
+        else if (IsAlly(pSkillTarget)) {
             if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_ALLY))
                 return TS_RESULT_NOT_ACTABLE;
         }
-        else if (IsEnemy(pSkillTarget, false))
-        {
+        else if (IsEnemy(pSkillTarget, false)) {
             if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_ENEMY))
                 return TS_RESULT_NOT_ACTABLE;
         }
-        else if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_NEUTRAL))
-        {
+        else if (!pSkill->GetSkillBase()->IsUsable(SkillBase::USE_NEUTRAL)) {
             return TS_RESULT_NOT_ACTABLE;
         }
 
@@ -596,12 +551,10 @@ int32_t Unit::CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_h
 
 void Unit::onAttackAndSkillProcess()
 {
-    if (m_castingSkill != nullptr)
-    {
+    if (m_castingSkill != nullptr) {
         m_castingSkill->ProcSkill();
     }
-    else
-    {
+    else {
         if (GetTargetHandle() != 0)
             processAttack();
     }
@@ -609,12 +562,10 @@ void Unit::onAttackAndSkillProcess()
 
 bool Unit::StartAttack(uint32_t target, bool bNeedFastReaction)
 {
-    if (GetHealth() == 0)
-    {
+    if (GetHealth() == 0) {
         return false;
     }
-    else
-    {
+    else {
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
         RemoveFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
         if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
@@ -633,21 +584,17 @@ void Unit::processAttack()
 
     Player *player{nullptr};
 
-    if (GetNextAttackableTime() <= t)
-    {
-        if ((IsUsingCrossBow() || IsUsingBow()) && IsPlayer())
-        {
+    if (GetNextAttackableTime() <= t) {
+        if ((IsUsingCrossBow() || IsUsingBow()) && IsPlayer()) {
             auto bullets = GetBulletCount();
-            if (bullets < 1)
-            {
+            if (bullets < 1) {
                 EndAttack();
                 return;
             }
         }
 
         auto enemy = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
-        if (enemy == nullptr)
-        {
+        if (enemy == nullptr) {
             if (IsPlayer())
                 Messages::SendCantAttackMessage(this->As<Player>(), GetHandle(), GetTargetHandle(), TS_RESULT_NOT_EXIST);
             else if (IsSummon())
@@ -657,8 +604,7 @@ void Unit::processAttack()
             return;
         }
 
-        if (IsDead())
-        {
+        if (IsDead()) {
             CancelAttack();
             return;
         }
@@ -669,8 +615,7 @@ void Unit::processAttack()
         if (!IsAttacking())
             return;
 
-        if (enemy == nullptr || !IsEnemy(enemy, false) || enemy->IsDead() || sRegion.IsVisibleRegion(this, enemy) == 0)
-        {
+        if (enemy == nullptr || !IsEnemy(enemy, false) || enemy->IsDead() || sRegion.IsVisibleRegion(this, enemy) == 0) {
             if (IsPlayer())
                 Messages::SendCantAttackMessage(this->As<Player>(), GetHandle(), GetTargetHandle(), TS_RESULT_NOT_EXIST);
             else if (IsSummon())
@@ -680,14 +625,12 @@ void Unit::processAttack()
             return;
         }
 
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK))
-        {
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK)) {
             enemy->OnUpdate();
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
         }
 
-        if (enemy->IsDead())
-        {
+        if (enemy->IsDead()) {
             if (IsPlayer())
                 Messages::SendCantAttackMessage(this->As<Player>(), GetHandle(), GetTargetHandle(), TS_RESULT_NOT_EXIST);
             else if (IsSummon())
@@ -714,30 +657,25 @@ void Unit::processAttack()
 
         uint32_t attack_interval = GetAttackInterval();
         auto attint32_t = GetAttackInterval();
-        if (attack_range < real_distance)
-        {
+        if (attack_range < real_distance) {
             onCantAttack(enemy->GetHandle(), t);
             return;
         }
 
         int32_t next_mode = m_nNextAttackMode;
         // If Bow/Crossbow
-        if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer())
-        {
-            if (m_nNextAttackMode == 1)
-            {
+        if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer()) {
+            if (m_nNextAttackMode == 1) {
                 attint32_t = (uint32_t)(GetBowAttackInterval() * 0.8f);
                 SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, attint32_t + t);
                 m_nNextAttackMode = 0;
                 SetFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
 
                 bool bFormChanged = HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED);
-                if (bFormChanged)
-                {
+                if (bFormChanged) {
                     // @todo: form changed
                 }
-                if (!bFormChanged || next_mode != 1)
-                {
+                if (!bFormChanged || next_mode != 1) {
                     auto delay = (int32_t)(10 * (GetNextAttackableTime() - t));
                     broadcastAttackMessage(enemy, Damages, (int32_t)(10 * attint32_t), delay, _bDoubleAttack, next_mode == 1, false, false);
                 }
@@ -747,14 +685,11 @@ void Unit::processAttack()
             attack_interval = attint32_t + GetBowInterval();
             m_nNextAttackMode = 1;
         }
-        else
-        {
+        else {
             next_mode = 0;
         }
-        if (next_mode == 0)
-        {
-            if ((IsUsingCrossBow() || IsUsingBow()) && IsPlayer())
-            {
+        if (next_mode == 0) {
+            if ((IsUsingCrossBow() || IsUsingBow()) && IsPlayer()) {
                 player = dynamic_cast<Player *>(this);
                 player->EraseBullet(1);
             }
@@ -763,8 +698,7 @@ void Unit::processAttack()
         }
         SetFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED);
 
-        if (next_mode != 1)
-        {
+        if (next_mode != 1) {
             auto delay = (int32_t)(10 * (GetNextAttackableTime() - t));
             broadcastAttackMessage(enemy, Damages, (int32_t)(10 * attint32_t), delay, _bDoubleAttack, next_mode == 1, false, false);
         }
@@ -787,14 +721,12 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
     if (IsUsingDoubleWeapon())
         nAttackCount *= 2;
 
-    if (irand(1, 100) < m_Attribute.nDoubleAttackRatio)
-    {
+    if (irand(1, 100) < m_Attribute.nDoubleAttackRatio) {
         bIsDoubleAttack = true;
         nAttackCount *= 2;
     }
 
-    for (int32_t i = 0; i < nAttackCount; ++i)
-    {
+    for (int32_t i = 0; i < nAttackCount; ++i) {
         bool bLeftHandAttack = IsUsingDoubleWeapon() && i % 2;
 
         auto prev_target_hp = pTarget->GetHealth();
@@ -812,11 +744,9 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
         else
             arDamage[i].SetDamageInfo(pTarget->DealPhysicalNormalDamage(this, GetAttackPointRight(), ElementalType::TYPE_NONE, 0, nCriticalBonus));
 
-        if (arDamage[i].bCritical)
-        {
+        if (arDamage[i].bCritical) {
             SetInt32Value(BATTLE_FIELD_CRIT_COUNT, GetInt32Value(BATTLE_FIELD_CRIT_COUNT) + 1);
-            if (GetInt32Value(BATTLE_FIELD_CRIT_COUNT) >= 3)
-            {
+            if (GetInt32Value(BATTLE_FIELD_CRIT_COUNT) >= 3) {
                 SetInt32Value(BATTLE_FIELD_CRIT_COUNT, 0);
             }
 
@@ -824,15 +754,12 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
         }
 
         bool bSuccess = !arDamage[i].bMiss;
-        if (bSuccess)
-        {
+        if (bSuccess) {
             AddStateByAttack(pTarget, true, false, false, true);
             pTarget->AddStateByAttack(this, false, false, false, true);
 
-            for (const auto &it : m_vAbsorbByNormalAttack)
-            {
-                if (irand(1, 100) < it.ratio)
-                {
+            for (const auto &it : m_vAbsorbByNormalAttack) {
+                if (irand(1, 100) < it.ratio) {
                     if (it.hp_absorb_ratio != 0)
                         AddHealth(it.hp_absorb_ratio * arDamage[i].nDamage);
                     if (it.mp_absorb_ratio != 0)
@@ -840,10 +767,8 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
                 }
             }
 
-            for (const auto &it : m_vHealOnAttack)
-            {
-                if (irand(1, 100) < it.ratio)
-                {
+            for (const auto &it : m_vHealOnAttack) {
+                if (irand(1, 100) < it.ratio) {
                     if (it.hp_inc)
                         AddHealth(it.hp_inc);
                     if (it.mp_inc)
@@ -851,18 +776,14 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
                 }
             }
 
-            for (const auto &it : m_vStealOnAttack)
-            {
-                if (irand(1, 100) < it.ratio)
-                {
-                    if (it.hp_steal)
-                    {
+            for (const auto &it : m_vStealOnAttack) {
+                if (irand(1, 100) < it.ratio) {
+                    if (it.hp_steal) {
                         int32_t nHP = std::min(pTarget->GetHealth(), it.hp_steal);
                         AddHealth(nHP);
                         pTarget->damage(this, nHP);
                     }
-                    if (it.mp_steal)
-                    {
+                    if (it.mp_steal) {
                         int32_t nMP = std::min(pTarget->GetMana(), it.mp_steal);
                         AddMana(nMP);
                         pTarget->AddMana(-nMP);
@@ -887,8 +808,7 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
         // @todo: Havoc here
     }
 
-    if (pTarget->IsMonster())
-    {
+    if (pTarget->IsMonster()) {
         bool bRange = (IsUsingBow() || IsUsingCrossBow()) && IsPlayer();
         auto HateMod = GetHateMod(3, true);
 
@@ -900,8 +820,7 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
         else
             pTarget->As<Monster>()->AddHate(GetHandle(), GetFloatValue(UNIT_FIELD_HATE_RATIO) * nHate * m_NormalStateAdvantage.fHate * pTarget->m_NormalStatePenalty.fHate);
     }
-    else if (pTarget->IsNPC())
-    {
+    else if (pTarget->IsNPC()) {
         // pTarget->As<NPC>()->SetAttacker(pTarget);
     }
 }
@@ -913,19 +832,15 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
     int32_t nTargetGroup = pFrom->GetCreatureGroup();
     StateMod damageReduceByState{};
 
-    for (auto &dit : m_vDamageReduceValueInfo)
-    {
-        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
-        {
+    for (auto &dit : m_vDamageReduceValueInfo) {
+        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100)) {
             damageReduceByState.nDamage -= dit.physical_reduce;
         }
     }
 
     float fReduce{0.0f};
-    for (auto &dit : m_vDamageReducePercentInfo)
-    {
-        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
-        {
+    for (auto &dit : m_vDamageReducePercentInfo) {
+        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100)) {
             damageReduceByState.fDamage -= dit.physical_reduce;
             if (damageReduceByState.fDamage < 0.0f)
                 damageReduceByState.fDamage = 0.0f;
@@ -937,12 +852,9 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
 
     damage_info.SetDamage(DealPhysicalLeftHandDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, &damageReduceByState, &(pFrom->m_NormalStateAdvantage)));
 
-    if (!damage_info.bMiss && !damage_info.bPerfectBlock)
-    {
-        for (auto &it : pFrom->m_vNormalAdditionalDamage)
-        {
-            if (it.ratio > irand(1, 100))
-            {
+    if (!damage_info.bMiss && !damage_info.bPerfectBlock) {
+        for (auto &it : pFrom->m_vNormalAdditionalDamage) {
+            if (it.ratio > irand(1, 100)) {
                 int32_t damage{0};
                 if (it.nDamage != 0)
                     damage = it.nDamage;
@@ -976,17 +888,14 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     else
         damageReduceByState = m_NormalStatePenalty;
 
-    for (auto &dit : m_vDamageReduceValueInfo)
-    {
+    for (auto &dit : m_vDamageReduceValueInfo) {
         if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
             damageReduceByState.nDamage -= dit.physical_reduce;
     }
 
     float fReduce{0.0f};
-    for (auto &dit : m_vDamageReducePercentInfo)
-    {
-        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100))
-        {
+    for (auto &dit : m_vDamageReducePercentInfo) {
+        if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100)) {
             damageReduceByState.fDamage -= dit.physical_reduce;
             if (damageReduceByState.fDamage < 0.0f)
                 damageReduceByState.fDamage = 0.0f;
@@ -1001,18 +910,15 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     else
         damage_info.SetDamage(DealPhysicalDamage(pFrom, nDamage, elemental_type, accuracy_bonus, critical_bonus, nFlag, &damageReduceByState, &(pFrom->m_NormalStateAdvantage)));
 
-    if (!damage_info.bMiss && !damage_info.bPerfectBlock)
-    {
+    if (!damage_info.bMiss && !damage_info.bPerfectBlock) {
         std::vector<AdditionalDamageInfo> AdditionalDamage{};
         if (bRange)
             AdditionalDamage = (pFrom->m_vRangeAdditionalDamage);
         else
             AdditionalDamage = (pFrom->m_vNormalAdditionalDamage);
 
-        for (auto &it : AdditionalDamage)
-        {
-            if (it.ratio > irand(1, 100))
-            {
+        for (auto &it : AdditionalDamage) {
+            if (it.ratio > irand(1, 100)) {
                 int32_t damage{0};
                 if (it.nDamage != 0)
                     damage = it.nDamage;
@@ -1041,16 +947,13 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
         1.0f + (damage_penalty != nullptr ? damage_penalty->fCritical - 1.0f : 0.0f) + (damage_advantage != nullptr ? damage_advantage->fCritical - 1.0f : 0.0f),
         critical_bonus + (damage_advantage != nullptr ? damage_advantage->nCritical : 0) + (damage_penalty != nullptr ? damage_penalty->nCritical : 0), nFlag);
 
-    if (!damage_result.bMiss)
-    {
-        if (damage_penalty != nullptr)
-        {
+    if (!damage_result.bMiss) {
+        if (damage_penalty != nullptr) {
             damage_result.nDamage += damage_penalty->nDamage;
             damage_result.nDamage *= damage_penalty->fDamage;
         }
 
-        if (damage_advantage != nullptr)
-        {
+        if (damage_advantage != nullptr) {
             damage_result.nDamage += damage_advantage->nDamage;
             damage_result.nDamage *= damage_advantage->fDamage;
         }
@@ -1060,8 +963,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
         damage_result.nDamage = 0;
 
     float mana_shield_absorb_ratio{0.0f};
-    switch (damageType)
-    {
+    switch (damageType) {
     case DT_NORMAL_PHYSICAL_DAMAGE:
     case DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE:
     case DT_NORMAL_PHYSICAL_SKILL_DAMAGE:
@@ -1084,8 +986,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     else if (mana_shield_absorb_ratio < 0.0f)
         mana_shield_absorb_ratio = 0.0f;
 
-    if (mana_shield_absorb_ratio > 0.0f)
-    {
+    if (mana_shield_absorb_ratio > 0.0f) {
         int32_t nAbsorbableDamage = damage_result.nDamage * mana_shield_absorb_ratio;
         if (GetMana() < nAbsorbableDamage)
             nAbsorbableDamage = GetMana();
@@ -1103,8 +1004,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     if (IsUsingSkill())
         m_castingSkill->onDamage(damage_result.nDamage);*/
 
-    if (!damage_result.bMiss)
-    {
+    if (!damage_result.bMiss) {
         RemoveStatesOnDamage();
         RemoveState(SC_SLEEP, GameRule::MAX_STATE_LEVEL);
         RemoveState(SC_NIGHTMARE, GameRule::MAX_STATE_LEVEL);
@@ -1113,8 +1013,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
             RemoveState(SC_SHINE_WALL, GameRule::MAX_STATE_LEVEL);
 
         auto pFrozen = GetState(SC_FROZEN);
-        if (pFrozen != nullptr)
-        {
+        if (pFrozen != nullptr) {
             int32_t nRatio = (pFrozen->GetValue(4) + pFrozen->GetLevel() * pFrozen->GetValue(5)) * 100.0f;
             if (irand(1, 100) < nRatio)
                 RemoveState(SC_FROZEN, GameRule::MAX_STATE_LEVEL);
@@ -1135,23 +1034,18 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 
     auto t = sWorld.GetArTime();
     auto myPos = GetCurrentPosition(sWorld.GetArTime());
-    if (damage_result.bBlock && !m_vStateReflectInfo.empty() && pFrom->GetCurrentPosition(sWorld.GetArTime()).GetExactDist2d(&myPos) <= GameRule::REFLECT_RANGE)
-    {
-        for (auto &it : m_vStateReflectInfo)
-        {
+    if (damage_result.bBlock && !m_vStateReflectInfo.empty() && pFrom->GetCurrentPosition(sWorld.GetArTime()).GetExactDist2d(&myPos) <= GameRule::REFLECT_RANGE) {
+        for (auto &it : m_vStateReflectInfo) {
             if (!pFrom->IsNPC())
                 pFrom->AddState(SG_NORMAL, it.nCode, GetHandle(), it.nLevel, t, t + it.nDuration);
         }
     }
 
-    if (!IsProcessingReflectDamage() && !pFrom->IsProcessingReflectDamage() && !m_vDamageReflectInfo.empty())
-    {
+    if (!IsProcessingReflectDamage() && !pFrom->IsProcessingReflectDamage() && !m_vDamageReflectInfo.empty()) {
         SetFlag(UNIT_FIELD_STATUS, STATUS_PROCESSING_REFELCT);
-        for (auto &it : m_vDamageReflectInfo)
-        {
+        for (auto &it : m_vDamageReflectInfo) {
             myPos = GetCurrentPosition(sWorld.GetArTime());
-            if (irand(1, 100) < it.fire_ratio && pFrom->GetCurrentPosition(sWorld.GetArTime()).GetExactDist2d(&myPos) <= it.range * GameRule::DEFAULT_UNIT_SIZE)
-            {
+            if (irand(1, 100) < it.fire_ratio && pFrom->GetCurrentPosition(sWorld.GetArTime()).GetExactDist2d(&myPos) <= it.range * GameRule::DEFAULT_UNIT_SIZE) {
                 int32_t nPrevHP = pFrom->GetHealth();
                 int32_t nPrevMP = pFrom->GetMana();
                 int32_t nDamageFlag = IGNORE_AVOID | IGNORE_BLOCK | IGNORE_CRITICAL;
@@ -1234,18 +1128,15 @@ Damage Unit::DealAdditionalMagicalDamage(
 Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, float critical_amp, int32_t critical_bonus, int32_t nFlag)
 {
     Damage damage{};
-    if (damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE)
-    {
-        if (pTarget->IsMagicalImmune())
-        {
+    if (damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE) {
+        if (pTarget->IsMagicalImmune()) {
             damage.bMiss = true;
             damage.nDamage = 0;
 
             return damage;
         }
     }
-    else if (pTarget->IsPhysicalImmune())
-    {
+    else if (pTarget->IsPhysicalImmune()) {
         damage.bMiss = true;
         damage.nDamage = 0;
 
@@ -1265,8 +1156,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     bool bIsAdditionalDamage = (damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE || damage_type == DT_ADDITIONAL_MAGICAL_DAMAGE);
     bool bIsLeftHandDamage = (damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE);
 
-    if (!(nFlag & IGNORE_AVOID) && bIsPhysicalDamage && !bIsStateDamage)
-    {
+    if (!(nFlag & IGNORE_AVOID) && bIsPhysicalDamage && !bIsStateDamage) {
         int32_t nAccuracy;
         if (bIsLeftHandDamage)
             nAccuracy = GetAccuracyLeft();
@@ -1277,8 +1167,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         if (pTarget->GetAvoid() != 0)
             nPercentage = 7 + std::max(10, 88 + (GetLevel() - pTarget->GetLevel()) * 2) * ((float)nAccuracy / (float)pTarget->GetAvoid()) + accuracy_bonus;
 
-        if (irand(1, 100) > nPercentage)
-        {
+        if (irand(1, 100) > nPercentage) {
             damage.bMiss = true;
             damage.nDamage = 0;
 
@@ -1286,14 +1175,12 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         }
     }
 
-    if (!(nFlag & IGNORE_AVOID) && bIsMagicalDamage && !bIsStateDamage)
-    {
+    if (!(nFlag & IGNORE_AVOID) && bIsMagicalDamage && !bIsStateDamage) {
         int32_t nPercentage = 100;
         if (pTarget->GetMagicAvoid() != 0)
             nPercentage = 7 + std::max(10, 88 + (GetLevel() - pTarget->GetLevel()) * 2) * ((float)GetMagicAccuracy() / (float)pTarget->GetMagicAvoid()) + accuracy_bonus;
 
-        if (irand(1, 100) > nPercentage)
-        {
+        if (irand(1, 100) > nPercentage) {
             damage.bMiss = true;
             damage.nDamage = 0;
 
@@ -1304,32 +1191,25 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     int32_t nRandomDamage{0};
     int32_t nDefence{0};
 
-    if (!bIsAdditionalDamage && !bIsStateDamage && !IsSkillProp())
-    {
-        if (!(nFlag & IGNORE_DEFENCE))
-        {
-            if (bIsPhysicalDamage)
-            {
+    if (!bIsAdditionalDamage && !bIsStateDamage && !IsSkillProp()) {
+        if (!(nFlag & IGNORE_DEFENCE)) {
+            if (bIsPhysicalDamage) {
                 nDefence = pTarget->GetDefence();
 
-                if ((pTarget->IsWearShield() || pTarget->IsSummon()) && ((irand(1, 100)) < pTarget->GetBlockChance()))
-                {
-                    if (irand(1, 100) < 20)
-                    {
+                if ((pTarget->IsWearShield() || pTarget->IsSummon()) && ((irand(1, 100)) < pTarget->GetBlockChance())) {
+                    if (irand(1, 100) < 20) {
                         damage.bPerfectBlock = true;
                         damage.nDamage = 0;
 
                         return damage;
                     }
-                    else
-                    {
+                    else {
                         damage.bBlock = true;
                         nDefence += pTarget->GetBlockDefence();
                     }
                 }
             }
-            else if (bIsMagicalDamage)
-            {
+            else if (bIsMagicalDamage) {
                 nDefence = pTarget->GetMagicDefence();
             }
         }
@@ -1339,32 +1219,26 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         if (nFinalDamage < 1)
             nFinalDamage = 1;
 
-        if (!sWorld.getBoolConfig(CONFIG_IGNORE_RANDOM_DAMAGE))
-        {
+        if (!sWorld.getBoolConfig(CONFIG_IGNORE_RANDOM_DAMAGE)) {
             nRandomDamage = nFinalDamage * 0.05f;
             nRandomDamage = irand(-nRandomDamage, nRandomDamage);
         }
     }
-    else if (bIsStateDamage)
-    {
+    else if (bIsStateDamage) {
         float fDefAdjust = 1.0f;
-        if (bIsMagicalDamage && GetMagicPoint() < pTarget->GetMagicDefence())
-        {
+        if (bIsMagicalDamage && GetMagicPoint() < pTarget->GetMagicDefence()) {
             fDefAdjust = 1.0f - (pTarget->GetMagicDefence() - GetMagicPoint()) / (((pTarget->GetMagicDefence() > 0) ? pTarget->GetMagicDefence() : 1) * 2);
         }
-        else if (bIsPhysicalDamage && GetAttackPointRight() < pTarget->GetDefence())
-        {
+        else if (bIsPhysicalDamage && GetAttackPointRight() < pTarget->GetDefence()) {
             fDefAdjust = 1.0f - (pTarget->GetDefence() - GetAttackPointRight()) / (((pTarget->GetDefence() > 0) ? pTarget->GetDefence() : 1) * 2);
         }
 
         nFinalDamage = nDamage * fDefAdjust;
     }
-    else
-    {
+    else {
         nFinalDamage = nDamage;
 
-        if (!sWorld.getBoolConfig(CONFIG_IGNORE_RANDOM_DAMAGE))
-        {
+        if (!sWorld.getBoolConfig(CONFIG_IGNORE_RANDOM_DAMAGE)) {
             nRandomDamage = nFinalDamage * 0.05f;
             nRandomDamage = irand(-nRandomDamage, nRandomDamage);
         }
@@ -1374,19 +1248,16 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     nFinalDamage *= fDamageAdjust;
 
     // ũ��Ƽ��
-    if (!bIsAdditionalDamage && !(nFlag & IGNORE_CRITICAL))
-    {
+    if (!bIsAdditionalDamage && !(nFlag & IGNORE_CRITICAL)) {
         int32_t nCriticalDamage = GetCriticalDamage(nFinalDamage, critical_amp, critical_bonus);
 
-        if (nCriticalDamage)
-        {
+        if (nCriticalDamage) {
             damage.bCritical = true;
             nFinalDamage += nCriticalDamage;
         }
     }
 
-    if ((damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE) && IsUsingDoubleWeapon())
-    {
+    if ((damage_type == DT_ADDITIONAL_DAMAGE || damage_type == DT_ADDITIONAL_LEFT_HAND_DAMAGE) && IsUsingDoubleWeapon()) {
         if (bIsLeftHandDamage)
             nFinalDamage *= (0.44f + m_nDoubleWeaponMasteryLevel * 0.02f);
         else
@@ -1397,8 +1268,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     damage.nDamage = nFinalDamage * fElementalResist;
     damage.nResistedDamage = nFinalDamage - damage.nDamage;
 
-    if ((pTarget->IsPlayer() || pTarget->IsSummon()) && pTarget != this)
-    {
+    if ((pTarget->IsPlayer() || pTarget->IsSummon()) && pTarget != this) {
         if (IsPlayer())
             damage.nDamage *= GameRule::fPVPDamageRateForPlayer;
         else if (IsSummon())
@@ -1421,15 +1291,13 @@ int32_t Unit::damage(Unit *pFrom, int32_t nDamage, bool decreaseEXPOnDead)
     if (IsDead())
         return 0;
 
-    if (IsHiding())
-    {
+    if (IsHiding()) {
         RemoveState(SC_HIDE, GameRule::MAX_STATE_LEVEL);
         RemoveState(SC_TRACE_OF_FUGITIVE, GameRule::MAX_STATE_LEVEL);
     }
 
     SetHealth(GetHealth() > nDamage ? GetHealth() - nDamage : 0);
-    if (IsDead())
-    {
+    if (IsDead()) {
         SetUInt32Value(UNIT_FIELD_DEAD_TIME, sWorld.GetArTime());
         onDead(pFrom, decreaseEXPOnDead);
     }
@@ -1442,8 +1310,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int32_t t
     if (bEndAttack || bCancelAttack)
         attack_count = 0;
 
-    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED))
-    {
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED)) {
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
             attack_count *= 2;
         if (bIsDoubleAttack)
@@ -1460,8 +1327,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int32_t t
     pct.attack_delay = static_cast<uint16_t>(delay);
 
     pct.attack_flag = AEAF_None;
-    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED))
-    {
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FORM_CHANGED)) {
         if (bIsDoubleAttack)
             pct.attack_flag = AEAF_DoubleAttack;
         if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
@@ -1480,8 +1346,7 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int32_t t
     else if (bCancelAttack)
         pct.attack_action = AEAA_CancelAttack;
 
-    for (int32_t i = 0; i < attack_count; ++i)
-    {
+    for (int32_t i = 0; i < attack_count; ++i) {
         ATTACK_INFO attack_info{};
         attack_info.damage = arDamage[i].nDamage;
         attack_info.mp_damage = arDamage[i].mp_damage;
@@ -1511,17 +1376,14 @@ void Unit::broadcastAttackMessage(Unit *pTarget, AttackInfo *arDamage, int32_t t
 void Unit::EndAttack()
 {
     AttackInfo info[4]{};
-    if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer() && m_nNextAttackMode == 0)
-    {
+    if ((IsUsingBow() || IsUsingCrossBow()) && IsPlayer() && m_nNextAttackMode == 0) {
         m_nNextAttackMode = 1;
         SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld.GetArTime());
     }
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED))
-    {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED)) {
         // auto target = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(GetTargetHandle()));
         auto target = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
-        if (IsPlayer() || IsSummon())
-        {
+        if (IsPlayer() || IsSummon()) {
             if (target != nullptr)
                 broadcastAttackMessage(target, info, 0, 0, false, false, true, false);
         }
@@ -1536,8 +1398,7 @@ void Unit::onDead(Unit *pFrom, bool decreaseEXPOnDead)
     if (m_castingSkill != nullptr)
         CancelSkill();
 
-    if (IsMoving() && IsInWorld())
-    {
+    if (IsMoving() && IsInWorld()) {
         auto pos = GetCurrentPosition(GetUInt32Value(UNIT_FIELD_DEAD_TIME));
         sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
         if (IsPlayer() && this->As<Player>()->GetRideObject() != nullptr)
@@ -1563,8 +1424,7 @@ void Unit::AddEXP(int64_t exp, uint32_t jp, bool bApplyStamina)
 
 void Unit::CancelSkill()
 {
-    if (m_castingSkill != nullptr && m_castingSkill->Cancel())
-    {
+    if (m_castingSkill != nullptr && m_castingSkill->Cancel()) {
         m_castingSkill = nullptr;
     }
 }
@@ -1572,13 +1432,11 @@ void Unit::CancelSkill()
 void Unit::CancelAttack()
 {
     AttackInfo info[4]{};
-    if ((IsUsingCrossBow() || IsUsingBow()) && (IsPlayer() && m_nNextAttackMode == 0))
-    {
+    if ((IsUsingCrossBow() || IsUsingBow()) && (IsPlayer() && m_nNextAttackMode == 0)) {
         m_nNextAttackMode = 1;
         SetUInt32Value(BATTLE_FIELD_NEXT_ATTACKABLE_TIME, sWorld.GetArTime());
     }
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED))
-    {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_ATTACK_STARTED)) {
         this->broadcastAttackMessage(sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle()), info, 0, 0, false, false, false, true);
     }
     SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
@@ -1619,8 +1477,7 @@ uint16_t Unit::Puton(ItemWearType pos, Item *pItem, bool bIsTranslated)
     if (!TranslateWearPosition(pos, pItem, &vOverlappedItemList))
         return TS_RESULT_NOT_ACTABLE;
 
-    for (auto &it : vOverlappedItemList)
-    {
+    for (auto &it : vOverlappedItemList) {
         putoffItem(static_cast<ItemWearType>(it));
         if (m_anWear[it] != nullptr)
             return TS_RESULT_NOT_ACTABLE;
@@ -1666,15 +1523,13 @@ uint16_t Unit::Putoff(ItemWearType pos)
     if (absolute_pos == ItemWearType::WEAR_CANTWEAR)
         return TS_RESULT_NOT_ACTABLE;
 
-    if (pos == ItemWearType::WEAR_BAG_SLOT)
-    {
+    if (pos == ItemWearType::WEAR_BAG_SLOT) {
         if (GetMaxWeight() < GetFloatValue(PLAYER_FIELD_WEIGHT))
             return TS_RESULT_TOO_HEAVY;
 
         const auto &current_bag_base = m_anWear[(absolute_pos)]->GetItemBase();
         float current_bag_capacity{0};
-        for (int32_t i = 0; i < MAX_OPTION_NUMBER; ++i)
-        {
+        for (int32_t i = 0; i < MAX_OPTION_NUMBER; ++i) {
             if (current_bag_base->opt_type[i] != static_cast<int32_t>(ITEM_EFFECT_PASSIVE::CARRY_WEIGHT))
                 continue;
 
@@ -1717,10 +1572,8 @@ ItemClass Unit::GetWeaponClass()
     ItemClass result = ItemClass::CLASS_ETC;
     auto itemRight = GetWornItem(ItemWearType::WEAR_RIGHTHAND);
 
-    if (itemRight != nullptr)
-    {
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON))
-        {
+    if (itemRight != nullptr) {
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_USING_DOUBLE_WEAPON)) {
             Item *itemLeft = GetWornItem(ItemWearType::WEAR_LEFTHAND);
             if (itemRight->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_SWORD && itemLeft->GetItemTemplate()->eClass == ItemClass::CLASS_ONEHAND_SWORD)
                 return ItemClass::CLASS_DOUBLE_SWORD;
@@ -1761,8 +1614,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
     if (IsDead() && (stateInfo->state_time_type & AF_ERASE_ON_DEAD || stateInfo->state_time_type & AF_ERASE_ON_RESURRECT))
         return TS_RESULT_NOT_ACTABLE;
 
-    if (IsMonster())
-    {
+    if (IsMonster()) {
         auto pMonster = this->As<Monster>();
         if ((stateInfo->state_time_type & AF_NOT_ACTABLE_TO_BOSS) != 0 && pMonster->IsBossMonster())
             return TS_RESULT_LIMIT_TARGET;
@@ -1772,28 +1624,23 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
     }
 
     if (code == SC_SLEEP || code == SC_NIGHTMARE || code == SC_SEAL || code == SC_SHINE_WALL || code == SC_FEAR || code == SC_STUN || stateInfo->effect_type == SEF_TRANSFORMATION ||
-        (stateInfo->effect_type == SEF_MEZZ && (stateInfo->value[0] != 0 || stateInfo->value[1] != 0 || stateInfo->value[2] != 0 || stateInfo->value[3] != 0)))
-    {
+        (stateInfo->effect_type == SEF_MEZZ && (stateInfo->value[0] != 0 || stateInfo->value[1] != 0 || stateInfo->value[2] != 0 || stateInfo->value[3] != 0))) {
         if (IsUsingSkill())
             CancelSkill();
 
         Player *pThisPlayer{nullptr};
         if (IsPlayer())
             pThisPlayer = this->As<Player>();
-        else if (IsSummon())
-        {
+        else if (IsSummon()) {
             pThisPlayer = this->As<Summon>()->GetMaster();
             if (pThisPlayer != nullptr && pThisPlayer->GetRideObject() != this)
                 pThisPlayer = nullptr;
         }
 
-        if (pThisPlayer != nullptr && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState()))
-        {
+        if (pThisPlayer != nullptr && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState())) {
             auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(caster);
-            if (pUnit != nullptr)
-            {
-                if (pThisPlayer && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState()))
-                {
+            if (pUnit != nullptr) {
+                if (pThisPlayer && (pThisPlayer->IsRiding() || pThisPlayer->HasRidingState())) {
                     pThisPlayer->UnMount(UNMOUNT_FALL, pUnit);
 
                     if (IsDead() && (stateInfo->state_time_type & AF_ERASE_ON_DEAD || stateInfo->state_time_type & AF_ERASE_ON_RESURRECT))
@@ -1803,8 +1650,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
         }
     }
 
-    if (stateInfo->effect_type == SEF_RIDING && IsHiding())
-    {
+    if (stateInfo->effect_type == SEF_RIDING && IsHiding()) {
         RemoveState(SC_HIDE, GameRule::MAX_STATE_LEVEL);
         RemoveState(SC_TRACE_OF_FUGITIVE, GameRule::MAX_STATE_LEVEL);
     }
@@ -1814,10 +1660,8 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
 
     int32_t base_damage{0};
     auto pCaster = sMemoryPool.GetObjectInWorld<Unit>(caster);
-    if (pCaster != nullptr)
-    {
-        switch (stateInfo->base_effect_id)
-        {
+    if (pCaster != nullptr) {
+        switch (stateInfo->base_effect_id) {
         case BEF_PHYSICAL_STATE_DAMAGE:
         case BEF_PHYSICAL_IGNORE_DEFENCE_STATE_DAMAGE:
         case BEF_PHYSICAL_IGNORE_DEFENCE_PER_STATE_DAMAGE:
@@ -1838,31 +1682,24 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
     std::vector<uint16_t> vDeleteStateUID{};
     bool bAlreadyExist{false};
 
-    for (auto &it : m_vStateList)
-    {
+    for (auto &it : m_vStateList) {
         bool bIsDuplicatedGroup{false};
-        if (code == it->GetCode())
-        {
+        if (code == it->GetCode()) {
             bAlreadyExist = true;
             bIsDuplicatedGroup = true;
         }
-        else
-        {
-            for (int32_t i = 0; i < 3; ++i)
-            {
-                if (it->IsDuplicatedGroup(stateInfo->duplicate_group[i]))
-                {
+        else {
+            for (int32_t i = 0; i < 3; ++i) {
+                if (it->IsDuplicatedGroup(stateInfo->duplicate_group[i])) {
                     bIsDuplicatedGroup = true;
                     break;
                 }
             }
         }
 
-        if (bIsDuplicatedGroup)
-        {
+        if (bIsDuplicatedGroup) {
             bool bNotErasableCur = it->GetTimeType() & AF_AF_NOT_ERASABLE;
-            if (bNotErasable == bNotErasableCur)
-            {
+            if (bNotErasable == bNotErasableCur) {
                 if (it->GetLevel() > level || (it->GetLevel() == level && it->GetEndTime() > end_time))
                     return TS_RESULT_ALREADY_EXIST;
 
@@ -1871,24 +1708,19 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
 
                 vDeleteStateUID.emplace_back(it->GetUID());
             }
-            else if (bNotErasable)
-            {
+            else if (bNotErasable) {
                 vDeleteStateUID.emplace_back(it->GetUID());
                 continue;
             }
-            else
-            {
+            else {
                 return TS_RESULT_ALREADY_EXIST;
             }
         }
     }
 
-    for (auto dit = vDeleteStateUID.begin(); dit != vDeleteStateUID.end(); ++dit)
-    {
-        for (auto it = m_vStateList.begin(); it != m_vStateList.end(); ++it)
-        {
-            if ((*it)->GetUID() == (*dit))
-            {
+    for (auto dit = vDeleteStateUID.begin(); dit != vDeleteStateUID.end(); ++dit) {
+        for (auto it = m_vStateList.begin(); it != m_vStateList.end(); ++it) {
+            if ((*it)->GetUID() == (*dit)) {
                 auto state = (*it);
 
                 onUpdateState((*it), true);
@@ -1902,12 +1734,9 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
         }
     }
 
-    if (bAlreadyExist)
-    {
-        for (auto &it : m_vStateList)
-        {
-            if (code == it->GetCode())
-            {
+    if (bAlreadyExist) {
+        for (auto &it : m_vStateList) {
+            if (code == it->GetCode()) {
                 it->AddState(type, caster, level, start_time, end_time, base_damage, bIsAura);
                 CalculateStat();
                 onUpdateState(it, false);
@@ -1929,8 +1758,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
     CalculateStat();
     onUpdateState(m_vStateList.back(), false);
 
-    if (IsMonster() && !IsMovable())
-    {
+    if (IsMonster() && !IsMovable()) {
         if (m_Attribute.nAttackRange < GameRule::MAX_ATTACK_RANGE * GameRule::ATTACK_RANGE_UNIT)
             m_Attribute.nAttackRange = GameRule::MAX_ATTACK_RANGE * GameRule::ATTACK_RANGE_UNIT;
     }
@@ -1954,8 +1782,7 @@ void Unit::procMoveSpeedChange()
     if (!IsMovable())
         sWorld.SetMove(this, pos, pos, 0, true, sWorld.GetArTime(), true);
 
-    else if (GetMoveSpeed() != GetRealMoveSpeed())
-    {
+    else if (GetMoveSpeed() != GetRealMoveSpeed()) {
         const std::vector<ArMoveVector::MoveInfo> &vMoveVector(ends);
         std::vector<Position> vMovePos{};
 
@@ -1975,48 +1802,40 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
 {
     uint16_t result{TS_RESULT_SUCCESS};
 
-    switch (static_cast<ITEM_EFFECT_INSTANT>(type))
-    {
-    case ITEM_EFFECT_INSTANT::INC_HP:
-    {
+    switch (static_cast<ITEM_EFFECT_INSTANT>(type)) {
+    case ITEM_EFFECT_INSTANT::INC_HP: {
         int32_t prev_hp = GetHealth();
         HealByItem((int32_t)var1);
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
         break;
     }
-    case ITEM_EFFECT_INSTANT::INC_MP:
-    {
+    case ITEM_EFFECT_INSTANT::INC_MP: {
         int32_t prev_mp = GetMana();
         MPHealByItem(static_cast<int32_t>(var1));
         Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
         break;
     }
-    case ITEM_EFFECT_INSTANT::INC_HP_PERCENT:
-    {
+    case ITEM_EFFECT_INSTANT::INC_HP_PERCENT: {
         int32_t prev_hp = GetHealth();
         HealByItem(static_cast<int32_t>(var1 * GetMaxHealth()));
         Messages::BroadcastHPMPMessage(this, GetHealth() - prev_hp, 0, false);
         break;
     }
-    case ITEM_EFFECT_INSTANT::INC_MP_PERCENT:
-    {
+    case ITEM_EFFECT_INSTANT::INC_MP_PERCENT: {
         int32_t prev_mp = GetMana();
         MPHealByItem(static_cast<int32_t>(var1 * GetMaxMana()));
         Messages::BroadcastHPMPMessage(this, 0, GetMana() - prev_mp, false);
         break;
     }
-    case ITEM_EFFECT_INSTANT::INC_STAMINA:
-    {
-        if (!IsPlayer())
-        {
+    case ITEM_EFFECT_INSTANT::INC_STAMINA: {
+        if (!IsPlayer()) {
             result = TS_RESULT_ACCESS_DENIED;
             break;
         }
         this->As<Player>()->AddStamina(static_cast<int32_t>(var1));
         break;
     }
-    case ITEM_EFFECT_INSTANT::RESURECTION:
-    {
+    case ITEM_EFFECT_INSTANT::RESURECTION: {
         result = TS_RESULT_ACCESS_DENIED;
         if (pItem->GetOwnerHandle() == GetHandle())
             break;
@@ -2035,13 +1854,11 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
         result = TS_RESULT_SUCCESS;
         break;
     }
-    case ITEM_EFFECT_INSTANT::WARP:
-    {
+    case ITEM_EFFECT_INSTANT::WARP: {
         // Nothing to do apparentely
         break;
     }
-    case ITEM_EFFECT_INSTANT::SKILL:
-    {
+    case ITEM_EFFECT_INSTANT::SKILL: {
         auto target_handle = GetHandle();
         if (var1 == SKILL_RETURN_FEATHER || var1 == SKILL_RETURN_BACK_FEATHER)
             target_handle = pItem->GetHandle();
@@ -2049,34 +1866,27 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
         break;
     }
     case ITEM_EFFECT_INSTANT::ADD_STATE:
-    case ITEM_EFFECT_INSTANT::ADD_STATE_EX:
-    {
+    case ITEM_EFFECT_INSTANT::ADD_STATE_EX: {
         auto eCode = static_cast<StateCode>(static_cast<int32_t>((static_cast<ITEM_EFFECT_INSTANT>(type) == ITEM_EFFECT_INSTANT::ADD_STATE) ? pItem->GetItemTemplate()->state_id : var1));
 
-        if (IsPlayer())
-        {
+        if (IsPlayer()) {
             auto pPlayer = this->As<Player>();
             const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(static_cast<int32_t>(eCode));
 
-            if (pStateInfo == nullptr)
-            {
+            if (pStateInfo == nullptr) {
                 result = TS_RESULT_NOT_ACTABLE;
                 break;
             }
 
-            if (pStateInfo->effect_type == SEF_RIDING)
-            {
-                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon())
-                {
+            if (pStateInfo->effect_type == SEF_RIDING) {
+                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon()) {
                     result = TS_RESULT_ACCESS_DENIED;
                     break;
                 }
             }
 
-            if (static_cast<int32_t>(eCode) == SC_STAMINA_SAVE)
-            {
-                if (pPlayer->GetState(SC_STAMINA_SAVE))
-                {
+            if (static_cast<int32_t>(eCode) == SC_STAMINA_SAVE) {
+                if (pPlayer->GetState(SC_STAMINA_SAVE)) {
                     result = TS_RESULT_ALREADY_STAMINA_SAVED;
                     break;
                 }
@@ -2088,44 +1898,34 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
         AddState(SG_NORMAL, eCode, pItem->GetItemInstance().GetOwnerHandle(), nLevel, t, t + pItem->GetItemTemplate()->state_time * 100);
         break;
     }
-    case ITEM_EFFECT_INSTANT::REMOVE_STATE:
-    {
+    case ITEM_EFFECT_INSTANT::REMOVE_STATE: {
         RemoveState((StateCode)pItem->GetItemTemplate()->state_id, pItem->GetItemTemplate()->state_level);
         break;
     }
-    case ITEM_EFFECT_INSTANT::TOGGLE_STATE:
-    {
+    case ITEM_EFFECT_INSTANT::TOGGLE_STATE: {
         auto pWornItem = GetWornItem(ItemWearType::WEAR_RIDE_ITEM);
-        if (GetState((StateCode)pItem->GetItemTemplate()->state_id) != nullptr && pItem == pWornItem)
-        {
+        if (GetState((StateCode)pItem->GetItemTemplate()->state_id) != nullptr && pItem == pWornItem) {
             RemoveState((StateCode)pItem->GetItemTemplate()->state_id, pItem->GetItemTemplate()->state_level);
             return TS_RESULT_SUCCESS;
         }
-        else
-        {
-            if (IsPlayer())
-            {
+        else {
+            if (IsPlayer()) {
                 auto pPlayer = this->As<Player>();
-                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon())
-                {
+                if (pPlayer->IsRiding() || pPlayer->HasRidingState() || pPlayer->IsInDungeon()) {
                     const StateTemplate *pStateInfo = sObjectMgr.GetStateInfo(pItem->GetItemTemplate()->state_id);
-                    if (pStateInfo->effect_type == SEF_RIDING)
-                    {
+                    if (pStateInfo->effect_type == SEF_RIDING) {
                         result = TS_RESULT_ACCESS_DENIED;
                         break;
                     }
                 }
 
-                if (pWornItem != nullptr)
-                {
-                    if (pWornItem != pItem && (pPlayer->Putoff(ItemWearType::WEAR_RIDE_ITEM) != TS_RESULT_SUCCESS || pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS))
-                    {
+                if (pWornItem != nullptr) {
+                    if (pWornItem != pItem && (pPlayer->Putoff(ItemWearType::WEAR_RIDE_ITEM) != TS_RESULT_SUCCESS || pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS)) {
                         result = TS_RESULT_ACCESS_DENIED;
                         break;
                     }
                 }
-                else if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS)
-                {
+                else if (pPlayer->Puton(ItemWearType::WEAR_RIDE_ITEM, pItem) != TS_RESULT_SUCCESS) {
                     result = TS_RESULT_ACCESS_DENIED;
                     break;
                 }
@@ -2137,40 +1937,32 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
         }
         break;
     }
-    case ITEM_EFFECT_INSTANT::GENERATE_ITEM:
-    {
-        if (!IsPlayer())
-        {
+    case ITEM_EFFECT_INSTANT::GENERATE_ITEM: {
+        if (!IsPlayer()) {
             result = TS_RESULT_ACCESS_DENIED;
             break;
         }
 
-        if (var1 == 0)
-        {
+        if (var1 == 0) {
             auto pPlayer = this->As<Player>();
-            if (pPlayer->ChangeGold(pPlayer->GetGold() + static_cast<int64_t>(var2)) != TS_RESULT_SUCCESS)
-            {
+            if (pPlayer->ChangeGold(pPlayer->GetGold() + static_cast<int64_t>(var2)) != TS_RESULT_SUCCESS) {
                 result = TS_RESULT_TOO_MUCH_MONEY;
                 break;
             }
         }
-        else
-        {
+        else {
             auto pPlayer = this->As<Player>();
             int32_t nGenCount = (var1 >= 0) ? 1 : var2;
 
-            for (int32_t i = 0; i < nGenCount; ++i)
-            {
+            for (int32_t i = 0; i < nGenCount; ++i) {
                 int32_t nItemID = var1;
                 auto nItemCount = static_cast<int64_t>(var2);
 
-                while (nItemID < 0)
-                {
+                while (nItemID < 0) {
                     GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
                 }
 
-                if (nItemID != 0)
-                {
+                if (nItemID != 0) {
                     auto pItem = Item::AllocItem(0, nItemID, nItemCount, GenerateCode::BY_ITEM);
                     auto pNewItem = this->As<Player>()->PushItem(pItem, pItem->GetCount(), false);
 
@@ -2185,8 +1977,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
 
         break;
     }
-    default:
-    {
+    default: {
         std::string error = NGemity::StringFormat("Unit::onItemUseEffect [{}]: Unknown type {} !", pItem->GetItemInstance().GetCode(), type);
         NG_LOG_ERROR("entites.unit", "%s", error.c_str());
         Messages::SendChatMessage(30, "@SYSTEM", dynamic_cast<Player *>(pCaster), error);
@@ -2209,21 +2000,17 @@ std::pair<float, int32_t> Unit::GetHateMod(int32_t nHateModType, bool bIsHarmful
     float fAmpValue = 1.0f;
     int32_t nIncValue = 0;
 
-    for (auto &hm : m_vHateMod)
-    {
-        if (bIsHarmful)
-        {
+    for (auto &hm : m_vHateMod) {
+        if (bIsHarmful) {
             if (!hm.bIsApplyToHarmful)
                 continue;
         }
-        else
-        {
+        else {
             if (!hm.bIsApplyToHelpful)
                 continue;
         }
 
-        if ((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 3 && hm.bIsApplyToPhysicalAttack))
-        {
+        if ((nHateModType == 1 && hm.bIsApplyToPhysicalSkill) || (nHateModType == 2 && hm.bIsApplyToMagicalSkill) || (nHateModType == 3 && hm.bIsApplyToPhysicalAttack)) {
             fAmpValue += hm.fAmpValue;
             nIncValue += hm.nIncValue;
         }
@@ -2240,16 +2027,14 @@ bool Unit::ClearExpiredState(uint32_t t)
     if (t == 0)
         t = sWorld.GetArTime();
 
-    for (auto it = m_vStateList.begin(); it != m_vStateList.end();)
-    {
+    for (auto it = m_vStateList.begin(); it != m_vStateList.end();) {
         bErase = false;
         bModified = false;
 
         if ((*it)->GetCode() == SC_HAVOC_BURST && GetInt32Value(UNIT_FIELD_HAVOC) < 1)
             bErase = true;
 
-        if ((*it)->ClearExpiredState(t))
-        {
+        if ((*it)->ClearExpiredState(t)) {
             bRtn = true;
             if (!(*it)->IsValid(t))
                 bErase = true;
@@ -2257,18 +2042,14 @@ bool Unit::ClearExpiredState(uint32_t t)
                 onUpdateState((*it), false);
         }
 
-        if (bErase)
-        {
-            if ((*it)->GetCode() == SC_ADD_ENERGY)
-            {
+        if (bErase) {
+            if ((*it)->GetCode() == SC_ADD_ENERGY) {
                 AddEnergy();
             }
-            else if ((*it)->GetCode() == SC_HAVOC_BURST)
-            {
+            else if ((*it)->GetCode() == SC_HAVOC_BURST) {
                 bRtn = true;
             }
-            else if ((*it)->GetEffectType() == SEF_PROVOKE && IsMonster())
-            {
+            else if ((*it)->GetEffectType() == SEF_PROVOKE && IsMonster()) {
                 //
             }
 
@@ -2324,10 +2105,8 @@ void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additiona
     if (damage_info.bMiss || damage_info.bPerfectBlock)
         return;
 
-    for (auto &additional : vAdditionalDamage)
-    {
-        if ((additional.require_type == ElementalType::TYPE_UNKN || additional.require_type == elemental_type) && additional.ratio > urand(1, 100))
-        {
+    for (auto &additional : vAdditionalDamage) {
+        if ((additional.require_type == ElementalType::TYPE_UNKN || additional.require_type == elemental_type) && additional.ratio > urand(1, 100)) {
             int32_t damage{0};
             if (additional.nDamage != 0)
                 damage = additional.nDamage;
@@ -2362,8 +2141,7 @@ uint32_t Unit::GetTotalCoolTime(int32_t skill_id) const
 
 float Unit::GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
 {
-    if (bPhysical)
-    {
+    if (bPhysical) {
         if (bBad)
             return m_BadPhysicalElementalSkillStateMod[(type)].fCooltime;
 
@@ -2394,8 +2172,7 @@ void Unit::SetEXP(int64_t exp)
 
 bool Unit::IsWornByCode(int32_t code) const
 {
-    for (auto &i : m_anWear)
-    {
+    for (auto &i : m_anWear) {
         if (i != nullptr && i->GetItemTemplate() != nullptr && i->GetItemTemplate()->nID == code)
             return true;
     }
@@ -2410,8 +2187,7 @@ void Unit::SetCurrentJLv(int32_t jlv)
 
 int32_t Unit::Heal(int32_t hp)
 {
-    if (/*IsMagicImmune()*/ false)
-    {
+    if (/*IsMagicImmune()*/ false) {
         return 0;
     }
     int32_t heal = (int32_t)GetFloatValue(UNIT_FIELD_HEAL_RATIO) * hp;
@@ -2422,12 +2198,10 @@ int32_t Unit::Heal(int32_t hp)
 int64_t Unit::GetBulletCount() const
 {
     auto item = m_anWear[(ItemWearType::WEAR_SHIELD)];
-    if (item != nullptr && item->GetItemGroup() == ItemGroup::GROUP_BULLET)
-    {
+    if (item != nullptr && item->GetItemGroup() == ItemGroup::GROUP_BULLET) {
         return item->GetItemInstance().GetCount();
     }
-    else
-    {
+    else {
         return 0;
     }
 }
@@ -2439,8 +2213,7 @@ ItemClass Unit::GetArmorClass() const
 
 void Unit::procState(uint32_t t)
 {
-    struct ADD_STATE_INFO
-    {
+    struct ADD_STATE_INFO {
         StateCode code;
         int32_t nLevel;
         uint32_t nEndTime;
@@ -2453,10 +2226,8 @@ void Unit::procState(uint32_t t)
     std::vector<int32_t> vGoodStates{};
     bool bHasSequentialStateRemover{false};
 
-    for (auto &pState : m_vStateList)
-    {
-        if (pState->GetEffectType() == SEF_REMOVE_GOOD_STATE)
-        {
+    for (auto &pState : m_vStateList) {
+        if (pState->GetEffectType() == SEF_REMOVE_GOOD_STATE) {
             uint32_t nFireTime = pState->GetLastProcessedTime() + pState->GetFireInterval();
             if (nFireTime >= t || nFireTime > pState->GetEndTime(SG_NORMAL))
                 continue;
@@ -2466,13 +2237,11 @@ void Unit::procState(uint32_t t)
 
             vGoodStateRemover.emplace_back(pState);
         }
-        else if (!pState->IsHarmful() && pState->GetTimeType() & AF_ERASE_ON_DEAD)
-        {
+        else if (!pState->IsHarmful() && pState->GetTimeType() & AF_ERASE_ON_DEAD) {
             vGoodStates.emplace_back(pState->GetUID());
         }
 
-        if (pState->GetEffectType() == SEF_ADD_REGION_STATE)
-        {
+        if (pState->GetEffectType() == SEF_ADD_REGION_STATE) {
             auto curr = sWorld.GetArTime();
             if (pState->GetLastProcessedTime() + pState->GetValue(1) > curr)
                 continue;
@@ -2492,8 +2261,7 @@ void Unit::procState(uint32_t t)
             Skill::EnumSkillTargetsAndCalcDamage(GetCurrentPosition(curr), GetLayer(), GetCurrentPosition(curr), true, fEffectLength, -1, 0, 0, true, pCaster,
                 static_cast<int32_t>(pState->GetValue(5)), static_cast<int32_t>(pState->GetValue(6)), vTargetList);
 
-            for (auto &pTarget : vTargetList)
-            {
+            for (auto &pTarget : vTargetList) {
                 if (pTarget == nullptr || pTarget->IsDead())
                     continue;
 
@@ -2518,24 +2286,20 @@ void Unit::procState(uint32_t t)
         }
     }
 
-    if (!vGoodStateRemover.empty())
-    {
-        if (bHasSequentialStateRemover)
-        {
+    if (!vGoodStateRemover.empty()) {
+        if (bHasSequentialStateRemover) {
             std::sort(vGoodStateRemover.begin(), vGoodStateRemover.end(), [](State *lh, State *rh) -> bool { return lh->GetValue(5) == 0 && rh->GetValue(5) != 0; });
             std::reverse(vGoodStates.begin(), vGoodStates.end());
         }
 
-        for (auto it = vGoodStateRemover.begin(); it != vGoodStateRemover.end(); ++it)
-        {
+        for (auto it = vGoodStateRemover.begin(); it != vGoodStateRemover.end(); ++it) {
             if (vGoodStates.empty() || ((*it)->GetValue(0) + (*it)->GetValue(1) * (*it)->GetLevel()) <= irand(0, 99))
                 break;
             if ((*it)->GetValue(5) != 0)
                 std::shuffle(vGoodStates.begin(), vGoodStates.end(), std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
 
             int32_t nRemoveCount = (*it)->GetValue(3) + (*it)->GetValue(4) * (*it)->GetLevel();
-            for (int32_t i = 0; i < nRemoveCount; i++)
-            {
+            for (int32_t i = 0; i < nRemoveCount; i++) {
                 if (vGoodStates.empty())
                     break;
                 RemoveState(vGoodStates.back());
@@ -2544,10 +2308,8 @@ void Unit::procState(uint32_t t)
         }
     }
 
-    if (!vAddStateInfo.empty())
-    {
-        for (auto &stateInfo : vAddStateInfo)
-        {
+    if (!vAddStateInfo.empty()) {
+        for (auto &stateInfo : vAddStateInfo) {
             if (stateInfo.pTarget->IsDead() || !stateInfo.pTarget->IsInWorld())
                 continue;
 
@@ -2561,16 +2323,12 @@ void Unit::procState(uint32_t t)
 void Unit::procStateDamage(uint32_t t)
 {
     std::vector<StateDamage> vDamageList{};
-    for (auto &st : m_vStateList)
-    {
-        if (IsPlayer() || IsSummon())
-        {
+    for (auto &st : m_vStateList) {
+        if (IsPlayer() || IsSummon()) {
             auto caster = sMemoryPool.GetObjectInWorld<Unit>(st->m_hCaster[0]);
-            if (caster == nullptr)
-            {
+            if (caster == nullptr) {
                 if (st->m_nCode != StateCode::SC_GAIA_MEMBER_SHIP && st->m_nCode != StateCode::SC_NEMESIS && st->m_nCode != StateCode::SC_NEMESIS_FOR_AUTO &&
-                    st->m_nCode != StateCode::SC_FALL_FROM_SUMMON && st->IsHarmful())
-                {
+                    st->m_nCode != StateCode::SC_FALL_FROM_SUMMON && st->IsHarmful()) {
                     st->AddState(StateType::SG_NORMAL, st->m_hCaster[0], (uint16_t)st->m_nLevel[0], st->m_nStartTime[0], (uint32_t)(t - 1), st->m_nBaseDamage[0], false);
                     onUpdateState(st, false);
                     continue;
@@ -2583,8 +2341,7 @@ void Unit::procStateDamage(uint32_t t)
             continue;
         int32_t nBaseEffectID = 0;
         auto nThisFireTime = (uint32_t)(st->m_nLastProcessedTime + 100 * stateBase->fire_interval);
-        if (nThisFireTime < t && nThisFireTime <= st->m_nEndTime[0])
-        {
+        if (nThisFireTime < t && nThisFireTime <= st->m_nEndTime[0]) {
             nBaseEffectID = stateBase->base_effect_id;
             if (nBaseEffectID <= 0)
                 continue;
@@ -2593,23 +2350,22 @@ void Unit::procStateDamage(uint32_t t)
             int32_t nDamageMP = 0;
             auto elem = (ElementalType)stateBase->elemental_type;
 
-            switch (nBaseEffectID)
-            {
+            switch (nBaseEffectID) {
             case 1:
             case 2:
             case 3:
             case 4:
             case 11:
-                nDamageHP = (int32_t)(
-                    (stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
+                nDamageHP = (int32_t)((stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) +
+                    stateBase->add_damage_base);
                 break;
             case 6:
                 nDamageHP = (int32_t)((st->GetValue(0) + (st->GetValue(1) * st->GetLevel())) * GetMaxHealth());
                 nDamageMP = (int32_t)((st->GetValue(2) + (st->GetValue(3) * st->GetLevel())) * GetMaxMana());
                 break;
             case 12:
-                nDamageMP = (int32_t)(
-                    (stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) + stateBase->add_damage_base);
+                nDamageMP = (int32_t)((stateBase->add_damage_per_skl * st->GetLevel()) + (st->m_nBaseDamage[0] * (stateBase->amplify_base + (stateBase->amplify_per_skl * st->GetLevel()))) +
+                    stateBase->add_damage_base);
                 break;
             case 21:
                 nDamageHP = (stateBase->add_damage_base + (stateBase->add_damage_per_skl * st->GetLevel()));
@@ -2629,8 +2385,7 @@ void Unit::procStateDamage(uint32_t t)
                 break;
             }
 
-            if (nDamageHP != 0 || nDamageMP != 0)
-            {
+            if (nDamageHP != 0 || nDamageMP != 0) {
                 st->m_nLastProcessedTime = nThisFireTime;
                 StateDamage sd{st->m_hCaster[0], elem, nBaseEffectID, (int32_t)st->m_nCode, st->GetLevel(), nDamageHP, nDamageMP, nThisFireTime + (100 * stateBase->fire_interval) > st->m_nEndTime[0],
                     st->m_nUID};
@@ -2639,21 +2394,17 @@ void Unit::procStateDamage(uint32_t t)
         }
     }
 
-    for (auto &sd : vDamageList)
-    {
+    for (auto &sd : vDamageList) {
         auto caster = sMemoryPool.GetObjectInWorld<Unit>(sd.caster);
         int32_t nFlag = 0;
         Damage dmg{};
-        if (sd.base_effect_id < 11)
-        {
-            if (caster == nullptr)
-            {
+        if (sd.base_effect_id < 11) {
+            if (caster == nullptr) {
                 RemoveState(sd.uid);
                 continue;
             }
 
-            switch (sd.base_effect_id)
-            {
+            switch (sd.base_effect_id) {
             case 1:
                 nFlag |= 10;
                 dmg = DealPhysicalStateDamage(caster, sd.damage_hp, sd.elementalType, 0, 0, nFlag, nullptr, nullptr);
@@ -2676,10 +2427,8 @@ void Unit::procStateDamage(uint32_t t)
             }
 
             int32_t total_amount = 0;
-            for (auto &st : m_vStateList)
-            {
-                if (st->m_nUID == sd.uid)
-                {
+            for (auto &st : m_vStateList) {
+                if (st->m_nUID == sd.uid) {
                     auto stateBase = sObjectMgr.GetStateInfo((int32_t)st->m_nCode);
                     if (stateBase == nullptr)
                         continue;
@@ -2702,13 +2451,11 @@ void Unit::procStateDamage(uint32_t t)
 
             sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), statePct);
         }
-        else
-        {
+        else {
             int32_t nHealHP = 0;
             int32_t nHealMP = 0;
 
-            switch (sd.base_effect_id)
-            {
+            switch (sd.base_effect_id) {
             case 11:
                 nHealHP = Heal(sd.damage_hp);
                 break;
@@ -2731,15 +2478,12 @@ void Unit::procStateDamage(uint32_t t)
             }
 
             int32_t total_amount = 0;
-            for (auto &st : m_vStateList)
-            {
-                if (st->m_nUID == sd.uid)
-                {
+            for (auto &st : m_vStateList) {
+                if (st->m_nUID == sd.uid) {
                     int32_t ad = nHealHP;
                     if (ad == 0)
                         ad = nHealMP;
-                    if (ad != 0)
-                    {
+                    if (ad != 0) {
                         st->m_nTotalDamage += ad;
                         total_amount = st->m_nTotalDamage;
                     }
@@ -2748,8 +2492,7 @@ void Unit::procStateDamage(uint32_t t)
             }
 
             int32_t df = 0;
-            if (nHealHP != 0)
-            {
+            if (nHealHP != 0) {
 
                 TS_SC_STATE_RESULT statePct{};
                 statePct.caster_handle = sd.caster;
@@ -2766,8 +2509,7 @@ void Unit::procStateDamage(uint32_t t)
                     (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), statePct);
             }
 
-            if (nHealMP != 0)
-            {
+            if (nHealMP != 0) {
                 df = df != 0 ? -1 : 0;
                 df = total_amount & df;
 
@@ -2804,8 +2546,7 @@ Damage Unit::DealMagicalStateDamage(
 void Unit::RemoveState(StateCode code, int32_t state_level)
 {
     auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [code, state_level](State *s) { return s->m_nCode == code && s->GetLevel() <= state_level; });
-    if (state != m_vStateList.end())
-    {
+    if (state != m_vStateList.end()) {
         onUpdateState(*state, true);
         m_vStateList.erase(state);
         CalculateStat();
@@ -2818,8 +2559,7 @@ void Unit::RemoveState(int32_t uid)
 {
     auto state = std::find_if(m_vStateList.begin(), m_vStateList.end(), [uid](const State *s) { return s->m_nUID == uid; });
 
-    if (state != m_vStateList.end())
-    {
+    if (state != m_vStateList.end()) {
         onUpdateState(*state, true);
         m_vStateList.erase(state);
         CalculateStat();
@@ -2830,8 +2570,7 @@ void Unit::RemoveState(int32_t uid)
 
 void Unit::RemoveGoodState(int32_t state_level)
 {
-    for (auto &s : m_vStateList)
-    {
+    for (auto &s : m_vStateList) {
         if (!s->IsHarmful() && s->GetTimeType() != 0)
             RemoveState(s->m_nCode, state_level);
     }
@@ -2858,8 +2597,7 @@ int32_t Unit::MPHealByItem(int32_t mp)
 
 bool Unit::OnCompleteSkill()
 {
-    if (m_castingSkill != nullptr)
-    {
+    if (m_castingSkill != nullptr) {
         m_castingSkill = nullptr;
         return true;
     }
@@ -2874,8 +2612,7 @@ float Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
 void Unit::BindSkillCard(Item *pItem)
 {
     Skill *pSkill = GetSkill(pItem->GetItemTemplate()->skill_id);
-    if (pSkill != nullptr)
-    {
+    if (pSkill != nullptr) {
         pSkill->m_nEnhance = (uint32_t)pItem->GetItemInstance().GetEnhance();
         pItem->SetBindTarget(this);
         Messages::SendSkillCardInfo(dynamic_cast<Player *>(this), pItem);
@@ -2885,8 +2622,7 @@ void Unit::BindSkillCard(Item *pItem)
 void Unit::UnBindSkillCard(Item *pItem)
 {
     Skill *pSkill = GetSkill(pItem->GetItemTemplate()->skill_id);
-    if (pSkill != nullptr)
-    {
+    if (pSkill != nullptr) {
         pSkill->m_nEnhance = 0;
         pItem->SetBindTarget(nullptr);
         Messages::SendSkillCardInfo(dynamic_cast<Player *>(this), pItem);
@@ -2910,8 +2646,7 @@ bool Unit::IsVisible(const Unit *pTarget)
 
 bool Unit::IsActiveAura(Skill *pSkill) const
 {
-    for (const auto &aura : m_vAura)
-    {
+    for (const auto &aura : m_vAura) {
         if (aura.first == pSkill)
             return true;
     }
@@ -2924,18 +2659,15 @@ bool Unit::TurnOnAura(Skill *pSkill)
         return false;
 
     int32_t nToggleGroup = pSkill->GetSkillBase()->GetToggleGroup();
-    if (nToggleGroup > Skill::MAX_TOGGLE_GROUP || nToggleGroup < 0)
-    {
+    if (nToggleGroup > Skill::MAX_TOGGLE_GROUP || nToggleGroup < 0) {
         ASSERT(0, "toggle group invalid!");
         return false;
     }
 
     TS_SC_AURA msg{};
     bool bExistSameGroup{false};
-    for (auto &it : m_vAura)
-    {
-        if (it.first->GetSkillBase()->GetToggleGroup() != 0 && it.first->GetSkillBase()->GetToggleGroup() == nToggleGroup)
-        {
+    for (auto &it : m_vAura) {
+        if (it.first->GetSkillBase()->GetToggleGroup() != 0 && it.first->GetSkillBase()->GetToggleGroup() == nToggleGroup) {
             msg.caster = GetHandle();
             msg.skill_id = it.first->GetSkillId();
 
@@ -2974,10 +2706,8 @@ bool Unit::TurnOffAura(Skill *pSkill)
     if (pSkill == nullptr)
         return false;
 
-    for (auto it = m_vAura.begin(); it != m_vAura.end(); ++it)
-    {
-        if ((*it).first == pSkill)
-        {
+    for (auto it = m_vAura.begin(); it != m_vAura.end(); ++it) {
+        if ((*it).first == pSkill) {
             TS_SC_AURA msg{};
             msg.caster = GetHandle();
             msg.skill_id = (*it).first->GetSkillId();
@@ -3085,8 +2815,7 @@ void Unit::RemoveEnergy(int32_t nEnergy)
 {
     auto energy = (GetInt32Value(UNIT_FIELD_ENERGY) < nEnergy) ? GetInt32Value(UNIT_FIELD_ENERGY) : nEnergy;
 
-    if (energy >= 1)
-    {
+    if (energy >= 1) {
         SetInt32Value(UNIT_FIELD_ENERGY, GetInt32Value(UNIT_FIELD_ENERGY) - energy);
         SetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS, GetInt32Value(UNIT_FIELD_ENERGY_STARTING_POS) + energy);
 
@@ -3098,8 +2827,7 @@ void Unit::RemoveEnergy(int32_t nEnergy)
 
 int32_t Unit::GetMagicPoint(ElementalType type, bool bPhysical, bool bBad)
 {
-    if (bPhysical)
-    {
+    if (bPhysical) {
         if (bBad)
             return m_Attribute.nMagicPoint * m_BadPhysicalElementalSkillStateMod[(type)].fMagicalDamage;
 
@@ -3124,15 +2852,13 @@ float Unit::GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad)
 {
     float result = 0;
 
-    if (bPhysical)
-    {
+    if (bPhysical) {
         if (bBad)
             result = m_BadPhysicalElementalSkillStateMod[(int32_t)type].fHate;
         else
             result = m_GoodPhysicalElementalSkillStateMod[(int32_t)type].fHate;
     }
-    else
-    {
+    else {
         if (bBad)
             result = m_BadMagicalElementalSkillStateMod[(int32_t)type].fHate;
         else
@@ -3146,10 +2872,8 @@ void Unit::ProcessAddHPMPOnCritical()
     if (m_vAddHPMPOnCritical.empty())
         return;
 
-    for (const auto &it : m_vAddHPMPOnCritical)
-    {
-        if (irand(0, 99) < it.nActivationRate)
-        {
+    for (const auto &it : m_vAddHPMPOnCritical) {
+        if (irand(0, 99) < it.nActivationRate) {
             AddHealth(it.nAddHP);
             AddMana(it.nAddMP);
         }
@@ -3160,90 +2884,67 @@ void Unit::AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, boo
 {
     std::vector<_ADD_STATE_TAG> vState{};
 
-    if (bIsAttacking)
-    {
+    if (bIsAttacking) {
         if (!bIsSkill)
             vState = m_vStateByNormalAttack;
-        else
-        {
-            if (bIsPhysicalSkill)
-            {
-                if (bIsHarmful)
-                {
+        else {
+            if (bIsPhysicalSkill) {
+                if (bIsHarmful) {
                     vState = m_vStateByHarmfulPhysicalSkill;
                 }
-                else
-                {
+                else {
                     vState = m_vStateByHelpfulPhysicalSkill;
                 }
             }
-            else
-            {
-                if (bIsHarmful)
-                {
+            else {
+                if (bIsHarmful) {
                     vState = m_vStateByHarmfulMagicalSkill;
                 }
-                else
-                {
+                else {
                     vState = m_vStateByHelpfulMagicalSkill;
                 }
             }
         }
     }
-    else
-    {
+    else {
         if (!bIsSkill)
             vState = m_vStateByBeingNormalAttacked;
-        else
-        {
-            if (bIsPhysicalSkill)
-            {
-                if (bIsHarmful)
-                {
+        else {
+            if (bIsPhysicalSkill) {
+                if (bIsHarmful) {
                     vState = m_vStateByBeingHarmfulPhysicalSkilled;
                 }
-                else
-                {
+                else {
                     vState = m_vStateByBeingHelpfulPhysicalSkilled;
                 }
             }
-            else
-            {
-                if (bIsHarmful)
-                {
+            else {
+                if (bIsHarmful) {
                     vState = m_vStateByBeingHarmfulMagicalSkilled;
                 }
-                else
-                {
+                else {
                     vState = m_vStateByBeingHelpfulMagicalSkilled;
                 }
             }
         }
     }
 
-    for (const auto &itState : vState)
-    {
+    for (const auto &itState : vState) {
         Unit *pStateTarget{nullptr};
 
-        if (itState.target == ATTACKER)
-        {
-            if (bIsAttacking)
-            {
+        if (itState.target == ATTACKER) {
+            if (bIsAttacking) {
                 pStateTarget = this;
             }
-            else
-            {
+            else {
                 pStateTarget = pTarget;
             }
         }
-        else
-        {
-            if (bIsAttacking)
-            {
+        else {
+            if (bIsAttacking) {
                 pStateTarget = pTarget;
             }
-            else
-            {
+            else {
                 pStateTarget = this;
             }
         }
@@ -3270,10 +2971,8 @@ void Unit::AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, boo
 
 void Unit::RemoveStatesOnDamage()
 {
-    for (auto it = m_vStateList.begin(); it != m_vStateList.end();)
-    {
-        if (!((*it)->GetTimeType() & AF_ERASE_ON_DAMAGED) /*|| (*it).IsByEvent()*/)
-        {
+    for (auto it = m_vStateList.begin(); it != m_vStateList.end();) {
+        if (!((*it)->GetTimeType() & AF_ERASE_ON_DAMAGED) /*|| (*it).IsByEvent()*/) {
             ++it;
             continue;
         }
@@ -3300,8 +2999,7 @@ void Unit::onAfterRemoveState(State *pState)
 
 bool Unit::AddToEnemyList(uint32_t handle)
 {
-    if (std::find(m_vEnemyList.begin(), m_vEnemyList.end(), handle) != m_vEnemyList.end())
-    {
+    if (std::find(m_vEnemyList.begin(), m_vEnemyList.end(), handle) != m_vEnemyList.end()) {
         m_vEnemyList.emplace_back(handle);
         return true;
     }
@@ -3310,10 +3008,8 @@ bool Unit::AddToEnemyList(uint32_t handle)
 
 bool Unit::RemoveFromEnemyList(uint32_t handle)
 {
-    for (auto it = m_vEnemyList.begin(); it != m_vEnemyList.end(); ++it)
-    {
-        if ((*it) == handle)
-        {
+    for (auto it = m_vEnemyList.begin(); it != m_vEnemyList.end(); ++it) {
+        if ((*it) == handle) {
             m_vEnemyList.erase(it);
             return true;
         }
@@ -3342,17 +3038,13 @@ void Unit::removeStateByDead()
     std::vector<State *> removedStates{};
     RemoveStateIf([](const State *p) { return p->GetTimeType() & AF_ERASE_ON_DEAD; }, &removedStates, true);
 
-    if (IsPlayer())
-    {
-        for (auto &pState : removedStates)
-        {
-            if (!pState->IsHarmful())
-            {
+    if (IsPlayer()) {
+        for (auto &pState : removedStates) {
+            if (!pState->IsHarmful()) {
                 State::DB_InsertState(this, pState);
                 m_vStateListRemovedByDeath.emplace_back(pState);
             }
-            else
-            {
+            else {
                 // pState->Expire(this);
                 pState->DeleteThis();
             }
@@ -3368,16 +3060,12 @@ void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool b
     if (result != nullptr)
         removedStates.swap(*result);
 
-    for (it = m_vStateList.begin(), trail = it; it != m_vStateList.end(); ++it)
-    {
-        if (comparer(*it))
-        {
+    for (it = m_vStateList.begin(), trail = it; it != m_vStateList.end(); ++it) {
+        if (comparer(*it)) {
             removedStates.emplace_back(*it);
         }
-        else
-        {
-            if (trail != it)
-            {
+        else {
+            if (trail != it) {
                 *trail = *it;
             }
             ++trail;
@@ -3386,8 +3074,7 @@ void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool b
 
     m_vStateList.resize(trail - m_vStateList.begin());
 
-    for (it = removedStates.begin(); it != removedStates.end(); ++it)
-    {
+    for (it = removedStates.begin(); it != removedStates.end(); ++it) {
         onUpdateState((*it), true);
         onAfterRemoveState(*it);
     }
@@ -3402,21 +3089,17 @@ void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool b
 void Unit::RestoreRemovedStateByDeath()
 {
     auto t = sWorld.GetArTime();
-    for (auto it = m_vStateListRemovedByDeath.begin(); it != m_vStateListRemovedByDeath.end();)
-    {
+    for (auto it = m_vStateListRemovedByDeath.begin(); it != m_vStateListRemovedByDeath.end();) {
         const State *state = (*it);
-        if (GetState(state->GetCode()) || (state->GetTimeType() & AF_ERASE_ON_DEAD))
-        {
+        if (GetState(state->GetCode()) || (state->GetTimeType() & AF_ERASE_ON_DEAD)) {
             ++it;
             continue;
         }
 
-        if (state->GetEndTime() == UINT32_MAX)
-        {
+        if (state->GetEndTime() == UINT32_MAX) {
             AddState(StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), UINT32_MAX, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
         }
-        else
-        {
+        else {
             auto time_difference = sWorld.GetArTime() - GetUInt32Value(UNIT_FIELD_DEAD_TIME);
             AddState(
                 StateType::SG_NORMAL, state->GetCode(), state->m_hCaster[0], state->GetLevel(), state->GetStartTime(), time_difference, state->IsAura(), state->m_nStateValue, state->m_szStateValue);
@@ -3461,8 +3144,7 @@ void Unit::RemoveAllAura()
     if (m_vAura.empty())
         return;
 
-    for (auto &it : m_vAura)
-    {
+    for (auto &it : m_vAura) {
         TS_SC_AURA msg{};
 
         msg.caster = GetHandle();
@@ -3479,11 +3161,9 @@ void Unit::RemoveAllAura()
 
 void Unit::RemoveAllHate()
 {
-    for (auto &it : m_vEnemyList)
-    {
+    for (auto &it : m_vEnemyList) {
         auto pUnit = sMemoryPool.GetObjectInWorld<Monster>(it);
-        if (pUnit != nullptr && pUnit->IsMonster())
-        {
+        if (pUnit != nullptr && pUnit->IsMonster()) {
             auto pMonster = pUnit->As<Monster>();
             pMonster->RemoveHate(GetHandle(), pMonster->GetHate(GetHandle()));
         }
@@ -3498,10 +3178,8 @@ bool Unit::ResurrectByState()
         return false;
 
     State *pResurrectState{nullptr};
-    for (auto &state : m_vStateList)
-    {
-        if (state->GetEffectType() == SEF_RESURRECTION)
-        {
+    for (auto &state : m_vStateList) {
+        if (state->GetEffectType() == SEF_RESURRECTION) {
             if (pResurrectState == nullptr || pResurrectState->GetLevel() < state->GetLevel())
                 pResurrectState = state;
         }
@@ -3518,8 +3196,7 @@ bool Unit::ResurrectByState()
     AddMana(nIncMP);
     ClearRemovedStateByDeath();
 
-    if (IsPlayer())
-    {
+    if (IsPlayer()) {
         auto pPlayer = this->As<Player>();
         pPlayer->Save(true);
 
@@ -3535,25 +3212,19 @@ bool Unit::ResurrectByState()
 
 void Unit::PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay)
 {
-    if (bPhysical)
-    {
-        if (bHarmful)
-        {
+    if (bPhysical) {
+        if (bHarmful) {
             m_BadPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_BadPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
         }
-        else
-        {
+        else {
             m_GoodPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_GoodPhysicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
         }
     }
-    else
-    {
-        if (bHarmful)
-        {
+    else {
+        if (bHarmful) {
             m_BadMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_BadMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
         }
-        else
-        {
+        else {
             m_GoodMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCodeForDelete = m_GoodMagicalElementalSkillStateMod[nElementalType].vExhaustiveStateCode;
         }
     }
@@ -3561,25 +3232,19 @@ void Unit::PrepareRemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, i
 
 void Unit::RemoveExhaustiveSkillStateMod(bool bPhysical, bool bHarmful, int32_t nElementalType, uint32_t nOriginalCastingDelay)
 {
-    if (bPhysical)
-    {
-        if (bHarmful)
-        {
+    if (bPhysical) {
+        if (bHarmful) {
             removeExhaustiveSkillStateMod(m_BadPhysicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
         }
-        else
-        {
+        else {
             removeExhaustiveSkillStateMod(m_GoodPhysicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
         }
     }
-    else
-    {
-        if (bHarmful)
-        {
+    else {
+        if (bHarmful) {
             removeExhaustiveSkillStateMod(m_BadMagicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
         }
-        else
-        {
+        else {
             removeExhaustiveSkillStateMod(m_GoodMagicalElementalSkillStateMod[nElementalType], nOriginalCastingDelay);
         }
     }
@@ -3591,8 +3256,7 @@ void Unit::removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, 
 {
     std::vector<StateCode> vEraseList = skillStateMod.vExhaustiveStateCodeForDelete;
 
-    for (auto it = vEraseList.begin(); it != vEraseList.end(); ++it)
-    {
+    for (auto it = vEraseList.begin(); it != vEraseList.end(); ++it) {
         auto pState = GetState(*it);
         if (pState == nullptr)
             continue;
@@ -3606,10 +3270,8 @@ void Unit::removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, 
 
 float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_t nOriginalCoolTime) const
 {
-    if (bPhysical)
-    {
-        if (bBad)
-        {
+    if (bPhysical) {
+        if (bBad) {
             if (m_BadPhysicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
                 return m_BadPhysicalElementalSkillStateMod[(type)].fCastingSpeed;
             else
@@ -3622,8 +3284,7 @@ float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_
             return 1.0f;
     }
 
-    if (bBad)
-    {
+    if (bBad) {
         if (m_BadMagicalElementalSkillStateMod[(type)].nCastingSpeedApplyTime >= nOriginalCoolTime)
             return m_BadMagicalElementalSkillStateMod[(type)].fCastingSpeed;
         else
@@ -3638,8 +3299,7 @@ float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_
 
 Skill *Unit::GetSkillByEffectType(SKILL_EFFECT_TYPE nEffectTypeID) const
 {
-    for (auto pSkill : m_vSkillList)
-    {
+    for (auto pSkill : m_vSkillList) {
         if (pSkill->GetSkillBase()->GetSkillEffectType() == nEffectTypeID)
             return pSkill;
     }

@@ -21,8 +21,7 @@
 // C++ implementation of Dmitry Vyukov's lock free MPSC queue
 // http://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue
 template<typename T>
-class MPSCQueue
-{
+class MPSCQueue {
 public:
     MPSCQueue()
         : _head(new Node())
@@ -63,8 +62,7 @@ public:
     }
 
 private:
-    struct Node
-    {
+    struct Node {
         Node() = default;
 
         explicit Node(T *data)

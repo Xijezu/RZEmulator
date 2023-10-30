@@ -2,8 +2,7 @@
 
 #include "MySQLConnection.h"
 
-enum GameDatabaseStatements : uint32_t
-{
+enum GameDatabaseStatements : uint32_t {
     /*  Naming standard for defines:
 {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
 When updating more than one field, consider looking at the calling function
@@ -12,8 +11,7 @@ name for a suiting suffix.
     MAX_GAMEDATABASE_STATEMENTS
 };
 
-class GameDatabaseConnection : public MySQLConnection
-{
+class GameDatabaseConnection : public MySQLConnection {
 public:
     typedef GameDatabaseStatements Statements;
 

@@ -56,11 +56,9 @@ bool WinServiceInstall()
 {
     SC_HANDLE serviceControlManager = OpenSCManager(0, 0, SC_MANAGER_CREATE_SERVICE);
 
-    if (serviceControlManager)
-    {
+    if (serviceControlManager) {
         char path[_MAX_PATH + 10];
-        if (GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])) > 0)
-        {
+        if (GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])) > 0) {
             SC_HANDLE service;
             std::strcat(path, " --service");
             service = CreateService(serviceControlManager,
@@ -77,19 +75,16 @@ bool WinServiceInstall()
                 0, // no dependencies
                 0, // LocalSystem account
                 0); // no password
-            if (service)
-            {
+            if (service) {
                 HMODULE advapi32 = GetModuleHandle("ADVAPI32.DLL");
-                if (!advapi32)
-                {
+                if (!advapi32) {
                     CloseServiceHandle(service);
                     CloseServiceHandle(serviceControlManager);
                     return false;
                 }
 
                 CSD_T ChangeService_Config2 = (CSD_T)GetProcAddress(advapi32, "ChangeServiceConfig2A");
-                if (!ChangeService_Config2)
-                {
+                if (!ChangeService_Config2) {
                     CloseServiceHandle(service);
                     CloseServiceHandle(serviceControlManager);
                     return false;
@@ -125,14 +120,11 @@ bool WinServiceUninstall()
 {
     SC_HANDLE serviceControlManager = OpenSCManager(0, 0, SC_MANAGER_CONNECT);
 
-    if (serviceControlManager)
-    {
+    if (serviceControlManager) {
         SC_HANDLE service = OpenService(serviceControlManager, serviceName, SERVICE_QUERY_STATUS | DELETE);
-        if (service)
-        {
+        if (service) {
             SERVICE_STATUS serviceStatus2;
-            if (QueryServiceStatus(service, &serviceStatus2))
-            {
+            if (QueryServiceStatus(service, &serviceStatus2)) {
                 if (serviceStatus2.dwCurrentState == SERVICE_STOPPED)
                     DeleteService(service);
             }
@@ -146,8 +138,7 @@ bool WinServiceUninstall()
 
 void WINAPI ServiceControlHandler(DWORD controlCode)
 {
-    switch (controlCode)
-    {
+    switch (controlCode) {
     case SERVICE_CONTROL_INTERROGATE:
         break;
 
@@ -196,15 +187,13 @@ void WINAPI ServiceMain(DWORD argc, char *argv[])
 
     serviceStatusHandle = RegisterServiceCtrlHandler(serviceName, ServiceControlHandler);
 
-    if (serviceStatusHandle)
-    {
+    if (serviceStatusHandle) {
         char path[_MAX_PATH + 1];
         unsigned int i, last_slash = 0;
 
         GetModuleFileName(0, path, sizeof(path) / sizeof(path[0]));
 
-        for (i = 0; i < std::strlen(path); i++)
-        {
+        for (i = 0; i < std::strlen(path); i++) {
             if (path[i] == '\\')
                 last_slash = i;
         }
@@ -248,8 +237,7 @@ bool WinServiceRun()
 {
     SERVICE_TABLE_ENTRY serviceTable[] = {{serviceName, ServiceMain}, {0, 0}};
 
-    if (!StartServiceCtrlDispatcher(serviceTable))
-    {
+    if (!StartServiceCtrlDispatcher(serviceTable)) {
         NG_LOG_ERROR("server.worldserver", "StartService Failed. Error [%u]", ::GetLastError());
         return false;
     }

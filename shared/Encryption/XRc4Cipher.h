@@ -1,7 +1,6 @@
 #pragma once
 
-struct XRC4Cipher
-{
+struct XRC4Cipher {
 public:
     XRC4Cipher();
     virtual ~XRC4Cipher();

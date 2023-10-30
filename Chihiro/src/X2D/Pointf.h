@@ -17,23 +17,19 @@
  */
 #include "Common.h"
 
-namespace X2D
-{
-    enum CcwResult : int
-    {
+namespace X2D {
+    enum CcwResult : int {
         Parallelism = 0,
         ClockWise = 1,
         CounterClockWise = -1,
     };
 
-    struct PointBasef
-    {
+    struct PointBasef {
         float x;
         float y;
     };
 
-    class Pointf
-    {
+    class Pointf {
     public:
         Pointf() = default;
         ~Pointf() = default;

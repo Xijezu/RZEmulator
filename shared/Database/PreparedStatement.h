@@ -26,8 +26,7 @@
 #endif
 
 //- Union for data buffer (upper-level bind -> queue -> lower-level bind)
-union PreparedStatementDataUnion
-{
+union PreparedStatementDataUnion {
     bool boolean;
     uint8_t ui8;
     int8_t i8;
@@ -42,26 +41,9 @@ union PreparedStatementDataUnion
 };
 
 //- This enum helps us differ data held in above union
-enum PreparedStatementValueType
-{
-    TYPE_BOOL,
-    TYPE_UI8,
-    TYPE_UI16,
-    TYPE_UI32,
-    TYPE_UI64,
-    TYPE_I8,
-    TYPE_I16,
-    TYPE_I32,
-    TYPE_I64,
-    TYPE_FLOAT,
-    TYPE_DOUBLE,
-    TYPE_STRING,
-    TYPE_BINARY,
-    TYPE_NULL
-};
+enum PreparedStatementValueType { TYPE_BOOL, TYPE_UI8, TYPE_UI16, TYPE_UI32, TYPE_UI64, TYPE_I8, TYPE_I16, TYPE_I32, TYPE_I64, TYPE_FLOAT, TYPE_DOUBLE, TYPE_STRING, TYPE_BINARY, TYPE_NULL };
 
-struct PreparedStatementData
-{
+struct PreparedStatementData {
     PreparedStatementDataUnion data;
     PreparedStatementValueType type;
     std::vector<uint8_t> binary;
@@ -71,8 +53,7 @@ struct PreparedStatementData
 class MySQLPreparedStatement;
 
 //- Upper-level class that is used in code
-class PreparedStatement
-{
+class PreparedStatement {
     friend class PreparedStatementTask;
     friend class MySQLPreparedStatement;
     friend class MySQLConnection;
@@ -111,8 +92,7 @@ protected:
 //- Class of which the instances are unique per MySQLConnection
 //- access to these class objects is only done when a prepared statement task
 //- is executed.
-class MySQLPreparedStatement
-{
+class MySQLPreparedStatement {
     friend class MySQLConnection;
     friend class PreparedStatement;
 
@@ -155,8 +135,7 @@ private:
 };
 
 //- Lower-level class, enqueuable operation
-class PreparedStatementTask : public SQLOperation
-{
+class PreparedStatementTask : public SQLOperation {
 public:
     PreparedStatementTask(PreparedStatement *stmt, bool async = false);
     ~PreparedStatementTask();

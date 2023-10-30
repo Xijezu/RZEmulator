@@ -25,8 +25,7 @@
 struct Player;
 
 // Handle the player network
-class AuthClientSession : public XSocket
-{
+class AuthClientSession : public XSocket {
 public:
     explicit AuthClientSession(boost::asio::ip::tcp::socket &&socket);
     ~AuthClientSession();

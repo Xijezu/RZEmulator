@@ -108,15 +108,13 @@ void ObjectMgr::LoadItemResource()
                                             "enhance_1_03, enhance_1_04, skill_id, state_id, state_level, state_time, state_type, cool_time, "
                                             "cool_time_group, script_text, name_id FROM ItemResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Items. Table `ItemResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *fields = result->Fetch();
         auto itemTemplate = std::make_shared<ItemTemplate>();
 
@@ -149,8 +147,7 @@ void ObjectMgr::LoadItemResource()
         itemTemplate->endurance = fields[26].GetInt32();
         itemTemplate->material = fields[27].GetInt32();
         itemTemplate->summon_id = fields[28].GetInt32();
-        for (int32_t i = 0; i < 19; i++)
-        {
+        for (int32_t i = 0; i < 19; i++) {
             itemTemplate->flaglist[i] = fields[29 + i].GetUInt8();
         }
         itemTemplate->available_period = fields[48].GetInt32();
@@ -158,22 +155,19 @@ void ObjectMgr::LoadItemResource()
         itemTemplate->throw_range = fields[50].GetFloat();
         itemTemplate->distribute_type = fields[51].GetUInt8();
         int32_t y = 52;
-        for (int32_t i = 0; i < 4; i++)
-        {
+        for (int32_t i = 0; i < 4; i++) {
             itemTemplate->base_type[i] = fields[y++].GetInt16();
             itemTemplate->base_var[i][0] = fields[y++].GetFloat();
             itemTemplate->base_var[i][1] = fields[y++].GetFloat();
         }
         y = 64;
-        for (int32_t i = 0; i < 4; i++)
-        {
+        for (int32_t i = 0; i < 4; i++) {
             itemTemplate->opt_type[i] = fields[y++].GetInt16();
             itemTemplate->opt_var[i][0] = fields[y++].GetFloat();
             itemTemplate->opt_var[i][1] = fields[y++].GetFloat();
         }
         y = 76;
-        for (int32_t i = 0; i < 2; i++)
-        {
+        for (int32_t i = 0; i < 2; i++) {
             itemTemplate->enhance_id[i] = fields[y++].GetInt16();
             itemTemplate->_enhance[i][0] = fields[y++].GetFloat();
             itemTemplate->_enhance[i][1] = fields[y++].GetFloat();
@@ -205,15 +199,13 @@ void ObjectMgr::LoadMonsterResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM MonsterResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Monstertemplates. Table `MonsterResource` is empty!");
         return;
     }
 
     uint32_t count = 0, y = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
         MonsterBase base{};
@@ -231,8 +223,7 @@ void ObjectMgr::LoadMonsterResource()
         base.race = field[idx++].GetInt32();
         base.visible_range = field[idx++].GetInt32() * 12;
         base.chase_range = field[idx++].GetInt32();
-        for (auto &curr : base.flag)
-        {
+        for (auto &curr : base.flag) {
             curr = field[idx++].GetInt32();
         }
         base.monster_type = field[idx++].GetInt32();
@@ -262,8 +253,7 @@ void ObjectMgr::LoadMonsterResource()
         base.taming_id = field[idx++].GetInt32();
         base.taming_percentage = field[idx++].GetFloat();
         base.taming_exp_mod = field[idx++].GetFloat();
-        for (y = 0; y < 2; y++)
-        {
+        for (y = 0; y < 2; y++) {
             base.exp[y] = field[idx++].GetInt32();
             base.jp[y] = field[idx++].GetInt32();
             if (y == 0)
@@ -275,8 +265,7 @@ void ObjectMgr::LoadMonsterResource()
             base.chaos_min[y] = field[idx++].GetInt32();
             base.chaos_max[y] = field[idx++].GetInt32();
         }
-        for (y = 0; y < 10; y++)
-        {
+        for (y = 0; y < 10; y++) {
             base.drop_item_id[y] = field[idx++].GetInt32();
             base.drop_percentage[y] = (int32_t)(field[idx++].GetFloat() * 100000000);
             base.drop_min_count[y] = field[idx++].GetInt32();
@@ -284,8 +273,7 @@ void ObjectMgr::LoadMonsterResource()
             base.drop_min_level[y] = field[idx++].GetInt32();
             base.drop_max_level[y] = field[idx++].GetInt32();
         }
-        for (y = 0; y < 4; y++)
-        {
+        for (y = 0; y < 4; y++) {
             base.skill_id[y] = field[idx++].GetInt32();
             base.skill_lv[y] = field[idx++].GetInt32();
             base.skill_probability[y] = field[idx++].GetFloat();
@@ -302,15 +290,13 @@ void ObjectMgr::LoadQuestResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM QuestResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Quests. Table `QuestResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
 
@@ -339,8 +325,7 @@ void ObjectMgr::LoadQuestResource()
         q.nInvokeCondition = field[idx++].GetInt32();
         q.nInvokeValue = field[idx++].GetInt32();
         q.nType = (QuestType)field[idx++].GetInt32();
-        for (int32_t &i : q.nValue)
-        {
+        for (int32_t &i : q.nValue) {
             i = field[idx++].GetInt32();
         }
         q.nDropGroupID = field[idx++].GetInt32();
@@ -354,14 +339,12 @@ void ObjectMgr::LoadQuestResource()
         q.DefaultReward.nItemCode = field[idx++].GetInt32();
         q.DefaultReward.nLevel = field[idx++].GetInt32();
         q.DefaultReward.nQuantity = field[idx++].GetInt32();
-        for (auto &i : q.OptionalReward)
-        {
+        for (auto &i : q.OptionalReward) {
             i.nItemCode = field[idx++].GetInt32();
             i.nLevel = field[idx++].GetInt32();
             i.nQuantity = field[idx++].GetInt32();
         }
-        for (int32_t &i : q.nForeQuest)
-        {
+        for (int32_t &i : q.nForeQuest) {
             i = field[idx++].GetInt32();
         }
         q.bForceCheckType = field[idx++].GetUInt8() != 0;
@@ -396,15 +379,13 @@ void ObjectMgr::LoadFieldPropResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM FieldPropResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 FieldProps. Table `FieldPropResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
 
@@ -429,15 +410,13 @@ void ObjectMgr::LoadFieldPropResource()
         int32_t limit_magician = field[idx++].GetUInt8();
         int32_t limit_summoner = field[idx++].GetUInt8();
         propTemplate.nLimitJobID = field[idx++].GetInt32();
-        for (int32_t i = 0; i < 2; i++)
-        {
+        for (int32_t i = 0; i < 2; i++) {
             propTemplate.nActivateID[i] = field[idx++].GetInt32();
             propTemplate.nActivateValue[i][0] = field[idx++].GetInt32();
             propTemplate.nActivateValue[i][1] = field[idx++].GetInt32();
         }
         propTemplate.nActivateSkillID = field[idx++].GetInt32();
-        for (auto &i : propTemplate.drop_info)
-        {
+        for (auto &i : propTemplate.drop_info) {
             i.code = field[idx++].GetInt32();
             i.ratio = (int32_t)(field[idx++].GetFloat() * 100000000);
             i.min_count = field[idx++].GetInt32();
@@ -476,15 +455,13 @@ void ObjectMgr::LoadQuestLinkResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM QuestLinkResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 QuestLinks. Table `QuestLinkResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
 
@@ -510,21 +487,18 @@ void ObjectMgr::LoadDropGroupResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM DropGroupResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 DropGroups. Table `DropGroupResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
         DropGroup dg{};
         dg.uid = field[idx++].GetInt32();
-        for (int32_t i = 0; i < MAX_DROP_GROUP; i++)
-        {
+        for (int32_t i = 0; i < MAX_DROP_GROUP; i++) {
             dg.drop_item_id[i] = field[idx++].GetInt32();
             dg.drop_percentage[i] = (int32_t)(field[idx++].GetFloat() * 100000000);
         }
@@ -539,15 +513,13 @@ void ObjectMgr::LoadSkillTreeResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM SkillTreeResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Skilltrees. Table `SkillTreeResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
         SkillTreeBase base{};
@@ -558,8 +530,7 @@ void ObjectMgr::LoadSkillTreeResource()
         base.lv = field[idx++].GetInt32();
         base.job_lv = field[idx++].GetInt32();
         base.jp_ratio = field[idx++].GetFloat();
-        for (int32_t i = 0; i < 3; i++)
-        {
+        for (int32_t i = 0; i < 3; i++) {
             base.need_skill_id[i] = field[idx++].GetInt32();
             base.need_skill_lv[i] = field[idx++].GetInt32();
         }
@@ -574,15 +545,13 @@ void ObjectMgr::LoadSkillResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM SkillResource");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Skills. Table `SkillResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         int32_t idx = 0;
         Field *field = result->Fetch();
         SkillBase base{};
@@ -685,8 +654,7 @@ void ObjectMgr::LoadSkillResource()
         base.hate_per_enhance = field[idx++].GetFloat();
         base.critical_bonus = field[idx++].GetInt32();
         base.critical_bonus_per_skl = field[idx++].GetInt32();
-        for (float &i : base.var)
-        {
+        for (float &i : base.var) {
             i = field[idx++].GetFloat();
         }
         idx += 2;
@@ -704,15 +672,13 @@ void ObjectMgr::LoadDungeonResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM DungeonResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Dungeons. Table `DungeonResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
         DungeonTemplate base{};
@@ -768,15 +734,13 @@ void ObjectMgr::LoadLevelResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM LevelResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Leveltemplates. DB packetHandler `LevelResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         LevelResourceTemplate base{};
         base.level = field[0].GetInt32();
@@ -794,15 +758,13 @@ void ObjectMgr::LoadStateResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM StateResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 States. Table `StateResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
         StateTemplate state{};
@@ -839,15 +801,13 @@ void ObjectMgr::LoadStatResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, str, vit, dex, agi, `int`, men, luk FROM StatResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Stats. Table `StatResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         CreatureStat stat{};
         stat.stat_id = field[0].GetInt16();
@@ -869,8 +829,7 @@ void ObjectMgr::LoadMarketResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT sort_id, name, code, price_ratio, huntaholic_ratio FROM MarketResource ORDER BY name, sort_id;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Markettemplates. Table `MarketResource` is empty!");
         return;
     }
@@ -878,8 +837,7 @@ void ObjectMgr::LoadMarketResource()
     uint32_t count = 0;
     std::string lastMarket{};
     std::vector<MarketInfo> vContainer{};
-    do
-    {
+    do {
         Field *field = result->Fetch();
 
         MarketInfo info{};
@@ -896,8 +854,7 @@ void ObjectMgr::LoadMarketResource()
         if (lastMarket.empty())
             lastMarket = info.name;
 
-        if (lastMarket != info.name)
-        {
+        if (lastMarket != info.name) {
             _marketResourceStore[lastMarket] = vContainer;
             lastMarket = info.name;
             vContainer.clear();
@@ -918,15 +875,13 @@ void ObjectMgr::LoadJobResource()
     QueryResult result = GameDatabase.Query("SELECT id, stati_id, job_class, job_depth, up_lv, up_jlv,"
                                             "available_job_0, available_job_1, available_job_2,"
                                             "available_job_3 FROM JobResource;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Jobs. Table `JobResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         int32_t i = 0;
         Field *field = result->Fetch();
         JobResourceTemplate job{};
@@ -936,8 +891,7 @@ void ObjectMgr::LoadJobResource()
         job.job_depth = field[i++].GetUInt32();
         job.up_lv = field[i++].GetInt32();
         job.up_jlv = field[i++].GetInt32();
-        for (int32_t &j : job.available_job)
-        {
+        for (int32_t &j : job.available_job) {
             j = field[i++].GetInt32();
         }
         _jobTemplateStore[job.id] = job;
@@ -951,15 +905,13 @@ void ObjectMgr::LoadSummonLevelResource()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT level, normal_exp FROM SummonLevelResource ORDER BY level ASC");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLeveltemplates. Table `SummonLevelResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         auto level = field[0].GetInt32();
         auto exp = field[1].GetUInt64();
@@ -974,15 +926,13 @@ void ObjectMgr::LoadSummonLevelBonus()
 {
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT summon_id, strength, vital, dexterity, agility, intelligence, mentality, luck FROM CreatureLevelBonus;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonLevelBonus templates. Table `CreatureLevelBonus` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         SummonLevelBonus bonus{};
 
@@ -1011,22 +961,19 @@ void ObjectMgr::LoadJobLevelBonus()
                                             "strength_2, vital_2, dexterity_2, agility_2, intelligence_2, mentality_2, luck_2, "
                                             "strength_3, vital_3, dexterity_3, agility_3, intelligence_3, mentality_3, luck_3 "
                                             "FROM JobLevelBonus;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 job level bonus templates. Table `JobLevelBonus` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         JobLevelBonusTemplate bonus{};
 
         int32_t i = 0, j = 0;
         bonus.job_id = field[i++].GetInt32();
-        for (j = 0; j < 4; j++)
-        {
+        for (j = 0; j < 4; j++) {
             bonus.strength[j] = field[i++].GetFloat();
             bonus.vital[j] = field[i++].GetFloat();
             bonus.dexterity[j] = field[i++].GetFloat();
@@ -1047,15 +994,13 @@ void ObjectMgr::LoadNPCResource()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, x, y, z, face, local_flag, contact_script, spawn_type FROM NPCResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 NPCs. Table `NPCResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         NPCTemplate npc{};
         // SELECT id, x, y, z, face, local_flag, contact_script FROM npcresource;
@@ -1080,23 +1025,19 @@ void ObjectMgr::LoadSkillJP()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM SkillJPResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 SkillJPTemplates. Table `SkillJPResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t off = 0;
         int32_t skill_id = field[off++].GetInt32();
         SkillBase *sb = &_skillBaseStore[skill_id];
-        if (sb->id != 0)
-        {
-            for (int32_t &v : sb->m_need_jp)
-            {
+        if (sb->id != 0) {
+            for (int32_t &v : sb->m_need_jp) {
                 v = field[off++].GetInt32();
             }
         }
@@ -1110,15 +1051,13 @@ void ObjectMgr::LoadWorldLocation()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT id, location_type, time_id, weather_id, weather_ratio, weather_change_time FROM WorldLocation;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 WorldLocation templates. Table `WorldLocation` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         auto idx = field[0].GetUInt32();
         auto location_type = field[1].GetUInt8();
@@ -1137,15 +1076,13 @@ void ObjectMgr::LoadEnhanceResource()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM EnhanceResource");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Enhancetemplates. Table `EnhanceResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
 
@@ -1156,12 +1093,10 @@ void ObjectMgr::LoadEnhanceResource()
         info.nMaxEnhance = field[idx++].GetInt32();
         info.nLocalFlag = field[idx++].GetUInt32();
         info.nNeedItemCode = field[idx++].GetInt32();
-        for (auto &perc : info.fPercentage)
-        {
+        for (auto &perc : info.fPercentage) {
             perc = field[idx++].GetFloat();
         }
-        if ((GameRule::GetLocalFlag() & info.nLocalFlag) != 0)
-        {
+        if ((GameRule::GetLocalFlag() & info.nLocalFlag) != 0) {
             sMixManager.RegisterEnhanceInfo(info);
         }
 
@@ -1175,35 +1110,29 @@ void ObjectMgr::LoadMixResource()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT * FROM MixResource");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Mixtemplates. Table `MixResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         int32_t idx = 0;
 
         MixBase info{};
         info.id = field[idx++].GetInt32();
         info.type = field[idx++].GetInt32();
-        for (int32_t &i : info.value)
-        {
+        for (int32_t &i : info.value) {
             i = field[idx++].GetInt32();
         }
         info.sub_material_cnt = field[idx++].GetInt32();
-        for (int32_t i = 0; i < MATERIAL_INFO_COUNT; ++i)
-        {
+        for (int32_t i = 0; i < MATERIAL_INFO_COUNT; ++i) {
             info.main_material.type[i] = field[idx++].GetInt32();
             info.main_material.value[i] = field[idx++].GetInt32();
         }
-        for (auto &i : info.sub_material)
-        {
-            for (int32_t j = 0; j < MATERIAL_INFO_COUNT; ++j)
-            {
+        for (auto &i : info.sub_material) {
+            for (int32_t j = 0; j < MATERIAL_INFO_COUNT; ++j) {
                 i.type[j] = field[idx++].GetInt32();
                 i.value[j] = field[idx++].GetInt32();
             }
@@ -1222,15 +1151,13 @@ void ObjectMgr::LoadSummonResource()
                                             "walk_speed, run_speed, is_riding_only, attack_range, material, weapon_type,"
                                             "form, evolve_target, card_id FROM SummonResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Summons. Table `SummonResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
         SummonResourceTemplate summon{};
         int32_t i = 0;
@@ -1263,15 +1190,13 @@ void ObjectMgr::LoadStringResource()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT code, value FROM StringResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Strings. Table `StringResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
 
         int32_t code = field[0].GetInt32();
@@ -1288,15 +1213,13 @@ void ObjectMgr::LoadSummonNameResource()
     uint32_t oldMSTime = getMSTime();
     QueryResult result = GameDatabase.Query("SELECT is_post_fix, text_id FROM SummonDefaultNameResource;");
 
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 SummonDefaultNames. Table `SummonDefaultNameResource` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         Field *field = result->Fetch();
 
         bool isPostFix = field[0].GetInt32() != 0;
@@ -1337,10 +1260,8 @@ void ObjectMgr::AddWayPoint(int32_t waypoint_id, float x, float y)
     Position pos{};
     pos.Relocate(x, y, 0);
 
-    for (auto &wpi : g_vWayPoint)
-    {
-        if (wpi.first == waypoint_id)
-        {
+    for (auto &wpi : g_vWayPoint) {
+        if (wpi.first == waypoint_id) {
             wpi.second.vWayPoint.emplace_back(pos);
             return;
         }
@@ -1356,8 +1277,7 @@ void ObjectMgr::AddWayPoint(int32_t waypoint_id, float x, float y)
 
 void ObjectMgr::SetWayPointType(int32_t waypoint_id, int32_t type)
 {
-    for (const auto &wpi : g_vWayPoint)
-    {
+    for (const auto &wpi : g_vWayPoint) {
         if (wpi.first == waypoint_id)
             return;
     }
@@ -1394,12 +1314,9 @@ void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
 CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[])
 {
     CreatureStat stat{};
-    if (depth >= 0)
-    {
-        for (int32_t i = 0; i < 4; i++)
-        {
-            if (_jobBonusStore.count((uint32_t)jobs[i]))
-            {
+    if (depth >= 0) {
+        for (int32_t i = 0; i < 4; i++) {
+            if (_jobBonusStore.count((uint32_t)jobs[i])) {
                 auto jlb = _jobBonusStore[jobs[i]];
 
                 float v1 = (levels[i] - 20);
@@ -1462,10 +1379,8 @@ int32_t ObjectMgr::GetNeedJpForJobLevelUp(const int32_t jlv, const int32_t depth
 
 void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
 {
-    for (auto &stg : _skillTreeResourceStore)
-    {
-        if (stg.skill_id == base.skill_id && stg.job_id == base.job_id)
-        {
+    for (auto &stg : _skillTreeResourceStore) {
+        if (stg.skill_id == base.skill_id && stg.job_id == base.job_id) {
             stg.skillTrees.emplace_back(base);
             return;
         }
@@ -1480,12 +1395,9 @@ void ObjectMgr::RegisterSkillTree(SkillTreeBase base)
 std::vector<SkillTreeBase> ObjectMgr::getSkillTree(int32_t job_id)
 {
     std::vector<SkillTreeBase> skills{};
-    for (auto &stg : _skillTreeResourceStore)
-    {
-        if (stg.job_id == job_id)
-        {
-            for (auto st : stg.skillTrees)
-            {
+    for (auto &stg : _skillTreeResourceStore) {
+        if (stg.job_id == job_id) {
+            for (auto st : stg.skillTrees) {
                 skills.emplace_back(st);
             }
         }
@@ -1498,12 +1410,9 @@ int32_t ObjectMgr::GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_leve
     auto pSkillBase = GetSkillBase((uint32_t)skill_id);
     std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
     float jp_ratio = -1.0f;
-    if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty())
-    {
-        for (auto st : trees)
-        {
-            if (st.skill_id == skill_id && st.max_skill_lv >= skill_level)
-            {
+    if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty()) {
+        for (auto st : trees) {
+            if (st.skill_id == skill_id && st.max_skill_lv >= skill_level) {
                 jp_ratio = st.jp_ratio;
             }
         }
@@ -1557,8 +1466,7 @@ QuestBaseServer *ObjectMgr::GetQuestBase(int32_t code)
 
 bool ObjectMgr::checkQuestTypeFlag(QuestType type, int32_t flag)
 {
-    switch (type)
-    {
+    switch (type) {
     case QuestType::QUEST_MISC:
         return (flag & 1) != 0;
 
@@ -1623,8 +1531,7 @@ CreatureStat ObjectMgr::GetSummonLevelBonus(int32_t summon_code, int32_t growth_
 
     CreatureStat stat{};
     auto bonus = _summonBonusStore[summon_code];
-    if (growth_depth != 1)
-    {
+    if (growth_depth != 1) {
         level = level - 50 * growth_depth + 51;
     }
 

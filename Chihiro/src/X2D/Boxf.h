@@ -18,10 +18,8 @@
 #include "Common.h"
 #include "Pointf.h"
 
-namespace X2D
-{
-    class Boxf
-    {
+namespace X2D {
+    class Boxf {
     public:
         Boxf() = default;
         ~Boxf() = default;

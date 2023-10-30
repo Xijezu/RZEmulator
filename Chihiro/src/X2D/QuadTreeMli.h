@@ -20,22 +20,18 @@
 #include "MapLocationInfo.h"
 #include "RectangleF.h"
 
-namespace X2D
-{
-    class QuadTreeMli : public Boxf
-    {
+namespace X2D {
+    class QuadTreeMli : public Boxf {
     public:
         QuadTreeMli() = default;
         ~QuadTreeMli() = default;
 
-        class FunctorAdaptor
-        {
+        class FunctorAdaptor {
         public:
             std::vector<MapLocationInfo> pResult{};
         };
 
-        class Node : public Rectf
-        {
+        class Node : public Rectf {
         public:
             Node() = default;
             bool Add(MapLocationInfo u);

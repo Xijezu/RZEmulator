@@ -4,8 +4,7 @@
 #include "SharedMutex.h"
 
 template<class T>
-class HashMapHolder
-{
+class HashMapHolder {
 public:
     typedef std::unordered_map<uint32_t, T *> MapType;
 

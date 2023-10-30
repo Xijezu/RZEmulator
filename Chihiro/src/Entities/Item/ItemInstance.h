@@ -19,8 +19,7 @@
 #include "Common.h"
 #include "ItemTemplate.hpp"
 
-class ItemInstance
-{
+class ItemInstance {
 public:
     void Copy(const ItemInstance &pFrom)
     {

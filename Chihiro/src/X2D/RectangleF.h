@@ -19,10 +19,8 @@
 #include "Linef.h"
 #include "Pointf.h"
 
-namespace X2D
-{
-    class Rectf
-    {
+namespace X2D {
+    class Rectf {
     public:
         Rectf() = default;
         ~Rectf() = default;
@@ -33,8 +31,7 @@ namespace X2D
         X2D::Pointf pos{}, size{};
     };
 
-    class RectangleF
-    {
+    class RectangleF {
     public:
         RectangleF() = default;
         ~RectangleF() = default;

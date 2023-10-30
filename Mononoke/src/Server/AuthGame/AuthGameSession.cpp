@@ -33,13 +33,10 @@ AuthGameSession::AuthGameSession(boost::asio::ip::tcp::socket &&socket)
 
 AuthGameSession::~AuthGameSession()
 {
-    if (m_pGame)
-    {
-        if (m_bIsAuthed)
-        {
+    if (m_pGame) {
+        if (m_bIsAuthed) {
             auto g = sGameMapList.GetGame(m_pGame->server_idx);
-            if (g != nullptr)
-            {
+            if (g != nullptr) {
                 sGameMapList.RemoveGame(g->server_idx);
             }
         }
@@ -53,15 +50,12 @@ void AuthGameSession::OnClose()
     if (m_pGame == nullptr)
         return;
     auto g = sGameMapList.GetGame(m_pGame->server_idx);
-    if (g != nullptr && g->server_name == m_pGame->server_name)
-    {
+    if (g != nullptr && g->server_name == m_pGame->server_name) {
         {
             NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
             auto map = sPlayerMapList.GetMap();
-            for (auto &player : *map)
-            {
-                if (player.second->nGameIDX == g->server_idx)
-                {
+            for (auto &player : *map) {
+                if (player.second->nGameIDX == g->server_idx) {
                     map->erase(player.second->szLoginName);
                     delete player.second;
                 }
@@ -72,14 +66,9 @@ void AuthGameSession::OnClose()
     }
 }
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct GameHandler
-{
+typedef struct GameHandler {
     int cmd;
     eStatus status;
     std::function<void(AuthGameSession *, XPacket *)> handler;
@@ -115,18 +104,15 @@ ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     auto _cmd = pGamePct->GetPacketID();
     int i = 0;
 
-    for (i = 0; i < tableSize; i++)
-    {
-        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED)))
-        {
+    for (i = 0; i < tableSize; i++) {
+        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED))) {
             packetHandler[i].handler(this, pGamePct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == tableSize)
-    {
+    if (i == tableSize) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
@@ -146,16 +132,14 @@ void AuthGameSession::HandleGameLogin(const TS_GA_LOGIN *pGamePct)
     auto pGame = sGameMapList.GetGame(m_pGame->server_idx);
     TS_AG_LOGIN_RESULT resultPct;
 
-    if (pGame == nullptr)
-    {
+    if (pGame == nullptr) {
         m_bIsAuthed = true;
         sGameMapList.AddGame(m_pGame);
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d registered.", m_pGame->server_name.c_str(), m_pGame->server_idx, m_pGame->server_ip.c_str(), m_pGame->server_port);
         resultPct.result = TS_RESULT_SUCCESS;
         SendPacket(resultPct);
     }
-    else
-    {
+    else {
         m_bIsAuthed = false;
         NG_LOG_INFO("server.authserver", "Gameserver <%s> [Idx: %d] at %s:%d already in list!", m_pGame->server_name.c_str(), m_pGame->server_idx, m_pGame->server_ip.c_str(), m_pGame->server_port);
         resultPct.result = TS_RESULT_ACCESS_DENIED;
@@ -169,15 +153,12 @@ void AuthGameSession::HandleClientLogin(const TS_GA_CLIENT_LOGIN *pGamePct)
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
     uint16_t result = TS_RESULT_ACCESS_DENIED;
 
-    if (p != nullptr)
-    {
-        if (pGamePct->one_time_key == p->nOneTimeKey)
-        {
+    if (p != nullptr) {
+        if (pGamePct->one_time_key == p->nOneTimeKey) {
             p->bIsInGame = true;
             result = TS_RESULT_SUCCESS;
         }
-        else
-        {
+        else {
             NG_LOG_ERROR("network", "AuthGameSession::HandleClientLogin: Client [%d:%s] tried to login with wrong key!!!", p->nAccountID, p->szLoginName.c_str());
         }
     }
@@ -201,8 +182,7 @@ void AuthGameSession::HandleClientLogin(const TS_GA_CLIENT_LOGIN *pGamePct)
 void AuthGameSession::HandleClientLogout(const TS_GA_CLIENT_LOGOUT *pGamePct)
 {
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
-    if (p != nullptr)
-    {
+    if (p != nullptr) {
         sPlayerMapList.RemovePlayer(pGamePct->account);
         delete p;
     }
@@ -211,8 +191,7 @@ void AuthGameSession::HandleClientLogout(const TS_GA_CLIENT_LOGOUT *pGamePct)
 void AuthGameSession::HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *pGamePct)
 {
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
-    if (p != nullptr)
-    {
+    if (p != nullptr) {
         sPlayerMapList.RemovePlayer(pGamePct->account);
         delete p;
     }

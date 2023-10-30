@@ -23,8 +23,7 @@
 class XPacket;
 
 // Handle login commands
-class AuthGameSession : public XSocket
-{
+class AuthGameSession : public XSocket {
 public:
     explicit AuthGameSession(boost::asio::ip::tcp::socket &&socket);
     ~AuthGameSession();

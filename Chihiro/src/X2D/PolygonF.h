@@ -20,10 +20,8 @@
 #include "Linef.h"
 #include "RectangleF.h"
 
-namespace X2D
-{
-    class Polygonf : public Rectf
-    {
+namespace X2D {
+    class Polygonf : public Rectf {
     public:
         Polygonf() = default;
         bool Set(Pointf _begin, Pointf _end) override;
@@ -48,8 +46,7 @@ namespace X2D
         Boxf m_bxArea{};
     };
 
-    class PolygonF
-    {
+    class PolygonF {
     public:
         PolygonF() = default;
         ~PolygonF() = default;

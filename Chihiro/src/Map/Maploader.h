@@ -21,8 +21,7 @@
 #include "TerrainPropInfo.h"
 #include "TerrainSeamlessWorld.h"
 
-struct LocationInfoHeader
-{
+struct LocationInfoHeader {
     int32_t nPriority;
     float x;
     float y;
@@ -30,8 +29,7 @@ struct LocationInfoHeader
     float fRadius;
 };
 
-struct NfsHeader
-{
+struct NfsHeader {
     std::string szSign; // Data           :   this+0x0, Member, Type: char[0x10], szSign
     uint32_t dwVersion;
     uint32_t dwEventLocationOffset;
@@ -39,8 +37,7 @@ struct NfsHeader
     uint32_t dwPropScriptOffset;
 };
 
-struct ScriptRegion
-{
+struct ScriptRegion {
     float left;
     float top;
     float right;
@@ -48,22 +45,19 @@ struct ScriptRegion
     std::string szName;
 };
 
-struct ScriptTag
-{
+struct ScriptTag {
     int32_t nTrigger;
     std::string strFunction;
 };
 
-struct ScriptRegionInfo
-{
+struct ScriptRegionInfo {
     int32_t nRegionIndex;
     std::vector<ScriptTag> vInfoList;
 };
 
 class ByteBuffer;
 
-class Maploader
-{
+class Maploader {
 public:
     static Maploader &Instance()
     {

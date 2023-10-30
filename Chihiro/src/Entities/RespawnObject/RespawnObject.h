@@ -19,8 +19,7 @@
 #include "GameRule.h"
 #include "Monster.h"
 
-struct RespawnInfo : public MonsterRespawnInfo
-{
+struct RespawnInfo : public MonsterRespawnInfo {
     explicit RespawnInfo(MonsterRespawnInfo info)
         : MonsterRespawnInfo(info)
         , count(0)
@@ -33,8 +32,7 @@ struct RespawnInfo : public MonsterRespawnInfo
     uint32_t prespawn_count;
 };
 
-class RespawnObject : public MonsterDeleteHandler
-{
+class RespawnObject : public MonsterDeleteHandler {
 public:
     explicit RespawnObject(MonsterRespawnInfo rh);
     ~RespawnObject() = default;

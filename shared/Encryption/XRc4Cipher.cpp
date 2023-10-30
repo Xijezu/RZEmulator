@@ -2,9 +2,7 @@
 
 #include "rc4_cipher.h"
 
-struct XRC4Cipher::TImpl : public RC4Cipher
-{
-};
+struct XRC4Cipher::TImpl : public RC4Cipher {};
 
 XRC4Cipher::XRC4Cipher()
 {

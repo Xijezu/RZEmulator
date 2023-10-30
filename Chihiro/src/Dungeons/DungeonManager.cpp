@@ -19,8 +19,7 @@
 
 Position DungeonManager::GetRaidStartPosition(int32_t nDungeonID)
 {
-    for (auto &dt : m_vDungeonInfo)
-    {
+    for (auto &dt : m_vDungeonInfo) {
         if (dt.id == nDungeonID)
             return dt.raid_start_pos;
     }
@@ -29,8 +28,7 @@ Position DungeonManager::GetRaidStartPosition(int32_t nDungeonID)
 
 int32_t DungeonManager::GetDungeonID(float x, float y)
 {
-    for (auto &dt : m_vDungeonInfo)
-    {
+    for (auto &dt : m_vDungeonInfo) {
         if (dt.box.IsInclude(x, y))
             return dt.id;
     }

@@ -27,8 +27,7 @@ class DatabaseWorkerPool;
 
 // A helper class to initiate all database worker pools,
 // handles updating, delays preparing of statements and cleans up on failure.
-class DatabaseLoader
-{
+class DatabaseLoader {
 public:
     DatabaseLoader(std::string const &logger, uint32_t const defaultUpdateMask);
 
@@ -39,8 +38,7 @@ public:
     // Load all databases
     bool Load();
 
-    enum DatabaseTypeFlags
-    {
+    enum DatabaseTypeFlags {
         DATABASE_NONE = 0,
 
         DATABASE_LOGIN = 1,

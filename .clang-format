@@ -1,3 +1,4 @@
+BasedOnStyle: LLVM
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignEscapedNewlines: Left
@@ -11,7 +12,7 @@ AlwaysBreakTemplateDeclarations: true
 AlignOperands: false
 AlignTrailingComments: false
 BreakAfterJavaFieldAnnotations: true
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Stroustrup
 BreakInheritanceList: AfterColon
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: false

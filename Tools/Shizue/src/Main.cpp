@@ -17,8 +17,7 @@ int main(int argc, char **argv)
     // Making sure the args are there
 
     auto [bSuccess, ioContext] = NGemity::InitFramework("luna.conf", "Luna", argc, argv);
-    if (!bSuccess)
-    {
+    if (!bSuccess) {
         return -1;
     }
 

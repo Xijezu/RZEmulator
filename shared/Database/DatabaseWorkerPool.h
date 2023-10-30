@@ -30,15 +30,9 @@ class SQLOperation;
 struct MySQLConnectionInfo;
 
 template<class T>
-class DatabaseWorkerPool
-{
+class DatabaseWorkerPool {
 private:
-    enum InternalIndex
-    {
-        IDX_ASYNC,
-        IDX_SYNCH,
-        IDX_SIZE
-    };
+    enum InternalIndex { IDX_ASYNC, IDX_SYNCH, IDX_SIZE };
 
 public:
     /* Activity state*/
@@ -68,7 +62,7 @@ public:
     //! Enqueues a one-way SQL operation in string format -with variable args- that will be executed asynchronously.
     //! This method should only be used for queries that are only executed once, e.g during startup.
     template<typename Format, typename... Args>
-    void PExecute(Format &&sql, Args &&... args)
+    void PExecute(Format &&sql, Args &&...args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
             return;
@@ -91,7 +85,7 @@ public:
     //! Directly executes a one-way SQL operation in string format -with variable args-, that will block the calling thread until finished.
     //! This method should only be used for queries that are only executed once, e.g during startup.
     template<typename Format, typename... Args>
-    void DirectPExecute(Format &&sql, Args &&... args)
+    void DirectPExecute(Format &&sql, Args &&...args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
             return;
@@ -114,7 +108,7 @@ public:
     //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
     //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
     template<typename Format, typename... Args>
-    QueryResult PQuery(Format &&sql, T *conn, Args &&... args)
+    QueryResult PQuery(Format &&sql, T *conn, Args &&...args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
             return QueryResult(nullptr);
@@ -125,7 +119,7 @@ public:
     //! Directly executes an SQL query in string format -with variable args- that will block the calling thread until finished.
     //! Returns reference counted auto pointer, no need for manual memory management in upper level code.
     template<typename Format, typename... Args>
-    QueryResult PQuery(Format &&sql, Args &&... args)
+    QueryResult PQuery(Format &&sql, Args &&...args)
     {
         if (NGemity::IsFormatEmptyOrNull(sql))
             return QueryResult(nullptr);

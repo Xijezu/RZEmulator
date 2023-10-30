@@ -30,12 +30,9 @@
 #define IoContextBase io_service
 #endif
 
-namespace NGemity
-{
-    namespace Asio
-    {
-        class IoContext : public IoContextBaseNamespace::IoContextBase
-        {
+namespace NGemity {
+    namespace Asio {
+        class IoContext : public IoContextBaseNamespace::IoContextBase {
             using IoContextBaseNamespace::IoContextBase::IoContextBase;
         };
 

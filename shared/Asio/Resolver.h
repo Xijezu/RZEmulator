@@ -19,10 +19,8 @@
 
 #include <boost/asio/ip/tcp.hpp>
 
-namespace NGemity
-{
-    namespace Net
-    {
+namespace NGemity {
+    namespace Net {
         inline std::optional<boost::asio::ip::tcp::endpoint> Resolve(
             boost::asio::ip::tcp::resolver &resolver, boost::asio::ip::tcp const &protocol, std::string const &host, std::string const &service)
         {

@@ -26,8 +26,7 @@ struct WayPointInfo;
 class NPC;
 struct NPCTemplate;
 
-class GameContent
-{
+class GameContent {
 public:
     static Monster *RespawnMonster(float x, float y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
     static bool IsInRandomPoolMonster(int32_t group_id, int32_t monster_id);

@@ -39,8 +39,7 @@
 #include "MessageBuffer.h"
 
 // Root of ByteBuffer exception hierarchy
-class ByteBufferException : public std::exception
-{
+class ByteBufferException : public std::exception {
 public:
     ~ByteBufferException() throw() {}
 
@@ -53,24 +52,21 @@ private:
     std::string msg_;
 };
 
-class ByteBufferPositionException : public ByteBufferException
-{
+class ByteBufferPositionException : public ByteBufferException {
 public:
     ByteBufferPositionException(bool add, size_t pos, size_t size, size_t valueSize);
 
     ~ByteBufferPositionException() throw() {}
 };
 
-class ByteBufferSourceException : public ByteBufferException
-{
+class ByteBufferSourceException : public ByteBufferException {
 public:
     ByteBufferSourceException(size_t pos, size_t size, size_t valueSize);
 
     ~ByteBufferSourceException() throw() {}
 };
 
-class ByteBuffer
-{
+class ByteBuffer {
 public:
     constexpr static size_t DEFAULT_SIZE = 0x1000;
 
@@ -157,8 +153,7 @@ public:
         if (pos + bitCount > size() * 8)
             throw ByteBufferPositionException(false, (pos + bitCount) / 8, size(), (bitCount - 1) / 8 + 1);
 
-        for (uint32_t i = 0; i < bitCount; ++i)
-        {
+        for (uint32_t i = 0; i < bitCount; ++i) {
             size_t wp = (pos + i) / 8;
             size_t bit = (pos + i) % 8;
             if ((value >> (bitCount - i - 1)) & 1)
@@ -306,10 +301,8 @@ public:
     void fill(const std::string &src, size_t cnt)
     {
         append(src.c_str(), src.length());
-        if (src.length() < cnt)
-        {
-            while (src.length() < cnt)
-            {
+        if (src.length() < cnt) {
+            while (src.length() < cnt) {
                 append<uint8_t>(0);
                 --cnt;
             }
@@ -394,8 +387,7 @@ template<typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {
     b << (uint32_t)v.size();
-    for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i)
-    {
+    for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i) {
         b << *i;
     }
     return b;
@@ -407,8 +399,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
     uint32_t vsize;
     b >> vsize;
     v.clear();
-    while (vsize--)
-    {
+    while (vsize--) {
         T t;
         b >> t;
         v.push_back(t);
@@ -420,8 +411,7 @@ template<typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 {
     b << (uint32_t)v.size();
-    for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i)
-    {
+    for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i) {
         b << *i;
     }
     return b;
@@ -433,8 +423,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
     uint32_t vsize;
     b >> vsize;
     v.clear();
-    while (vsize--)
-    {
+    while (vsize--) {
         T t;
         b >> t;
         v.push_back(t);
@@ -446,8 +435,7 @@ template<typename K, typename V>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 {
     b << (uint32_t)m.size();
-    for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); ++i)
-    {
+    for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); ++i) {
         b << i->first << i->second;
     }
     return b;
@@ -459,8 +447,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
     uint32_t msize;
     b >> msize;
     m.clear();
-    while (msize--)
-    {
+    while (msize--) {
         K k;
         V v;
         b >> k >> v;

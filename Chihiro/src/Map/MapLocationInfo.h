@@ -18,8 +18,7 @@
 #include "Common.h"
 #include "PolygonF.h"
 
-class MapLocationInfo : public X2D::PolygonF
-{
+class MapLocationInfo : public X2D::PolygonF {
 public:
     MapLocationInfo(X2D::Pointf p1, X2D::Pointf p2, int32_t id, int32_t _pri)
         : X2D::PolygonF(p1, p2)

@@ -12,7 +12,7 @@
 # define VER_COMPANYNAME_STR        "NGemity"
 #endif
 #if !defined(VER_LEGALCOPYRIGHT_STR)
-# define VER_LEGALCOPYRIGHT_STR     "(c)2016-2020 NGemity"
+# define VER_LEGALCOPYRIGHT_STR     "(c)2016-2023 NGemity"
 #endif
 #if !defined(VER_FILEVERSION)
 # define VER_FILEVERSION            0,0,0

@@ -21,8 +21,7 @@
 #include "DatabaseEnvFwd.h"
 #include "Define.h"
 
-class ResultSet
-{
+class ResultSet {
 public:
     ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64_t rowCount, uint32_t fieldCount);
     ~ResultSet();
@@ -51,8 +50,7 @@ private:
     ResultSet &operator=(ResultSet const &right) = delete;
 };
 
-class PreparedResultSet
-{
+class PreparedResultSet {
 public:
     PreparedResultSet(MYSQL_STMT *stmt, MYSQL_RES *result, uint64_t rowCount, uint32_t fieldCount);
     ~PreparedResultSet();

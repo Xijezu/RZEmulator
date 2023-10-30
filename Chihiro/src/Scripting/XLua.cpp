@@ -109,28 +109,22 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
 
     int32_t nFiles{0};
-    for (auto &it : fs::directory_iterator(configFile))
-    {
-        if (it.path().extension().string() == ".lua"s)
-        {
+    for (auto &it : fs::directory_iterator(configFile)) {
+        if (it.path().extension().string() == ".lua"s) {
             auto t = m_pState.do_file(it.path().string());
-            if (!t.valid())
-            {
+            if (!t.valid()) {
                 sol::error err = t;
                 NG_LOG_ERROR("scripting", "%s", err.what());
             }
-            else
-            {
+            else {
                 nFiles++;
             }
         }
     }
-    try
-    {
+    try {
         m_pState.script("on_server_init()");
     }
-    catch (sol::error &ex)
-    {
+    catch (sol::error &ex) {
         NG_LOG_ERROR("scripting", "%s", ex.what());
         return false;
     }
@@ -145,12 +139,10 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     if (szLua == "0")
         return true;
 
-    try
-    {
+    try {
         m_pState.script(szLua);
     }
-    catch (std::exception &ex)
-    {
+    catch (std::exception &ex) {
         Messages::SendChatMessage(50, "@SCRIPT", m_pUnit->As<Player>(), ex.what());
         NG_LOG_ERROR("scripting", "%s", ex.what());
     }
@@ -165,12 +157,10 @@ bool XLua::RunString(Unit *pObject, std::string pScript)
 
 bool XLua::RunString(std::string szScript)
 {
-    try
-    {
+    try {
         m_pState.script(szScript);
     }
-    catch (sol::error &err)
-    {
+    catch (sol::error &err) {
         NG_LOG_ERROR("scripting", "%s", err.what());
         return false;
     }
@@ -228,8 +218,7 @@ int32_t XLua::SCRIPT_GetNPCID()
         return -1;
 
     auto t = sMemoryPool.GetObjectInWorld<WorldObject>(player->GetLastContactLong("npc"));
-    if (t != nullptr)
-    {
+    if (t != nullptr) {
         return t->GetUInt32Value(UNIT_FIELD_UID);
     }
     return 0;
@@ -286,9 +275,9 @@ int32_t XLua::SCRIPT_GetLocalFlag()
     return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }
 
-constexpr unsigned int str2int(const char* str, int h = 0)
+constexpr unsigned int str2int(const char *str, int h = 0)
 {
-    return !str[h] ? 5381 : (str2int(str, h+1) * 33) ^ str[h];
+    return !str[h] ? 5381 : (str2int(str, h + 1) * 33) ^ str[h];
 }
 
 sol::object XLua::SCRIPT_GetValue(std::string szKey)
@@ -296,73 +285,73 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     if (m_pUnit == nullptr)
         return return_object("");
 
-    switch(str2int(szKey.c_str())) {
-        case str2int("race"):
-            return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_RACE));
-        case str2int("job"):
-            return return_object(m_pUnit->GetCurrentJob());
-        case str2int("hp"):
-        case str2int("health"):
-            return return_object(m_pUnit->GetHealth());
-        case str2int("mp"):
-        case str2int("mana"):
-            return return_object(m_pUnit->GetMana());
-        case str2int("max_hp"):
-            return return_object(m_pUnit->GetMaxHealth());
-        case str2int("max_mp"):
-            return return_object(m_pUnit->GetMaxMana());
-        case str2int("x"):
-            return return_object(m_pUnit->GetPositionX());
-        case str2int("y"):
-            return return_object(m_pUnit->GetPositionY());
-        case str2int("auto_user"):
-            return return_object((int32_t)0);
-        case str2int("lv"):
-        case str2int("level"):
-            return return_object(m_pUnit->GetLevel());
-        case str2int("job_depth"):
-            return m_pUnit->IsPlayer() ? return_object(m_pUnit->As<Player>()->GetJobDepth()) : return_object(""s);
-        case str2int("job_level"):
-        case str2int("jlv"):
-            return return_object(m_pUnit->GetCurrentJLv());
-        case str2int("stamina"):
-        case str2int("stanima"): // I do that typo all the time /shrug
-            return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_STAMINA));
-        case str2int("layer"):
-            return return_object(m_pUnit->GetLayer());
-        case str2int("jp"):
-            return return_object(m_pUnit->GetJP());
-        case str2int("name"):
-            return return_object(m_pUnit->GetName());
-        case str2int("job_0"):
-            return return_object(m_pUnit->GetPrevJobId(0));
-        case str2int("job_1"):
-            return return_object(m_pUnit->GetPrevJobId(1));
-        case str2int("job_2"):
-            return return_object(m_pUnit->GetPrevJobId(2));
-        case str2int("jlv_0"):
+    switch (str2int(szKey.c_str())) {
+    case str2int("race"):
+        return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_RACE));
+    case str2int("job"):
+        return return_object(m_pUnit->GetCurrentJob());
+    case str2int("hp"):
+    case str2int("health"):
+        return return_object(m_pUnit->GetHealth());
+    case str2int("mp"):
+    case str2int("mana"):
+        return return_object(m_pUnit->GetMana());
+    case str2int("max_hp"):
+        return return_object(m_pUnit->GetMaxHealth());
+    case str2int("max_mp"):
+        return return_object(m_pUnit->GetMaxMana());
+    case str2int("x"):
+        return return_object(m_pUnit->GetPositionX());
+    case str2int("y"):
+        return return_object(m_pUnit->GetPositionY());
+    case str2int("auto_user"):
+        return return_object((int32_t)0);
+    case str2int("lv"):
+    case str2int("level"):
+        return return_object(m_pUnit->GetLevel());
+    case str2int("job_depth"):
+        return m_pUnit->IsPlayer() ? return_object(m_pUnit->As<Player>()->GetJobDepth()) : return_object(""s);
+    case str2int("job_level"):
+    case str2int("jlv"):
+        return return_object(m_pUnit->GetCurrentJLv());
+    case str2int("stamina"):
+    case str2int("stanima"): // I do that typo all the time /shrug
+        return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_STAMINA));
+    case str2int("layer"):
+        return return_object(m_pUnit->GetLayer());
+    case str2int("jp"):
+        return return_object(m_pUnit->GetJP());
+    case str2int("name"):
+        return return_object(m_pUnit->GetName());
+    case str2int("job_0"):
+        return return_object(m_pUnit->GetPrevJobId(0));
+    case str2int("job_1"):
+        return return_object(m_pUnit->GetPrevJobId(1));
+    case str2int("job_2"):
+        return return_object(m_pUnit->GetPrevJobId(2));
+    case str2int("jlv_0"):
         return return_object(m_pUnit->GetPrevJobLv(0));
-        case str2int("jlv_1"):
-            return return_object(m_pUnit->GetPrevJobLv(1));
-        case str2int("jlv_2"):
-            return return_object(m_pUnit->GetPrevJobLv(2));
-        default:
-            break;
+    case str2int("jlv_1"):
+        return return_object(m_pUnit->GetPrevJobLv(1));
+    case str2int("jlv_2"):
+        return return_object(m_pUnit->GetPrevJobLv(2));
+    default:
+        break;
     }
 
-    if(!m_pUnit->IsPlayer())
+    if (!m_pUnit->IsPlayer())
         return return_object("");
 
     auto pPlayer = m_pUnit->As<Player>();
-    switch(str2int(szKey.c_str())) {
-        case str2int("gold"):
-            return return_object((int64_t)pPlayer->GetGold());
-        case str2int("guild_id"):
-            return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID));
-        case str2int("permission"):
-            return return_object(pPlayer->GetPermission());
-        case str2int("chaos"):
-            return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_CHAOS));
+    switch (str2int(szKey.c_str())) {
+    case str2int("gold"):
+        return return_object((int64_t)pPlayer->GetGold());
+    case str2int("guild_id"):
+        return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID));
+    case str2int("permission"):
+        return return_object(pPlayer->GetPermission());
+    case str2int("chaos"):
+        return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_CHAOS));
     }
 
     NG_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
@@ -398,94 +387,97 @@ void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
     if (m_pUnit == nullptr)
         return;
 
-    if (szKey == "race")
-    {
+    switch (str2int(szKey.c_str())) {
+    case str2int("race"):
         m_pUnit->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int32_t>());
-    }
-    else if (szKey == "job")
-    {
+        break;
+    case str2int("job"):
         m_pUnit->SetCurrentJob(args[0].get<uint32_t>());
-    }
-    else if (szKey == "level" || szKey == "lv")
-    {
-        m_pUnit->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
-    }
-    else if (szKey == "job_level" || szKey == "jlv")
-    {
-        m_pUnit->SetCurrentJLv(args[0].get<int32_t>());
-    }
-    else if (szKey == "x")
-    {
-        m_pUnit->Relocate(args[0].get<int32_t>(), m_pUnit->GetPositionY());
-    }
-    else if (szKey == "y")
-    {
-        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int32_t>());
-    }
-    else if (szKey == "stamina" || szKey == "stanima")
-    { // I do that typo all the time /shrug
-        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
-    }
-    else if (szKey == "jp")
-    {
-        m_pUnit->SetJP(args[0].get<int32_t>());
-        Messages::SendPropertyMessage(m_pUnit->As<Player>(), m_pUnit, "jp", args[0].get<int32_t>());
-    }
-    else if (szKey == "hp")
-    {
+        break;
+    case str2int("hp"):
+    case str2int("health"):
         m_pUnit->SetHealth(args[0].get<uint32_t>());
         Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint32_t>(), 0, false);
-    }
-    else if (szKey == "mp")
-    {
+        break;
+    case str2int("mp"):
+    case str2int("mana"):
         m_pUnit->SetMana(args[0].get<uint32_t>());
         Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint32_t>(), false);
-    }
-    else if (szKey == "job_0")
+        break;
+    case str2int("x"):
+        m_pUnit->Relocate(args[0].get<int32_t>(), m_pUnit->GetPositionY());
+        break;
+    case str2int("y"):
+        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int32_t>());
+        break;
+    case str2int("lv"):
+    case str2int("level"):
+        m_pUnit->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
+        break;
+    case str2int("job_level"):
+    case str2int("jlv"):
+        m_pUnit->SetCurrentJLv(args[0].get<int32_t>());
+        break;
+    case str2int("stamina"):
+    case str2int("stanima"): // I do that typo all the time /shrug
+        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
+        break;
+    case str2int("jp"):
+        m_pUnit->SetJP(args[0].get<int32_t>());
+        Messages::SendPropertyMessage(m_pUnit->As<Player>(), m_pUnit, "jp", args[0].get<int32_t>());
+        break;
+    case str2int("job_0"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint32_t>());
-    else if (szKey == "job_1")
+        break;
+    case str2int("job_1"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint32_t>());
-    else if (szKey == "job_2")
+        break;
+    case str2int("job_2"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint32_t>());
-    else if (szKey == "jlv_0")
+        break;
+    case str2int("jlv_0"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint32_t>());
-    else if (szKey == "jlv_1")
+        break;
+    case str2int("jlv_1"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint32_t>());
-    else if (szKey == "jlv_2")
+        break;
+    case str2int("jlv_2"):
         m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint32_t>());
-
-    if (m_pUnit->IsPlayer())
-    {
-        auto player = m_pUnit->As<Player>();
-        if (szKey == "gold")
-        {
-            player->ChangeGold(args[0].get<int64_t>());
-        }
-        else if (szKey == "permission")
-        {
-            player->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
-        }
-        else if (szKey == "chaos")
-        {
-            player->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint32_t>());
-            player->SendGoldChaosMessage();
-        }
+        break;
+    default:
+        break;
     }
-    auto player = m_pUnit->As<Player>();
-    if (player != nullptr)
-        player->onChangeProperty(szKey, args[0].get<int32_t>());
+
+    if (!m_pUnit->IsPlayer())
+        return;
+
+    auto pPlayer = m_pUnit->As<Player>();
+    switch (str2int(szKey.c_str())) {
+    case str2int("gold"):
+        pPlayer->ChangeGold(args[0].get<int64_t>());
+        break;
+    case str2int("permission"):
+        pPlayer->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
+        break;
+    case str2int("chaos"):
+        pPlayer->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint32_t>());
+        pPlayer->SendGoldChaosMessage();
+        break;
+    default:
+        break;
+    }
+
+    pPlayer->onChangeProperty(szKey, args[0].get<int32_t>());
 }
 
 sol::object XLua::SCRIPT_GetEnv(std::string szKey)
 {
     auto value = sConfigMgr->GetStringDefault(szKey.c_str(), "");
-    if (isMXNumeric(value))
-    {
+    if (isMXNumeric(value)) {
         int32_t val = std::stoi(value);
         return return_object(val);
     }
-    else
-    {
+    else {
         return return_object(value);
     }
 }
@@ -498,8 +490,7 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
 
     auto info = sObjectMgr.GetMarketInfo(szMarket);
 
-    if (info != nullptr && !info->empty())
-    {
+    if (info != nullptr && !info->empty()) {
         Messages::SendMarketInfo(player, player->GetLastContactLong("npc"), *info);
     }
 }
@@ -507,11 +498,9 @@ void XLua::SCRIPT_ShowMarket(std::string szMarket)
 std::string XLua::SCRIPT_Conv(sol::variadic_args args)
 {
     std::string result{};
-    if (args.size() >= 1 && args.size() % 2 == 1)
-    {
+    if (args.size() >= 1 && args.size() % 2 == 1) {
         std::size_t count = 0;
-        do
-        {
+        do {
             if (count != 0)
                 result += '\v';
             result += args[count].get<std::string>();
@@ -547,8 +536,7 @@ void XLua::SCRIPT_Warp(sol::variadic_args args)
     int32_t x = args[0].get<int32_t>();
     int32_t y = args[1].get<int32_t>();
 
-    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y)
-    {
+    if (x < 0.0f || sWorld.getIntConfig(CONFIG_MAP_WIDTH) < x || y < 0.0f || sWorld.getIntConfig(CONFIG_MAP_HEIGHT) < y) {
         return;
     }
     player->PendWarp(x, y, 0);
@@ -601,14 +589,11 @@ int32_t XLua::SCRIPT_SetItemLevel(uint32_t handle, int32_t level)
     item->m_bIsNeedUpdateToDB = true;
     Messages::SendItemMessage(m_pUnit->As<Player>(), item);
     m_pUnit->As<Player>()->UpdateQuestStatusByItemUpgrade();
-    if (item->GetItemInstance().GetItemWearType() != WEAR_NONE)
-    {
-        if (item->GetItemInstance().GetOwnSummonHandle() != 0)
-        {
+    if (item->GetItemInstance().GetItemWearType() != WEAR_NONE) {
+        if (item->GetItemInstance().GetOwnSummonHandle() != 0) {
             // get summon
         }
-        else
-        {
+        else {
             m_pUnit->CalculateStat();
             Messages::SendStatInfo(m_pUnit->As<Player>(), m_pUnit);
         }
@@ -681,8 +666,7 @@ uint32_t XLua::SCRIPT_InsertItem(sol::variadic_args args)
 
     auto player = Player::FindPlayer(pName);
     uint32_t handle = 0;
-    if (player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0)
-    {
+    if (player != nullptr && nCount >= 1 && nLevel >= 0 && nEnhance >= 0) {
         auto item = Item::AllocItem(0, nCode, nCount, BY_SCRIPT, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
 
         Item *pNewItem = player->PushItem(item, nCount, false);
@@ -723,8 +707,7 @@ void XLua::SCRIPT_CPrint(sol::variadic_args) {}
 
 void XLua::SCRIPT_AddMonster(int32_t x, int32_t y, int32_t id, int32_t amount)
 {
-    for (int32_t i = 0; i < amount; i++)
-    {
+    for (int32_t i = 0; i < amount; i++) {
         auto mob = GameContent::RespawnMonster((float)x, (float)y, 0, id, true, 0, nullptr, false);
         mob->m_bNearClient = true;
     }
@@ -736,8 +719,7 @@ int32_t XLua::SCRIPT_GetCreatureHandle(int32_t idx)
         return 0;
 
     auto player = m_pUnit->As<Player>();
-    if (player->m_aBindSummonCard[idx] != nullptr && player->m_aBindSummonCard[idx]->m_pSummon != nullptr)
-    {
+    if (player->m_aBindSummonCard[idx] != nullptr && player->m_aBindSummonCard[idx]->m_pSummon != nullptr) {
         return player->m_aBindSummonCard[idx]->m_pSummon->GetHandle();
     }
     return 0;
@@ -746,13 +728,10 @@ int32_t XLua::SCRIPT_GetCreatureHandle(int32_t idx)
 void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key, sol::object value)
 {
     auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint32_t)handle);
-    if (summon == nullptr && handle < 6 && handle > 0)
-    {
+    if (summon == nullptr && handle < 6 && handle > 0) {
         auto player = m_pUnit->As<Player>();
-        if (player != nullptr)
-        {
-            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
-            {
+        if (player != nullptr) {
+            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr) {
                 summon = player->m_aBindSummonCard[handle]->m_pSummon;
             }
         }
@@ -762,36 +741,28 @@ void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key, sol::object 
         return;
 
     auto type = value.get_type();
-    if (type == sol::type::number)
-    {
-        if (key == "level"s || key == "lv"s)
-        {
+    if (type == sol::type::number) {
+        if (key == "level"s || key == "lv"s) {
             summon->SetEXP(sObjectMgr.GetNeedSummonExp(value.as<int32_t>()));
             Messages::SendEXPMessage(m_pUnit->As<Player>(), summon);
         }
-        else if (key == "ev_1_ID"s)
-        {
+        else if (key == "ev_1_ID"s) {
             summon->SetInt32Value(UNIT_FIELD_PREV_JOB, value.as<int32_t>());
         }
-        else if (key == "ev_2_ID"s)
-        {
+        else if (key == "ev_2_ID"s) {
             summon->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, value.as<int32_t>());
         }
-        else if (key == "ev_1_level"s)
-        {
+        else if (key == "ev_1_level"s) {
             summon->SetInt32Value(UNIT_FIELD_PREV_JLV, value.as<int32_t>());
         }
-        else if (key == "ev_2_level"s)
-        {
+        else if (key == "ev_2_level"s) {
             summon->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, value.as<int32_t>());
         }
-        else if (key == "hp")
-        {
+        else if (key == "hp") {
             summon->SetHealth(value.as<float>());
             Messages::SendHPMPMessage(m_pUnit->As<Player>(), summon, summon->GetHealth(), 0, false);
         }
-        else if (key == "mp")
-        {
+        else if (key == "mp") {
             summon->SetMana(value.as<float>());
             Messages::SendHPMPMessage(m_pUnit->As<Player>(), summon, 0, summon->GetMana(), false);
         }
@@ -801,13 +772,10 @@ void XLua::SCRIPT_SetCreatureValue(int32_t handle, std::string key, sol::object 
 sol::object XLua::SCRIPT_GetCreatureValue(int32_t handle, std::string key)
 {
     auto summon = sMemoryPool.GetObjectInWorld<Summon>((uint32_t)handle);
-    if (summon == nullptr && handle < 6 && handle > 0)
-    {
+    if (summon == nullptr && handle < 6 && handle > 0) {
         auto player = m_pUnit->As<Player>();
-        if (player != nullptr)
-        {
-            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr)
-            {
+        if (player != nullptr) {
+            if (player->m_aBindSummonCard[handle] != nullptr && player->m_aBindSummonCard[handle]->m_pSummon != nullptr) {
                 summon = player->m_aBindSummonCard[handle]->m_pSummon;
             }
         }
@@ -816,40 +784,31 @@ sol::object XLua::SCRIPT_GetCreatureValue(int32_t handle, std::string key)
     if (summon == nullptr)
         return return_object((int32_t)0);
 
-    if (key == "hp"s)
-    {
+    if (key == "hp"s) {
         return return_object(summon->GetHealth());
     }
-    else if (key == "mp"s)
-    {
+    else if (key == "mp"s) {
         return return_object(summon->GetMana());
     }
-    else if (key == "max_hp"s)
-    {
+    else if (key == "max_hp"s) {
         return return_object(summon->GetMaxHealth());
     }
-    else if (key == "max_mp"s)
-    {
+    else if (key == "max_mp"s) {
         return return_object(summon->GetMaxMana());
     }
-    else if (key == "evolution_depth"s)
-    {
+    else if (key == "evolution_depth"s) {
         return return_object(summon->m_nTransform);
     }
-    else if (key == "level"s)
-    {
+    else if (key == "level"s) {
         return return_object(summon->GetLevel());
     }
-    else if (key == "job"s)
-    {
+    else if (key == "job"s) {
         return return_object(summon->GetSummonCode());
     }
-    else if (key == "name"s)
-    {
+    else if (key == "name"s) {
         return return_object(summon->GetName());
     }
-    else if (key == "summon_state"s)
-    {
+    else if (key == "summon_state"s) {
         return return_object(summon->IsInWorld() ? 1 : 0);
     }
     return return_object((int32_t)0);
@@ -862,8 +821,7 @@ void XLua::SCRIPT_CreatureEvolution(int32_t slot)
         return;
 
     auto summon = player->GetSummonByHandle(slot);
-    if (summon != nullptr)
-    {
+    if (summon != nullptr) {
         summon->DoEvolution();
     }
 }
@@ -899,8 +857,7 @@ int32_t XLua::SCRIPT_GetSiegeDungeonID()
 
 void XLua::SCRIPT_StartQuest(int32_t code, sol::variadic_args args)
 {
-    if (code != 0 && args.size() >= 1)
-    {
+    if (code != 0 && args.size() >= 1) {
         auto player = m_pUnit->As<Player>();
         if (player == nullptr)
             return;
@@ -930,8 +887,7 @@ void XLua::SCRIPT_EndQuest(int32_t quest_id, int32_t reward_id, sol::variadic_ar
 void XLua::SCRIPT_EnterDungeon(int32_t nDungeonID)
 {
     auto pos = sDungeonManager.GetRaidStartPosition(nDungeonID);
-    if (pos.GetPositionX() != 0 && pos.GetPositionY() != 0)
-    {
+    if (pos.GetPositionX() != 0 && pos.GetPositionY() != 0) {
         m_pUnit->As<Player>()->PendWarp((int32_t)pos.GetPositionX(), (int32_t)pos.GetPositionY(), 0);
     }
 }
@@ -981,8 +937,7 @@ void XLua::SCRIPT_OpenStorage()
 
 void XLua::SCRIPT_AddState(sol::variadic_args args)
 {
-    if (args.size() < 3)
-    {
+    if (args.size() < 3) {
         NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Parameters");
         return;
     }
@@ -991,8 +946,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     int32_t nStateLevel = args[1].get<uint8_t>();
     uint32_t nStateTime = args[2].get<uint32_t>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
-    if (player == nullptr)
-    {
+    if (player == nullptr) {
         NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
         return;
     }
@@ -1002,8 +956,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
 
 void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
 {
-    if (args.size() < 3)
-    {
+    if (args.size() < 3) {
         NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Parameters");
         return;
     }
@@ -1014,8 +967,7 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     Summon *summon = player->m_pMainSummon;
 
-    if (summon == nullptr || !summon->IsInWorld())
-    {
+    if (summon == nullptr || !summon->IsInWorld()) {
         NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Name");
         return;
     }
@@ -1023,23 +975,24 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
     summon->AddState(SG_NORMAL, (StateCode)nStateCode, summon->GetHandle(), nStateLevel, sWorld.GetArTime(), sWorld.GetArTime() + nStateTime, false, 0, "");
 }
 
-void XLua::SCRIPT_InsertGold(sol::variadic_args args) 
+void XLua::SCRIPT_InsertGold(sol::variadic_args args)
 {
     if (m_pUnit == nullptr)
         return;
 
-    Player* pTarget = nullptr;
+    Player *pTarget = nullptr;
     uint32_t nGold = 0;
 
     if (args.size() > 1) {
         pTarget = Player::FindPlayer(args[0].get<std::string>());
         nGold = args[1].get<uint32_t>();
-    } else {
+    }
+    else {
         pTarget = m_pUnit->IsPlayer() ? m_pUnit->As<Player>() : nullptr;
         nGold = args[0].get<uint32_t>();
     }
-    
-    if(pTarget == nullptr)
+
+    if (pTarget == nullptr)
         return;
 
     pTarget->ChangeGold(pTarget->GetGold() + nGold);

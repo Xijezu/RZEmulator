@@ -24,8 +24,7 @@
 
 bool SQLQueryHolder::SetPreparedQuery(size_t index, PreparedStatement *stmt)
 {
-    if (m_queries.size() <= index)
-    {
+    if (m_queries.size() <= index) {
         NG_LOG_ERROR("sql.sql", "Query index (%u) out of range (size: %u) for prepared statement", uint32_t(index), (uint32_t)m_queries.size());
         return false;
     }
@@ -45,8 +44,7 @@ PreparedQueryResult SQLQueryHolder::GetPreparedResult(size_t index)
 
 void SQLQueryHolder::SetPreparedResult(size_t index, PreparedResultSet *result)
 {
-    if (result && !result->GetRowCount())
-    {
+    if (result && !result->GetRowCount()) {
         delete result;
         result = NULL;
     }
@@ -58,8 +56,7 @@ void SQLQueryHolder::SetPreparedResult(size_t index, PreparedResultSet *result)
 
 SQLQueryHolder::~SQLQueryHolder()
 {
-    for (size_t i = 0; i < m_queries.size(); i++)
-    {
+    for (size_t i = 0; i < m_queries.size(); i++) {
         /// if the result was never used, free the resources
         /// results used already (getresult called) are expected to be deleted
         delete m_queries[i].first;

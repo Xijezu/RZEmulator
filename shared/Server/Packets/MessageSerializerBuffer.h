@@ -1,18 +1,18 @@
 #ifndef MESSAGESERIALIZERBUFFER_H
 #define MESSAGESERIALIZERBUFFER_H
 
-#include "XPacket.h"
-#include "StructSerializer.h"
 #include <string.h>
 #include <type_traits>
 #include <vector>
 
-class MessageSerializerBuffer : public StructSerializer
-{
-  private:
+#include "StructSerializer.h"
+#include "XPacket.h"
+
+class MessageSerializerBuffer : public StructSerializer {
+private:
     XPacket *packet;
 
-  public:
+public:
     MessageSerializerBuffer(XPacket *packet);
     ~MessageSerializerBuffer();
 
@@ -34,18 +34,12 @@ class MessageSerializerBuffer : public StructSerializer
         packet->Reset();
     }
 
-    uint32_t getReadSize() const
-    {
-        return static_cast<uint32_t>(packet->rpos());
-    }
+    uint32_t getReadSize() const { return static_cast<uint32_t>(packet->rpos()); }
 
-    uint32_t getWrittenSize() const
-    {
-        return static_cast<uint32_t>(packet->wpos());
-    }
+    uint32_t getWrittenSize() const { return static_cast<uint32_t>(packet->wpos()); }
 
     // Write primitives types T
-    template <typename T>
+    template<typename T>
     typename std::enable_if<is_primitive<T>::value, void>::type write(const char *fieldName, T val)
     {
         (void)fieldName;
@@ -53,7 +47,7 @@ class MessageSerializerBuffer : public StructSerializer
     }
 
     // Objects
-    template <typename T>
+    template<typename T>
     typename std::enable_if<!is_primitive<T>::value, void>::type write(const char *fieldName, const T &val)
     {
         (void)fieldName;
@@ -65,72 +59,57 @@ class MessageSerializerBuffer : public StructSerializer
     void writeDynString(const char *fieldName, const std::string &val, size_t count);
 
     // Fixed array of primitive
-    template <typename T>
-    typename std::enable_if<is_primitive<T>::value, void>::type writeArray(const char *fieldName,
-                                                                           const T *val,
-                                                                           size_t size)
+    template<typename T>
+    typename std::enable_if<is_primitive<T>::value, void>::type writeArray(const char *fieldName, const T *val, size_t size)
     {
         (void)fieldName;
         packet->append<T>(val, size);
     }
 
     // Fixed array of primitive with cast from U to T
-    template <typename T, typename U>
-    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type writeArray(const char *fieldName,
-                                                                                       const U *val,
-                                                                                       size_t size)
+    template<typename T, typename U>
+    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type writeArray(const char *fieldName, const U *val, size_t size)
     {
-        for (size_t i = 0; i < size; ++i)
-        {
+        for (size_t i = 0; i < size; ++i) {
             write<T>(fieldName, (T)val[i]);
         }
     }
 
     // Fixed array of object
-    template <typename T>
-    typename std::enable_if<!is_primitive<T>::value, void>::type writeArray(const char *fieldName,
-                                                                            const T *val,
-                                                                            size_t size)
+    template<typename T>
+    typename std::enable_if<!is_primitive<T>::value, void>::type writeArray(const char *fieldName, const T *val, size_t size)
     {
-        for (size_t i = 0; i < size; i++)
-        {
+        for (size_t i = 0; i < size; i++) {
             write<T>(fieldName, val[i]);
         }
     }
 
     // Dynamic array of primitive
-    template <typename T>
-    typename std::enable_if<is_primitive<T>::value, void>::type writeDynArray(const char *fieldName,
-                                                                              const std::vector<T> &val,
-                                                                              uint32_t count)
+    template<typename T>
+    typename std::enable_if<is_primitive<T>::value, void>::type writeDynArray(const char *fieldName, const std::vector<T> &val, uint32_t count)
     {
         (void)fieldName;
         packet->append<T>(val.data(), count);
     }
 
     // Dynamic array of primitive with cast
-    template <typename T, typename U>
-    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type writeDynArray(const char *fieldName,
-                                                                                          const std::vector<U> &val,
-                                                                                          uint32_t count)
+    template<typename T, typename U>
+    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type writeDynArray(const char *fieldName, const std::vector<U> &val, uint32_t count)
     {
-        for (size_t i = 0; i < count; ++i)
-        {
+        for (size_t i = 0; i < count; ++i) {
             write<T>(fieldName, (T)val[i]);
         }
     }
 
     // Dynamic array of object or primitive with cast
-    template <typename T>
-    typename std::enable_if<!is_primitive<T>::value, void>::type writeDynArray(const char *fieldName,
-                                                                               const std::vector<T> &val,
-                                                                               uint32_t count)
+    template<typename T>
+    typename std::enable_if<!is_primitive<T>::value, void>::type writeDynArray(const char *fieldName, const std::vector<T> &val, uint32_t count)
     {
         for (size_t i = 0; i < count; i++)
             write<T>(fieldName, val[i]);
     }
 
-    template <typename T>
+    template<typename T>
     typename std::enable_if<is_primitive<T>::value, void>::type writeSize(const char *fieldName, T size)
     {
         write<T>(fieldName, size);
@@ -146,13 +125,10 @@ class MessageSerializerBuffer : public StructSerializer
 
     // Read functions /////////////////////////
 
-    void readHeader(uint16_t &id)
-    {
-        id = packet->GetPacketID();
-    }
+    void readHeader(uint16_t &id) { id = packet->GetPacketID(); }
 
     // Primitives via arg
-    template <typename T, typename U>
+    template<typename T, typename U>
     typename std::enable_if<is_primitive<U>::value, void>::type read(const char *fieldName, U &val)
     {
         (void)fieldName;
@@ -160,7 +136,7 @@ class MessageSerializerBuffer : public StructSerializer
     }
 
     // Objects
-    template <typename T>
+    template<typename T>
     typename std::enable_if<!is_primitive<T>::value, void>::type read(const char *fieldName, T &val)
     {
         (void)fieldName;
@@ -173,7 +149,7 @@ class MessageSerializerBuffer : public StructSerializer
     void readEndString(const char *fieldName, std::string &val, bool hasNullTerminator);
 
     // Fixed array of primitive
-    template <typename T>
+    template<typename T>
     typename std::enable_if<is_primitive<T>::value, void>::type readArray(const char *fieldName, T *val, size_t size)
     {
         (void)fieldName;
@@ -181,68 +157,54 @@ class MessageSerializerBuffer : public StructSerializer
     }
 
     // Fixed array of primitive with cast
-    template <typename T, typename U>
-    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type readArray(const char *fieldName,
-                                                                                      U *val,
-                                                                                      size_t size)
+    template<typename T, typename U>
+    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type readArray(const char *fieldName, U *val, size_t size)
     {
-        for (size_t i = 0; i < size; i++)
-        {
+        for (size_t i = 0; i < size; i++) {
             read<T, U>(fieldName, val[i]);
         }
     }
 
     // Fixed array of objects
-    template <typename T>
+    template<typename T>
     typename std::enable_if<!is_primitive<T>::value, void>::type readArray(const char *fieldName, T *val, size_t size)
     {
-        for (size_t i = 0; i < size; i++)
-        {
+        for (size_t i = 0; i < size; i++) {
             read<T>(fieldName, val[i]);
         }
     }
 
     // Dynamic array of primitive
-    template <typename T>
-    typename std::enable_if<is_primitive<T>::value, void>::type readDynArray(const char *fieldName,
-                                                                             std::vector<T> &val,
-                                                                             uint32_t sizeToRead)
+    template<typename T>
+    typename std::enable_if<is_primitive<T>::value, void>::type readDynArray(const char *fieldName, std::vector<T> &val, uint32_t sizeToRead)
     {
         (void)fieldName;
-        if (sizeToRead > 0)
-        {
+        if (sizeToRead > 0) {
             val.resize(sizeToRead);
             packet->read(static_cast<uint8_t *>(val.data()), val.size() * sizeof(T));
         }
-        else
-        {
+        else {
             val.clear();
         }
     }
 
     // Dynamic array of primitive with cast
-    template <typename T, typename U>
-    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type readDynArray(const char *fieldName,
-                                                                                         std::vector<U> &val,
-                                                                                         uint32_t sizeToRead)
+    template<typename T, typename U>
+    typename std::enable_if<is_castable_primitive<T, U>::value, void>::type readDynArray(const char *fieldName, std::vector<U> &val, uint32_t sizeToRead)
     {
         (void)fieldName;
         val.clear();
-        if (sizeToRead > 0)
-        {
+        if (sizeToRead > 0) {
             val.reserve(sizeToRead);
-            for (size_t i = 0; i < sizeToRead; i++)
-            {
+            for (size_t i = 0; i < sizeToRead; i++) {
                 val.push_back(packet->read<T>());
             }
         }
     }
 
     // Dynamic array of object
-    template <typename T>
-    typename std::enable_if<!is_primitive<T>::value, void>::type readDynArray(const char *fieldName,
-                                                                              std::vector<T> &val,
-                                                                              uint32_t sizeToRead)
+    template<typename T>
+    typename std::enable_if<!is_primitive<T>::value, void>::type readDynArray(const char *fieldName, std::vector<T> &val, uint32_t sizeToRead)
     {
         val.resize(sizeToRead, T{});
 
@@ -253,13 +215,12 @@ class MessageSerializerBuffer : public StructSerializer
     }
 
     // End array, read to the end of stream
-    template <typename T>
+    template<typename T>
     void readEndArray(const char *fieldName, std::vector<T> &val)
     {
         // While there are non parsed bytes and the read actually read something, continue
         uint32_t lastParsedSize = UINT32_MAX;
-        while (lastParsedSize != packet->rpos() && packet->rpos() < packet->size())
-        {
+        while (lastParsedSize != packet->rpos() && packet->rpos() < packet->size()) {
             lastParsedSize = packet->rpos();
             auto it = val.insert(val.end(), T());
             T &newItem = *it;
@@ -268,7 +229,7 @@ class MessageSerializerBuffer : public StructSerializer
     }
 
     // read size for objects (std:: containers)
-    template <typename T>
+    template<typename T>
     typename std::enable_if<is_primitive<T>::value, void>::type readSize(const char *fieldName, uint32_t &val)
     {
         read<T>(fieldName, val);

@@ -43,8 +43,7 @@ documentation and/or software.
 //      MD5(std::string).hexdigest()
 //
 // assumes that char is 8 bit and int is 32 bit
-class MD5
-{
+class MD5 {
 public:
     typedef unsigned int size_type; // must be 32bit
 
@@ -60,10 +59,7 @@ private:
     void init();
     typedef unsigned char uint1; //  8bit
     typedef unsigned int uint4; // 32bit
-    enum
-    {
-        blocksize = 64
-    }; // VC6 won't eat a const static int here
+    enum { blocksize = 64 }; // VC6 won't eat a const static int here
 
     void transform(const uint1 block[blocksize]);
     static void decode(uint4 output[], const uint1 input[], size_type len);

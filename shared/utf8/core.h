@@ -26,8 +26,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <iterator>
 
-namespace utf8
-{
+namespace utf8 {
     // The typedefs for 8-bit, 16-bit and 32-bit unsigned integers
     // You may need to change them to match your system.
     // These typedefs have the same names as ones from cstdint, or boost/cstdint
@@ -36,8 +35,7 @@ namespace utf8
     typedef unsigned int uint32_t;
 
     // Helper code - not intended to be directly called by the library users. May be changed at any time
-    namespace internal
-    {
+    namespace internal {
         // Unicode constants
         // Leading (high) surrogates: 0xd800 - 0xdbff
         // Trailing (low) surrogates: 0xdc00 - 0xdfff
@@ -112,18 +110,15 @@ namespace utf8
         template<typename octet_difference_type>
         inline bool is_overlong_sequence(uint32_t cp, octet_difference_type length)
         {
-            if (cp < 0x80)
-            {
+            if (cp < 0x80) {
                 if (length != 1)
                     return true;
             }
-            else if (cp < 0x800)
-            {
+            else if (cp < 0x800) {
                 if (length != 2)
                     return true;
             }
-            else if (cp < 0x10000)
-            {
+            else if (cp < 0x10000) {
                 if (length != 3)
                     return true;
             }
@@ -131,23 +126,14 @@ namespace utf8
             return false;
         }
 
-        enum utf_error
-        {
-            UTF8_OK,
-            NOT_ENOUGH_ROOM,
-            INVALID_LEAD,
-            INCOMPLETE_SEQUENCE,
-            OVERLONG_SEQUENCE,
-            INVALID_CODE_POINT
-        };
+        enum utf_error { UTF8_OK, NOT_ENOUGH_ROOM, INVALID_LEAD, INCOMPLETE_SEQUENCE, OVERLONG_SEQUENCE, INVALID_CODE_POINT };
 
         /// get_sequence_x functions decode utf-8 sequences of the length x
 
         template<typename octet_iterator>
         utf_error get_sequence_1(octet_iterator &it, octet_iterator end, uint32_t *code_point)
         {
-            if (it != end)
-            {
+            if (it != end) {
                 if (code_point)
                     *code_point = mask8(*it);
                 return UTF8_OK;
@@ -160,13 +146,10 @@ namespace utf8
         {
             utf_error ret_code = NOT_ENOUGH_ROOM;
 
-            if (it != end)
-            {
+            if (it != end) {
                 uint32_t cp = mask8(*it);
-                if (++it != end)
-                {
-                    if (is_trail(*it))
-                    {
+                if (++it != end) {
+                    if (is_trail(*it)) {
                         cp = ((cp << 6) & 0x7ff) + ((*it) & 0x3f);
 
                         if (code_point)
@@ -188,18 +171,13 @@ namespace utf8
         {
             utf_error ret_code = NOT_ENOUGH_ROOM;
 
-            if (it != end)
-            {
+            if (it != end) {
                 uint32_t cp = mask8(*it);
-                if (++it != end)
-                {
-                    if (is_trail(*it))
-                    {
+                if (++it != end) {
+                    if (is_trail(*it)) {
                         cp = ((cp << 12) & 0xffff) + ((mask8(*it) << 6) & 0xfff);
-                        if (++it != end)
-                        {
-                            if (is_trail(*it))
-                            {
+                        if (++it != end) {
+                            if (is_trail(*it)) {
                                 cp += (*it) & 0x3f;
 
                                 if (code_point)
@@ -227,23 +205,16 @@ namespace utf8
         {
             utf_error ret_code = NOT_ENOUGH_ROOM;
 
-            if (it != end)
-            {
+            if (it != end) {
                 uint32_t cp = mask8(*it);
-                if (++it != end)
-                {
-                    if (is_trail(*it))
-                    {
+                if (++it != end) {
+                    if (is_trail(*it)) {
                         cp = ((cp << 18) & 0x1fffff) + ((mask8(*it) << 12) & 0x3ffff);
-                        if (++it != end)
-                        {
-                            if (is_trail(*it))
-                            {
+                        if (++it != end) {
+                            if (is_trail(*it)) {
                                 cp += (mask8(*it) << 6) & 0xfff;
-                                if (++it != end)
-                                {
-                                    if (is_trail(*it))
-                                    {
+                                if (++it != end) {
+                                    if (is_trail(*it)) {
                                         cp += (*it) & 0x3f;
 
                                         if (code_point)
@@ -288,8 +259,7 @@ namespace utf8
 
             // Now that we have a valid sequence length, get trail octets and calculate the code point
             utf_error err = UTF8_OK;
-            switch (length)
-            {
+            switch (length) {
             case 1:
                 err = get_sequence_1(it, end, &cp);
                 break;
@@ -304,13 +274,10 @@ namespace utf8
                 break;
             }
 
-            if (err == UTF8_OK)
-            {
+            if (err == UTF8_OK) {
                 // Decoding succeeded. Now, security checks...
-                if (is_code_point_valid(cp))
-                {
-                    if (!is_overlong_sequence(cp, length))
-                    {
+                if (is_code_point_valid(cp)) {
+                    if (!is_overlong_sequence(cp, length)) {
                         // Passed! Return here.
                         if (code_point)
                             *code_point = cp;
@@ -346,8 +313,7 @@ namespace utf8
     octet_iterator find_invalid(octet_iterator start, octet_iterator end)
     {
         octet_iterator result = start;
-        while (result != end)
-        {
+        while (result != end) {
             internal::utf_error err_code = internal::validate_next(result, end);
             if (err_code != internal::UTF8_OK)
                 return result;

@@ -42,8 +42,7 @@ void DatabaseWorker::WorkerThread()
     if (!_queue)
         return;
 
-    for (;;)
-    {
+    for (;;) {
         SQLOperation *operation = nullptr;
 
         _queue->WaitAndPop(operation);

@@ -26,8 +26,7 @@ class ProducerConsumerQueue;
 class MySQLConnection;
 class SQLOperation;
 
-class DatabaseWorker
-{
+class DatabaseWorker {
 public:
     DatabaseWorker(ProducerConsumerQueue<SQLOperation *> *newQueue, MySQLConnection *connection);
     ~DatabaseWorker();

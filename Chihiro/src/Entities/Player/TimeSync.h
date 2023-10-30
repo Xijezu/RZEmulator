@@ -17,8 +17,7 @@
  */
 #include "Common.h"
 
-class TimeSynch
-{
+class TimeSynch {
 public:
     TimeSynch(uint32_t L, uint32_t DC, uint32_t pMAX)
         : m_L(L)
@@ -44,10 +43,8 @@ public:
         uint32_t CDC = 0;
         auto size = static_cast<uint32_t>(m_vT.size());
 
-        for (auto &i : m_vT)
-        {
-            if (i < m_L || CDC >= m_DC)
-            {
+        for (auto &i : m_vT) {
+            if (i < m_L || CDC >= m_DC) {
                 ++size;
                 tc += i;
             }

@@ -132,8 +132,7 @@ void CliThread()
     // printf("NG> ");
 
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
-    while (!World::IsStopped())
-    {
+    while (!World::IsStopped()) {
         fflush(stdout);
 
         char *command_str; // = fgets(commandbuf, sizeof(commandbuf), stdin);
@@ -146,17 +145,14 @@ void CliThread()
         rl_bind_key('\t', rl_complete);
 #endif
 
-        if (command_str != NULL)
-        {
+        if (command_str != NULL) {
             for (int32_t x = 0; command_str[x]; ++x)
-                if (command_str[x] == '\r' || command_str[x] == '\n')
-                {
+                if (command_str[x] == '\r' || command_str[x] == '\n') {
                     command_str[x] = 0;
                     break;
                 }
 
-            if (!*command_str)
-            {
+            if (!*command_str) {
 #if PLATFORM == PLATFORM_WINDOWS
                 printf("NG> ");
 #else
@@ -185,8 +181,7 @@ void CliThread()
             free(command_str);
 #endif
         }
-        else if (feof(stdin))
-        {
+        else if (feof(stdin)) {
             World::StopNow(SHUTDOWN_EXIT_CODE);
         }
     }

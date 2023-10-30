@@ -33,15 +33,9 @@ constexpr int s_Matrix[VISIBLE_REGION_BOX_WIDTH][VISIBLE_REGION_BOX_WIDTH] = {
 
 #define NG_REGION_FUNCTOR(fn) [&fn](RegionType &pRegionType) { (fn).Run(pRegionType); }
 
-enum class RegionVisitor : uint8_t
-{
-    ClientVisitor = 0x01,
-    MovableVisitor = 0x02,
-    StaticVisitor = 0x04
-};
+enum class RegionVisitor : uint8_t { ClientVisitor = 0x01, MovableVisitor = 0x02, StaticVisitor = 0x04 };
 
-class RegionContainer
-{
+class RegionContainer {
 public:
     static RegionContainer &Instance()
     {
@@ -71,15 +65,11 @@ public:
         int32_t fx = std::max((int32_t)rx - VISIBLE_REGION_RANGE, 0);
         int32_t fy = std::max((int32_t)ry - VISIBLE_REGION_RANGE, 0);
 
-        for (int32_t x = fx; x <= tx; x++)
-        {
-            for (int32_t y = fy; y <= ty; y++)
-            {
-                if (IsVisibleRegion(rx, ry, x, y) != 0)
-                {
+        for (int32_t x = fx; x <= tx; x++) {
+            for (int32_t y = fy; y <= ty; y++) {
+                if (IsVisibleRegion(rx, ry, x, y) != 0) {
                     Region *region = getRegionPtr(x, y, layer);
-                    if (region != nullptr)
-                    {
+                    if (region != nullptr) {
                         if ((nBitset & (uint8_t)RegionVisitor::ClientVisitor) != 0)
                             region->DoEachClient2(visitor);
                         if ((nBitset & (uint8_t)RegionVisitor::MovableVisitor) != 0)
@@ -101,15 +91,11 @@ public:
         int32_t right = std::min(std::max((int32_t)rx1 + VISIBLE_REGION_RANGE, (int32_t)rx2 + VISIBLE_REGION_RANGE), (int32_t)m_nRegionWidth - 1);
         int32_t bottom = std::min(std::max((int32_t)ry1 + VISIBLE_REGION_RANGE, (int32_t)ry2 + VISIBLE_REGION_RANGE), (int32_t)m_nRegionHeight - 1);
 
-        for (int32_t y = top; y <= bottom; y++)
-        {
-            for (int32_t x = left; x <= right; x++)
-            {
-                if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0)
-                {
+        for (int32_t y = top; y <= bottom; y++) {
+            for (int32_t x = left; x <= right; x++) {
+                if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0) {
                     Region *region = getRegionPtr(x, y, layer);
-                    if (region != nullptr)
-                    {
+                    if (region != nullptr) {
                         if ((nBitset & (uint8_t)RegionVisitor::ClientVisitor) != 0)
                             region->DoEachClient2(visitor);
                         if ((nBitset & (uint8_t)RegionVisitor::MovableVisitor) != 0)
@@ -131,17 +117,12 @@ public:
         int32_t right = std::min(std::max((int32_t)rx + VISIBLE_REGION_RANGE, (int32_t)prx + VISIBLE_REGION_RANGE), (int32_t)m_nRegionWidth - 1);
         int32_t bottom = std::min(std::max((int32_t)ry + VISIBLE_REGION_RANGE, (int32_t)pry + VISIBLE_REGION_RANGE), (int32_t)m_nRegionHeight - 1);
 
-        for (int32_t y = top; y <= bottom; y++)
-        {
-            for (int32_t x = left; x <= right; x++)
-            {
-                if (IsVisibleRegion(rx, ry, x, y) != 0)
-                {
-                    if (IsVisibleRegion(prx, pry, x, y) == 0)
-                    {
+        for (int32_t y = top; y <= bottom; y++) {
+            for (int32_t x = left; x <= right; x++) {
+                if (IsVisibleRegion(rx, ry, x, y) != 0) {
+                    if (IsVisibleRegion(prx, pry, x, y) == 0) {
                         Region *region = getRegionPtr(x, y, layer);
-                        if (region != nullptr)
-                        {
+                        if (region != nullptr) {
                             if ((nBitset & (uint8_t)RegionVisitor::ClientVisitor) != 0)
                                 region->DoEachClient2(visitor);
                             if ((nBitset & (uint8_t)RegionVisitor::MovableVisitor) != 0)

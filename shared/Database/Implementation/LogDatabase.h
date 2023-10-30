@@ -2,8 +2,7 @@
 
 #include "MySQLConnection.h"
 
-enum LogDatabaseStatements : uint32_t
-{
+enum LogDatabaseStatements : uint32_t {
     /*  Naming standard for defines:
     {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
     When updating more than one field, consider looking at the calling function
@@ -13,8 +12,7 @@ enum LogDatabaseStatements : uint32_t
     MAX_LOGDATABASE_STATEMENTS
 };
 
-class LogDatabaseConnection : public MySQLConnection
-{
+class LogDatabaseConnection : public MySQLConnection {
 public:
     typedef LogDatabaseStatements Statements;
 

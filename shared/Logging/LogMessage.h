@@ -21,8 +21,7 @@
 #include "Define.h"
 #include "LogCommon.h"
 
-struct LogMessage
-{
+struct LogMessage {
     LogMessage(LogLevel _level, std::string const &_type, std::string &&_text);
     LogMessage(LogLevel _level, std::string const &_type, std::string &&_text, std::string &&_param1);
 

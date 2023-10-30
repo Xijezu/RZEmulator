@@ -17,8 +17,7 @@
  */
 #include "Define.h"
 
-namespace MySQL
-{
+namespace MySQL {
     void Library_Init();
     void Library_End();
 };

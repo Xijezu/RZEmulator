@@ -27,8 +27,7 @@
 #include "Define.h"
 #include "Errors.h"
 
-class Tokenizer
-{
+class Tokenizer {
 public:
     typedef std::vector<char const *> StorageType;
 
@@ -67,8 +66,7 @@ uint32_t TimeStringToSecs(const std::string &timestring);
 std::string TimeToTimestampStr(time_t t);
 
 // See here: http://www.martinbroadhurst.com/case-insensitive-string-comparison-in-c.html
-struct iequal
-{
+struct iequal {
     bool operator()(int c1, int c2) const { return std::toupper(c1) == std::toupper(c2); }
 };
 
@@ -365,8 +363,7 @@ void string_replace(std::string &str, const std::string &from, const std::string
 
 // simple class for not-modifyable list
 template<typename T>
-class HookList
-{
+class HookList {
     typedef typename std::list<T>::iterator ListIterator;
 
 private:

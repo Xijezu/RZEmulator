@@ -29,10 +29,8 @@ class Appender;
 class Logger;
 struct LogMessage;
 
-namespace NGemity
-{
-    namespace Asio
-    {
+namespace NGemity {
+    namespace Asio {
         class IoContext;
     }
 } // namespace NGemity
@@ -47,8 +45,7 @@ Appender *CreateAppender(uint8_t id, std::string const &name, LogLevel level, Ap
     return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const *>>(extraArgs));
 }
 
-class Log
-{
+class Log {
 private:
     Log();
     ~Log();
@@ -68,13 +65,13 @@ public:
     bool SetLogLevel(std::string const &name, char const *level, bool isLogger = true);
 
     template<typename Format, typename... Args>
-    inline void outMessage(std::string const &filter, LogLevel const level, Format &&fmt, Args &&... args)
+    inline void outMessage(std::string const &filter, LogLevel const level, Format &&fmt, Args &&...args)
     {
         outMessage(filter, level, NGemity::StringFormatTC(std::forward<Format>(fmt), std::forward<Args>(args)...));
     }
 
     template<typename Format, typename... Args>
-    void outCommand(uint32_t account, Format &&fmt, Args &&... args)
+    void outCommand(uint32_t account, Format &&fmt, Args &&...args)
     {
         if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
             return;
@@ -129,12 +126,10 @@ private:
 
 #define LOG_EXCEPTION_FREE(filterType__, level__, ...)                                                                         \
     {                                                                                                                          \
-        try                                                                                                                    \
-        {                                                                                                                      \
+        try {                                                                                                                  \
             sLog->outMessage(filterType__, level__, __VA_ARGS__);                                                              \
         }                                                                                                                      \
-        catch (std::exception & e)                                                                                             \
-        {                                                                                                                      \
+        catch (std::exception & e) {                                                                                           \
             sLog->outMessage("server", LOG_LEVEL_ERROR, "Wrong format occurred (%s) at %s:%u.", e.what(), __FILE__, __LINE__); \
         }                                                                                                                      \
     }
@@ -145,10 +140,8 @@ void check_args(std::string const &, ...);
 
 // This will catch format errors on build time
 #define NG_LOG_MESSAGE_BODY(filterType__, level__, ...)             \
-    do                                                              \
-    {                                                               \
-        if (sLog->ShouldLog(filterType__, level__))                 \
-        {                                                           \
+    do {                                                            \
+        if (sLog->ShouldLog(filterType__, level__)) {               \
             if (false)                                              \
                 check_args(__VA_ARGS__);                            \
                                                                     \

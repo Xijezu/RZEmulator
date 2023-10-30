@@ -95,21 +95,17 @@ int32_t Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType d
 
     uint32_t ct = sWorld.GetArTime();
 
-    if (pFrom->IsSummon())
-    {
+    if (pFrom->IsSummon()) {
         summon = dynamic_cast<Summon *>(pFrom);
-        if (summon->GetMaster() != nullptr)
-        {
+        if (summon->GetMaster() != nullptr) {
             player = summon->GetMaster();
         }
     }
-    else
-    {
+    else {
         player = dynamic_cast<Player *>(pFrom);
     }
 
-    if (m_hFirstAttacker == 0)
-    {
+    if (m_hFirstAttacker == 0) {
         if (player != nullptr)
             m_hFirstAttacker = player->GetHandle();
         m_nFirstAttackTime = ct;
@@ -129,8 +125,7 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
     takePriority Priority{};
     m_bTamedSuccess = false;
 
-    if (GetTamer() != 0)
-    {
+    if (GetTamer() != 0) {
         auto player = sMemoryPool.GetObjectInWorld<Player>(m_hTamer);
         if (player != nullptr)
             m_bTamedSuccess = sWorld.ProcTame(this);
@@ -140,8 +135,7 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
     if (m_Base->exp[0] > 0)
         procEXP(pKiller, vPartyContribute);
 
-    if (!m_bTamedSuccess)
-    {
+    if (!m_bTamedSuccess) {
         std::sort(vPartyContribute.begin(), vPartyContribute.end(), [](const auto &a, const auto &b) -> bool { return a.fContribute > b.fContribute; });
         auto pos = GetCurrentPosition(sWorld.GetArTime());
 
@@ -149,20 +143,16 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
 
         int32_t nCount{0};
 
-        for (auto &vp : vPartyContribute)
-        {
-            if (m_Base->monster_type >= 31 /* && isDungeonRaidMonster*/)
-            {
+        for (auto &vp : vPartyContribute) {
+            if (m_Base->monster_type >= 31 /* && isDungeonRaidMonster*/) {
                 Priority.PickupOrder.hPlayer[nCount] = 0;
                 Priority.PickupOrder.nPartyID[nCount] = 0;
             }
-            else if (vp.hPlayer != 0)
-            {
+            else if (vp.hPlayer != 0) {
                 Priority.PickupOrder.hPlayer[nCount] = vp.hPlayer;
                 Priority.PickupOrder.nPartyID[nCount] = 0;
             }
-            else
-            {
+            else {
                 Priority.PickupOrder.hPlayer[nCount] = 0;
                 Priority.PickupOrder.nPartyID[nCount] = vp.nPartyID;
             }
@@ -191,15 +181,13 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
         if (pKiller->IsPlayer() && pPlayer->GetChaos() < 1 && pPlayer->GetQuestProgress(1032) == 1)
             sWorld.addChaos(this, pPlayer, 1.0f);
 
-        if (m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/)
-        {
+        if (m_Base->monster_type < 31 /* || !IsDungeonRaidMonster*/) {
             procDropGold(pos, pKiller, Priority, vPartyContribute, fDropRatePenalty);
             procDropItem(pos, pKiller, Priority, vPartyContribute, fDropRatePenalty);
         }
     }
 
-    for (const auto &pHate : m_vHateList)
-    {
+    for (const auto &pHate : m_vHateList) {
         auto pEnemy = sMemoryPool.GetObjectInWorld<Unit>(pHate.uid);
         if (pEnemy != nullptr)
             pEnemy->RemoveFromEnemyList(GetHandle());
@@ -219,29 +207,24 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     int32_t nLastAttackPartyID{0};
     float fMaxDamageAdd{0.1f};
 
-    if (m_nFirstAttackTime + GameRule::MAX_FIRST_ATTACK_BONUS_TIME < t)
-    {
+    if (m_nFirstAttackTime + GameRule::MAX_FIRST_ATTACK_BONUS_TIME < t) {
         fMaxDamageAdd = 0.4f;
         m_hFirstAttacker = 0;
     }
 
-    if (pKiller->IsSummon())
-    {
+    if (pKiller->IsSummon()) {
         auto pPlayer = pKiller->As<Summon>()->GetMaster();
-        if (pPlayer != nullptr)
-        {
+        if (pPlayer != nullptr) {
             hKiller = pPlayer->GetHandle();
             nLastAttackPartyID = pPlayer->GetPartyID();
         }
     }
-    else if (pKiller->IsPlayer())
-    {
+    else if (pKiller->IsPlayer()) {
         hKiller = pKiller->GetHandle();
         nLastAttackPartyID = pKiller->As<Player>()->GetPartyID();
     }
 
-    for (const auto &it : m_vDamageList)
-    {
+    for (const auto &it : m_vDamageList) {
         auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(it.uid);
         if (pUnit == nullptr)
             continue;
@@ -255,17 +238,14 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
         if (pPlayer == nullptr)
             pPlayer = pSummon->GetMaster();
 
-        if (pPlayer->IsInParty())
-        {
+        if (pPlayer->IsInParty()) {
             if (GetTamer() == pPlayer->GetHandle())
                 nTamerPartyID = pPlayer->GetPartyID();
 
-            if (auto itMap = mapPartyDamageContribute.find(pPlayer->GetPartyID()); itMap == mapPartyDamageContribute.end())
-            {
+            if (auto itMap = mapPartyDamageContribute.find(pPlayer->GetPartyID()); itMap == mapPartyDamageContribute.end()) {
                 mapPartyDamageContribute[pPlayer->GetPartyID()] = PARTY_DAMAGE(it.nDamage, pPlayer->GetLevel());
             }
-            else
-            {
+            else {
                 itMap->second.nDamage += it.nDamage;
                 if (itMap->second.nLevel < pPlayer->GetLevel())
                     itMap->second.nLevel = pPlayer->GetLevel();
@@ -274,13 +254,10 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
             if (pPlayer->GetHandle() == m_hFirstAttacker)
                 nFirstAttackPartyID = pPlayer->GetPartyID();
         }
-        else
-        {
+        else {
             std::vector<VirtualParty>::iterator itVector;
-            for (itVector = vPartyContribute.begin(); itVector != vPartyContribute.end(); ++itVector)
-            {
-                if ((*itVector).hPlayer == pPlayer->GetHandle())
-                {
+            for (itVector = vPartyContribute.begin(); itVector != vPartyContribute.end(); ++itVector) {
+                if ((*itVector).hPlayer == pPlayer->GetHandle()) {
                     (*itVector).nDamage += it.nDamage;
                     break;
                 }
@@ -296,8 +273,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
 
     std::sort(vPartyContribute.begin(), vPartyContribute.end(), [](const VirtualParty &a, const VirtualParty &b) -> bool { return a.nDamage > b.nDamage; });
 
-    for (auto itVector = vPartyContribute.begin(); itVector != vPartyContribute.end(); ++itVector)
-    {
+    for (auto itVector = vPartyContribute.begin(); itVector != vPartyContribute.end(); ++itVector) {
         float fContribute{0.0f};
         if (nTamerPartyID != 0 && nTamerPartyID == (*itVector).nPartyID)
             (*itVector).bTamer = true;
@@ -308,23 +284,19 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
         if (itVector == vPartyContribute.begin())
             fContribute += fMaxDamageAdd;
 
-        if (nFirstAttackPartyID != 0)
-        {
+        if (nFirstAttackPartyID != 0) {
             if ((*itVector).nPartyID == nFirstAttackPartyID)
                 fContribute += 0.3f;
         }
-        else if (m_hFirstAttacker != 0 && (*itVector).hPlayer == m_hFirstAttacker)
-        {
+        else if (m_hFirstAttacker != 0 && (*itVector).hPlayer == m_hFirstAttacker) {
             fContribute += 0.3f;
         }
 
-        if (nLastAttackPartyID != 0)
-        {
+        if (nLastAttackPartyID != 0) {
             if ((*itVector).nPartyID == nLastAttackPartyID)
                 fContribute += 0.1f;
         }
-        else
-        {
+        else {
             if ((*itVector).hPlayer == hKiller)
                 fContribute += 0.1f;
         }
@@ -337,8 +309,7 @@ DamageTag *Monster::addDamage(uint32_t handle, int32_t nDamage)
 {
     uint32_t ct = sWorld.GetArTime();
     auto tag = getDamageTag(handle, ct);
-    if (tag == nullptr)
-    {
+    if (tag == nullptr) {
         m_vDamageList.emplace_back(DamageTag{handle, ct, nDamage});
         tag = &m_vDamageList.back();
     }
@@ -351,17 +322,14 @@ DamageTag *Monster::getDamageTag(uint32_t handle, uint32_t t)
 {
     if (m_vDamageList.empty())
         return nullptr;
-    for (uint32_t i = 0; i < m_vDamageList.size(); i++)
-    {
+    for (uint32_t i = 0; i < m_vDamageList.size(); i++) {
         DamageTag *dt = &m_vDamageList[i];
-        if (dt->uid == handle)
-        {
+        if (dt->uid == handle) {
             if (t != 0)
                 dt->nTime = t;
             return dt;
         }
-        if (dt->nTime + 30000 < t)
-        {
+        if (dt->nTime + 30000 < t) {
             m_nTotalDamage -= dt->nDamage;
             m_vDamageList.erase(m_vDamageList.begin() + i);
         }
@@ -377,38 +345,31 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
     int32_t nEXP = m_Base->exp[0];
     int32_t nJP = m_Base->jp[0];
 
-    for (auto &vp : vPartyContribute)
-    {
+    for (auto &vp : vPartyContribute) {
         int32_t nSharedEXP = nEXP * vp.fContribute;
         float fSharedJP = nJP * vp.fContribute;
         if (nSharedEXP < 1)
             nSharedEXP = 1;
 
-        if (vp.hPlayer != 0)
-        {
-            if (vp.hPlayer == GetTamer())
-            {
+        if (vp.hPlayer != 0) {
+            if (vp.hPlayer == GetTamer()) {
                 nSharedEXP *= GetTameExpAdjust();
                 fSharedJP *= GetTameExpAdjust();
             }
         }
-        else
-        {
-            if (vp.bTamer)
-            {
+        else {
+            if (vp.bTamer) {
                 nSharedEXP *= GetTameExpAdjust();
                 fSharedJP *= GetTameExpAdjust();
             }
         }
 
-        if (vp.hPlayer != 0)
-        {
+        if (vp.hPlayer != 0) {
             auto pPlayer = sMemoryPool.GetObjectInWorld<Player>(vp.hPlayer);
             if (pPlayer != nullptr)
                 sWorld.addEXP(this, pPlayer, nSharedEXP, fSharedJP);
         }
-        else
-        {
+        else {
             sWorld.addEXP(this, vp.nPartyID, nSharedEXP, fSharedJP);
         }
     }
@@ -425,37 +386,29 @@ void Monster::Update(uint32_t diff)
     uint32_t ct = sWorld.GetArTime();
     MONSTER_STATUS ms = GetStatus();
 
-    if (ms != STATUS_NORMAL)
-    {
-        if ((int32_t)ms > 0)
-        {
-            if ((int32_t)ms <= 3)
-            {
+    if (ms != STATUS_NORMAL) {
+        if ((int32_t)ms > 0) {
+            if ((int32_t)ms <= 3) {
                 if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 50 < ct)
                     OnUpdate();
 
-                if (IsActable())
-                {
+                if (IsActable()) {
                     if (GetHealth() == 0)
                         return;
 
                     AI_processAttack(ct);
                 }
             }
-            else
-            {
-                if (ms == STATUS_DEAD)
-                {
+            else {
+                if (ms == STATUS_DEAD) {
                     processDead(ct);
                     return;
                 }
             }
         }
     }
-    else
-    {
-        if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-        {
+    else {
+        if (GetUInt32Value(UNIT_LAST_UPDATE_TIME) + 3000 < ct || HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
             OnUpdate();
 
             if (GetHealth() == 0)
@@ -469,26 +422,21 @@ void Monster::Update(uint32_t diff)
             processMove(ct);
     }
 
-    if (GetHealth() != 0)
-    {
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-        {
+    if (GetHealth() != 0) {
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
             if (IsInWorld())
                 processPendingMove();
         }
-        if (m_nLastHateUpdateTime < ct + 6000)
-        {
+        if (m_nLastHateUpdateTime < ct + 6000) {
             m_nLastHateUpdateTime = ct;
             // updateHate();
         }
-        if (m_nTamedTime + 30000 < static_cast<int32_t>(ct))
-        {
+        if (m_nTamedTime + 30000 < static_cast<int32_t>(ct)) {
             m_hTamer = 0;
             m_nTamedTime = -1;
         }
 
-        if (bIsMoving && IsInWorld())
-        {
+        if (bIsMoving && IsInWorld()) {
             if (IsMovable())
                 processWalk(ct);
         }
@@ -498,13 +446,11 @@ void Monster::Update(uint32_t diff)
 
 void Monster::processDead(uint32_t t)
 {
-    if (m_pDeleteHandler != nullptr)
-    {
+    if (m_pDeleteHandler != nullptr) {
         m_pDeleteHandler->onMonsterDelete(this);
     }
 
-    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t)
-    {
+    if (GetUInt32Value(UNIT_FIELD_DEAD_TIME) + 1200 < t) {
         if (IsInWorld())
             sWorld.RemoveObjectFromWorld(this);
         // sMemoryPool.RemoveObject(this, true);
@@ -514,12 +460,10 @@ void Monster::processDead(uint32_t t)
 
 void Monster::SetStatus(MONSTER_STATUS status)
 {
-    if (m_nStatus != STATUS_DEAD)
-    {
+    if (m_nStatus != STATUS_DEAD) {
         // if((int32_t)status != m_nStatus && (int32_t)status != 4 && (int32_t)status != 0 && m_nStatus == 0)
         // ResetTriggerCondition();
-        if (m_nStatus != status)
-        {
+        if (m_nStatus != status) {
             m_nStatus = status;
             Messages::BroadcastStatusMessage(this);
         }
@@ -529,17 +473,13 @@ void Monster::SetStatus(MONSTER_STATUS status)
 void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
 {
     int64_t item_count;
-    for (int32_t i = 0; i < 10; ++i)
-    {
-        if (m_Base->drop_item_id[i] != 0 && sWorld.checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1))
-        {
+    for (int32_t i = 0; i < 10; ++i) {
+        if (m_Base->drop_item_id[i] != 0 && sWorld.checkDrop(pKiller, m_Base->drop_item_id[i], m_Base->drop_percentage[i], fDropRatePenalty, 1)) {
             item_count = irand(m_Base->drop_min_count[i], m_Base->drop_max_count[i]);
-            if (item_count < m_Base->drop_min_count[i])
-            {
+            if (item_count < m_Base->drop_min_count[i]) {
                 NG_LOG_WARN("entities.monster", "Monster::procDropItem: Min/Max Count error!");
             }
-            else
-            {
+            else {
                 int32_t level = irand(m_Base->drop_min_level[i], m_Base->drop_max_level[i]);
                 int32_t code = m_Base->drop_item_id[i];
                 if (code >= 0)
@@ -554,8 +494,7 @@ void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, 
 
 void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int32_t code, long count, int32_t level, bool bIsEventItem, int32_t nFlagIndex)
 {
-    if (count == 0)
-    {
+    if (count == 0) {
         NG_LOG_ERROR("entities.monster", "Monster::dropItem: count was 0. (x: %f, y: %f, code: %u, Killer: %s", pos.GetPositionX(), pos.GetPositionY(), code, pKiller->GetName());
         return;
     }
@@ -563,14 +502,11 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
     WorldObject *cr{nullptr};
     Player *player{nullptr};
 
-    for (auto &ht : m_vHateList)
-    {
-        if (ht.uid != 0)
-        {
+    for (auto &ht : m_vHateList) {
+        if (ht.uid != 0) {
             cr = sMemoryPool.GetObjectInWorld<WorldObject>(ht.uid);
 
-            if (cr != nullptr)
-            {
+            if (cr != nullptr) {
                 if (cr->IsPlayer())
                     player = dynamic_cast<Player *>(cr);
 
@@ -583,8 +519,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
         }
     }
 
-    if (player == nullptr)
-    {
+    if (player == nullptr) {
         if (pKiller == nullptr)
             return;
         if (pKiller->IsPlayer())
@@ -593,8 +528,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
             player = dynamic_cast<Summon *>(pKiller)->GetMaster();
     }
 
-    if (player != nullptr && player->IsInWorld())
-    {
+    if (player != nullptr && player->IsInWorld()) {
         auto ni = Item::AllocItem(0, code, count, GenerateCode::BY_MONSTER, level, -1, -1, 0, 0, 0, 0, 0);
         if (ni == nullptr)
             return;
@@ -605,8 +539,7 @@ void Monster::dropItem(Position pos, Unit *pKiller, takePriority pPriority, std:
 
         if ((uint32_t)nFlagIndex <= 0x1F)
             ni->GetItemInstance().SetFlag(ni->GetItemInstance().GetFlag() | (uint32_t)(1 << (nFlagIndex & 0x1F)));
-        if (bIsEventItem)
-        {
+        if (bIsEventItem) {
             ni->GetItemInstance().SetFlag(ni->GetItemInstance().GetFlag() | 0x10);
         }
         sWorld.MonsterDropItemToWorld(this, ni);
@@ -617,8 +550,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
 {
     std::map<int32_t, int64_t> mapDropItem{};
 
-    for (int32_t i = 0; i < static_cast<int32_t>(count); ++i)
-    {
+    for (int32_t i = 0; i < static_cast<int32_t>(count); ++i) {
         int32_t nItemID = nDropGroupID;
         int64_t nItemCount = 1;
 
@@ -626,8 +558,7 @@ void Monster::dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority,
             GameContent::SelectItemIDFromDropGroup(nItemID, nItemID, nItemCount);
         while (nItemID < 0);
 
-        if (nItemID > 0)
-        {
+        if (nItemID > 0) {
             auto it = mapDropItem.find(nItemID);
             if (it == mapDropItem.end())
                 mapDropItem.emplace(nItemID, nItemCount);
@@ -695,8 +626,7 @@ void Monster::onApplyAttributeAdjustment()
 
 void Monster::OnUpdate()
 {
-    if (m_bNeedToFindEnemy)
-    {
+    if (m_bNeedToFindEnemy) {
         m_bNeedToFindEnemy = false;
         findNextEnemy();
     }
@@ -708,38 +638,31 @@ void Monster::findNextEnemy()
     int32_t nMaxHate{-1};
     uint32_t target{0};
 
-    for (auto &ht : m_vHateList)
-    {
+    for (auto &ht : m_vHateList) {
         if (!ht.bIsActive)
             continue;
 
         int32_t nHate = ht.nHate;
-        for (const auto &mit : m_vHateModifierByState)
-        {
-            if (mit.uid == ht.uid)
-            {
+        for (const auto &mit : m_vHateModifierByState) {
+            if (mit.uid == ht.uid) {
                 nHate += mit.nHate;
                 break;
             }
         }
 
-        if (nHate > nMaxHate)
-        {
+        if (nHate > nMaxHate) {
             auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(ht.uid);
-            if (pTarget != nullptr && sRegion.IsVisibleRegion(pTarget, this) && IsVisible(pTarget))
-            {
+            if (pTarget != nullptr && sRegion.IsVisibleRegion(pTarget, this) && IsVisible(pTarget)) {
                 nMaxHate = nHate;
                 target = ht.uid;
             }
         }
     }
 
-    if (nMaxHate == -1)
-    {
+    if (nMaxHate == -1) {
         comeBackHome(false);
     }
-    else
-    {
+    else {
         m_nMaxHate = nMaxHate;
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, target);
         SetFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
@@ -749,8 +672,7 @@ void Monster::findNextEnemy()
 void Monster::comeBackHome(bool bInvincible)
 {
     std::vector<Position> pl{};
-    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED))
-    {
+    if (!HasFlag(UNIT_FIELD_STATUS, STATUS_FEARED)) {
         SetStatus(STATUS_NORMAL);
         m_nLastHateUpdateTime = sWorld.GetArTime();
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
@@ -768,8 +690,7 @@ void Monster::comeBackHome(bool bInvincible)
 bool Monster::StartAttack(uint32_t target, bool bNeedFastReaction)
 {
     bool result{false};
-    if (Unit::StartAttack(target, bNeedFastReaction))
-    {
+    if (Unit::StartAttack(target, bNeedFastReaction)) {
         SetStatus(STATUS_ATTACK);
         result = true;
     }
@@ -778,27 +699,22 @@ bool Monster::StartAttack(uint32_t target, bool bNeedFastReaction)
 
 void Monster::AI_processAttack(uint32_t t)
 {
-    if (m_castingSkill != nullptr)
-    {
+    if (m_castingSkill != nullptr) {
         m_castingSkill->ProcSkill();
         return;
     }
 
     auto target = sMemoryPool.GetObjectInWorld<Unit>(GetTargetHandle());
-    if (target == nullptr || target->GetHandle() != GetTargetHandle() || target->GetHealth() == 0 || !target->IsInWorld())
-    {
+    if (target == nullptr || target->GetHandle() != GetTargetHandle() || target->GetHealth() == 0 || !target->IsInWorld()) {
         removeFromHateList(GetTargetHandle());
         findNextEnemy();
     }
-    else
-    {
-        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK))
-        {
+    else {
+        if (HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK)) {
             target->OnUpdate();
             RemoveFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ATTACK);
         }
-        if (target->GetHealth() != 0)
-        {
+        if (target->GetHealth() != 0) {
             AI_processAttack(target, t);
             return;
         }
@@ -812,14 +728,12 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
     if (!IsInWorld() || pEnemy == nullptr)
         return;
 
-    if ((IsAutoTrap() || (IsAgent())) && pEnemy->GetEnemyHandle() != GetHandle())
-    {
+    if ((IsAutoTrap() || (IsAgent())) && pEnemy->GetEnemyHandle() != GetHandle()) {
         comeBackHome(false);
         return;
     }
 
-    if (!sRegion.IsVisibleRegion(this, pEnemy) || pEnemy->GetLayer() != GetLayer())
-    {
+    if (!sRegion.IsVisibleRegion(this, pEnemy) || pEnemy->GetLayer() != GetLayer()) {
         comeBackHome(false);
         return;
     }
@@ -829,8 +743,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
     auto enemy_distance = myPosition.GetExactDist2d(&enemyPosition);
 
     // Trigger condition
-    if (GetNextAttackableTime() <= t)
-    {
+    if (GetNextAttackableTime() <= t) {
         // @todo
     }
 
@@ -839,11 +752,9 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
         m_bNeedToFindEnemy = true;
 
     if (/*!IsDungeonRaidMonster() &&*/ ((m_bNeedToFindEnemy && pEnemy->IsMoving() && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME) ||
-        (m_nLastEnemyDistance != 0 && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME && enemy_distance > m_nLastEnemyDistance)))
-    {
+        (m_nLastEnemyDistance != 0 && enemy_distance > GameRule::MONSTER_TRACKING_RANGE_BY_TIME && enemy_distance > m_nLastEnemyDistance))) {
         auto pHateTag = getHateTag(pEnemy->GetHandle(), t);
-        if (pHateTag != nullptr)
-        {
+        if (pHateTag != nullptr) {
             pHateTag->bIsActive = false;
             ++pHateTag->nBadAttackCount;
 
@@ -855,10 +766,8 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
 
     m_nLastEnemyDistance = enemy_distance;
     auto gap = GetUnitSize() / 2 + pEnemy->GetUnitSize() / 2;
-    if ((pEnemy->IsMoving(t) && (enemy_distance - gap > GetRealAttackRange() * 1.5f)) || (!pEnemy->IsMoving(t) && (enemy_distance - gap > GetRealAttackRange() * 1.2f)))
-    {
-        if (IsMoving() && !pEnemy->IsMoving(t))
-        {
+    if ((pEnemy->IsMoving(t) && (enemy_distance - gap > GetRealAttackRange() * 1.5f)) || (!pEnemy->IsMoving(t) && (enemy_distance - gap > GetRealAttackRange() * 1.2f))) {
+        if (IsMoving() && !pEnemy->IsMoving(t)) {
             auto targetPosition = GetTargetPos();
             if (targetPosition.GetExactDist2d(&enemyPosition) - gap <= GetRealAttackRange() * 1.2f)
                 return;
@@ -873,8 +782,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
         else
             FindAttackablePosition(myPosition, targetPosition, enemy_distance, gap + GetRealAttackRange());
 
-        if (sWorld.getBoolConfig(CONFIG_MONSTER_PATHFINDING) && !GameContent::IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY()))
-        {
+        if (sWorld.getBoolConfig(CONFIG_MONSTER_PATHFINDING) && !GameContent::IsBlocked(targetPosition.GetPositionX(), targetPosition.GetPositionY())) {
             // Pathfinding here
         }
 
@@ -883,14 +791,12 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
         auto homePosition = m_pRespawn;
         auto track_distance = myPosition.GetExactDist2d(&homePosition);
 
-        if (/*!IsDungeonRaidMonster() &&*/ track_distance > GetChaseRange())
-        {
+        if (/*!IsDungeonRaidMonster() &&*/ track_distance > GetChaseRange()) {
             comeBackHome(true);
             return;
         }
 
-        if (m_nLastTrackTime + 50 < t)
-        {
+        if (m_nLastTrackTime + 50 < t) {
             m_nLastTrackTime = t;
 
             float fMod = irand(0, 9);
@@ -904,20 +810,16 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
                 sWorld.SetMove(this, GetCurrentPosition(t), targetPosition, static_cast<uint8_t>(GetRealMoveSpeed() * fMod), true, sWorld.GetArTime());
         }
     }
-    else
-    {
+    else {
         if (GetStatus() == STATUS_FIND_ATTACK_POS && IsMoving(t))
             return;
 
-        if (!pEnemy->IsMoving(t) && (GetStatus() == STATUS_TRACKING || (pEnemy->GetEnemyCount() < 6 && irand(0, 99) < GameRule::MONSTER_FIND_ATTACK_POS_RATIO)))
-        {
+        if (!pEnemy->IsMoving(t) && (GetStatus() == STATUS_TRACKING || (pEnemy->GetEnemyCount() < 6 && irand(0, 99) < GameRule::MONSTER_FIND_ATTACK_POS_RATIO))) {
             std::vector<uint32_t> vList{};
             sWorld.EnumMovableObject(myPosition, GetLayer(), GetUnitSize() / 2, vList);
-            for (const auto &hUnit : vList)
-            {
+            for (const auto &hUnit : vList) {
                 auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(hUnit);
-                if (((pUnit != nullptr && pUnit->IsMonster()) && hUnit > GetHandle()) || ((GetStatus() == STATUS_TRACKING) && pEnemy->IsPlayer() && pEnemy->GetHandle() == hUnit))
-                {
+                if (((pUnit != nullptr && pUnit->IsMonster()) && hUnit > GetHandle()) || ((GetStatus() == STATUS_TRACKING) && pEnemy->IsPlayer() && pEnemy->GetHandle() == hUnit)) {
                     auto attack_pos = getNonDuplicateAttackPos(pEnemy);
                     SetStatus(STATUS_FIND_ATTACK_POS);
                     if (GameContent::IsBlocked(attack_pos.GetPositionX(), attack_pos.GetPositionY()))
@@ -933,13 +835,11 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
         int32_t nPrevStatus = GetStatus();
         SetStatus(STATUS_ATTACK);
 
-        if (GetNextAttackableTime() <= t)
-        {
+        if (GetNextAttackableTime() <= t) {
             if (!IsAttackable() || pEnemy == nullptr || !IsEnemy(pEnemy) || pEnemy->IsDead())
                 return;
 
-            if (IsMoving())
-            {
+            if (IsMoving()) {
                 auto stopPosition = GetCurrentPosition(t + 10);
                 sWorld.SetMove(this, myPosition, stopPosition, 0, true, sWorld.GetArTime());
             }
@@ -1036,8 +936,7 @@ int32_t Monster::GetMonsterGroup() const
 int32_t Monster::GetTameItemCode() const
 {
     int32_t result = m_Base->taming_id;
-    if (result != 0)
-    {
+    if (result != 0) {
         auto si = sObjectMgr.GetSummonBase(result);
         if (si != nullptr)
             result = si->card_id;
@@ -1103,19 +1002,15 @@ int32_t Monster::AddHate(uint32_t handle, int32_t pt, bool bBroadcast, bool bPro
     auto ht = addHate(handle, pt);
 
     int32_t nHate = ht->nHate;
-    if (unit != nullptr)
-    {
+    if (unit != nullptr) {
         // IsRoamer
     }
-    if (pt >= 0)
-    {
-        if (bBroadcast)
-        {
+    if (pt >= 0) {
+        if (bBroadcast) {
             // moar roamer
         }
     }
-    else
-    {
+    else {
         findNextEnemy();
     }
     return nHate;
@@ -1125,8 +1020,7 @@ HateTag *Monster::getHateTag(uint32_t handle, uint32_t t)
 {
     auto pos = std::find_if(m_vHateList.begin(), m_vHateList.end(), [handle](const HateTag &ht) { return ht.uid == handle; });
 
-    if (pos != m_vHateList.end())
-    {
+    if (pos != m_vHateList.end()) {
         pos->nTime = t;
         return &*pos;
     }
@@ -1138,8 +1032,7 @@ HateTag *Monster::addHate(uint32_t handle, int32_t nHate)
     auto t = sWorld.GetArTime();
     auto pHateTag = getHateTag(handle, t);
 
-    if (pHateTag == nullptr)
-    {
+    if (pHateTag == nullptr) {
         m_vHateList.emplace_back(HateTag(handle, t, 0));
         pHateTag = &m_vHateList.back();
 
@@ -1151,20 +1044,17 @@ HateTag *Monster::addHate(uint32_t handle, int32_t nHate)
         pHateTag->nHate = 0;
 
     pHateTag->nLastMaxHate = pHateTag->nHate;
-    if (!pHateTag->bIsActive)
-    {
+    if (!pHateTag->bIsActive) {
         pHateTag->bIsActive = true;
 
         int32_t nFrenzyLevel{0};
         uint32_t nFrenzyTime{0};
 
-        if (pHateTag->nBadAttackCount == 1)
-        {
+        if (pHateTag->nBadAttackCount == 1) {
             nFrenzyLevel = 1;
             nFrenzyTime = 300;
         }
-        else
-        {
+        else {
             nFrenzyLevel = 2;
             nFrenzyTime = 500;
         }
@@ -1172,22 +1062,18 @@ HateTag *Monster::addHate(uint32_t handle, int32_t nHate)
         AddState(SG_NORMAL, SC_FRENZY, GetHandle(), nFrenzyLevel, t, t + nFrenzyTime);
     }
 
-    if (!IsAttacking())
-    {
+    if (!IsAttacking()) {
         m_nMaxHate = pHateTag->nHate;
         auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(handle);
-        if (pTarget != nullptr)
-        {
+        if (pTarget != nullptr) {
             StartAttack(handle, false);
         }
     }
-    else if (GetTargetHandle() != handle && pHateTag->nHate > m_nMaxHate)
-    {
+    else if (GetTargetHandle() != handle && pHateTag->nHate > m_nMaxHate) {
         m_nMaxHate = pHateTag->nHate;
         SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, handle);
     }
-    else if (GetTargetHandle() == handle)
-    {
+    else if (GetTargetHandle() == handle) {
         m_nMaxHate = pHateTag->nHate;
     }
 
@@ -1197,15 +1083,12 @@ HateTag *Monster::addHate(uint32_t handle, int32_t nHate)
 bool Monster::removeFromHateList(uint32_t handle)
 {
     bool found{false};
-    for (int32_t i = m_vHateList.size() - 1; i >= 0; --i)
-    {
+    for (int32_t i = m_vHateList.size() - 1; i >= 0; --i) {
         auto ht = m_vHateList[i];
-        if (ht.uid == handle)
-        {
+        if (ht.uid == handle) {
             m_vHateList.erase(m_vHateList.begin() + i);
             auto unit = sMemoryPool.GetObjectInWorld<Unit>(handle);
-            if (unit != nullptr)
-            {
+            if (unit != nullptr) {
                 found = true;
                 // RemoveFromEnemyList
             }
@@ -1221,8 +1104,7 @@ void Monster::processWalk(uint32_t t)
     tmp_mv.Copy(*this);
     tmp_mv.Step(t);
     int32_t wpi{0};
-    if (GetStatus() == STATUS_NORMAL && !m_bComeBackHome && m_pWayPointInfo != nullptr)
-    {
+    if (GetStatus() == STATUS_NORMAL && !m_bComeBackHome && m_pWayPointInfo != nullptr) {
         m_pRespawn.m_positionX = tmp_mv.GetPositionX();
         m_pRespawn.m_positionY = tmp_mv.GetPositionY();
         if (m_nWayPointIdx < 0 && m_pWayPointInfo->way_point_type == 1)
@@ -1233,15 +1115,12 @@ void Monster::processWalk(uint32_t t)
     }
 
     if ((uint32_t)(tmp_mv.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) ||
-        (uint32_t)(tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || !tmp_mv.bIsMoving)
-    {
+        (uint32_t)(tmp_mv.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) != (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)) || !tmp_mv.bIsMoving) {
         if (!IsInWorld())
             return;
 
-        if (m_bComeBackHome && !IsBattleMode())
-        {
-            if (tmp_mv.bIsMoving)
-            {
+        if (m_bComeBackHome && !IsBattleMode()) {
+            if (tmp_mv.bIsMoving) {
                 sWorld.onRegionChange(this, t - lastStepTime, tmp_mv.bIsMoving == 0);
                 return;
             }
@@ -1261,18 +1140,13 @@ void Monster::processMove(uint32_t t)
     std::vector<Position> vMoveInfo{};
     Position targetPos{};
 
-    if (m_pWayPointInfo == nullptr)
-    {
-        if (GetStatus() != STATUS_NORMAL || m_bNearClient || !m_vHateList.empty())
-        {
-            if (m_bIsWandering)
-            {
+    if (m_pWayPointInfo == nullptr) {
+        if (GetStatus() != STATUS_NORMAL || m_bNearClient || !m_vHateList.empty()) {
+            if (m_bIsWandering) {
                 int32_t rnd = rand32();
-                if (GetStatus() == STATUS_NORMAL && GetHealth() != 0 && (!bIsMoving || !IsInWorld()) && rnd % 500 + lastStepTime + 1000 < t && (rnd % 3) != 0)
-                {
+                if (GetStatus() == STATUS_NORMAL && GetHealth() != 0 && (!bIsMoving || !IsInWorld()) && rnd % 500 + lastStepTime + 1000 < t && (rnd % 3) != 0) {
                     getMovePosition(targetPos);
-                    if (!GameContent::IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY()))
-                    {
+                    if (!GameContent::IsBlocked(targetPos.GetPositionX(), targetPos.GetPositionY())) {
                         auto speed = (uint8_t)(m_Attribute.nMoveSpeed / 7);
                         sWorld.SetMove(this, GetCurrentPosition(t), targetPos, speed, true, sWorld.GetArTime(), true);
                         m_pRespawn.m_positionX = targetPos.GetPositionX();
@@ -1281,19 +1155,15 @@ void Monster::processMove(uint32_t t)
                 }
             }
         }
-        else
-        {
+        else {
             sWorld.ClearTamer(this, true);
             SetStatus(STATUS_NORMAL);
         }
     }
-    else
-    {
-        if (!bIsMoving || !IsInWorld())
-        {
+    else {
+        if (!bIsMoving || !IsInWorld()) {
             int32_t lwpi = (int32_t)m_pWayPointInfo->vWayPoint.size() - 1;
-            if (m_nWayPointIdx >= lwpi)
-            {
+            if (m_nWayPointIdx >= lwpi) {
                 if (m_pWayPointInfo->way_point_type == 1)
                     m_nWayPointIdx = -lwpi;
                 else
@@ -1303,8 +1173,7 @@ void Monster::processMove(uint32_t t)
             if (m_pWayPointInfo->way_point_type == 1 && m_nWayPointIdx < 0)
                 lwpi = 0;
             int32_t wpi = m_nWayPointIdx;
-            while (true)
-            {
+            while (true) {
                 ++wpi;
                 if (wpi > lwpi)
                     break;
@@ -1333,34 +1202,27 @@ void Monster::processFirstAttack(uint32_t t)
     std::vector<Monster *> vSameGroup{};
     uint32_t target{0};
 
-    if (IsAgent())
-    {
+    if (IsAgent()) {
     }
-    else
-    {
+    else {
         sWorld.EnumMovableObject(this->GetPosition(), GetLayer(), GetFirstAttackRange(), vResult, true, true);
 
         auto distance = GetFirstAttackRange() + 1.0f;
-        for (const auto &handle : vResult)
-        {
+        for (const auto &handle : vResult) {
             auto unit = sMemoryPool.GetObjectInWorld<Unit>(handle);
-            if (unit != nullptr && unit->GetHealth() != 0)
-            {
+            if (unit != nullptr && unit->GetHealth() != 0) {
                 if (!IsFirstAttacker() && unit->IsMonster() && unit->GetTargetHandle() != 0)
                     target = unit->GetTargetHandle();
 
-                if (IsGroupFirstAttacker() && unit->IsMonster() && unit != this)
-                {
+                if (IsGroupFirstAttacker() && unit->IsMonster() && unit != this) {
                     auto mob = unit->As<Monster>();
                     if (mob->GetMonsterGroup() == GetMonsterGroup())
                         vSameGroup.emplace_back(mob);
                 }
 
-                if (IsFirstAttacker() && IsEnemy(unit, false))
-                {
+                if (IsFirstAttacker() && IsEnemy(unit, false)) {
                     auto _distance = unit->GetCurrentPosition(t).GetExactDist2d(this);
-                    if (!unit->IsSummon() || (GetFirstAttackRange() * 0.5f >= _distance && distance > _distance))
-                    {
+                    if (!unit->IsSummon() || (GetFirstAttackRange() * 0.5f >= _distance && distance > _distance)) {
                         distance = _distance;
                         target = handle;
                     }
@@ -1372,16 +1234,13 @@ void Monster::processFirstAttack(uint32_t t)
     if (target == 0)
         return;
 
-    if (IsFirstAttacker())
-    {
+    if (IsFirstAttacker()) {
         AddHate(target, 1, false, true);
-        if (IsGroupFirstAttacker())
-        {
+        if (IsGroupFirstAttacker()) {
             for (const auto &m : vSameGroup)
                 m->AddHate(target, 1, false, true);
         }
-        else
-        {
+        else {
             AddHate(target, 1, true, true);
         }
     }
@@ -1392,8 +1251,7 @@ void Monster::FindAttackablePosition(Position &myPosition, Position &enemyPositi
     auto duplicateEnemyPosition = enemyPosition.GetPosition();
     float walk_length = distance - gap;
     float v{0};
-    if (walk_length >= 0.0f)
-    {
+    if (walk_length >= 0.0f) {
         v = (walk_length / distance) + 0.1f;
         enemyPosition.m_positionX = ((enemyPosition.GetPositionX() - myPosition.GetPositionX()) * v) + myPosition.GetPositionX();
         enemyPosition.m_positionY = ((enemyPosition.GetPositionY() - myPosition.GetPositionY()) * v) + myPosition.GetPositionY();
@@ -1404,8 +1262,7 @@ void Monster::FindAttackablePosition(Position &myPosition, Position &enemyPositi
 
         enemyPosition = duplicateEnemyPosition;
     }
-    else
-    {
+    else {
         enemyPosition = myPosition;
     }
 }
@@ -1473,35 +1330,27 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
     std::vector<Quest *> vQuestList{};
     std::vector<Player *> vPlayer{};
 
-    if (!vPartyContribute.empty())
-    {
-        if (vPartyContribute.front().hPlayer != 0)
-        {
+    if (!vPartyContribute.empty()) {
+        if (vPartyContribute.front().hPlayer != 0) {
             auto player = sMemoryPool.GetObjectInWorld<Player>(vPartyContribute.front().hPlayer);
             if (player != nullptr)
                 vPlayer.emplace_back(player);
         }
-        else
-        {
+        else {
             sGroupManager.DoEachMemberTag(vPartyContribute.front().nPartyID, [&vPlayer, pos](PartyMemberTag &tag) {
-                if (tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f)
-                {
+                if (tag.bIsOnline && tag.pPlayer != nullptr && tag.pPlayer->GetExactDist2d(&pos) <= 500.0f) {
                     vPlayer.emplace_back(tag.pPlayer);
                 }
             });
         }
-        for (auto &p : vPlayer)
-        {
+        for (auto &p : vPlayer) {
             p->UpdateQuestStatusByMonsterKill(m_Base->id);
             vQuestList.clear();
             p->GetQuestByMonster(m_Base->id, vQuestList, 4112);
 
-            for (auto &q : vQuestList)
-            {
-                if (q != nullptr && q->m_QuestBase->nDropGroupID != 0)
-                {
-                    if (!q->IsFinishable())
-                    {
+            for (auto &q : vQuestList) {
+                if (q != nullptr && q->m_QuestBase->nDropGroupID != 0) {
+                    if (!q->IsFinishable()) {
                         dropItemGroup(pos, pKiller, pPriority, vPartyContribute, q->m_QuestBase->nDropGroupID, 1, 1, -1);
                     }
                 }
@@ -1520,15 +1369,12 @@ void Monster::procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyCont
         return;
 
     chaos = irand(m_Base->chaos_min[0], m_Base->chaos_max[0]);
-    for (auto &vp : vPartyContribute)
-    {
+    for (auto &vp : vPartyContribute) {
         float fSharedChaos = vp.fContribute * chaos;
-        if (vp.hPlayer == 0)
-        {
+        if (vp.hPlayer == 0) {
             // sWorld.addChaos(this, vp.nPartyID, fSharedChaos);
         }
-        else
-        {
+        else {
             auto p = sMemoryPool.GetObjectInWorld<Player>(vp.hPlayer);
             if (p != nullptr)
                 sWorld.addChaos(this, p, fSharedChaos);
@@ -1555,20 +1401,16 @@ const std::string &Monster::GetNameAsString()
 int32_t Monster::RemoveHate(uint32_t handle, int32_t pt)
 {
     auto pHateTag = getHateTag(handle, sWorld.GetArTime());
-    if (pHateTag != nullptr)
-    {
-        if (pt < pHateTag->nHate)
-        {
+    if (pHateTag != nullptr) {
+        if (pt < pHateTag->nHate) {
             pHateTag->nHate -= pt;
             if (handle == GetTargetHandle() && !IsDead())
                 findNextEnemy();
             return pHateTag->nHate;
         }
-        else
-        {
+        else {
             removeFromHateList(handle);
-            if (handle == GetTargetHandle())
-            {
+            if (handle == GetTargetHandle()) {
                 SetUInt32Value(BATTLE_FIELD_TARGET_HANDLE, 0);
                 findNextEnemy();
             }

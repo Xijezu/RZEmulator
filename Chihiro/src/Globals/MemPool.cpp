@@ -63,8 +63,7 @@ void MemoryPoolMgr::AllocItemHandle(Item *item)
 {
     item->m_nHandle = m_nItemTop++;
     item->SetUInt32Value(UNIT_FIELD_HANDLE, item->m_nHandle);
-    if (item->GetItemInstance().GetUID() == 0)
-    {
+    if (item->GetItemInstance().GetUID() == 0) {
         item->GetItemInstance().SetUID(sWorld.GetItemIndex());
     }
     m_nMiscTop++;
@@ -120,32 +119,28 @@ void MemoryPoolMgr::Update(uint32_t diff)
     while (addUpdateQueue.next(sess))
         i_objectsToUpdate[sess->GetHandle()] = sess;
 
-    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr != i_objectsToUpdate.end(); itr = next)
-    {
+    for (UpdateMap::iterator itr = i_objectsToUpdate.begin(), next; itr != i_objectsToUpdate.end(); itr = next) {
         next = itr;
         ++next;
 
         if (itr->second->IsWorldObject())
             reinterpret_cast<WorldObject *>(itr->second)->Update(0);
 
-        if (itr->second->IsDeleteRequested())
-        {
+        if (itr->second->IsDeleteRequested()) {
             AddToDeleteList(itr->second);
             i_objectsToUpdate.erase(itr->second->GetHandle());
             continue;
         }
     }
     // First deleting all things in the remove list
-    while (!i_objectsToRemove.empty())
-    {
+    while (!i_objectsToRemove.empty()) {
         auto itr = i_objectsToRemove.begin();
         Object *obj = *itr;
 
         if (obj->IsWorldObject() && obj->IsInWorld())
             sWorld.RemoveObjectFromWorld(obj->As<WorldObject>());
 
-        switch (obj->GetSubType())
-        {
+        switch (obj->GetSubType()) {
         case ST_Player:
             RemoveObject(obj->As<Player>());
             break;
@@ -180,8 +175,7 @@ void MemoryPoolMgr::_unload()
 {
     NG_UNIQUE_GUARD uniqueGuard(*HashMapHolder<T>::GetLock());
     auto container = HashMapHolder<T>::GetContainer();
-    for (auto &obj : container)
-    {
+    for (auto &obj : container) {
         container.erase(obj.second->GetHandle());
         delete obj.second;
     }

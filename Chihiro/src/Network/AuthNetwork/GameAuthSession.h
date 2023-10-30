@@ -22,8 +22,7 @@ class XPacket;
 class WorldSession;
 
 // Handle login commands
-class GameAuthSession : public XSocket
-{
+class GameAuthSession : public XSocket {
 public:
     typedef std::unordered_map<std::string, WorldSession *> AuthQueue;
     explicit GameAuthSession(boost::asio::ip::tcp::socket &&socket);

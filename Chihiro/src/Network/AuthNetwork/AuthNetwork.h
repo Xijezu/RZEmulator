@@ -28,8 +28,7 @@
 #include "World.h"
 #include "XSocket.h"
 
-class AuthNetwork
-{
+class AuthNetwork {
 public:
     static AuthNetwork &Instance()
     {
@@ -39,8 +38,7 @@ public:
 
     ~AuthNetwork()
     {
-        if (!m_bClosed)
-        {
+        if (!m_bClosed) {
             Stop();
         }
     }
@@ -53,8 +51,7 @@ public:
         if (!m_pSocket->IsOpen())
             m_bClosed = true;
 
-        if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen())
-        {
+        if (m_nLastPingTime + 18000 < m_nLastPingTime && m_pSocket && m_pSocket->IsOpen()) {
             m_nLastPingTime = sWorld.GetArTime();
             TS_CS_PING ping{};
             m_pSocket->SendPacket(ping);
@@ -67,13 +64,11 @@ public:
     {
         NG_UNIQUE_GUARD _guard(_mutex);
         m_bClosed = true;
-        if (m_pThread != nullptr && m_pThread->joinable())
-        {
+        if (m_pThread != nullptr && m_pThread->joinable()) {
             m_pThread->join();
         }
 
-        if (m_pSocket != nullptr)
-        {
+        if (m_pSocket != nullptr) {
             m_pSocket->CloseSocket();
         }
     }
@@ -85,13 +80,11 @@ public:
         boost::asio::ip::tcp::socket socket(ioContext);
         m_pNetworkThread = std::make_unique<NetworkThread>();
 
-        try
-        {
+        try {
             socket.connect(endpoint);
             socket.set_option(boost::asio::ip::tcp::no_delay(true));
         }
-        catch (std::exception &)
-        {
+        catch (std::exception &) {
             NG_LOG_ERROR("server.network", "Cannot connect to login server at %s:%d", bindIp.c_str(), port);
             return false;
         }

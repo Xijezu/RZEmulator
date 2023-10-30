@@ -20,8 +20,7 @@
 #include "Unit.h"
 
 class Player;
-class Summon : public Unit
-{
+class Summon : public Unit {
 public:
     friend class Player;
     static Summon *AllocSummon(Player *, uint32_t);

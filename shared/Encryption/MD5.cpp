@@ -155,8 +155,7 @@ void MD5::decode(uint4 output[], const uint1 input[], size_type len)
 // a multiple of 4.
 void MD5::encode(uint1 output[], const uint4 input[], size_type len)
 {
-    for (size_type i = 0, j = 0; j < len; i++, j += 4)
-    {
+    for (size_type i = 0, j = 0; j < len; i++, j += 4) {
         output[j] = input[i] & 0xff;
         output[j + 1] = (input[i] >> 8) & 0xff;
         output[j + 2] = (input[i] >> 16) & 0xff;
@@ -273,8 +272,7 @@ void MD5::update(const unsigned char input[], size_type length)
     size_type i;
 
     // transform as many times as possible.
-    if (length >= firstpart)
-    {
+    if (length >= firstpart) {
         // fill buffer first, transform
         memcpy(&buffer[index], input, firstpart);
         transform(buffer);
@@ -309,8 +307,7 @@ MD5 &MD5::finalize()
     static unsigned char padding[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    if (!finalized)
-    {
+    if (!finalized) {
         // Save number of bits
         unsigned char bits[8];
         encode(bits, count, 8);

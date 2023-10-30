@@ -38,8 +38,7 @@ Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode
 
     // Workaround for Gold (handled as item, too)
     // Don't set that stuff if it's gold
-    if (pItem->GetItemTemplate() != nullptr)
-    {
+    if (pItem->GetItemTemplate() != nullptr) {
         if (nLevel == -1)
             pItem->GetItemInstance().SetLevel(pItem->GetItemTemplate()->level);
         else
@@ -170,8 +169,7 @@ void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
     pEnterPct << (uint64_t)pItem->GetItemInstance().GetCount();
 
     pEnterPct << (uint32_t)pItem->m_nDropTime;
-    for (int32_t i = 0; i < 3; i++)
-    {
+    for (int32_t i = 0; i < 3; i++) {
         pEnterPct << (uint32_t)pItem->m_pPickupOrder.hPlayer[i];
         pEnterPct << (uint32_t)pItem->m_pPickupOrder.nPartyID[i];
     }
@@ -179,8 +177,7 @@ void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
 
 void Item::SetPickupOrder(const ItemPickupOrder &order)
 {
-    for (int32_t i = 0; i < 3; i++)
-    {
+    for (int32_t i = 0; i < 3; i++) {
         m_pPickupOrder.hPlayer[i] = order.hPlayer[i];
         m_pPickupOrder.nPartyID[i] = order.nPartyID[i];
     }
@@ -237,16 +234,13 @@ int32_t Item::GetMaxEndurance() const
     if (GetItemTemplate() == nullptr)
         return 0;
 
-    if (GetItemTemplate()->socket != 0)
-    {
+    if (GetItemTemplate()->socket != 0) {
         if (GetItemTemplate()->socket <= 0)
             return GetItemTemplate()->endurance;
 
         int32_t total_endurance = 0;
-        for (int32_t i = 0; i < GetItemTemplate()->socket; ++i)
-        {
-            if (GetItemInstance().GetSocketIndex(i) != 0)
-            {
+        for (int32_t i = 0; i < GetItemTemplate()->socket; ++i) {
+            if (GetItemInstance().GetSocketIndex(i) != 0) {
                 total_endurance += sObjectMgr.GetItemBase(GetItemInstance().GetSocketIndex(i))->endurance;
             }
         }
@@ -255,8 +249,7 @@ int32_t Item::GetMaxEndurance() const
         else
             result = GetItemTemplate()->endurance;
     }
-    else
-    {
+    else {
         result = GetItemTemplate()->endurance;
     }
     return result;

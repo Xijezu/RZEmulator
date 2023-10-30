@@ -20,8 +20,7 @@
 #include "Object.h"
 #include "X2D/Boxf.h"
 
-struct DungeonTemplate
-{
+struct DungeonTemplate {
     int32_t id;
     int32_t level;
     Position raid_start_pos;
@@ -65,8 +64,7 @@ struct DungeonTemplate
     int32_t tax_rate;
 };
 
-class DungeonManager
-{
+class DungeonManager {
 public:
     static DungeonManager &Instance()
     {

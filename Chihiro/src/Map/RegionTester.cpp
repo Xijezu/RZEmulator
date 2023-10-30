@@ -40,8 +40,7 @@ void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float
 bool DirectionRegionTester::IsInRegion(Position pos)
 {
     float dist = abs(-dy * pos.GetPositionX() + dx * pos.GetPositionY() + c) / denominator;
-    if (thickness > dist)
-    {
+    if (thickness > dist) {
         float _V2x = pos.GetPositionX() - ori_x;
         float _V2y = pos.GetPositionY() - ori_y;
 
@@ -83,13 +82,11 @@ void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float
 
     float m = std::sqrt(_V1x * _V1x + _V1y * _V1y);
 
-    if (m == 0)
-    {
+    if (m == 0) {
         V1x = 1;
         V1y = 0;
     }
-    else
-    {
+    else {
         V1x = _V1x / m;
         V1y = _V1y / m;
     }

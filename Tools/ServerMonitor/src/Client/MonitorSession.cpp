@@ -28,14 +28,9 @@
 #include "ServerMonitor.h"
 #include "cipher/XStrZlibWithSimpleCipherUtil.h"
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct
-{
+typedef struct {
     int cmd;
     eStatus status;
     std::function<void(MonitorSession *, XPacket *)> handler;
@@ -66,18 +61,15 @@ ReadDataHandlerResult MonitorSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
     int i = 0;
 
-    for (i = 0; i < PacketTableSize; i++)
-    {
-        if ((uint16_t)_PacketHandler[i].cmd == _cmd)
-        {
+    for (i = 0; i < PacketTableSize; i++) {
+        if ((uint16_t)_PacketHandler[i].cmd == _cmd) {
             _PacketHandler[i].handler(this, pRecvPct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == PacketTableSize)
-    {
+    if (i == PacketTableSize) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
@@ -88,16 +80,14 @@ void MonitorSession::OnClose() {}
 
 void MonitorSession::DoRequest()
 {
-    if (bRequesterEnabled != nullptr)
-    {
+    if (bRequesterEnabled != nullptr) {
         TS_CS_REQUEST requestPct{};
         requestPct.t = 'u';
         requestPct.command = XStrZlibWithSimpleCipherUtil::Encrypt("SELECT TOP 1 id FROM Character");
         SendPacket(requestPct);
     }
 
-    if (pUserCount != nullptr)
-    {
+    if (pUserCount != nullptr) {
         TS_CS_VERSION versionPct{};
         versionPct.szVersion = sConfigMgr->GetStringDefault("monitor.version", "ASER");
         SendPacket(versionPct);
@@ -106,12 +96,10 @@ void MonitorSession::DoRequest()
 
 void MonitorSession::onResultHandler(const TS_SC_RESULT *resultPct)
 {
-    if (resultPct->getReceivedId() == 60 && bRequesterEnabled != nullptr)
-    {
+    if (resultPct->getReceivedId() == 60 && bRequesterEnabled != nullptr) {
         *bRequesterEnabled = true;
     }
-    else if (pUserCount != nullptr)
-    {
+    else if (pUserCount != nullptr) {
         *pUserCount = resultPct->value ^ 0xADADADAD;
         auto stmt = LogDatabase.GetPreparedStatement(LOG_REP_USER_COUNT);
         stmt->setString(0, m_Server.szName);

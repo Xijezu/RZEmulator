@@ -64,14 +64,9 @@ std::string WorldSession::GetAccountName() const
     return m_pPlayer != nullptr ? m_pPlayer->GetName() : "<null>";
 }
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct WorldSessionHandler
-{
+typedef struct WorldSessionHandler {
     int32_t cmd;
     eStatus status;
     std::function<void(WorldSession *, XPacket *)> handler;
@@ -151,18 +146,15 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
     int32_t i = 0;
 
-    for (i = 0; i < worldTableSize; i++)
-    {
-        if ((uint16_t)worldPacketHandler[i].cmd == _cmd && (worldPacketHandler[i].status == STATUS_CONNECTED || (_isAuthed && worldPacketHandler[i].status == STATUS_AUTHED)))
-        {
+    for (i = 0; i < worldTableSize; i++) {
+        if ((uint16_t)worldPacketHandler[i].cmd == _cmd && (worldPacketHandler[i].status == STATUS_CONNECTED || (_isAuthed && worldPacketHandler[i].status == STATUS_AUTHED))) {
             worldPacketHandler[i].handler(this, pRecvPct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == worldTableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets))
-    {
+    if (i == worldTableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets)) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
@@ -200,10 +192,8 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_CHARACTERLIST);
     stmt->setInt32(0, account_id);
-    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-    {
-        do
-        {
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
+        do {
             LOBBY_CHARACTER_INFO info{};
             int32_t sid = (*result)[0].GetInt32();
             info.name = (*result)[1].GetString();
@@ -217,18 +207,15 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
             info.job = (*result)[9].GetInt32();
             info.permission = (*result)[10].GetInt32();
             info.skin_color = (*result)[11].GetUInt32();
-            for (int32_t i = 0; i < 5; i++)
-            {
+            for (int32_t i = 0; i < 5; i++) {
                 info.model_id[i] = (*result)[12 + i].GetInt32();
             }
             info.szCreateTime = (*result)[17].GetString();
             info.szDeleteTime = (*result)[18].GetString();
             PreparedStatement *wstmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_WEARINFO);
             wstmt->setInt32(0, sid);
-            if (PreparedQueryResult wresult = CharacterDatabase.Query(wstmt))
-            {
-                do
-                {
+            if (PreparedQueryResult wresult = CharacterDatabase.Query(wstmt)) {
+                do {
                     int32_t wear_info = (*wresult)[0].GetInt32();
                     info.wear_info[wear_info] = (*wresult)[1].GetInt32();
                     info.wear_item_enhance_info[wear_info] = (*wresult)[2].GetInt32();
@@ -242,8 +229,7 @@ void WorldSession::_PrepareCharacterList(uint32_t account_id, std::vector<LOBBY_
 
 void WorldSession::onAuthResult(const TS_AG_CLIENT_LOGIN *pRecvPct)
 {
-    if (pRecvPct->result == TS_RESULT_SUCCESS)
-    {
+    if (pRecvPct->result == TS_RESULT_SUCCESS) {
         _isAuthed = true;
         _accountId = pRecvPct->nAccountID;
         _accountName = pRecvPct->account;
@@ -256,8 +242,7 @@ void WorldSession::onLogin(const TS_CS_LOGIN *pRecvPct)
 {
     m_pPlayer = sMemoryPool.AllocPlayer();
     m_pPlayer->SetSession(this);
-    if (!m_pPlayer->ReadCharacter(pRecvPct->name, _accountId))
-    {
+    if (!m_pPlayer->ReadCharacter(pRecvPct->name, _accountId)) {
         m_pPlayer->DeleteThis();
         return;
     }
@@ -299,22 +284,18 @@ bool GetValidWayPoint(Player *pClient, Unit *pMObj, const TS_CS_MOVE_REQUEST *pM
     Position wayPoint{pMsg->x, pMsg->y};
 
     if (wayPoint.GetPositionX() < 0 || wayPoint.GetPositionX() > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || wayPoint.GetPositionY() < 0 ||
-        wayPoint.GetPositionY() > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
-    {
+        wayPoint.GetPositionY() > sWorld.getIntConfig(CONFIG_MAP_HEIGHT)) {
         Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
         return false;
     }
 
-    if (curPosFromServer.GetExactDist2d(&wayPoint) > GameRule::VISIBLE_RANGE)
-    {
+    if (curPosFromServer.GetExactDist2d(&wayPoint) > GameRule::VISIBLE_RANGE) {
         Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
         return false;
     }
 
-    if (pMObj->IsPlayer())
-    {
-        if (GameContent::CollisionToLine(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY(), wayPoint.GetPositionX(), wayPoint.GetPositionY()))
-        {
+    if (pMObj->IsPlayer()) {
+        if (GameContent::CollisionToLine(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY(), wayPoint.GetPositionX(), wayPoint.GetPositionY())) {
             Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
 
             if (GameContent::IsBlocked(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY()))
@@ -327,18 +308,14 @@ bool GetValidWayPoint(Player *pClient, Unit *pMObj, const TS_CS_MOVE_REQUEST *pM
         }
     }
 
-    for (const auto &mv : pMsg->move_infos)
-    {
-        if (mv.tx < 0 || mv.tx > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || mv.ty < 0 || mv.ty > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
-        {
+    for (const auto &mv : pMsg->move_infos) {
+        if (mv.tx < 0 || mv.tx > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || mv.ty < 0 || mv.ty > sWorld.getIntConfig(CONFIG_MAP_HEIGHT)) {
             Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
             return false;
         }
 
-        if (pMObj->IsPlayer())
-        {
-            if (GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mv.tx, mv.ty))
-            {
+        if (pMObj->IsPlayer()) {
+            if (GameContent::CollisionToLine(wayPoint.GetPositionX(), wayPoint.GetPositionY(), mv.tx, mv.ty)) {
                 Messages::SendResult(pClient, pMsg->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
                 if (GameContent::IsBlocked(curPosFromServer.GetPositionX(), curPosFromServer.GetPositionY()))
                     return false;
@@ -367,35 +344,27 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 
     Unit *pMObj = m_pPlayer;
     auto speed = m_pPlayer->GetRealMoveSpeed();
-    if (pRecvPct->handle != 0 && pRecvPct->handle != m_pPlayer->GetHandle())
-    {
+    if (pRecvPct->handle != 0 && pRecvPct->handle != m_pPlayer->GetHandle()) {
         pMObj = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
-        if (pMObj != nullptr)
-        {
-            if (m_pPlayer->IsRiding() && m_pPlayer->GetRideObject() == pMObj)
-            {
+        if (pMObj != nullptr) {
+            if (m_pPlayer->IsRiding() && m_pPlayer->GetRideObject() == pMObj) {
                 pMObj = m_pPlayer;
             }
-            else
-            {
+            else {
                 speed = pMObj->GetRealMoveSpeed();
-                if (pRecvPct->speed_sync != 0)
-                {
+                if (pRecvPct->speed_sync != 0) {
                     speed = (m_pPlayer->HasRidingState() ? m_pPlayer->GetRealRidingSpeed() : m_pPlayer->GetRealMoveSpeed());
 
                     Position pos{pRecvPct->x, pRecvPct->y};
                     auto distance = pos.GetExactDist2d(m_pPlayer);
-                    if (distance >= GameRule::SUMMON_FOLLOWING_LIMIT_RANGE)
-                    {
+                    if (distance >= GameRule::SUMMON_FOLLOWING_LIMIT_RANGE) {
                         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_FAR, 0);
                         return;
                     }
-                    else if (distance >= GameRule::SUMMON_FOLLOWING_SECOND_SPEED_UP_RANGE)
-                    {
+                    else if (distance >= GameRule::SUMMON_FOLLOWING_SECOND_SPEED_UP_RANGE) {
                         speed *= GameRule::SUMMON_FOLLOWING_SECOND_SPEED_UP_RATE;
                     }
-                    else if (distance >= GameRule::SUMMON_FOLLOWING_FIRST_SPEED_UP_RANGE)
-                    {
+                    else if (distance >= GameRule::SUMMON_FOLLOWING_FIRST_SPEED_UP_RANGE) {
                         speed *= GameRule::SUMMON_FOLLOWING_FIRST_SPEED_UP_RATE;
                     }
                 }
@@ -407,8 +376,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     if (pMObj == m_pPlayer && (m_pPlayer->IsRiding() || m_pPlayer->HasRidingState()))
         speed = m_pPlayer->GetRealRidingSpeed();
 
-    if (pMObj == nullptr)
-    {
+    if (pMObj == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
         return;
     }
@@ -431,27 +399,23 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     if (pMObj->IsAttacking())
         pMObj->CancelAttack();
 
-    if (pMObj->GetNextMovableTime() > t)
-    {
+    if (pMObj->GetNextMovableTime() > t) {
         if (!pMObj->SetPendingMove(vMoveInfo, moveSpeed))
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
         return;
     }
 
-    if (!pMObj->IsActable() || !pMObj->IsInWorld())
-    {
+    if (!pMObj->IsActable() || !pMObj->IsInWorld()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
         return;
     }
 
-    if (m_pPlayer == pMObj && m_pPlayer->IsSitDown())
-    {
+    if (m_pPlayer == pMObj && m_pPlayer->IsSitDown()) {
         // m_pPlayer->StandUp(); @todo
         Messages::BroadcastStatusMessage(m_pPlayer);
     }
 
-    if (!pMObj->IsMovable())
-    {
+    if (!pMObj->IsMovable()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);
         return;
     }
@@ -459,8 +423,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     auto pos = pMObj->GetCurrentPosition(sWorld.GetArTime());
     auto targetPos = vMoveInfo.back();
 
-    if (pMObj == m_pPlayer && pos.GetExactDist2d(&start_pos) > (sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5))
-    {
+    if (pMObj == m_pPlayer && pos.GetExactDist2d(&start_pos) > (sWorld.getFloatConfig(CONFIG_MAP_LENGTH) / 5)) {
         // Check for Abyss
     }
 
@@ -481,8 +444,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
 
 void WorldSession::onReturnToLobby(const TS_CS_RETURN_LOBBY *pRecvPct)
 {
-    if (m_pPlayer != nullptr)
-    {
+    if (m_pPlayer != nullptr) {
         m_pPlayer->LogoutNow(2);
         m_pPlayer->CleanupsBeforeDelete();
         m_pPlayer->DeleteThis();
@@ -499,8 +461,7 @@ void WorldSession::onRequestReturnToLobby(const TS_CS_REQUEST_RETURN_LOBBY *pRec
 
 void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
 {
-    if (checkCharacterName(pRecvPct->character.name))
-    {
+    if (checkCharacterName(pRecvPct->character.name)) {
         uint8_t j = 0;
         PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_ADD_CHARACTER);
         stmt->setString(j++, pRecvPct->character.name);
@@ -520,8 +481,7 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
         stmt->setInt32(j++, 320);
         stmt->setInt32(j++, 320);
         stmt->setUInt32(j++, pRecvPct->character.skin_color);
-        for (const auto &i : pRecvPct->character.model_id)
-        {
+        for (const auto &i : pRecvPct->character.model_id) {
             stmt->setUInt32(j++, i);
         }
         auto playerUID = sWorld.GetPlayerIndex();
@@ -535,17 +495,14 @@ void WorldSession::onCreateCharacter(const TS_CS_CREATE_CHARACTER *pRecvPct)
             nDefaultArmorCode = 220109;
 
         int32_t nDefaultWeaponCode = 106100;
-        if (pRecvPct->character.race == 3)
-        {
+        if (pRecvPct->character.race == 3) {
             nDefaultArmorCode = 240100;
             if (m_wear_item == 602)
                 nDefaultArmorCode = 240109;
             nDefaultWeaponCode = 112100;
         }
-        else
-        {
-            if (pRecvPct->character.race == 5)
-            {
+        else {
+            if (pRecvPct->character.race == 5) {
                 nDefaultArmorCode = 230100;
                 if (m_wear_item == 602)
                     nDefaultArmorCode = 230109;
@@ -584,8 +541,7 @@ bool WorldSession::checkCharacterName(const std::string &szName)
 {
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHARACTER_GET_NAMECHECK);
     stmt->setString(0, szName);
-    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-    {
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt)) {
         return false;
     }
     return true;
@@ -593,8 +549,7 @@ bool WorldSession::checkCharacterName(const std::string &szName)
 
 void WorldSession::onCharacterName(const TS_CS_CHECK_CHARACTER_NAME *pRecvPct)
 {
-    if (!checkCharacterName(pRecvPct->name))
-    {
+    if (!checkCharacterName(pRecvPct->name)) {
         _SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_ALREADY_EXIST, 0);
         return;
     }
@@ -603,14 +558,12 @@ void WorldSession::onCharacterName(const TS_CS_CHECK_CHARACTER_NAME *pRecvPct)
 
 void WorldSession::onChatRequest(const TS_CS_CHAT_REQUEST *pRectPct)
 {
-    if (pRectPct->type != CHAT_WHISPER && pRectPct->message[0] == 47)
-    {
+    if (pRectPct->type != CHAT_WHISPER && pRectPct->message[0] == 47) {
         sAllowedCommandInfo.Run(m_pPlayer, pRectPct->message);
         return;
     }
 
-    switch (pRectPct->type)
-    {
+    switch (pRectPct->type) {
     // local chat message: msg
     case CHAT_NORMAL:
         Messages::SendLocalChatMessage(0, m_pPlayer->GetHandle(), pRectPct->message, 0);
@@ -621,40 +574,32 @@ void WorldSession::onChatRequest(const TS_CS_CHAT_REQUEST *pRectPct)
         break;
 
         // Whisper chat message: "player msg
-    case CHAT_WHISPER:
-    {
+    case CHAT_WHISPER: {
         auto target = Player::FindPlayer(pRectPct->szTarget);
-        if (target != nullptr)
-        {
+        if (target != nullptr) {
             // Todo: Denal check
             Messages::SendChatMessage((m_pPlayer->GetPermission() > 0 ? 7 : 3), m_pPlayer->GetName(), target, pRectPct->message);
             Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_SUCCESS, 0);
             return;
         }
         Messages::SendResult(m_pPlayer, pRectPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
-    }
-    break;
+    } break;
         // Global chat message: !msg
     case CHAT_GLOBAL:
         Messages::SendGlobalChatMessage(m_pPlayer->GetPermission() > 0 ? 6 : 4, m_pPlayer->GetName(), pRectPct->message, 0);
         break;
-    case CHAT_PARTY:
-    {
-        if (m_pPlayer->GetPartyID() != 0)
-        {
+    case CHAT_PARTY: {
+        if (m_pPlayer->GetPartyID() != 0) {
             sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &pRectPct](PartyMemberTag &tag) {
-                if (tag.bIsOnline)
-                {
+                if (tag.bIsOnline) {
                     auto player = Player::FindPlayer(tag.strName);
-                    if (player != nullptr)
-                    {
+                    if (player != nullptr) {
                         Messages::SendChatMessage(0xA, m_pPlayer->GetName(), player, pRectPct->message);
                     }
                 }
             });
         }
-    }
-    break;
+    } break;
     default:
         break;
     }
@@ -667,36 +612,29 @@ void WorldSession::onLogoutTimerRequest(const TS_CS_REQUEST_LOGOUT *pRecvPct)
 
 void WorldSession::onPutOnItem(const TS_CS_PUTON_ITEM *pRecvPct)
 {
-    if (m_pPlayer->GetHealth() != 0)
-    {
+    if (m_pPlayer->GetHealth() != 0) {
         auto ci = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-        if (ci != nullptr)
-        {
-            if (!ci->IsWearable() || m_pPlayer->FindItemBySID(ci->GetItemInstance().GetUID()) == nullptr)
-            {
+        if (ci != nullptr) {
+            if (!ci->IsWearable() || m_pPlayer->FindItemBySID(ci->GetItemInstance().GetUID()) == nullptr) {
                 Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_ACCESS_DENIED, 0);
                 return;
             }
 
             auto unit = m_pPlayer->As<Unit>();
-            if (pRecvPct->target_handle != 0)
-            {
+            if (pRecvPct->target_handle != 0) {
                 auto summon = sMemoryPool.GetObjectInWorld<Summon>(pRecvPct->target_handle);
-                if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
-                {
+                if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle()) {
                     Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
                     return;
                 }
                 unit = summon;
             }
 
-            if (unit->Puton((ItemWearType)pRecvPct->position, ci) == 0)
-            {
+            if (unit->Puton((ItemWearType)pRecvPct->position, ci) == 0) {
                 unit->CalculateStat();
                 Messages::SendStatInfo(m_pPlayer, unit);
                 Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_SUCCESS, 0);
-                if (unit->IsPlayer())
-                {
+                if (unit->IsPlayer()) {
                     m_pPlayer->SendWearInfo();
                 }
             }
@@ -706,18 +644,15 @@ void WorldSession::onPutOnItem(const TS_CS_PUTON_ITEM *pRecvPct)
 
 void WorldSession::onPutOffItem(const TS_CS_PUTOFF_ITEM *pRecvPct)
 {
-    if (m_pPlayer->GetHealth() == 0)
-    {
+    if (m_pPlayer->GetHealth() == 0) {
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTOFF_ITEM, 5, 0);
         return;
     }
 
     auto unit = m_pPlayer->As<Unit>();
-    if (pRecvPct->target_handle != 0)
-    {
+    if (pRecvPct->target_handle != 0) {
         auto summon = sMemoryPool.GetObjectInWorld<Summon>(pRecvPct->target_handle);
-        if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
-        {
+        if (summon == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle()) {
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTON_ITEM, TS_RESULT_NOT_EXIST, 0);
             return;
         }
@@ -725,20 +660,16 @@ void WorldSession::onPutOffItem(const TS_CS_PUTOFF_ITEM *pRecvPct)
     }
 
     Item *curitem = unit->GetWornItem((ItemWearType)pRecvPct->position);
-    if (curitem == nullptr)
-    {
+    if (curitem == nullptr) {
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_CS_PUTOFF_ITEM, 1, 0);
     }
-    else
-    {
+    else {
         uint16_t por = unit->Putoff((ItemWearType)pRecvPct->position);
         unit->CalculateStat();
         Messages::SendStatInfo(m_pPlayer, unit);
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, 0);
-        if (por == 0)
-        {
-            if (unit->IsPlayer())
-            {
+        if (por == 0) {
+            if (unit->IsPlayer()) {
                 m_pPlayer->SendWearInfo();
             }
         }
@@ -750,8 +681,7 @@ void WorldSession::onRegionUpdate(const TS_CS_REGION_UPDATE *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (m_pPlayer->IsInWorld())
-    {
+    if (m_pPlayer->IsInWorld()) {
         sWorld.onRegionChange(m_pPlayer, pRecvPct->update_time, pRecvPct->bIsStopMessage);
     }
 }
@@ -765,8 +695,7 @@ void WorldSession::onContact(const TS_CS_CONTACT *pRecvPct)
 {
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pRecvPct->handle);
 
-    if (npc != nullptr)
-    {
+    if (npc != nullptr) {
         m_pPlayer->SetLastContact("npc", pRecvPct->handle);
         sScriptingMgr.RunString(m_pPlayer, npc->m_pBase->contact_script);
     }
@@ -777,10 +706,8 @@ void WorldSession::onDialog(const TS_CS_DIALOG *pRecvPct)
     if (pRecvPct->trigger.empty())
         return;
 
-    if (!m_pPlayer->IsValidTrigger(pRecvPct->trigger))
-    {
-        if (!m_pPlayer->IsFixedDialogTrigger(pRecvPct->trigger))
-        {
+    if (!m_pPlayer->IsValidTrigger(pRecvPct->trigger)) {
+        if (!m_pPlayer->IsFixedDialogTrigger(pRecvPct->trigger)) {
             NG_LOG_ERROR("scripting", "INVALID SCRIPT TRIGGER!!! [%s][%s]", m_pPlayer->GetName(), pRecvPct->trigger.c_str());
             return;
         }
@@ -788,8 +715,7 @@ void WorldSession::onDialog(const TS_CS_DIALOG *pRecvPct)
 
     // auto npc = dynamic_cast<NPC *>(sMemoryPool.getPtrFromId(m_pPlayer->GetLastContactLong("npc")));
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(m_pPlayer->GetLastContactLong("npc"));
-    if (npc == nullptr)
-    {
+    if (npc == nullptr) {
         NG_LOG_TRACE("scripting", "onDialog: NPC not found!");
         return;
     }
@@ -803,15 +729,13 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
 {
     auto szMarketName = m_pPlayer->GetLastContactStr("market");
     auto buy_count = pRecvPct->buy_count;
-    if (buy_count == 0)
-    {
+    if (buy_count == 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_UNKNOWN, 0);
         return;
     }
 
     auto market = sObjectMgr.GetMarketInfo(szMarketName);
-    if (market->empty())
-    {
+    if (market->empty()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_UNKNOWN, 0);
         return;
     }
@@ -819,50 +743,41 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
     bool bJoinable{false};
     Item *pNewItem{nullptr};
 
-    for (auto &mt : *market)
-    {
-        if (mt.code == static_cast<uint32_t>(pRecvPct->item_code))
-        {
+    for (auto &mt : *market) {
+        if (mt.code == static_cast<uint32_t>(pRecvPct->item_code)) {
             auto ibs = sObjectMgr.GetItemBase((uint32_t)pRecvPct->item_code);
             if (ibs == nullptr)
                 continue;
-            if (ibs->flaglist[FLAG_DUPLICATE] == 1)
-            {
+            if (ibs->flaglist[FLAG_DUPLICATE] == 1) {
                 bJoinable = true;
             }
-            else
-            {
+            else {
                 bJoinable = false;
                 if (buy_count != 1)
                     buy_count = 1;
             }
 
             auto nTotalPrice = (int32_t)floor(buy_count * mt.price_ratio);
-            if (nTotalPrice / buy_count != mt.price_ratio || m_pPlayer->GetGold() < nTotalPrice || nTotalPrice < 0)
-            {
+            if (nTotalPrice / buy_count != mt.price_ratio || m_pPlayer->GetGold() < nTotalPrice || nTotalPrice < 0) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
                 return;
             }
 
-            if (m_pPlayer->m_Attribute.nMaxWeight - m_pPlayer->GetFloatValue(PLAYER_FIELD_WEIGHT) < ibs->weight * buy_count)
-            {
+            if (m_pPlayer->m_Attribute.nMaxWeight - m_pPlayer->GetFloatValue(PLAYER_FIELD_WEIGHT) < ibs->weight * buy_count) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_HEAVY, pRecvPct->item_code);
                 return;
             }
             uint32_t uid{0};
 
             auto result = m_pPlayer->ChangeGold(m_pPlayer->GetGold() - nTotalPrice);
-            if (result != TS_RESULT_SUCCESS)
-            {
+            if (result != TS_RESULT_SUCCESS) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), result, 0);
                 return;
             }
 
-            if (bJoinable)
-            {
+            if (bJoinable) {
                 auto item = Item::AllocItem(0, mt.code, buy_count, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
-                if (item == nullptr)
-                {
+                if (item == nullptr) {
                     NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
                     return;
                 }
@@ -871,13 +786,10 @@ void WorldSession::onBuyItem(const TS_CS_BUY_ITEM *pRecvPct)
                 if (pNewItem != nullptr && pNewItem->GetHandle() != item->GetHandle())
                     Item::PendFreeItem(item);
             }
-            else
-            {
-                for (int32_t i = 0; i < buy_count; i++)
-                {
+            else {
+                for (int32_t i = 0; i < buy_count; i++) {
                     auto item = Item::AllocItem(0, mt.code, 1, BY_MARKET, -1, -1, -1, 0, 0, 0, 0, 0);
-                    if (item == nullptr)
-                    {
+                    if (item == nullptr) {
                         NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", mt.code);
                         return;
                     }
@@ -918,14 +830,12 @@ void WorldSession::onTimeSync(const TS_TIMESYNC *pRecvPct)
 {
     uint32_t ct = sWorld.GetArTime();
     m_pPlayer->m_TS.onEcho(ct - pRecvPct->time);
-    if (m_pPlayer->m_TS.m_vT.size() >= 4)
-    {
+    if (m_pPlayer->m_TS.m_vT.size() >= 4) {
         TS_SC_SET_TIME timePct{};
         timePct.gap = m_pPlayer->m_TS.GetInterval();
         SendPacket(timePct);
     }
-    else
-    {
+    else {
         Messages::SendTimeSynch(m_pPlayer);
     }
 }
@@ -938,8 +848,7 @@ void WorldSession::onGameTime(const TS_CS_GAME_TIME * /*pRecvPct*/)
 void WorldSession::onQuery(const TS_CS_QUERY *pRecvPct)
 {
     auto obj = sMemoryPool.GetObjectInWorld<WorldObject>(pRecvPct->handle);
-    if (obj != nullptr && obj->IsInWorld() && obj->GetLayer() == m_pPlayer->GetLayer() && sRegion.IsVisibleRegion(obj, m_pPlayer) != 0)
-    {
+    if (obj != nullptr && obj->IsInWorld() && obj->GetLayer() == m_pPlayer->GetLayer() && sRegion.IsVisibleRegion(obj, m_pPlayer) != 0) {
         Messages::sendEnterMessage(m_pPlayer, obj, false);
     }
 }
@@ -947,12 +856,10 @@ void WorldSession::onQuery(const TS_CS_QUERY *pRecvPct)
 void WorldSession::onUpdate(const TS_CS_UPDATE *pRecvPct)
 {
     auto unit = dynamic_cast<Unit *>(m_pPlayer);
-    if (pRecvPct->handle != m_pPlayer->GetHandle())
-    {
+    if (pRecvPct->handle != m_pPlayer->GetHandle()) {
         // Do Summon stuff here
     }
-    if (unit != nullptr)
-    {
+    if (unit != nullptr) {
         unit->OnUpdate();
         return;
     }
@@ -961,36 +868,30 @@ void WorldSession::onUpdate(const TS_CS_UPDATE *pRecvPct)
 void WorldSession::onJobLevelUp(const TS_CS_JOB_LEVEL_UP *pRecvPct)
 {
     auto cr = m_pPlayer->As<Unit>();
-    if (cr == nullptr)
-    {
+    if (cr == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->target);
         return;
     }
-    if (cr->IsPlayer() && cr->GetHandle() != m_pPlayer->GetHandle())
-    {
+    if (cr->IsPlayer() && cr->GetHandle() != m_pPlayer->GetHandle()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->target);
         return;
     }
     int32_t jp = sObjectMgr.GetNeedJpForJobLevelUp(cr->GetCurrentJLv(), m_pPlayer->GetJobDepth());
-    if (cr->GetJP() < jp)
-    {
+    if (cr->GetJP() < jp) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_JP, pRecvPct->target);
         return;
     }
-    if (jp == 0)
-    {
+    if (jp == 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_LIMIT_MAX, pRecvPct->target);
         return;
     }
     cr->SetJP(cr->GetJP() - jp);
     cr->SetCurrentJLv(cr->GetCurrentJLv() + 1);
     cr->CalculateStat();
-    if (cr->IsPlayer())
-    {
+    if (cr->IsPlayer()) {
         dynamic_cast<Player *>(cr)->Save(true);
     }
-    else
-    {
+    else {
         // Summon
     }
 
@@ -1009,11 +910,9 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
     int32_t jobID{};
     int32_t value{};
 
-    if (m_pPlayer->GetHandle() != pRecvPct->target)
-    {
+    if (m_pPlayer->GetHandle() != pRecvPct->target) {
         auto summon = sMemoryPool.GetObjectInWorld<Summon>(pRecvPct->target);
-        if (summon == nullptr || !summon->IsSummon() || summon->GetMaster() == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle())
-        {
+        if (summon == nullptr || !summon->IsSummon() || summon->GetMaster() == nullptr || summon->GetMaster()->GetHandle() != m_pPlayer->GetHandle()) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
@@ -1023,8 +922,7 @@ void WorldSession::onLearnSkill(const TS_CS_LEARN_SKILL *pRecvPct)
     // if(skill_level == currentLevel)
     //{
     result = GameContent::IsLearnableSkill(target, pRecvPct->skill_id, currentLevel, jobID);
-    if (result == TS_RESULT_SUCCESS)
-    {
+    if (result == TS_RESULT_SUCCESS) {
         target->RegisterSkill(pRecvPct->skill_id, currentLevel, 0, jobID);
         m_pPlayer->Save(true);
     }
@@ -1049,41 +947,32 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
 
     Item *pItem = nullptr;
     Summon *summon = nullptr;
-    for (int32_t i = 0; i < nCFL; ++i)
-    {
+    for (int32_t i = 0; i < nCFL; ++i) {
         bool bFound = false;
         pItem = nullptr;
-        if (pRecvPct->card_handle[i] != 0)
-        {
+        if (pRecvPct->card_handle[i] != 0) {
             pItem = m_pPlayer->FindItemByHandle(pRecvPct->card_handle[i]);
-            if (pItem != nullptr && pItem->GetItemTemplate() != nullptr)
-            {
+            if (pItem != nullptr && pItem->GetItemTemplate() != nullptr) {
                 if (pItem->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || m_pPlayer->GetHandle() != pItem->GetItemInstance().GetOwnerHandle() ||
                     (pItem->GetItemInstance().GetFlag() & (uint32_t)FlagBits::ITEM_FLAG_SUMMON) == 0)
                     continue;
             }
         }
-        for (int32_t j = 0; j < nCFL; j++)
-        {
-            if (pItem != nullptr)
-            {
+        for (int32_t j = 0; j < nCFL; j++) {
+            if (pItem != nullptr) {
                 // Belt Slot Card
             }
         }
         if (bFound)
             continue;
 
-        if (m_pPlayer->m_aBindSummonCard[i] != nullptr)
-        {
-            if (pItem == nullptr || m_pPlayer->m_aBindSummonCard[i]->m_nHandle != pItem->m_nHandle)
-            {
+        if (m_pPlayer->m_aBindSummonCard[i] != nullptr) {
+            if (pItem == nullptr || m_pPlayer->m_aBindSummonCard[i]->m_nHandle != pItem->m_nHandle) {
                 summon = m_pPlayer->m_aBindSummonCard[i]->m_pSummon;
                 if (pRecvPct->card_handle[i] == 0)
                     m_pPlayer->m_aBindSummonCard[i] = nullptr;
-                if (summon != nullptr && !summon->IsInWorld())
-                {
-                    for (int32_t k = 0; k < 24; ++k)
-                    {
+                if (summon != nullptr && !summon->IsInWorld()) {
+                    for (int32_t k = 0; k < 24; ++k) {
                         if (summon->GetWornItem((ItemWearType)k) != nullptr)
                             summon->Putoff((ItemWearType)k);
                     }
@@ -1091,13 +980,10 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
             }
         }
 
-        if (pItem != nullptr)
-        {
-            if ((pItem->GetItemInstance().GetFlag() & ITEM_FLAG_SUMMON) != 0)
-            {
+        if (pItem != nullptr) {
+            if ((pItem->GetItemInstance().GetFlag() & ITEM_FLAG_SUMMON) != 0) {
                 summon = pItem->m_pSummon;
-                if (summon == nullptr)
-                {
+                if (summon == nullptr) {
                     summon = sMemoryPool.AllocNewSummon(m_pPlayer, pItem);
                     summon->SetFlag(UNIT_FIELD_STATUS, STATUS_LOGIN_COMPLETE);
                     m_pPlayer->AddSummon(summon, true);
@@ -1114,16 +1000,11 @@ void WorldSession::onEquipSummon(const TS_EQUIP_SUMMON *pRecvPct)
             m_pPlayer->m_aBindSummonCard[i] = pItem;
         }
     }
-    if (nCFL > 1)
-    {
-        for (int32_t i = 0; i < nCFL; ++i)
-        {
-            if (m_pPlayer->m_aBindSummonCard[i] == nullptr)
-            {
-                for (int32_t x = i + 1; x < nCFL; ++x)
-                {
-                    if (m_pPlayer->m_aBindSummonCard[x] != nullptr)
-                    {
+    if (nCFL > 1) {
+        for (int32_t i = 0; i < nCFL; ++i) {
+            if (m_pPlayer->m_aBindSummonCard[i] == nullptr) {
+                for (int32_t x = i + 1; x < nCFL; ++x) {
+                    if (m_pPlayer->m_aBindSummonCard[x] != nullptr) {
                         m_pPlayer->m_aBindSummonCard[i] = m_pPlayer->m_aBindSummonCard[x];
                         m_pPlayer->m_aBindSummonCard[x] = nullptr;
                     }
@@ -1140,13 +1021,11 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
         return;
 
     auto item = m_pPlayer->FindItemByHandle(pRecvPct->handle);
-    if (item == nullptr || item->GetItemTemplate() == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || !item->IsInInventory())
-    {
+    if (item == nullptr || item->GetItemTemplate() == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || !item->IsInInventory()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, 0);
         return;
     }
-    if (pRecvPct->sell_count == 0)
-    {
+    if (pRecvPct->sell_count == 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_UNKNOWN, 0);
         return;
     }
@@ -1157,29 +1036,24 @@ void WorldSession::onSellItem(const TS_CS_SELL_ITEM *pRecvPct)
     auto nResultCount = item->GetItemInstance().GetCount() - pRecvPct->sell_count;
     auto nEnhanceLevel = (item->GetItemInstance().GetLevel() + 100 * item->GetItemInstance().GetEnhance());
 
-    if (!m_pPlayer->IsSellable(item) || nResultCount < 0)
-    {
+    if (!m_pPlayer->IsSellable(item) || nResultCount < 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, item->GetItemInstance().GetCode());
         return;
     }
-    if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice > MAX_GOLD_FOR_INVENTORY)
-    {
+    if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice > MAX_GOLD_FOR_INVENTORY) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->GetItemInstance().GetCode());
         return;
     }
-    if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice < 0)
-    {
+    if (m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice < 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->GetItemInstance().GetCode());
         return;
     }
     auto code = item->GetItemCode();
-    if (!m_pPlayer->EraseItem(item, pRecvPct->sell_count))
-    {
+    if (!m_pPlayer->EraseItem(item, pRecvPct->sell_count)) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, item->GetHandle());
         return;
     }
-    if (m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice) != 0)
-    {
+    if (m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->sell_count * nPrice) != 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, item->GetItemInstance().GetCode());
         return;
     }
@@ -1210,44 +1084,37 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
     if (pRecvPct->caster != m_pPlayer->GetHandle())
         pCaster = m_pPlayer->GetSummonByHandle(pRecvPct->caster);
 
-    if (pCaster == nullptr || !pCaster->IsInWorld())
-    {
+    if (pCaster == nullptr || !pCaster->IsInWorld()) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_EXIST);
         return;
     }
     auto base = sObjectMgr.GetSkillBase(pRecvPct->skill_id);
-    if (base == nullptr || !base->IsValid() || base->IsSystemSkill())
-    {
+    if (base == nullptr || !base->IsValid() || base->IsSystemSkill()) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_ACCESS_DENIED);
         return;
     }
 
-    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable()))
-    {
+    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable())) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_ACTABLE);
         return;
     }
 
-    if (pRecvPct->target != 0)
-    {
+    if (pRecvPct->target != 0) {
         pTarget = sMemoryPool.GetObjectInWorld<WorldObject>(pRecvPct->target);
-        if (pTarget == nullptr)
-        {
+        if (pTarget == nullptr) {
             Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_EXIST);
             return;
         }
     }
 
     auto ct = sWorld.GetArTime();
-    if (pCaster->IsMoving(ct))
-    {
+    if (pCaster->IsMoving(ct)) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_ACTABLE);
         return;
     }
 
     // Once again
-    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable()))
-    {
+    if ((base->IsPhysicalSkill() && !pCaster->IsSkillCastable()) || (!base->IsPhysicalSkill() && !pCaster->IsMagicCastable())) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_NOT_ACTABLE);
         return;
     }
@@ -1256,8 +1123,7 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
     if (pSkill == nullptr || (pSkill != nullptr && pSkill->m_nSkillUID == -1))
         return;
 
-    if (pSkill->GetCurrentSkillLevel() <= 0)
-    {
+    if (pSkill->GetCurrentSkillLevel() <= 0) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, TS_RESULT_ACCESS_DENIED);
         return;
     }
@@ -1267,8 +1133,7 @@ void WorldSession::onSkill(const TS_CS_SKILL *pRecvPct)
         nSkillLv = pSkill->GetCurrentSkillLevel();
 
     int32_t nResult = pCaster->CastSkill(pRecvPct->skill_id, nSkillLv, pRecvPct->target, pos, pCaster->GetLayer(), false);
-    if (nResult != TS_RESULT_SUCCESS)
-    {
+    if (nResult != TS_RESULT_SUCCESS) {
         Messages::SendSkillCastFailMessage(m_pPlayer, pRecvPct->caster, pRecvPct->target, pRecvPct->skill_id, pRecvPct->skill_level, pos, nResult);
         return;
     }
@@ -1298,24 +1163,20 @@ void WorldSession::onAttackRequest(const TS_CS_ATTACK_REQUEST *pRecvPct)
     auto unit = dynamic_cast<Unit *>(m_pPlayer);
     if (pRecvPct->handle != m_pPlayer->GetHandle())
         unit = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
-    if (unit == nullptr)
-    {
+    if (unit == nullptr) {
         Messages::SendCantAttackMessage(m_pPlayer, pRecvPct->handle, pRecvPct->target_handle, TS_RESULT_NOT_OWN);
         return;
     }
 
-    if (pRecvPct->target_handle == 0)
-    {
+    if (pRecvPct->target_handle == 0) {
         if (unit->GetTargetHandle() != 0)
             unit->CancelAttack();
         return;
     }
 
     auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(pRecvPct->target_handle);
-    if (pTarget == nullptr)
-    {
-        if (unit->GetTargetHandle() != 0)
-        {
+    if (pTarget == nullptr) {
+        if (unit->GetTargetHandle() != 0) {
             unit->EndAttack();
             return;
         }
@@ -1323,10 +1184,8 @@ void WorldSession::onAttackRequest(const TS_CS_ATTACK_REQUEST *pRecvPct)
         return;
     }
 
-    if (!unit->IsEnemy(pTarget, false))
-    {
-        if (unit->GetTargetHandle() != 0)
-        {
+    if (!unit->IsEnemy(pTarget, false)) {
+        if (unit->GetTargetHandle() != 0) {
             unit->EndAttack();
             return;
         }
@@ -1334,8 +1193,7 @@ void WorldSession::onAttackRequest(const TS_CS_ATTACK_REQUEST *pRecvPct)
         return;
     }
 
-    if ((unit->IsUsingCrossBow() || unit->IsUsingBow()) && unit->IsPlayer() && unit->GetBulletCount() < 1)
-    {
+    if ((unit->IsUsingCrossBow() || unit->IsUsingBow()) && unit->IsPlayer() && unit->GetBulletCount() < 1) {
         Messages::SendCantAttackMessage(m_pPlayer, pRecvPct->getReceivedId(), pRecvPct->target_handle, 0);
         return;
     }
@@ -1351,14 +1209,11 @@ void WorldSession::onCancelAction(const TS_CS_CANCEL_ACTION *pRecvPct)
     Unit *cancellor = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
     if (cancellor == nullptr || !cancellor->IsInWorld())
         cancellor = dynamic_cast<Unit *>(m_pPlayer);
-    if (cancellor->GetHandle() == pRecvPct->handle)
-    {
-        if (cancellor->m_castingSkill != nullptr)
-        {
+    if (cancellor->GetHandle() == pRecvPct->handle) {
+        if (cancellor->m_castingSkill != nullptr) {
             cancellor->CancelSkill();
         }
-        else
-        {
+        else {
             if (cancellor->GetTargetHandle() != 0)
                 cancellor->CancelAttack();
         }
@@ -1372,28 +1227,24 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     uint32_t ct = sWorld.GetArTime();
 
     auto item = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (item == nullptr || !item->IsInWorld())
-    {
+    if (item == nullptr || !item->IsInWorld()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
         return;
     }
 
     // TODO: Weight
-    if (item->GetItemInstance().GetOwnerHandle() != 0)
-    {
+    if (item->GetItemInstance().GetOwnerHandle() != 0) {
         NG_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
         return;
     }
 
     auto pos = m_pPlayer->GetPosition();
-    if (GameRule::GetPickableRange() < item->GetExactDist2d(&pos))
-    {
+    if (GameRule::GetPickableRange() < item->GetExactDist2d(&pos)) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_FAR, pRecvPct->item_handle);
         return;
     }
 
-    if (item->IsQuestItem() && !m_pPlayer->IsTakeableQuestItem(item->GetItemInstance().GetCode()))
-    {
+    if (item->IsQuestItem() && !m_pPlayer->IsTakeableQuestItem(item->GetItemInstance().GetCode())) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
@@ -1401,17 +1252,13 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     auto drop_duration = ct - item->m_nDropTime;
     uint32_t ry = 3000;
 
-    for (int32_t i = 0; i < 3; i++)
-    {
+    for (int32_t i = 0; i < 3; i++) {
         if (item->m_pPickupOrder.hPlayer[i] == 0 && item->m_pPickupOrder.nPartyID[i] == 0)
             break;
 
-        if (item->m_pPickupOrder.nPartyID[i] <= 0 || item->m_pPickupOrder.nPartyID[i] != m_pPlayer->GetPartyID())
-        {
-            if (item->m_pPickupOrder.hPlayer[i] != m_pPlayer->GetHandle())
-            {
-                if (drop_duration < ry)
-                {
+        if (item->m_pPickupOrder.nPartyID[i] <= 0 || item->m_pPickupOrder.nPartyID[i] != m_pPlayer->GetPartyID()) {
+            if (item->m_pPickupOrder.hPlayer[i] != m_pPlayer->GetHandle()) {
+                if (drop_duration < ry) {
                     Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
                     return;
                 }
@@ -1420,12 +1267,9 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
         }
     }
 
-    if (item->GetItemInstance().GetCode() == 0)
-    {
-        if (m_pPlayer->GetPartyID() == 0)
-        {
-            if (m_pPlayer->GetGold() + item->GetItemInstance().GetCount() > MAX_GOLD_FOR_INVENTORY)
-            {
+    if (item->GetItemInstance().GetCode() == 0) {
+        if (m_pPlayer->GetPartyID() == 0) {
+            if (m_pPlayer->GetGold() + item->GetItemInstance().GetCount() > MAX_GOLD_FOR_INVENTORY) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
                 return;
             }
@@ -1437,24 +1281,19 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
     resultPct.item_taker = m_pPlayer->GetHandle();
     sWorld.Broadcast((uint32_t)(m_pPlayer->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(m_pPlayer->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
         m_pPlayer->GetLayer(), resultPct);
-    if (sWorld.RemoveItemFromWorld(item))
-    {
-        if (m_pPlayer->GetPartyID() != 0)
-        {
-            if (item->GetItemInstance().GetCode() != 0)
-            {
+    if (sWorld.RemoveItemFromWorld(item)) {
+        if (m_pPlayer->GetPartyID() != 0) {
+            if (item->GetItemInstance().GetCode() != 0) {
                 ///- Actual Item
                 sWorld.procPartyShare(m_pPlayer, item);
             }
-            else
-            {
+            else {
                 ///- Gold
                 std::vector<Player *> vList{};
                 sGroupManager.GetNearMember(m_pPlayer, 400.0f, vList);
                 auto incGold = (int64_t)(item->GetItemInstance().GetCount() / (!vList.empty() ? vList.size() : 1));
 
-                for (auto &np : vList)
-                {
+                for (auto &np : vList) {
                     auto nNewGold = incGold + np->GetGold();
                     np->ChangeGold(nNewGold);
                 }
@@ -1463,8 +1302,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
             return;
         }
         uint32_t nih = sWorld.procAddItem(m_pPlayer, item, false);
-        if (nih != 0)
-        { // nih = new item handle
+        if (nih != 0) { // nih = new item handle
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, nih);
             return;
         }
@@ -1478,20 +1316,17 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
     uint32_t ct = sWorld.GetArTime();
 
     auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_handle);
-    if (item == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle())
-    {
+    if (item == nullptr || item->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
         return;
     }
 
-    if (item->GetItemTemplate()->eType != ItemType::TYPE_USE && false /*!item->IsUsingItem()*/)
-    {
+    if (item->GetItemTemplate()->eType != ItemType::TYPE_USE && false /*!item->IsUsingItem()*/) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
 
-    if ((item->GetItemTemplate()->flaglist[ItemFlag::FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct)))
-    {
+    if ((item->GetItemTemplate()->flaglist[ItemFlag::FLAG_MOVE] == 0 && m_pPlayer->IsMoving(ct))) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->item_handle);
         return;
     }
@@ -1503,39 +1338,33 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
     // Eventmap
 
     uint16_t nResult = m_pPlayer->IsUseableItem(item, nullptr);
-    if (nResult != TS_RESULT_SUCCESS)
-    {
+    if (nResult != TS_RESULT_SUCCESS) {
         if (nResult == TS_RESULT_COOL_TIME)
             Messages::SendItemCoolTimeInfo(m_pPlayer);
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), nResult, pRecvPct->item_handle);
         return;
     }
 
-    if (item->GetItemTemplate()->flaglist[FLAG_TARGET_USE] == 0)
-    {
+    if (item->GetItemTemplate()->flaglist[FLAG_TARGET_USE] == 0) {
         nResult = m_pPlayer->UseItem(item, nullptr, pRecvPct->szParameter);
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), nResult, pRecvPct->item_handle);
         if (nResult != 0)
             return;
     }
-    else
-    {
+    else {
         // auto unit = dynamic_cast<Unit*>(sMemoryPool.getPtrFromId(target_handle));
         auto unit = sMemoryPool.GetObjectInWorld<Unit>(pRecvPct->target_handle);
-        if (unit == nullptr || unit->GetHandle() == 0)
-        {
+        if (unit == nullptr || unit->GetHandle() == 0) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->target_handle);
             return;
         }
         nResult = m_pPlayer->IsUseableItem(item, unit);
-        if (nResult == TS_RESULT_SUCCESS)
-        {
+        if (nResult == TS_RESULT_SUCCESS) {
             nResult = m_pPlayer->UseItem(item, unit, pRecvPct->szParameter);
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), nResult, pRecvPct->item_handle);
         }
 
-        if (nResult != TS_RESULT_SUCCESS)
-        {
+        if (nResult != TS_RESULT_SUCCESS) {
             return;
         }
     }
@@ -1548,8 +1377,7 @@ void WorldSession::onUseItem(const TS_CS_USE_ITEM *pRecvPct)
 
 bool WorldSession::Update(uint32_t /*diff*/)
 {
-    if (_accountId != 0 && (m_nLastPing > 0 && m_nLastPing + 30000 < sWorld.GetArTime()))
-    {
+    if (_accountId != 0 && (m_nLastPing > 0 && m_nLastPing + 30000 < sWorld.GetArTime())) {
         NG_LOG_DEBUG("server.worldserver", "Kicking Account [%d : %s] due to inactivity.", _accountId, _accountName.c_str());
         return false;
     }
@@ -1562,8 +1390,7 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (pRecvPct->use_state)
-    {
+    if (pRecvPct->use_state) {
         Unit *pTarget = m_pPlayer;
         if (pRecvPct->handle != m_pPlayer->GetHandle())
             pTarget = m_pPlayer->GetSummonByHandle(pRecvPct->handle);
@@ -1579,15 +1406,13 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
         Messages::SendResult(this, NGemity::Packets::TS_CS_RESURRECTION, nResult, 0);
         return;
     }
-    else if (pRecvPct->use_potion)
-    {
+    else if (pRecvPct->use_potion) {
     }
 
     if (!m_pPlayer->IsDead())
         return;
 
-    enum _REVIVE_TYPE
-    {
+    enum _REVIVE_TYPE {
         REVIVE_NORMAL = 0,
         REVIVE_BATTLE = 1,
         REVIVE_COMPETE = 2,
@@ -1605,21 +1430,18 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
 void WorldSession::onDropItem(const TS_CS_DROP_ITEM *pRecvPct)
 {
     auto item = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || !(item->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_SUMMON)))
-    {
+    if (item != nullptr && item->IsDropable() && pRecvPct->count > 0 && (item->GetItemGroup() != ItemGroup::GROUP_SUMMONCARD || !(item->GetItemInstance().GetFlag() & FlagBits::ITEM_FLAG_SUMMON))) {
         m_pPlayer->DropItem(m_pPlayer, item, pRecvPct->count);
         Messages::SendDropResult(m_pPlayer, pRecvPct->item_handle, true);
     }
-    else
-    {
+    else {
         Messages::SendDropResult(m_pPlayer, pRecvPct->item_handle, false);
     }
 }
 
 void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
 {
-    if (pRecvPct->sub_items.size() > 9)
-    {
+    if (pRecvPct->sub_items.size() > 9) {
         KickPlayer();
         return;
     }
@@ -1630,10 +1452,8 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
 
     std::vector<Item *> pSubItem{};
     std::vector<uint16_t> pCountList{};
-    if (pRecvPct->sub_items.size() != 0)
-    {
-        for (auto &mixInfo : pRecvPct->sub_items)
-        {
+    if (pRecvPct->sub_items.size() != 0) {
+        for (auto &mixInfo : pRecvPct->sub_items) {
             auto item = sMixManager.check_mixable_item(m_pPlayer, mixInfo.handle, mixInfo.count);
             if (item == nullptr)
                 return;
@@ -1643,14 +1463,12 @@ void WorldSession::onMixRequest(const TS_CS_MIX *pRecvPct)
     }
 
     auto mb = sMixManager.GetProperMixInfo(pMainItem, pRecvPct->sub_items.size(), pSubItem, pCountList);
-    if (mb == nullptr)
-    {
+    if (mb == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_INVALID_ARGUMENT, 0);
         return;
     }
 
-    switch (mb->type)
-    {
+    switch (mb->type) {
     case 0:
         break;
     case MIX_ENHANCE: // EnchantItem without E-Protect Powder
@@ -1680,15 +1498,13 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
 
     auto nPrevGold = m_pPlayer->GetGold();
     auto pItem = m_pPlayer->FindItemByHandle(pRecvPct->craft_item_handle);
-    if (pItem == nullptr)
-    {
+    if (pItem == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->craft_item_handle);
         return;
     }
 
     int32_t nSocketCount = pItem->GetItemTemplate()->socket;
-    if (nSocketCount < 1 || nSocketCount > 4)
-    {
+    if (nSocketCount < 1 || nSocketCount > 4) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->craft_item_handle);
         return;
     }
@@ -1698,28 +1514,22 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
     bool bIsValid = false;
     Item *pSoulStoneList[sizeof(pRecvPct->soulstone_handle)]{nullptr};
 
-    for (int32_t i = 0; i < nSocketCount; ++i)
-    {
-        if (pRecvPct->soulstone_handle[i] != 0)
-        {
+    for (int32_t i = 0; i < nSocketCount; ++i) {
+        if (pRecvPct->soulstone_handle[i] != 0) {
             pSoulStoneList[i] = m_pPlayer->FindItemByHandle(pRecvPct->soulstone_handle[i]);
-            if (pSoulStoneList[i] == nullptr)
-            {
+            if (pSoulStoneList[i] == nullptr) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->soulstone_handle[i]);
                 return;
             }
             if (pSoulStoneList[i]->GetItemTemplate()->eType != ItemType::TYPE_SOULSTONE || pSoulStoneList[i]->GetItemGroup() != ItemGroup::GROUP_SOULSTONE ||
-                pSoulStoneList[i]->GetItemTemplate()->eClass != ItemClass::CLASS_SOULSTONE)
-            {
+                pSoulStoneList[i]->GetItemTemplate()->eClass != ItemClass::CLASS_SOULSTONE) {
                 Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->soulstone_handle[i]);
                 return;
             }
 
             int32_t nReplicatedCount = 0;
-            for (int32_t k = 0; k < pItem->GetItemTemplate()->socket; ++k)
-            {
-                if (pItem->GetItemInstance().GetSocketIndex(k) != 0 && k != i)
-                {
+            for (int32_t k = 0; k < pItem->GetItemTemplate()->socket; ++k) {
+                if (pItem->GetItemInstance().GetSocketIndex(k) != 0 && k != i) {
                     auto ibs = sObjectMgr.GetItemBase(pItem->GetItemInstance().GetSocketIndex(k));
                     if (ibs->base_type[0] == pSoulStoneList[i]->GetItemTemplate()->base_type[0] && ibs->base_type[1] == pSoulStoneList[i]->GetItemTemplate()->base_type[1] &&
                         ibs->base_type[2] == pSoulStoneList[i]->GetItemTemplate()->base_type[2] && ibs->base_type[3] == pSoulStoneList[i]->GetItemTemplate()->base_type[3] &&
@@ -1728,11 +1538,9 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
                         ibs->opt_type[0] == pSoulStoneList[i]->GetItemTemplate()->opt_type[0] && ibs->opt_type[1] == pSoulStoneList[i]->GetItemTemplate()->opt_type[1] &&
                         ibs->opt_type[2] == pSoulStoneList[i]->GetItemTemplate()->opt_type[2] && ibs->opt_type[3] == pSoulStoneList[i]->GetItemTemplate()->opt_type[3] &&
                         ibs->opt_var[0][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[0][0] && ibs->opt_var[1][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[1][0] &&
-                        ibs->opt_var[2][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[2][0] && ibs->opt_var[3][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[3][0])
-                    {
+                        ibs->opt_var[2][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[2][0] && ibs->opt_var[3][0] == pSoulStoneList[i]->GetItemTemplate()->opt_var[3][0]) {
                         nReplicatedCount++;
-                        if (nReplicatedCount >= nMaxReplicatableCount)
-                        {
+                        if (nReplicatedCount >= nMaxReplicatableCount) {
                             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ALREADY_EXIST, 0);
                             return;
                         }
@@ -1743,31 +1551,25 @@ void WorldSession::onSoulStoneCraft(const TS_CS_SOULSTONE_CRAFT *pRecvPct)
             bIsValid = true;
         }
     }
-    if (!bIsValid)
-    {
+    if (!bIsValid) {
         // maybe log here?
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_INVALID_ARGUMENT, 0);
         return;
     }
-    if (nPrevGold < nCraftCost || m_pPlayer->ChangeGold(nPrevGold - nCraftCost) != TS_RESULT_SUCCESS)
-    {
+    if (nPrevGold < nCraftCost || m_pPlayer->ChangeGold(nPrevGold - nCraftCost) != TS_RESULT_SUCCESS) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, 0);
         return;
     }
 
     int32_t nEndurance = 0;
-    for (int32_t i = 0; i < 4; ++i)
-    {
-        if (pItem->GetItemInstance().GetSocketIndex(i) != 0 || pSoulStoneList[i] != nullptr)
-        {
-            if (pSoulStoneList[i] != nullptr)
-            {
+    for (int32_t i = 0; i < 4; ++i) {
+        if (pItem->GetItemInstance().GetSocketIndex(i) != 0 || pSoulStoneList[i] != nullptr) {
+            if (pSoulStoneList[i] != nullptr) {
                 nEndurance += pSoulStoneList[i]->GetItemInstance().GetCurrentEndurance();
                 pItem->GetItemInstance().SetSocketIndex(i, pSoulStoneList[i]->GetItemInstance().GetCode());
                 m_pPlayer->EraseItem(pSoulStoneList[i], 1);
             }
-            else
-            {
+            else {
                 nEndurance += pItem->GetItemInstance().GetCurrentEndurance();
             }
         }
@@ -1787,44 +1589,34 @@ void WorldSession::onStorage(const TS_CS_STORAGE *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr || m_pPlayer->GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) != 0 || !m_pPlayer->IsActable())
-    {
+    if (!m_pPlayer->m_bIsUsingStorage || m_pPlayer->m_castingSkill != nullptr || m_pPlayer->GetUInt32Value(PLAYER_FIELD_TRADE_TARGET) != 0 || !m_pPlayer->IsActable()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->item_handle);
         return;
     }
 
-    switch ((STORAGE_MODE)pRecvPct->mode)
-    {
+    switch ((STORAGE_MODE)pRecvPct->mode) {
     case ITEM_INVENTORY_TO_STORAGE:
-    case ITEM_STORAGE_TO_INVENTORY:
-    {
-        if (pRecvPct->count <= 0)
-        {
+    case ITEM_STORAGE_TO_INVENTORY: {
+        if (pRecvPct->count <= 0) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ENOUGH_MONEY, pRecvPct->item_handle);
             return;
         }
 
         auto *pItem = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-        if (pItem == nullptr)
-        {
+        if (pItem == nullptr) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
             return;
         }
-        if (pItem->GetOwnerHandle() != m_pPlayer->GetHandle())
-        {
+        if (pItem->GetOwnerHandle() != m_pPlayer->GetHandle()) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
             return;
         }
 
-        if (pItem->IsInInventory() && pRecvPct->mode == ITEM_INVENTORY_TO_STORAGE)
-        {
+        if (pItem->IsInInventory() && pRecvPct->mode == ITEM_INVENTORY_TO_STORAGE) {
             if (pItem->GetItemBase()->flaglist[ITEM_FLAG_EVENT])
-                if (pItem->m_pSummon != nullptr)
-                {
-                    for (const auto &v : m_pPlayer->m_aBindSummonCard)
-                    {
-                        if (v == pItem)
-                        {
+                if (pItem->m_pSummon != nullptr) {
+                    for (const auto &v : m_pPlayer->m_aBindSummonCard) {
+                        if (v == pItem) {
                             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pItem->GetHandle());
                             return;
                         }
@@ -1837,8 +1629,7 @@ void WorldSession::onStorage(const TS_CS_STORAGE *pRecvPct)
                 }*/
             m_pPlayer->MoveInventoryToStorage(pItem, pRecvPct->count);
         }
-        else if (pItem->IsInStorage() && pRecvPct->mode == ITEM_STORAGE_TO_INVENTORY)
-        {
+        else if (pItem->IsInStorage() && pRecvPct->mode == ITEM_STORAGE_TO_INVENTORY) {
             m_pPlayer->MoveStorageToInventory(pItem, pRecvPct->count);
         }
         m_pPlayer->Save(true);
@@ -1848,31 +1639,26 @@ void WorldSession::onStorage(const TS_CS_STORAGE *pRecvPct)
     {
         if (m_pPlayer->GetGold() < pRecvPct->count)
             return;
-        if (m_pPlayer->GetStorageGold() + pRecvPct->count > MAX_GOLD_FOR_STORAGE)
-        {
+        if (m_pPlayer->GetStorageGold() + pRecvPct->count > MAX_GOLD_FOR_STORAGE) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
             return;
         }
         auto nGold = m_pPlayer->GetGold();
-        if (m_pPlayer->ChangeGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeStorageGold(m_pPlayer->GetStorageGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
-        {
+        if (m_pPlayer->ChangeGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeStorageGold(m_pPlayer->GetStorageGold() + pRecvPct->count) == TS_RESULT_SUCCESS) {
             m_pPlayer->Save(true);
             return;
         }
     }
         return;
-    case GOLD_STORAGE_TO_INVENTORY:
-    {
+    case GOLD_STORAGE_TO_INVENTORY: {
         if (m_pPlayer->GetStorageGold() < pRecvPct->count)
             return;
-        if (m_pPlayer->GetGold() + pRecvPct->count > MAX_GOLD_FOR_INVENTORY)
-        {
+        if (m_pPlayer->GetGold() + pRecvPct->count > MAX_GOLD_FOR_INVENTORY) {
             Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_TOO_MUCH_MONEY, pRecvPct->item_handle);
             return;
         }
         auto nGold = m_pPlayer->GetStorageGold();
-        if (m_pPlayer->ChangeStorageGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->count) == TS_RESULT_SUCCESS)
-        {
+        if (m_pPlayer->ChangeStorageGold(nGold - pRecvPct->count) == TS_RESULT_SUCCESS && m_pPlayer->ChangeGold(m_pPlayer->GetGold() + pRecvPct->count) == TS_RESULT_SUCCESS) {
             m_pPlayer->Save(true);
             return;
         }
@@ -1892,25 +1678,21 @@ void WorldSession::onBindSkillCard(const TS_CS_BIND_SKILLCARD *pRecvPct)
         return;
 
     auto pItem = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (pItem == nullptr)
-    {
+    if (pItem == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
         return;
     }
-    if (pRecvPct->target_handle != m_pPlayer->GetHandle())
-    {
+    if (pRecvPct->target_handle != m_pPlayer->GetHandle()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget != 0)
-    {
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget != 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
 
     auto pSkill = m_pPlayer->GetSkill(pItem->GetItemTemplate()->skill_id);
-    if (pSkill != nullptr && pSkill->GetSkillEnhance() == 0)
-    {
+    if (pSkill != nullptr && pSkill->GetSkillEnhance() == 0) {
         m_pPlayer->BindSkillCard(pItem);
     }
 }
@@ -1918,18 +1700,15 @@ void WorldSession::onBindSkillCard(const TS_CS_BIND_SKILLCARD *pRecvPct)
 void WorldSession::onUnBindSkilLCard(const TS_CS_UNBIND_SKILLCARD *pRecvPct)
 {
     auto pItem = sMemoryPool.GetObjectInWorld<Item>(pRecvPct->item_handle);
-    if (pItem == nullptr)
-    {
+    if (pItem == nullptr) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_EXIST, pRecvPct->item_handle);
         return;
     }
-    if (pRecvPct->target_handle != m_pPlayer->GetHandle())
-    {
+    if (pRecvPct->target_handle != m_pPlayer->GetHandle()) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, pRecvPct->target_handle);
         return;
     }
-    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget == 0)
-    {
+    if (!pItem->IsInInventory() || pItem->GetItemInstance().GetOwnerHandle() != m_pPlayer->GetHandle() || pItem->GetItemGroup() != ItemGroup::GROUP_SKILLCARD || pItem->m_hBindedTarget == 0) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, pRecvPct->item_handle);
         return;
     }
@@ -1945,16 +1724,13 @@ void WorldSession::onTrade(const TS_TRADE *pRecvPct)
     if (m_pPlayer->m_bIsUsingStorage)
         return;
 
-    if (m_pPlayer->bIsMoving && m_pPlayer->IsInWorld())
-    {
+    if (m_pPlayer->bIsMoving && m_pPlayer->IsInWorld()) {
         m_pPlayer->CancelTrade(false);
         return;
     }
 
-    if (pRecvPct->target_player == m_pPlayer->GetHandle())
-    {
-        if (m_pPlayer->GetTargetHandle() != 0)
-        {
+    if (pRecvPct->target_player == m_pPlayer->GetHandle()) {
+        if (m_pPlayer->GetTargetHandle() != 0) {
             auto pTarget = sMemoryPool.GetObjectInWorld<Player>(m_pPlayer->GetTargetHandle());
             pTarget->CancelTrade(false);
         }
@@ -1962,8 +1738,7 @@ void WorldSession::onTrade(const TS_TRADE *pRecvPct)
         return;
     }
 
-    switch (pRecvPct->mode)
-    {
+    switch (pRecvPct->mode) {
     case TM_REQUEST_TRADE:
         onRequestTrade(pRecvPct->target_player);
         break;
@@ -2006,8 +1781,7 @@ void WorldSession::onRequestTrade(uint32_t hTradeTarget)
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, tradeTarget->GetHandle());
     else if (!m_pPlayer->IsTradableWith(tradeTarget))
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_PK_LIMIT, tradeTarget->GetHandle());
-    else
-    {
+    else {
         TS_TRADE tradePct{};
         tradePct.target_player = m_pPlayer->GetHandle();
         tradePct.mode = static_cast<uint8_t>(TM_REQUEST_TRADE);
@@ -2021,12 +1795,10 @@ void WorldSession::onAcceptTrade(uint32_t hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    if (m_pPlayer->m_bTrading || tradeTarget->m_bTrading || m_pPlayer->m_hTamingTarget || tradeTarget->m_hTamingTarget)
-    {
+    if (m_pPlayer->m_bTrading || tradeTarget->m_bTrading || m_pPlayer->m_hTamingTarget || tradeTarget->m_hTamingTarget) {
         Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
     }
-    else
-    {
+    else {
         m_pPlayer->StartTrade(tradeTarget->GetHandle());
         tradeTarget->StartTrade(m_pPlayer->GetHandle());
 
@@ -2076,30 +1848,26 @@ void WorldSession::onAddItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    if (!m_pPlayer->m_bTradeFreezed)
-    {
+    if (!m_pPlayer->m_bTradeFreezed) {
         auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
         if (item == nullptr || item->GetItemTemplate() == nullptr)
             return;
 
-        if (count <= 0 || count > item->GetItemInstance().GetCount())
-        {
+        if (count <= 0 || count > item->GetItemInstance().GetCount()) {
             NG_LOG_ERROR("trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
         }
 
-        if (!m_pPlayer->IsTradable(item))
-        {
+        if (!m_pPlayer->IsTradable(item)) {
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
 
-        if (m_pPlayer->AddItemToTradeWindow(item, count))
-        {
+        if (m_pPlayer->AddItemToTradeWindow(item, count)) {
             Messages::SendTradeItemInfo(TM_ADD_ITEM, item, count, m_pPlayer, tradeTarget);
         }
     }
@@ -2108,26 +1876,22 @@ void WorldSession::onAddItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 void WorldSession::onRemoveItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 {
     auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
-    if (!isValidTradeTarget(tradeTarget))
-    {
+    if (!isValidTradeTarget(tradeTarget)) {
         m_pPlayer->CancelTrade(false);
         return;
     }
 
-    if (!m_pPlayer->m_bTradeFreezed)
-    {
+    if (!m_pPlayer->m_bTradeFreezed) {
         auto item = m_pPlayer->FindItemByHandle(pRecvPct->item_info.base_info.handle);
         auto count = pRecvPct->item_info.base_info.count;
 
         if (item == nullptr || item->GetItemTemplate() == nullptr)
             return;
 
-        if (m_pPlayer->RemoveItemFromTradeWindow(item, count))
-        {
+        if (m_pPlayer->RemoveItemFromTradeWindow(item, count)) {
             Messages::SendTradeItemInfo(TM_REMOVE_ITEM, item, count, m_pPlayer, tradeTarget);
         }
-        else
-        {
+        else {
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
         }
     }
@@ -2135,15 +1899,13 @@ void WorldSession::onRemoveItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 
 void WorldSession::onAddGold(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 {
-    if (!m_pPlayer->m_bTradeFreezed)
-    {
+    if (!m_pPlayer->m_bTradeFreezed) {
         auto tradeTarget = sMemoryPool.GetObjectInWorld<Player>(hTradeTarget);
         if (!isValidTradeTarget(tradeTarget))
             return;
 
         int64_t gold = pRecvPct->item_info.base_info.count;
-        if (gold <= 0)
-        {
+        if (gold <= 0) {
             NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
@@ -2159,8 +1921,7 @@ void WorldSession::onAddGold(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
         tradeTarget->SendPacket(tradePct);
         m_pPlayer->SendPacket(tradePct);
     }
-    else
-    {
+    else {
         m_pPlayer->CancelTrade(false);
     }
 }
@@ -2168,8 +1929,7 @@ void WorldSession::onAddGold(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 void WorldSession::onFreezeTrade()
 {
     auto tradeTarget = m_pPlayer->GetTradeTarget();
-    if (tradeTarget != nullptr)
-    {
+    if (tradeTarget != nullptr) {
         m_pPlayer->FreezeTrade();
 
         TS_TRADE tradePct{};
@@ -2188,8 +1948,7 @@ void WorldSession::onConfirmTrade(uint32_t hTradeTarget)
     if (!isValidTradeTarget(tradeTarget))
         return;
 
-    if (!m_pPlayer->m_bTrading || !tradeTarget->m_bTrading || !m_pPlayer->m_bTradeFreezed || !tradeTarget->m_bTradeFreezed || tradeTarget->GetTradeTarget() != m_pPlayer)
-    {
+    if (!m_pPlayer->m_bTrading || !tradeTarget->m_bTrading || !m_pPlayer->m_bTradeFreezed || !tradeTarget->m_bTradeFreezed || tradeTarget->GetTradeTarget() != m_pPlayer) {
         m_pPlayer->CancelTrade(true);
         tradeTarget->CancelTrade(true);
         return;
@@ -2209,8 +1968,7 @@ void WorldSession::onConfirmTrade(uint32_t hTradeTarget)
     if (!tradeTarget->m_bTradeAccepted)
         return;
 
-    if (!m_pPlayer->CheckTradeWeight() || !tradeTarget->CheckTradeWeight())
-    {
+    if (!m_pPlayer->CheckTradeWeight() || !tradeTarget->CheckTradeWeight()) {
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
 
@@ -2220,8 +1978,7 @@ void WorldSession::onConfirmTrade(uint32_t hTradeTarget)
         return;
     }
 
-    if (!m_pPlayer->CheckTradeItem() || !tradeTarget->CheckTradeItem())
-    {
+    if (!m_pPlayer->CheckTradeItem() || !tradeTarget->CheckTradeItem()) {
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
 
@@ -2237,28 +1994,23 @@ void WorldSession::onConfirmTrade(uint32_t hTradeTarget)
     bool bExceedGold = tradeGold > MAX_GOLD_FOR_INVENTORY;
     bool bExceedGoldTradeTarget = tradeTargetGold > MAX_GOLD_FOR_INVENTORY;
 
-    if (bExceedGold || bExceedGoldTradeTarget)
-    {
+    if (bExceedGold || bExceedGoldTradeTarget) {
         m_pPlayer->CancelTrade(false);
         tradeTarget->CancelTrade(false);
 
-        if (bExceedGold)
-        {
+        if (bExceedGold) {
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
             Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, m_pPlayer->GetHandle());
         }
 
-        if (bExceedGoldTradeTarget)
-        {
+        if (bExceedGoldTradeTarget) {
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
             Messages::SendResult(tradeTarget, NGemity::Packets::TS_TRADE, TS_RESULT_TOO_MUCH_MONEY, tradeTarget->GetHandle());
         }
     }
-    else
-    {
+    else {
         if (m_pPlayer->m_bTrading && tradeTarget->m_bTrading && m_pPlayer->m_bTradeFreezed && tradeTarget->m_bTradeFreezed && m_pPlayer->GetTradeTarget() == tradeTarget &&
-            tradeTarget->GetTradeTarget() == m_pPlayer && m_pPlayer->ProcessTrade())
-        {
+            tradeTarget->GetTradeTarget() == m_pPlayer && m_pPlayer->ProcessTrade()) {
             TS_TRADE tradePct{};
             tradePct.target_player = m_pPlayer->GetHandle();
             tradePct.mode = static_cast<uint8_t>(TM_PROCESS_TRADE);
@@ -2280,8 +2032,7 @@ void WorldSession::onDropQuest(const TS_CS_DROP_QUEST *pRecvPct)
     if (m_pPlayer == nullptr)
         return;
 
-    if (m_pPlayer->DropQuest(pRecvPct->code))
-    {
+    if (m_pPlayer->DropQuest(pRecvPct->code)) {
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_SUCCESS, 0);
         return;
     }

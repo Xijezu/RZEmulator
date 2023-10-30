@@ -16,8 +16,7 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-enum class SUMMON_DEFAULTS : int32_t
-{
+enum class SUMMON_DEFAULTS : int32_t {
     SUMMON_SPAWN_LENGTH = 70,
     SUMMON_SPAWN_MIN_LENGTH = 24,
     SUMMON_MAX_NON_ARTIFACT_ITEM_WEAR = 2,
@@ -25,8 +24,7 @@ enum class SUMMON_DEFAULTS : int32_t
     SUMMON_MAX_ITEM_WEAR = 6,
 };
 
-struct SummonLevelBonus
-{
+struct SummonLevelBonus {
     int32_t summon_id;
     float strength;
     float vital;
@@ -37,14 +35,9 @@ struct SummonLevelBonus
     float luck;
 };
 
-enum class SUMMON_RIDE_TYPE
-{
-    CANT_RIDING = 0,
-    RIDING_LENT = 1
-};
+enum class SUMMON_RIDE_TYPE { CANT_RIDING = 0, RIDING_LENT = 1 };
 
-struct SummonResourceTemplate
-{
+struct SummonResourceTemplate {
     int32_t id;
     int32_t type;
     int32_t magic_type;

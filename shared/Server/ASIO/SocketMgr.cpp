@@ -17,18 +17,15 @@ bool SocketMgr::StartNetwork(NGemity::Asio::IoContext &ioContext, std::string co
     ASSERT(threadCount > 0);
 
     AsyncAcceptor *acceptor = nullptr;
-    try
-    {
+    try {
         acceptor = new AsyncAcceptor(ioContext, bindIp, port);
     }
-    catch (boost::system::system_error const &err)
-    {
+    catch (boost::system::system_error const &err) {
         NG_LOG_ERROR("network", "Exception caught in SocketMgr.StartNetwork (%s:%u): %s", bindIp.c_str(), port, err.what());
         return false;
     }
 
-    if (!acceptor->Bind())
-    {
+    if (!acceptor->Bind()) {
         NG_LOG_ERROR("network", "StartNetwork failed to bind socket acceptor");
         return false;
     }
@@ -71,13 +68,11 @@ void SocketMgr::Wait()
 
 void SocketMgr::OnSocketOpen(tcp::socket &&sock, uint32_t nThreadIndex)
 {
-    try
-    {
+    try {
         std::shared_ptr<XSocket> newSocket = std::make_shared<XSocket>(std::move(sock));
         _threads[nThreadIndex].AddSocket(newSocket);
     }
-    catch (boost::system::system_error const &err)
-    {
+    catch (boost::system::system_error const &err) {
         NG_LOG_WARN("network", "Failed to retrieve client's remote address %s", err.what());
     }
 }

@@ -26,8 +26,7 @@
 
 using boost::asio::ip::tcp;
 
-class SocketMgr
-{
+class SocketMgr {
 public:
     virtual ~SocketMgr();
 

@@ -22,8 +22,7 @@
 class WorldObject;
 using RegionType = std::vector<WorldObject *>;
 
-class Region
-{
+class Region {
 public:
     friend class RegionBlock;
     Region() = default;

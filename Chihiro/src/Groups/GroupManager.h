@@ -21,8 +21,7 @@
 #include "Common.h"
 #include "SharedMutex.h"
 
-enum PARTY_TYPE : int
-{
+enum PARTY_TYPE : int {
     TYPE_UNKNOWN = 0xFF,
     TYPE_NORMAL_PARTY = 0,
     TYPE_RAID_ATTACKTEAM = 1,
@@ -32,16 +31,10 @@ enum PARTY_TYPE : int
     TYPE_BATTLE_ARENA_EXERCISE_TEAM = 5*/
 };
 
-enum ITEM_SHARE_MODE : int
-{
-    ITEM_SHARE_MONOPOLY = 0,
-    ITEM_SHARE_RANDOM = 1,
-    ITEM_SHARE_LINEAR = 2
-};
+enum ITEM_SHARE_MODE : int { ITEM_SHARE_MONOPOLY = 0, ITEM_SHARE_RANDOM = 1, ITEM_SHARE_LINEAR = 2 };
 
 class Player;
-struct PartyMemberTag
-{
+struct PartyMemberTag {
     bool bIsOnline;
     int32_t sid;
     std::string strName;
@@ -50,8 +43,7 @@ struct PartyMemberTag
     int32_t nJobID;
 };
 
-struct PartyInfo
-{
+struct PartyInfo {
     uint32_t nPartyPassword;
     int32_t nPartyID;
     int32_t nLeaderSID;
@@ -67,8 +59,7 @@ struct PartyInfo
 };
 
 class Player;
-class GroupManager
-{
+class GroupManager {
 public:
     ~GroupManager() = default;
     // Deleting the copy & assignment operators

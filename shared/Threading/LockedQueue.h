@@ -20,8 +20,7 @@
 #include <mutex>
 
 template<class T, typename StorageType = std::deque<T>>
-class LockedQueue
-{
+class LockedQueue {
     //! Lock access to the queue.
     std::mutex _lock;
 

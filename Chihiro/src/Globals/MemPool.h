@@ -29,8 +29,7 @@
 #include "Summon.h"
 
 typedef std::unordered_map<uint32_t, Object *> UpdateMap;
-class MemoryPoolMgr
-{
+class MemoryPoolMgr {
 public:
     ~MemoryPoolMgr() = default;
     // Deleting the copy & assignment operators
@@ -48,8 +47,7 @@ public:
     T *GetObjectInWorld(uint32_t handle)
     {
         uint32_t idbase = handle & 0xE0000000;
-        switch (idbase)
-        {
+        switch (idbase) {
         case 0x00000000:
             return dynamic_cast<T *>(HashMapHolder<Item>::Find(handle));
         case 0x20000000:

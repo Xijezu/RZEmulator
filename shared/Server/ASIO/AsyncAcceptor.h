@@ -33,8 +33,7 @@ using boost::asio::ip::tcp;
 #define NGEMITY_MAX_LISTEN_CONNECTIONS boost::asio::socket_base::max_connections
 #endif
 
-class AsyncAcceptor
-{
+class AsyncAcceptor {
     using SocketHandler = std::function<void(tcp::socket &&sock, uint32_t threadIndex)>;
 
 public:
@@ -50,16 +49,13 @@ public:
         uint32_t threadIndex;
         std::tie(socket, threadIndex) = _socketFactory();
         _acceptor.async_accept(*socket, [this, socket, threadIndex, handler](boost::system::error_code error) {
-            if (!error)
-            {
-                try
-                {
+            if (!error) {
+                try {
                     socket->non_blocking(true);
 
                     (handler)(std::move(*socket), threadIndex);
                 }
-                catch (boost::system::system_error const &err)
-                {
+                catch (boost::system::system_error const &err) {
                     NG_LOG_INFO("network", "Failed to initialize client's socket %s", err.what());
                 }
             }

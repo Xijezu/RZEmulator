@@ -21,16 +21,14 @@
 #include "Unit.h"
 
 class FieldProp;
-struct FieldPropDeleteHandler
-{
+struct FieldPropDeleteHandler {
     virtual void onFieldPropDelete(FieldProp *prop) = 0;
 };
 
 class Player;
 class XPacket;
 
-class FieldProp : public WorldObject
-{
+class FieldProp : public WorldObject {
     friend class Skill;
     friend class FieldPropManager;
 

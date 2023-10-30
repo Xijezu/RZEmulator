@@ -28,8 +28,7 @@
 class XPacket;
 struct Server;
 // Handle login commands
-class MonitorSession : public XSocket
-{
+class MonitorSession : public XSocket {
 public:
     explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server);
     ~MonitorSession();

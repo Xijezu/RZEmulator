@@ -61,8 +61,7 @@ using boost::asio::ip::tcp;
             tcp::socket::endpoint_type remote_endpoint() const;
 */
 template<class T, class Stream = tcp::socket>
-class Socket : public std::enable_shared_from_this<T>
-{
+class Socket : public std::enable_shared_from_this<T> {
 public:
     explicit Socket(tcp::socket &&socket)
         : _socket(std::move(socket))
@@ -194,8 +193,7 @@ protected:
 private:
     void ReadHandlerInternal(boost::system::error_code error, size_t transferredBytes)
     {
-        if (error)
-        {
+        if (error) {
             CloseSocket();
             return;
         }
@@ -208,8 +206,7 @@ private:
 
     void WriteHandler(boost::system::error_code error, std::size_t transferedBytes)
     {
-        if (!error)
-        {
+        if (!error) {
             _isWritingAsync = false;
             _writeQueue.front().ReadCompleted(transferedBytes);
             if (!_writeQueue.front().GetActiveSize())
@@ -244,8 +241,7 @@ private:
         boost::system::error_code error;
         std::size_t bytesSent = _socket.write_some(boost::asio::buffer(queuedMessage.GetReadPointer(), bytesToSend), error);
 
-        if (error)
-        {
+        if (error) {
             if (error == boost::asio::error::would_block || error == boost::asio::error::try_again)
                 return AsyncProcessQueue();
 
@@ -254,8 +250,7 @@ private:
                 CloseSocket();
             return false;
         }
-        else if (bytesSent == 0)
-        {
+        else if (bytesSent == 0) {
             _writeQueue.pop();
             if (_closing && _writeQueue.empty())
                 CloseSocket();

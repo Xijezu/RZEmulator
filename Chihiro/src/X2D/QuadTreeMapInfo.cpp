@@ -30,8 +30,7 @@ bool X2D::QuadTreeMapInfo::Node::Add(MapLocationInfo u)
     nn.init = false;
 
     result = u.IsCollision(this->m_Area);
-    if (result)
-    {
+    if (result) {
         if (this->m_pNode.count(0) != 0)
             nn = this->getFitNode(u);
         if (this->m_pNode.count(0) == 0 || !nn.init || !nn.Add(u))
@@ -43,20 +42,16 @@ bool X2D::QuadTreeMapInfo::Node::Add(MapLocationInfo u)
 
 void X2D::QuadTreeMapInfo::Node::Enum(X2D::Pointf c, X2D::QuadTreeMapInfo::FunctorAdaptor &f)
 {
-    if (this->m_Area.IsInclude(c.x, c.y))
-    {
-        if (this->m_pNode.count(0) != 0)
-        {
+    if (this->m_Area.IsInclude(c.x, c.y)) {
+        if (this->m_pNode.count(0) != 0) {
             this->m_pNode[0].Enum(c, f);
             this->m_pNode[1].Enum(c, f);
             this->m_pNode[2].Enum(c, f);
             this->m_pNode[3].Enum(c, f);
         }
 
-        for (auto &info : m_vList)
-        {
-            if (info.IsInclude(c))
-            {
+        for (auto &info : m_vList) {
+            if (info.IsInclude(c)) {
                 f.pResult.push_back(info);
             }
         }
@@ -65,10 +60,8 @@ void X2D::QuadTreeMapInfo::Node::Enum(X2D::Pointf c, X2D::QuadTreeMapInfo::Funct
 
 bool X2D::QuadTreeMapInfo::Node::Collision(X2D::Pointf c)
 {
-    if (this->m_Area.IsInclude(c))
-    {
-        for (auto &p : this->m_vList)
-        {
+    if (this->m_Area.IsInclude(c)) {
+        for (auto &p : this->m_vList) {
             if (p.IsInclude(c))
                 return true;
         }
@@ -81,10 +74,8 @@ bool X2D::QuadTreeMapInfo::Node::Collision(X2D::Pointf c)
 
 bool X2D::QuadTreeMapInfo::Node::LooseCollision(X2D::Linef pLine)
 {
-    if (this->m_Area.IsCollision(pLine))
-    {
-        for (auto &p : this->m_vList)
-        {
+    if (this->m_Area.IsCollision(pLine)) {
+        for (auto &p : this->m_vList) {
             if (p.IsLooseCollision(pLine))
                 return true;
         }
@@ -114,8 +105,7 @@ X2D::QuadTreeMapInfo::Node X2D::QuadTreeMapInfo::Node::getFitNode(MapLocationInf
 void X2D::QuadTreeMapInfo::Node::add(MapLocationInfo u)
 {
     this->m_vList.emplace_back(u);
-    if (this->m_vList.size() >= 10)
-    {
+    if (this->m_vList.size() >= 10) {
         if (this->m_unDepth < 10)
             this->divide();
     }
@@ -123,8 +113,7 @@ void X2D::QuadTreeMapInfo::Node::add(MapLocationInfo u)
 
 void X2D::QuadTreeMapInfo::Node::divide()
 {
-    if (this->m_pNode.count(0) == 0)
-    {
+    if (this->m_pNode.count(0) == 0) {
         Pointf p1{};
         Pointf p2{};
 
@@ -150,15 +139,12 @@ void X2D::QuadTreeMapInfo::Node::divide()
 
         std::vector<MapLocationInfo> nl{};
 
-        for (auto &info : this->m_vList)
-        {
+        for (auto &info : this->m_vList) {
             Node fn = this->getFitNode(info);
-            if (fn.init)
-            {
+            if (fn.init) {
                 fn.Add(info);
             }
-            else
-            {
+            else {
                 nl.emplace_back(info);
             }
         }

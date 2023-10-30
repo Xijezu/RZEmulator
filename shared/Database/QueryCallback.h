@@ -24,8 +24,7 @@
 #include "DatabaseEnvFwd.h"
 #include "Define.h"
 
-class QueryCallback
-{
+class QueryCallback {
 public:
     explicit QueryCallback(QueryResultFuture &&result);
     explicit QueryCallback(PreparedQueryResultFuture &&result);
@@ -42,12 +41,7 @@ public:
     // Moves std::future from next to this object
     void SetNextQuery(QueryCallback &&next);
 
-    enum Status
-    {
-        NotReady,
-        NextStep,
-        Completed
-    };
+    enum Status { NotReady, NextStep, Completed };
 
     Status InvokeIfReady();
 
@@ -62,8 +56,7 @@ private:
     template<typename T>
     friend void MoveFrom(T *to, T &&from);
 
-    union
-    {
+    union {
         QueryResultFuture _string;
         PreparedQueryResultFuture _prepared;
     };

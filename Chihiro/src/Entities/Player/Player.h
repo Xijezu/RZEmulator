@@ -30,30 +30,26 @@ class WorldLocation;
 
 constexpr int32_t MAX_ITEM_COOLTIME_GROUP = 20;
 
-enum BONUS_TYPE : int
-{
+enum BONUS_TYPE : int {
     BONUS_PCBANG = 0x0,
     BONUS_STAMINA = 0x1,
     BONUS_PREMIUM_PCBANG = 0x2,
     MAX_BONUS_TYPE = 0x3,
 };
 
-enum MOUNT_MODE : uint8_t
-{
+enum MOUNT_MODE : uint8_t {
     MOUNT_NOTHING = 0,
     MOUNT_ON_MAIN = 1,
     MOUNT_ON_SUB = 2,
 };
 
-enum UNMOUNT_TYPE : uint8_t
-{
+enum UNMOUNT_TYPE : uint8_t {
     UNMOUNT_NORMAL = 0,
     UNMOUNT_FALL = 1,
     UNMOUNT_UNSUMMON = 2,
 };
 
-enum TRADE_MODE : int
-{
+enum TRADE_MODE : int {
     TM_REQUEST_TRADE = 0,
     TM_ACCEPT_TRADE,
     TM_BEGIN_TRADE,
@@ -68,30 +64,22 @@ enum TRADE_MODE : int
     TM_MODIFY_COUNT
 };
 
-enum struct JOB_RACE : int32_t
-{
+enum struct JOB_RACE : int32_t {
     GAIA = 3,
     DEVA = 4,
     ASURA = 5,
 };
 
-struct BonusInfo
-{
+struct BonusInfo {
     int32_t type;
     int32_t rate;
     int64_t exp;
     int32_t jp;
 };
 
-enum CONDITION_INFO : int
-{
-    CONDITION_GOOD = 0,
-    CONDITION_AVERAGE = 1,
-    CONDITION_BAD = 2
-};
+enum CONDITION_INFO : int { CONDITION_GOOD = 0, CONDITION_AVERAGE = 1, CONDITION_BAD = 2 };
 
-class Player : public Unit, public QuestEventHandler, public InventoryEventReceiver
-{
+class Player : public Unit, public QuestEventHandler, public InventoryEventReceiver {
 public:
     friend class Messages;
     friend class Summon;

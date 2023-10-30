@@ -20,15 +20,13 @@
 
 class Inventory;
 class Item;
-struct InventoryEventReceiver
-{
+struct InventoryEventReceiver {
     virtual void onAdd(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) = 0;
     virtual void onRemove(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) = 0;
     virtual void onChangeCount(Inventory *pInventory, Item *pItem, bool bSkipUpdateItemToDB) = 0;
 };
 
-class Inventory
-{
+class Inventory {
 public:
     friend class Player;
     Inventory();

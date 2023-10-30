@@ -20,8 +20,7 @@
 #include "SQLOperation.h"
 
 /*! Raw, ad-hoc query.*/
-class BasicStatementTask : public SQLOperation
-{
+class BasicStatementTask : public SQLOperation {
 public:
     BasicStatementTask(const char *sql, bool async = false);
     ~BasicStatementTask();

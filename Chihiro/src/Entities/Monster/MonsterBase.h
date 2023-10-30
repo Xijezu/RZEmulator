@@ -21,8 +21,7 @@
 
 class Monster;
 
-struct PARTY_DAMAGE
-{
+struct PARTY_DAMAGE {
     PARTY_DAMAGE()
     {
         nDamage = 0;
@@ -38,10 +37,8 @@ struct PARTY_DAMAGE
     int32_t nLevel;
 };
 
-struct MonsterBase
-{
-    enum
-    {
+struct MonsterBase {
+    enum {
         FIGHT_TYPE_NORMAL = 0,
         FIGHT_TYPE_ENVIRONMENT = 1,
         FIGHT_TYPE_DUNGEON_CONNECTOR = 2,
@@ -52,8 +49,7 @@ struct MonsterBase
         FIGHT_TYPE_NOT_MOVABLE = 7,
     };
 
-    enum
-    {
+    enum {
         MONSTER_TYPE_NORMAL = 0,
         MONSTER_TYPE_WARRIOR = 1,
         MONSTER_TYPE_MAGICAN = 2,
@@ -76,8 +72,7 @@ struct MonsterBase
         MONSTER_TYPE_B_BOSS = 32,
     };
 
-    enum
-    {
+    enum {
         MONSTER_RACE_DUNGEON_CORE = 20000,
         MONSTER_RACE_DUNGEON_CONNECTOR = 20001,
     };
@@ -141,18 +136,15 @@ struct MonsterBase
     int32_t local_flag;
 };
 
-struct MonsterDeleteHandler
-{
+struct MonsterDeleteHandler {
     virtual void onMonsterDelete(Monster *mob) = 0;
 };
 
-struct takePriority
-{
+struct takePriority {
     ItemPickupOrder PickupOrder{};
 };
 
-struct HateTag
-{
+struct HateTag {
     HateTag(uint32_t _uid, uint32_t _time, int32_t _hate)
         : uid(_uid)
         , nTime(_time)
@@ -171,8 +163,7 @@ struct HateTag
     int32_t nLastMaxHate;
 };
 
-struct HateModifierTag
-{
+struct HateModifierTag {
     HateModifierTag(uint32_t _uid, int32_t _hate)
     {
         uid = _uid;
@@ -183,25 +174,16 @@ struct HateModifierTag
     int32_t nHate;
 };
 
-enum ATTACK_TYPE_FLAG : uint16_t
-{
-    AT_FIRST_ATTACK = 0x1,
-    AT_GROUP_FIRST_ATTACK = 0x2,
-    AT_RESPONSE_CASTING = 0x4,
-    AT_RESPONSE_RACE = 0x8,
-    AT_RESPONSE_BATTLE = 0x10
-};
+enum ATTACK_TYPE_FLAG : uint16_t { AT_FIRST_ATTACK = 0x1, AT_GROUP_FIRST_ATTACK = 0x2, AT_RESPONSE_CASTING = 0x4, AT_RESPONSE_RACE = 0x8, AT_RESPONSE_BATTLE = 0x10 };
 
-enum MONSTER_GENERATE_CODE : int
-{
+enum MONSTER_GENERATE_CODE : int {
     MGC_NONE = 0,
     MGC_BY_RESPAWN = 1,
     MGC_BY_SCRIPT = 2,
     MGC_BY_SHOVELING = 3,
 };
 
-enum MONSTER_STATUS : int
-{
+enum MONSTER_STATUS : int {
     STATUS_NORMAL = 0,
     STATUS_TRACKING = 1,
     STATUS_FIND_ATTACK_POS = 2,
@@ -209,8 +191,7 @@ enum MONSTER_STATUS : int
     STATUS_DEAD = 4,
 };
 
-struct MonsterRespawnInfo
-{
+struct MonsterRespawnInfo {
     uint32_t interval;
     float left;
     float top;

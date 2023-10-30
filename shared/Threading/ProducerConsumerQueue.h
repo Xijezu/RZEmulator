@@ -22,8 +22,7 @@
 #include <type_traits>
 
 template<typename T>
-class ProducerConsumerQueue
-{
+class ProducerConsumerQueue {
 private:
     std::mutex _queueLock;
     std::queue<T> _queue;
@@ -86,8 +85,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(_queueLock);
 
-        while (!_queue.empty())
-        {
+        while (!_queue.empty()) {
             T &value = _queue.front();
 
             DeleteQueuedObject(value);

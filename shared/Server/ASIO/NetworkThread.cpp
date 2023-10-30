@@ -13,8 +13,7 @@ NetworkThread::NetworkThread()
 NetworkThread::~NetworkThread()
 {
     Stop();
-    if (_thread)
-    {
+    if (_thread) {
         Wait();
         delete _thread;
     }
@@ -60,10 +59,8 @@ void NetworkThread::AddNewSockets()
     if (_newSockets.empty())
         return;
 
-    for (std::shared_ptr<XSocket> sock : _newSockets)
-    {
-        if (!sock->IsOpen())
-        {
+    for (std::shared_ptr<XSocket> sock : _newSockets) {
+        if (!sock->IsOpen()) {
             SocketRemoved(sock);
             --_connections;
         }
@@ -99,8 +96,7 @@ void NetworkThread::Update()
 
     _sockets.erase(std::remove_if(_sockets.begin(), _sockets.end(),
                        [this](std::shared_ptr<XSocket> sock) {
-                           if (!sock->Update())
-                           {
+                           if (!sock->Update()) {
                                if (sock->IsOpen())
                                    sock->CloseSocket();
 

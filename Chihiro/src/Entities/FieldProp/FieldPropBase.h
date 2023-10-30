@@ -18,8 +18,7 @@
 
 #include "Common.h"
 
-enum ACTIVATE_CHECK_TYPE : int
-{
+enum ACTIVATE_CHECK_TYPE : int {
     CHECK_TYPE_ITEM = 1,
     CHECK_TYPE_QUEST = 2,
     CHECK_TYPE_SKILL = 3,
@@ -32,8 +31,7 @@ enum ACTIVATE_CHECK_TYPE : int
     CHECK_TYPE_OWN_TACTICAL_POSITION = 13,
 };
 
-struct DropItemInfo
-{
+struct DropItemInfo {
     int32_t code; // 0x0
     int32_t ratio; // 0x4
     int32_t min_count; // 0x8
@@ -42,8 +40,7 @@ struct DropItemInfo
     int32_t max_level; // 0x14
 };
 
-struct FieldPropRespawnInfo
-{
+struct FieldPropRespawnInfo {
     FieldPropRespawnInfo() = default;
 
     FieldPropRespawnInfo(const FieldPropRespawnInfo &_src)
@@ -80,8 +77,7 @@ struct FieldPropRespawnInfo
     bool bOnce;
 };
 
-struct FieldPropTemplate
-{
+struct FieldPropTemplate {
     uint32_t nPropID;
     int32_t nPropTextID;
     int32_t nType;

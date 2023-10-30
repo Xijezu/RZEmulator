@@ -20,8 +20,7 @@
 #include "FieldProp.h"
 #include "SharedMutex.h"
 
-struct FieldPropRegenInfo
-{
+struct FieldPropRegenInfo {
     FieldPropRegenInfo(uint32_t t, uint32_t lt)
     {
         tNextRegen = t;
@@ -33,8 +32,7 @@ struct FieldPropRegenInfo
     uint32_t nLifeTime;
 };
 
-class FieldPropManager : public FieldPropDeleteHandler
-{
+class FieldPropManager : public FieldPropDeleteHandler {
 public:
     static FieldPropManager &Instance()
     {

@@ -19,15 +19,13 @@
 
 #include "Object.h"
 
-struct RegionTester
-{
+struct RegionTester {
     virtual void Init(Position OriginalPos, Position TargetPos, float RegionProperty) = 0;
     virtual bool IsInRegion(Position pos) = 0;
     virtual ~RegionTester() = default;
 };
 
-struct DirectionRegionTester : public RegionTester
-{
+struct DirectionRegionTester : public RegionTester {
     DirectionRegionTester()
         : V1x()
         , V1y()
@@ -55,8 +53,7 @@ struct DirectionRegionTester : public RegionTester
     float denominator;
 };
 
-struct CrossRegionTester : public RegionTester
-{
+struct CrossRegionTester : public RegionTester {
     CrossRegionTester()
         : x1()
         , y1()
@@ -80,8 +77,7 @@ struct CrossRegionTester : public RegionTester
     float denominator;
 };
 
-struct ArcCircleRegionTester : public RegionTester
-{
+struct ArcCircleRegionTester : public RegionTester {
     ArcCircleRegionTester()
         : V1x()
         , V1y()
@@ -101,8 +97,7 @@ struct ArcCircleRegionTester : public RegionTester
     float fCos;
 };
 
-struct CircleRegionTester : public RegionTester
-{
+struct CircleRegionTester : public RegionTester {
     void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override {}
 
     bool IsInRegion(Position pos) override { return true; }

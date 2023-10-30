@@ -34,8 +34,7 @@
 
 using boost::asio::ip::tcp;
 
-class NetworkThread
-{
+class NetworkThread {
 public:
     NetworkThread();
     virtual ~NetworkThread();
@@ -74,8 +73,7 @@ private:
     boost::asio::deadline_timer _updateTimer;
 };
 
-class XSocketThread : public NetworkThread
-{
+class XSocketThread : public NetworkThread {
 public:
     void SocketAdded(std::shared_ptr<XSocket> sock) override { sock->Start(); }
 

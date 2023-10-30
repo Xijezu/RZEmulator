@@ -22,14 +22,9 @@
 
 ShizukeSession::~ShizukeSession() {}
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct
-{
+typedef struct {
     int cmd;
     eStatus status;
     std::function<void(ShizukeSession *, XPacket *)> handler;
@@ -60,18 +55,15 @@ ReadDataHandlerResult ShizukeSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
     int i = 0;
 
-    for (i = 0; i < shizukeTableSize; i++)
-    {
-        if ((uint16_t)shizukePacketHandler[i].cmd == _cmd)
-        {
+    for (i = 0; i < shizukeTableSize; i++) {
+        if ((uint16_t)shizukePacketHandler[i].cmd == _cmd) {
             shizukePacketHandler[i].handler(this, pRecvPct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == shizukeTableSize)
-    {
+    if (i == shizukeTableSize) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }

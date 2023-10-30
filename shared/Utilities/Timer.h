@@ -43,8 +43,7 @@ inline uint32_t GetMSTimeDiffToNow(uint32_t oldMSTime)
     return getMSTimeDiff(oldMSTime, getMSTime());
 }
 
-struct IntervalTimer
-{
+struct IntervalTimer {
 public:
     IntervalTimer()
         : _interval(0)
@@ -80,8 +79,7 @@ private:
     time_t _current;
 };
 
-struct TimeTracker
-{
+struct TimeTracker {
 public:
     TimeTracker(time_t expiry)
         : i_expiryTime(expiry)
@@ -100,8 +98,7 @@ private:
     time_t i_expiryTime;
 };
 
-struct TimeTrackerSmall
-{
+struct TimeTrackerSmall {
 public:
     TimeTrackerSmall(uint32_t expiry = 0)
         : i_expiryTime(expiry)
@@ -120,8 +117,7 @@ private:
     int32_t i_expiryTime;
 };
 
-struct PeriodicTimer
-{
+struct PeriodicTimer {
 public:
     PeriodicTimer(int32_t period, int32_t start_time)
         : i_period(period)

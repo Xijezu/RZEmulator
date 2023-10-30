@@ -24,8 +24,7 @@
 #include "StringFormat.h"
 
 /*! Transactions, high level class.*/
-class Transaction
-{
+class Transaction {
     friend class TransactionTask;
     friend class MySQLConnection;
 
@@ -44,7 +43,7 @@ public:
     void Append(const char *sql);
 
     template<typename Format, typename... Args>
-    void PAppend(Format &&sql, Args &&... args)
+    void PAppend(Format &&sql, Args &&...args)
     {
         Append(NGemity::StringFormatTC(std::forward<Format>(sql), std::forward<Args>(args)...).c_str());
     }
@@ -60,8 +59,7 @@ private:
 };
 
 /*! Low level class*/
-class TransactionTask : public SQLOperation
-{
+class TransactionTask : public SQLOperation {
     template<class T>
     friend class DatabaseWorkerPool;
     friend class DatabaseWorker;

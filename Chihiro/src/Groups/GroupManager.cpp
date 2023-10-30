@@ -49,8 +49,7 @@ bool GroupManager::DestroyParty(int32_t nPartyID)
 {
     auto name = GetPartyName(nPartyID);
     DoEachMemberTag(nPartyID, [&name](PartyMemberTag &tag) {
-        if (tag.bIsOnline && tag.pPlayer != nullptr)
-        {
+        if (tag.bIsOnline && tag.pPlayer != nullptr) {
             tag.pPlayer->SetInt32Value(PLAYER_FIELD_PARTY_ID, 0);
             Messages::SendChatMessage(100, "@PARTY", tag.pPlayer, NGemity::StringFormat("DESTROY|{}|", name));
         }
@@ -112,19 +111,15 @@ bool GroupManager::LeaveParty(int32_t nPartyID, const std::string &szName)
         if (info == nullptr || iequals(info->strLeaderName, szName))
             return false;
 
-        for (auto it = info->vMemberNameList.begin(); it != info->vMemberNameList.end(); ++it)
-        {
-            if (iequals(szName, it->strName))
-            {
+        for (auto it = info->vMemberNameList.begin(); it != info->vMemberNameList.end(); ++it) {
+            if (iequals(szName, it->strName)) {
                 info->vMemberNameList.erase(it);
                 break;
             }
         }
     }
-    for (auto &member : info->vMemberNameList)
-    {
-        if (member.bIsOnline && member.pPlayer != nullptr)
-        {
+    for (auto &member : info->vMemberNameList) {
+        if (member.bIsOnline && member.pPlayer != nullptr) {
             Messages::SendPartyInfo(member.pPlayer);
         }
     }
@@ -139,10 +134,8 @@ bool GroupManager::onLogin(int32_t nPartyID, Player *pPlayer)
         auto info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
-        for (auto &tag : info->vMemberNameList)
-        {
-            if (iequals(tag.strName, pPlayer->GetNameAsString()))
-            {
+        for (auto &tag : info->vMemberNameList) {
+            if (iequals(tag.strName, pPlayer->GetNameAsString())) {
                 tag.bIsOnline = true;
                 tag.pPlayer = pPlayer;
                 tag.nLevel = pPlayer->GetLevel();
@@ -151,8 +144,7 @@ bool GroupManager::onLogin(int32_t nPartyID, Player *pPlayer)
             }
         }
     }
-    if (result)
-    {
+    if (result) {
         Messages::BroadcastPartyLoginStatus(nPartyID, true, pPlayer->GetNameAsString());
         Messages::BroadcastPartyMemberInfo(pPlayer);
     }
@@ -167,18 +159,15 @@ bool GroupManager::onLogout(int32_t nPartyID, Player *pPlayer)
         auto info = getPartyInfoNC(nPartyID);
         if (info == nullptr)
             return result;
-        for (auto &tag : info->vMemberNameList)
-        {
-            if (iequals(tag.strName, pPlayer->GetNameAsString()))
-            {
+        for (auto &tag : info->vMemberNameList) {
+            if (iequals(tag.strName, pPlayer->GetNameAsString())) {
                 tag.bIsOnline = false;
                 tag.pPlayer = nullptr;
                 result = true;
             }
         }
     }
-    if (result)
-    {
+    if (result) {
         Messages::BroadcastPartyLoginStatus(nPartyID, false, pPlayer->GetNameAsString());
     }
     return result;
@@ -190,11 +179,9 @@ void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Pl
     if (info == nullptr)
         return;
 
-    for (auto &p : info->vMemberNameList)
-    {
+    for (auto &p : info->vMemberNameList) {
         auto player = Player::FindPlayer(p.strName);
-        if (player != nullptr && player->GetExactDist2d(pPlayer) <= distance)
-        {
+        if (player != nullptr && player->GetExactDist2d(pPlayer) <= distance) {
             vList.emplace_back(player);
         }
     }
@@ -226,10 +213,8 @@ int32_t GroupManager::CreateParty(Player *pPlayer, const std::string &szName, PA
     PartyInfo partyInfo{};
     {
         NG_UNIQUE_GUARD writeLock(i_lock);
-        for (auto &party : m_hshPartyID)
-        {
-            if (party.second.strPartyName == szName)
-            {
+        for (auto &party : m_hshPartyID) {
+            if (party.second.strPartyName == szName) {
                 return -1;
             }
         }
@@ -274,10 +259,8 @@ void GroupManager::DoEachMemberTag(int32_t nPartyID, std::function<void(PartyMem
     {
         NG_SHARED_GUARD readGuard(i_lock);
         auto info = getPartyInfoNC(nPartyID);
-        if (info != nullptr)
-        {
-            for (auto &tag : info->vMemberNameList)
-            {
+        if (info != nullptr) {
+            for (auto &tag : info->vMemberNameList) {
                 fn(tag);
             }
         }
@@ -290,10 +273,8 @@ int32_t GroupManager::DoEachMemberTagNum(int32_t nPartyID, std::function<bool(Pa
         NG_SHARED_GUARD readGuard(i_lock);
         auto info = getPartyInfoNC(nPartyID);
         int32_t nCnt{0};
-        if (info != nullptr)
-        {
-            for (auto &tag : info->vMemberNameList)
-            {
+        if (info != nullptr) {
+            for (auto &tag : info->vMemberNameList) {
                 if (fn(tag))
                     nCnt++;
             }
@@ -344,15 +325,13 @@ void GroupManager::InitGroupSystem()
     uint32_t oldMSTime = getMSTime();
     m_nMaxPartyID = CharacterDatabase.Query("SELECT MAX(sid) FROM Party;").get()->Fetch()->GetUInt64();
     QueryResult result = CharacterDatabase.Query("SELECT * FROM Party;");
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", ">> Loaded 0 Parties. Table `Party` is empty!");
         return;
     }
 
     uint32_t count = 0;
-    do
-    {
+    do {
         uint32_t idx = 0;
         Field *field = result->Fetch();
         PartyInfo info{};
@@ -383,14 +362,12 @@ void GroupManager::AddGroupToDatabase(const PartyInfo &info)
 void GroupManager::LoadPartyInfo(PartyInfo &info)
 {
     QueryResult result = CharacterDatabase.Query(NGemity::StringFormat("SELECT sid, name, job, lv FROM `Character` WHERE party_id = {};", info.nPartyID).c_str());
-    if (!result)
-    {
+    if (!result) {
         NG_LOG_INFO("server.worldserver", "Invalid party ID %d!", info.nPartyID);
         return;
     }
 
-    do
-    {
+    do {
         uint32_t idx = 0;
         Field *field = result->Fetch();
         PartyMemberTag tag{};
@@ -400,8 +377,7 @@ void GroupManager::LoadPartyInfo(PartyInfo &info)
         tag.nLevel = field[idx].GetInt32();
         tag.bIsOnline = 0;
         tag.pPlayer = nullptr;
-        if (tag.sid == info.nLeaderSID)
-        {
+        if (tag.sid == info.nLeaderSID) {
             info.strLeaderName = tag.strName;
             info.nLeaderJobID = tag.nJobID;
         }

@@ -31,15 +31,9 @@ class DatabaseWorker;
 class MySQLPreparedStatement;
 class SQLOperation;
 
-enum ConnectionFlags
-{
-    CONNECTION_ASYNC = 0x1,
-    CONNECTION_SYNCH = 0x2,
-    CONNECTION_BOTH = CONNECTION_ASYNC | CONNECTION_SYNCH
-};
+enum ConnectionFlags { CONNECTION_ASYNC = 0x1, CONNECTION_SYNCH = 0x2, CONNECTION_BOTH = CONNECTION_ASYNC | CONNECTION_SYNCH };
 
-struct MySQLConnectionInfo
-{
+struct MySQLConnectionInfo {
     explicit MySQLConnectionInfo(std::string const &infoString);
 
     std::string user;
@@ -51,8 +45,7 @@ struct MySQLConnectionInfo
 
 typedef std::map<uint32_t /*index*/, std::pair<std::string /*query*/, ConnectionFlags /*sync/async*/>> PreparedStatementMap;
 
-class MySQLConnection
-{
+class MySQLConnection {
     template<class T>
     friend class DatabaseWorkerPool;
     friend class PingOperation;

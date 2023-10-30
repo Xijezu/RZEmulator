@@ -82,12 +82,9 @@ void RegionContainer::DoEachVisibleRegion(uint32_t rx, uint32_t ry, uint8_t laye
     bottom = ry + 3;
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
-    for (uint32_t x = left; x <= right; ++x)
-    {
-        for (uint32_t y = top; y < bottom; ++y)
-        {
-            if (IsVisibleRegion(rx, ry, x, y) != 0)
-            {
+    for (uint32_t x = left; x <= right; ++x) {
+        for (uint32_t y = top; y < bottom; ++y) {
+            if (IsVisibleRegion(rx, ry, x, y) != 0) {
                 Region *region = getRegionPtr(x, y, layer);
                 if (region != nullptr)
                     fn.Run(region);
@@ -151,12 +148,9 @@ void RegionContainer::DoEachVisibleRegion(uint32_t rx1, uint32_t ry1, uint32_t r
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
 
-    for (uint32_t x = left; x <= right; ++x)
-    {
-        for (uint32_t y = top; y < bottom; ++y)
-        {
-            if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0)
-            {
+    for (uint32_t x = left; x <= right; ++x) {
+        for (uint32_t y = top; y < bottom; ++y) {
+            if (IsVisibleRegion(rx1, ry1, x, y) != 0 || IsVisibleRegion(rx2, ry2, x, y) != 0) {
                 Region *region = getRegionPtr(x, y, layer);
                 if (region != nullptr)
                     fn.Run(region);
@@ -188,14 +182,10 @@ void RegionContainer::DoEachNewRegion(uint32_t rx, uint32_t ry, uint32_t prx, ui
     if (bottom >= m_nRegionHeight)
         bottom = m_nRegionHeight - 1;
 
-    for (uint32_t x = left; x <= right; ++x)
-    {
-        for (uint32_t y = top; y < bottom; ++y)
-        {
-            if (IsVisibleRegion(rx, ry, x, y) != 0)
-            {
-                if (IsVisibleRegion(prx, pry, x, y) == 0)
-                {
+    for (uint32_t x = left; x <= right; ++x) {
+        for (uint32_t y = top; y < bottom; ++y) {
+            if (IsVisibleRegion(rx, ry, x, y) != 0) {
+                if (IsVisibleRegion(prx, pry, x, y) == 0) {
                     Region *region = getRegionPtr(x, y, layer);
                     if (region != nullptr)
                         fn.Run(region);
@@ -243,8 +233,7 @@ RegionBlock *RegionContainer::getRegionBlock(uint32_t rcx, uint32_t rcy)
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
         res = m_RegionBlock[rcx + rcy * m_nRegionBlockWidth];
-        if (res == nullptr)
-        {
+        if (res == nullptr) {
             res = new RegionBlock{};
             m_RegionBlock[rcx + rcy * m_nRegionBlockWidth] = res;
         }
@@ -276,8 +265,7 @@ RegionContainer::~RegionContainer()
 void RegionContainer::deinitRegion()
 {
     NG_UNIQUE_GUARD writeLock(i_lock);
-    for (auto &x : m_RegionBlock)
-    {
+    for (auto &x : m_RegionBlock) {
         delete x;
         x = nullptr;
     }

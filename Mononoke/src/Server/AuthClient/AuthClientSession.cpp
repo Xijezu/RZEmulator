@@ -43,21 +43,15 @@ void AuthClientSession::OnClose()
     if (m_pPlayer == nullptr)
         return;
     auto g = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
-    if (g != nullptr && g->nAccountID == m_pPlayer->nAccountID && !g->bIsInGame)
-    {
+    if (g != nullptr && g->nAccountID == m_pPlayer->nAccountID && !g->bIsInGame) {
         sPlayerMapList.RemovePlayer(g->szLoginName);
         delete m_pPlayer;
     }
 }
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct AuthHandler
-{
+typedef struct AuthHandler {
     int cmd;
     eStatus status;
     std::function<void(AuthClientSession *, XPacket *)> handler;
@@ -96,17 +90,14 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
 
     int i = 0;
-    for (i = 0; i < tableSize; i++)
-    {
-        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED)))
-        {
+    for (i = 0; i < tableSize; i++) {
+        if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED))) {
             packetHandler[i].handler(this, pRecvPct);
             break;
         }
     }
     // Report unknown packets in the error log
-    if (i == tableSize && _cmd != static_cast<int>(NGemity::Packets::TS_CS_PING))
-    {
+    if (i == tableSize && _cmd != static_cast<int>(NGemity::Packets::TS_CS_PING)) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_v4().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
@@ -125,8 +116,7 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
     PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCOUNT);
     stmt->setString(0, pRecvPct->account);
     stmt->setString(1, szPassword);
-    if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt))
-    {
+    if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt)) {
         m_pPlayer = new Player{};
         m_pPlayer->nAccountID = (*dbResult)[0].GetUInt32();
         m_pPlayer->szLoginName = (*dbResult)[1].GetString();
@@ -137,17 +127,14 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
 
         std::transform(m_pPlayer->szLoginName.begin(), m_pPlayer->szLoginName.end(), m_pPlayer->szLoginName.begin(), ::tolower);
 
-        if (m_pPlayer->bIsBlocked)
-        {
+        if (m_pPlayer->bIsBlocked) {
             SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_ACCESS_DENIED, 0);
             return;
         }
 
         auto pOldPlayer = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
-        if (pOldPlayer != nullptr)
-        {
-            if (pOldPlayer->bIsInGame)
-            {
+        if (pOldPlayer != nullptr) {
+            if (pOldPlayer->bIsInGame) {
                 auto game = sGameMapList.GetGame(static_cast<uint32_t>(pOldPlayer->nGameIDX));
                 if (game != nullptr && game->m_pSession != nullptr)
                     game->m_pSession->KickPlayer(pOldPlayer);
@@ -175,8 +162,7 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
     auto map = sGameMapList.GetMap();
     TS_AC_SERVER_LIST serverList{};
-    for (auto &x : *map)
-    {
+    for (auto &x : *map) {
         serverList.servers.emplace_back(*x.second);
     }
     SendPacket(serverList);

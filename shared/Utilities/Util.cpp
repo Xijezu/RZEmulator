@@ -100,17 +100,14 @@ Tokenizer::Tokenizer(const std::string &src, const char sep, uint32_t vectorRese
     char *posold = m_str;
     char *posnew = m_str;
 
-    for (;;)
-    {
-        if (*posnew == sep)
-        {
+    for (;;) {
+        if (*posnew == sep) {
             m_storage.push_back(posold);
             posold = posnew + 1;
 
             *posnew = '\0';
         }
-        else if (*posnew == '\0')
-        {
+        else if (*posnew == '\0') {
             // Hack like, but the old code accepted these kind of broken strings,
             // so changing it would break other things
             if (posold != posnew)
@@ -130,18 +127,14 @@ void stripLineInvisibleChars(std::string &str)
     size_t wpos = 0;
 
     bool space = false;
-    for (size_t pos = 0; pos < str.size(); ++pos)
-    {
-        if (invChars.find(str[pos]) != std::string::npos)
-        {
-            if (!space)
-            {
+    for (size_t pos = 0; pos < str.size(); ++pos) {
+        if (invChars.find(str[pos]) != std::string::npos) {
+            if (!space) {
                 str[wpos++] = ' ';
                 space = true;
             }
         }
-        else
-        {
+        else {
             if (wpos != pos)
                 str[wpos++] = str[pos];
             else
@@ -168,8 +161,7 @@ std::string secsToTimeString(uint64_t timeInSecs, bool shortText, bool hoursOnly
         ss << days << (shortText ? "d" : " Day(s) ");
     if (hours || hoursOnly)
         ss << hours << (shortText ? "h" : " Hour(s) ");
-    if (!hoursOnly)
-    {
+    if (!hoursOnly) {
         if (minutes)
             ss << minutes << (shortText ? "m" : " Minute(s) ");
         if (secs || (!days && !hours && !minutes))
@@ -187,8 +179,7 @@ int64_t MoneyStringToMoney(const std::string &moneyString)
         return 0; // Bad format
 
     Tokenizer tokens(moneyString, ' ');
-    for (Tokenizer::const_iterator itr = tokens.begin(); itr != tokens.end(); ++itr)
-    {
+    for (Tokenizer::const_iterator itr = tokens.begin(); itr != tokens.end(); ++itr) {
         std::string tokenString(*itr);
         size_t gCount = std::count(tokenString.begin(), tokenString.end(), 'g');
         size_t sCount = std::count(tokenString.begin(), tokenString.end(), 's');
@@ -214,17 +205,13 @@ uint32_t TimeStringToSecs(const std::string &timestring)
     uint32_t buffer = 0;
     uint32_t multiplier = 0;
 
-    for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr)
-    {
-        if (isdigit(*itr))
-        {
+    for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr) {
+        if (isdigit(*itr)) {
             buffer *= 10;
             buffer += (*itr) - '0';
         }
-        else
-        {
-            switch (*itr)
-            {
+        else {
+            switch (*itr) {
             case 'd':
                 multiplier = DAY;
                 break;
@@ -254,8 +241,7 @@ void string_replace(std::string &str, const std::string &from, const std::string
     if (from.empty())
         return;
     size_t start_pos = 0;
-    while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-    {
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
@@ -263,12 +249,10 @@ void string_replace(std::string &str, const std::string &from, const std::string
 
 size_t utf8length(std::string &utf8str)
 {
-    try
-    {
+    try {
         return utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         utf8str = "";
         return 0;
     }
@@ -276,8 +260,7 @@ size_t utf8length(std::string &utf8str)
 
 void utf8truncate(std::string &utf8str, size_t len)
 {
-    try
-    {
+    try {
         size_t wlen = utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
         if (wlen <= len)
             return;
@@ -289,19 +272,16 @@ void utf8truncate(std::string &utf8str, size_t len)
         char *oend = utf8::utf16to8(wstr.c_str(), wstr.c_str() + wstr.size(), &utf8str[0]);
         utf8str.resize(oend - (&utf8str[0])); // remove unused tail
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         utf8str = "";
     }
 }
 
 bool Utf8toWStr(char const *utf8str, size_t csize, wchar_t *wstr, size_t &wsize)
 {
-    try
-    {
+    try {
         size_t len = utf8::distance(utf8str, utf8str + csize);
-        if (len > wsize)
-        {
+        if (len > wsize) {
             if (wsize > 0)
                 wstr[0] = L'\0';
             wsize = 0;
@@ -312,8 +292,7 @@ bool Utf8toWStr(char const *utf8str, size_t csize, wchar_t *wstr, size_t &wsize)
         utf8::utf8to16(utf8str, utf8str + csize, wstr);
         wstr[len] = L'\0';
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         if (wsize > 0)
             wstr[0] = L'\0';
         wsize = 0;
@@ -325,16 +304,13 @@ bool Utf8toWStr(char const *utf8str, size_t csize, wchar_t *wstr, size_t &wsize)
 
 bool Utf8toWStr(const std::string &utf8str, std::wstring &wstr)
 {
-    try
-    {
-        if (size_t len = utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size()))
-        {
+    try {
+        if (size_t len = utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size())) {
             wstr.resize(len);
             utf8::utf8to16(utf8str.c_str(), utf8str.c_str() + utf8str.size(), &wstr[0]);
         }
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         wstr = L"";
         return false;
     }
@@ -344,20 +320,17 @@ bool Utf8toWStr(const std::string &utf8str, std::wstring &wstr)
 
 bool WStrToUtf8(wchar_t *wstr, size_t size, std::string &utf8str)
 {
-    try
-    {
+    try {
         std::string utf8str2;
         utf8str2.resize(size * 4); // allocate for most long case
 
-        if (size)
-        {
+        if (size) {
             char *oend = utf8::utf16to8(wstr, wstr + size, &utf8str2[0]);
             utf8str2.resize(oend - (&utf8str2[0])); // remove unused tail
         }
         utf8str = utf8str2;
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         utf8str = "";
         return false;
     }
@@ -367,20 +340,17 @@ bool WStrToUtf8(wchar_t *wstr, size_t size, std::string &utf8str)
 
 bool WStrToUtf8(std::wstring wstr, std::string &utf8str)
 {
-    try
-    {
+    try {
         std::string utf8str2;
         utf8str2.resize(wstr.size() * 4); // allocate for most long case
 
-        if (wstr.size())
-        {
+        if (wstr.size()) {
             char *oend = utf8::utf16to8(wstr.c_str(), wstr.c_str() + wstr.size(), &utf8str2[0]);
             utf8str2.resize(oend - (&utf8str2[0])); // remove unused tail
         }
         utf8str = utf8str2;
     }
-    catch (std::exception &)
-    {
+    catch (std::exception &) {
         utf8str = "";
         return false;
     }
@@ -428,8 +398,7 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32_t declension)
         {&u_End[1], &yu_End[1], &o_End[1], &ie_End[1], &soft_End[1], &ya_End[1], &a_End[1], NULL}, {&oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], NULL},
         {&ie_End[1], &i_End[1], NULL, NULL, NULL, NULL, NULL, NULL}};
 
-    for (wchar_t const *const *itr = &dropEnds[declension][0]; *itr; ++itr)
-    {
+    for (wchar_t const *const *itr = &dropEnds[declension][0]; *itr; ++itr) {
         size_t len = size_t((*itr)[-1]); // get length from string size field
 
         if (wname.substr(wname.size() - len, len) == *itr)
@@ -519,16 +488,14 @@ std::string ByteArrayToHexStr(uint8_t const *bytes, uint32_t arrayLen, bool reve
     int32_t end = arrayLen;
     int8_t op = 1;
 
-    if (reverse)
-    {
+    if (reverse) {
         init = arrayLen - 1;
         end = -1;
         op = -1;
     }
 
     std::ostringstream ss;
-    for (int32_t i = init; i != end; i += op)
-    {
+    for (int32_t i = init; i != end; i += op) {
         char buffer[4];
         sprintf(buffer, "%02X", bytes[i]);
         ss << buffer;

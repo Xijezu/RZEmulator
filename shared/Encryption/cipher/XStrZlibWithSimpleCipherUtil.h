@@ -12,11 +12,9 @@
 #include <cstddef>
 #include <numeric>
 
-namespace SimpleCipher
-{
+namespace SimpleCipher {
     template<class _T1, class _T2>
-    struct MagicNumOp
-    {
+    struct MagicNumOp {
         _T1 operator()(const _T1 &_Left, const _T2 &_Right) const { return (_Left + static_cast<_T1>(_Right) * 65539); }
     };
 
@@ -29,8 +27,7 @@ namespace SimpleCipher
         {
             if (!sz)
                 return 0;
-            else if (sz == 1)
-            {
+            else if (sz == 1) {
                 dest.resize(1);
                 dest[0] = src[0];
 
@@ -49,8 +46,7 @@ namespace SimpleCipher
 
         {
             nJump = int((nJump % sz) / 2 - 2);
-            if (nJump <= 1)
-            {
+            if (nJump <= 1) {
                 if (sz <= 4)
                     nJump = int(sz - 1);
                 else if (sz <= 16)
@@ -63,8 +59,7 @@ namespace SimpleCipher
             {
                 int nMaxValue = int(sz);
                 std::vector<int> vQuotientList;
-                for (int nDivisor = 2; nDivisor < nMaxValue; ++nDivisor)
-                {
+                for (int nDivisor = 2; nDivisor < nMaxValue; ++nDivisor) {
                     if (sz % nDivisor)
                         continue;
 
@@ -74,17 +69,14 @@ namespace SimpleCipher
                         vQuotientList.push_back(nMaxValue);
                 }
                 vDivisorList.reserve(vDivisorList.size() + vQuotientList.size());
-                for (std::vector<int>::const_reverse_iterator it = vQuotientList.rbegin(); it != vQuotientList.rend(); ++it)
-                {
+                for (std::vector<int>::const_reverse_iterator it = vQuotientList.rbegin(); it != vQuotientList.rend(); ++it) {
                     vDivisorList.push_back((*it));
                 }
             }
 
-            for (; nJump > 1; --nJump)
-            {
+            for (; nJump > 1; --nJump) {
                 std::vector<int>::const_iterator it;
-                for (it = vDivisorList.begin(); it != vDivisorList.end(); ++it)
-                {
+                for (it = vDivisorList.begin(); it != vDivisorList.end(); ++it) {
                     if (!(nJump % (*it)))
                         break;
                 }
@@ -101,8 +93,7 @@ namespace SimpleCipher
         nStart += nJump;
         nStart %= sz;
 
-        for (size_t i = 1; i < sz; ++i)
-        {
+        for (size_t i = 1; i < sz; ++i) {
             assert(!dest[nStart]);
             dest[nStart] = static_cast<typename T::value_type>((src[i] - ucValue) ^ magicnum);
             ucValue = src[i];
@@ -113,12 +104,12 @@ namespace SimpleCipher
         dest[sz + 0] = typename T::value_type(((nOriginalLength >> 24) & 0xff) ^ magicnum);
         dest[sz + 1] = typename T::value_type(((nOriginalLength >> 16) & 0xff) ^ magicnum);
         dest[sz + 2] = typename T::value_type(((nOriginalLength >> 8) & 0xff) ^ magicnum);
-        dest[sz + 3] = typename T::value_type(((nOriginalLength)&0xff) ^ magicnum);
+        dest[sz + 3] = typename T::value_type(((nOriginalLength) & 0xff) ^ magicnum);
 
         dest[sz + 4] = typename T::value_type((magicnum >> 24) & 0xff);
         dest[sz + 5] = typename T::value_type((magicnum >> 16) & 0xff);
         dest[sz + 6] = typename T::value_type((magicnum >> 8) & 0xff);
-        dest[sz + 7] = typename T::value_type((magicnum)&0xff);
+        dest[sz + 7] = typename T::value_type((magicnum) & 0xff);
 
         return 0;
     };
@@ -130,16 +121,13 @@ namespace SimpleCipher
 
         // 1 ����Ʈ ������ �����ʹ� ���� �״�� ����
         size_t nSrcSize = src.size();
-        if (nSrcSize == 1)
-        {
-            if (!nSrcSize)
-            {
+        if (nSrcSize == 1) {
+            if (!nSrcSize) {
                 *pnOriginalLength = 0;
 
                 return 0;
             }
-            else if (nSrcSize == 1)
-            {
+            else if (nSrcSize == 1) {
                 dest.resize(1);
                 dest[0] = src[0];
                 *pnOriginalLength = 1;
@@ -147,9 +135,9 @@ namespace SimpleCipher
                 return 0;
             }
         }
-        // ���� �����Ͱ� 2����Ʈ �̻��̸� 8 ����Ʈ�� �߰� ����(nOriginalLength, magicnum)�� �����Ƿ� 10 ����Ʈ �̻����� ���̰� �þ.
-        else if (nSrcSize < 10)
-        {
+        // ���� �����Ͱ� 2����Ʈ �̻��̸� 8 ����Ʈ�� �߰� ����(nOriginalLength, magicnum)�� �����Ƿ� 10 ����Ʈ �̻����� ���̰�
+        // �þ.
+        else if (nSrcSize < 10) {
             assert(0);
             return 0;
         }
@@ -187,8 +175,7 @@ namespace SimpleCipher
             // SimpleCipher�� nJump ��� ������� sz�� ���� �������� 2�� ������ -2 �Ͽ� �ִ� sz / 2 - 2 ���� ���� ���� ������ ��.
             nJump = int((nJump % sz) / 2 - 2);
             // ���� nJump�� 1 �����̸� ������ �꿡 ���� nJump(�� �ִ밪)�� �ٽ� ���.
-            if (nJump <= 1)
-            {
+            if (nJump <= 1) {
                 // �����Ͱ� 4 ����Ʈ ������ ��쿡�� nJump�� ������ sz-1
                 // sz == 4 : 1, 3�� ��ȿ nJump�� �� �� �ִµ� 1�� ���ϴ� ���� �����Ƿ� 3.
                 // sz == 3 : 1, 2�� ��ȿ nJump�� �� �� �ִµ� 1�� ���ϴ� ���� �����Ƿ� 2.
@@ -211,11 +198,10 @@ namespace SimpleCipher
             std::vector<int> vDivisorList;
             {
                 int nMaxValue = int(sz);
-                // vDivisorList�� n, (Num/n)�� 2���� ���ڰ� ���ÿ� ���� ������ ��ų �� �����Ƿ� (Num/n)�� ��(quotient) ����Ʈ�� ���� �־��ٰ� ���߿� vDivisorList��
-                // ��ħ
+                // vDivisorList�� n, (Num/n)�� 2���� ���ڰ� ���ÿ� ���� ������ ��ų �� �����Ƿ� (Num/n)�� ��(quotient) ����Ʈ�� ���� �־��ٰ� ���߿�
+                // vDivisorList�� ��ħ
                 std::vector<int> vQuotientList;
-                for (int nDivisor = 2; nDivisor < nMaxValue; ++nDivisor)
-                {
+                for (int nDivisor = 2; nDivisor < nMaxValue; ++nDivisor) {
                     // ����� �ƴϸ� �н�
                     if (sz % nDivisor)
                         continue;
@@ -231,18 +217,15 @@ namespace SimpleCipher
                 // �� ����Ʈ�� ��� ����Ʈ�� ��ġ��
                 // * ���� ū ������ ��������Ƿ� �������� vDivisorList�� �߰���
                 vDivisorList.reserve(vDivisorList.size() + vQuotientList.size());
-                for (std::vector<int>::const_reverse_iterator it = vQuotientList.rbegin(); it != vQuotientList.rend(); ++it)
-                {
+                for (std::vector<int>::const_reverse_iterator it = vQuotientList.rbegin(); it != vQuotientList.rend(); ++it) {
                     vDivisorList.push_back((*it));
                 }
             }
 
             // nJump ���� ���ų� ���� ���� �� ���� ū sz���� ����� ���� �� ���ϱ�
-            for (; nJump > 1; --nJump)
-            {
+            for (; nJump > 1; --nJump) {
                 std::vector<int>::const_iterator it;
-                for (it = vDivisorList.begin(); it != vDivisorList.end(); ++it)
-                {
+                for (it = vDivisorList.begin(); it != vDivisorList.end(); ++it) {
                     // sz�� ����� nJump�� ����� ��� ���� ����� ���ؼ��� �˻� ����
                     if (!(nJump % (*it)))
                         break;
@@ -258,8 +241,7 @@ namespace SimpleCipher
 
         dest.resize(src.size());
 
-        for (size_t i = 0; i < sz; ++i)
-        {
+        for (size_t i = 0; i < sz; ++i) {
             ucValue += temp[nStart];
             dest[i] = ucValue;
             nStart += nJump;
@@ -275,10 +257,8 @@ void *s_memcpy(void *dest, size_t dest_size, const void *src, size_t copy_size)
 {
     // assert( src != NULL );
 
-    if (src != NULL && copy_size > 0)
-    {
-        if (dest != NULL && dest_size >= copy_size)
-        {
+    if (src != NULL && copy_size > 0) {
+        if (dest != NULL && dest_size >= copy_size) {
 #ifdef SUPPORT_SAFE_FUNCTION
 #ifdef _DEBUG
             errno_t error =
@@ -298,8 +278,7 @@ void *s_memcpy(void *dest, size_t dest_size, const void *src, size_t copy_size)
     return dest;
 }
 
-struct XZlibEncoder
-{
+struct XZlibEncoder {
 
     static int Encode(const void *pSource, const size_t nSourceLen, void *pTarget, const size_t nTargetLen, size_t *pEncodedLen)
     {
@@ -307,25 +286,21 @@ struct XZlibEncoder
             return Z_DATA_ERROR;
 
         void *pFinalTarget = 0;
-        if (!(pTarget >= (static_cast<const char *>(pSource) + nSourceLen) || pSource >= (static_cast<char *>(pTarget) + nTargetLen)))
-        {
+        if (!(pTarget >= (static_cast<const char *>(pSource) + nSourceLen) || pSource >= (static_cast<char *>(pTarget) + nTargetLen))) {
             pFinalTarget = pTarget;
             pTarget = new char[nTargetLen];
         }
 
-        unsigned long nEncodedLength = static_cast<const unsigned long>(nTargetLen);
+        unsigned long nEncodedLength = static_cast<unsigned long>(nTargetLen);
 
         int nErrorCode = compress(reinterpret_cast<unsigned char *>(pTarget), &nEncodedLength, reinterpret_cast<const unsigned char *>(pSource), static_cast<unsigned long>(nSourceLen));
 
-        if (nErrorCode == Z_OK)
-        {
-            if (pEncodedLen)
-            {
+        if (nErrorCode == Z_OK) {
+            if (pEncodedLen) {
                 *pEncodedLen = static_cast<size_t>(nEncodedLength);
             }
 
-            if (pFinalTarget)
-            {
+            if (pFinalTarget) {
                 s_memcpy(pFinalTarget, nTargetLen, pTarget, nEncodedLength);
                 delete[] pTarget;
             }
@@ -340,25 +315,21 @@ struct XZlibEncoder
             return Z_DATA_ERROR;
 
         void *pFinalTarget = 0;
-        if (!(pTarget >= (static_cast<const char *>(pSource) + nSourceLen) || pSource >= (static_cast<char *>(pTarget) + nTargetLen)))
-        {
+        if (!(pTarget >= (static_cast<const char *>(pSource) + nSourceLen) || pSource >= (static_cast<char *>(pTarget) + nTargetLen))) {
             pFinalTarget = pTarget;
             pTarget = new char[nTargetLen];
         }
 
-        unsigned long nDecodedLength = static_cast<const unsigned long>(nTargetLen);
+        unsigned long nDecodedLength = static_cast<unsigned long>(nTargetLen);
 
         int nErrorCode = uncompress(reinterpret_cast<unsigned char *>(pTarget), &nDecodedLength, reinterpret_cast<const unsigned char *>(pSource), static_cast<unsigned long>(nSourceLen));
 
-        if (nErrorCode == Z_OK)
-        {
-            if (pDecodedLen)
-            {
+        if (nErrorCode == Z_OK) {
+            if (pDecodedLen) {
                 *pDecodedLen = static_cast<size_t>(nDecodedLength);
             }
 
-            if (pFinalTarget)
-            {
+            if (pFinalTarget) {
                 s_memcpy(pFinalTarget, nTargetLen, pTarget, nDecodedLength);
                 delete[] pTarget;
             }
@@ -371,8 +342,7 @@ struct XZlibEncoder
 bool MXEncrypt(const char *pszFmtTag, const unsigned int nVersion, const char *pSource, size_t nSourceLength, std::vector<uint8_t> &vResult)
 {
     size_t nFmtTagLength = strlen(pszFmtTag);
-    if (nFmtTagLength > 8)
-    {
+    if (nFmtTagLength > 8) {
         assert(0);
         return false;
     }
@@ -381,18 +351,15 @@ bool MXEncrypt(const char *pszFmtTag, const unsigned int nVersion, const char *p
     std::vector<uint8_t> vBuffer((nSourceLength) ? static_cast<size_t>(1.001 * (nSourceLength + 12) + 1) : 0);
     uint8_t *pBuffer = &vBuffer.front();
 
-    if (nSourceLength)
-    {
+    if (nSourceLength) {
         size_t nWrittenLength = 0;
 
-        if (XZlibEncoder::Encode(pSource, nSourceLength, pBuffer, vBuffer.size(), &nWrittenLength))
-        {
+        if (XZlibEncoder::Encode(pSource, nSourceLength, pBuffer, vBuffer.size(), &nWrittenLength)) {
             assert(0);
             return false;
         }
 
-        if (nWrittenLength > vBuffer.size())
-        {
+        if (nWrittenLength > vBuffer.size()) {
             assert(0);
             return false;
         }
@@ -413,8 +380,7 @@ bool MXEncrypt(const char *pszFmtTag, const unsigned int nVersion, const char *p
     return true;
 }
 
-struct XStrZlibWithSimpleCipherUtil
-{
+struct XStrZlibWithSimpleCipherUtil {
     static std::string Encrypt(const char *str)
     {
         if (!strlen(str))
@@ -424,8 +390,7 @@ struct XStrZlibWithSimpleCipherUtil
         MXEncrypt("EV", 0x00030000, str, strlen(str), vEncrypted);
 
         std::string strEncrypt = "";
-        for (std::vector<uint8_t>::const_iterator it = vEncrypted.begin(); it != vEncrypted.end(); ++it)
-        {
+        for (std::vector<uint8_t>::const_iterator it = vEncrypted.begin(); it != vEncrypted.end(); ++it) {
             char szBuf[3] = {
                 0,
             };
@@ -443,8 +408,7 @@ struct XStrZlibWithSimpleCipherUtil
 
         int nContentsLength = static_cast<int>(strlen(str) / 2);
         uint8_t *pBuffer = new uint8_t[nContentsLength + 3];
-        struct MemoryDeallocator
-        {
+        struct MemoryDeallocator {
             MemoryDeallocator(uint8_t *_pBuffer)
                 : pBuffer(_pBuffer)
             {
@@ -454,8 +418,7 @@ struct XStrZlibWithSimpleCipherUtil
             uint8_t *pBuffer;
         } md(pBuffer);
 
-        for (int i = 0; i < nContentsLength; ++i)
-        {
+        for (int i = 0; i < nContentsLength; ++i) {
             sscanf(&str[2 * i], "%02x", &pBuffer[i]);
         }
 
@@ -463,8 +426,7 @@ struct XStrZlibWithSimpleCipherUtil
         // XEncrypt::Decrypt(XEncrypt::ET_ZLIB_WITH_SIMPLE_CIPHER, "EV", 0x00030000, pBuffer, nContentsLength, vDecrypted);
 
         std::string strDecrypt = "";
-        for (std::vector<uint8_t>::const_iterator it = vDecrypted.begin(); it != vDecrypted.end(); ++it)
-        {
+        for (std::vector<uint8_t>::const_iterator it = vDecrypted.begin(); it != vDecrypted.end(); ++it) {
             strDecrypt += (*it);
         }
 

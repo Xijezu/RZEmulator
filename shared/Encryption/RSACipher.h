@@ -13,8 +13,7 @@
 
 typedef struct rsa_st RSA;
 
-class RsaCipher
-{
+class RsaCipher {
 public:
     RsaCipher();
     ~RsaCipher();

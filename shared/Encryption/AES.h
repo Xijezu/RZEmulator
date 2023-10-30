@@ -11,8 +11,7 @@
 
 typedef struct evp_cipher_ctx_st EVP_CIPHER_CTX;
 
-class AesPasswordCipher
-{
+class AesPasswordCipher {
 public:
     AesPasswordCipher();
     ~AesPasswordCipher();

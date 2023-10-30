@@ -29,8 +29,7 @@
 #include "XPacket.h"
 #include "XRc4Cipher.h"
 
-class EncryptablePacket : public XPacket
-{
+class EncryptablePacket : public XPacket {
 public:
     EncryptablePacket(XPacket const &packet, bool encrypt)
         : XPacket(packet)
@@ -44,8 +43,7 @@ private:
 };
 
 constexpr int HEADER_SIZE = sizeof(TS_MESSAGE);
-class XSocket : public Socket<XSocket>
-{
+class XSocket : public Socket<XSocket> {
     typedef Socket<XSocket> BaseSocket;
 
 public:

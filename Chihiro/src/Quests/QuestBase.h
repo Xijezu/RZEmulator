@@ -26,8 +26,7 @@ constexpr int32_t MAX_RANDOM_QUEST_VALUE = 3;
 constexpr int32_t QUEST_PARAMETER_CHAOS = 99;
 constexpr int32_t FAVOR_GROUP_ID_CONTACT = 999;
 
-enum class QuestType : int
-{
+enum class QuestType : int {
     QUEST_MISC = 100,
     QUEST_KILL_TOTAL = 101,
     QUEST_KILL_INDIVIDUAL = 102,
@@ -44,22 +43,15 @@ enum class QuestType : int
     QUEST_RANDOM_COLLECT = 902,
 };
 
-enum class QuestProgress : int
-{
-    QUEST_IS_STARTABLE = 0,
-    QUEST_IS_IN_PROGRESS = 1,
-    QUEST_IS_FINISHABLE = 255
-};
+enum class QuestProgress : int { QUEST_IS_STARTABLE = 0, QUEST_IS_IN_PROGRESS = 1, QUEST_IS_FINISHABLE = 255 };
 
-struct Reward
-{
+struct Reward {
     int32_t nItemCode;
     int32_t nLevel;
     int32_t nQuantity;
 };
 
-struct QuestBase
-{
+struct QuestBase {
     int32_t nCode;
     int32_t nQuestTextID;
     int32_t nSummaryTextID;
@@ -91,8 +83,7 @@ struct QuestBase
     int32_t nEndType;
 };
 
-struct QuestBaseServer : public QuestBase
-{
+struct QuestBaseServer : public QuestBase {
     int32_t nLimitFavorGroupID;
     int32_t nFavorGroupID;
     int32_t nHateGroupID;
@@ -101,8 +92,7 @@ struct QuestBaseServer : public QuestBase
     std::string strScript;
 };
 
-struct QuestLink
-{
+struct QuestLink {
     int32_t nNPCID;
     int32_t code;
     bool bLF_Start;
@@ -114,8 +104,7 @@ struct QuestLink
 };
 
 class NPC;
-struct QuestInstance
-{
+struct QuestInstance {
     int32_t nID;
     int32_t Code;
     uint32_t nTime;
@@ -127,8 +116,7 @@ struct QuestInstance
     NPC *start_npc{nullptr};
 };
 
-struct RandomQuestInfo
-{
+struct RandomQuestInfo {
     int32_t code;
     int32_t key[MAX_RANDOM_QUEST_VALUE];
     int32_t value[MAX_RANDOM_QUEST_VALUE];

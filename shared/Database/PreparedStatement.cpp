@@ -42,10 +42,8 @@ void PreparedStatement::BindParameters()
     ASSERT(m_stmt);
 
     uint8_t i = 0;
-    for (; i < statement_data.size(); i++)
-    {
-        switch (statement_data[i].type)
-        {
+    for (; i < statement_data.size(); i++) {
+        switch (statement_data[i].type) {
         case TYPE_BOOL:
             m_stmt->setBool(i, statement_data[i].data.boolean);
             break;
@@ -242,8 +240,7 @@ MySQLPreparedStatement::MySQLPreparedStatement(MYSQL_STMT *stmt)
 MySQLPreparedStatement::~MySQLPreparedStatement()
 {
     ClearParameters();
-    if (m_Mstmt->bind_result_done)
-    {
+    if (m_Mstmt->bind_result_done) {
         delete[] m_Mstmt->bind->length;
         delete[] m_Mstmt->bind->is_null;
     }
@@ -253,11 +250,10 @@ MySQLPreparedStatement::~MySQLPreparedStatement()
 
 void MySQLPreparedStatement::ClearParameters()
 {
-    for (uint32_t i = 0; i < m_paramCount; ++i)
-    {
+    for (uint32_t i = 0; i < m_paramCount; ++i) {
         delete m_bind[i].length;
         m_bind[i].length = NULL;
-        delete[](char *) m_bind[i].buffer;
+        delete[] (char *)m_bind[i].buffer;
         m_bind[i].buffer = NULL;
         m_paramsSet[i] = false;
     }
@@ -404,8 +400,7 @@ void MySQLPreparedStatement::setBinary(const uint8_t index, const std::vector<ui
     param->is_null_value = 0;
     delete param->length;
     param->length = new unsigned long(len);
-    if (isString)
-    {
+    if (isString) {
         *param->length -= 1;
         param->buffer_type = MYSQL_TYPE_VAR_STRING;
     }
@@ -418,13 +413,11 @@ std::string MySQLPreparedStatement::getQueryString(std::string const &sqlPattern
     std::string queryString = sqlPattern;
 
     size_t pos = 0;
-    for (uint32_t i = 0; i < m_stmt->statement_data.size(); i++)
-    {
+    for (uint32_t i = 0; i < m_stmt->statement_data.size(); i++) {
         pos = queryString.find('?', pos);
         std::stringstream ss;
 
-        switch (m_stmt->statement_data[i].type)
-        {
+        switch (m_stmt->statement_data[i].type) {
         case TYPE_BOOL:
             ss << uint16_t(m_stmt->statement_data[i].data.boolean);
             break;
@@ -496,11 +489,9 @@ PreparedStatementTask::~PreparedStatementTask()
 
 bool PreparedStatementTask::Execute()
 {
-    if (m_has_result)
-    {
+    if (m_has_result) {
         PreparedResultSet *result = m_conn->Query(m_stmt);
-        if (!result || !result->GetRowCount())
-        {
+        if (!result || !result->GetRowCount()) {
             delete result;
             m_result->set_value(PreparedQueryResult(NULL));
             return false;

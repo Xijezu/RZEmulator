@@ -20,8 +20,7 @@
 #include "SharedMutex.h"
 
 class Item;
-class ItemCollector
-{
+class ItemCollector {
 public:
     static ItemCollector &Instance()
     {

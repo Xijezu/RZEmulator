@@ -20,8 +20,7 @@
 #include "Skill.h"
 #include "Unit.h"
 
-class SkillProp : public WorldObject
-{
+class SkillProp : public WorldObject {
 public:
     static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio);
     static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
@@ -57,8 +56,7 @@ protected:
 private:
     explicit SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio);
 
-    struct _SKILL_PROP_INFO
-    {
+    struct _SKILL_PROP_INFO {
         uint32_t m_nStartTime;
         uint32_t m_nEndTime;
         uint32_t m_nInterval;

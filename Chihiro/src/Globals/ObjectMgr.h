@@ -36,16 +36,14 @@ class Monster;
 class Unit;
 class NPC;
 
-struct WayPointInfo
-{
+struct WayPointInfo {
     int32_t way_point_speed;
     int32_t way_point_type;
     int32_t way_point_id;
     std::vector<Position> vWayPoint;
 };
 
-class ObjectMgr
-{
+class ObjectMgr {
 public:
     friend class GameContent;
     ~ObjectMgr() = default;

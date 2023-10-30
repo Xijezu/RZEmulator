@@ -52,7 +52,7 @@
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
-//#define snprintf _snprintf
+// #define snprintf _snprintf
 #define atoll _atoi64
 #define vsnprintf _vsnprintf
 #define llabs _abs64
@@ -72,16 +72,7 @@ inline unsigned long long atoull(char const *str)
 }
 #define STRINGIZE(a) #a
 
-enum TimeConstants
-{
-    MINUTE = 60,
-    HOUR = MINUTE * 60,
-    DAY = HOUR * 24,
-    WEEK = DAY * 7,
-    MONTH = DAY * 30,
-    YEAR = MONTH * 12,
-    IN_MILLISECONDS = 1000
-};
+enum TimeConstants { MINUTE = 60, HOUR = MINUTE * 60, DAY = HOUR * 24, WEEK = DAY * 7, MONTH = DAY * 30, YEAR = MONTH * 12, IN_MILLISECONDS = 1000 };
 
 using namespace std::literals::string_literals;
 
@@ -101,7 +92,6 @@ using namespace std::literals::string_literals;
 
 #define MAX_QUERY_LEN 32 * 1024
 
-namespace NGemity
-{
+namespace NGemity {
     using std::make_unique;
 }

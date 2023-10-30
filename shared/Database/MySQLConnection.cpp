@@ -83,8 +83,7 @@ void MySQLConnection::Close()
 
     m_stmts.clear();
 
-    if (m_Mysql)
-    {
+    if (m_Mysql) {
         mysql_close(m_Mysql);
         m_Mysql = nullptr;
     }
@@ -94,8 +93,7 @@ uint32_t MySQLConnection::Open()
 {
     MYSQL *mysqlInit;
     mysqlInit = mysql_init(NULL);
-    if (!mysqlInit)
-    {
+    if (!mysqlInit) {
         NG_LOG_ERROR("sql.sql", "Could not initialize Mysql connection to database `%s`", m_connectionInfo.database.c_str());
         return CR_UNKNOWN_ERROR;
     }
@@ -137,10 +135,8 @@ uint32_t MySQLConnection::Open()
 
     m_Mysql = mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(), m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0);
 
-    if (m_Mysql)
-    {
-        if (!m_reconnecting)
-        {
+    if (m_Mysql) {
+        if (!m_reconnecting) {
             NG_LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
             NG_LOG_INFO("sql.sql", "MySQL server ver: %s ", mysql_get_server_info(m_Mysql));
             // MySQL version above 5.1 IS required in both client and server and there is no known issue with different versions above 5.1
@@ -156,8 +152,7 @@ uint32_t MySQLConnection::Open()
         mysql_set_character_set(m_Mysql, "utf8");
         return 0;
     }
-    else
-    {
+    else {
         NG_LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s: %s", m_connectionInfo.host.c_str(), mysql_error(mysqlInit));
         mysql_close(mysqlInit);
         return mysql_errno(mysqlInit);
@@ -178,8 +173,7 @@ bool MySQLConnection::Execute(const char *sql)
     {
         uint32_t _s = getMSTime();
 
-        if (mysql_query(m_Mysql, sql))
-        {
+        if (mysql_query(m_Mysql, sql)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
 
             NG_LOG_INFO("sql.sql", "SQL: %s", sql);
@@ -216,8 +210,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
 
         uint32_t _s = getMSTime();
 
-        if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
-        {
+        if (mysql_stmt_bind_param(msql_STMT, msql_BIND)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
@@ -228,8 +221,7 @@ bool MySQLConnection::Execute(PreparedStatement *stmt)
             return false;
         }
 
-        if (mysql_stmt_execute(msql_STMT))
-        {
+        if (mysql_stmt_execute(msql_STMT)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
@@ -266,8 +258,7 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
 
         uint32_t _s = getMSTime();
 
-        if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
-        {
+        if (mysql_stmt_bind_param(msql_STMT, msql_BIND)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
@@ -278,8 +269,7 @@ bool MySQLConnection::_Query(PreparedStatement *stmt, MYSQL_RES **pResult, uint6
             return false;
         }
 
-        if (mysql_stmt_execute(msql_STMT))
-        {
+        if (mysql_stmt_execute(msql_STMT)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%u] %s", m_mStmt->getQueryString(m_queries[index].first).c_str(), lErrno, mysql_stmt_error(msql_STMT));
 
@@ -326,8 +316,7 @@ bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD *
     {
         uint32_t _s = getMSTime();
 
-        if (mysql_query(m_Mysql, sql))
-        {
+        if (mysql_query(m_Mysql, sql)) {
             uint32_t lErrno = mysql_errno(m_Mysql);
             NG_LOG_INFO("sql.sql", "SQL: %s", sql);
             NG_LOG_ERROR("sql.sql", "[%u] %s", lErrno, mysql_error(m_Mysql));
@@ -348,8 +337,7 @@ bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD *
     if (!*pResult)
         return false;
 
-    if (!*pRowCount)
-    {
+    if (!*pRowCount) {
         mysql_free_result(*pResult);
         return false;
     }
@@ -382,37 +370,29 @@ int MySQLConnection::ExecuteTransaction(SQLTransaction &transaction)
 
     BeginTransaction();
 
-    for (auto itr = queries.begin(); itr != queries.end(); ++itr)
-    {
+    for (auto itr = queries.begin(); itr != queries.end(); ++itr) {
         SQLElementData const &data = *itr;
-        switch (itr->type)
-        {
-        case SQL_ELEMENT_PREPARED:
-        {
+        switch (itr->type) {
+        case SQL_ELEMENT_PREPARED: {
             PreparedStatement *stmt = data.element.stmt;
             ASSERT(stmt);
-            if (!Execute(stmt))
-            {
+            if (!Execute(stmt)) {
                 NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32_t)queries.size());
                 int errorCode = GetLastError();
                 RollbackTransaction();
                 return errorCode;
             }
-        }
-        break;
-        case SQL_ELEMENT_RAW:
-        {
+        } break;
+        case SQL_ELEMENT_RAW: {
             const char *sql = data.element.query;
             ASSERT(sql);
-            if (!Execute(sql))
-            {
+            if (!Execute(sql)) {
                 NG_LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", (uint32_t)queries.size());
                 int errorCode = GetLastError();
                 RollbackTransaction();
                 return errorCode;
             }
-        }
-        break;
+        } break;
         }
     }
 
@@ -463,30 +443,25 @@ void MySQLConnection::PrepareStatement(uint32_t index, const char *sql, Connecti
     // Check if specified query should be prepared on this connection
     // i.e. don't prepare async statements on synchronous connections
     // to save memory that will not be used.
-    if (!(m_connectionFlags & flags))
-    {
+    if (!(m_connectionFlags & flags)) {
         m_stmts[index].reset();
         return;
     }
 
     MYSQL_STMT *stmt = mysql_stmt_init(m_Mysql);
-    if (!stmt)
-    {
+    if (!stmt) {
         NG_LOG_ERROR("sql.sql", "In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql);
         NG_LOG_ERROR("sql.sql", "%s", mysql_error(m_Mysql));
         m_prepareError = true;
     }
-    else
-    {
-        if (mysql_stmt_prepare(stmt, sql, static_cast<unsigned long>(strlen(sql))))
-        {
+    else {
+        if (mysql_stmt_prepare(stmt, sql, static_cast<unsigned long>(strlen(sql)))) {
             NG_LOG_ERROR("sql.sql", "In mysql_stmt_prepare() id: %u, sql: \"%s\"", index, sql);
             NG_LOG_ERROR("sql.sql", "%s", mysql_stmt_error(stmt));
             mysql_stmt_close(stmt);
             m_prepareError = true;
         }
-        else
-        {
+        else {
             m_stmts[index] = NGemity::make_unique<MySQLPreparedStatement>(stmt);
         }
     }
@@ -501,8 +476,7 @@ PreparedResultSet *MySQLConnection::Query(PreparedStatement *stmt)
     if (!_Query(stmt, &result, &rowCount, &fieldCount))
         return NULL;
 
-    if (mysql_more_results(m_Mysql))
-    {
+    if (mysql_more_results(m_Mysql)) {
         mysql_next_result(m_Mysql);
     }
     return new PreparedResultSet(stmt->m_stmt->GetSTMT(), result, rowCount, fieldCount);
@@ -510,17 +484,14 @@ PreparedResultSet *MySQLConnection::Query(PreparedStatement *stmt)
 
 bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/)
 {
-    switch (errNo)
-    {
+    switch (errNo) {
     case CR_SERVER_GONE_ERROR:
     case CR_SERVER_LOST:
 #ifdef CR_INVALID_CONN_HANDLE
     case CR_INVALID_CONN_HANDLE:
 #endif
-    case CR_SERVER_LOST_EXTENDED:
-    {
-        if (m_Mysql)
-        {
+    case CR_SERVER_LOST_EXTENDED: {
+        if (m_Mysql) {
             NG_LOG_ERROR("sql.sql", "Lost the connection to the MySQL server!");
 
             mysql_close(GetHandle());
@@ -528,18 +499,15 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
         }
     }
         [[fallthrough]];
-    case CR_CONN_HOST_ERROR:
-    {
+    case CR_CONN_HOST_ERROR: {
         NG_LOG_INFO("sql.sql", "Attempting to reconnect to the MySQL server...");
 
         m_reconnecting = true;
 
         uint32_t const lErrno = Open();
-        if (!lErrno)
-        {
+        if (!lErrno) {
             // Don't remove 'this' pointer unless you want to skip loading all prepared statements...
-            if (!this->PrepareStatements())
-            {
+            if (!this->PrepareStatements()) {
                 NG_LOG_FATAL("sql.sql", "Could not re-prepare statements!");
                 std::this_thread::sleep_for(std::chrono::seconds(10));
                 std::abort();
@@ -552,8 +520,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
             return true;
         }
 
-        if ((--attempts) == 0)
-        {
+        if ((--attempts) == 0) {
             // Shut down the server when the mysql server isn't
             // reachable for some time
             NG_LOG_FATAL("sql.sql",
@@ -564,8 +531,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32_t errNo, uint8_t attempts /*= 5*/
             std::this_thread::sleep_for(std::chrono::seconds(10));
             std::abort();
         }
-        else
-        {
+        else {
             // It's possible this attempted reconnect throws 2006 at us.
             // To prevent crazy recursive calls, sleep here.
             std::this_thread::sleep_for(std::chrono::seconds(3)); // Sleep 3 seconds

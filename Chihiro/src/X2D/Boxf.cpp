@@ -25,8 +25,7 @@ bool X2D::Boxf::IsInclude(float x, float y)
 void X2D::Boxf::SetLeft(float x)
 {
     begin.x = x;
-    if (end.x < x)
-    {
+    if (end.x < x) {
         begin.x = end.x;
         end.x = x;
     }
@@ -35,8 +34,7 @@ void X2D::Boxf::SetLeft(float x)
 void X2D::Boxf::SetTop(float y)
 {
     begin.y = y;
-    if (end.y < y)
-    {
+    if (end.y < y) {
         begin.y = end.y;
         end.y = y;
     }
@@ -45,8 +43,7 @@ void X2D::Boxf::SetTop(float y)
 void X2D::Boxf::SetRight(float x)
 {
     end.x = x;
-    if (x < begin.x)
-    {
+    if (x < begin.x) {
         end.x = begin.x;
         begin.x = x;
     }
@@ -55,8 +52,7 @@ void X2D::Boxf::SetRight(float x)
 void X2D::Boxf::SetBottom(float y)
 {
     end.y = y;
-    if (y < begin.y)
-    {
+    if (y < begin.y) {
         end.y = begin.y;
         begin.y = y;
     }
@@ -75,14 +71,12 @@ void X2D::Boxf::normalize()
 {
     float t;
 
-    if (end.x < begin.x)
-    {
+    if (end.x < begin.x) {
         t = begin.x;
         begin.x = end.x;
         end.x = t;
     }
-    if (end.y < begin.y)
-    {
+    if (end.y < begin.y) {
         t = begin.y;
         begin.y = end.y;
         end.y = t;

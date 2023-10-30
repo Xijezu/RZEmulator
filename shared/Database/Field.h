@@ -20,19 +20,7 @@
 #include "DatabaseEnvFwd.h"
 #include "Define.h"
 
-enum class DatabaseFieldTypes : uint8_t
-{
-    Null,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Float,
-    Double,
-    Decimal,
-    Date,
-    Binary
-};
+enum class DatabaseFieldTypes : uint8_t { Null, Int8, Int16, Int32, Int64, Float, Double, Decimal, Date, Binary };
 
 /**
     @class Field
@@ -64,8 +52,7 @@ enum class DatabaseFieldTypes : uint8_t
     | SUM, AVG | DECIMAL           |
     | COUNT    | BIGINT            |
 */
-class Field
-{
+class Field {
     friend class ResultSet;
     friend class PreparedResultSet;
 
@@ -94,8 +81,7 @@ public:
 
     bool IsNull() const { return data.value == NULL; }
 
-    struct Metadata
-    {
+    struct Metadata {
         char const *TableName;
         char const *TableAlias;
         char const *Name;
@@ -106,8 +92,7 @@ public:
 
 protected:
 #pragma pack(push, 1)
-    struct
-    {
+    struct {
         uint32_t length; // Length (prepared strings only)
         void *value; // Actual data in memory
         DatabaseFieldTypes type; // Field type
@@ -122,7 +107,7 @@ protected:
     {
         // Field does not own the data if fetched with prepared statement
         if (!data.raw)
-            delete[]((char *)data.value);
+            delete[] ((char *)data.value);
         data.value = NULL;
     }
 

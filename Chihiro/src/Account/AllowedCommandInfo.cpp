@@ -25,8 +25,7 @@
 #include "Scripting/XLua.h"
 #include "World.h"
 
-typedef struct AllowedCommands
-{
+typedef struct AllowedCommands {
     std::string szCommand;
     bool bNeedsPermission;
     void (AllowedCommandInfo::*handler)(Player *, const std::string &);
@@ -53,8 +52,7 @@ void AllowedCommandInfo::onRunScript(Player *pClient, const std::string &pScript
 
 void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string & /* tokens*/)
 {
-    if (pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable())
-    {
+    if (pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable()) {
         if (pClient->GetTargetHandle() != 0)
             pClient->CancelAttack();
         pClient->m_bSitdown = true;
@@ -77,10 +75,8 @@ void AllowedCommandInfo::onCheatParty(Player *pClient, const std::string &) {}
 void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
 {
     Tokenizer tokenizer(szMessage, ' ');
-    for (const auto &i : commandHandler)
-    {
-        if (i.szCommand == tokenizer[0] && (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100)))
-        {
+    for (const auto &i : commandHandler) {
+        if (i.szCommand == tokenizer[0] && (!i.bNeedsPermission || (i.bNeedsPermission && pClient->GetPermission() >= 100))) {
             auto pos = szMessage.find(' ');
             if (pos != std::string::npos)
                 (*this.*i.handler)(pClient, szMessage.substr(pos + 1));
@@ -98,8 +94,7 @@ void AllowedCommandInfo::onCheatSuicide(Player * /*pClient*/, const std::string 
 void AllowedCommandInfo::onCheatKillAll(Player *pClient, const std::string &)
 {
     auto functor = [&pClient](RegionType &list) -> void {
-        for (const auto &obj : list)
-        {
+        for (const auto &obj : list) {
             if (obj != nullptr && pClient != nullptr && obj->IsMonster())
                 obj->As<Monster>()->TriggerForceKill(pClient);
         }
@@ -129,8 +124,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
         return;
 
     auto partyID = sGroupManager.CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
-    if (partyID == -1)
-    {
+    if (partyID == -1) {
         NG_LOG_ERROR("group", "Player wasn't able to create party - %u, %s", pClient->GetPartyID(), pClient->GetName());
         return;
     }
@@ -161,8 +155,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
 {
     if (pClient == nullptr)
         return;
-    if (pClient->GetPartyID() != 0)
-    {
+    if (pClient->GetPartyID() != 0) {
         Messages::SendChatMessage(100, "@PARTY", pClient, "ERROR_YOU_CAN_JOIN_ONLY_ONE_PARTY");
         return;
     }
@@ -176,8 +169,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
     int32_t partyID = std::stoi(tokenizer[0]);
     uint32_t partyPW = (uint32_t)std::stoi(tokenizer[1]);
 
-    if (!sGroupManager.JoinParty(partyID, pClient, partyPW))
-    {
+    if (!sGroupManager.JoinParty(partyID, pClient, partyPW)) {
         NG_LOG_ERROR("group", "JoinParty failed!");
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;

@@ -22,13 +22,11 @@
 #include "TS_AC_SERVER_LIST.h"
 
 class AuthGameSession;
-struct Game : public TS_SERVER_INFO
-{
+struct Game : public TS_SERVER_INFO {
     AuthGameSession *m_pSession;
 };
 
-class GameList
-{
+class GameList {
 public:
     typedef std::map<uint32_t, Game *> GameMap;
     ~GameList() = default;

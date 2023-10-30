@@ -24,10 +24,8 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
 {
     auto c = (int32_t)cl;
 
-    if (c <= 210)
-    {
-        switch (c)
-        {
+    if (c <= 210) {
+        switch (c) {
         case 101:
             return vf_one_hand_sword != 0;
         case 102:
@@ -108,8 +106,7 @@ int32_t SkillBase::GetNeedJobPoint(int32_t skill_lv)
 
 bool SkillBase::IsUsable(uint8_t nUseIndex) const
 {
-    switch (nUseIndex)
-    {
+    switch (nUseIndex) {
     case 0:
         return uf_self != 0;
     case 1:

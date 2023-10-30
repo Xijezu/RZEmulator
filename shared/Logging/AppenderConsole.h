@@ -17,29 +17,11 @@
  */
 #include "Appender.h"
 
-enum ColorTypes
-{
-    BLACK,
-    RED,
-    GREEN,
-    BROWN,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    GREY,
-    YELLOW,
-    LRED,
-    LGREEN,
-    LBLUE,
-    LMAGENTA,
-    LCYAN,
-    WHITE
-};
+enum ColorTypes { BLACK, RED, GREEN, BROWN, BLUE, MAGENTA, CYAN, GREY, YELLOW, LRED, LGREEN, LBLUE, LMAGENTA, LCYAN, WHITE };
 
 const uint8_t MaxColors = uint8_t(WHITE) + 1;
 
-class AppenderConsole : public Appender
-{
+class AppenderConsole : public Appender {
 public:
     typedef std::integral_constant<AppenderType, APPENDER_CONSOLE>::type TypeIndex;
 

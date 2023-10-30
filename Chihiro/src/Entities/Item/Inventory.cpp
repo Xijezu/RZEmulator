@@ -35,8 +35,7 @@ Item *Inventory::Push(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
     if (pItem->IsJoinable())
         pExistItem = FindByCode(pItem->GetItemCode());
 
-    if (!pItem->IsJoinable() || pExistItem == nullptr)
-    {
+    if (!pItem->IsJoinable() || pExistItem == nullptr) {
         m_fWeight += pItem->GetWeight();
         if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
             m_fWeightModifier -= pItem->GetWeight();
@@ -61,8 +60,7 @@ Item *Inventory::Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
 {
     check(pItem);
 
-    if (pItem->GetCount() > cnt)
-    {
+    if (pItem->GetCount() > cnt) {
         auto pNewItem = Item::AllocItem(0, pItem->GetItemCode(), 1, GenerateCode::BY_DIVIDE);
 
         pNewItem->CopyFrom(pItem);
@@ -76,8 +74,7 @@ Item *Inventory::Pop(Item *pItem, int64_t cnt, bool bSkipUpdateItemToDB)
         return pNewItem;
     }
 
-    if (pItem->GetCount() == cnt)
-    {
+    if (pItem->GetCount() == cnt) {
         m_fWeight -= pItem->GetWeight();
         if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
             m_fWeightModifier += pItem->GetWeight();
@@ -94,8 +91,7 @@ bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
     if (!check(pItem))
         return false;
 
-    if (pItem->GetCount() > count)
-    {
+    if (pItem->GetCount() > count) {
         m_fWeight -= pItem->GetWeight();
         if (pItem->GetWearInfo() != ItemWearType::WEAR_NONE)
             m_fWeightModifier += pItem->GetWeight();
@@ -113,11 +109,9 @@ bool Inventory::Erase(Item *pItem, int64_t count, bool bSkipUpdateItemToDB)
 
 Item *Inventory::Find(int32_t code, uint32_t flag, bool bFlag)
 {
-    for (auto &i : m_vList)
-    {
+    for (auto &i : m_vList) {
         bool isFlagged = (flag & i->GetItemInstance().GetFlag()) != 0;
-        if (i->GetItemInstance().GetCode() == code)
-        {
+        if (i->GetItemInstance().GetCode() == code) {
             if (bFlag == isFlagged)
                 return i;
         }
@@ -127,8 +121,7 @@ Item *Inventory::Find(int32_t code, uint32_t flag, bool bFlag)
 
 Item *Inventory::FindByCode(int32_t code)
 {
-    for (auto &i : m_vList)
-    {
+    for (auto &i : m_vList) {
         if (i->GetItemInstance().GetCode() == code)
             return i;
     }
@@ -137,8 +130,7 @@ Item *Inventory::FindByCode(int32_t code)
 
 Item *Inventory::FindBySID(int64_t uid)
 {
-    for (auto &i : m_vList)
-    {
+    for (auto &i : m_vList) {
         if (i->GetItemInstance().GetUID() == uid)
             return i;
     }
@@ -147,8 +139,7 @@ Item *Inventory::FindBySID(int64_t uid)
 
 Item *Inventory::FindByHandle(uint32_t handle)
 {
-    for (auto &i : m_vList)
-    {
+    for (auto &i : m_vList) {
         if (i->GetHandle() == handle)
             return i;
     }
@@ -179,8 +170,7 @@ void Inventory::pop(Item *pItem, bool bSkipUpdateItemToDB)
     if (m_pEventReceiver != nullptr)
         m_pEventReceiver->onRemove(this, pItem, bSkipUpdateItemToDB);
 
-    if (m_vList.back() != pItem)
-    {
+    if (m_vList.back() != pItem) {
         m_vList.back()->SetStorageIndex(pItem->GetStorageIndex());
         m_vList[pItem->GetStorageIndex()] = m_vList.back();
     }

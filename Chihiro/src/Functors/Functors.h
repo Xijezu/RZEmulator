@@ -36,53 +36,44 @@ class Skill;
  * But it is annoying.
  */
 
-struct WorldObjectFunctor
-{
+struct WorldObjectFunctor {
     virtual void Run(WorldObject *obj){};
 };
 
-struct RegionFunctor
-{
+struct RegionFunctor {
     virtual void Run(Region *){};
 };
 
-struct SkillFunctor
-{
+struct SkillFunctor {
     virtual void onSkill(const Skill *pSkill) {}
 };
 
 template<typename T>
-struct BroadcastFunctor
-{
+struct BroadcastFunctor {
     T packet;
 
     void Run(RegionType &list)
     {
-        for (const auto &obj : list)
-        {
-            if (obj != nullptr && obj->IsPlayer())
-            {
+        for (const auto &obj : list) {
+            if (obj != nullptr && obj->IsPlayer()) {
                 obj->As<Player>()->SendPacket(packet);
             }
         }
     }
 };
 
-struct SendEnterMessageEachOtherFunctor
-{
+struct SendEnterMessageEachOtherFunctor {
     WorldObject *obj{nullptr};
     bool bSent{false};
     void Run(RegionType &client);
 };
 
-struct SendEnterMessageFunctor
-{
+struct SendEnterMessageFunctor {
     Player *obj{nullptr};
     void Run(RegionType &regionType);
 };
 
-struct AddObjectFunctor
-{
+struct AddObjectFunctor {
     explicit AddObjectFunctor(uint32_t _x, uint32_t _y, uint8_t _layer, WorldObject *obj)
         : newObj(obj)
         , bSend(false)
@@ -118,21 +109,18 @@ struct AddObjectFunctor
     uint8_t layer;
 };
 
-struct SendMoveMessageFunctor : public WorldObjectFunctor
-{
+struct SendMoveMessageFunctor : public WorldObjectFunctor {
     Unit *obj{nullptr};
     void Run(WorldObject *client) override;
 };
 
-struct SetMoveFunctor : public RegionFunctor
-{
+struct SetMoveFunctor : public RegionFunctor {
     uint32_t nCnt{0};
     Unit *obj{nullptr};
     void Run(Region *region) override;
 };
 
-struct EnumMovableObjectRegionFunctor : public RegionFunctor
-{
+struct EnumMovableObjectRegionFunctor : public RegionFunctor {
     std::vector<uint32_t> &pvResult;
     uint32_t t;
     Position pos;
@@ -144,8 +132,7 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor
     bool bIncludeClient;
     bool bIncludeNPC;
 
-    struct SubFunctor : public WorldObjectFunctor
-    {
+    struct SubFunctor : public WorldObjectFunctor {
         SubFunctor()
             : pParent(nullptr)
         {

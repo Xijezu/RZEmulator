@@ -47,8 +47,7 @@ Object::Object()
 
 Object::~Object()
 {
-    if (IsInWorld())
-    {
+    if (IsInWorld()) {
         // sLog->outCrash("Object::~Object");
         // ASSERT(false);
         RemoveFromWorld();
@@ -91,13 +90,11 @@ void Object::SetInt32Value(uint16_t index, int32_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (m_int32Values[index] != value)
-    {
+    if (m_int32Values[index] != value) {
         m_int32Values[index] = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -107,13 +104,11 @@ void Object::SetUInt32Value(uint16_t index, uint32_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (_uint32Values[index] != value)
-    {
+    if (_uint32Values[index] != value) {
         _uint32Values[index] = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -130,15 +125,13 @@ void Object::UpdateUInt32Value(uint16_t index, uint32_t value)
 void Object::SetUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (*((uint64_t *)&(_uint32Values[index])) != value)
-    {
+    if (*((uint64_t *)&(_uint32Values[index])) != value) {
         _uint32Values[index] = PAIR64_LOPART(value);
         _uint32Values[index + 1] = PAIR64_HIPART(value);
         _changedFields[index] = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -147,15 +140,13 @@ void Object::SetUInt64Value(uint16_t index, uint64_t value)
 bool Object::AddUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && !*((uint64_t *)&(_uint32Values[index])))
-    {
+    if (value && !*((uint64_t *)&(_uint32Values[index]))) {
         _uint32Values[index] = PAIR64_LOPART(value);
         _uint32Values[index + 1] = PAIR64_HIPART(value);
         _changedFields[index] = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
 
@@ -168,15 +159,13 @@ bool Object::AddUInt64Value(uint16_t index, uint64_t value)
 bool Object::RemoveUInt64Value(uint16_t index, uint64_t value)
 {
     ASSERT(index + 1 < _valuesCount || PrintIndexError(index, true));
-    if (value && *((uint64_t *)&(_uint32Values[index])) == value)
-    {
+    if (value && *((uint64_t *)&(_uint32Values[index])) == value) {
         _uint32Values[index] = 0;
         _uint32Values[index + 1] = 0;
         _changedFields[index] = true;
         _changedFields[index + 1] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
 
@@ -190,13 +179,11 @@ void Object::SetFloatValue(uint16_t index, float value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (m_floatValues[index] != value)
-    {
+    if (m_floatValues[index] != value) {
         m_floatValues[index] = value;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -206,20 +193,17 @@ void Object::SetByteValue(uint16_t index, uint8_t offset, uint8_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4)
-    {
+    if (offset > 4) {
         NG_LOG_DEBUG("game", "Object::SetByteValue: wrong offset %u", offset);
         return;
     }
 
-    if (uint8_t(_uint32Values[index] >> (offset * 8)) != value)
-    {
+    if (uint8_t(_uint32Values[index] >> (offset * 8)) != value) {
         _uint32Values[index] &= ~uint32_t(uint32_t(0xFF) << (offset * 8));
         _uint32Values[index] |= uint32_t(uint32_t(value) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -229,20 +213,17 @@ void Object::SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 2)
-    {
+    if (offset > 2) {
         NG_LOG_ERROR("game", "Object::SetUInt16Value: wrong offset %u", offset);
         return;
     }
 
-    if (uint16_t(_uint32Values[index] >> (offset * 16)) != value)
-    {
+    if (uint16_t(_uint32Values[index] >> (offset * 16)) != value) {
         _uint32Values[index] &= ~uint32_t(uint32_t(0xFFFF) << (offset * 16));
         _uint32Values[index] |= uint32_t(uint32_t(value) << (offset * 16));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -302,13 +283,11 @@ void Object::SetFlag(uint16_t index, uint32_t newFlag)
     uint32_t oldval = _uint32Values[index];
     uint32_t newval = oldval | newFlag;
 
-    if (oldval != newval)
-    {
+    if (oldval != newval) {
         _uint32Values[index] = newval;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -322,13 +301,11 @@ void Object::RemoveFlag(uint16_t index, uint32_t oldFlag)
     uint32_t oldval = _uint32Values[index];
     uint32_t newval = oldval & ~oldFlag;
 
-    if (oldval != newval)
-    {
+    if (oldval != newval) {
         _uint32Values[index] = newval;
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -338,19 +315,16 @@ void Object::SetByteFlag(uint16_t index, uint8_t offset, uint8_t newFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4)
-    {
+    if (offset > 4) {
         NG_LOG_ERROR("entities", "Object::SetByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if (!(uint8_t(_uint32Values[index] >> (offset * 8)) & newFlag))
-    {
+    if (!(uint8_t(_uint32Values[index] >> (offset * 8)) & newFlag)) {
         _uint32Values[index] |= uint32_t(uint32_t(newFlag) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -360,19 +334,16 @@ void Object::RemoveByteFlag(uint16_t index, uint8_t offset, uint8_t oldFlag)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
-    if (offset > 4)
-    {
+    if (offset > 4) {
         NG_LOG_ERROR("entities", "Object::RemoveByteFlag: wrong offset %u", offset);
         return;
     }
 
-    if (uint8_t(_uint32Values[index] >> (offset * 8)) & oldFlag)
-    {
+    if (uint8_t(_uint32Values[index] >> (offset * 8)) & oldFlag) {
         _uint32Values[index] &= ~uint32_t(uint32_t(oldFlag) << (offset * 8));
         _changedFields[index] = true;
 
-        if (m_inWorld && !m_objectUpdated)
-        {
+        if (m_inWorld && !m_objectUpdated) {
             m_objectUpdated = true;
         }
     }
@@ -409,8 +380,7 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
     packet << (uint8_t)GetLayer();
     packet << (uint8_t)GetSubType();
 
-    switch (GetSubType())
-    {
+    switch (GetSubType()) {
     case ST_NPC:
         NPC::EnterPacket(packet, dynamic_cast<NPC *>(this), pPlayer);
         break;
@@ -443,12 +413,10 @@ void WorldObject::SendEnterMsg(Player *pPlayer)
 
 bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
 {
-    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED))
-    {
+    if (HasFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED)) {
         return false;
     }
-    else
-    {
+    else {
         m_PendingMovePos = std::move(vMoveInfo);
         m_nPendingMoveSpeed = speed;
         SetFlag(UNIT_FIELD_STATUS, STATUS_MOVE_PENDED);
@@ -459,8 +427,7 @@ bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)
 bool WorldObject::Step(uint32_t tm)
 {
     bool res = ArMoveVector::Step(tm);
-    if (res)
-    {
+    if (res) {
         auto pos = GetTargetPos();
         this->m_positionX = pos.GetPositionX();
         this->m_positionY = pos.GetPositionY();
@@ -503,8 +470,7 @@ Position WorldObject::GetCurrentPosition(uint32_t t)
 {
     Position result{};
     ArMoveVector _mv{};
-    if (bIsMoving && IsInWorld())
-    {
+    if (bIsMoving && IsInWorld()) {
         _mv = ArMoveVector{*dynamic_cast<ArMoveVector *>(this)};
         _mv.Step(t);
         result.m_positionX = _mv.GetPositionX();
@@ -512,8 +478,7 @@ Position WorldObject::GetCurrentPosition(uint32_t t)
         result.m_positionZ = _mv.GetPositionZ();
         result._orientation = _mv.GetOrientation();
     }
-    else
-    {
+    else {
         result.m_positionX = GetPositionX();
         result.m_positionY = GetPositionY();
         result.m_positionZ = GetPositionZ();
@@ -534,8 +499,7 @@ void ArMoveVector::Copy(const ArMoveVector &src)
     this->speed = src.speed;
     this->start_time = src.start_time;
     this->proc_time = src.proc_time;
-    for (auto &mi : src.ends)
-    {
+    for (auto &mi : src.ends) {
         this->ends.emplace_back(MoveInfo(mi.end, mi.end_time));
     }
     this->bHasDirectionChanged = src.bHasDirectionChanged;
@@ -550,18 +514,14 @@ bool ArMoveVector::Step(uint32_t current_time)
     bool res{false};
     std::vector<MoveInfo> removed{};
 
-    if (proc_time < current_time && bIsMoving)
-    {
-        for (auto &info : ends)
-        {
-            if (current_time < info.end_time)
-            {
+    if (proc_time < current_time && bIsMoving) {
+        for (auto &info : ends) {
+            if (current_time < info.end_time) {
                 uint32_t et = current_time - proc_time;
                 float fet = (float)et / (float)(info.end_time - proc_time);
                 m_positionX = (info.end.m_positionX - m_positionX) * fet + m_positionX;
                 m_positionY = (info.end.m_positionY - m_positionY) * fet + m_positionY;
-                if (bWithZMoving)
-                {
+                if (bWithZMoving) {
                     m_positionZ = (info.end.m_positionZ - m_positionZ) * fet + m_positionZ;
                 }
                 break;
@@ -575,23 +535,19 @@ bool ArMoveVector::Step(uint32_t current_time)
                 SetDirection(ends[0].end);
         }
         proc_time = current_time;
-        for (auto &info : removed)
-        {
+        for (auto &info : removed) {
             this->ends.erase(std::remove(ends.begin(), ends.end(), info), ends.end());
         }
-        if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX && m_positionY == (ends.back()).end.m_positionY && m_positionZ == (ends.back()).end.m_positionZ))
-        {
+        if (ends.empty() || (this->m_positionX == (ends.back()).end.m_positionX && m_positionY == (ends.back()).end.m_positionY && m_positionZ == (ends.back()).end.m_positionZ)) {
             bIsMoving = false;
             ends.clear();
             res = true;
         }
-        else
-        {
+        else {
             res = false;
         }
     }
-    else
-    {
+    else {
         res = false;
     }
     return res;
@@ -600,8 +556,7 @@ bool ArMoveVector::Step(uint32_t current_time)
 void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time, uint32_t current_time)
 {
     ends.clear();
-    if (!_to.empty())
-    {
+    if (!_to.empty()) {
         speed = _speed;
         uint32_t ct = _start_time;
         if (ct == 0)
@@ -614,8 +569,7 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, u
         float before_x = m_positionX;
         float before_y = m_positionY;
 
-        for (const auto &pos : _to)
-        {
+        for (const auto &pos : _to) {
             float cx = pos.m_positionX - before_x;
             float cy = pos.m_positionY - before_y;
 
@@ -667,8 +621,7 @@ void ArMoveVector::SetDirection(Position pos)
     float px{}, py{};
     px = pos.m_positionX - m_positionX;
     py = pos.m_positionY - m_positionY;
-    if (0.0 != px || 0.0 != py)
-    {
+    if (0.0 != px || 0.0 != py) {
         bHasDirectionChanged = true;
         direction.m_positionX = pos.m_positionX;
         direction.m_positionY = pos.m_positionY;

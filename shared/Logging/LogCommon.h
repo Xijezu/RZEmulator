@@ -15,8 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-enum LogLevel
-{
+enum LogLevel {
     LOG_LEVEL_DISABLED = 0,
     LOG_LEVEL_TRACE = 1,
     LOG_LEVEL_DEBUG = 2,
@@ -28,16 +27,9 @@ enum LogLevel
     NUM_ENABLED_LOG_LEVELS = 6
 };
 
-enum AppenderType : uint8_t
-{
-    APPENDER_NONE,
-    APPENDER_CONSOLE,
-    APPENDER_FILE,
-    APPENDER_DB
-};
+enum AppenderType : uint8_t { APPENDER_NONE, APPENDER_CONSOLE, APPENDER_FILE, APPENDER_DB };
 
-enum AppenderFlags
-{
+enum AppenderFlags {
     APPENDER_FLAGS_NONE = 0x00,
     APPENDER_FLAGS_PREFIX_TIMESTAMP = 0x01,
     APPENDER_FLAGS_PREFIX_LOGLEVEL = 0x02,

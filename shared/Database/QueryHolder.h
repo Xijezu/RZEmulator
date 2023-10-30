@@ -17,8 +17,7 @@
  */
 #include "SQLOperation.h"
 
-class SQLQueryHolder
-{
+class SQLQueryHolder {
     friend class SQLQueryHolderTask;
 
 private:
@@ -34,8 +33,7 @@ public:
     void SetPreparedResult(size_t index, PreparedResultSet *result);
 };
 
-class SQLQueryHolderTask : public SQLOperation
-{
+class SQLQueryHolderTask : public SQLOperation {
 private:
     SQLQueryHolder *m_holder;
     QueryResultHolderPromise m_result;

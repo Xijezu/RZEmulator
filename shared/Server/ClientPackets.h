@@ -18,10 +18,8 @@
 
 #include "Server/XPacket.h"
 
-namespace NGemity
-{
-    enum class Packets
-    {
+namespace NGemity {
+    enum class Packets {
         TS_SC_RESULT = 0,
         TS_CS_LOGIN = 1,
         TS_TIMESYNC = 2,

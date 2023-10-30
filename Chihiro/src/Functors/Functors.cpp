@@ -24,10 +24,8 @@
 
 void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
 {
-    for (const auto &client : regionType)
-    {
-        if (client != nullptr && client->GetHandle() != obj->GetHandle())
-        {
+    for (const auto &client : regionType) {
+        if (client != nullptr && client->GetHandle() != obj->GetHandle()) {
             Messages::sendEnterMessage(dynamic_cast<Player *>(client), obj, false);
             if (obj->IsPlayer())
                 Messages::sendEnterMessage(dynamic_cast<Player *>(obj), client, false);
@@ -38,11 +36,9 @@ void SendEnterMessageEachOtherFunctor::Run(RegionType &regionType)
 
 void SendEnterMessageFunctor::Run(RegionType &regionType)
 {
-    for (const auto &client : regionType)
-    {
+    for (const auto &client : regionType) {
         Messages::sendEnterMessage(obj, client, false);
-        if (obj->IsMonster())
-        {
+        if (obj->IsMonster()) {
             obj->As<Monster>()->m_bNearClient = true;
         }
     }
@@ -57,8 +53,7 @@ void AddObjectFunctor::Run()
     if (fn.bSent)
         bSend = true;
 
-    if (newObj->IsPlayer())
-    {
+    if (newObj->IsPlayer()) {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
         sRegion.DoEachVisibleRegion(x, y, layer, NG_REGION_FUNCTOR(fn2), (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
@@ -74,8 +69,7 @@ void AddObjectFunctor::Run2()
     if (fn.bSent)
         bSend = true;
 
-    if (newObj->IsPlayer())
-    {
+    if (newObj->IsPlayer()) {
         SendEnterMessageFunctor fn2;
         fn2.obj = newObj->As<Player>();
         sRegion.DoEachNewRegion(x, y, x2, y2, layer, NG_REGION_FUNCTOR(fn2), (uint8_t)RegionVisitor::MovableVisitor | (uint8_t)RegionVisitor::StaticVisitor);
@@ -99,8 +93,7 @@ void EnumMovableObjectRegionFunctor::SubFunctor::Run(WorldObject *obj)
 
     auto c_pos = obj->GetCurrentPosition(pParent->t);
     if (c_pos.GetPositionX() >= pParent->left && c_pos.GetPositionX() <= pParent->right && c_pos.GetPositionY() >= pParent->top && c_pos.GetPositionY() <= pParent->bottom &&
-        pParent->range > c_pos.GetExactDist2d(&pParent->pos))
-    {
+        pParent->range > c_pos.GetExactDist2d(&pParent->pos)) {
         pParent->pvResult.emplace_back(obj->GetHandle());
     }
 }

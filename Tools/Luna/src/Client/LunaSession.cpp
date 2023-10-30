@@ -32,14 +32,9 @@ void SendSerializedPacket(TS_SERIALIZABLE_PACKET const &packet, SOCKET_TYPE *Soc
     Socket->SendPacket(*serializer.getFinalizedPacket());
 }
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
+enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
-typedef struct
-{
+typedef struct {
     int cmd;
     eStatus status;
     std::function<void(LunaSession *, XPacket *)> handler;
@@ -71,18 +66,15 @@ ReadDataHandlerResult LunaSession::ProcessIncoming(XPacket *pRecvPct)
     auto _cmd = pRecvPct->GetPacketID();
     int i = 0;
 
-    for (i = 0; i < LunaTableSize; i++)
-    {
-        if ((uint16_t)LunaPacketHandler[i].cmd == _cmd)
-        {
+    for (i = 0; i < LunaTableSize; i++) {
+        if ((uint16_t)LunaPacketHandler[i].cmd == _cmd) {
             LunaPacketHandler[i].handler(this, pRecvPct);
             break;
         }
     }
 
     // Report unknown packets in the error log
-    if (i == LunaTableSize)
-    {
+    if (i == LunaTableSize) {
         NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
@@ -106,8 +98,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
     TS_CA_ACCOUNT accountMsg{};
     std::vector<uint8_t> encryptedPassword{};
 
-    if (!m_pCipher->privateDecrypt(pRecv->data.data(), pRecv->data.size(), aesKey) || aesKey.size() != 32)
-    {
+    if (!m_pCipher->privateDecrypt(pRecv->data.data(), pRecv->data.size(), aesKey) || aesKey.size() != 32) {
         NG_LOG_INFO("network", "onPacketAuthPasswordKey: invalid decrypted data size: %d", static_cast<int32_t>(aesKey.size()));
         CloseSocket();
         return;
@@ -116,8 +107,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
     AesPasswordCipher cipher{};
     cipher.init(aesKey.data());
 
-    if (!cipher.encrypt((const uint8_t *)m_szPassword.c_str(), m_szPassword.size(), encryptedPassword))
-    {
+    if (!cipher.encrypt((const uint8_t *)m_szPassword.c_str(), m_szPassword.size(), encryptedPassword)) {
         NG_LOG_WARN("network", "onPacketAuthPasswordKey: could not encrypt password !");
         CloseSocket();
         return;
@@ -134,8 +124,7 @@ void LunaSession::onRsaKey(const TS_AC_AES_KEY_IV *pRecv)
 
 void LunaSession::onPacketServerList(const TS_AC_SERVER_LIST *pRecv)
 {
-    for (const auto &server : pRecv->servers)
-    {
+    for (const auto &server : pRecv->servers) {
         NG_LOG_INFO("network", "Name: %s - IP: %s, Port: %d", server.server_name.c_str(), server.server_ip.c_str(), server.server_port);
     }
     CloseSocket();
@@ -144,13 +133,11 @@ void LunaSession::onPacketServerList(const TS_AC_SERVER_LIST *pRecv)
 void LunaSession::onAuthResult(const TS_AC_RESULT *pRecv)
 {
     NG_LOG_INFO("network", "Received Auth Result: %s", pRecv->result == 0 ? "Success" : "Error");
-    if (pRecv->result == 0)
-    {
+    if (pRecv->result == 0) {
         TS_CA_SERVER_LIST list{};
         SendSerializedPacket(list, this);
     }
-    else
-    {
+    else {
         CloseSocket();
     }
 }
@@ -169,22 +156,19 @@ void LunaSession::InitConnection(const std::string &szUsername, const std::strin
     versionPkt.szVersion = "200701120";
     SendSerializedPacket(versionPkt, this);
 
-    if (!m_pCipher->isInitialized())
-    {
+    if (!m_pCipher->isInitialized()) {
         if (!m_pCipher->generateKey())
             NG_LOG_ERROR("network", "Failed to generate RSA Key.");
     }
 
-    if (m_pCipher->isInitialized())
-    {
+    if (m_pCipher->isInitialized()) {
         TS_CA_RSA_PUBLIC_KEY keyMsg{};
 
         m_pCipher->getPemPublicKey(keyMsg.key);
 
         SendSerializedPacket(keyMsg, this);
     }
-    else
-    {
+    else {
         NG_LOG_ERROR("network", "No RSA key to send, aborting...");
         CloseSocket();
     }

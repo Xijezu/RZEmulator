@@ -37,15 +37,13 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
 
     _open.push([this, name, &pool]() -> bool {
         std::string const dbString = sConfigMgr->GetStringDefault((name + "Database.CString").c_str(), "");
-        if (dbString.empty())
-        {
+        if (dbString.empty()) {
             NG_LOG_ERROR(_logger, "Database %s not specified in configuration file!", name.c_str());
             return false;
         }
 
         uint8_t const asyncThreads = uint8_t(sConfigMgr->GetIntDefault(name + "Database.WorkerThreads", 1));
-        if (asyncThreads < 1 || asyncThreads > 32)
-        {
+        if (asyncThreads < 1 || asyncThreads > 32) {
             NG_LOG_ERROR(_logger,
                 "%s database: invalid number of worker threads specified. "
                 "Please pick a value between 1 and 32.",
@@ -56,8 +54,7 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
         uint8_t const synchThreads = uint8_t(sConfigMgr->GetIntDefault((name + "Database.SynchThreads").c_str(), 1));
 
         pool.SetConnectionInfo(dbString, asyncThreads, synchThreads);
-        if (auto error = pool.Open() != 0)
-        {
+        if (auto error = pool.Open() != 0) {
             NG_LOG_ERROR("sql.driver",
                 "\nDatabasePool %s NOT opened. There were errors opening the MySQL connections. Check your SQLDriverLogFile "
                 "for specific errors. Read wiki at https://www.trinitycore.info/display/tc/TrinityCore+Home",
@@ -71,8 +68,7 @@ DatabaseLoader &DatabaseLoader::AddDatabase(DatabaseWorkerPool<T> &pool, std::st
     });
 
     _prepare.push([this, name, &pool]() -> bool {
-        if (!pool.PrepareStatements())
-        {
+        if (!pool.PrepareStatements()) {
             NG_LOG_ERROR(_logger, "Could not prepare statements of the %s database, see log for details.", name.c_str());
             return false;
         }
@@ -124,13 +120,10 @@ bool DatabaseLoader::PrepareStatements()
 
 bool DatabaseLoader::Process(std::queue<Predicate> &queue)
 {
-    while (!queue.empty())
-    {
-        if (!queue.front()())
-        {
+    while (!queue.empty()) {
+        if (!queue.front()()) {
             // Close all open databases which have a registered close operation
-            while (!_close.empty())
-            {
+            while (!_close.empty()) {
                 _close.top()();
                 _close.pop();
             }

@@ -79,8 +79,7 @@ void Appender::write(LogMessage *message)
 
 const char *Appender::getLogLevelString(LogLevel level)
 {
-    switch (level)
-    {
+    switch (level) {
     case LOG_LEVEL_FATAL:
         return "FATAL";
     case LOG_LEVEL_ERROR:

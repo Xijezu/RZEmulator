@@ -44,29 +44,24 @@ void RespawnObject::Update(uint32_t diff)
 
     auto respawn_count = std::min(m_nMaxRespawnNum - info.count, info.inc);
 
-    if (lastDeadTime == 0)
-    {
+    if (lastDeadTime == 0) {
         lastDeadTime = ct;
         respawn_count = m_nMaxRespawnNum;
     }
 
     /// Do we need a respawn?
-    if (respawn_count > 0)
-    {
+    if (respawn_count > 0) {
         int32_t try_cnt = 0;
-        for (uint32_t i = 0; i < respawn_count; ++i)
-        {
+        for (uint32_t i = 0; i < respawn_count; ++i) {
             /// Generate random respawn coordinates based on a rectangle
             int32_t x{};
             int32_t y{};
 
-            do
-            {
+            do {
                 x = irand((int32_t)info.left, (int32_t)info.right);
                 y = irand((int32_t)info.top, (int32_t)info.bottom);
 
-                if (++try_cnt > 500)
-                {
+                if (++try_cnt > 500) {
                     NG_LOG_ERROR("server.worldserver", "Cannot respawn monster - try_cnt = 500");
                     return;
                 }
@@ -76,10 +71,8 @@ void RespawnObject::Update(uint32_t diff)
             auto monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
 
             /// Put it to the list when it's not blocked
-            if (monster != nullptr)
-            {
-                if (info.dungeon_id != 0)
-                {
+            if (monster != nullptr) {
+                if (info.dungeon_id != 0) {
                     // monster.m_nDungeonId = info.dungeon_id;
                 }
                 m_vRespawnedMonster.emplace_back(monster->GetHandle());
@@ -98,8 +91,7 @@ void RespawnObject::onMonsterDelete(Monster *mob)
     --info.count;
 
     auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
-    if (pos != m_vRespawnedMonster.end())
-    {
+    if (pos != m_vRespawnedMonster.end()) {
         m_vRespawnedMonster.erase(pos);
         mob->m_pDeleteHandler = nullptr;
     }

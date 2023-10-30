@@ -27,15 +27,13 @@ constexpr int32_t MAX_SPARE_ITEM_WEAR{28};
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-struct ItemPickupOrder
-{
+struct ItemPickupOrder {
     uint32_t hPlayer[3];
     int32_t nPartyID[3];
 };
 
 
-enum class ITEM_EFFECT_PASSIVE
-{
+enum class ITEM_EFFECT_PASSIVE {
     NONE = 0,
 
     ATTACK_POint32_t = 11,
@@ -66,8 +64,7 @@ enum class ITEM_EFFECT_PASSIVE
     AMP_PARAMETER_B = 99,
 };
 
-enum ItemCode : int32_t
-{
+enum ItemCode : int32_t {
     CHALK_OF_RESTORATION = 800000,
     UNIT_CARD = 800001,
     FEATHER_OF_RETURN = 910006,
@@ -76,8 +73,7 @@ enum ItemCode : int32_t
     FEATHER_OF_RETURN_EVENT = 2902104
 };
 
-enum
-{
+enum {
     IEP_NONE = 0,
     IEP_ATTACK_POINT = 11,
     IEP_MAGIC_POINT = 12,
@@ -107,8 +103,7 @@ enum
     IEP_AMP_PARAMETER_B = 99,
 };
 
-enum class ITEM_EFFECT_INSTANT
-{
+enum class ITEM_EFFECT_INSTANT {
     NONE = 0,
 
     INC_HP = 1,
@@ -141,21 +136,9 @@ enum class ITEM_EFFECT_INSTANT
     ADD_STATE_EX = 124,
 };
 
-enum ElementalType : int32_t
-{
-    TYPE_NONE = 0,
-    TYPE_FIRE = 1,
-    TYPE_WATER = 2,
-    TYPE_WIND = 3,
-    TYPE_EARTH = 4,
-    TYPE_LIGHT = 5,
-    TYPE_DARK = 6,
-    TYPE_COUNT = 7,
-    TYPE_UNKN = 99
-};
+enum ElementalType : int32_t { TYPE_NONE = 0, TYPE_FIRE = 1, TYPE_WATER = 2, TYPE_WIND = 3, TYPE_EARTH = 4, TYPE_LIGHT = 5, TYPE_DARK = 6, TYPE_COUNT = 7, TYPE_UNKN = 99 };
 
-enum FlagBits : uint32_t
-{
+enum FlagBits : uint32_t {
     ITEM_FLAG_NORMAL = 0x00,
     ITEM_FLAG_CARD = 0x01,
     ITEM_FLAG_FULL = 0x02,
@@ -170,8 +153,7 @@ enum FlagBits : uint32_t
 
 /// \brief This is actually the idx for the ItemBase::flaglist
 /// Not the retail bitset
-enum ItemFlag : int32_t
-{
+enum ItemFlag : int32_t {
     FLAG_CASHITEM = 0,
     FLAG_WEAR = 1,
     FLAG_USE = 2,
@@ -194,8 +176,7 @@ enum ItemFlag : int32_t
 };
 
 
-enum GenerateCode : int32_t
-{
+enum GenerateCode : int32_t {
     BY_MONSTER = 0,
     BY_MARKET = 1,
     BY_QUEST = 2,
@@ -214,8 +195,7 @@ enum GenerateCode : int32_t
     BY_UNKNOWN = 126
 };
 
-enum ItemWearType : int16_t
-{
+enum ItemWearType : int16_t {
     WEAR_CANTWEAR = -1,
     WEAR_NONE = -1,
     WEAR_WEAPON = 0,
@@ -250,8 +230,7 @@ enum ItemWearType : int16_t
     WEAR_BULLET = 1,
 };
 
-enum ItemClass : int32_t
-{
+enum ItemClass : int32_t {
     CLASS_ETC = 0,
     CLASS_DOUBLE_AXE = 95,
     CLASS_DOUBLE_SWORD = 96,
@@ -314,8 +293,7 @@ enum ItemClass : int32_t
     CLASS_DECO_ONEHAND_AXE = 621,
 };
 
-enum ItemType : int32_t
-{
+enum ItemType : int32_t {
     TYPE_ETC = 0,
     TYPE_ARMOR = 1,
     TYPE_CARD = 2,
@@ -327,8 +305,7 @@ enum ItemType : int32_t
     TYPE_USE_CARD = 8,
 };
 
-enum ItemGroup : int32_t
-{
+enum ItemGroup : int32_t {
     GROUP_ETC = 0,
     GROUP_WEAPON = 1,
     GROUP_ARMOR = 2,
@@ -360,8 +337,7 @@ enum ItemGroup : int32_t
     GROUP_BOSSCARD = 140,
 };
 
-enum LIMIT_FLAG : int32_t
-{
+enum LIMIT_FLAG : int32_t {
     LIMIT_DEVA = (1 << 2),
     LIMIT_ASURA = (1 << 3),
     LIMIT_GAIA = (1 << 4),
@@ -372,8 +348,7 @@ enum LIMIT_FLAG : int32_t
     LIMIT_SUMMONER = (1 << 13),
 };
 
-struct ItemTemplate
-{
+struct ItemTemplate {
     int32_t nID;
     int32_t nNameID;
     ItemType eType;

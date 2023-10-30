@@ -11,8 +11,7 @@ NGemity::SingleSocketInstance::SingleSocketInstance()
 
 void NGemity::SingleSocketInstance::InitializeSingleSocketInstance()
 {
-    if (m_pNetworkThread != nullptr)
-    {
+    if (m_pNetworkThread != nullptr) {
         NG_LOG_ERROR("network", "SingleSocketInstance: Networkthread already started, initialization failed!");
         return;
     }

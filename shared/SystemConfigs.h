@@ -23,7 +23,7 @@
 #include "Define.h"
 #include "revision.h"
 
-#define _PACKAGENAME "Rappelz-Emulator"
+#define _PACKAGENAME "NGemity"
 
 #if NGEMITY_ENDIAN == NGEMITY_BIGENDIAN
 #define _ENDIAN_STRING "big-endian"

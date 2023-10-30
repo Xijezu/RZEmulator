@@ -2,8 +2,7 @@
 
 #include "MySQLConnection.h"
 
-enum CharacterDatabaseStatements : uint32_t
-{
+enum CharacterDatabaseStatements : uint32_t {
     /*  Naming standard for defines:
 {DB}_{SET/DEL/ADD/REP}_{Summary of data changed}
 When updating more than one field, consider looking at the calling function
@@ -44,8 +43,7 @@ name for a suiting suffix.
     MAX_CHARACTERDATABASE_STATEMENTS,
 };
 
-class CharacterDatabaseConnection : public MySQLConnection
-{
+class CharacterDatabaseConnection : public MySQLConnection {
 public:
     typedef CharacterDatabaseStatements Statements;
 

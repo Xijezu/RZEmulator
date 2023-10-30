@@ -11,8 +11,7 @@
 int main(int argc, char **argv)
 {
     // Making sure the args are there
-    if (argc < 4)
-    {
+    if (argc < 4) {
         std::cout << "You're missing the IP and port:" << std::endl;
         std::cout << "Luna [IP] [PORT] [USERNAME] [PASSWORD]" << std::endl;
         return 0;
@@ -24,8 +23,7 @@ int main(int argc, char **argv)
     std::string szPass = argv[4];
 
     auto [bSuccess, ioContext] = NGemity::InitFramework("luna.conf", "Luna", argc, argv);
-    if (!bSuccess)
-    {
+    if (!bSuccess) {
         return -1;
     }
 

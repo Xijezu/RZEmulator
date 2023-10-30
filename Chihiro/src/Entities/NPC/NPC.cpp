@@ -101,26 +101,21 @@ bool NPC::HasStartableQuest(Player *player)
     bool bHasProgressRandom{false};
     bool isstart{false};
 
-    for (auto &ql : m_vQuestLink_Start)
-    {
+    for (auto &ql : m_vQuestLink_Start) {
         auto b = sObjectMgr.GetQuestBase(ql->code);
         if (b == nullptr)
             continue;
         auto qt = b->nType;
-        if (qt == QuestType::QUEST_RANDOM_KILL_INDIVIDUAL || qt == QuestType::QUEST_RANDOM_COLLECT)
-        {
-            if (player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code))
-            {
+        if (qt == QuestType::QUEST_RANDOM_KILL_INDIVIDUAL || qt == QuestType::QUEST_RANDOM_COLLECT) {
+            if (player->IsInProgressQuest(ql->code) || player->IsFinishableQuest(ql->code)) {
                 bHasProgressRandom = true;
             }
-            else
-            {
+            else {
                 if (player->IsStartableQuest(ql->code, true))
                     isstart = true;
             }
         }
-        else
-        {
+        else {
             if (player->IsStartableQuest(ql->code, true))
                 return true;
         }
@@ -130,8 +125,7 @@ bool NPC::HasStartableQuest(Player *player)
 
 bool NPC::HasFinishableQuest(Player *player)
 {
-    for (auto &ql : m_vQuestLink_End)
-    {
+    for (auto &ql : m_vQuestLink_End) {
         if (player->IsFinishableQuest(ql->code))
             return true;
     }
@@ -140,8 +134,7 @@ bool NPC::HasFinishableQuest(Player *player)
 
 bool NPC::HasInProgressQuest(Player *player)
 {
-    for (auto &ql : m_vQuestLink_Progress)
-    {
+    for (auto &ql : m_vQuestLink_Progress) {
         if (player->IsInProgressQuest(ql->code))
             return true;
     }
@@ -150,10 +143,8 @@ bool NPC::HasInProgressQuest(Player *player)
 
 void NPC::DoEachStartableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn)
 {
-    for (auto &ql : m_vQuestLink_Start)
-    {
-        if (pPlayer->IsStartableQuest(ql->code, false))
-        {
+    for (auto &ql : m_vQuestLink_Start) {
+        if (pPlayer->IsStartableQuest(ql->code, false)) {
             fn(pPlayer, ql);
         }
     }
@@ -161,10 +152,8 @@ void NPC::DoEachStartableQuest(Player *pPlayer, const std::function<void(Player 
 
 void NPC::DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn)
 {
-    for (auto &ql : m_vQuestLink_Progress)
-    {
-        if (pPlayer->IsInProgressQuest(ql->code))
-        {
+    for (auto &ql : m_vQuestLink_Progress) {
+        if (pPlayer->IsInProgressQuest(ql->code)) {
             fn(pPlayer, ql);
         }
     }
@@ -172,10 +161,8 @@ void NPC::DoEachInProgressQuest(Player *pPlayer, const std::function<void(Player
 
 void NPC::DoEachFinishableQuest(Player *pPlayer, const std::function<void(Player *, QuestLink *)> &fn)
 {
-    for (auto &ql : m_vQuestLink_End)
-    {
-        if (pPlayer->IsFinishableQuest(ql->code))
-        {
+    for (auto &ql : m_vQuestLink_End) {
+        if (pPlayer->IsFinishableQuest(ql->code)) {
             fn(pPlayer, ql);
         }
     }
@@ -191,10 +178,8 @@ int32_t NPC::GetQuestTextID(int32_t code, int32_t progress) const
     else
         wpl = m_vQuestLink_Start;
 
-    for (auto &ql : wpl)
-    {
-        if (ql->code == code)
-        {
+    for (auto &ql : wpl) {
+        if (ql->code == code) {
             if (progress == 0)
                 return ql->nStartTextID;
             if (progress == 1)
@@ -208,10 +193,8 @@ int32_t NPC::GetQuestTextID(int32_t code, int32_t progress) const
 
 int32_t NPC::GetProgressFromTextID(int32_t code, int32_t textId) const
 {
-    for (auto &ql : m_vQuestLink_Start)
-    {
-        if (ql->code == code)
-        {
+    for (auto &ql : m_vQuestLink_Start) {
+        if (ql->code == code) {
             if (textId == ql->nStartTextID)
                 return 0;
             if (textId == ql->nInProgressTextID)

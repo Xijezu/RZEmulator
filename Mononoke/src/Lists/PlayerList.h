@@ -22,8 +22,7 @@
 
 class AuthClientSession;
 // Storage object for a player
-struct Player
-{
+struct Player {
     Player()
         : nAccountID(0)
         , szLoginName()
@@ -49,8 +48,7 @@ struct Player
 };
 
 /// Storage object for the list of players on the server
-class PlayerList
-{
+class PlayerList {
 public:
     typedef std::map<std::string, Player *> PlayerMap;
     ~PlayerList() = default;

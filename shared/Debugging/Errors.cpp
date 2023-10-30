@@ -34,8 +34,7 @@
     terminates the application.
 */
 
-namespace NGemity
-{
+namespace NGemity {
 
     void Assert(char const *file, int line, char const *function, char const *message)
     {
@@ -81,7 +80,10 @@ namespace NGemity
         exit(1);
     }
 
-    void Warning(char const *file, int line, char const *function, char const *message) { fprintf(stderr, "\n%s:%i in %s WARNING:\n  %s\n", file, line, function, message); }
+    void Warning(char const *file, int line, char const *function, char const *message)
+    {
+        fprintf(stderr, "\n%s:%i in %s WARNING:\n  %s\n", file, line, function, message);
+    }
 
     void Abort(char const *file, int line, char const *function)
     {
