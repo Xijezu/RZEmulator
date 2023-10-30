@@ -463,13 +463,13 @@ void Unit::applyState(State &state)
             break;
 
         if (state.GetEffectType() == SEF_PARAMETER_INC_WHEN_EQUIP) {
-            incParameter(state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3), (state.GetValue(1) <= FLAG_LUK) ? true : false);
-            incParameter(state.GetValue(4), state.GetValue(5) + state.GetLevel() * state.GetValue(6), (state.GetValue(4) <= FLAG_LUK) ? true : false);
+            incParameter(state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3), (static_cast<int32_t>(state.GetValue(1)) <= FLAG_LUK) ? true : false);
+            incParameter(state.GetValue(4), state.GetValue(5) + state.GetLevel() * state.GetValue(6), (static_cast<int32_t>(state.GetValue(4)) <= FLAG_LUK) ? true : false);
             incParameter2(state.GetValue(7), state.GetValue(8) + state.GetLevel() * state.GetValue(9));
         }
         else if (state.GetEffectType() == SEF_PARAMETER_AMP_WHEN_EQUIP) {
-            ampParameter(state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3), (state.GetValue(1) <= FLAG_LUK) ? true : false);
-            ampParameter(state.GetValue(4), state.GetValue(5) + state.GetLevel() * state.GetValue(6), (state.GetValue(4) <= FLAG_LUK) ? true : false);
+            ampParameter(state.GetValue(1), state.GetValue(2) + state.GetLevel() * state.GetValue(3), (static_cast<int32_t>(state.GetValue(1)) <= FLAG_LUK) ? true : false);
+            ampParameter(state.GetValue(4), state.GetValue(5) + state.GetLevel() * state.GetValue(6), (static_cast<int32_t>(state.GetValue(4)) <= FLAG_LUK) ? true : false);
             ampParameter2(state.GetValue(7), state.GetValue(8) + state.GetLevel() * state.GetValue(9));
         }
     } break;
@@ -479,8 +479,8 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (state.GetValue(8) != CLASS_EVERY_WEAPON) {
-            if (weapon_class != state.GetValue(8) && weapon_class != state.GetValue(9) && weapon_class != state.GetValue(10) && weapon_class != state.GetValue(11))
+        if (state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON) {
+            if (weapon_class != state.GetValue<int32_t>(8) && weapon_class != state.GetValue<int32_t>(9) && weapon_class != state.GetValue<int32_t>(10) && weapon_class != state.GetValue<int32_t>(11))
                 break;
         }
 
@@ -489,10 +489,10 @@ void Unit::applyState(State &state)
 
     case SEF_ADDITIONAL_DAMAGE_ON_ATTACK: {
         if (state.GetValue(11) == 0 || state.GetValue(11) == 99)
-            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8),
+            m_vNormalAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)state.GetValue<int32_t>(8),
                 state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
         if (state.GetValue(11) == 1 || state.GetValue(11) == 99)
-            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)(int32_t)state.GetValue(8),
+            m_vRangeAdditionalDamage.emplace_back(AdditionalDamageInfo(state.GetValue(6) + state.GetValue(7) * state.GetLevel(), ElementalType::TYPE_NONE, (ElementalType)state.GetValue<int32_t>(8),
                 state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
     } break;
 
@@ -528,25 +528,25 @@ void Unit::applyState(State &state)
     case SEF_ADD_STATE_BY_SELF_ON_ATTACK:
     case SEF_ADD_STATE_ON_BEING_ATTACKED:
     case SEF_ADD_STATE_BY_SELF_ON_BEING_ATTACKED: {
-        if (state.GetValue(8) != CLASS_EVERY_WEAPON) {
+        if (state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON) {
             auto weapon_class = GetWeaponClass();
             if (weapon_class == 0)
                 break;
 
-            if (weapon_class != state.GetValue(8) && weapon_class != state.GetValue(9) && weapon_class != state.GetValue(10) && weapon_class != state.GetValue(11))
+            if (weapon_class != state.GetValue<int32_t>(8) && weapon_class != state.GetValue<int32_t>(9) && weapon_class != state.GetValue<int32_t>(10) && weapon_class != state.GetValue<int32_t>(11))
                 break;
         }
 
-        StateCode code = (StateCode)(int32_t)state.GetValue(0);
+        StateCode code = (StateCode)state.GetValue<int32_t>(0);
         int32_t level = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
         int32_t ratio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
         uint32_t duration = (state.GetValue(4) + state.GetLevel() * state.GetValue(5)) * 100;
-        uint32_t attack_type = (uint32_t)state.GetValue(12);
-        int32_t cost_mp = (int32_t)state.GetValue(13);
-        int32_t min = (int32_t)state.GetValue(14);
-        int32_t max = (int32_t)state.GetValue(15);
-        int32_t tmin = (int32_t)state.GetValue(16);
-        int32_t tmax = (int32_t)state.GetValue(17);
+        uint32_t attack_type = state.GetValue<uint32_t>(12);
+        int32_t cost_mp = state.GetValue<int32_t>(13);
+        int32_t min = state.GetValue<int32_t>(14);
+        int32_t max = state.GetValue<int32_t>(15);
+        int32_t tmin = state.GetValue<int32_t>(16);
+        int32_t tmax = state.GetValue<int32_t>(17);
 
         if (state.GetEffectType() == SEF_ADD_STATE_ON_ATTACK_OLD) {
             m_vStateByNormalAttack.emplace_back(_ADD_STATE_TAG(code, level, ratio, duration, ATTACKEE, 0, 0, 0, 0, 0));
@@ -607,13 +607,13 @@ void Unit::applyState(State &state)
 
     case SEF_ADD_HP_ON_ATTACK: {
 
-        if (state.GetValue(8) != CLASS_EVERY_WEAPON) {
+        if (state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON) {
             auto weapon_class = GetWeaponClass();
 
             if (weapon_class == 0)
                 break;
 
-            if (weapon_class != state.GetValue(8) && weapon_class != state.GetValue(9) && weapon_class != state.GetValue(10) && weapon_class != state.GetValue(11))
+            if (weapon_class != state.GetValue<int32_t>(8) && weapon_class != state.GetValue<int32_t>(9) && weapon_class != state.GetValue<int32_t>(10) && weapon_class != state.GetValue<int32_t>(11))
                 break;
         }
 
@@ -627,13 +627,13 @@ void Unit::applyState(State &state)
     } break;
 
     case SEF_ABSORB: {
-        if (state.GetValue(8) != CLASS_EVERY_WEAPON) {
+        if (state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON) {
             auto weapon_class = GetWeaponClass();
 
             if (weapon_class == 0)
                 break;
 
-            if (weapon_class != state.GetValue(8) && weapon_class != state.GetValue(9) && weapon_class != state.GetValue(10) && weapon_class != state.GetValue(11))
+            if (weapon_class != state.GetValue<int32_t>(8) && weapon_class != state.GetValue<int32_t>(9) && weapon_class != state.GetValue<int32_t>(10) && weapon_class != state.GetValue<int32_t>(11))
                 break;
         }
 
@@ -648,13 +648,13 @@ void Unit::applyState(State &state)
 
     case SEF_STEAL:
     case SEF_STEAL_WITH_REGEN_STOP: {
-        if (state.GetValue(8) != CLASS_EVERY_WEAPON) {
+        if (state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON) {
             auto weapon_class = GetWeaponClass();
 
             if (weapon_class == 0)
                 break;
 
-            if (weapon_class != state.GetValue(8) && weapon_class != state.GetValue(9) && weapon_class != state.GetValue(10) && weapon_class != state.GetValue(11))
+            if (weapon_class != state.GetValue<int32_t>(8) && weapon_class != state.GetValue<int32_t>(9) && weapon_class != state.GetValue<int32_t>(10) && weapon_class != state.GetValue<int32_t>(11))
                 break;
         }
 
@@ -724,8 +724,8 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) && state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
@@ -737,8 +737,8 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue(6) && state.GetValue(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(7) && state.GetValue(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue(8) && state.GetValue(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue(9) && state.GetValue(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) && state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
@@ -1889,7 +1889,7 @@ void Unit::applyStateAmplify(State *state)
             else
                 RemoveFlag(UNIT_FIELD_STATUS, STATUS_MOVABLE);
 
-            if (GetWeaponClass() == state->GetValue(0)) {
+            if (GetWeaponClass() == state->GetValue<int32_t>(0)) {
                 m_AttributeAmplifier.fAttackSpeedRight += (state->GetValue(2) + state->GetValue(3) * state->GetLevel());
 
                 if (IsUsingDoubleWeapon())
@@ -2340,7 +2340,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
     } break;
 
     case EF_SPECIALIZE_ARMOR: {
-        if (GetArmorClass() != pSkill->GetVar(0))
+        if (GetArmorClass() != static_cast<int32_t>(pSkill->GetVar(0)))
             break;
 
         m_Attribute.nAccuracyRight += pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel();
@@ -2352,7 +2352,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         m_Attribute.nMPRegenPercentage += pSkill->GetVar(5) + pSkill->GetVar(6) * pSkill->GetCurrentSkillLevel();
     } break;
     case EF_SPECIALIZE_ARMOR_AMP: {
-        if (GetArmorClass() != pSkill->GetVar(0))
+        if (GetArmorClass() != static_cast<int32_t>(pSkill->GetVar(0)))
             break;
 
         m_AttributeAmplifier.fAttackSpeedRight += pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel();

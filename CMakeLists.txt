@@ -1,6 +1,7 @@
 project(NGemity)
 cmake_minimum_required(VERSION 3.10)
 
+add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
 ########## CONAN ##########
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
@@ -24,10 +25,10 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(DEBUG 1)
 endif()
 
-option(WITHOUT_GIT          "Disable the GIT testing routines"               0)
-option(WITH_PCH             "Use Precompiled Headers"                        1)
-option(WITH_TOOLS           "Also compile additional tools"                  1)
-option(NG_USE_CLITHREAD     "Use CLI Thread (readline on Linux)"             0)
+option(WITHOUT_GIT          "Disable the GIT testing routines"               OFF)
+option(WITH_PCH             "Use Precompiled Headers"                        OFF)
+option(WITH_TOOLS           "Also compile additional tools"                  ON)
+option(NG_USE_CLITHREAD     "Use CLI Thread (readline on Linux)"             OFF)
 
 find_package(Platform REQUIRED)
 find_package(PCHSupport REQUIRED)

@@ -219,7 +219,7 @@ void Messages::SendChatMessage(int32_t nChatType, const std::string &szSenderNam
 
 void Messages::SendPartyChatMessage(int32_t nChatType, const std::string &szSender, int32_t nPartyID, const std::string &szMessage)
 {
-    sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
+    sGroupManager.DoEachMemberTag(nPartyID, [nChatType, &szSender, &szMessage](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr) {
             Messages::SendChatMessage(nChatType, szSender, tag.pPlayer, szMessage);
         }
@@ -795,7 +795,7 @@ void Messages::SendGlobalChatMessage(int32_t chatType, const std::string &szSend
     chatPct.type = chatType;
     chatPct.message = szString;
 
-    Player::DoEachPlayer([=](Player *pPlayer) { pPlayer->SendPacket(chatPct); });
+    Player::DoEachPlayer([&chatPct](Player *pPlayer) { pPlayer->SendPacket(chatPct); });
     auto sender = Player::FindPlayer(szSenderName);
     if (sender != nullptr)
         Messages::SendResult(sender, NGemity::Packets::TS_CS_CHAT_REQUEST, TS_RESULT_SUCCESS, 0);

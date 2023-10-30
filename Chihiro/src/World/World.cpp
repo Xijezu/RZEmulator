@@ -594,7 +594,7 @@ int32_t World::ShowQuestMenu(Player *pPlayer)
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr) {
         int32_t m_QuestProgress{0};
-        auto functor = [=, &m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
+        auto functor = [this, &m_QuestProgress](Player *pPlayer, QuestLink *linkInfo) {
             std::string szBuf{};
             std::string szButtonName{};
             auto qbs = sObjectMgr.GetQuestBase(linkInfo->code);
@@ -760,7 +760,7 @@ void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp)
     int32_t nTotalCount = 0;
     float fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
-    sGroupManager.DoEachMemberTag(nPartyID, [=, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
+    sGroupManager.DoEachMemberTag(nPartyID, [this, &pCorpse, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &fLevelPenalty, &pOneManPlayer](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr) {
             nTotalCount++;
             if (tag.pPlayer->IsInWorld() && pCorpse->GetLayer() == tag.pPlayer->GetLayer() && pCorpse->GetExactDist2d(tag.pPlayer) <= 500.0f) {
@@ -798,7 +798,7 @@ void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp)
         float lp = fLevelPenalty * 0.01f + 1.0f;
         auto nSharedEXP = (int32_t)(exp * lp);
         auto nSharedJP = (int32_t)(jp * lp);
-        sGroupManager.DoEachMemberTag(nPartyID, [=](PartyMemberTag &tag) {
+        sGroupManager.DoEachMemberTag(nPartyID, [this, &nTotalLevel, &nSharedEXP, &nSharedJP, &nMaxLevel, &pCorpse](PartyMemberTag &tag) {
             if (tag.bIsOnline && tag.pPlayer != nullptr) {
                 float ratio = (float)tag.pPlayer->GetLevel() / nTotalLevel;
                 float fEXP = nSharedEXP * ratio;

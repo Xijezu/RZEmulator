@@ -590,7 +590,7 @@ void WorldSession::onChatRequest(const TS_CS_CHAT_REQUEST *pRectPct)
         break;
     case CHAT_PARTY: {
         if (m_pPlayer->GetPartyID() != 0) {
-            sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [=, &pRectPct](PartyMemberTag &tag) {
+            sGroupManager.DoEachMemberTag(m_pPlayer->GetPartyID(), [this, &pRectPct](PartyMemberTag &tag) {
                 if (tag.bIsOnline) {
                     auto player = Player::FindPlayer(tag.strName);
                     if (player != nullptr) {

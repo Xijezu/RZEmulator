@@ -15,27 +15,34 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <atomic>
 #include <type_traits>
 
-template<typename T>
-class ProducerConsumerQueue {
+template <typename T>
+class ProducerConsumerQueue
+{
 private:
-    std::mutex _queueLock;
+    mutable std::mutex _queueLock;
     std::queue<T> _queue;
     std::condition_variable _condition;
     std::atomic<bool> _shutdown;
 
 public:
-    ProducerConsumerQueue<T>()
-        : _shutdown(false)
+
+    ProducerConsumerQueue() : _shutdown(false) { }
+
+    void Push(T const& value)
     {
+        std::lock_guard<std::mutex> lock(_queueLock);
+        _queue.push(value);
+
+        _condition.notify_one();
     }
 
-    void Push(const T &value)
+    void Push(T&& value)
     {
         std::lock_guard<std::mutex> lock(_queueLock);
         _queue.push(std::move(value));
@@ -43,28 +50,35 @@ public:
         _condition.notify_one();
     }
 
-    bool Empty()
+    bool Empty() const
     {
         std::lock_guard<std::mutex> lock(_queueLock);
 
         return _queue.empty();
     }
 
-    bool Pop(T &value)
+    size_t Size() const
+    {
+        std::lock_guard<std::mutex> lock(_queueLock);
+
+        return _queue.size();
+    }
+
+    bool Pop(T& value)
     {
         std::lock_guard<std::mutex> lock(_queueLock);
 
         if (_queue.empty() || _shutdown)
             return false;
 
-        value = _queue.front();
+        value = std::move(_queue.front());
 
         _queue.pop();
 
         return true;
     }
 
-    void WaitAndPop(T &value)
+    void WaitAndPop(T& value)
     {
         std::unique_lock<std::mutex> lock(_queueLock);
 
@@ -85,10 +99,12 @@ public:
     {
         std::unique_lock<std::mutex> lock(_queueLock);
 
-        while (!_queue.empty()) {
-            T &value = _queue.front();
+        while (!_queue.empty())
+        {
+            T& value = _queue.front();
 
-            DeleteQueuedObject(value);
+            if constexpr (std::is_pointer_v<T>)
+                delete value;
 
             _queue.pop();
         }
@@ -96,17 +112,5 @@ public:
         _shutdown = true;
 
         _condition.notify_all();
-    }
-
-private:
-    template<typename E = T>
-    typename std::enable_if<std::is_pointer<E>::value>::type DeleteQueuedObject(E &obj)
-    {
-        delete obj;
-    }
-
-    template<typename E = T>
-    typename std::enable_if<!std::is_pointer<E>::value>::type DeleteQueuedObject(E const & /*packet*/)
-    {
     }
 };

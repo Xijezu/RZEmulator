@@ -63,6 +63,11 @@ public:
     State(StateType type, StateCode code, int32_t uid, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura, int32_t nStateValue,
         std::string szStateValue);
 
+    template<class T>
+    inline T GetValue(int32_t index) const {
+        return static_cast<T>(GetValue(index));
+    }
+
     bool IsValid(uint32_t t) const;
     bool IsHolded();
     void ReleaseRemainDuration();

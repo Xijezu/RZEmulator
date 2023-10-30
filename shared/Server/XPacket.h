@@ -15,6 +15,10 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include "TS_MESSAGE.h"
+#include "ByteBuffer.h"
+#include "Common.h"
 #include "AuthClient/TS_AC_ACCOUNT_NAME.h"
 #include "AuthClient/TS_AC_AES_KEY_IV.h"
 #include "AuthClient/TS_AC_RESULT.h"
@@ -43,8 +47,6 @@
 #include "AuthGame/TS_GA_CLIENT_LOGOUT.h"
 #include "AuthGame/TS_GA_LOGIN.h"
 #include "AuthGame/TS_GA_SECURITY_NO_CHECK.h"
-#include "ByteBuffer.h"
-#include "Common.h"
 #include "GameClient/TS_CS_ACCOUNT_WITH_AUTH.h"
 #include "GameClient/TS_CS_ANTI_HACK.h"
 #include "GameClient/TS_CS_ARRANGE_ITEM.h"
@@ -321,7 +323,6 @@
 #include "GameClient/TS_SC_XTRAP_CHECK.h"
 #include "GameClient/TS_TIMESYNC.h"
 #include "GameClient/TS_TRADE.h"
-#include "TS_MESSAGE.h"
 
 class MessageBuffer;
 
