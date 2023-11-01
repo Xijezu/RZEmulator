@@ -1860,7 +1860,7 @@ uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float v
     }
     case ITEM_EFFECT_INSTANT::SKILL: {
         auto target_handle = GetHandle();
-        if (var1 == SKILL_RETURN_FEATHER || var1 == SKILL_RETURN_BACK_FEATHER)
+        if (static_cast<int32_t>(var1) == SKILL_RETURN_FEATHER || static_cast<int32_t>(var1) == SKILL_RETURN_BACK_FEATHER)
             target_handle = pItem->GetHandle();
         result = pCaster->CastSkill((int32_t)var1, (int32_t)var2, target_handle, Position(), GetLayer(), true);
         break;
@@ -2022,14 +2022,12 @@ bool Unit::ClearExpiredState(uint32_t t)
 {
     bool bRtn{false};
     bool bErase{false};
-    bool bModified{false};
 
     if (t == 0)
         t = sWorld.GetArTime();
 
     for (auto it = m_vStateList.begin(); it != m_vStateList.end();) {
         bErase = false;
-        bModified = false;
 
         if ((*it)->GetCode() == SC_HAVOC_BURST && GetInt32Value(UNIT_FIELD_HAVOC) < 1)
             bErase = true;
@@ -2050,7 +2048,7 @@ bool Unit::ClearExpiredState(uint32_t t)
                 bRtn = true;
             }
             else if ((*it)->GetEffectType() == SEF_PROVOKE && IsMonster()) {
-                //
+                this->As<Monster>()->SetNeedToFindEnemy();
             }
 
             auto state = (*it);

@@ -508,7 +508,7 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
     if (*nSubMaterialCount == 1) {
         if (pItem->GetItemInstance().GetFlag() % 2 == ITEM_FLAG_CARD) {
             switch (pSubItem[0]->GetItemInstance().GetCode()) {
-            case UNIT_CARD:
+            case ITEM_CODE_UNIT_CARD:
                 return false;
             default:
                 break;
@@ -516,7 +516,7 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
         }
         else if (pItem->GetItemInstance().GetFlag() % 2 == ITEM_FLAG_NORMAL) {
             switch (pSubItem[0]->GetItemInstance().GetCode()) {
-            case CHALK_OF_RESTORATION:
+            case ITEM_CODE_CHALK_OF_RESTORATION:
                 return false;
             default:
                 break;
@@ -524,7 +524,7 @@ bool MixManager::CompatibilityCheck(const int32_t *nSubMaterialCount, std::vecto
         }
 
         if (pItem->GetItemInstance().GetFlag() == ITEM_FLAG_FAILED) {
-            return pSubItem[0]->GetItemInstance().GetCode() == E_REPAIR_POWDER;
+            return pSubItem[0]->GetItemInstance().GetCode() == ITEM_CODE_E_REPAIR_POWDER;
         }
     }
     return true;

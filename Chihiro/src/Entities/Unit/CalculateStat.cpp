@@ -1917,9 +1917,10 @@ void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float va
     /*if(type != IEP_ATTACK_SPEED)
         item_var_penalty *= m_fItemMod;*/
 
-    Player *pPlayer{nullptr};
-    if (IsPlayer())
-        pPlayer = this->As<Player>();
+    // Check Riding State
+    // Player *pPlayer{nullptr};
+    // if (IsPlayer())
+    //     pPlayer = this->As<Player>();
 
     switch (type) {
     case IEP_MAGIC_POINT:

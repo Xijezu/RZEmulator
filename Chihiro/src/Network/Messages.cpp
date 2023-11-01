@@ -591,17 +591,21 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
     std::string strButton{};
     std::string strTrigger{};
     int32_t i = 0;
+#if EPIC >= EPIC_5_1
     int32_t type = 3;
+#endif // EPIC >= EPIC_5_1
 
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(pPlayer->GetLastContactLong("npc"));
     if (npc != nullptr) {
         int32_t progress = 0;
         if (text != 0) {
             progress = npc->GetProgressFromTextID(code, text);
+#if EPIC >= EPIC_5_1
             if (progress == 1)
                 type = 7;
             if (progress == 2)
                 type = 8;
+#endif // EPIC >= EPIC_5_1
         }
         else {
             if (pPlayer->IsStartableQuest(code, false))
@@ -615,14 +619,18 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
             textID = npc->GetQuestTextID(code, progress);
         if (npc == nullptr) {
             if (q->m_QuestBase->nEndType != 1 || progress != 2) {
+#if EPIC >= EPIC_5_1
                 type = 7;
+#endif // EPIC >= EPIC_5_1
                 progress = 1;
             }
             else {
                 QuestLink *l = sObjectMgr.GetQuestLink(code, q->m_Instance.nStartID);
                 if (l != nullptr && l->nEndTextID != 0)
                     textID = l->nEndTextID;
+#if EPIC >= EPIC_5_1
                 type = 8;
+#endif // EPIC >= EPIC_5_1
             }
         }
 

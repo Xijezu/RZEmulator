@@ -149,7 +149,7 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
                 pt.x = sx + ((float)buffer.read<int32_t>() * fAttrLen);
                 pt.x = sy + ((float)buffer.read<int32_t>() * fAttrLen);
                 points.emplace_back(pt);
-                auto location_info = MapLocationInfo(points, sObjectMgr.g_currentLocationId, 0);
+                auto location_info = MapLocationInfo(points, sObjectMgr.g_currentLocationId, lih.nPriority);
                 RegisterMapLocationInfo(location_info);
             }
         }

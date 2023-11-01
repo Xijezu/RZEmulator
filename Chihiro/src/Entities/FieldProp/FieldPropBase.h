@@ -42,25 +42,9 @@ struct DropItemInfo {
 
 struct FieldPropRespawnInfo {
     FieldPropRespawnInfo() = default;
-
-    FieldPropRespawnInfo(const FieldPropRespawnInfo &_src)
-    {
-        nPropID = _src.nPropID;
-        x = _src.x;
-        y = _src.y;
-        layer = _src.layer;
-        fZOffset = _src.fZOffset;
-        fRotateX = _src.fRotateX;
-        fRotateY = _src.fRotateY;
-        fRotateZ = _src.fRotateZ;
-        fScaleX = _src.fScaleX;
-        fScaleY = _src.fScaleY;
-        fScaleZ = _src.fScaleZ;
-        bLockHeight = _src.bLockHeight;
-        fLockHeight = _src.fLockHeight;
-        bOnce = _src.bOnce;
-    }
-
+    FieldPropRespawnInfo(const FieldPropRespawnInfo &) = default;
+    FieldPropRespawnInfo& operator=(const FieldPropRespawnInfo&) = default;
+    
     int32_t nPropID;
     float x;
     float y;

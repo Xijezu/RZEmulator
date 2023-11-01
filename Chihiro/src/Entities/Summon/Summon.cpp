@@ -205,51 +205,50 @@ void Summon::onExpChange()
     if (m_pMaster != nullptr)
         Messages::SendEXPMessage(m_pMaster, this);
 
-    if (level != 0) {
-        if (level != GetLevel()) {
-            uint64_t uid{0};
-            if (m_pItem != nullptr)
-                uid = m_pItem->GetItemInstance().GetUID();
-            int32_t ljp{0};
-            if (level <= GetLevel())
-                ljp = 0;
-            else
-                ljp = jp;
+    if (level != 0 && level != GetLevel()) {
+        // Implement Max Summon Level
+        // uint64_t uid{0};
+        // if (m_pItem != nullptr)
+        //     uid = m_pItem->GetItemInstance().GetUID();
+        // int32_t ljp{0};
+        // if (level <= GetLevel())
+        //     ljp = 0;
+        // else
+        //     ljp = jp;
 
-            int32_t levelchange = level - GetLevel();
-            SetCurrentJLv(level);
-            SetInt32Value(UNIT_FIELD_LEVEL, level);
-            if (levelchange <= 0) {
-                CalculateStat();
+        int32_t levelchange = level - GetLevel();
+        SetCurrentJLv(level);
+        SetInt32Value(UNIT_FIELD_LEVEL, level);
+        if (levelchange <= 0) {
+            CalculateStat();
+        }
+        else {
+            auto old_hp = GetHealth();
+            auto old_mp = GetMana();
+            SetJP(GetJP() + jp);
+            CalculateStat();
+            if (GetHealth() != 0) {
+                SetHealth(GetMaxHealth());
+                SetMana(GetMaxMana());
+            }
+            if (IsInWorld()) {
+                Messages::BroadcastHPMPMessage(this, GetHealth() - old_hp, GetMana() - old_mp, false);
             }
             else {
-                auto old_hp = GetHealth();
-                auto old_mp = GetMana();
-                SetJP(GetJP() + jp);
-                CalculateStat();
-                if (GetHealth() != 0) {
-                    SetHealth(GetMaxHealth());
-                    SetMana(GetMaxMana());
+                if (m_pMaster != nullptr) {
+                    Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - old_hp, GetMana() - old_mp, false);
                 }
-                if (IsInWorld()) {
-                    Messages::BroadcastHPMPMessage(this, GetHealth() - old_hp, GetMana() - old_mp, false);
-                }
-                else {
-                    if (m_pMaster != nullptr) {
-                        Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - old_hp, GetMana() - old_mp, false);
-                    }
-                }
-                if (m_pMaster != nullptr)
-                    Messages::SendPropertyMessage(m_pMaster, this, "jp", GetJP());
             }
-            DB_UpdateSummon(m_pMaster, this);
-            if (m_pItem != nullptr && m_pMaster != nullptr)
-                Messages::SendItemMessage(m_pMaster, m_pItem);
-            if (IsInWorld())
-                Messages::BroadcastLevelMsg(this);
             if (m_pMaster != nullptr)
-                Messages::SendLevelMessage(m_pMaster, this);
+                Messages::SendPropertyMessage(m_pMaster, this, "jp", GetJP());
         }
+        DB_UpdateSummon(m_pMaster, this);
+        if (m_pItem != nullptr && m_pMaster != nullptr)
+            Messages::SendItemMessage(m_pMaster, m_pItem);
+        if (IsInWorld())
+            Messages::BroadcastLevelMsg(this);
+        if (m_pMaster != nullptr)
+            Messages::SendLevelMessage(m_pMaster, this);
     }
 }
 

@@ -2186,9 +2186,9 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
     }
 
     switch (pItem->GetItemInstance().GetCode()) {
-    case FEATHER_OF_RETURN:
-    case FEATHER_OF_REINSTATEMENT:
-    case FEATHER_OF_RETURN_EVENT:
+    case ITEM_CODE_FEATHER_OF_RETURN:
+    case ITEM_CODE_FEATHER_OF_REINSTATEMENT:
+    case ITEM_CODE_FEATHER_OF_RETURN_EVENT:
         return TS_RESULT_SUCCESS;
     default:
         break;
@@ -2255,9 +2255,10 @@ void Player::StartQuest(int32_t code, int32_t nStartQuestID, bool bForce)
         return;
     }
 
-    bool bHasRandomQuest{false};
-    if (Quest::IsRandomQuest(code) && m_QuestManager.HasRandomQuestInfo(code))
-        bHasRandomQuest = true;
+    // Random Quest not implemented yet
+    // bool bHasRandomQuest{false};
+    // if (Quest::IsRandomQuest(code) && m_QuestManager.HasRandomQuestInfo(code))
+    //     bHasRandomQuest = true;
     if (m_QuestManager.StartQuest(code, nStartQuestID)) {
         auto q = m_QuestManager.FindQuest(code);
         if (q == nullptr) {

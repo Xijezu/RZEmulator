@@ -57,7 +57,7 @@ public:
     bool IsFieldProp() const override { return true; }
 
 private:
-    FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo);
+    FieldProp(FieldPropDeleteHandler *propDeleteHandler, const FieldPropRespawnInfo& pPropInfo);
 
     uint32_t m_nRegenTime;
     FieldPropDeleteHandler *m_pDeleteHandler;

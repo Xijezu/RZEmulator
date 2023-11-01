@@ -326,7 +326,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         auto nTargetCreatureGroup = static_cast<int32_t>(pUnit->GetCreatureGroup());
         bool bIsInvalidTarget{true};
         for (int i = -1; i < 5; ++i) {
-            if (nTargetCreatureGroup == GetVar(i + 7) || true /* @Todo: CREATURE_ALL */) {
+            if (nTargetCreatureGroup == GetVar(i + 7) || nTargetCreatureGroup != GameRule::CREATURE_ALL ) {
                 bIsInvalidTarget = false;
                 break;
             }
@@ -459,7 +459,6 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
         return InitError(TS_RESULT_NOT_ENOUGH_LEVEL);
     if (m_pOwner->GetJP() < GetSkillBase()->GetCostJP(GetRequestedSkillLevel(), GetSkillEnhance()))
         return InitError(TS_RESULT_NOT_ENOUGH_JP);
-    ;
     if (int nCostEXP = GetSkillBase()->GetCostEXP(GetRequestedSkillLevel(), GetSkillEnhance()); nCostEXP > 0) {
         if (m_pOwner->GetEXP() < nCostEXP)
             return InitError(TS_RESULT_NOT_ENOUGH_EXP);
@@ -469,12 +468,13 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     auto pTarget = sMemoryPool.GetObjectInWorld<Unit>(handle);
     if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST || GetSkillBase()->GetSkillEffectType() == EF_ADD_REGION_STATE_BY_SELF_COST) {
         float fCostHP{};
-        float fCostSP{};
+        /// @Todo: SP
+        // float fCostSP{};
         float fCostEnergy{};
         float fCostMP{};
 
         fCostHP = GetVar(0) + GetVar(1) * GetRequestedSkillLevel() + GetVar(2) * GetSkillEnhance();
-        fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
+        // fCostSP = GetVar(3) + GetVar(4) * GetRequestedSkillLevel() + GetVar(5) * GetSkillEnhance();
         fCostEnergy = GetVar(6) + GetVar(7) * GetRequestedSkillLevel() + GetVar(8) * GetSkillEnhance();
         if (GetSkillBase()->GetSkillEffectType() == EF_ADD_STATE_BY_SELF_COST)
             fCostMP = GetVar(9) + GetVar(10) * GetRequestedSkillLevel() + GetVar(11) * GetSkillEnhance();
@@ -526,14 +526,28 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
             return InitError(TS_RESULT_NOT_ENOUGH_MP);
     }
 
-    Player *pPlayer{nullptr};
-    if (m_pOwner->IsPlayer())
-        pPlayer = m_pOwner->As<Player>();
-    else if (m_pOwner->IsSummon())
-        pPlayer = m_pOwner->As<Summon>()->GetMaster();
+    if (GetSkillBase()->GetCostItem()) {
+        Player *pPlayer{nullptr};
+        if (m_pOwner->IsPlayer())
+            pPlayer = m_pOwner->As<Player>();
+        else if (m_pOwner->IsSummon())
+            pPlayer = m_pOwner->As<Summon>()->GetMaster();
 
-    if (pPlayer != nullptr) {
-        /// @TODO Cost Item
+        if (pPlayer != nullptr) {
+            if (GetSkillBase()->GetCostItemCode() == ItemCode::ITEM_CODE_WEARED_BULLET) {
+                auto pCostItem = pPlayer->GetWornItem(ItemWearType::WEAR_BULLET);
+                if (pCostItem == nullptr || !pCostItem->IsBullet())
+                    return InitError(TS_RESULT_NOT_ENOUGH_BULLET);
+
+                if (pCostItem == nullptr || pCostItem->GetCount() < GetSkillBase()->GetCostItemCount(GetRequestedSkillLevel()))
+                    return InitError(TS_RESULT_NOT_ENOUGH_BULLET);
+            }
+            else if (GetSkillBase()->GetCostItemCode() != 0) {
+                auto pCostItem = pPlayer->FindItemByCode(GetSkillBase()->GetCostItemCode());
+                if (pCostItem == nullptr || pCostItem->GetCount() < GetSkillBase()->GetCostItemCount(GetRequestedSkillLevel()))
+                    return InitError(TS_RESULT_NOT_ENOUGH_ITEM);
+            }
+        }
     }
 
     if (GetSkillBase()->GetNeedStateId()) {
@@ -879,7 +893,28 @@ void Skill::ProcSkill()
                     Messages::BroadcastHPMPMessage(pSummon, pSummon->GetHealth() - nPrevHP, 0, true);
                 }
             }
-            /// @Todo: Item Cost
+            auto cost_item_code = GetSkillBase()->GetCostItemCode();
+            auto nItemCostCount = GetSkillBase()->GetCostItemCount(GetRequestedSkillLevel());
+            if (cost_item_code != 0) {
+                Player *pPlayer{nullptr};
+                if (m_pOwner->IsPlayer())
+                    pPlayer = m_pOwner->As<Player>();
+                if (m_pOwner->IsSummon())
+                    pPlayer = m_pOwner->As<Summon>()->GetMaster();
+
+                if (pPlayer != nullptr) {
+                    if(cost_item_code == ITEM_CODE_WEARED_BULLET) {
+                        bSuccess = pPlayer->EraseBullet(nItemCostCount);
+                    } else {
+                        auto pCostItem = pPlayer->FindItemByCode(cost_item_code);
+                        if(pCostItem != nullptr && pCostItem->GetCount() >= nItemCostCount) {
+                            pPlayer->EraseItem(pCostItem, nItemCostCount);
+                        } else {
+                            bSuccess = false;
+                        }
+                    }
+                }
+            }
         }
 
         FireSkill(pTarget, bSuccess);
@@ -1444,9 +1479,9 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
 
                 if (!m_pOwner->IsMonster() && GetSkillBase()->GetSkillEffectType() != EF_REMOVE_HATE && GetSkillBase()->GetSkillEffectType() != EF_REGION_REMOVE_HATE) {
                     pt = 0;
-                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK)
+                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_MAGIC_DAMAGE)
                         pt = sr.hitDamage.damage.damage;
-                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP)
+                    else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_HEAL)
                         pt = sr.hitAddStat.nIncStat;
                     else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP) {
                         pt = sr.hitAddHPMPSP.nIncHP;
@@ -1465,8 +1500,7 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                         ++nAddHate;
 
                     if (pDealTarget->IsMonster()) {
-                        auto pMonster = pDealTarget->As<Monster>();
-                        pMonster->AddHate(m_pOwner->GetHandle(), nAddHate, true, true);
+                        pDealTarget->As<Monster>()->AddHate(m_pOwner->GetHandle(), nAddHate, true, true);
                     }
                     else if (pDealTarget->IsNPC()) {
                         /// @Todo: SetAttacker
@@ -1475,31 +1509,6 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                         /// @Todo: AddHateToEnemyList
                     }
 
-                    float fHV{0.0f};
-                    if (nAddHate > 0) {
-                        fHV = nAddHate * 0.02f;
-                    }
-                    else {
-                        if (GetSkillBase()->IsPhysicalSkill())
-                            fHV = nAddHate * 0.65f;
-                        else
-                            fHV = nAddHate * 0.25f;
-                    }
-
-                    float fSC{0.0f};
-                    auto cool_time = GetSkillCoolTime();
-                    if (cool_time <= 1000)
-                        fSC = 1.0f;
-                    else if (cool_time <= 3000)
-                        fSC = 1.2f;
-                    else if (cool_time <= 6000)
-                        fSC = 1.4f;
-                    else if (cool_time <= 15000)
-                        fSC = 1.7f;
-                    else
-                        fSC = 2.0f;
-
-                    /// @Todo: AddHavoc, like seriously, wtf is havoc?!
                 }
             }
         }

@@ -169,8 +169,9 @@ int32_t FieldProp::GetCastingDelay() const
     return m_pFieldPropBase != nullptr ? static_cast<int32_t>(m_pFieldPropBase->nCastingTime) : 0;
 }
 
-FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo)
-    : WorldObject(true)
+FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, const FieldPropRespawnInfo& pPropInfo)
+    : WorldObject(true),
+      m_PropInfo(pPropInfo)
 {
     _mainType = MT_StaticObject;
     _subType = ST_FieldProp;
@@ -181,7 +182,6 @@ FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawn
     m_bIsCasting = false;
     sMemoryPool.AllocMiscHandle(this);
     m_pFieldPropBase = sObjectMgr.GetFieldPropBase(pPropInfo.nPropID);
-    m_PropInfo = pPropInfo;
     m_pDeleteHandler = propDeleteHandler;
     nLifeTime = m_pFieldPropBase->nLifeTime;
     m_nRegenTime = sWorld.GetArTime();

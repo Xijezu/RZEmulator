@@ -97,6 +97,7 @@ public:
 
     void SetStatus(MONSTER_STATUS status);
     void SetTamer(uint32_t handle, int32_t nTamingSkillLevel);
+    void SetNeedToFindEnemy() { m_bNeedToFindEnemy = true; }
 
     uint32_t GetCreatureGroup() const override;
     bool IsEnvironmentMonster() const;

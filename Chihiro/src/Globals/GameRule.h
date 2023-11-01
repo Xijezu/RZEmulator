@@ -64,6 +64,29 @@ public:
     constexpr static int32_t DEFAULT_RUSH_SPEED{140};
     constexpr static int32_t DEFAULT_KNOCK_BACK_SPEED{140};
 
+    constexpr static int RACE_DEVA = 91;
+    constexpr static int RACE_ASURA = 92;
+    constexpr static int RACE_ANT = 11;
+    constexpr static int RACE_CHICKEN = 12;
+    constexpr static int RACE_STONE_TURTLE = 13;
+    constexpr static int RACE_SIREN = 32;
+    constexpr static int RACE_WHITE_DRAGON = 73;
+    constexpr static int RACE_GOBLIN_SKELECTON = 81;
+    constexpr static int JOB_HUNTER = 0;
+
+    constexpr static int CREATURE_NONE = -1;
+    constexpr static int CREATURE_ETC = 0;
+    constexpr static int CREATURE_BEAST = 1;
+    constexpr static int CREATURE_SEMIHUMAN = 2;
+    constexpr static int CREATURE_ELEMENTAL = 3;
+    constexpr static int CREATURE_ANGEL = 4;
+    constexpr static int CREATURE_DEVIL = 5;
+    constexpr static int CREATURE_MECHA = 6;
+    constexpr static int CREATURE_DRAGON = 7;
+    constexpr static int CREATURE_UNDEAD = 8;
+    constexpr static int CREATURE_HUMAN = 9;
+    constexpr static int CREATURE_ALL = 99;
+
 private:
     static int32_t _chipLevelLimit[];
     static int32_t _modtable[];

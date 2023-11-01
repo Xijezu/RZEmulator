@@ -62,7 +62,7 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
 {
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
 #ifdef NG_MARIADB
-    WPFatal(mysql_get_client_version() >= MIN_MARIADB_CLIENT_VERSION, "RZEmulator does not support MariaDB versions below 5.1");
+    WPFatal(mysql_get_client_version() <  MIN_MARIADB_CLIENT_VERSION, "RZEmulator does not support MariaDB versions below 5.1");
     WPFatal(mysql_get_client_version() == MARIADB_PACKAGE_VERSION_ID, "Used MariaDB library version (%s) does not match the version used to compile RZEmulator (%s).", mysql_get_client_info(),
         "MYSQL_SERVER_VERSION");
 #else // NG_MARIADB
