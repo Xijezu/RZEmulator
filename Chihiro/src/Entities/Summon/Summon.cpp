@@ -439,7 +439,7 @@ uint16_t Summon::putoffItem(ItemWearType pos)
 
 void Summon::onCompleteCalculateStat()
 {
-    /* todo: riding mount*/
+
     m_Attribute.nAttackRange = m_tSummonBase->attack_range;
 }
 
@@ -541,7 +541,7 @@ bool Summon::IsAlly(const Unit *pTarget)
     return GetMaster()->IsAlly(pTarget);
 }
 
-void Summon::onAfterRemoveState(State *state)
+void Summon::onAfterRemoveState(State *state, bool)
 {
     SetFlag(UNIT_FIELD_STATUS, STATUS_NEED_TO_CALCULATE_STAT);
     Unit::onAfterRemoveState(state);

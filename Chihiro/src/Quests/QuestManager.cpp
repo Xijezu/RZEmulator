@@ -45,7 +45,7 @@ bool QuestManager::AddQuest(Quest *quest)
     nQuestCode = quest->m_Instance.Code;
 
     if (quest->m_Instance.Code == 0) {
-        NG_LOG_ERROR("quest", "QuestManager::AddQuest: Quest code is zero!");
+        NG_LOG_ERROR("server.quest", "QuestManager::AddQuest: Quest code is zero!");
         return false;
     }
     for (auto &q : m_vActiveQuest) {

@@ -86,7 +86,7 @@ SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float f
         break;
     }
     default:
-        NG_LOG_ERROR("skill", "SkillProp::SkillProp - Unknown Effect Type: %d", m_pSkill.m_SkillBase->effect_type);
+        NG_LOG_ERROR("entities.skill", "SkillProp::SkillProp - Unknown Effect Type: %d", m_pSkill.m_SkillBase->effect_type);
         break;
     }
 }
@@ -164,7 +164,7 @@ void SkillProp::Update(uint32_t /* diff*/)
         break;
     }
     default:
-        NG_LOG_ERROR("skill", "SkillProp::Update - Unknown Effect Type: %d", m_pSkill.m_SkillBase->effect_type);
+        NG_LOG_ERROR("entities.skill", "SkillProp::Update - Unknown Effect Type: %d", m_pSkill.m_SkillBase->effect_type);
         break;
     }
 

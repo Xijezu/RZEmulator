@@ -101,7 +101,7 @@ public:
 
     uint32_t GetCreatureGroup() const override;
     bool IsEnvironmentMonster() const;
-    bool IsBattleMode() const; // override;
+    bool IsBattleMode() const override { return (GetStatus() == STATUS_TRACKING || GetStatus() == STATUS_ATTACK || GetStatus() == STATUS_FIND_ATTACK_POS); }
     bool IsBossMonster() const;
     bool IsDungeonConnector() const;
     bool IsDungeonCore() const;

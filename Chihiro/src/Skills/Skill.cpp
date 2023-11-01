@@ -1448,7 +1448,7 @@ void Skill::FireSkill(Unit *pTarget, bool &bIsSuccess)
 
     if (!bHandled) {
         auto result = NGemity::StringFormat("Unknown skill casted - ID {}, effect_type {}", m_SkillBase->id, m_SkillBase->effect_type);
-        NG_LOG_INFO("skill", "%s", result.c_str());
+        NG_LOG_INFO("entities.skill", "%s", result.c_str());
         if (m_pOwner->IsPlayer())
             Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Player>(), result);
         else if (m_pOwner->IsSummon()) {
@@ -2129,7 +2129,7 @@ void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
         else if (m_pOwner->IsSummon()) {
             Messages::SendChatMessage(50, "@SYSTEM", m_pOwner->As<Summon>()->GetMaster(), result);
         }
-        NG_LOG_DEBUG("skill", "%s", result.c_str());
+        NG_LOG_DEBUG("entities.skill", "%s", result.c_str());
         break;
     }
     }

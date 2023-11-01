@@ -31,7 +31,7 @@ Quest *Quest::AllocQuest(QuestEventHandler *handler, int32_t nID, int32_t code, 
         result->m_bIsNeedUpdateToDB = false;
         result->m_QuestBase = sObjectMgr.GetQuestBase(code);
         if (result->m_QuestBase == nullptr) {
-            NG_LOG_ERROR("quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
+            NG_LOG_ERROR("server.quest", "Quest::AllocQuest: Invalid Quest Code: %u", code);
             delete result;
             return nullptr;
         }
@@ -50,7 +50,7 @@ bool Quest::IsRandomQuest(int32_t code)
 {
     auto base = sObjectMgr.GetQuestBase(code);
     if (base == nullptr) {
-        NG_LOG_ERROR("quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
+        NG_LOG_ERROR("server.quest", "Quest::IsRandomQuest: Invalid Quest Code: %u", code);
         return false;
     }
     QuestType qt = base->nType;
@@ -91,7 +91,7 @@ int32_t Quest::GetValue(int32_t idx) const
 {
     int32_t result{0};
     if (idx > MAX_VALUE_NUMBER - 1) {
-        NG_LOG_ERROR("quest", "Quest::GetValue - Invald Index %u", idx);
+        NG_LOG_ERROR("server.quest", "Quest::GetValue - Invald Index %u", idx);
         result = 0;
     }
     else {
@@ -104,7 +104,7 @@ int32_t Quest::GetStatus(int32_t idx) const
 {
     int32_t result{0};
     if (idx > 5) {
-        NG_LOG_ERROR("quest", "Quest::GetStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("server.quest", "Quest::GetStatus - Invald Index %u", idx);
         result = 0;
     }
     else {
@@ -116,7 +116,7 @@ int32_t Quest::GetStatus(int32_t idx) const
 void Quest::UpdateStatus(int32_t idx, int32_t value)
 {
     if (idx > 5) {
-        NG_LOG_ERROR("quest", "Quest::UpdateStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("server.quest", "Quest::UpdateStatus - Invald Index %u", idx);
     }
     else {
         int32_t old = m_Instance.nStatus[idx];
@@ -130,7 +130,7 @@ void Quest::UpdateStatus(int32_t idx, int32_t value)
 void Quest::IncStatus(int32_t idx, int32_t value)
 {
     if (idx > 5) {
-        NG_LOG_ERROR("quest", "Quest::IncStatus - Invald Index %u", idx);
+        NG_LOG_ERROR("server.quest", "Quest::IncStatus - Invald Index %u", idx);
     }
     else {
         int32_t old = m_Instance.nStatus[idx];

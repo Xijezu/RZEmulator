@@ -155,7 +155,7 @@ ReadDataHandlerResult WorldSession::ProcessIncoming(XPacket *pRecvPct)
 
     // Report unknown packets in the error log
     if (i == worldTableSize && std::find(std::begin(ignoredPackets), std::end(ignoredPackets), (NGemity::Packets)_cmd) == std::end(ignoredPackets)) {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("server.network", "Got unknown packet '%d' from '%s'", pRecvPct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Ok;
     }
     return ReadDataHandlerResult::Ok;
@@ -411,7 +411,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     }
 
     if (m_pPlayer == pMObj && m_pPlayer->IsSitDown()) {
-        // m_pPlayer->StandUp(); @todo
+        m_pPlayer->Standup();
         Messages::BroadcastStatusMessage(m_pPlayer);
     }
 
@@ -438,7 +438,7 @@ void WorldSession::onMoveRequest(const TS_CS_MOVE_REQUEST *pRecvPct)
     if (pMObj->IsPlayer() && pMObj->As<Player>()->IsRiding())
         sWorld.SetMultipleMove(pMObj->As<Player>()->GetRideObject(), start_pos, vMoveInfo, moveSpeed, true, t, true);
 
-    /*if (!mover->SetPendingMove(vMoveInfo, (uint8_t)speed))
+    /*if (!pMObj->SetPendingMove(vMoveInfo, (uint8_t)speed))
         Messages::SendResult(m_pPlayer, pRecvPct->getReceivedId(), TS_RESULT_NOT_ACTABLE, 0);*/
 }
 
@@ -708,7 +708,7 @@ void WorldSession::onDialog(const TS_CS_DIALOG *pRecvPct)
 
     if (!m_pPlayer->IsValidTrigger(pRecvPct->trigger)) {
         if (!m_pPlayer->IsFixedDialogTrigger(pRecvPct->trigger)) {
-            NG_LOG_ERROR("scripting", "INVALID SCRIPT TRIGGER!!! [%s][%s]", m_pPlayer->GetName(), pRecvPct->trigger.c_str());
+            NG_LOG_ERROR("server.scripting", "INVALID SCRIPT TRIGGER!!! [%s][%s]", m_pPlayer->GetName(), pRecvPct->trigger.c_str());
             return;
         }
     }
@@ -716,7 +716,7 @@ void WorldSession::onDialog(const TS_CS_DIALOG *pRecvPct)
     // auto npc = dynamic_cast<NPC *>(sMemoryPool.getPtrFromId(m_pPlayer->GetLastContactLong("npc")));
     auto npc = sMemoryPool.GetObjectInWorld<NPC>(m_pPlayer->GetLastContactLong("npc"));
     if (npc == nullptr) {
-        NG_LOG_TRACE("scripting", "onDialog: NPC not found!");
+        NG_LOG_TRACE("server.scripting", "onDialog: NPC not found!");
         return;
     }
 
@@ -1234,7 +1234,7 @@ void WorldSession::onTakeItem(const TS_CS_TAKE_ITEM *pRecvPct)
 
     // TODO: Weight
     if (item->GetItemInstance().GetOwnerHandle() != 0) {
-        NG_LOG_ERROR("WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
+        NG_LOG_ERROR("entities.item", "WorldSession::onTakeItem(): OwnerHandle not null: %s, handle: %u", m_pPlayer->GetName(), item->GetHandle());
         return;
     }
 
@@ -1856,7 +1856,7 @@ void WorldSession::onAddItem(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
             return;
 
         if (count <= 0 || count > item->GetItemInstance().GetCount()) {
-            NG_LOG_ERROR("trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
+            NG_LOG_ERROR("server.trade", "Add Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;
@@ -1906,7 +1906,7 @@ void WorldSession::onAddGold(uint32_t hTradeTarget, const TS_TRADE *pRecvPct)
 
         int64_t gold = pRecvPct->item_info.base_info.count;
         if (gold <= 0) {
-            NG_LOG_ERROR("trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
+            NG_LOG_ERROR("server.trade", "Add gold Trade Bug [%s:%d]", m_pPlayer->m_szAccount.c_str(), m_pPlayer->GetHandle());
             // Register block account in game rule?
             Messages::SendResult(m_pPlayer, NGemity::Packets::TS_TRADE, TS_ResultCode::TS_RESULT_NOT_EXIST, 0);
             return;

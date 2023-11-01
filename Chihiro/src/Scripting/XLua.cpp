@@ -86,6 +86,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("get_item_rank", &XLua::SCRIPT_GetItemRank, this);
     m_pState.set_function("save", &XLua::SCRIPT_SavePlayer, this);
     m_pState.set_function("insert_item", &XLua::SCRIPT_InsertItem, this);
+    m_pState.set_function("insert_gold", &XLua::SCRIPT_InsertGold, this);
     m_pState.set_function("cprint", &XLua::SCRIPT_CPrint, this);
     m_pState.set_function("add_npc", &XLua::SCRIPT_AddMonster, this);
     m_pState.set_function("get_creature_value", &XLua::SCRIPT_GetCreatureValue, this);
@@ -112,7 +113,7 @@ bool XLua::InitializeLua()
             auto t = m_pState.do_file(it.path().string());
             if (!t.valid()) {
                 sol::error err = t;
-                NG_LOG_ERROR("scripting", "%s", err.what());
+                NG_LOG_ERROR("server.scripting", "%s", err.what());
             }
             else {
                 nFiles++;
@@ -123,10 +124,10 @@ bool XLua::InitializeLua()
         m_pState.script("on_server_init()");
     }
     catch (sol::error &ex) {
-        NG_LOG_ERROR("scripting", "%s", ex.what());
+        NG_LOG_ERROR("server.scripting", "%s", ex.what());
         return false;
     }
-    NG_LOG_INFO("scripting", "Loaded %d files.", nFiles);
+    NG_LOG_INFO("server.scripting", "Loaded %d files.", nFiles);
     return true;
 }
 
@@ -142,7 +143,7 @@ bool XLua::RunString(Unit *pObject, std::string szLua, std::string &szResult)
     }
     catch (std::exception &ex) {
         Messages::SendChatMessage(50, "@SCRIPT", m_pUnit->As<Player>(), ex.what());
-        NG_LOG_ERROR("scripting", "%s", ex.what());
+        NG_LOG_ERROR("server.scripting", "%s", ex.what());
     }
     return true;
 }
@@ -159,7 +160,7 @@ bool XLua::RunString(std::string szScript)
         m_pState.script(szScript);
     }
     catch (sol::error &err) {
-        NG_LOG_ERROR("scripting", "%s", err.what());
+        NG_LOG_ERROR("server.scripting", "%s", err.what());
         return false;
     }
     return true;
@@ -352,7 +353,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
         return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_CHAOS));
     }
 
-    NG_LOG_WARN("scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
+    NG_LOG_WARN("server.scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
     return return_object("");
 }
 
@@ -936,7 +937,7 @@ void XLua::SCRIPT_OpenStorage()
 void XLua::SCRIPT_AddState(sol::variadic_args args)
 {
     if (args.size() < 3) {
-        NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Parameters");
+        NG_LOG_ERROR("server.scripting", "SCRIPT_AddState: Invalid Parameters");
         return;
     }
 
@@ -945,7 +946,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
     uint32_t nStateTime = args[2].get<uint32_t>();
     Player *player = args.size() == 4 ? Player::FindPlayer(args[3].get<std::string>()) : m_pUnit->As<Player>();
     if (player == nullptr) {
-        NG_LOG_ERROR("scripting", "SCRIPT_AddState: Invalid Name");
+        NG_LOG_ERROR("server.scripting", "SCRIPT_AddState: Invalid Name");
         return;
     }
 
@@ -955,7 +956,7 @@ void XLua::SCRIPT_AddState(sol::variadic_args args)
 void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
 {
     if (args.size() < 3) {
-        NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Parameters");
+        NG_LOG_ERROR("server.scripting", "SCRIPT_AddCreatureState: Invalid Parameters");
         return;
     }
 
@@ -966,7 +967,7 @@ void XLua::SCRIPT_AddCreatureState(sol::variadic_args args)
     Summon *summon = player->m_pMainSummon;
 
     if (summon == nullptr || !summon->IsInWorld()) {
-        NG_LOG_ERROR("scripting", "SCRIPT_AddCreatureState: Invalid Name");
+        NG_LOG_ERROR("server.scripting", "SCRIPT_AddCreatureState: Invalid Name");
         return;
     }
 

@@ -36,7 +36,7 @@ const AllowedCommands commandHandler[] = {{"/run", true, &AllowedCommandInfo::on
     {"/notice", true, &AllowedCommandInfo::onCheatNotice}, {"/suicide", true, &AllowedCommandInfo::onCheatSuicide}, {"/doit", true, &AllowedCommandInfo::onCheatKillAll},
     {"/pcreate", false, &AllowedCommandInfo::onCheatCreateParty}, {"/regenerate", true, &AllowedCommandInfo::onCheatRespawn}, {"/pinvite", false, &AllowedCommandInfo::onInviteParty},
     {"/pjoin", false, &AllowedCommandInfo::onJoinParty}, {"/plist", false, &AllowedCommandInfo::onPartyInfo}, {"/pdestroy", false, &AllowedCommandInfo::onPartyDestroy},
-    {"/pleave", false, &AllowedCommandInfo::onLeaveParty}};
+    {"/pleave", false, &AllowedCommandInfo::onLeaveParty}, {"/walk", false, &AllowedCommandInfo::onCheatWalk}};
 
 constexpr int32_t tableSize = (sizeof(commandHandler) / sizeof(AllowedCommands));
 
@@ -55,7 +55,7 @@ void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string & /* 
     if (pClient != nullptr && !pClient->bIsMoving && pClient->IsInWorld() && pClient->GetHealth() != 0 && pClient->IsSitdownable()) {
         if (pClient->GetTargetHandle() != 0)
             pClient->CancelAttack();
-        pClient->m_bSitdown = true;
+        pClient->SitDown();
         Messages::BroadcastStatusMessage(pClient);
     }
 }
@@ -63,9 +63,20 @@ void AllowedCommandInfo::onCheatSitdown(Player *pClient, const std::string & /* 
 void AllowedCommandInfo::onBattleMode(Player *pClient, const std::string &tokens)
 {
     auto target_handle = (uint32_t)std::stoul(tokens);
-    auto unit = sMemoryPool.GetObjectInWorld<Unit>(target_handle);
-    if (unit != nullptr)
-        Messages::BroadcastStatusMessage(unit);
+    auto pUnit = sMemoryPool.GetObjectInWorld<Unit>(target_handle);
+    if (pUnit == nullptr)
+        return;
+
+    if (pUnit->IsPlayer() && pUnit->As<Player>()->GetHandle() == pClient->GetHandle()) {
+        pClient->SetBattleModeOn();
+    }
+    else if (pUnit->IsSummon()) {
+        auto pSummon = pClient->GetSummonByHandle(pUnit->GetHandle());
+        if (pSummon != nullptr) {
+            pSummon->SetBattleModeOn();
+        }
+    }
+    Messages::BroadcastStatusMessage(pUnit);
 }
 
 void AllowedCommandInfo::onCheatNotice(Player *pClient, const std::string &) {}
@@ -82,7 +93,9 @@ void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
                 (*this.*i.handler)(pClient, szMessage.substr(pos + 1));
             else
                 (*this.*i.handler)(pClient, "");
+            return;
         }
+        NG_LOG_ERROR("server.command", "Cannot find command %s, executed by Player %s", szMessage, pClient->GetNameAsString());
     }
 }
 
@@ -125,7 +138,7 @@ void AllowedCommandInfo::onCheatCreateParty(Player *pClient, const std::string &
 
     auto partyID = sGroupManager.CreateParty(pClient, partyName, PARTY_TYPE::TYPE_NORMAL_PARTY);
     if (partyID == -1) {
-        NG_LOG_ERROR("group", "Player wasn't able to create party - %u, %s", pClient->GetPartyID(), pClient->GetName());
+        NG_LOG_ERROR("server.group", "Player wasn't able to create party - %u, %s", pClient->GetPartyID(), pClient->GetName());
         return;
     }
     pClient->SetInt32Value(PLAYER_FIELD_PARTY_ID, partyID);
@@ -170,7 +183,7 @@ void AllowedCommandInfo::onJoinParty(Player *pClient, const std::string &args)
     uint32_t partyPW = (uint32_t)std::stoi(tokenizer[1]);
 
     if (!sGroupManager.JoinParty(partyID, pClient, partyPW)) {
-        NG_LOG_ERROR("group", "JoinParty failed!");
+        NG_LOG_ERROR("server.group", "JoinParty failed!");
         Messages::SendChatMessage(100, "@PARTY", pClient, "HAS_NO_AUTHORITY");
         return;
     }
@@ -208,4 +221,14 @@ void AllowedCommandInfo::onLeaveParty(Player *pClient, const std::string &)
 
     if (sGroupManager.LeaveParty(pClient->GetPartyID(), pClient->GetNameAsString()))
         pClient->SetUInt32Value(PLAYER_FIELD_PARTY_ID, 0);
+}
+
+void AllowedCommandInfo::onCheatWalk(Player *pClient, const std::string &args)
+{
+    if (args.compare("on") == 0)
+        pClient->SetWalk(true);
+    else
+        pClient->SetWalk(false);
+
+    Messages::BroadcastStatusMessage(pClient);
 }

@@ -868,11 +868,6 @@ bool Monster::IsEnvironmentMonster() const
     return m_Base->fight_type == MonsterBase::FIGHT_TYPE_ENVIRONMENT;
 }
 
-bool Monster::IsBattleMode() const
-{
-    return GetStatus() == 1 || GetStatus() == 3 || GetStatus() == 2;
-}
-
 bool Monster::IsBossMonster() const
 {
     return m_Base->monster_type >= MonsterBase::MONSTER_TYPE_DUNGEON_SUB_BOSS;

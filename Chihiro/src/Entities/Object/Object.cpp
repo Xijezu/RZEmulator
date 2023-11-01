@@ -194,7 +194,7 @@ void Object::SetByteValue(uint16_t index, uint8_t offset, uint8_t value)
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
     if (offset > 4) {
-        NG_LOG_DEBUG("game", "Object::SetByteValue: wrong offset %u", offset);
+        NG_LOG_DEBUG("server.worldserver", "Object::SetByteValue: wrong offset %u", offset);
         return;
     }
 
@@ -214,7 +214,7 @@ void Object::SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value)
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
     if (offset > 2) {
-        NG_LOG_ERROR("game", "Object::SetUInt16Value: wrong offset %u", offset);
+        NG_LOG_ERROR("server.worldserver", "Object::SetUInt16Value: wrong offset %u", offset);
         return;
     }
 
@@ -316,7 +316,7 @@ void Object::SetByteFlag(uint16_t index, uint8_t offset, uint8_t newFlag)
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
     if (offset > 4) {
-        NG_LOG_ERROR("entities", "Object::SetByteFlag: wrong offset %u", offset);
+        NG_LOG_ERROR("server.worldserver", "Object::SetByteFlag: wrong offset %u", offset);
         return;
     }
 
@@ -335,7 +335,7 @@ void Object::RemoveByteFlag(uint16_t index, uint8_t offset, uint8_t oldFlag)
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
     if (offset > 4) {
-        NG_LOG_ERROR("entities", "Object::RemoveByteFlag: wrong offset %u", offset);
+        NG_LOG_ERROR("server.worldserver", "Object::RemoveByteFlag: wrong offset %u", offset);
         return;
     }
 

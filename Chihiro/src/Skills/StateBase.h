@@ -18,14 +18,37 @@
 #include "Common.h"
 
 enum AttributeFlag {
-    AF_ERASE_ON_DEAD = 0x1,
-    AF_ERASE_ON_LOGOUT = 0x2,
-    AF_TIME_DECREASE_ON_LOGOUT = 0x4,
-    AF_NOT_ACTABLE_TO_BOSS = 0x8,
-    AF_AF_NOT_ERASABLE = 0x10,
-    AF_ERASE_ON_REQUEST = 0x20,
-    AF_ERASE_ON_DAMAGED = 0x40,
-    AF_ERASE_ON_RESURRECT = 0x80,
+    AF_ERASE_ON_DEAD = (1 << 0),
+    AF_ERASE_ON_LOGOUT = (1 << 1),
+    AF_TIME_DECREASE_ON_LOGOUT = (1 << 2),
+
+    AF_NOT_ACTABLE_TO_BOSS = (1 << 3),
+    AF_NOT_ERASABLE = (1 << 4),
+    AF_ERASE_ON_REQUEST = (1 << 5),
+    AF_ERASE_ON_DAMAGED = (1 << 6),
+    AF_ERASE_ON_RESURRECT = (1 << 7),
+    AF_ERASE_ON_QUIT_HUNTAHOLIC = (1 << 8),
+
+    AF_ERASE_ON_QUIT_DEATHMATCH = (1 << 9),
+    AF_NOT_ERASABLE_ON_ENTER_DEATHMATCH = (1 << 10),
+    AF_NOT_ACTABLE_ON_DEATHMATCH = (1 << 11),
+    AF_ERASE_ON_COMPETE_START = (1 << 12),
+    AF_NOT_ACTABLE_IN_COMPETE = (1 << 13),
+
+    AF_ONLY_FOR_WORLD_STATE = (1 << 14),
+
+    AF_ERASE_ON_QUIT_BATTLE_ARENA = (1 << 15),
+    AF_ERASE_ON_STAND_UP = (1 << 16),
+};
+
+enum {
+    TYPE_NORMAL = 0,
+    TYPE_DUPLICATE = 1,
+    TYPE_DEPENDENCE = 2,
+};
+
+enum {
+    MAX_STATE_VALUE = 20,
 };
 
 enum StateCode {
@@ -300,5 +323,5 @@ struct StateTemplate {
     int32_t add_damage_base;
     int32_t add_damage_per_skl;
     int32_t effect_type;
-    float value[20]{0};
+    float value[MAX_STATE_VALUE]{0};
 };

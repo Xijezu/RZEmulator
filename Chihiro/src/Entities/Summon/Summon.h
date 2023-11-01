@@ -38,6 +38,10 @@ public:
     CreatureStat *GetBaseStat() const override;
     inline uint32_t GetSummonSID() const { return GetUInt32Value(UNIT_FIELD_UID); }
 
+    bool IsBattleMode() const override { return m_bIsBattleMode; }
+    void SetBattleModeOn() { m_bIsBattleMode = true; }
+    void SetBattleModeOff() { m_bIsBattleMode = false; }
+
     uint32_t GetCreatureGroup() const override { return 9; }
 
     void OnAfterReadSummon();
@@ -80,7 +84,7 @@ protected:
     void onBeforeCalculateStat() override;
     void applyJobLevelBonus() override;
     void onUpdateState(State *state, bool bIsExpire) override;
-    void onAfterRemoveState(State *state) override;
+    void onAfterRemoveState(State *state, bool bByDead = false) override;
     using Unit::applyPassiveSkillEffect; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
     void applyPassiveSkillEffect() override;
     using Unit::applyState; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
@@ -102,4 +106,5 @@ private:
     float m_fBaseMagicPointRatio{};
     float m_fBaseDefenceRatio{};
     float m_fBaseMagicDefenceRatio{};
+    bool m_bIsBattleMode{false};
 };

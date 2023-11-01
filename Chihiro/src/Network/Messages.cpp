@@ -555,35 +555,67 @@ void Messages::SendCantAttackMessage(Player *pPlayer, uint32_t handle, uint32_t 
 
 uint32_t Messages::GetStatusCode(WorldObject *pObj, Player *pClient)
 {
-    uint32_t v2{0};
-
-    switch (pObj->GetSubType()) {
-    case ST_NPC: {
-        auto npc = dynamic_cast<NPC *>(pObj);
-        if (npc->HasFinishableQuest(pClient))
-            v2 |= 0x400;
-        else if (npc->HasStartableQuest(pClient))
-            v2 |= 0x100;
-        else if (npc->HasInProgressQuest(pClient))
-            v2 |= 0x200;
-    } break;
-    case ST_Mob: {
-        auto monster = dynamic_cast<Monster *>(pObj);
-        if (monster->GetStatus() == 4)
-            v2 |= 0x100;
-    } break;
-    case ST_Player: {
-        auto player = dynamic_cast<Player *>(pObj);
-        if (player->IsSitDown())
-            v2 |= 0x100;
-        if (player->GetPermission() >= 100)
-            v2 |= 0x4000;
-    } break;
-    default:
-        break;
+    uint32_t status = 0;
+    if (pObj->IsUnit()) {
+        auto pUnit = pObj->As<Unit>();
+        if (pUnit->IsBattleMode())
+            status |= TS_UNIT_FLAG::FLAG_BATTLE_MODE;
+        if (pUnit->IsInvisible())
+            status |= TS_UNIT_FLAG::FLAG_INVISIBLE;
     }
 
-    return v2;
+    if (pObj->IsPlayer()) {
+        auto pPlayer = pObj->As<Player>();
+
+        if (pPlayer->IsSitDown())
+            status |= TS_PLAYER_FLAG::FLAG_SITDOWN;
+        // @Todo: Booth
+        // if (pPlayer->GetBoothStatus() == StructPlayer::BUY_BOOTH)
+        //     status |= TS_PLAYER_FLAG::FLAG_BUY_BOOTH;
+        // if (pPlayer->GetBoothStatus() == StructPlayer::SELL_BOOTH)
+        //     status |= TS_PLAYER_FLAG::FLAG_SELL_BOOTH;
+        if (pPlayer->IsPKOn())
+            status |= TS_PLAYER_FLAG::FLAG_PK_ON;
+        if (pPlayer->IsBloodyCharacter())
+            status |= TS_PLAYER_FLAG::FLAG_BLOODY;
+        if (pPlayer->IsDemoniacCharacter())
+            status |= TS_PLAYER_FLAG::FLAG_DEMONIAC;
+        if (pPlayer->GetPermission() >= GameRule::GM_PERMISSION)
+            status |= TS_PLAYER_FLAG::FLAG_GM;
+        // @Todo: Dungeon Siege
+        // if (pPlayer->IsDungeonOriginalOwner())
+        //     status |= TS_PLAYER_FLAG::FLAG_DUNGEON_ORIGINAL_OWNER;
+        // if (pPlayer->IsDungeonOriginalSieger())
+        //     status |= TS_PLAYER_FLAG::FLAG_DUNGEON_ORIGINAL_SIEGER;
+        if (pPlayer->IsWalking())
+            status |= TS_PLAYER_FLAG::FLAG_WALKING;
+    }
+    else if (pObj->IsNPC()) {
+        auto pNPC = pObj->As<NPC>();
+
+        if (pNPC->HasFinishableQuest(pClient)) {
+            status |= TS_NPC_FLAG::FLAG_HAS_FINISHABLE_QUEST;
+        }
+        else if (pNPC->HasStartableQuest(pClient)) {
+            status |= TS_NPC_FLAG::FLAG_HAS_STARTABLE_QUEST;
+        }
+        else if (pNPC->HasInProgressQuest(pClient)) {
+            status |= TS_NPC_FLAG::FLAG_HAS_IN_PROGRESS_QUEST;
+        }
+    }
+    else if (pObj->IsMonster()) {
+        auto pMonster = pObj->As<Monster>();
+
+        if (pMonster->IsDead())
+            status |= TS_MONSTER_FLAG::FLAG_DEAD;
+        // @Todo: Dungeon Siege
+        // if (pMonster->IsOriginalDungeonOwnerGuardian())
+        //     status |= TS_PLAYER_FLAG::FLAG_DUNGEON_ORIGINAL_OWNER;
+        // if (pMonster->IsOriginalDungeonSiegerGuardian())
+        //     status |= TS_PLAYER_FLAG::FLAG_DUNGEON_ORIGINAL_SIEGER;
+    }
+
+    return status;
 }
 
 void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text, int32_t ttype)

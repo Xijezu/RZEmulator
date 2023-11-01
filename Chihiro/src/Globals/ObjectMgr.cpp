@@ -1308,7 +1308,7 @@ void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
     if (_monsterBaseStore.count(info.monster_id))
         g_vRespawnInfo.emplace_back(info);
     else
-        NG_LOG_WARN("misc", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
+        NG_LOG_WARN("server.worldserver", "[respawn_rare_mob] Monster %d does not exist!", info.monster_id);
 }
 
 CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[])

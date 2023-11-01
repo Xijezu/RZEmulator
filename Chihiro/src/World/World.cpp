@@ -101,7 +101,7 @@ void World::LoadConfigSettings(bool reload)
     if (reload) {
         std::string configError;
         if (!sConfigMgr->Reload(configError)) {
-            NG_LOG_ERROR("misc", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
+            NG_LOG_ERROR("server.worldserver", "World settings reload fail: can't read settings from %s.", sConfigMgr->GetFilename().c_str());
             return;
         }
         sLog->LoadFromConfig();
@@ -310,7 +310,7 @@ void World::AddObjectToWorld(WorldObject *obj)
     rf.Run();
 
     if (obj->pRegion != nullptr)
-        NG_LOG_INFO("map", "Region not nullptr!!!");
+        NG_LOG_INFO("server.worldserver", "Region not nullptr!!!");
     region->AddObject(obj);
 }
 
@@ -639,7 +639,7 @@ bool World::ProcTame(Monster *pMonster)
 
     Item *pItem = player->FindItem(nTameItemCode, (uint32_t)ITEM_FLAG_TAMING, true);
     if (pItem == nullptr) {
-        NG_LOG_INFO("skills", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
+        NG_LOG_INFO("entities.skill", "ProcTame: A summon card used for taming is lost. [%s]", player->GetName());
         ClearTamer(pMonster, false);
         Messages::BroadcastTamingMessage(player, pMonster, 3);
         return false;
@@ -662,7 +662,7 @@ bool World::ProcTame(Monster *pMonster)
     }
 
     fTameProbability *= (((pSkill->m_SkillBase->var[1] * pSkill->GetSkillEnhance()) + (pSkill->m_SkillBase->var[0] * pMonster->m_nTamingSkillLevel) + 1) * 1000000);
-    NG_LOG_INFO("taming", "You have a success rate of %f percent.", fTameProbability / 1000000);
+    NG_LOG_DEBUG("server.worldserver", "Taming success rate of %f percent.", fTameProbability / 1000000);
     if (fTameProbability < irand(1, 1000000)) {
         player->EraseItem(pItem, 1);
         ClearTamer(pMonster, false);

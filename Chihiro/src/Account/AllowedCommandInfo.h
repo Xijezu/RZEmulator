@@ -47,6 +47,7 @@ public:
     void onPartyInfo(Player *pClient, const std::string &);
     void onLeaveParty(Player *pClient, const std::string &);
     void onPartyDestroy(Player *pClient, const std::string &);
+    void onCheatWalk(Player *pClient, const std::string &);
 
 protected:
     AllowedCommandInfo() = default;

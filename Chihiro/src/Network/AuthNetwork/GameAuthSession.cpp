@@ -62,7 +62,7 @@ ReadDataHandlerResult GameAuthSession::ProcessIncoming(XPacket *pGamePct)
 
     // Report unknown packets in the error log
     if (i == authTableSize) {
-        NG_LOG_DEBUG("network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
+        NG_LOG_DEBUG("server.network", "Got unknown packet '%d' from '%s'", pGamePct->GetPacketID(), GetRemoteIpAddress().to_string().c_str());
         return ReadDataHandlerResult::Error;
     }
     return ReadDataHandlerResult::Ok;
@@ -108,14 +108,14 @@ std::string GameAuthSession::GetAccountName()
 
 void GameAuthSession::OnClose()
 {
-    NG_LOG_ERROR("network", "Authserver has closed connection!");
+    NG_LOG_ERROR("server.network", "Authserver has closed connection!");
 }
 
 void GameAuthSession::HandleGameLoginResult(XPacket *pRecvPct)
 {
     auto result = pRecvPct->read<uint16_t>();
     if (result != TS_RESULT_SUCCESS) {
-        NG_LOG_ERROR("network", "Authserver refused login! Shutting down...");
+        NG_LOG_ERROR("server.network", "Authserver refused login! Shutting down...");
         World::StopNow(ERROR_EXIT_CODE);
     }
 }

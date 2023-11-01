@@ -53,7 +53,7 @@ namespace NGemity {
         NG_LOG_INFO("server.authserver", "      |_| \\_|\\_____|\\___|_| |_| |_|_|\\__|\\__, |");
         NG_LOG_INFO("server.authserver", "                                          __/ |");
         NG_LOG_INFO("server.authserver", "                                         |___/");
-        NG_LOG_INFO("server.authserver", "           NGemity (c) 2024 - For Rappelz");
+        NG_LOG_INFO("server.authserver", "           NGemity (c) 2023 - For Rappelz");
         NG_LOG_INFO("server.authserver", "               <https://ngemity.org/>");
 
         return NGInitTuple(true, ioContext);

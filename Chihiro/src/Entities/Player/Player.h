@@ -22,6 +22,7 @@
 #include "TimeSync.h"
 #include "Unit.h"
 #include "XPacket.h"
+#include "GameRule.h"
 
 class WorldSession;
 class Item;
@@ -149,9 +150,18 @@ public:
     int32_t AddStamina(int32_t nStamina);
     int32_t GetStaminaRegenRate();
     CONDITION_INFO GetCondition() const;
-    bool IsSitdownable();
 
+    bool IsSitdownable();
     bool IsSitDown() const override { return m_bSitdown; }
+    void SitDown() { m_bSitdown = true; }
+    void Standup()
+    {
+        m_bSitdown = false;
+        onStandUp();
+    }
+
+    void SetWalk(bool bOn) { m_bWalk = bOn; }
+    bool IsWalking() const { return m_bWalk; }
 
     int32_t GetJobDepth();
 
@@ -254,6 +264,13 @@ public:
 
     bool IsAlly(const Unit *pUnit) override;
 
+    /* ****************** PK *******************/
+    inline bool IsPKOn() const { return m_bIsPK; }
+    inline void SetPKOn() { m_bIsPK = true; }
+    inline void SetPKOff() { m_bIsPK = false; }
+    bool IsBloodyCharacter() const { return (GetFloatValue(PLAYER_FIELD_IP) >= GameRule::MORAL_LIMIT); }
+    bool IsDemoniacCharacter() const { return (GetFloatValue(PLAYER_FIELD_IP) >= GameRule::CRIME_LIMIT); }
+
     /* ****************** DIALOG *******************/
     void SetLastContact(const std::string &, uint32_t);
     void SetLastContact(const std::string &, const std::string &);
@@ -295,6 +312,10 @@ public:
     bool IsSummoner();
     bool IsUsingBow() const override;
     bool IsUsingCrossBow() const override;
+
+    bool IsBattleMode() const override { return m_bIsBattleMode; }
+    void SetBattleModeOn() { m_bIsBattleMode = true; }
+    void SetBattleModeOff() { m_bIsBattleMode = false; }
 
     bool IsPlayer() const override { return true; }
 
@@ -349,6 +370,7 @@ public:
     void AddChaos(int32_t chaos);
     bool m_bSitdown{false};
     bool m_bTrading{false};
+    bool m_bWalk{false};
     bool m_bTradeFreezed{false};
     bool m_bTradeAccepted{false};
 
@@ -367,6 +389,7 @@ protected:
     void applyState(State &state) override;
     void onDead(Unit *pFrom, bool decreaseEXPOnDead) override;
     int32_t onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical) override;
+    void onAfterRemoveState(State *state, bool bByDead = false) override;
 
     void onStartQuest(Quest *pQuest);
     void updateQuestStatus(Quest *pQuest);
@@ -375,6 +398,7 @@ protected:
 private:
     void onDropQuest(Quest *pQuest);
     void openStorage();
+    void onStandUp();
     void setSummonUpdate();
     Item *popItem(Item *pItem, int64_t cnt, bool bSkipUpdateToDB);
 
@@ -416,6 +440,8 @@ private:
     bool m_bIsStorageRequested{false};
     bool m_bIsStorageLoaded{false};
     bool m_bIsUsingStorage{false};
+    bool m_bIsPK{false};
+    bool m_bIsBattleMode{false};
 
     // Dialog stuff
     int32_t m_nDialogType{};

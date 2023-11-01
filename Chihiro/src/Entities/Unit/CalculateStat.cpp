@@ -107,13 +107,13 @@ void Unit::CalculateStat()
 
     m_nDoubleWeaponMasteryLevel = 0;
 
-    m_cStatByState.Reset(0);
-    m_StatAmplifier.Reset(0.0f);
-    m_AttributeByState.Reset(0);
-    m_AttributeAmplifier.Reset(0);
-    m_Attribute.Reset(0);
-    m_Resist.Reset(0);
-    m_ResistAmplifier.Reset(0.0f);
+    m_cStatByState = {};
+    m_StatAmplifier = {};
+    m_AttributeByState = CreatureAtributeServer{};
+    m_AttributeAmplifier = {};
+    m_Attribute = CreatureAtributeServer{};
+    m_Resist = {};
+    m_ResistAmplifier = {};
 
     m_vNormalAdditionalDamage.clear();
     m_vRangeAdditionalDamage.clear();
@@ -127,8 +127,8 @@ void Unit::CalculateStat()
     auto statptr = GetBaseStat();
     CreatureStat basestat{};
     if (statptr != nullptr)
-        basestat.Copy(*statptr);
-    m_cStat.Copy(basestat);
+        basestat = CreatureStat{*statptr};
+    m_cStat = CreatureStat{basestat};
     onBeforeCalculateStat();
 
     // checkAdditionalItemEffect(); -> Nonexistant in epic 4
@@ -167,7 +167,7 @@ void Unit::CalculateStat()
     // TODO onAfterCalcAttrivuteByStat -> Nonexistant, loop through passiveskills <- Beltskills? o0
     applyItemEffect();
     applyPassiveSkillEffect();
-    stateAttr.Copy(m_Attribute);
+    stateAttr = CreatureAtributeServer(m_Attribute);
     applyStateEffect();
     m_AttributeByState.nAttackPointRight += (m_Attribute.nAttackPointRight - stateAttr.nAttackPointRight);
     m_AttributeByState.nAttackPointLeft += (m_Attribute.nAttackPointLeft - stateAttr.nAttackPointLeft);
@@ -196,7 +196,7 @@ void Unit::CalculateStat()
     m_AttributeByState.nMPRegenPoint += (m_Attribute.nMPRegenPoint - stateAttr.nMPRegenPoint);
     applyPassiveSkillAmplifyEffect();
     onApplyAttributeAdjustment();
-    stateAttr.Copy(m_Attribute);
+    stateAttr = CreatureAtributeServer(m_Attribute);
     getAmplifiedAttributeByAmplifier(stateAttr);
     applyStateAmplifyEffect();
     getAmplifiedAttributeByAmplifier(m_Attribute);

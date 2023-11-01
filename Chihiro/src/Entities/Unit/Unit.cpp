@@ -1678,7 +1678,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
         }
     }
 
-    bool bNotErasable = stateInfo->state_time_type & AF_AF_NOT_ERASABLE;
+    bool bNotErasable = stateInfo->state_time_type & AF_NOT_ERASABLE;
     std::vector<uint16_t> vDeleteStateUID{};
     bool bAlreadyExist{false};
 
@@ -1698,7 +1698,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
         }
 
         if (bIsDuplicatedGroup) {
-            bool bNotErasableCur = it->GetTimeType() & AF_AF_NOT_ERASABLE;
+            bool bNotErasableCur = it->GetTimeType() & AF_NOT_ERASABLE;
             if (bNotErasable == bNotErasableCur) {
                 if (it->GetLevel() > level || (it->GetLevel() == level && it->GetEndTime() > end_time))
                     return TS_RESULT_ALREADY_EXIST;
@@ -1727,7 +1727,7 @@ uint16_t Unit::AddState(StateType type, StateCode code, uint32_t caster, int32_t
                 m_vStateList.erase(it);
                 CalculateStat();
 
-                onAfterRemoveState(state);
+                onAfterRemoveState(state, false);
                 state->DeleteThis();
                 break;
             }
@@ -2056,7 +2056,7 @@ bool Unit::ClearExpiredState(uint32_t t)
             it = m_vStateList.erase(it);
 
             CalculateStat();
-            onAfterRemoveState(state);
+            onAfterRemoveState(state, false);
 
             continue;
         }
@@ -2990,7 +2990,7 @@ int32_t Unit::GetCriticalDamage(int32_t damage, float critical_amp, int32_t crit
     return 0;
 }
 
-void Unit::onAfterRemoveState(State *pState)
+void Unit::onAfterRemoveState(State *pState, bool)
 {
     procMoveSpeedChange();
 }
@@ -3034,7 +3034,7 @@ void Unit::removeStateByDead()
     ClearRemovedStateByDeath();
 
     std::vector<State *> removedStates{};
-    RemoveStateIf([](const State *p) { return p->GetTimeType() & AF_ERASE_ON_DEAD; }, &removedStates, true);
+    RemoveStateIf(StateFlagChecker(AF_ERASE_ON_DEAD), &removedStates, true);
 
     if (IsPlayer()) {
         for (auto &pState : removedStates) {
@@ -3074,7 +3074,7 @@ void Unit::RemoveStateIf(COMPARER comparer, std::vector<State *> *result, bool b
 
     for (it = removedStates.begin(); it != removedStates.end(); ++it) {
         onUpdateState((*it), true);
-        onAfterRemoveState(*it);
+        onAfterRemoveState(*it, bByDead);
     }
 
     if (!removedStates.empty())
@@ -3302,4 +3302,8 @@ Skill *Unit::GetSkillByEffectType(SKILL_EFFECT_TYPE nEffectTypeID) const
             return pSkill;
     }
     return nullptr;
+}
+
+bool Unit::StateFlagChecker::operator()(const State* state) {
+    return static_cast<bool>( state->GetTimeType() & flag );
 }

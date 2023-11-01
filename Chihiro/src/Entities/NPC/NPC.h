@@ -49,10 +49,12 @@ public:
     int32_t GetQuestTextID(int32_t code, int32_t progress) const;
     int32_t GetProgressFromTextID(int32_t code, int32_t textId) const;
 
+    bool IsBattleMode() const override {return (GetStatus() == NPC_STATUS_TRACKING || GetStatus() == NPC_STATUS_ATTACK || GetStatus() == NPC_STATUS_FIND_ATTACK_POS); }
+
     NPCTemplate *m_pBase;
 
 private:
-    int32_t m_nStatus;
+    int32_t m_nStatus{0};
     std::vector<QuestLink *> m_vQuestLink_Start{};
     std::vector<QuestLink *> m_vQuestLink_Progress{};
     std::vector<QuestLink *> m_vQuestLink_End{};

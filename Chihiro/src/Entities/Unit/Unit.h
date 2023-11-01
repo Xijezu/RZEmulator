@@ -400,7 +400,19 @@ public:
     uint16_t AddState(
         StateType type, StateCode code, uint32_t caster, int32_t level, uint32_t start_time, uint32_t end_time, bool bIsAura = false, int32_t nStateValue = 0, std::string szStateValue = "");
 
+    template<typename COMPARER>
+    void RemoveStateIf(COMPARER comparer, std::vector<State *> *result = nullptr, bool bByDead = false);
+
 protected:
+    struct StateFlagChecker {
+        StateFlagChecker(const int flag)
+            : flag(flag)
+        {
+        }
+        bool operator()(const State *state);
+        int flag;
+    };
+
     uint16_t onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float var1, float var2, const std::string &szParameter);
     void removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, uint32_t nOriginalCastingTime);
 
@@ -432,7 +444,7 @@ protected:
     void processAttack();
     void broadcastAttackMessage(Unit *pTarget, AttackInfo arDamage[], int32_t tm, int32_t delay, bool bIsDoubleAttack, bool bIsAiming = false, bool bEndAttack = false, bool bCancelAttack = false);
     void onAfterAddState(State *);
-    virtual void onAfterRemoveState(State *state);
+    virtual void onAfterRemoveState(State *state, bool bByDead = false);
     virtual void onUpdateState(State *state, bool bIsExpire);
     void procMoveSpeedChange();
     void processPendingMove();
@@ -468,6 +480,9 @@ protected:
     void applyStateAmplifyEffect();
     void amplifyStatByState();
     ///-END CalculateStat functions
+
+    virtual bool IsBattleMode() const { return false; }
+    bool IsInvisible() const { return HasFlag(UNIT_FIELD_STATUS, STATUS_HIDING); }
 
     void _InitTimerFieldsAndStatus();
     std::vector<State *> m_vStateList{};
@@ -560,6 +575,4 @@ private:
     void AddStateByAttack(Unit *pTarget, bool bIsAttacking, bool bIsSkill, bool bIsPhysicalSkill, bool bIsHarmful);
     void RemoveStatesOnDamage();
     int32_t GetCriticalDamage(int32_t damage, float critical_amp, int32_t critical_bonus);
-    template<typename COMPARER>
-    void RemoveStateIf(COMPARER comparer, std::vector<State *> *result = nullptr, bool bByDead = false);
 };

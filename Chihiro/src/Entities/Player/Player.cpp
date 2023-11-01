@@ -237,7 +237,7 @@ bool Player::ReadCharacter(const std::string &_name, int32_t _race)
                     nSummonIdx++;
                 }
                 else {
-                    NG_LOG_ERROR("entities", "Invalid Summon Bind!");
+                    NG_LOG_ERROR("entities.player", "Invalid Summon Bind!");
                 }
             }
         }
@@ -306,7 +306,7 @@ void Player::DB_ReadStorage(bool bReload)
 
             Item *newItem = Item::AllocItem(sid, code, cnt, genCode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
             if (newItem == nullptr) {
-                NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                NG_LOG_ERROR("entities.player", "ItemID Invalid! %d", code);
                 continue;
             }
             newItem->GetItemInstance().SetFlag(newItem->GetItemInstance().GetFlag() & ITEM_FLAG_TAMING);
@@ -419,7 +419,7 @@ bool Player::ReadItemList(int32_t sid)
 
             auto item = Item::AllocItem(uid, code, cnt, (GenerateCode)gcode, level, enhance, flag, socket_0, socket_1, socket_2, socket_3, remain_time);
             if (item == nullptr) {
-                NG_LOG_ERROR("entities.item", "ItemID Invalid! %d", code);
+                NG_LOG_ERROR("entities.player", "ItemID Invalid! %d", code);
                 continue;
             }
             item->GetItemInstance().SetFlag(item->GetItemInstance().GetFlag() & 0xDFFFFFFF);
@@ -961,7 +961,7 @@ void Player::applyJobLevelBonus()
         jobs[i] = GetCurrentJob();
         levels[i] = GetCurrentJLv();
         stat = sObjectMgr.GetJobLevelBonus(jobDepth, jobs, levels);
-        m_cStat.Add(stat);
+        m_cStat = m_cStat + stat;
     }
 }
 
@@ -1263,7 +1263,7 @@ void Player::onChangeCount(Inventory * /*pInventory*/, Item *pItem, bool bSkipUp
 Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
 {
     if ((uint32_t)pItem->GetItemInstance().GetOwnerUID() == GetUInt32Value(UNIT_FIELD_UID)) {
-        NG_LOG_ERROR("entities", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->GetItemInstance().GetOwnerUID(), GetName());
+        NG_LOG_ERROR("entities.player", "Player::PushItem(): tried to push already owned Item: %d, %s", pItem->GetItemInstance().GetOwnerUID(), GetName());
         return nullptr;
     }
 
@@ -1272,7 +1272,7 @@ Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
         int64_t nPrevGoldAmount = GetGold();
         int64_t gold = GetGold() + pItem->GetItemInstance().GetCount();
         if (ChangeGold(gold) != TS_RESULT_SUCCESS) {
-            NG_LOG_ERROR("ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
+            NG_LOG_ERROR("entities.player", "ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
         }
         Item::PendFreeItem(pItem);
         return nullptr;
@@ -2170,8 +2170,8 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
                 nCode = pTarget->As<NPC>()->GetNPCID();
             }
 
-            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), static_cast<int32_t>(targetType), (pTarget != nullptr ? pTarget->GetHandle() : 0),
-                nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
+            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), static_cast<int32_t>(targetType),
+                (pTarget != nullptr ? pTarget->GetHandle() : 0), nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
         }
 
         auto nNPCHandle = GetLastContactLong("npc");
@@ -2437,7 +2437,7 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
     }
     else {
         if (ChangeGold(nPrevGold) != TS_RESULT_SUCCESS) {
-            NG_LOG_ERROR("quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nPrevGold);
+            NG_LOG_ERROR("server.quest", "ChangeGold/ChangeStorageGold Failed: Case[6], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nPrevGold);
         }
         Messages::SendQuestMessage(120, this, "END|FAIL|0");
     }
@@ -3381,7 +3381,7 @@ bool Player::ProcessTrade()
             }
 
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS) {
-                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
+                NG_LOG_ERROR("server.trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
 
             return false;
@@ -3395,14 +3395,14 @@ bool Player::ProcessTrade()
             }
 
             if (ChangeGold(nTradeTargetResult) != TS_RESULT_SUCCESS || tradeTarget->ChangeGold(nPrevTradeTargetGold) != TS_RESULT_SUCCESS) {
-                NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s], Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
+                NG_LOG_ERROR("server.trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s], Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), nTradeTargetResult);
             }
 
             return false;
         }
 
         if (processTradeItem() != TS_RESULT_SUCCESS || tradeTarget->processTradeItem() != TS_RESULT_SUCCESS) {
-            NG_LOG_ERROR("trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount.c_str(), tradeTarget->m_szAccount.c_str());
+            NG_LOG_ERROR("server.trade", "Player::ProcessTrade(): Error on trading with %s(%s)", m_szAccount.c_str(), tradeTarget->m_szAccount.c_str());
             return false;
         }
 
@@ -3432,7 +3432,7 @@ uint16_t Player::processTradeGold()
             return TS_RESULT_SUCCESS;
 
         if (tradeGold < 0) {
-            NG_LOG_ERROR("trade", "Player::processTradeGold(): Gold cannot be negative value");
+            NG_LOG_ERROR("server.trade", "Player::processTradeGold(): Gold cannot be negative value");
             // GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
             return TS_RESULT_ACCESS_DENIED;
         }
@@ -3442,13 +3442,13 @@ uint16_t Player::processTradeGold()
         }
 
         if (ChangeGold(prevGold) != TS_RESULT_SUCCESS) {
-            NG_LOG_ERROR("trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), prevGold);
+            NG_LOG_ERROR("server.trade", "ChangeGold/ChangeStorageGold Failed: Case[3], Player[%s}, Info[Owned(%ld), Target(%ld)]", GetName(), GetGold(), prevGold);
         }
 
         return TS_RESULT_TOO_MUCH_MONEY;
     }
     else {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
+        NG_LOG_ERROR("server.trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         // GameRule::RegisterBlockAccount((const char *)(v1 + 4104));
         return TS_RESULT_NOT_EXIST;
     }
@@ -3463,7 +3463,7 @@ uint16_t Player::processTradeItem()
         return TS_RESULT_NOT_EXIST;
 
     if (!IsInWorld()) {
-        NG_LOG_ERROR("trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
+        NG_LOG_ERROR("server.trade", "Player::processTradeGold(): Player not logged in %s", m_szAccount.c_str());
         return TS_RESULT_NOT_EXIST;
     }
 
@@ -3565,6 +3565,30 @@ void Player::onEnergyChange()
     energyPct.handle = GetHandle();
     energyPct.energy = static_cast<uint16_t>(GetInt32Value(UNIT_FIELD_ENERGY));
     sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), energyPct);
+}
+
+
+void Player::onAfterRemoveState(State *state, bool bOnDead)
+{
+    if (!bOnDead)
+        state->DeleteThis();
+
+    if (state->GetEffectType() == SEF_CREATURE_PARAMETER_AMP) {
+        setSummonUpdate();
+    }
+    // else if (state->GetEffectType() == SEF_IMMORTALIZE) {
+    //     int nHealingHP = state->GetValue(2) > state->GetValue(3) * GetMaxHealth() ? state->GetValue(2) : state->GetValue(3) * GetMaxHealth();
+    //     AddHealth(nHealingHP);
+
+    //     Messages::BroadcastHPMPMessage(this, nHealingHP, 0);
+    // }
+    // else if (state->GetEffectType() == SEF_AUTO_RESURRECTION_AFTER_REMOVE_STATE) {
+    //     int nCostMP = (state.GetValue(0) + state.GetValue(1) * state.GetLevel()) * GetMP();
+    //     int nIncHP = (state.GetValue(2) + state.GetValue(3) * state.GetLevel()) * nCostMP;
+    //     Resurrect(CRT_STATE, nIncHP, -nCostMP, GetLastDecreasedEXP(), true);
+    // }
+
+    Unit::onAfterRemoveState(state);
 }
 
 Summon *Player::GetRideObject() const
@@ -3694,4 +3718,9 @@ int32_t Player::onDamage(Unit *pFrom, ElementalType elementalType, DamageType da
         }
     }
     return Unit::onDamage(pFrom, elementalType, damageType, nDamage, bCritical);
+}
+
+void Player::onStandUp()
+{
+    RemoveStateIf(StateFlagChecker(AF_ERASE_ON_STAND_UP));
 }

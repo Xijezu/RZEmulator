@@ -39,27 +39,16 @@ Item *Item::AllocItem(uint64_t nUID, int32_t nCode, int64_t nCount, GenerateCode
     // Workaround for Gold (handled as item, too)
     // Don't set that stuff if it's gold
     if (pItem->GetItemTemplate() != nullptr) {
-        if (nLevel == -1)
-            pItem->GetItemInstance().SetLevel(pItem->GetItemTemplate()->level);
-        else
-            pItem->GetItemInstance().SetLevel(nLevel);
+        pItem->GetItemInstance().SetLevel(nLevel == -1 ? pItem->GetItemTemplate()->level : nLevel);
         if (pItem->GetItemInstance().GetLevel() <= 0)
             pItem->GetItemInstance().SetLevel(1);
 
-        if (nEnhance == -1)
-            pItem->GetItemInstance().SetEnhance(pItem->GetItemTemplate()->enhance);
-        else
-            pItem->GetItemInstance().SetEnhance(nEnhance);
+        pItem->GetItemInstance().SetEnhance(nEnhance == -1 ? pItem->GetItemTemplate()->enhance : nEnhance);
         if (pItem->GetItemGroup() == ItemGroup::GROUP_SKILLCARD && pItem->GetItemInstance().GetEnhance() == 0)
             pItem->GetItemInstance().SetEnhance(1);
 
-        if (nFlag == -1)
-            pItem->GetItemInstance().SetFlag(pItem->GetItemTemplate()->status_flag);
-        else
-            pItem->GetItemInstance().SetFlag(nFlag);
-
+        pItem->GetItemInstance().SetFlag(nFlag == -1 ? pItem->GetItemTemplate()->status_flag : nFlag);
         pItem->GetItemInstance().SetGenerateInfo(eGenerateCode);
-        pItem->GetItemInstance().SetFlag(nFlag);
         pItem->GetItemInstance().SetCurrentEndurance(pItem->GetItemBase()->endurance);
     }
 

@@ -18,18 +18,13 @@
 
 #include "Common.h"
 #include "StateBase.h"
+#include "ItemTemplate.hpp"
+#include "TS_SC_STAT_INFO.h"
 
 struct TS_SC_STAT_INFO;
 
 struct CreatureElementalResist {
-    uint16_t nResist[7];
-
-    void Reset(uint16_t v)
-    {
-        for (unsigned short &i : nResist) {
-            i = v;
-        }
-    }
+    uint16_t nResist[ElementalType::TYPE_COUNT];
 };
 
 struct ExpertMod {
@@ -127,17 +122,44 @@ struct ElementalSkillStateMod {
     std::vector<StateCode> vExhaustiveStateCode{};
 };
 
-class CreatureStat {
-public:
-    CreatureStat() { Reset(0); }
+struct CreatureStat {
 
-    void Reset(int16_t);
+    CreatureStat() = default;
+    constexpr CreatureStat& operator=(const CreatureStat&) = default;
+	CreatureStat( const CreatureStat & stat )
+		: stat_id( stat.stat_id )
+		, strength( stat.strength )
+		, vital( stat.vital )
+		, dexterity( stat.dexterity )
+		, agility( stat.agility )
+		, intelligence( stat.intelligence )
+		, mentality( stat.mentality )
+		, luck( stat.luck )
+	{}
 
-    void Copy(const CreatureStat &);
+    CreatureStat operator+(const CreatureStat &creatureStat)
+    {
+        strength += creatureStat.strength;
+        vital += creatureStat.vital;
+        dexterity += creatureStat.dexterity;
+        agility += creatureStat.agility;
+        intelligence += creatureStat.intelligence;
+        mentality += creatureStat.mentality;
+        luck += creatureStat.luck;
+        return *this;
+    }
 
-    void Add(const CreatureStat &);
-
-    void WriteToPacket(TS_SC_STAT_INFO &);
+    void WriteToPacket(TS_SC_STAT_INFO &packet)
+    {
+        packet.stat.stat_id = stat_id;
+        packet.stat.strength = (strength > 32000 ? 32000 : strength);
+        packet.stat.vital = (vital > 32000 ? 32000 : vital);
+        packet.stat.dexterity = (dexterity > 32000 ? 32000 : dexterity);
+        packet.stat.agility = (agility > 32000 ? 32000 : agility);
+        packet.stat.intelligence = (intelligence > 32000 ? 32000 : intelligence);
+        packet.stat.mentality = (mentality > 32000 ? 32000 : mentality);
+        packet.stat.luck = (luck > 32000 ? 32000 : luck);
+    }
 
     short stat_id;
     float strength;
@@ -149,8 +171,7 @@ public:
     float luck;
 };
 
-class CreatureStatAmplifier {
-public:
+struct CreatureStatAmplifier {
     float stat_id;
     float strength;
     float vital;
@@ -159,25 +180,9 @@ public:
     float intelligence;
     float mentality;
     float luck;
-
-    //         CreatureStatAmplifier(cCreatureStatAmplifier &)
-    // CreatureStatAmplifier()
-    // CreatureStatAmplifier & operator=(const struct CreatureStatAmplifier &)
-    void Reset(float v)
-    {
-        stat_id = v;
-        strength = v;
-        vital = v;
-        dexterity = v;
-        agility = v;
-        intelligence = v;
-        mentality = v;
-        luck = v;
-    }
 };
 
-class CreatureAttributeAmplifier {
-public:
+struct CreatureAttributeAmplifier {
     float fCritical;
     float fCriticalPower;
     float fAttackPointRight;
@@ -212,114 +217,116 @@ public:
     float fMPAdd;
     float fHPAddByItem;
     float fMPAddByItem;
-    //         void CreatureAttributeAmplifier(const struct CreatureAttributeAmplifier &)
-    //         void CreatureAttributeAmplifier::CreatureAttributeAmplifier()
-    //         struct CreatureAttributeAmplifier & operator=(const struct CreatureAttributeAmplifier &)
-
-    void Reset(float v)
-    {
-        fCritical = v;
-        fCriticalPower = v;
-        fAttackPointRight = v;
-        fAttackPointLeft = v;
-        fDefence = v;
-        fBlockDefence = v;
-        fMagicPoint = v;
-        fMagicDefence = v;
-        fAccuracyRight = v;
-        fAccuracyLeft = v;
-        fMagicAccuracy = v;
-        fAvoid = v;
-        fMagicAvoid = v;
-        fBlockChance = v;
-        fMoveSpeed = v;
-        fAttackSpeed = v;
-        fAttackRange = v;
-        fMaxWeight = v;
-        fCastingSpeed = v;
-        fCoolTimeSpeed = v;
-        fItemChance = v;
-        fHPRegenPercentage = v;
-        fHPRegenPoint = v;
-        fMPRegenPercentage = v;
-        fMPRegenPoint = v;
-        fAttackSpeedRight = v;
-        fAttackSpeedLeft = v;
-        fDoubleAttackRatio = v;
-        fStunResistance = v;
-        fMoveSpeedDecreaseResistance = v;
-        fHPAdd = v;
-        fMPAdd = v;
-        fHPAddByItem = v;
-        fMPAddByItem = v;
-    }
 };
 
-class CreatureAtribute {
-public:
-    CreatureAtribute() = default;
+struct CreatureAtributeServer {
 
-    ~CreatureAtribute() = default;
+	float nCritical;			
+	float nCriticalPower;		
+	float nAttackPointRight;	
+	float nAttackPointLeft;	
+	float nDefence;			
+	float nBlockDefence;		
+	float nMagicPoint;		
+	float nMagicDefence;		
+	float nAccuracyRight;		
+	float nAccuracyLeft;		
+	float nMagicAccuracy;		
+	float nAvoid;				
+	float nMagicAvoid;		
+	float nBlockChance;		
+	float nMoveSpeed;			
+	float nAttackSpeed;		
+	float nAttackRange;		
+	float nMaxWeight;			
+	float nCastingSpeed;		
+	float nCoolTimeSpeed;		
+	float nItemChance;		
+	float nHPRegenPercentage;	
+	float nHPRegenPoint;		
+	float nMPRegenPercentage;	
+	float nMPRegenPoint;		
 
-    float nCritical;
-    float nCriticalPower;
-    float nAttackPointRight;
-    float nAttackPointLeft;
-    float nDefence;
-    float nBlockDefence;
-    float nMagicPoint;
-    float nMagicDefence;
-    float nAccuracyRight;
-    float nAccuracyLeft;
-    float nMagicAccuracy;
-    float nAvoid;
-    float nMagicAvoid;
-    float nBlockChance;
-    float nMoveSpeed;
-    float nAttackSpeed;
-    float nAttackRange;
-    float nMaxWeight;
-    float nCastingSpeed;
-    float nCoolTimeSpeed;
-    float nItemChance;
-    float nHPRegenPercentage;
-    float nHPRegenPoint;
-    float nMPRegenPercentage;
-    float nMPRegenPoint;
-};
+	float nAttackSpeedRight;	
+	float nAttackSpeedLeft;	
+	float nDoubleAttackRatio;
+	float nStunResistance;
+	float nMoveSpeedDecreaseResistance;
+	float nHPAdd;
+	float nMPAdd;
+	float nHPAddByItem;
+	float nMPAddByItem;
 
-class CreatureAtributeServer : public CreatureAtribute {
-public:
     CreatureAtributeServer() = default;
+    constexpr CreatureAtributeServer& operator=(const CreatureAtributeServer&) = default;
+    CreatureAtributeServer(const CreatureAtributeServer &attr)
+		: nCritical( attr.nCritical )
+		, nCriticalPower( attr.nCriticalPower )
+		, nAttackPointRight( attr.nAttackPointRight )
+		, nAttackPointLeft( attr.nAttackPointLeft )
+		, nDefence( attr.nDefence )
+		, nBlockDefence( attr.nBlockDefence )
+		, nMagicPoint( attr.nMagicPoint )
+		, nMagicDefence( attr.nMagicDefence )
+		, nAccuracyRight( attr.nAccuracyRight )
+		, nAccuracyLeft( attr.nAccuracyLeft )
+		, nMagicAccuracy( attr.nMagicAccuracy )
+		, nAvoid( attr.nAvoid )
+		, nMagicAvoid( attr.nMagicAvoid )
+		, nBlockChance( attr.nBlockChance )
+		, nMoveSpeed( attr.nMoveSpeed )
+		, nAttackSpeed( attr.nAttackSpeed )
+		, nAttackRange( attr.nAttackRange )
+		, nMaxWeight( attr.nMaxWeight )
+		, nCastingSpeed( attr.nCastingSpeed )
+		, nCoolTimeSpeed( attr.nCoolTimeSpeed )
+		, nItemChance( attr.nItemChance )
+		, nHPRegenPercentage( attr.nHPRegenPercentage )
+		, nHPRegenPoint( attr.nHPRegenPoint )
+		, nMPRegenPercentage( attr.nMPRegenPercentage )
+		, nMPRegenPoint( attr.nMPRegenPoint )	
 
-    void Reset(int16_t);
+		, nAttackSpeedRight( 0 )
+		, nAttackSpeedLeft( 0 )
+		, nDoubleAttackRatio( 0 )
+		, nStunResistance( 0 )
+		, nMoveSpeedDecreaseResistance( 0 )
+		, nHPAdd( 0 )
+		, nMPAdd( 0 )
+		, nHPAddByItem( 0 )
+		, nMPAddByItem( 0 )
+    {}
 
-    void Copy(const CreatureAtributeServer &);
-
-    void WriteToPacket(TS_SC_STAT_INFO &packet);
-
-    float nAttackSpeedRight;
-    float nAttackSpeedLeft;
-    float nDoubleAttackRatio;
-    float nStunResistance;
-    float nMoveSpeedDecreaseResistance;
-    float nHPAdd;
-    float nMPAdd;
-    float nHPAddByItem;
-    float nMPAddByItem;
+    void WriteToPacket(TS_SC_STAT_INFO &packet)
+    {
+        packet.attribute.nCritical = static_cast<int16_t>(nCritical > 32000 ? 32000 : nCritical);
+        packet.attribute.nCriticalPower = static_cast<int16_t>(nCriticalPower > 32000 ? 32000 : nCriticalPower);
+        packet.attribute.nAttackPointRight = static_cast<int16_t>(nAttackPointRight > 32000 ? 32000 : nAttackPointRight);
+        packet.attribute.nAttackPointLeft = static_cast<int16_t>(nAttackPointLeft > 32000 ? 32000 : nAttackPointLeft);
+        packet.attribute.nDefence = static_cast<int16_t>(nDefence > 32000 ? 32000 : nDefence);
+        packet.attribute.nBlockDefence = static_cast<int16_t>(nBlockDefence > 32000 ? 32000 : nBlockDefence);
+        packet.attribute.nMagicPoint = static_cast<int16_t>(nMagicPoint > 32000 ? 32000 : nMagicPoint);
+        packet.attribute.nMagicDefence = static_cast<int16_t>(nMagicDefence > 32000 ? 32000 : nMagicDefence);
+        packet.attribute.nAccuracyRight = static_cast<int16_t>(nAccuracyRight > 32000 ? 32000 : nAccuracyRight);
+        packet.attribute.nAccuracyLeft = static_cast<int16_t>(nAccuracyLeft > 32000 ? 32000 : nAccuracyLeft);
+        packet.attribute.nMagicAccuracy = static_cast<int16_t>(nMagicAccuracy > 32000 ? 32000 : nMagicAccuracy);
+        packet.attribute.nAvoid = static_cast<int16_t>(nAvoid > 32000 ? 32000 : nAvoid);
+        packet.attribute.nMagicAvoid = static_cast<int16_t>(nMagicAvoid > 32000 ? 32000 : nMagicAvoid);
+        packet.attribute.nBlockChance = static_cast<int16_t>(nBlockChance > 32000 ? 32000 : nBlockChance);
+        packet.attribute.nMoveSpeed = static_cast<int16_t>(nMoveSpeed > 32000 ? 32000 : nMoveSpeed);
+        packet.attribute.nAttackSpeed = static_cast<int16_t>(nAttackSpeedRight > 32000 ? 32000 : nAttackSpeedRight);
+        packet.attribute.nAttackRange = static_cast<int16_t>(nAttackRange > 32000 ? 32000 : nAttackRange);
+        packet.attribute.nMaxWeight = static_cast<int16_t>(nMaxWeight);
+        packet.attribute.nCastingSpeed = static_cast<int16_t>(nCastingSpeed > 32000 ? 32000 : nCastingSpeed);
+        packet.attribute.nCoolTimeSpeed = static_cast<int16_t>(nCoolTimeSpeed > 32000 ? 32000 : nCoolTimeSpeed);
+        packet.attribute.nItemChance = static_cast<int16_t>(nItemChance > 32000 ? 32000 : nItemChance);
+        packet.attribute.nHPRegenPercentage = static_cast<int16_t>(nHPRegenPercentage > 32000 ? 32000 : nHPRegenPercentage);
+        packet.attribute.nHPRegenPoint = static_cast<int16_t>(nHPRegenPoint > 32000 ? 32000 : nHPRegenPoint);
+        packet.attribute.nMPRegenPercentage = static_cast<int16_t>(nMPRegenPercentage > 32000 ? 32000 : nMPRegenPercentage);
+        packet.attribute.nMPRegenPoint = static_cast<int16_t>(nMPRegenPoint > 32000 ? 32000 : nMPRegenPoint);
+    }
 };
 
-class CreatureElementalResistAmplifier {
-public:
-    float fResist[7]{0};
-
-    // Function       :   void CreatureElementalResistAmplifier(const struct CreatureElementalResistAmplifier &)
-    // Function       :   void CreatureElementalResistAmplifier()
-    // Function       :   struct CreatureElementalResistAmplifier & operator=(const struct CreatureElementalResistAmplifier &)
-    void Reset(float v)
-    {
-        for (float &i : fResist) {
-            i = v;
-        }
-    }
+struct CreatureElementalResistAmplifier {
+    float fResist[ElementalType::TYPE_COUNT]{0};
 };
