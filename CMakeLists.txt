@@ -38,6 +38,14 @@ IF(NG_USE_CLITHREAD)
     find_package(Readline REQUIRED)
     add_definitions(-DNG_USE_CLITHREAD)
 endif()
+# VCPKG Packages
+find_package(fmt CONFIG REQUIRED)
+find_package(unofficial-libmariadb CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(Boost REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+# VCPKG Packages end
 
 #Include platform/compiler-specific definitions
 include(${CMAKE_SOURCE_DIR}/cmake/SetDefinitions.cmake)

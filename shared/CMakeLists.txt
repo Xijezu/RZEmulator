@@ -79,14 +79,6 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_BINARY_DIR}
 )
-link_directories(${CONAN_LIB_DIRS_OPENSSL})
-
-find_package(fmt CONFIG REQUIRED)
-find_package(unofficial-libmariadb CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(Boost REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 target_include_directories(${LIBRARY_NAME} SYSTEM PRIVATE $ENV{INCLUDE})
