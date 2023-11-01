@@ -44,6 +44,9 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
     if (propTemplate == nullptr)
         return;
 
+    if(propTemplate->nLocalFlag & GameRule::GetLocalFlag())
+        return;
+
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
         info.nPropID = nPropID;
