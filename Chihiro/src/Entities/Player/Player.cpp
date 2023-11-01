@@ -1272,7 +1272,7 @@ Item *Player::PushItem(Item *pItem, int64_t count, bool bSkipUpdateToDB)
         int64_t nPrevGoldAmount = GetGold();
         int64_t gold = GetGold() + pItem->GetItemInstance().GetCount();
         if (ChangeGold(gold) != TS_RESULT_SUCCESS) {
-            NG_LOG_ERROR("entities.player", "ChangeGold failed! Player[%s], Curr[%d], Add [%d]", GetName(), nPrevGoldAmount, gold);
+            NG_LOG_ERROR("entities.player", "ChangeGold failed! Player[%s], Curr[%ll], Add [%ll]", GetName(), nPrevGoldAmount, gold);
         }
         Item::PendFreeItem(pItem);
         return nullptr;
