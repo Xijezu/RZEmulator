@@ -20,10 +20,10 @@
 
 namespace NGemity {
     /// Default NG string format function.
-    template<typename Format, typename... Args>
-    inline std::string StringFormat(Format &&fmt, Args &&...args)
+template <typename... Args>
+    std::string StringFormat(const fmt::format_string<Args...> s, Args&&... args)
     {
-        return fmt::format(std::forward<Format>(fmt), std::forward<Args>(args)...);
+        return fmt::format(s, std::forward<Args>(args)...);
     }
 
     /// Default TC string format function.

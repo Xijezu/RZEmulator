@@ -1,0 +1,15 @@
+{
+    "name": "ngemity",
+    "version-string": "0.1.5",
+    "license": "GPL-2.0-or-later",
+    "dependencies": [
+        "fmt",
+        "openssl",
+        "zlib",
+        "boost-asio",
+        "boost-stacktrace",
+        "boost-property-tree",
+        "libmariadb",
+        "nlohmann-json"
+    ]
+}

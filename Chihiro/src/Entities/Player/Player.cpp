@@ -2170,7 +2170,7 @@ uint16_t Player::UseItem(Item *pItem, Unit *pTarget, const std::string &szParame
                 nCode = pTarget->As<NPC>()->GetNPCID();
             }
 
-            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), targetType, (pTarget != nullptr ? pTarget->GetHandle() : 0),
+            szOnUseItem = NGemity::StringFormat("on_use_item({}, {}, {}, {}, {}, {})", pItem->GetItemInstance().GetCode(), GetHandle(), static_cast<int32_t>(targetType), (pTarget != nullptr ? pTarget->GetHandle() : 0),
                 nCode, (targetType == Item::TARGET_TYPE_SUMMON && pTarget->As<Summon>()->GetMaster() == this) ? 1 : 0);
         }
 

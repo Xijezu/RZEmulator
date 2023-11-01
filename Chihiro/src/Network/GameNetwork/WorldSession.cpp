@@ -1423,7 +1423,7 @@ void WorldSession::onRevive(const TS_CS_RESURRECTION *pRecvPct)
     if (m_pPlayer->IsInSiegeDungeon())
         eReviveType = REVIVE_DUNGEON_SIEGE;
 
-    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("revive_in_town({})", eReviveType));
+    sScriptingMgr.RunString(m_pPlayer, NGemity::StringFormat("revive_in_town({})", static_cast<int32_t>(eReviveType)));
     m_pPlayer->ClearRemovedStateByDeath();
 }
 

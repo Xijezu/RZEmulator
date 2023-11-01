@@ -22,7 +22,7 @@
 #include <memory>
 #include <mutex>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/property_tree/ini_parser.hpp>
 
 #include "Log.h"
@@ -168,8 +168,8 @@ std::string ConfigMgr::GetCorrectPath(std::string path)
     auto args = this->GetArguments();
     bool bIsRunningDir = std::find(args.begin(), args.end(), "-runningdir") != args.end();
 
-    auto exePath = boost::filesystem::system_complete(args[0]).parent_path();
-    auto destPath = boost::filesystem::path(path);
+    auto exePath = std::filesystem::absolute(args[0]).parent_path();
+    auto destPath = std::filesystem::path(path);
 
     if (!bIsRunningDir)
         destPath = (exePath /= destPath);

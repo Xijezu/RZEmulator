@@ -1,17 +1,19 @@
-project(NGemity)
 cmake_minimum_required(VERSION 3.10)
 
-add_definitions(-DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
-########## CONAN ##########
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-  message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
-  file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
-                "${CMAKE_BINARY_DIR}/conan.cmake"
-                TLS_VERIFY ON)
-endif()
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
 
-include(${CMAKE_BINARY_DIR}/conan.cmake)
-conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing) # run conan setup
+project(NGemity)
+########## CONAN ##########
+# if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+#   message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+#   file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
+#                 "${CMAKE_BINARY_DIR}/conan.cmake"
+#                 TLS_VERIFY ON)
+# endif()
+
+# include(${CMAKE_BINARY_DIR}/conan.cmake)
+# conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing) # run conan setup
 ######## END CONAN ########
 
 # set macro-directory

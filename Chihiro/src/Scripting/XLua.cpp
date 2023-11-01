@@ -17,7 +17,7 @@
 
 #include "XLua.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "Config.h"
 #include "DungeonManager.h"
@@ -28,8 +28,6 @@
 #include "ObjectMgr.h"
 #include "World.h"
 
-namespace fs = boost::filesystem;
-
 XLua::XLua()
 {
     m_pState.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::package);
@@ -38,7 +36,7 @@ XLua::XLua()
 bool XLua::InitializeLua()
 {
 
-    auto configFile = boost::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
+    auto configFile = std::filesystem::path(ConfigMgr::instance()->GetCorrectPath("Resource/Script/"));
 
     // Monster relevant
     m_pState.set_function("set_way_point_type", &XLua::SCRIPT_SetWayPointType, this);
@@ -109,7 +107,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
 
     int32_t nFiles{0};
-    for (auto &it : fs::directory_iterator(configFile)) {
+    for (auto &it : std::filesystem::directory_iterator(configFile)) {
         if (it.path().extension().string() == ".lua"s) {
             auto t = m_pState.do_file(it.path().string());
             if (!t.valid()) {
