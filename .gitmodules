@@ -1,3 +1,6 @@
 [submodule "dep/sol2"]
 	path = dep/sol2
 	url = https://github.com/ThePhD/sol2
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg
