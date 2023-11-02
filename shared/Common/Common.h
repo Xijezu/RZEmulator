@@ -54,7 +54,7 @@
 #if COMPILER == COMPILER_MICROSOFT
 // #define snprintf _snprintf
 #define atoll _atoi64
-#define vsnprintf _vsnprintf
+// #define vsnprintf _vsnprintf
 #define llabs _abs64
 #else
 #define stricmp strcasecmp

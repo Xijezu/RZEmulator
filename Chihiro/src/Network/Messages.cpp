@@ -275,7 +275,8 @@ std::optional<TS_ITEM_INFO> Messages::fillItemInfo(Item *item)
     itemInfo.base_info.level = static_cast<uint8_t>(item->GetItemInstance().GetLevel());
     itemInfo.base_info.flag = static_cast<uint32_t>(item->GetItemInstance().GetFlag());
 
-    std::copy(std::begin(item->GetItemInstance().GetSocket()), std::end(item->GetItemInstance().GetSocket()), std::begin(itemInfo.base_info.socket));
+    auto socket = item->GetItemInstance().GetSocket();
+    std::copy(std::begin(socket), std::end(socket), std::begin(itemInfo.base_info.socket));
 
     if (item->GetItemGroup() == ItemGroup::GROUP_SUMMONCARD) {
         if (item->m_pSummon != nullptr) {

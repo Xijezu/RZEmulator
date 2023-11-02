@@ -35,7 +35,7 @@ bool AsyncAcceptor::Bind()
     boost::system::error_code errorCode;
     _acceptor.open(_endpoint.protocol(), errorCode);
     if (errorCode) {
-        NG_LOG_INFO("network", "Failed to open acceptor %s", errorCode.message().c_str());
+        NG_LOG_ERROR("network", "Failed to open acceptor %s", errorCode.message().c_str());
         return false;
     }
 
@@ -44,13 +44,13 @@ bool AsyncAcceptor::Bind()
 
     _acceptor.bind(_endpoint, errorCode);
     if (errorCode) {
-        NG_LOG_INFO("network", "Could not bind to %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
+        NG_LOG_ERROR("network", "Could not bind to %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
         return false;
     }
 
     _acceptor.listen(NGEMITY_MAX_LISTEN_CONNECTIONS, errorCode);
     if (errorCode) {
-        NG_LOG_INFO("network", "Failed to start listening on %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
+        NG_LOG_ERROR("network", "Failed to start listening on %s:%u %s", _endpoint.address().to_string().c_str(), _endpoint.port(), errorCode.message().c_str());
         return false;
     }
 

@@ -31,6 +31,7 @@
 #include "SkillFunctor.h"
 #include "SkillProp/SkillProp.h"
 #include "World.h"
+#include "Unit.h"
 
 constexpr int32_t PREDICTION_AIMING_TIME = 200;
 
@@ -106,7 +107,7 @@ void Skill::DB_InsertSkill(Unit *pUnit, int64_t skillUID, int skill_id, int skil
     CharacterDatabase.Execute(stmt);
 }
 
-void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type, int damageType, DamageInfo damageInfo, uint handle)
+void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type, int damageType, DamageInfo damageInfo, uint32_t handle)
 {
     SkillResult skillResult{};
     skillResult.type = type;
@@ -131,7 +132,7 @@ void Skill::AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type,
     pvList.emplace_back(skillResult);
 }
 
-void Skill::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint handle)
+void Skill::AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int nSuccessType, uint32_t handle)
 {
     SkillResult skillResult{};
     skillResult.type = TS_SKILL__HIT_TYPE::SHT_RESULT;
@@ -266,7 +267,7 @@ int Skill::EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t l
     return nResult;
 }
 
-int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool bIsCastedByItem)
+int Skill::Cast(int nSkillLevel, uint32_t handle, Position pos, uint8_t layer, bool bIsCastedByItem)
 {
     m_vResultList.clear();
     auto current_time = sWorld.GetArTime();
@@ -600,7 +601,7 @@ int Skill::Cast(int nSkillLevel, uint handle, Position pos, uint8_t layer, bool 
     return TS_RESULT_SUCCESS;
 }
 
-uint16_t Skill::PrepareSummon(uint handle, Position pos)
+uint16_t Skill::PrepareSummon(uint32_t handle, Position pos)
 {
     if (!m_pOwner->IsPlayer() /* @todo: subsummon */)
         return TS_RESULT_NOT_ACTABLE;
@@ -721,8 +722,8 @@ void Skill::broadcastSkillMessage(WorldObject *pUnit, int cost_hp, int cost_mp, 
     if (pUnit == nullptr)
         return;
 
-    auto rx = (uint)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
-    auto ry = (uint)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto rx = (uint32_t)(pUnit->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
+    auto ry = (uint32_t)(pUnit->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
     uint8_t layer = pUnit->GetLayer();
     TS_SC_SKILL skillPct{};
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
@@ -736,8 +737,8 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
 
     TS_SC_SKILL skillPct{};
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
-    sWorld.Broadcast((uint)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-        (uint)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit1->GetLayer(), skillPct);
+    sWorld.Broadcast((uint32_t)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
+        (uint32_t)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit1->GetLayer(), skillPct);
 }
 
 void Skill::ProcSkill()
@@ -1579,12 +1580,12 @@ bool Skill::Cancel()
     return true;
 }
 
-bool Skill::CheckCoolTime(uint t) const
+bool Skill::CheckCoolTime(uint32_t t) const
 {
     return m_nNextCoolTime < t;
 }
 
-uint Skill::GetSkillCoolTime() const
+uint32_t Skill::GetSkillCoolTime() const
 {
     int l{0};
     if (m_SkillBase == nullptr)
@@ -1601,17 +1602,17 @@ uint Skill::GetSkillCoolTime() const
     return static_cast<uint32_t>(cts * ctm * ct);
 }
 
-void Skill::SetRemainCoolTime(uint nTime)
+void Skill::SetRemainCoolTime(uint32_t nTime)
 {
     m_nNextCoolTime = nTime + sWorld.GetArTime();
 }
 
-uint Skill::GetSkillEnhance() const
+uint32_t Skill::GetSkillEnhance() const
 {
     return m_nEnhance;
 }
 
-uint16_t Skill::PrepareTaming(uint handle)
+uint16_t Skill::PrepareTaming(uint32_t handle)
 {
     if (!m_pOwner->IsPlayer())
         return TS_RESULT_NOT_ACTABLE;
@@ -1632,7 +1633,7 @@ uint16_t Skill::PrepareTaming(uint handle)
         return TS_RESULT_NOT_ENOUGH_HP;
 
     auto pPlayer = m_pOwner->As<Player>();
-    if (pPlayer->FindItem((uint)nTameItemCode, ITEM_FLAG_SUMMON, false) == nullptr)
+    if (pPlayer->FindItem((uint32_t)nTameItemCode, ITEM_FLAG_SUMMON, false) == nullptr)
         return TS_RESULT_NOT_ACTABLE;
 
     if (pPlayer->GetTamingTarget() != 0)
@@ -1976,7 +1977,7 @@ void Skill::ADD_ENERGY()
     AddSkillResult(m_vResultList, true, 0, 0);
 }
 
-void Skill::process_target(uint t, SkillTargetFunctor &fn, Unit *pTarget)
+void Skill::process_target(uint32_t t, SkillTargetFunctor &fn, Unit *pTarget)
 {
     switch (GetSkillBase()->GetSkillTargetType()) {
     case TARGET_TYPE::TARGET_TARGET:

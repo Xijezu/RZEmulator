@@ -204,7 +204,7 @@ void WorldUpdateLoop()
 void ShutdownCLIThread(std::thread *cliThread)
 {
     if (cliThread != nullptr) {
-#ifdef _WIN32
+#if defined(NG_USE_CLITHREAD) && defined(_WIN32)
         // First try to cancel any I/O in the CLI thread
         if (!CancelSynchronousIo(cliThread->native_handle())) {
             // if CancelSynchronousIo() fails, print32_t the error and try with old way

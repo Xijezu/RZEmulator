@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         return -1;
     }
     RDB_HEADER db_hdr;
-	auto file_size = fileSize("db_skill.rdb") - sizeof(db_hdr);
+	auto file_size = 0;//fileSize("db_skill.rdb") - sizeof(db_hdr);
     instream.read(reinterpret_cast<char*>(&db_hdr), sizeof(db_hdr));
 	int32_t entrySize = (int32_t)(file_size / db_hdr.nCount);
 	NG_LOG_DEBUG("ngrdb", "There are %d entries. File Size is %d, total size per entry is %d", db_hdr.nCount, (int32_t)file_size, entrySize);
