@@ -1198,17 +1198,6 @@ void Unit::applyState(State &state)
             SetFlag(UNIT_FIELD_STATUS, STATUS_ATTACKABLE);
             m_AttributeAmplifier.fMoveSpeed += fValue1;
             break;
-        case SC_HAVOC_BURST: {
-            SetFlag(UNIT_FIELD_STATUS, STATUS_HAVOC_BURST);
-            // m_nLastHavocUpdateTime = GetArTime();
-
-            m_AttributeAmplifier.fAttackSpeedRight += fValue1;
-            if (IsUsingDoubleWeapon())
-                m_AttributeAmplifier.fAttackSpeedLeft += fValue1;
-            m_AttributeAmplifier.fCastingSpeed += fValue2;
-            m_AttributeAmplifier.fMoveSpeed += fValue3;
-            break;
-        }
 
         case SC_FRENZY: {
             m_AttributeAmplifier.fAttackSpeedRight += fValue1;

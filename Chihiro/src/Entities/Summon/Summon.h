@@ -63,6 +63,21 @@ public:
 
     float GetSize() const override;
     float GetScale() const override;
+    int32_t GetSP() const { return m_nSP; }
+    int32_t GetMaxSP() const { return m_nMaxSP; }
+    int32_t AddSP(int SP) { return SetSP(GetSP() + SP); }
+    int32_t SetSP(int SP)
+    {
+        int oldSP = m_nSP;
+        m_nSP = SP;
+        if (m_nSP > m_nMaxSP)
+            m_nSP = m_nMaxSP;
+        if (m_nSP < 0)
+            m_nSP = 0;
+        if (oldSP != m_nSP)
+            onSPChange();
+        return m_nSP;
+    }
 
     void SetSummonInfo(int32_t);
     bool DoEvolution();
@@ -96,6 +111,7 @@ protected:
     void onCompleteCalculateStat() override;
     void applyStatByState() override;
     void onApplyStat() override;
+    void onSPChange() override;
 
 private:
     SummonResourceTemplate *m_tSummonBase{nullptr};
@@ -107,4 +123,6 @@ private:
     float m_fBaseDefenceRatio{};
     float m_fBaseMagicDefenceRatio{};
     bool m_bIsBattleMode{false};
+    int32_t m_nSP{};
+    int32_t m_nMaxSP{};
 };

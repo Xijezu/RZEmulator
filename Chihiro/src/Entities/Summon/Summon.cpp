@@ -119,6 +119,7 @@ void Summon::DB_UpdateSummon(Player * /*pMaster*/, Summon *pSummon)
     stmt->setInt32(i++, pSummon->GetPrevJobLv(1));
     stmt->setInt32(i++, pSummon->GetPrevJobId(0));
     stmt->setInt32(i++, pSummon->GetPrevJobId(1));
+    stmt->setInt32(i++, pSummon->GetSP());
     stmt->setInt32(i++, pSummon->GetHealth());
     stmt->setInt32(i++, pSummon->GetMana());
     stmt->setInt32(i, pSummon->GetUInt32Value(UNIT_FIELD_UID));
@@ -146,7 +147,7 @@ void Summon::DB_InsertSummon(Player *pMaster, Summon *pSummon)
     stmt->setInt32(15, 0);
     stmt->setInt32(16, 0);
     stmt->setInt32(17, 0); // prev_...stuff
-    stmt->setInt32(18, 0); // sp
+    stmt->setInt32(18, pSummon->GetMaxSP()); // sp
     stmt->setInt32(19, pSummon->GetMaxHealth());
     stmt->setInt32(20, pSummon->GetMaxMana());
     CharacterDatabase.Execute(stmt);
@@ -686,4 +687,10 @@ void Summon::onApplyStat()
 {
     onApplyStatFunctor fn(this);
     EnumPassiveSkill(fn);
+}
+
+void Summon::onSPChange()
+{
+    if (GetMaster() != nullptr)
+        Messages::SendSPMessage(GetMaster(), this);
 }

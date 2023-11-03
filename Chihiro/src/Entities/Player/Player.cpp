@@ -3704,6 +3704,19 @@ bool Player::IsTakeable(uint32_t nItemHandle, int64_t cnt)
 int32_t Player::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical)
 {
     // @Todo: Remove Riding & Sitdown
+    if (nDamage > 0 &&
+        (damageType == DT_NORMAL_PHYSICAL_DAMAGE || damageType == DT_NORMAL_MAGICAL_DAMAGE || damageType == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damageType == DT_NORMAL_PHYSICAL_SKILL_DAMAGE)) {
+        if (IsRiding() || HasRidingState()) {
+            // Remove Riding
+        }
+    }
+    else if (IsSitDown()) {
+        Standup();
+
+        Messages::BroadcastStatusMessage(this);
+        auto t = sWorld.GetArTime();
+        AddState(StateType::SG_NORMAL, SC_CARELESSNESS, 0, 1, t, t + 300);
+    }
 
     auto pMainSummon = GetMainSummon();
     if (GetFloatValue(PLAYER_FIELD_PASS_DAMAGE_RATIO) != 0 && pMainSummon != nullptr) {

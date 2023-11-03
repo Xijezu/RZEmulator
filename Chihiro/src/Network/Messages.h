@@ -94,6 +94,7 @@ public:
     static void BroadcastPartyLoginStatus(int32_t nPartyID, bool bIsOnline, const std::string &szName);
     static void SendTradeCancelMessage(Player *);
     static void SendTradeItemInfo(int32_t nTradeMode, Item *pItem, int32_t nCount, Player *pPlayer, Player *pTarget);
+    static void SendSPMessage(Player* pPlayer, Summon* pSummon);
 
 private:
     static std::optional<TS_ITEM_INFO> fillItemInfo(Item *);

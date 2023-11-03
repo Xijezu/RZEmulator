@@ -80,7 +80,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHARACTER_DEL_QUEST, "DELETE FROM Quest WHERE owner_id = ? AND id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_UPD_SUMMON,
         "UPDATE Summon SET account_id = ?, owner_id = ?, code = ?, exp = ?, jp = ?, last_decreased_exp = ?, name = ?, transform = ?, lv = ?, jlv = ?, max_level = ?, prev_level_01 = ?, prev_level_02 "
-        "= ?, prev_id_01 = ?, prev_id_02 = ?, hp = ?, mp = ? WHERE sid = ?;",
+        "= ?, prev_id_01 = ?, prev_id_02 = ?, sp = ?, hp = ?, mp = ? WHERE sid = ?;",
         CONNECTION_ASYNC);
     PrepareStatement(CHARACTER_GET_MAX_QUEST_ID, "SELECT MAX(id) AS id FROM Quest WHERE owner_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHARACTER_REP_ITEMCOOLTIME, "REPLACE INTO ItemCoolTime VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);

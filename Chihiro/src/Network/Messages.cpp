@@ -107,7 +107,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     summonPct.name = pSummon->GetNameAsString();
     summonPct.code = pSummon->GetSummonCode();
     summonPct.level = pSummon->GetLevel();
-    summonPct.sp = 1000; // @todo
+    summonPct.sp = pSummon->GetSP();
     pPlayer->SendPacket(summonPct);
 
     SendStatInfo(pPlayer, pSummon);
@@ -116,7 +116,7 @@ void Messages::SendAddSummonMessage(Player *pPlayer, Summon *pSummon)
     SendLevelMessage(pPlayer, pSummon);
     SendEXPMessage(pPlayer, pSummon);
     SendSkillList(pPlayer, pSummon, -1);
-    // SendSPMessage(pPlayer, pSummon);
+    SendSPMessage(pPlayer, pSummon);
 }
 
 void Messages::SendCreatureEquipMessage(Player *pPlayer, bool bShowDialog)
@@ -1122,4 +1122,13 @@ void Messages::SendStateMessage(Player *pPlayer, uint32_t handle, State *pState,
     }
 
     pPlayer->SendPacket(stateMsg);
+}
+
+void Messages::SendSPMessage(Player* pPlayer, Summon* pSummon)
+{
+    TS_SC_SP spMsg{};
+    spMsg.sp = pSummon->GetSP();
+    spMsg.max_sp = pSummon->GetMaxSP();
+    spMsg.handle = pSummon->GetHandle();
+    pPlayer->SendPacket(spMsg);
 }

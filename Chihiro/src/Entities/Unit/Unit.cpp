@@ -2029,9 +2029,6 @@ bool Unit::ClearExpiredState(uint32_t t)
     for (auto it = m_vStateList.begin(); it != m_vStateList.end();) {
         bErase = false;
 
-        if ((*it)->GetCode() == SC_HAVOC_BURST && GetInt32Value(UNIT_FIELD_HAVOC) < 1)
-            bErase = true;
-
         if ((*it)->ClearExpiredState(t)) {
             bRtn = true;
             if (!(*it)->IsValid(t))
@@ -2043,9 +2040,6 @@ bool Unit::ClearExpiredState(uint32_t t)
         if (bErase) {
             if ((*it)->GetCode() == SC_ADD_ENERGY) {
                 AddEnergy();
-            }
-            else if ((*it)->GetCode() == SC_HAVOC_BURST) {
-                bRtn = true;
             }
             else if ((*it)->GetEffectType() == SEF_PROVOKE && IsMonster()) {
                 this->As<Monster>()->SetNeedToFindEnemy();
