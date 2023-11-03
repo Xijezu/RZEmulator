@@ -21,6 +21,7 @@
 #include "Quest.h"
 #include "Unit.h"
 
+struct TS_SC_ENTER;
 class NPC : public Unit {
 public:
     explicit NPC(NPCTemplate *base);
@@ -29,7 +30,7 @@ public:
     NPC(const NPC &) = delete;
     NPC &operator=(const NPC &) = delete;
 
-    static void EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer);
+    static void EnterPacket(TS_SC_ENTER &pEnterPct, NPC *pNPC, Player *pPlayer);
 
     void LinkQuest(QuestLink *quest_link_info);
     NPC_STATUS GetStatus() const;

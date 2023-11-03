@@ -69,12 +69,13 @@ struct DamageTag {
 };
 
 struct WayPointInfo;
+struct TS_SC_ENTER;
 class Monster : public Unit {
     friend class World;
     friend class GameContent;
 
 public:
-    static void EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer);
+    static void EnterPacket(TS_SC_ENTER &pEnterPct, Monster *monster, Player *pPlayer);
     explicit Monster(uint32_t handle, MonsterBase *mb);
     ~Monster() = default;
     // Deleting the copy & assignment operators

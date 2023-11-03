@@ -105,19 +105,19 @@ void Unit::Update(uint32_t p_time)
         return;
 }
 
-void Unit::EnterPacket(XPacket &pEnterPct, Unit *pUnit, Player *pPlayer)
+void Unit::EnterPacket(TS_SC_ENTER__CREATURE_INFO &pEnterPct, Unit *pUnit, Player *pPlayer)
 {
-    pEnterPct << (uint32_t)Messages::GetStatusCode(pUnit, pPlayer);
-    pEnterPct << pUnit->GetOrientation();
-    pEnterPct << (int32_t)pUnit->GetHealth();
-    pEnterPct << (int32_t)pUnit->GetMaxHealth();
-    pEnterPct << (int32_t)pUnit->GetMana();
-    pEnterPct << (int32_t)pUnit->GetMaxMana();
-    pEnterPct << (int32_t)pUnit->GetLevel();
-    pEnterPct << (uint8_t)pUnit->GetUInt32Value(UNIT_FIELD_RACE);
-    pEnterPct << (uint32_t)pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
-    pEnterPct << (uint8_t)(pUnit->HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER) ? 1 : 0);
-    pEnterPct << (int32_t)0;
+    pEnterPct.status = Messages::GetStatusCode(pUnit, pPlayer);
+    pEnterPct.face_direction = pUnit->GetOrientation();
+    pEnterPct.hp = pUnit->GetHealth();
+    pEnterPct.mp = pUnit->GetMana();
+    pEnterPct.max_hp = pUnit->GetMaxHealth();
+    pEnterPct.max_mp = pUnit->GetMaxMana();
+    pEnterPct.level = pUnit->GetLevel();
+    pEnterPct.race = pUnit->GetUInt32Value(UNIT_FIELD_RACE);
+    pEnterPct.skin_color = pUnit->GetUInt32Value(UNIT_FIELD_SKIN_COLOR);
+    pEnterPct.is_first_enter = pUnit->HasFlag(UNIT_FIELD_STATUS, STATUS_FIRST_ENTER);
+    pEnterPct.energy = pUnit->GetInt32Value(UNIT_FIELD_ENERGY);
 }
 
 Item *Unit::GetWornItem(ItemWearType idx)

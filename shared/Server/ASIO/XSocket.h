@@ -24,10 +24,11 @@
 #include "Common.h"
 #include "MPSCQueue.h"
 #include "MessageBuffer.h"
-#include "Packets/MessageSerializerBuffer.h"
+#include "MessageSerializerBuffer.h"
 #include "Socket.h"
 #include "XPacket.h"
 #include "XRc4Cipher.h"
+#include "JSONWriter.h"
 
 class EncryptablePacket : public XPacket {
 public:
@@ -59,8 +60,6 @@ public:
     void Start() override;
     bool Update() override;
 
-    void SendPacket(XPacket const &packet);
-
     template<class TS_SERIALIZABLE_PACKET>
     void SendPacket(TS_SERIALIZABLE_PACKET const &packet)
     {
@@ -68,6 +67,13 @@ public:
             return;
 
         XPacket output;
+        // Log packet
+        if(sConfigMgr->GetBoolDefault("Network.LogPackets", false)) {
+            JSONWriter jsonWriter(sConfigMgr->getCachedConfig().packetVersion, true);
+            packet.serialize(&jsonWriter);
+            jsonWriter.finalize();
+            NG_LOG_DEBUG("network.packets", "Sending packet: %s", jsonWriter.toString().c_str());
+        }
         MessageSerializerBuffer serializer(&output);
         packet.serialize(&serializer);
         SendPacket(*serializer.getFinalizedPacket());
@@ -84,6 +90,7 @@ protected:
 
 private:
     void WritePacketToBuffer(EncryptablePacket const &packet, MessageBuffer &buffer);
+    void SendPacket(XPacket const &packet);
 
     XRC4Cipher _encryption, _decryption;
 

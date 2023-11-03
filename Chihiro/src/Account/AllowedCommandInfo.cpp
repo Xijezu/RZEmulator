@@ -95,8 +95,8 @@ void AllowedCommandInfo::Run(Player *pClient, const std::string &szMessage)
                 (*this.*i.handler)(pClient, "");
             return;
         }
-        NG_LOG_ERROR("server.command", "Cannot find command %s, executed by Player %s", szMessage.c_str(), pClient->GetName());
     }
+    NG_LOG_ERROR("server.command", "Cannot find command %s, executed by Player %s", szMessage.c_str(), pClient->GetName());
 }
 
 void AllowedCommandInfo::onCheatSuicide(Player * /*pClient*/, const std::string & /*szMessage*/)

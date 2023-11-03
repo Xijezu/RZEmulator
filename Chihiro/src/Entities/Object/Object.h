@@ -27,9 +27,9 @@ enum ObjType : int {
     OBJ_CLIENT = 2 // Static (Pyrok)
 };
 
-enum MainType : int { MT_Player = 0, MT_NPC = 1, MT_StaticObject = 2 };
+enum MainType : uint8_t { MT_Player = 0, MT_NPC = 1, MT_StaticObject = 2 };
 
-enum SubType : int {
+enum SubType : uint8_t {
     ST_Player = 0,
     ST_NPC = 1,
     ST_Object = 2, // Also Item

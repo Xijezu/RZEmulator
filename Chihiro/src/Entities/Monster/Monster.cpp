@@ -75,11 +75,13 @@ Monster::Monster(uint32_t handle, MonsterBase *mb)
     m_nWayPointIdx = 0;
 }
 
-void Monster::EnterPacket(XPacket &pEnterPct, Monster *monster, Player *pPlayer)
+void Monster::EnterPacket(TS_SC_ENTER &pEnterPct, Monster *monster, Player *pPlayer)
 {
-    Unit::EnterPacket(pEnterPct, monster, pPlayer);
-    Messages::GetEncodedInt(pEnterPct, EncodingScrambled::Scramble(static_cast<uint32_t>(monster->m_Base->id)));
-    pEnterPct << (uint8_t)0;
+    TS_SC_ENTER__MONSTER_INFO monsterInfo{};
+    Unit::EnterPacket(monsterInfo.creatureInfo, monster, pPlayer);
+    monsterInfo.monster_id = monster->m_Base->id;
+    monsterInfo.is_tamed = false;
+    pEnterPct.monsterInfo = monsterInfo;
 }
 
 int32_t Monster::onDamage(Unit *pFrom, ElementalType elementalType, DamageType damageType, int32_t nDamage, bool bCritical)

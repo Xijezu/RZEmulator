@@ -126,16 +126,19 @@ void Player::CleanupsBeforeDelete()
     m_QuestManager.m_vActiveQuest.clear();
 }
 
-void Player::EnterPacket(XPacket &pEnterPct, Player *pPlayer, Player *pReceiver)
+void Player::EnterPacket(TS_SC_ENTER &pEnterPct, Player *pPlayer, Player *pReceiver)
 {
-    Unit::EnterPacket(pEnterPct, pPlayer, pReceiver);
-    pEnterPct << (uint8_t)pPlayer->GetInt32Value(UNIT_FIELD_SEX);
-    pEnterPct << (uint32_t)pPlayer->GetInt32Value(UNIT_FIELD_MODEL + 1);
-    pEnterPct << (uint32_t)pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
-    pEnterPct.fill(pPlayer->GetName(), 19);
-    pEnterPct << (uint16_t)pPlayer->GetCurrentJob();
-    pEnterPct << (uint32_t)pPlayer->GetRideHandle();
-    pEnterPct << (uint32_t)pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
+    TS_SC_ENTER__PLAYER_INFO playerInfo{};
+    Unit::EnterPacket(playerInfo.creatureInfo, pPlayer, pReceiver);
+    playerInfo.sex = pPlayer->GetInt32Value(UNIT_FIELD_SEX);
+    playerInfo.faceId = pPlayer->GetInt32Value(UNIT_FIELD_MODEL + 1);
+    playerInfo.hairId = pPlayer->GetInt32Value(UNIT_FIELD_MODEL);
+    playerInfo.szName = pPlayer->GetNameAsString();
+    playerInfo.job_id = pPlayer->GetCurrentJob();
+    playerInfo.ride_handle = pPlayer->GetRideHandle();
+    playerInfo.guild_id = pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID);
+    pEnterPct.playerInfo = playerInfo;
+
     if (pPlayer->GetRideHandle() != 0)
         Messages::sendEnterMessage(pPlayer, pPlayer->GetRideObject(), true);
 }
@@ -848,9 +851,9 @@ void Player::SendJobInfo()
 
 void Player::SendWearInfo()
 {
-    XPacket packet(NGemity::Packets::TS_SC_WEAR_INFO);
-    packet << GetHandle();
-    for (int32_t i = 0; i < MAX_ITEM_WEAR; i++) {
+    TS_SC_WEAR_INFO wearInfoPct{};
+    wearInfoPct.handle = GetHandle();
+    for(auto i = 0; i < MAX_ITEM_WEAR; i++) {
         int32_t wear_info = (m_anWear[i] != nullptr ? m_anWear[i]->GetItemInstance().GetCode() : 0);
         if (i == 2 && wear_info == 0)
             wear_info = GetInt32Value(UNIT_FIELD_MODEL + 2);
@@ -858,15 +861,12 @@ void Player::SendWearInfo()
             wear_info = GetInt32Value(UNIT_FIELD_MODEL + 3);
         if (i == 5 && wear_info == 0)
             wear_info = GetInt32Value(UNIT_FIELD_MODEL + 4);
-        packet << wear_info;
+        wearInfoPct.item_code[i] = wear_info;
+
+        wearInfoPct.item_enhance[i] = (m_anWear[i] == nullptr ? 0 : m_anWear[i]->GetItemInstance().GetEnhance());
+        wearInfoPct.item_level[i] = (m_anWear[i] == nullptr ? 0 : m_anWear[i]->GetItemInstance().GetLevel());
     }
-    for (auto &i : m_anWear) {
-        packet << (i != nullptr ? i->GetItemInstance().GetEnhance() : 0);
-    }
-    for (auto &i : m_anWear) {
-        packet << (i != nullptr ? i->GetItemInstance().GetLevel() : 0);
-    }
-    SendPacket(packet);
+    SendPacket(wearInfoPct);
 }
 
 void Player::Save(bool bOnlyPlayer)
@@ -1038,12 +1038,12 @@ uint16_t Player::putoffItem(ItemWearType pos)
 
 void Player::SendItemWearInfoMessage(Item *item, Unit *u)
 {
-    XPacket packet(NGemity::Packets::TS_SC_ITEM_WEAR_INFO);
-    packet << (uint32_t)item->m_nHandle;
-    packet << (int16_t)item->GetItemInstance().GetItemWearType();
-    packet << (uint32_t)(u != nullptr ? u->GetHandle() : 0);
-    packet << (int32_t)item->GetItemInstance().GetEnhance();
-    SendPacket(packet);
+    TS_SC_ITEM_WEAR_INFO itemWearInfoPct{};
+    itemWearInfoPct.item_handle = item->GetHandle();
+    itemWearInfoPct.wear_position = item->GetItemInstance().GetItemWearType();
+    itemWearInfoPct.target_handle = (u != nullptr ? u->GetHandle() : 0);
+    itemWearInfoPct.enhance = item->GetItemInstance().GetEnhance();
+    SendPacket(itemWearInfoPct);
 }
 
 Summon *Player::GetSummon(int32_t summon_sid)
@@ -1353,10 +1353,10 @@ void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
         pos._orientation = client_pos._orientation;
     }
     int32_t nl = GameContent::GetLocationID(x, y);
-    XPacket locPct(NGemity::Packets::TS_SC_CHANGE_LOCATION);
-    locPct << m_nWorldLocationId;
-    locPct << nl;
-    SendPacket(locPct);
+    TS_SC_CHANGE_LOCATION changeLocationPct{};
+    changeLocationPct.prev_location_id = m_nWorldLocationId;
+    changeLocationPct.cur_location_id = nl;
+    SendPacket(changeLocationPct);
 
     if (m_nWorldLocationId != nl) {
         if (m_nWorldLocationId != 0) {
@@ -1575,16 +1575,6 @@ void Player::RemoveAllSummonFromWorld()
             continue;
         if (s->IsInWorld()) {
             sWorld.RemoveObjectFromWorld(s);
-        }
-    }
-}
-
-void Player::SendPacket(const XPacket &pPacket)
-{
-
-    if (m_session != nullptr) {
-        if (m_session != nullptr) {
-            m_session->SendPacket(pPacket);
         }
     }
 }

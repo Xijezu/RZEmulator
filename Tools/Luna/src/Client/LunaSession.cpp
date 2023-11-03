@@ -26,10 +26,7 @@
 template<class TS_SERIALIZABLE_PACKET, class SOCKET_TYPE>
 void SendSerializedPacket(TS_SERIALIZABLE_PACKET const &packet, SOCKET_TYPE *Socket)
 {
-    XPacket output;
-    MessageSerializerBuffer serializer(&output);
-    packet.serialize(&serializer);
-    Socket->SendPacket(*serializer.getFinalizedPacket());
+    Socket->SendPacket(packet);
 }
 
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };

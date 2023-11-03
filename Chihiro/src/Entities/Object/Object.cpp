@@ -371,44 +371,44 @@ WorldObject::~WorldObject() = default;
 void WorldObject::SendEnterMsg(Player *pPlayer)
 {
     Position tmpPos = this->GetCurrentPosition(sWorld.GetArTime());
-    XPacket packet(NGemity::Packets::TS_SC_ENTER);
-    packet << (uint8_t)GetMainType();
-    packet << GetHandle();
-    packet << tmpPos.GetPositionX();
-    packet << tmpPos.GetPositionY();
-    packet << tmpPos.GetPositionZ();
-    packet << (uint8_t)GetLayer();
-    packet << (uint8_t)GetSubType();
+    TS_SC_ENTER enterPct{};
+    enterPct.type = GetMainType();
+    enterPct.handle = GetHandle();
+    enterPct.x = tmpPos.GetPositionX();
+    enterPct.y = tmpPos.GetPositionY();
+    enterPct.z = tmpPos.GetPositionZ();
+    enterPct.layer = GetLayer();
+    enterPct.objType = (TS_SC_ENTER__OBJ_TYPE)((uint8_t)GetSubType());
 
     switch (GetSubType()) {
     case ST_NPC:
-        NPC::EnterPacket(packet, dynamic_cast<NPC *>(this), pPlayer);
+        NPC::EnterPacket(enterPct, this->As<NPC>(), pPlayer);
         break;
     case ST_Player:
-        Player::EnterPacket(packet, dynamic_cast<Player *>(this), pPlayer);
+        Player::EnterPacket(enterPct, this->As<Player>(), pPlayer);
         break;
     case ST_Summon:
-        Summon::EnterPacket(packet, dynamic_cast<Summon *>(this), pPlayer);
+        Summon::EnterPacket(enterPct, this->As<Summon>(), pPlayer);
         break;
     case ST_Mob:
-        Monster::EnterPacket(packet, dynamic_cast<Monster *>(this), pPlayer);
+        Monster::EnterPacket(enterPct, this->As<Monster>(), pPlayer);
         break;
     case ST_Object:
-        Item::EnterPacket(packet, dynamic_cast<Item *>(this));
+        Item::EnterPacket(enterPct, this->As<Item>());
         break;
     case ST_FieldProp:
-        FieldProp::EnterPacket(packet, dynamic_cast<FieldProp *>(this), pPlayer);
+        FieldProp::EnterPacket(enterPct, this->As<FieldProp>(), pPlayer);
         break;
     case ST_SkillProp:
-        SkillProp::EnterPacket(packet, dynamic_cast<SkillProp *>(this), pPlayer);
+        SkillProp::EnterPacket(enterPct, this->As<SkillProp>(), pPlayer);
         break;
     default:
         break;
     }
 
-    pPlayer->SendPacket(packet);
+    pPlayer->SendPacket(enterPct);
     if (IsPlayer())
-        Messages::SendWearInfo(pPlayer, dynamic_cast<Unit *>(this));
+        Messages::SendWearInfo(pPlayer, this->As<Unit>());
 }
 
 bool WorldObject::SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed)

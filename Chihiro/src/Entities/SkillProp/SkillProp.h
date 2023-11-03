@@ -20,10 +20,12 @@
 #include "Skill.h"
 #include "Unit.h"
 
+struct TS_SC_ENTER;
+
 class SkillProp : public WorldObject {
 public:
     static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio);
-    static void EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
+    static void EnterPacket(TS_SC_ENTER &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
     SkillProp() = delete;
     ~SkillProp() override = default;
     // Deleting the copy & assignment operators

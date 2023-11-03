@@ -52,23 +52,12 @@ NPC::NPC(NPCTemplate *base)
 }
 
 
-void NPC::EnterPacket(XPacket &pEnterPct, NPC *pNPC, Player *pPlayer)
+void NPC::EnterPacket(TS_SC_ENTER &pEnterPct, NPC *pNPC, Player *pPlayer)
 {
-    typedef unsigned long DWORD;
-    typedef unsigned short WORD;
-
-#if !defined(LOWORD)
-#define LOWORD(a) ((WORD)(a))
-#endif // #ifndef LOWORD
-#if !defined(HIWORD)
-#define HIWORD(a) ((WORD)(((DWORD)(a) >> 16) & 0xFFFF))
-#endif // #ifndef HIWORD
-
-    Unit::EnterPacket(pEnterPct, pNPC, pPlayer);
-    pEnterPct << (uint16_t)0;
-    pEnterPct << (uint16_t)HIWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
-    pEnterPct << (uint16_t)0;
-    pEnterPct << (uint16_t)LOWORD(pNPC->GetInt32Value(UNIT_FIELD_UID));
+    TS_SC_ENTER__NPC_INFO npcInfo{};
+    Unit::EnterPacket(npcInfo.creatureInfo, pNPC, pPlayer);
+    npcInfo.npc_id = pNPC->GetInt32Value(UNIT_FIELD_UID);
+    pEnterPct.npcInfo = npcInfo;
 }
 
 void NPC::LinkQuest(QuestLink *quest_link_info)

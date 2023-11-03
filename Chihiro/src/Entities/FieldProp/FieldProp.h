@@ -26,7 +26,7 @@ struct FieldPropDeleteHandler {
 };
 
 class Player;
-class XPacket;
+struct TS_SC_ENTER;
 
 class FieldProp : public WorldObject {
     friend class Skill;
@@ -42,7 +42,7 @@ public:
     /// \param pEnterPct Writable object
     /// \param pFieldProp The object we're generating for
     /// \param pPlayer the player who receives the packet
-    static void EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
+    static void EnterPacket(TS_SC_ENTER &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
     /// \brief Creates and spawns a fieldprop
     /// \param propDeleteHandler Always the instance of FieldPropManager, is used to delete it from its list
     /// \param pPropInfo RespawnInfo

@@ -25,18 +25,20 @@
 #include "Scripting/XLua.h"
 #include "World.h"
 
-void FieldProp::EnterPacket(XPacket &pEnterPct, FieldProp *pFieldProp, Player * /*pPlayer*/)
+void FieldProp::EnterPacket(TS_SC_ENTER &pEnterPct, FieldProp *pFieldProp, Player * /*pPlayer*/)
 {
-    pEnterPct << (uint32_t)pFieldProp->m_PropInfo.nPropID;
-    pEnterPct << pFieldProp->m_PropInfo.fZOffset;
-    pEnterPct << pFieldProp->m_PropInfo.fRotateX;
-    pEnterPct << pFieldProp->m_PropInfo.fRotateY;
-    pEnterPct << pFieldProp->m_PropInfo.fRotateZ;
-    pEnterPct << pFieldProp->m_PropInfo.fScaleX;
-    pEnterPct << pFieldProp->m_PropInfo.fScaleY;
-    pEnterPct << pFieldProp->m_PropInfo.fScaleZ;
-    pEnterPct << (uint8_t)(pFieldProp->m_PropInfo.bLockHeight ? 1 : 0);
-    pEnterPct << pFieldProp->m_PropInfo.fLockHeight;
+    TS_SC_ENTER__FIELD_PROP_INFO fieldPropInfo{};
+    fieldPropInfo.prop_id =pFieldProp->m_PropInfo.nPropID;
+    fieldPropInfo.fZOffset = pFieldProp->m_PropInfo.fZOffset; 
+    fieldPropInfo.fRotateX = pFieldProp->m_PropInfo.fRotateX;
+    fieldPropInfo.fRotateY = pFieldProp->m_PropInfo.fRotateY;
+    fieldPropInfo.fRotateZ = pFieldProp->m_PropInfo.fRotateZ;
+    fieldPropInfo.fScaleX = pFieldProp->m_PropInfo.fScaleX;
+    fieldPropInfo.fScaleY = pFieldProp->m_PropInfo.fScaleY;
+    fieldPropInfo.fScaleZ = pFieldProp->m_PropInfo.fScaleZ;
+    fieldPropInfo.bLockHeight = pFieldProp->m_PropInfo.bLockHeight;
+    fieldPropInfo.fLockHeight = pFieldProp->m_PropInfo.fLockHeight;
+    pEnterPct.fieldPropInfo = fieldPropInfo;
 }
 
 FieldProp *FieldProp::Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime)

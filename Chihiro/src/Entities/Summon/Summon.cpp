@@ -27,12 +27,14 @@
 #include "World.h"
 
 // static
-void Summon::EnterPacket(XPacket &pEnterPct, Summon *pSummon, Player *pPlayer)
+void Summon::EnterPacket(TS_SC_ENTER &pEnterPct, Summon *pSummon, Player *pPlayer)
 {
-    Unit::EnterPacket(pEnterPct, pSummon, pPlayer);
-    pEnterPct << pSummon->m_pMaster->GetHandle();
-    Messages::GetEncodedInt(pEnterPct, pSummon->GetSummonCode());
-    pEnterPct.fill(pSummon->GetName(), 19);
+    TS_SC_ENTER__SUMMON_INFO summonInfo{};
+    Unit::EnterPacket(summonInfo.creatureInfo, pSummon, pPlayer);
+    summonInfo.master_handle = pSummon->GetMaster()->GetHandle();
+    summonInfo.summon_code = pSummon->GetSummonCode();
+    summonInfo.szName = pSummon->GetNameAsString();
+    pEnterPct.summonInfo = summonInfo;
 };
 
 Summon::Summon(uint32_t pHandle, uint32_t pIdx)

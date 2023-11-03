@@ -24,10 +24,10 @@
 #include "Util.h"
 
 class State;
-class XPacket;
 class Item;
 class World;
 class Skill;
+struct TS_SC_ENTER__CREATURE_INFO;
 
 enum CREATURE_STATUS : uint32_t {
     STATUS_LOGIN_COMPLETE = 0x01,
@@ -102,7 +102,7 @@ public:
     Unit &operator=(const Unit &) = delete;
     virtual ~Unit();
 
-    static void EnterPacket(XPacket &, Unit *, Player *);
+    static void EnterPacket(TS_SC_ENTER__CREATURE_INFO &, Unit *, Player *);
     void AddToWorld() override;
     void RemoveFromWorld() override;
     void CleanupBeforeRemoveFromMap(bool finalCleanup);

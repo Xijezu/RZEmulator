@@ -21,10 +21,9 @@
 #include "QuestManager.h"
 #include "TimeSync.h"
 #include "Unit.h"
-#include "XPacket.h"
 #include "GameRule.h"
+#include "WorldSession.h"
 
-class WorldSession;
 class Item;
 class Summon;
 class WorldLocation;
@@ -96,7 +95,7 @@ public:
     void CleanupsBeforeDelete();
 
     /* ****************** STATIC FUNCTIONS *******************/
-    static void EnterPacket(XPacket &, Player *, Player *);
+    static void EnterPacket(TS_SC_ENTER &, Player *, Player *);
     static void DoEachPlayer(const std::function<void(Player *)> &fn);
     static Player *FindPlayer(const std::string &szName);
     static void DB_ItemCoolTime(Player *);
@@ -341,10 +340,7 @@ public:
     {
         if (m_session == nullptr)
             return;
-        XPacket output;
-        MessageSerializerBuffer serializer(&output);
-        packet.serialize(&serializer);
-        SendPacket(*serializer.getFinalizedPacket());
+        m_session->SendPacket(packet);
     }
 
     WorldSession &GetSession() const { return *m_session; }

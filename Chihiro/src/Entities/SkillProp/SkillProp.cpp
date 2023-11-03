@@ -28,11 +28,13 @@ SkillProp *SkillProp::Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint
     return new SkillProp(caster, *pSkill, nMagicPoint, fHateRatio);
 }
 
-void SkillProp::EnterPacket(XPacket &pEnterPct, SkillProp *pSkillProp, Player * /*pPlayer*/)
+void SkillProp::EnterPacket(TS_SC_ENTER &pEnterPct, SkillProp *pSkillProp, Player * /*pPlayer*/)
 {
-    pEnterPct << (uint32_t)pSkillProp->m_hCaster;
-    pEnterPct << (uint32_t)pSkillProp->start_time;
-    pEnterPct << (uint32_t)pSkillProp->m_pSkill.GetSkillId();
+    TS_SC_ENTER__SKILL_INFO skillInfo{};
+    skillInfo.casterHandle = pSkillProp->m_hCaster;
+    skillInfo.startTime = pSkillProp->start_time;
+    skillInfo.skillId = pSkillProp->m_pSkill.GetSkillId();
+    pEnterPct.skillInfo = skillInfo;
 }
 
 SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio)

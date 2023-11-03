@@ -42,6 +42,10 @@ public:
 
     uint32_t getParsedSize() const { return 0; }
 
+    uint32_t getReadSize() const { return 0; }
+
+    uint32_t getWrittenSize() const { return json.str().length(); }
+
     void printIdent(bool addNewLine = true)
     {
         if (!newList)

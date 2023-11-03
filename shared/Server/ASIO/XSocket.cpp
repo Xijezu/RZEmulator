@@ -57,9 +57,6 @@ void XSocket::SendPacket(XPacket const &packet)
     if (!IsOpen())
         return;
 
-    // if (sPacketLog->CanLogPacket())
-    // sPacketLog->LogPacket(packet, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
-
     _bufferQueue.Enqueue(new EncryptablePacket(packet, IsEncrypted()));
 }
 

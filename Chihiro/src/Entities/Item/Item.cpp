@@ -152,16 +152,17 @@ void Item::DBInsert()
     m_bIsNeedUpdateToDB = false;
 }
 
-void Item::EnterPacket(XPacket &pEnterPct, Item *pItem)
+void Item::EnterPacket(TS_SC_ENTER &pEnterPct, Item *pItem)
 {
-    Messages::GetEncodedInt(pEnterPct, pItem->GetItemInstance().GetCode());
-    pEnterPct << (uint64_t)pItem->GetItemInstance().GetCount();
-
-    pEnterPct << (uint32_t)pItem->m_nDropTime;
-    for (int32_t i = 0; i < 3; i++) {
-        pEnterPct << (uint32_t)pItem->m_pPickupOrder.hPlayer[i];
-        pEnterPct << (uint32_t)pItem->m_pPickupOrder.nPartyID[i];
+    TS_SC_ENTER__ITEM_INFO itemInfo{};
+    itemInfo.code = pItem->GetItemInstance().GetCode();
+    itemInfo.count = pItem->GetItemInstance().GetCount();
+    itemInfo.pick_up_order.drop_time = pItem->m_nDropTime;
+    for(auto i = 0; i < 3; i++) {
+        itemInfo.pick_up_order.hPlayer[i] = pItem->m_pPickupOrder.hPlayer[i];
+        itemInfo.pick_up_order.nPartyID[i] = pItem->m_pPickupOrder.nPartyID[i];
     }
+    pEnterPct.itemInfo = itemInfo;
 }
 
 void Item::SetPickupOrder(const ItemPickupOrder &order)

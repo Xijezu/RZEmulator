@@ -20,6 +20,8 @@
 #include "Unit.h"
 
 class Player;
+struct TS_SC_ENTER;
+
 class Summon : public Unit {
 public:
     friend class Player;
@@ -33,7 +35,7 @@ public:
 
     static void DB_InsertSummon(Player *, Summon *);
     static void DB_UpdateSummon(Player *, Summon *);
-    static void EnterPacket(XPacket &, Summon *, Player *pPlayer);
+    static void EnterPacket(TS_SC_ENTER &, Summon *, Player *pPlayer);
 
     CreatureStat *GetBaseStat() const override;
     inline uint32_t GetSummonSID() const { return GetUInt32Value(UNIT_FIELD_UID); }
