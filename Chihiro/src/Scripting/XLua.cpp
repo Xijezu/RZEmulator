@@ -279,8 +279,12 @@ constexpr unsigned int str2int(const char *str, int h = 0)
     return !str[h] ? 5381 : (str2int(str, h + 1) * 33) ^ str[h];
 }
 
-sol::object XLua::SCRIPT_GetValue(std::string szKey)
+sol::object XLua::SCRIPT_GetValue(sol::variadic_args args)
 {
+    auto szKey = args[0].get<std::string>();
+    if (args.size() > 1)
+        m_pUnit = Player::FindPlayer(args[2].get<std::string>());
+
     if (m_pUnit == nullptr)
         return return_object("");
 
@@ -373,7 +377,9 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
         return;
 
     if (args.size() != 2)
+    {
         return;
+    }
 
     auto key = args[0].get<std::string>();
     auto value = args[1].get<std::string>();
@@ -383,6 +389,9 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
 
 void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
 {
+    if (args.size() > 1)
+        m_pUnit = Player::FindPlayer(args[1].get<std::string>());
+
     if (m_pUnit == nullptr)
         return;
 

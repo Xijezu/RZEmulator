@@ -100,7 +100,7 @@ private:
     void SCRIPT_SavePlayer();
     uint32_t SCRIPT_InsertItem(sol::variadic_args);
 
-    sol::object SCRIPT_GetValue(std::string);
+    sol::object SCRIPT_GetValue(sol::variadic_args);
     void SCRIPT_SetValue(std::string, sol::variadic_args);
 
     std::string SCRIPT_GetFlag(std::string);
@@ -114,6 +114,7 @@ private:
     void SCRIPT_ShowMarket(std::string);
 
     void SCRIPT_InsertGold(sol::variadic_args);
+
 
     int32_t SCRIPT_GetProperChannelNum(int32_t) { return 0; }
 
