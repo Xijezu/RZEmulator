@@ -2733,7 +2733,7 @@ void Skill::ADD_STATE_BY_SELF_COST(Unit *pTarget)
 
     if (pTarget->GetHealth() < fCostHP)
         return;
-    if(pTarget->As<Summon>()->Get)
+    //if(pTarget->As<Summon>()->Get)
     if (fCostEnergy > 0 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
         return;
     if (pTarget->GetMana() < fCostMP)
