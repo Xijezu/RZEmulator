@@ -18,6 +18,7 @@
 
 #include "Common.h"
 #include "ItemTemplate.hpp"
+#include <array>
 
 class ItemInstance {
 public:

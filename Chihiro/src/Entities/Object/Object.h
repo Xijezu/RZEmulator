@@ -19,6 +19,7 @@
 #include "ByteBuffer.h"
 #include "Common.h"
 #include "Util.h"
+#include "Errors.h"
 
 enum ObjType : int {
     OBJ_STATIC = 0, // Player (Pyrok)

@@ -23,7 +23,6 @@ namespace SimpleCipher {
     {
         size_t sz = src.size();
 
-        // 1 ����Ʈ ������ �����ʹ� ���� �״�� ����
         {
             if (!sz)
                 return 0;
@@ -35,10 +34,8 @@ namespace SimpleCipher {
             }
         }
 
-        // MagicNum�� 4����Ʈ ����̸�, �����÷ο�� ���ǹǷ� ���������� ������ �����ϴ�.
-        uint magicnum = uint(std::accumulate(src.begin(), src.end(), sz, MagicNumOp<uint, typename S::value_type>()));
+        uint32_t magicnum = uint32_t(std::accumulate(src.begin(), src.end(), sz, MagicNumOp<uint32_t, typename S::value_type>()));
 
-        // nOriginalLength�� magicnum�� ���Ͽ� 8����Ʈ�� ����Ѵ�.
         dest.resize(sz + 4 * 2);
 
         int nStart = magicnum % int(sz);
@@ -81,7 +78,6 @@ namespace SimpleCipher {
                         break;
                 }
 
-                // ������� ������ ��� ���� nJump ���� ����ϵ��� ���� ����
                 if (it == vDivisorList.end())
                     break;
             }
@@ -119,7 +115,6 @@ namespace SimpleCipher {
     {
         S temp;
 
-        // 1 ����Ʈ ������ �����ʹ� ���� �״�� ����
         size_t nSrcSize = src.size();
         if (nSrcSize == 1) {
             if (!nSrcSize) {
@@ -135,14 +130,11 @@ namespace SimpleCipher {
                 return 0;
             }
         }
-        // ���� �����Ͱ� 2����Ʈ �̻��̸� 8 ����Ʈ�� �߰� ����(nOriginalLength, magicnum)�� �����Ƿ� 10 ����Ʈ �̻����� ���̰�
-        // �þ.
         else if (nSrcSize < 10) {
             assert(0);
             return 0;
         }
 
-        // nOriginalLength�� magicnum�� ���Ͽ� 8����Ʈ�� ����Ѵ�.
         size_t sz = nSrcSize - 4 * 2;
 
         unsigned int magicnum;
@@ -165,73 +157,44 @@ namespace SimpleCipher {
         int nStart = magicnum % int(sz);
         int nJump = (magicnum & 0xfff0) + 1;
 
-        // nJump �� ����
-        // * ����� ������� ���� sz���� Ŀ���� Ŀ�� ���� ���� �ð��� ���� �ɸ� �� ����(�ִ� sz���� ����Ͽ� ���� �ð� ����)
-        // * �ܼ��� �����ϸ� nJump�� �Ҽ��̸� sz ���� ������ �ƹ��� nJump �� �ε����� �̵����ѵ� ������ ���� �� ������
-        //   sz�� Ư�� �Ҽ��� ���(��� �ƴ�)�� ��쿡�� nJump�� �Ҽ����� nJump�� ����� �� ������, �ε��� ��ø��
-        //   �߻���. ���� nJump�� �Ҽ� ���οʹ� �����ϰ� sz�� ������� 1 �ܿ��� ���� ���ڿ��� ��.
-        // * �ּ��� �ڵ庸�� ���Ƽ� �׷��� ���� �� �ڵ尡 �ƴ� -,. -;;
         {
-            // SimpleCipher�� nJump ��� ������� sz�� ���� �������� 2�� ������ -2 �Ͽ� �ִ� sz / 2 - 2 ���� ���� ���� ������ ��.
             nJump = int((nJump % sz) / 2 - 2);
-            // ���� nJump�� 1 �����̸� ������ �꿡 ���� nJump(�� �ִ밪)�� �ٽ� ���.
             if (nJump <= 1) {
-                // �����Ͱ� 4 ����Ʈ ������ ��쿡�� nJump�� ������ sz-1
-                // sz == 4 : 1, 3�� ��ȿ nJump�� �� �� �ִµ� 1�� ���ϴ� ���� �����Ƿ� 3.
-                // sz == 3 : 1, 2�� ��ȿ nJump�� �� �� �ִµ� 1�� ���ϴ� ���� �����Ƿ� 2.
-                // sz == 2 : 1 �ۿ� ��ȿ nJump�� ���� -,. -;
-                // ���: 4����Ʈ ���ϴ� nJump = sz - 1 �� ����(�̶�⺸�ٴ� �׳��� ����)�� ����
                 if (sz <= 4)
                     nJump = int(sz - 1);
-                // �����Ͱ� 16 ����Ʈ ������ ��쿡�� nJump�� sz-2 �����̸鼭 sz�� ������� ���� ���� ���ϵ��� ��
-                // * ���⼭�� nJump�� �ִ밪�� �����ϰ� �� ������ ���� �� sz�� ������� ���� ���� �Ʒ��ʿ��� ����
                 else if (sz <= 16)
                     nJump = int(sz - 2);
-                // �����Ͱ� 17 ����Ʈ �̻��� ��쿡��(���� �� ���ǿ� �ش� �� �Ǵ� ��� ���) nJump�� sz / 2 - 1 ���� ���� sz�� ������� ���� ���� ����
                 else
                     nJump = int(sz / 2 - 1);
             }
 
-            // ���� ���� nJump ������ ���� �� sz�� ������� ���� ���� ���ϱ�...
-            // sz�� ��� ��� �̸� ���صα�
-            // sz�� ���� �� �ִ� ��� ���
             std::vector<int> vDivisorList;
             {
                 int nMaxValue = int(sz);
-                // vDivisorList�� n, (Num/n)�� 2���� ���ڰ� ���ÿ� ���� ������ ��ų �� �����Ƿ� (Num/n)�� ��(quotient) ����Ʈ�� ���� �־��ٰ� ���߿�
-                // vDivisorList�� ��ħ
                 std::vector<int> vQuotientList;
                 for (int nDivisor = 2; nDivisor < nMaxValue; ++nDivisor) {
-                    // ����� �ƴϸ� �н�
                     if (sz % nDivisor)
                         continue;
 
-                    // Num�� n���� ������ �������� ��쿡 ����� n, (Num/n) 2���̸�, n�� (Num/n)���� ũ�ų� �������� �ش� n���� ū n�� �̹� (Num/n)���� �����ߴ� ����� ��.
                     vDivisorList.push_back(nDivisor);
                     nMaxValue = int(sz / nDivisor);
-                    // sz�� Ư�� ���� �������� ��� nDivisor == nMaxValue�� ��
                     if (nDivisor != nMaxValue)
                         vQuotientList.push_back(nMaxValue);
                 }
 
-                // �� ����Ʈ�� ��� ����Ʈ�� ��ġ��
-                // * ���� ū ������ ��������Ƿ� �������� vDivisorList�� �߰���
                 vDivisorList.reserve(vDivisorList.size() + vQuotientList.size());
                 for (std::vector<int>::const_reverse_iterator it = vQuotientList.rbegin(); it != vQuotientList.rend(); ++it) {
                     vDivisorList.push_back((*it));
                 }
             }
 
-            // nJump ���� ���ų� ���� ���� �� ���� ū sz���� ����� ���� �� ���ϱ�
             for (; nJump > 1; --nJump) {
                 std::vector<int>::const_iterator it;
                 for (it = vDivisorList.begin(); it != vDivisorList.end(); ++it) {
-                    // sz�� ����� nJump�� ����� ��� ���� ����� ���ؼ��� �˻� ����
                     if (!(nJump % (*it)))
                         break;
                 }
 
-                // ������� ������ ��� ���� nJump ���� ����ϵ��� ���� ����
                 if (it == vDivisorList.end())
                     break;
             }
