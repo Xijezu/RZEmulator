@@ -76,8 +76,6 @@ public:
     void SetSendBufferSize(std::size_t sendBufferSize);
 
 protected:
-    virtual void OnClose() {}
-
     void ReadHandler() override;
     bool ReadHeaderHandler();
     ReadDataHandlerResult ReadDataHandler();

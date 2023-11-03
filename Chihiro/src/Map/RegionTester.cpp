@@ -39,7 +39,7 @@ void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float
 
 bool DirectionRegionTester::IsInRegion(Position pos)
 {
-    float dist = abs(-dy * pos.GetPositionX() + dx * pos.GetPositionY() + c) / denominator;
+    float dist = std::abs(-dy * pos.GetPositionX() + dx * pos.GetPositionY() + c) / denominator;
     if (thickness > dist) {
         float _V2x = pos.GetPositionX() - ori_x;
         float _V2y = pos.GetPositionY() - ori_y;

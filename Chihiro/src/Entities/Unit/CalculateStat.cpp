@@ -724,8 +724,9 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) && state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) &&
+            state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), 0, state.GetValue(0) + state.GetValue(1) * state.GetLevel()));
@@ -737,8 +738,9 @@ void Unit::applyState(State &state)
         if (weapon_class == 0)
             break;
 
-        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) && state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON &&
-            weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
+        if (weapon_class != state.GetValue<int32_t>(6) && state.GetValue<int32_t>(6) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(7) &&
+            state.GetValue<int32_t>(7) != CLASS_EVERY_WEAPON && weapon_class != state.GetValue<int32_t>(8) && state.GetValue<int32_t>(8) != CLASS_EVERY_WEAPON &&
+            weapon_class != state.GetValue<int32_t>(9) && state.GetValue<int32_t>(9) != CLASS_EVERY_WEAPON)
             break;
 
         m_vHateMod.emplace_back(HateModifier(state.GetValue(10), state.GetValue(11), state.GetValue(0) + state.GetValue(1) * state.GetLevel(), 0));
@@ -1406,22 +1408,17 @@ void Unit::applyItemEffect()
                 for (int32_t ol = 0; ol < 2; ol++) {
                     if (curItem->GetItemTemplate()->enhance_id[ol] != 0) {
                         int32_t curEnhance = curItem->GetItemInstance().GetEnhance();
-                        int32_t realEnhance = curEnhance;
 
-                        if (realEnhance >= 1) {
-                            fTotalPoints = curItem->GetItemTemplate()->_enhance[0][ol] * curEnhance;
+                        if (curEnhance > 0)
+                            fTotalPoints += std::min(curEnhance, 4) * curItem->GetItemTemplate()->_enhance[ol][0];
+                        if (curEnhance > 4)
+                            fTotalPoints += std::min(curEnhance - 4, 4) * curItem->GetItemTemplate()->_enhance[ol][1];
+                        if (curEnhance > 8)
+                            fTotalPoints += std::min(curEnhance - 8, 4) * curItem->GetItemTemplate()->_enhance[ol][2];
+                        if (curEnhance > 12)
+                            fTotalPoints += std::min(curEnhance - 12, 8) * curItem->GetItemTemplate()->_enhance[ol][3];
 
-                            if (realEnhance > 4) {
-                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[1][ol] * (float)(realEnhance - 4));
-                            }
-                            if (realEnhance > 8) {
-                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[2][ol] * (float)(realEnhance - 8));
-                            }
-                            if (realEnhance > 12) {
-                                fTotalPoints += (curItem->GetItemTemplate()->_enhance[3][ol] * (float)(realEnhance - 12));
-                            }
-                            onItemWearEffect(curItem, false, curItem->GetItemTemplate()->enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
-                        }
+                        onItemWearEffect(curItem, false, curItem->GetItemTemplate()->enhance_id[ol], fTotalPoints, fTotalPoints, fItemRatio);
                     }
                 }
             }

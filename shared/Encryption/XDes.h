@@ -1,8 +1,5 @@
 #pragma once
 
-// ��𼱰� �ܾ�� des ��ȣȭ �˰���.
-// 8byte ���ϴ� encrypt �ȵ�.
-
 class XDes {
 public:
     XDes(const char *password = NULL);
@@ -12,7 +9,6 @@ public:
     bool Encrypt(void *buf, int len);
     bool Decrypt(void *buf, int len);
 
-    // ���ϴ� ��� XDes( password ).Encrypt( buf, len ); ������ ���°ų� ���� ����.
     static bool Encrypt(const char *password, void *buf, int len);
     static bool Decrypt(const char *password, void *buf, int len);
 

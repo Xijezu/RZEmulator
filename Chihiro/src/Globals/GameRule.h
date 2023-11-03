@@ -61,8 +61,8 @@ public:
     constexpr static float SUMMON_FOLLOWING_FIRST_SPEED_UP_RATE{1.2f};
     constexpr static float VISIBLE_RANGE{525.0f};
     constexpr static int32_t SPEED_UNIT{30};
-    constexpr static int32_t DEFAULT_RUSH_SPEED{140};
-    constexpr static int32_t DEFAULT_KNOCK_BACK_SPEED{140};
+    constexpr static uint8_t DEFAULT_RUSH_SPEED{140};
+    constexpr static uint8_t DEFAULT_KNOCK_BACK_SPEED{140};
     constexpr static int32_t MORAL_LIMIT{100};
     constexpr static int32_t CRIME_LIMIT{100};
     constexpr static int32_t GM_PERMISSION{100};

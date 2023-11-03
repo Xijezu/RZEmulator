@@ -104,7 +104,7 @@ int32_t main(int32_t argc, char **argv)
 
     // Start the Boost based thread pool
     int32_t numThreads = sConfigMgr->GetIntDefault("ThreadPool", 1);
-    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext](std::vector<std::thread> *del) {
+    std::shared_ptr<std::vector<std::thread>> threadPool(new std::vector<std::thread>(), [ioContext = ioContext](std::vector<std::thread> *del) {
         ioContext->stop();
         for (std::thread &thr : *del)
             thr.join();
@@ -116,7 +116,7 @@ int32_t main(int32_t argc, char **argv)
         numThreads = 1;
 
     for (int32_t i = 0; i < numThreads; ++i)
-        threadPool->push_back(std::thread([ioContext]() { ioContext->run(); }));
+        threadPool->push_back(std::thread([ioContext = ioContext]() { ioContext->run(); }));
 
     WorldUpdateLoop();
 

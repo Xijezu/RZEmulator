@@ -72,7 +72,7 @@ CREATE_STRUCT(TS_SC_SKILL__HIT_DAMAGE);
 	_(simple) (TS_SC_SKILL__HIT_DAMAGE_INFO, damage) \
 	_(simple) (float, x) \
 	_(simple) (float, y) \
-	_(simple)(int8_t, speed) \
+	_(simple) (uint8_t, speed) \
 	_(simple) (uint32_t, knock_back_time)
 CREATE_STRUCT(TS_SC_SKILL__HIT_DAMAGE_WITH_KNOCKBACK);
 
@@ -111,7 +111,7 @@ CREATE_STRUCT(TS_SC_SKILL__HIT_REBIRTH);
 	_(simple) (float, x) \
 	_(simple) (float, y) \
 	_(simple) (float, face) \
-	_(simple) (int8_t, speed)
+	_(simple) (uint8_t, speed)
 CREATE_STRUCT(TS_SC_SKILL__HIT_RUSH);
 
 #define TS_SC_SKILL__HIT_CHAIN_DAMAGE_DEF(_) \

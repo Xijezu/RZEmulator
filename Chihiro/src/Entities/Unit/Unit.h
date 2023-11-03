@@ -467,6 +467,7 @@ protected:
     virtual void onBeforeCalculateStat(){};
     virtual void applyPassiveSkillEffect();
     virtual void onCompleteCalculateStat(){}; /* overwritten in player class*/
+    virtual void onSPChange() {}; // overwritten in Summon class
 
     void getAmplifiedAttributeByAmplifier(CreatureAtributeServer &attribute);
     void applyStateAmplify(State *state);

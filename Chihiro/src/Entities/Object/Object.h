@@ -512,8 +512,8 @@ public:
 
     virtual bool Step(uint32_t current_time);
     void Copy(const ArMoveVector &);
-    virtual void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
-    virtual void SetMove(Position _to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
+    void SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
+    void SetMove(Position _to, uint8_t _speed, uint32_t _start_time, uint32_t current_time);
     void SetDirection(Position pos);
     Position GetTargetPos();
     bool IsMoving(uint32_t t);
