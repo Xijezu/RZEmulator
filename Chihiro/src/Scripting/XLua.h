@@ -114,6 +114,7 @@ private:
     void SCRIPT_ShowMarket(std::string);
 
     void SCRIPT_InsertGold(sol::variadic_args);
+    void SCRIPT_DropItem(sol::variadic_args);
 
 
     int32_t SCRIPT_GetProperChannelNum(int32_t) { return 0; }

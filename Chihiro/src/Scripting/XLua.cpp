@@ -106,6 +106,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
+    m_pState.set_function("drop_item", &XLua::SCRIPT_DropItem, this);
 
     int32_t nFiles{0};
     for (auto &it : std::filesystem::directory_iterator(configFile)) {
@@ -1004,4 +1005,34 @@ void XLua::SCRIPT_InsertGold(sol::variadic_args args)
         return;
 
     pTarget->ChangeGold(pTarget->GetGold() + nGold);
+}
+
+void XLua::SCRIPT_DropItem(sol::variadic_args args)
+{
+
+    if (args.size() < 4) {
+        NG_LOG_ERROR("server.scripting", "SCRIPT_DropItem: Invalid Arguments");
+        return;
+    }
+
+    int x = args[0].get<int>();
+    int y = args[1].get<int>();
+    unsigned char layer = args[2].get<unsigned char>();
+    int code = args[3].get<int>();
+
+    int count = (args.size() >= 5) ? args[4].get<__int64>() : 1;
+    int nEnhance = (args.size() >= 6) ? args[5].get<int>() : 0;
+    int nLevel = (args.size() >= 7) ? args[6].get<int>() : 1;
+    int nFlag = (args.size() >= 8) ? args[7].get<int>() : -1;
+
+    auto ni = Item::AllocItem(0, code, count, GenerateCode::BY_GM, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
+
+    if (ni == nullptr)
+        return;
+
+    ni->SetCurrentXY(x, y);
+    ni->SetLayer(layer);
+    ni->AddNoise(rand32(), rand32(), 9);
+
+    sWorld.AddItemToWorld(ni);
 }
