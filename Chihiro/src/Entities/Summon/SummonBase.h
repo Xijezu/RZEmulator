@@ -24,6 +24,21 @@ enum class SUMMON_DEFAULTS : int32_t {
     SUMMON_MAX_ITEM_WEAR = 6,
 };
 
+enum class SUMMON_RATE : int32_t {
+    RATE_BASIC = 0,
+    RATE_COMMON = 1,
+    RATE_UNCOMMON = 2,
+    RATE_RARE = 3,
+    RATE_UNIQUE = 4,
+    RATE_EXTRA = 99,
+};
+
+enum class SUMMON_EVOLVE_TYPE : int32_t {
+    EVOLVE_NORMAL = 1,
+    EVOLVE_GROWTH = 2,
+    EVOLVE_EVOLVE = 3,
+};
+
 struct SummonLevelBonus {
     int32_t summon_id;
     float strength;

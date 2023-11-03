@@ -106,6 +106,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("open_storage", &XLua::SCRIPT_OpenStorage, this);
     m_pState.set_function("add_state", &XLua::SCRIPT_AddState, this);
     m_pState.set_function("add_cstate", &XLua::SCRIPT_AddCreatureState, this);
+    m_pState.set_function("learn_creature_all_skill", &XLua::SCRIPT_LearnCreatureAllSkill, this);
 
     int32_t nFiles{0};
     for (auto &it : std::filesystem::directory_iterator(configFile)) {
@@ -309,7 +310,7 @@ sol::object XLua::SCRIPT_GetValue(std::string szKey)
     case str2int("level"):
         return return_object(m_pUnit->GetLevel());
     case str2int("job_depth"):
-        return m_pUnit->IsPlayer() ? return_object(m_pUnit->As<Player>()->GetJobDepth()) : return_object(""s);
+        return m_pUnit->IsPlayer() ? return_object(m_pUnit->GetJobDepth()) : return_object(""s);
     case str2int("job_level"):
     case str2int("jlv"):
         return return_object(m_pUnit->GetCurrentJLv());
@@ -995,4 +996,44 @@ void XLua::SCRIPT_InsertGold(sol::variadic_args args)
         return;
 
     pTarget->ChangeGold(pTarget->GetGold() + nGold);
+}
+
+void XLua::SCRIPT_LearnCreatureAllSkill(sol::variadic_args args)
+{
+    if(m_pUnit == nullptr)
+        return;
+
+    Player *pPlayer = (args.size() >= 2 ? Player::FindPlayer(args[1].get<std::string>()) : (m_pUnit->IsPlayer() ? m_pUnit->As<Player>() : nullptr));
+    if(pPlayer == nullptr)
+        return;
+
+    if(args.size() == 0 || !args[0].is<int32_t>()) {
+        for(int i = 0; i < 6; i++) {
+            auto pSummon = pPlayer->GetSummon(i);
+            if(pSummon == nullptr)
+                continue;
+
+            // @todo: Summon EXP Resource
+            //int64_t nNecessaryEXP{0};
+            switch(pSummon->GetTransformLevel())
+            {
+                case (int32_t)SUMMON_EVOLVE_TYPE::EVOLVE_NORMAL:
+                    break;
+                case (int32_t)SUMMON_EVOLVE_TYPE::EVOLVE_GROWTH:
+                    break;
+                case (int32_t)SUMMON_EVOLVE_TYPE::EVOLVE_EVOLVE:
+                    break;
+                default:
+                    break;
+            }
+            GameContent::LearnAllSkill(pSummon);
+        }
+        return;
+    }
+
+    auto pSummon = pPlayer->GetSummon(args[0].get<int32_t>());
+    if(pSummon == nullptr)
+        return;
+
+    GameContent::LearnAllSkill(pSummon);
 }

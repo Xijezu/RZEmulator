@@ -46,6 +46,10 @@ public:
 
     uint32_t GetCreatureGroup() const override { return 9; }
 
+    int GetTransformLevel() const { return m_tSummonBase->type; }
+    int GetEvolveTarget() const { return m_tSummonBase->evolve_target; }
+
+
     void OnAfterReadSummon();
     uint32_t GetCardHandle();
 

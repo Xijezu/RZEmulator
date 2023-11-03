@@ -335,6 +335,7 @@ public:
     int32_t GetCurrentJob() const { return GetInt32Value(UNIT_FIELD_JOB); };
 
     int32_t GetCurrentJLv() const { return GetInt32Value(UNIT_FIELD_JLV); }
+    int32_t GetJobDepth() const;
 
     int32_t GetStamina() const { return GetInt32Value(UNIT_FIELD_STAMINA); }
 

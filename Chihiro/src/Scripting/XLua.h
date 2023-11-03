@@ -97,6 +97,7 @@ private:
     int32_t SCRIPT_GetItemCode(uint32_t);
     int32_t SCRIPT_UpdateGoldChaos();
     int32_t SCRIPT_LearnAllSkill();
+    void SCRIPT_LearnCreatureAllSkill(sol::variadic_args);
     void SCRIPT_SavePlayer();
     uint32_t SCRIPT_InsertItem(sol::variadic_args);
 

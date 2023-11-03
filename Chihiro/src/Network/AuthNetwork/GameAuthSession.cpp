@@ -134,7 +134,7 @@ void GameAuthSession::SendGameLogin()
     loginPct.server_name = m_szGameName;
     loginPct.server_screenshot_url = m_szGameSSU;
     loginPct.is_adult_server = static_cast<uint8_t>(m_bGameIsAdultServer ? 1 : 0);
-    loginPct.server_ip = m_szGameIP;
+    loginPct.server_ip = sConfigMgr->GetStringDefault("GameServer.ExternalIP", "127.0.0.1");
     loginPct.server_port = m_nGamePort;
     SendPacket(loginPct);
 }

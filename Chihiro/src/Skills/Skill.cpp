@@ -30,8 +30,8 @@
 #include "RegionTester.h"
 #include "SkillFunctor.h"
 #include "SkillProp/SkillProp.h"
-#include "World.h"
 #include "Unit.h"
+#include "World.h"
 
 constexpr int32_t PREDICTION_AIMING_TIME = 200;
 
@@ -327,7 +327,7 @@ int Skill::Cast(int nSkillLevel, uint32_t handle, Position pos, uint8_t layer, b
         auto nTargetCreatureGroup = static_cast<int32_t>(pUnit->GetCreatureGroup());
         bool bIsInvalidTarget{true};
         for (int i = -1; i < 5; ++i) {
-            if (nTargetCreatureGroup == GetVar(i + 7) || nTargetCreatureGroup != GameRule::CREATURE_ALL ) {
+            if (nTargetCreatureGroup == GetVar(i + 7) || nTargetCreatureGroup != GameRule::CREATURE_ALL) {
                 bIsInvalidTarget = false;
                 break;
             }
@@ -738,7 +738,8 @@ void Skill::broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int cost_hp, int c
     TS_SC_SKILL skillPct{};
     assembleMessage(skillPct, nType, cost_hp, cost_mp);
     sWorld.Broadcast((uint32_t)(pUnit1->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit1->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)),
-        (uint32_t)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit1->GetLayer(), skillPct);
+        (uint32_t)(pUnit2->GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pUnit2->GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), pUnit1->GetLayer(),
+        skillPct);
 }
 
 void Skill::ProcSkill()
@@ -904,13 +905,15 @@ void Skill::ProcSkill()
                     pPlayer = m_pOwner->As<Summon>()->GetMaster();
 
                 if (pPlayer != nullptr) {
-                    if(cost_item_code == ITEM_CODE_WEARED_BULLET) {
+                    if (cost_item_code == ITEM_CODE_WEARED_BULLET) {
                         bSuccess = pPlayer->EraseBullet(nItemCostCount);
-                    } else {
+                    }
+                    else {
                         auto pCostItem = pPlayer->FindItemByCode(cost_item_code);
-                        if(pCostItem != nullptr && pCostItem->GetCount() >= nItemCostCount) {
+                        if (pCostItem != nullptr && pCostItem->GetCount() >= nItemCostCount) {
                             pPlayer->EraseItem(pCostItem, nItemCostCount);
-                        } else {
+                        }
+                        else {
                             bSuccess = false;
                         }
                     }
@@ -1480,7 +1483,8 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
 
                 if (!m_pOwner->IsMonster() && GetSkillBase()->GetSkillEffectType() != EF_REMOVE_HATE && GetSkillBase()->GetSkillEffectType() != EF_REGION_REMOVE_HATE) {
                     pt = 0;
-                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_MAGIC_DAMAGE)
+                    if (sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_MAGIC_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_DAMAGE_WITH_KNOCK_BACK ||
+                        sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_DAMAGE || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_MAGIC_DAMAGE)
                         pt = sr.hitDamage.damage.damage;
                     else if (sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_HP || sr.type == TS_SKILL__HIT_TYPE::SHT_ADD_MP || sr.type == TS_SKILL__HIT_TYPE::SHT_CHAIN_HEAL)
                         pt = sr.hitAddStat.nIncStat;
@@ -1509,7 +1513,6 @@ void Skill::PostFireSkill(Unit * /*pTarget*/)
                     else if (!m_pOwner->IsEnemy(pDealTarget, false)) {
                         /// @Todo: AddHateToEnemyList
                     }
-
                 }
             }
         }
@@ -1587,19 +1590,12 @@ bool Skill::CheckCoolTime(uint32_t t) const
 
 uint32_t Skill::GetSkillCoolTime() const
 {
-    int l{0};
     if (m_SkillBase == nullptr)
         return 0;
 
-    if (m_pOwner->IsSummon())
-        l = m_nRequestedSkillLevel;
-    else
-        l = m_nEnhance;
-
-    auto cts = m_pOwner->GetCoolTimeSpeed();
-    auto ctm = m_pOwner->GetCoolTimeMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
-    auto ct = m_SkillBase->GetCoolTime(l);
-    return static_cast<uint32_t>(cts * ctm * ct);
+    uint32_t nCoolTime = m_SkillBase->GetCoolTime((m_pOwner->IsSummon()) ? GetRequestedSkillLevel() : GetSkillEnhance());
+    nCoolTime *= m_pOwner->GetCoolTimeMod((ElementalType)GetSkillBase()->GetElementalType(), GetSkillBase()->IsPhysicalSkill(), GetSkillBase()->IsHarmful());
+    return nCoolTime * m_pOwner->GetCoolTimeSpeed();
 }
 
 void Skill::SetRemainCoolTime(uint32_t nTime)
@@ -2734,7 +2730,7 @@ void Skill::ADD_STATE_BY_SELF_COST(Unit *pTarget)
 
     if (pTarget->GetHealth() < fCostHP)
         return;
-    //if(pTarget->As<Summon>()->Get)
+    // if(pTarget->As<Summon>()->Get)
     if (fCostEnergy > 0 && pTarget->GetUInt32Value(UNIT_FIELD_ENERGY) < fCostEnergy)
         return;
     if (pTarget->GetMana() < fCostMP)

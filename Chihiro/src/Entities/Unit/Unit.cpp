@@ -2115,11 +2115,11 @@ void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additiona
 
 uint32_t Unit::GetRemainCoolTime(int32_t skill_id) const
 {
-    uint32_t ct = sWorld.GetArTime();
-    auto sk = GetSkill(skill_id);
-    if (sk == nullptr || sk->m_nNextCoolTime < ct)
+    auto pSkill = GetSkill(skill_id);
+    if (pSkill == nullptr)
         return 0;
-    return sk->m_nNextCoolTime - ct;
+
+    return pSkill->GetSkillCoolTime();
 }
 
 uint32_t Unit::GetTotalCoolTime(int32_t skill_id) const
@@ -3300,4 +3300,12 @@ Skill *Unit::GetSkillByEffectType(SKILL_EFFECT_TYPE nEffectTypeID) const
 
 bool Unit::StateFlagChecker::operator()(const State* state) {
     return static_cast<bool>( state->GetTimeType() & flag );
+}
+
+int32_t Unit::GetJobDepth() const
+{
+    auto res = sObjectMgr.GetJobInfo(GetCurrentJob());
+    if (res != nullptr)
+        return res->job_depth;
+    return 0;
 }
