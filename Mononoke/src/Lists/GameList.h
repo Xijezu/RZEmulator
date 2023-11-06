@@ -28,7 +28,7 @@ struct Game : public TS_SERVER_INFO {
 
 class GameList {
 public:
-    typedef std::map<uint32_t, Game *> GameMap;
+    typedef std::map<uint16_t, std::shared_ptr<Game>> GameMap;
     ~GameList() = default;
 
     static GameList &Instance()
@@ -37,7 +37,7 @@ public:
         return instance;
     }
 
-    void AddGame(Game *pNewGame)
+    void AddGame(std::shared_ptr<Game> pNewGame)
     {
         // Adds a game to the list
         {
@@ -46,7 +46,7 @@ public:
         }
     }
 
-    void RemoveGame(const uint32_t nIDX)
+    void RemoveGame(const uint16_t nIDX)
     {
         // Removes a game from the list
         {
@@ -61,10 +61,10 @@ public:
     // You need to use the mutex while working with the map!
     GameMap *GetMap() { return &m_games; }
 
-    Game *GetGame(const uint32_t nIDX)
+    Game *GetGame(const uint16_t nIDX)
     {
         if (m_games.count(nIDX) == 1)
-            return m_games[nIDX];
+            return m_games[nIDX].get();
         return nullptr;
     }
 

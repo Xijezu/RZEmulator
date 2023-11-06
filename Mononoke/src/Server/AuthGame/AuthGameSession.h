@@ -57,6 +57,6 @@ public:
     std::string GetAccountName() const { return (m_pGame != nullptr ? m_pGame->server_name : "<null>"); }
 
 private:
-    Game *m_pGame;
+    std::shared_ptr<Game> m_pGame;
     bool m_bIsAuthed;
 };
