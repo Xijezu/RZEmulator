@@ -935,14 +935,6 @@ void Player::Save(bool bOnlyPlayer)
     }
 }
 
-int32_t Player::GetJobDepth()
-{
-    auto res = sObjectMgr.GetJobInfo(GetCurrentJob());
-    if (res != nullptr)
-        return res->job_depth;
-    return 0;
-}
-
 void Player::applyJobLevelBonus()
 {
     int32_t levels[4]{};

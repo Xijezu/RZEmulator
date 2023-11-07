@@ -162,8 +162,6 @@ public:
     void SetWalk(bool bOn) { m_bWalk = bOn; }
     bool IsWalking() const { return m_bWalk; }
 
-    int32_t GetJobDepth();
-
     std::string GetCharacterFlag(const std::string &flag) { return m_lFlagList[flag]; }
 
     /* ****************** DATABASE *******************/

@@ -1072,7 +1072,7 @@ void XLua::SCRIPT_LearnCreatureAllSkill(sol::variadic_args args)
         return;
 
     GameContent::LearnAllSkill(pSummon);
-}
+
 
 
 void XLua::SCRIPT_DropItem(sol::variadic_args args)
@@ -1096,4 +1096,5 @@ void XLua::SCRIPT_DropItem(sol::variadic_args args)
     ni->SetLayer(layer);
     ni->AddNoise(rand32(), rand32(), 9);
     sWorld.AddItemToWorld(ni);
+
 }

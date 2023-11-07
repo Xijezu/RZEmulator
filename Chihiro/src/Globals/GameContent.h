@@ -30,7 +30,7 @@ class GameContent {
 public:
     static Monster *RespawnMonster(float x, float y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool bNeedLock);
     static bool IsInRandomPoolMonster(int32_t group_id, int32_t monster_id);
-    static bool LearnAllSkill(Player *pPlayer);
+    static bool LearnAllSkill(Unit *pPlayer);
     static bool SelectItemIDFromDropGroup(int32_t nDropGroupID, int32_t &nItemID, int64_t &nItemCount);
     static uint16_t IsLearnableSkill(Unit *, int, int, int32_t &);
     static int32_t GetLocationID(float x, float y);

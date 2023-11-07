@@ -18,6 +18,7 @@
 #include <map>
 
 #include "Common.h"
+#include "Log.h"
 #include "SharedMutex.h"
 
 class AuthClientSession;
@@ -36,6 +37,8 @@ struct Player {
     {
     }
 
+    ~Player() {}
+
     uint32_t nAccountID;
     std::string szLoginName;
     bool bIsBlocked;
@@ -50,7 +53,7 @@ struct Player {
 /// Storage object for the list of players on the server
 class PlayerList {
 public:
-    typedef std::map<std::string, Player *> PlayerMap;
+    typedef std::map<std::string, std::shared_ptr<Player>> PlayerMap;
     ~PlayerList() = default;
 
     static PlayerList &Instance()
@@ -59,7 +62,7 @@ public:
         return instance;
     }
 
-    void AddPlayer(Player *pNewPlayer)
+    void AddPlayer(std::shared_ptr<Player> pNewPlayer)
     {
         // Adds a player to the list
         {
@@ -86,7 +89,7 @@ public:
     Player *GetPlayer(const std::string &szAccount)
     {
         if (m_players.count(szAccount) == 1)
-            return m_players[szAccount];
+            return m_players[szAccount].get();
         return nullptr;
     }
 

@@ -30,7 +30,7 @@
 // Constructo - give it a socket
 AuthClientSession::AuthClientSession(boost::asio::ip::tcp::socket &&socket)
     : XSocket(std::move(socket))
-    , m_pPlayer(nullptr)
+    , m_pPlayer(std::make_shared<Player>())
 {
     _desCipther.Init("MERONG");
 }
@@ -42,11 +42,18 @@ void AuthClientSession::OnClose()
 {
     if (m_pPlayer == nullptr)
         return;
-    auto g = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
-    if (g != nullptr && g->nAccountID == m_pPlayer->nAccountID && !g->bIsInGame) {
-        sPlayerMapList.RemovePlayer(g->szLoginName);
-        delete m_pPlayer;
-    }
+
+    auto mapPlayer = sPlayerMapList.GetPlayer(m_pPlayer->szLoginName);
+    if (mapPlayer == nullptr)
+        return;
+
+    if(mapPlayer->nAccountID != m_pPlayer->nAccountID)
+        return;
+
+    if(mapPlayer->bIsInGame)
+        return;
+
+    sPlayerMapList.RemovePlayer(m_pPlayer->szLoginName);
 }
 
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
@@ -117,7 +124,6 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
     stmt->setString(0, pRecvPct->account);
     stmt->setString(1, szPassword);
     if (PreparedQueryResult dbResult = LoginDatabase.Query(stmt)) {
-        m_pPlayer = new Player{};
         m_pPlayer->nAccountID = (*dbResult)[0].GetUInt32();
         m_pPlayer->szLoginName = (*dbResult)[1].GetString();
         m_pPlayer->nLastServerIDX = (*dbResult)[2].GetUInt32();
@@ -154,7 +160,7 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
 
 void AuthClientSession::HandleVersion(const TS_CA_VERSION *pRecvPct)
 {
-    NG_LOG_TRACE("network", "[Version] Client version is %s", pRecvPct->szVersion.c_str());
+    NG_LOG_DEBUG("network", "[Version] Client version is %s", pRecvPct->szVersion.c_str());
 }
 
 void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
@@ -170,10 +176,11 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
 
 void AuthClientSession::HandleSelectServer(const TS_CA_SELECT_SERVER *pRecvPct)
 {
+    bool bExist = sGameMapList.GetGame(pRecvPct->server_idx) != 0;
+    m_pPlayer->bIsInGame = bExist;
     m_pPlayer->nGameIDX = pRecvPct->server_idx;
     m_pPlayer->nOneTimeKey = ((uint64_t)rand32()) * rand32() * rand32() * rand32();
-    m_pPlayer->bIsInGame = true;
-    bool bExist = sGameMapList.GetGame((uint32_t)m_pPlayer->nGameIDX) != 0;
+
 
     TS_AC_SELECT_SERVER resultPct{};
     resultPct.result = (bExist ? TS_RESULT_SUCCESS : TS_RESULT_NOT_EXIST);

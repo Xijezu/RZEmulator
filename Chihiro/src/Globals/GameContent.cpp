@@ -41,21 +41,21 @@ bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
     return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1}, {x2, y2}});
 }
 
-bool GameContent::LearnAllSkill(Player *pPlayer)
+bool GameContent::LearnAllSkill(Unit *pUnit)
 {
-    auto depth = pPlayer->GetJobDepth();
+    auto depth = pUnit->GetJobDepth();
     for (int32_t i = 0; i <= depth; ++i) {
-        int32_t nCurrJob = i == depth ? pPlayer->GetCurrentJob() : pPlayer->GetPrevJobId(i);
+        int32_t nCurrJob = i == depth ? pUnit->GetCurrentJob() : pUnit->GetPrevJobId(i);
         auto tree = sObjectMgr.getSkillTree(nCurrJob);
         if (tree.empty())
             continue;
 
         if (i == depth)
-            pPlayer->SetCurrentJLv(depth == 0 ? 10 : 50);
+            pUnit->SetCurrentJLv(depth == 0 ? 10 : 50);
         else
-            pPlayer->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
+            pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + i, depth == 0 ? 10 : 50);
         for (auto &s : tree) {
-            auto currSkill = pPlayer->GetSkill(s.skill_id);
+            auto currSkill = pUnit->GetSkill(s.skill_id);
             int32_t currSkillLevel = 0;
             if (currSkill != nullptr)
                 currSkillLevel = currSkill->m_nSkillLevel;
@@ -65,8 +65,8 @@ bool GameContent::LearnAllSkill(Player *pPlayer)
 
             for (currSkillLevel += 1; currSkillLevel <= s.max_skill_lv; ++currSkillLevel) {
                 int32_t nNeedJP = sObjectMgr.GetNeedJpForSkillLevelUp(s.skill_id, currSkillLevel, nCurrJob);
-                pPlayer->SetJP(nNeedJP);
-                pPlayer->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
+                pUnit->SetJP(nNeedJP);
+                pUnit->RegisterSkill(s.skill_id, currSkillLevel, 0, nCurrJob);
             }
         }
     }

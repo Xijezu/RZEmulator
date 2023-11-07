@@ -24,7 +24,7 @@
 // Constructor - set the default server name to <null>, also give it a socket
 AuthGameSession::AuthGameSession(boost::asio::ip::tcp::socket &&socket)
     : XSocket(std::move(socket))
-    , m_pGame(new Game{})
+    , m_pGame(std::make_shared<Game>())
     , m_bIsAuthed(false)
 {
     m_pGame->server_idx = 255;
@@ -33,37 +33,42 @@ AuthGameSession::AuthGameSession(boost::asio::ip::tcp::socket &&socket)
 
 AuthGameSession::~AuthGameSession()
 {
-    if (m_pGame) {
-        if (m_bIsAuthed) {
-            auto g = sGameMapList.GetGame(m_pGame->server_idx);
-            if (g != nullptr) {
-                sGameMapList.RemoveGame(g->server_idx);
-            }
-        }
-        delete m_pGame;
-        m_pGame = nullptr;
-    }
+    if (m_pGame == nullptr)
+        return;
+
+    if (!m_bIsAuthed)
+        return;
+
+    sGameMapList.RemoveGame(m_pGame->server_idx);
 }
 
 void AuthGameSession::OnClose()
 {
     if (m_pGame == nullptr)
         return;
-    auto g = sGameMapList.GetGame(m_pGame->server_idx);
-    if (g != nullptr && g->server_name == m_pGame->server_name) {
-        {
-            NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
-            auto map = sPlayerMapList.GetMap();
-            for (auto player : *map) {
-                if (player.second->nGameIDX == g->server_idx) {
-                    map->erase(player.second->szLoginName);
-                    delete player.second;
-                }
+
+    auto gameMap = sGameMapList.GetGame(m_pGame->server_idx);
+    if (gameMap == nullptr)
+        return;
+
+    if (gameMap->server_name != m_pGame->server_name)
+        return;
+
+    {
+        NG_UNIQUE_GUARD writeGuard(*sPlayerMapList.GetGuard());
+        auto map = sPlayerMapList.GetMap();
+        ASSERT(map != nullptr);
+        for (auto mapIter = map->begin(); mapIter != map->end();) {
+            if (mapIter->second->nGameIDX == m_pGame->server_idx) {
+                map->erase(mapIter->second->szLoginName);
+                continue;
             }
+            mapIter++;
         }
-        sGameMapList.RemoveGame(g->server_idx);
-        NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->server_name.c_str(), m_pGame->server_idx);
     }
+
+    sGameMapList.RemoveGame(m_pGame->server_idx);
+    NG_LOG_INFO("gameserver", "Gameserver <%s> [Idx: %d] has disconnected.", m_pGame->server_name.c_str(), m_pGame->server_idx);
 }
 
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
@@ -184,7 +189,6 @@ void AuthGameSession::HandleClientLogout(const TS_GA_CLIENT_LOGOUT *pGamePct)
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
     if (p != nullptr) {
         sPlayerMapList.RemovePlayer(pGamePct->account);
-        delete p;
     }
 }
 
@@ -193,7 +197,6 @@ void AuthGameSession::HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *pGa
     auto p = sPlayerMapList.GetPlayer(pGamePct->account);
     if (p != nullptr) {
         sPlayerMapList.RemovePlayer(pGamePct->account);
-        delete p;
     }
 }
 
