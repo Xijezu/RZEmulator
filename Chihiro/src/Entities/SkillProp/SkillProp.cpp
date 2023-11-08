@@ -380,11 +380,11 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
 
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
 
-    Unit *pUnit{};
+    Unit *pUnit{nullptr};
     int32_t nTargetLimit = m_pSkill.GetVar(6);
     SkillResult skill_result{};
 
-    for (auto &handle : vResult) {
+    for (const auto &handle : vResult) {
         pUnit = sMemoryPool.GetObjectInWorld<Unit>(handle);
         if (pUnit == nullptr /* IsPet() */)
             continue;
@@ -401,7 +401,10 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
         nHPHeal = pUnit->Heal(nHPHeal);
         nMPHeal = pUnit->MPHeal(nMPHeal);
 
-        /// @TODO: SP
+        if(pUnit->IsSummon()) {
+            auto pSummon = pUnit->As<Summon>();
+            pSummon->SetSP(pSummon->GetSP() + nSPHeal); 
+        }
 
         skill_result.type = TS_SKILL__HIT_TYPE::SHT_ADD_HP_MP_SP;
         skill_result.hTarget = pUnit->GetHandle();

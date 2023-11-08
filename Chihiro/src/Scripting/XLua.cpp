@@ -45,8 +45,7 @@ bool XLua::InitializeLua()
     m_pState.set_function("respawn_roaming_mob", &XLua::SCRIPT_RespawnRoamingMob, this);
     m_pState.set_function("respawn_guardian", &XLua::SCRIPT_RespawnGuardian, this);
     m_pState.set_function("respawn", &XLua::SCRIPT_AddRespawnInfo, this);
-    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint,
-        this); /// TODO!!!!
+    m_pState.set_function("raid_respawn", &XLua::SCRIPT_CPrint, this); /// TODO!!!!
     // NPC relevant
     m_pState.set_function("get_npc_id", &XLua::SCRIPT_GetNPCID, this);
     m_pState.set_function("dlg_title", &XLua::SCRIPT_DialogTitle, this);

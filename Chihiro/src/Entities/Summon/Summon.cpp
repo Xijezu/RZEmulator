@@ -255,58 +255,59 @@ void Summon::onExpChange()
     }
 }
 
-bool Summon::DoEvolution()
+bool Summon::DoEvolution(int32_t nTargetCode)
 {
     auto prev_hp = GetHealth();
     auto prev_mp = GetMana();
 
-    if (this->m_tSummonBase->form < 3) {
-        // @TODO Ride
-        if (false) {
+    if (GetMaster()->IsRiding() && GetMaster()->GetRideHandle() == GetHandle())
+        return false;
+
+    if (nTargetCode == 0) {
+        if (m_tSummonBase->evolve_target != 0)
+            nTargetCode = m_tSummonBase->evolve_target;
+        else
             return false;
-        }
-        else {
-            auto nTargetCode = m_tSummonBase->evolve_target;
-            SetSummonInfo(nTargetCode);
-            CalculateStat();
-            m_pMaster->Save(false);
-
-            TS_SC_SUMMON_EVOLUTION evoPct{};
-            evoPct.card_handle = m_pItem->GetHandle();
-            evoPct.summon_handle = GetHandle();
-            evoPct.name = GetName();
-            evoPct.code = m_tSummonBase->id;
-            if (IsInWorld()) {
-                sWorld.Broadcast(
-                    (uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
-            }
-            else {
-                if (m_pMaster != nullptr)
-                    m_pMaster->SendPacket(evoPct);
-            }
-
-            if (sRegion.IsVisibleRegion(this, GetMaster()) == 0) {
-                m_pMaster->SendPacket(evoPct);
-            }
-            Messages::SendStatInfo(m_pMaster, this);
-            Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
-            Messages::SendLevelMessage(m_pMaster, this);
-            Messages::SendEXPMessage(m_pMaster, this);
-
-            if (m_pItem != nullptr) {
-                /*int32_t i = 0;
-                for( i = 0; i < m_tSummonBase.form - 1; ++i) {
-                    m_pItem->m_Instance.Socket[i+1] = GetPrevJobLv(i);
-                }
-                m_pItem->m_Instance.Socket[i + 1] = GetLevel();*/
-                if (m_pMaster != nullptr)
-                    Messages::SendItemMessage(m_pMaster, m_pItem);
-            }
-            return true;
-        }
     }
-    return false;
-};
+
+    SetSummonInfo(nTargetCode);
+    CalculateStat();
+    m_pMaster->Save(false);
+
+    TS_SC_SUMMON_EVOLUTION evoPct{};
+    evoPct.card_handle = m_pItem->GetHandle();
+    evoPct.summon_handle = GetHandle();
+    evoPct.name = GetName();
+    evoPct.code = m_tSummonBase->id;
+    if (IsInWorld()) {
+        sWorld.Broadcast((uint32_t)(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), GetLayer(), evoPct);
+    }
+    else if (GetMaster() != nullptr) {
+        m_pMaster->SendPacket(evoPct);
+    }
+
+    if (sRegion.IsVisibleRegion(this, GetMaster()) == 0) {
+        m_pMaster->SendPacket(evoPct);
+    }
+    Messages::SendStatInfo(m_pMaster, this);
+    Messages::SendHPMPMessage(m_pMaster, this, GetHealth() - prev_hp, GetMana() - prev_mp, false);
+    Messages::SendLevelMessage(m_pMaster, this);
+    Messages::SendEXPMessage(m_pMaster, this);
+    Messages::SendSPMessage(m_pMaster, this);
+
+    if (m_pItem != nullptr) {
+        auto nCardUID = m_pItem->GetItemUID();
+        auto depth = GetTransformLevel();
+        int32_t jobDepth = 0;
+        for (; jobDepth < depth - 1; ++jobDepth) {
+            m_pItem->GetItemInstance().SetSocketIndex(jobDepth + 1, GetPrevJobLv(jobDepth));
+        }
+        m_pItem->GetItemInstance().SetSocketIndex(jobDepth + 1, GetLevel());
+        if (m_pMaster != nullptr)
+            Messages::SendItemMessage(m_pMaster, m_pItem);
+    }
+    return true;
+}
 
 bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<int32_t> *ItemList)
 {

@@ -86,7 +86,7 @@ public:
     }
 
     void SetSummonInfo(int32_t);
-    bool DoEvolution();
+    bool DoEvolution(int32_t nTargetCode = 0);
 
     int32_t m_nSummonInfo{};
     int32_t m_nCardUID{};
