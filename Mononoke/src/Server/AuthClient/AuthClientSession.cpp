@@ -143,11 +143,10 @@ void AuthClientSession::HandleLoginPacket(const TS_CA_ACCOUNT *pRecvPct)
             if (pOldPlayer->bIsInGame) {
                 auto game = sGameMapList.GetGame(static_cast<uint32_t>(pOldPlayer->nGameIDX));
                 if (game != nullptr && game->m_pSession != nullptr)
-                    game->m_pSession->KickPlayer(pOldPlayer);
+                    game->m_pSession->KickPlayer(pOldPlayer->szLoginName);
             }
             SendResultMsg(pRecvPct->getReceivedId(), TS_RESULT_ALREADY_EXIST, 0);
             sPlayerMapList.RemovePlayer(pOldPlayer->szLoginName);
-            delete pOldPlayer;
         }
 
         _isAuthed = true;
@@ -168,7 +167,7 @@ void AuthClientSession::HandleServerList(const TS_CA_SERVER_LIST *pRecvPct)
     NG_SHARED_GUARD readGuard(*sGameMapList.GetGuard());
     auto map = sGameMapList.GetMap();
     TS_AC_SERVER_LIST serverList{};
-    for (auto &x : *map) {
+    for (const auto &x : *map) {
         serverList.servers.emplace_back(*x.second);
     }
     SendPacket(serverList);

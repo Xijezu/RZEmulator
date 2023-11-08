@@ -200,13 +200,10 @@ void AuthGameSession::HandleClientKickFailed(const TS_GA_CLIENT_KICK_FAILED *pGa
     }
 }
 
-void AuthGameSession::KickPlayer(Player *pPlayer)
+void AuthGameSession::KickPlayer(const std::string& szPlayerName)
 {
-    if (pPlayer == nullptr)
-        return;
-
     TS_AG_KICK_CLIENT kickPct{};
-    kickPct.account = pPlayer->szLoginName;
+    kickPct.account = szPlayerName;
     SendPacket(kickPct);
 }
 

@@ -61,7 +61,7 @@ public:
     // You need to use the mutex while working with the map!
     GameMap *GetMap() { return &m_games; }
 
-    Game *GetGame(const uint16_t nIDX)
+    const Game *GetGame(const uint16_t nIDX)
     {
         if (m_games.count(nIDX) == 1)
             return m_games[nIDX].get();

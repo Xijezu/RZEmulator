@@ -46,7 +46,7 @@ public:
     void HandlePingPacket(const TS_CS_PING *);
     /// \brief Kicks a player from the gameserver
     /// \param pPlayer The player to be kicked
-    void KickPlayer(Player *pPlayer);
+    void KickPlayer(const std::string&);
 
     /// \brief Gets the GameIDX - used in WorldSocket
     /// \return GameIDX
