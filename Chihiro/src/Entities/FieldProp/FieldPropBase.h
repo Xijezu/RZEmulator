@@ -18,7 +18,7 @@
 
 #include "Common.h"
 
-enum ACTIVATE_CHECK_TYPE : int {
+enum ACTIVATE_CHECK_TYPE : int32_t {
     CHECK_TYPE_ITEM = 1,
     CHECK_TYPE_QUEST = 2,
     CHECK_TYPE_SKILL = 3,
@@ -41,25 +41,50 @@ struct DropItemInfo {
 };
 
 struct FieldPropRespawnInfo {
-    FieldPropRespawnInfo() = default;
+    FieldPropRespawnInfo()
+    {
+        nPropId = 0;
+        x = 0;
+        y = 0;
+        layer = 0;
+        fZOffset = 0.0f;
+        fRotateX = 0.0f;
+        fRotateY = 0.0f;
+        fRotateZ = 0.0f;
+        fScaleX = 1.0f;
+        fScaleY = 1.0f;
+        fScaleY = 1.0f;
+        bLockHeight = false;
+        fLockHeight = 0.0f;
+    }
     FieldPropRespawnInfo(const FieldPropRespawnInfo &) = default;
-    FieldPropRespawnInfo& operator=(const FieldPropRespawnInfo&) = default;
-    
-    int32_t nPropID;
-    float x;
-    float y;
+    FieldPropRespawnInfo &operator=(const FieldPropRespawnInfo &) = default;
+
+    int32_t nPropId;
+    float_t x, y;
     uint8_t layer;
-    float fZOffset;
-    float fRotateX;
-    float fRotateY;
-    float fRotateZ;
-    float fScaleX;
-    float fScaleY;
-    float fScaleZ;
+    float_t fZOffset;
+    float_t fRotateX;
+    float_t fRotateY;
+    float_t fRotateZ;
+    float_t fScaleX;
+    float_t fScaleY;
+    float_t fScaleZ;
     bool bLockHeight;
-    float fLockHeight;
-    bool bOnce;
+    float_t fLockHeight;
 };
+
+struct RegenInfo {
+    RegenInfo(const FieldPropRespawnInfo *_pRespawnInfo, uint32_t _tNextRegen)
+        : pRespawnInfo(_pRespawnInfo)
+        , tNextRegen(_tNextRegen)
+    {
+    }
+
+    const FieldPropRespawnInfo *pRespawnInfo;
+    uint32_t tNextRegen;
+};
+
 
 struct FieldPropTemplate {
     uint32_t nPropID;

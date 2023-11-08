@@ -23,10 +23,10 @@ X2D::Linef::Linef(X2D::Pointf p1, X2D::Pointf p2)
     end = Pointf(p2.x, p2.y);
 }
 
-X2D::CcwResult X2D::Linef::CheckClockWisef(float x1, float y1, float x2, float y2, float x3, float y3)
+X2D::CcwResult X2D::Linef::CheckClockWisef(float_t x1, float_t y1, float_t x2, float_t y2, float_t x3, float_t y3)
 {
     CcwResult result{};
-    float l = ((y3 - y1) * (x2 - x1)) - ((x3 - x1) * (y2 - y1));
+    float_t l = ((y3 - y1) * (x2 - x1)) - ((x3 - x1) * (y2 - y1));
     if (l <= 0.0f) {
         if (l >= 0.0f)
             result = Parallelism;
@@ -57,8 +57,8 @@ X2D::Linef::IntersectResult X2D::Linef::IntersectCCW(X2D::Pointf p1, X2D::Pointf
     Pointf tp6{};
     Pointf tp7{};
     Pointf tp8{};
-    float f1{};
-    float f2{};
+    float_t f1{};
+    float_t f2{};
 
     if (p2.x >= p1.x) {
         tp1 = p1;

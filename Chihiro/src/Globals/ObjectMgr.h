@@ -22,6 +22,7 @@
 #include "DatabaseTemplates.h"
 #include "FieldPropBase.h"
 #include "MonsterBase.h"
+#include "GameContent.h"
 #include "NPCBase.h"
 #include "Object.h"
 #include "QuadTreeMapInfo.h"
@@ -132,14 +133,14 @@ public:
     WayPointInfo *GetWayPoint(int32_t waypoint_id);
     DropGroup *GetDropGroupInfo(int32_t drop_group_id);
 
-    void RegisterMonsterRespawnInfo(MonsterRespawnInfo info);
-    void AddWayPoint(int32_t waypoint_id, float x, float y);
+    void RegisterMonsterRespawnInfo(GameContent::MonsterRespawnInfo info);
+    void AddWayPoint(int32_t waypoint_id, float_t x, float_t y);
     void SetWayPointType(int32_t waypoint_id, int32_t type);
 
     int32_t g_currentLocationId{0};
 
     std::unordered_map<int, WayPointInfo> g_vWayPoint{};
-    std::vector<MonsterRespawnInfo> g_vRespawnInfo{};
+    std::vector<GameContent::MonsterRespawnInfo> g_vRespawnInfo{};
     X2D::QuadTreeMapInfo g_qtBlockInfo;
 
 private:

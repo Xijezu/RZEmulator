@@ -41,13 +41,13 @@ enum class SUMMON_EVOLVE_TYPE : int32_t {
 
 struct SummonLevelBonus {
     int32_t summon_id;
-    float strength;
-    float vital;
-    float dexterity;
-    float agility;
-    float intelligence;
-    float mentality;
-    float luck;
+    float_t strength;
+    float_t vital;
+    float_t dexterity;
+    float_t agility;
+    float_t intelligence;
+    float_t mentality;
+    float_t luck;
 };
 
 enum class SUMMON_RIDE_TYPE { CANT_RIDING = 0, RIDING_LENT = 1 };
@@ -58,14 +58,14 @@ struct SummonResourceTemplate {
     int32_t magic_type;
     int32_t rate;
     int32_t stat_id;
-    float size;
-    float scale;
+    float_t size;
+    float_t scale;
     int32_t standard_walk_speed;
     int32_t standard_run_speed;
     int32_t walk_speed;
     int32_t run_speed;
     bool is_riding_only;
-    float attack_range;
+    float_t attack_range;
     int32_t material;
     int32_t weapon_type;
     int32_t form;

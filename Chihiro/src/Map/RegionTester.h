@@ -20,7 +20,7 @@
 #include "Object.h"
 
 struct RegionTester {
-    virtual void Init(Position OriginalPos, Position TargetPos, float RegionProperty) = 0;
+    virtual void Init(Position OriginalPos, Position TargetPos, float_t RegionProperty) = 0;
     virtual bool IsInRegion(Position pos) = 0;
     virtual ~RegionTester() = default;
 };
@@ -39,18 +39,18 @@ struct DirectionRegionTester : public RegionTester {
 
           };
     ~DirectionRegionTester() = default;
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    void Init(Position OriginalPos, Position TargetPos, float_t RegionProperty) override;
     bool IsInRegion(Position pos) override;
 
-    float V1x;
-    float V1y;
-    float ori_x;
-    float ori_y;
-    float dx;
-    float dy;
-    float c;
-    float thickness;
-    float denominator;
+    float_t V1x;
+    float_t V1y;
+    float_t ori_x;
+    float_t ori_y;
+    float_t dx;
+    float_t dy;
+    float_t c;
+    float_t thickness;
+    float_t denominator;
 };
 
 struct CrossRegionTester : public RegionTester {
@@ -64,17 +64,17 @@ struct CrossRegionTester : public RegionTester {
         , thickness()
         , denominator(){};
 
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    void Init(Position OriginalPos, Position TargetPos, float_t RegionProperty) override;
     bool IsInRegion(Position pos) override;
 
-    float x1;
-    float y1;
-    float c1;
-    float x2;
-    float y2;
-    float c2;
-    float thickness;
-    float denominator;
+    float_t x1;
+    float_t y1;
+    float_t c1;
+    float_t x2;
+    float_t y2;
+    float_t c2;
+    float_t thickness;
+    float_t denominator;
 };
 
 struct ArcCircleRegionTester : public RegionTester {
@@ -87,18 +87,18 @@ struct ArcCircleRegionTester : public RegionTester {
 
           };
     ~ArcCircleRegionTester() = default;
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override;
+    void Init(Position OriginalPos, Position TargetPos, float_t RegionProperty) override;
     bool IsInRegion(Position pos) override;
 
-    float V1x;
-    float V1y;
-    float x;
-    float y;
-    float fCos;
+    float_t V1x;
+    float_t V1y;
+    float_t x;
+    float_t y;
+    float_t fCos;
 };
 
 struct CircleRegionTester : public RegionTester {
-    void Init(Position OriginalPos, Position TargetPos, float RegionProperty) override {}
+    void Init(Position OriginalPos, Position TargetPos, float_t RegionProperty) override {}
 
     bool IsInRegion(Position pos) override { return true; }
 };

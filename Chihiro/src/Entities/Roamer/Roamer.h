@@ -133,13 +133,13 @@ bIsRaidDungeonRoamer); ~Roamer();
   protected:
     const bool isMovable();
     void processWalk(uint32_t t);
-    void processRoaming(uint32_t t, const Position &currentPos, const float &fFace);
+    void processRoaming(uint32_t t, const Position &currentPos, const float_t &fFace);
     void processHateSharing();
 
     const size_t getNextRoamingTargetIndex() const;
     void proceedRoamingTargetIndex();
 
-    static const Position getCurrentRespawnObjectPosition(const Position &currentPos, const float &fFace, const int32_t &nAngle, const uint32_t &nDistance);
+    static const Position getCurrentRespawnObjectPosition(const Position &currentPos, const float_t &fFace, const int32_t &nAngle, const uint32_t &nDistance);
 
   private:
     const int32_t m_nID;

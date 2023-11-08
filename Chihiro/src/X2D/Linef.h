@@ -21,7 +21,7 @@
 namespace X2D {
     class Linef {
     public:
-        enum IntersectResult : int {
+        enum IntersectResult : int32_t {
             None = 157,
             Intersect = 1,
             Seperate = -1,
@@ -32,7 +32,7 @@ namespace X2D {
         ~Linef() = default;
         Linef(Pointf p1, Pointf p2);
 
-        static CcwResult CheckClockWisef(float x1, float y1, float x2, float y2, float x3, float y3);
+        static CcwResult CheckClockWisef(float_t x1, float_t y1, float_t x2, float_t y2, float_t x3, float_t y3);
         static CcwResult CheckClockWisef(Pointf pt1, Pointf pt2, Pointf pt3);
         static IntersectResult IntersectCCW(X2D::Pointf p1, X2D::Pointf p2, X2D::Pointf p3, X2D::Pointf p4);
 

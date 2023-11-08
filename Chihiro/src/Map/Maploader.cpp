@@ -39,7 +39,7 @@ bool Maploader::LoadMapContent()
     int32_t y = 0;
     fTileSize = seamlessWorldInfo.m_fTileLength;
     fMapLength = seamlessWorldInfo.m_nSegmentCountPerMap * seamlessWorldInfo.m_fTileLength * seamlessWorldInfo.m_nTileCountPerSegment;
-    for (float fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y) {
+    for (float_t fAttrLen = seamlessWorldInfo.m_fTileLength * 0.125f; y < seamlessWorldInfo.m_sizMapCount.height; ++y) {
         for (int32_t i = 0; i < seamlessWorldInfo.m_sizMapCount.width; ++i) {
             std::string strLocationFileName = seamlessWorldInfo.GetLocationFileName(i, y);
 
@@ -76,7 +76,7 @@ bool Maploader::LoadMapContent()
     return true;
 }
 
-void Maploader::SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32_t LocationId)
+void Maploader::SetDefaultLocation(int32_t x, int32_t y, float_t fMapLength, int32_t LocationId)
 {
     X2D::Pointf begin{};
     X2D::Pointf end{};
@@ -97,7 +97,7 @@ void Maploader::RegisterMapLocationInfo(MapLocationInfo location_info)
     g_qtLocationInfo->Add(std::move(location_info));
 }
 
-void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength)
+void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float_t fAttrLen, float_t fMapLength)
 {
     int32_t nCharSize;
     LocationInfoHeader lih;
@@ -140,8 +140,8 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
         nPolygonCount = buffer.read<int32_t>();
         for (int32_t cp = 0; cp < nPolygonCount; ++cp) {
             nPointCount = buffer.read<int32_t>();
-            float sx = x * fMapLength;
-            float sy = y * fMapLength;
+            float_t sx = x * fMapLength;
+            float_t sy = y * fMapLength;
             std::vector<X2D::Pointf> points{};
 
             for (int32_t p = 0; p < nPointCount; ++p) {
@@ -156,7 +156,7 @@ void Maploader::LoadLocationFile(const std::string &szFilename, int32_t x, int32
     }
 }
 
-void Maploader::LoadAttributeFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength)
+void Maploader::LoadAttributeFile(const std::string &szFilename, int32_t x, int32_t y, float_t fAttrLen, float_t fMapLength)
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
@@ -171,8 +171,8 @@ void Maploader::LoadAttributeFile(const std::string &szFilename, int32_t x, int3
     infile.close();
 
     auto total_entries = buffer.read<int32_t>();
-    float sx = x * fMapLength;
-    float sy = y * fMapLength;
+    float_t sx = x * fMapLength;
+    float_t sy = y * fMapLength;
 
     for (int32_t i = 0; i < total_entries; ++i) {
         auto nPointCount = buffer.read<int32_t>();
@@ -189,7 +189,7 @@ void Maploader::LoadAttributeFile(const std::string &szFilename, int32_t x, int3
     }
 }
 
-void Maploader::LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float fMapLength)
+void Maploader::LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float_t fMapLength)
 {
     NfsHeader header{};
 
@@ -226,11 +226,11 @@ void Maploader::LoadScriptFile(const std::string &szFilename, int32_t x, int32_t
     m_vRegionList.clear();
 }
 
-void Maploader::LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float fMapLength)
+void Maploader::LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float_t fMapLength)
 {
     auto nLocationCount = buffer.read<int32_t>();
-    float sx = x * fMapLength;
-    float sy = y * fMapLength;
+    float_t sx = x * fMapLength;
+    float_t sy = y * fMapLength;
 
     for (int32_t i = 0; i < nLocationCount; ++i) {
         ScriptRegion sr{};
@@ -297,7 +297,7 @@ bool Maploader::InitMapInfo()
     return true;
 }
 
-void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int32_t y, float /* fAttrLen*/, float fMapLength)
+void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int32_t y, float_t /* fAttrLen*/, float_t fMapLength)
 {
     std::ifstream infile(szFilename.c_str(), std::ios::in | std::ios::binary);
     infile.seekg(0, std::ios::end);
@@ -314,12 +314,12 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int3
     auto version = buffer.read<int32_t>(); // Version
 
     auto total_entries = buffer.read<int32_t>();
-    float rx = x * fMapLength;
-    float ry = y * fMapLength;
+    float_t rx = x * fMapLength;
+    float_t ry = y * fMapLength;
 
     for (int32_t i = 0; i < total_entries; ++i) {
         FieldPropRespawnInfo sr{};
-        sr.nPropID = buffer.read<int32_t>();
+        sr.nPropId = buffer.read<int32_t>();
         sr.x = buffer.read<float>() + rx;
         sr.y = buffer.read<float>() + ry;
         sr.fZOffset = buffer.read<float>();
@@ -331,7 +331,6 @@ void Maploader::LoadFieldPropFile(const std::string &szFilename, int32_t x, int3
         sr.fScaleZ = buffer.read<float>();
 
         sr.layer = 0;
-        sr.bOnce = false;
         if (version == 2)
             buffer.read_skip(7);
         else if (version == 3)

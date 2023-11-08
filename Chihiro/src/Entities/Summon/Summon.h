@@ -46,8 +46,8 @@ public:
 
     uint32_t GetCreatureGroup() const override { return 9; }
 
-    int GetTransformLevel() const { return m_tSummonBase->type; }
-    int GetEvolveTarget() const { return m_tSummonBase->evolve_target; }
+    int32_t GetTransformLevel() const { return m_tSummonBase->type; }
+    int32_t GetEvolveTarget() const { return m_tSummonBase->evolve_target; }
 
 
     void OnAfterReadSummon();
@@ -58,7 +58,7 @@ public:
     bool IsAlly(const Unit *pTarget) override;
 
     int32_t GetSummonCode();
-    float GetFCM() const override;
+    float_t GetFCM() const override;
     SUMMON_RIDE_TYPE GetRidingInfo();
 
     Player *GetMaster() const { return m_pMaster; }
@@ -67,14 +67,14 @@ public:
 
     bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList) override;
 
-    float GetSize() const override;
-    float GetScale() const override;
+    float_t GetSize() const override;
+    float_t GetScale() const override;
     int32_t GetSP() const { return m_nSP; }
     int32_t GetMaxSP() const { return m_nMaxSP; }
     int32_t AddSP(int SP) { return SetSP(GetSP() + SP); }
     int32_t SetSP(int SP)
     {
-        int oldSP = m_nSP;
+        int32_t oldSP = m_nSP;
         m_nSP = SP;
         if (m_nSP > m_nMaxSP)
             m_nSP = m_nMaxSP;
@@ -113,7 +113,7 @@ protected:
     using Unit::applyPassiveSkillAmplifyEffect; // -Woverloaded-virtual, honestly I have no idea if this is correct, but it works
     void applyPassiveSkillAmplifyEffect() override;
     void onModifyStatAndAttribute() override;
-    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio) override;
+    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float_t var1, float_t var2, float_t fRatio) override;
     void onCompleteCalculateStat() override;
     void applyStatByState() override;
     void onApplyStat() override;
@@ -124,10 +124,10 @@ private:
     Player *m_pMaster{nullptr};
 
     int32_t m_nAccountID{};
-    float m_fBaseAttackPointRatio{};
-    float m_fBaseMagicPointRatio{};
-    float m_fBaseDefenceRatio{};
-    float m_fBaseMagicDefenceRatio{};
+    float_t m_fBaseAttackPointRatio{};
+    float_t m_fBaseMagicPointRatio{};
+    float_t m_fBaseDefenceRatio{};
+    float_t m_fBaseMagicDefenceRatio{};
     bool m_bIsBattleMode{false};
     int32_t m_nSP{};
     int32_t m_nMaxSP{};

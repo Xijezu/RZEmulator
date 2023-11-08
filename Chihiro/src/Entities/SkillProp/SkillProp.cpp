@@ -23,7 +23,7 @@
 #include "World.h"
 #include "XPacket.h"
 
-SkillProp *SkillProp::Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio)
+SkillProp *SkillProp::Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float_t fHateRatio)
 {
     return new SkillProp(caster, *pSkill, nMagicPoint, fHateRatio);
 }
@@ -37,7 +37,7 @@ void SkillProp::EnterPacket(TS_SC_ENTER &pEnterPct, SkillProp *pSkillProp, Playe
     pEnterPct.skillInfo = skillInfo;
 }
 
-SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio)
+SkillProp::SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float_t fHateRatio)
     : WorldObject(false)
     , m_hCaster(caster)
     , m_pSkill(pSkill)
@@ -223,7 +223,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
     std::vector<Unit *> vResult{};
     vResult.reserve(30);
 
-    float fRange = m_pSkill.GetVar(9) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(9) * 12.0f;
 
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
     int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2)) + m_pSkill.GetVar(3) +
@@ -303,7 +303,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE(Unit *pCaster)
 void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_OLD(Unit *pCaster)
 {
     std::vector<uint32_t> vResult{};
-    float fRange = m_pSkill.GetVar(5) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(5) * 12.0f;
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
 
     int32_t nDamage = m_nOwnerMagicPoint + m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(7);
@@ -368,7 +368,7 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL(Unit *pCaster)
 {
     std::vector<uint32_t> vResult{};
 
-    float fRange = m_pSkill.GetVar(9) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(9) * 12.0f;
     m_pSkill.m_fRange = fRange;
 
     int32_t nHPHeal = m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1);
@@ -423,11 +423,11 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster)
 {
     std::vector<uint32_t> vResult{};
 
-    float fRange = m_pSkill.GetVar(4) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(4) * 12.0f;
     m_pSkill.m_fRange = fRange;
 
-    float fHPHeal = m_pSkill.GetVar(0) + m_pSkill.GetVar(1) * m_pSkill.GetRequestedSkillLevel();
-    float fMPHeal = m_pSkill.GetVar(2) + m_pSkill.GetVar(3) * m_pSkill.GetRequestedSkillLevel();
+    float_t fHPHeal = m_pSkill.GetVar(0) + m_pSkill.GetVar(1) * m_pSkill.GetRequestedSkillLevel();
+    float_t fMPHeal = m_pSkill.GetVar(2) + m_pSkill.GetVar(3) * m_pSkill.GetRequestedSkillLevel();
 
     sWorld.EnumMovableObject(GetPosition(), GetLayer(), fRange, vResult, false, false);
 
@@ -478,7 +478,7 @@ void SkillProp::FIRE_AREA_EFFECT_HEAL_BY_FIELD_PROP(Unit *pCaster)
 void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL(Unit *pCaster)
 {
     std::vector<uint32_t> vResult{};
-    float fRange = m_pSkill.GetVar(9) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(9) * 12.0f;
 
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
     int32_t nDamage = m_nOwnerMagicPoint * (m_pSkill.GetVar(0) + m_pSkill.GetRequestedSkillLevel() * m_pSkill.GetVar(1) + m_pSkill.GetSkillEnhance() * m_pSkill.GetVar(2));
@@ -559,7 +559,7 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
     vResult.reserve(30);
 
     auto t = sWorld.GetArTime();
-    float fRange = m_pSkill.GetVar(15) * 12.0f;
+    float_t fRange = m_pSkill.GetVar(15) * 12.0f;
 
     int32_t elemental_type = m_pSkill.GetSkillBase()->GetElementalType();
 
@@ -644,8 +644,8 @@ void SkillProp::FIRE_AREA_EFFECT_MAGIC_DAMAGE_AND_HEAL_T2(Unit *pCaster)
 
 void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
 {
-    float fFireRange = m_pSkill.GetVar(0) * 12.0f;
-    float fDamageRange = m_pSkill.GetVar(5) * 12.0f;
+    float_t fFireRange = m_pSkill.GetVar(0) * 12.0f;
+    float_t fDamageRange = m_pSkill.GetVar(5) * 12.0f;
 
     std::vector<Unit *> vTarget{};
 
@@ -704,8 +704,8 @@ void SkillProp::FIRE_TRAP_DAMAGE(Unit *pCaster)
 
 void SkillProp::FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster)
 {
-    float fFireRange = m_pSkill.GetVar(0) * 12.0f;
-    float fDamageRange = m_pSkill.GetVar(5) * 12.0f;
+    float_t fFireRange = m_pSkill.GetVar(0) * 12.0f;
+    float_t fDamageRange = m_pSkill.GetVar(5) * 12.0f;
 
     if (!m_bFired) {
         std::vector<Unit *> vTarget{};

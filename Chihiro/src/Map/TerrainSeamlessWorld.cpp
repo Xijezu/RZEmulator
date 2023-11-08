@@ -31,8 +31,8 @@ bool TerrainSeamlessWorldInfo::Initialize(std::string szFilename, bool bMapFileC
     int32_t nMapLayer = 0;
     int32_t nTileCountPerSegment = 0;
     int32_t nSegmentCountPerMap = 0;
-    float fTileLength = 0.0f;
-    float pStream = 0.0f;
+    float_t fTileLength = 0.0f;
+    float_t pStream = 0.0f;
     int32_t nMapCountX = 0;
     int32_t nMapCountY = 0;
 
@@ -117,7 +117,7 @@ int32_t TerrainSeamlessWorldInfo::GetWorldID(int32_t nMapPosX, int32_t nMapPosY)
     return -1;
 }
 
-float TerrainSeamlessWorldInfo::GetFOV()
+float_t TerrainSeamlessWorldInfo::GetFOV()
 {
     return m_fFOV;
 }

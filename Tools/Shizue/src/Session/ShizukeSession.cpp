@@ -25,7 +25,7 @@ ShizukeSession::~ShizukeSession() {}
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
 typedef struct {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(ShizukeSession *, XPacket *)> handler;
 } ShizukeHandler;
@@ -46,14 +46,14 @@ ShizukeHandler declareHandler(eStatus status, void (ShizukeSession::*handler)(co
 
 const ShizukeHandler shizukePacketHandler[] = {{declareHandler(STATUS_CONNECTED, &ShizukeSession::onResultHandler)}};
 
-constexpr int shizukeTableSize = (sizeof(shizukePacketHandler) / sizeof(ShizukeHandler));
+constexpr int32_t shizukeTableSize = (sizeof(shizukePacketHandler) / sizeof(ShizukeHandler));
 
 ReadDataHandlerResult ShizukeSession::ProcessIncoming(XPacket *pRecvPct)
 {
     ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < shizukeTableSize; i++) {
         if ((uint16_t)shizukePacketHandler[i].cmd == _cmd) {

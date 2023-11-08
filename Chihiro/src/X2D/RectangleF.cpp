@@ -17,18 +17,18 @@
 
 #include "RectangleF.h"
 
-bool X2D::Rectf::IsInclude(float x, float y)
+bool X2D::Rectf::IsInclude(float_t x, float_t y)
 {
-    float x1 = size.x + pos.x;
-    float y1 = size.y + pos.y;
+    float_t x1 = size.x + pos.x;
+    float_t y1 = size.y + pos.y;
 
     return x >= pos.x && x < x1 && y >= pos.y && y < y1;
 }
 
 bool X2D::Rectf::IsInclude(Pointf p)
 {
-    float x1 = size.x + pos.x;
-    float y1 = size.y + pos.y;
+    float_t x1 = size.x + pos.x;
+    float_t y1 = size.y + pos.y;
 
     return p.x >= pos.x && p.x < x1 && p.y >= pos.y && p.y < y1;
 }
@@ -74,7 +74,7 @@ X2D::RectangleF::RectangleF(std::vector<X2D::Pointf> points)
     }
 }
 
-bool X2D::RectangleF::IsInclude(float x, float y)
+bool X2D::RectangleF::IsInclude(float_t x, float_t y)
 {
     return x >= m_TopLeft.x && x < m_BottomRight.x && y >= m_TopLeft.y && y < m_BottomRight.y;
 }

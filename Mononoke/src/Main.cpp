@@ -33,7 +33,7 @@ void StopDB();
 
 #define _MONONOKE_CORE_CONFIG "mononoke.conf"
 
-void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/);
+void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int32_t /*signalNumber*/);
 void KeepDatabaseAliveHandler(std::weak_ptr<boost::asio::deadline_timer> dbPingTimerRef, int32_t dbPingInterval, boost::system::error_code const &error);
 
 int main(int argc, char **argv)
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int /*signalNumber*/)
+void SignalHandler(std::weak_ptr<NGemity::Asio::IoContext> ioContextRef, boost::system::error_code const &error, int32_t /*signalNumber*/)
 {
     if (!error)
         if (std::shared_ptr<NGemity::Asio::IoContext> ioContext = ioContextRef.lock())

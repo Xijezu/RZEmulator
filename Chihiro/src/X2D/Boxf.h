@@ -24,11 +24,11 @@ namespace X2D {
         Boxf() = default;
         ~Boxf() = default;
 
-        bool IsInclude(float x, float y);
-        void SetLeft(float x);
-        void SetTop(float y);
-        void SetRight(float x);
-        void SetBottom(float y);
+        bool IsInclude(float_t x, float_t y);
+        void SetLeft(float_t x);
+        void SetTop(float_t y);
+        void SetRight(float_t x);
+        void SetBottom(float_t y);
         virtual void Set(Pointf _begin, Pointf _end);
 
         Pointf begin{}, end{};

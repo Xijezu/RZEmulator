@@ -238,7 +238,7 @@ void Unit::OnUpdate()
         if (pState != nullptr) {
             int32_t nMoveSpeedAdd = pState->GetValue(1);
             Position newPos{};
-            float theta = static_cast<float>(irand(1, 628)) / 100.0f;
+            float_t theta = static_cast<float>(irand(1, 628)) / 100.0f;
             newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
 
             if (!HasFlag(UNIT_FIELD_STATUS, STATUS_MOVING_BY_FEAR)) {
@@ -256,7 +256,7 @@ void Unit::OnUpdate()
             }
             int32_t try_cnt{10};
             while (--try_cnt > 0 && GameContent::IsBlocked(newPos.GetPositionX(), newPos.GetPositionY())) {
-                float theta = static_cast<float>(irand(1, 628)) / 100.0f;
+                float_t theta = static_cast<float>(irand(1, 628)) / 100.0f;
                 newPos.Relocate(GetPositionX() + std::sin(theta) * 120, GetPositionY() + std::cos(theta) * 120);
             }
 
@@ -277,13 +277,13 @@ void Unit::OnUpdate()
 
 void Unit::regenHPMP(uint32_t t)
 {
-    float prev_mp;
+    float_t prev_mp;
     int32_t prev_hp;
-    float pt;
+    float_t pt;
 
     uint32_t et = t - GetUInt32Value(UNIT_LAST_UPDATE_TIME);
     if (et >= 300) {
-        float etf = (float)et / 6000.0f;
+        float_t etf = (float)et / 6000.0f;
         // prev_mp = et;
 
         if (GetHealth() != 0) {
@@ -499,7 +499,7 @@ int32_t Unit::CastSkill(int32_t nSkillID, int32_t nSkillLevel, uint32_t target_h
         auto myPosition = GetCurrentPosition(ct);
         auto distance = myPosition.GetExactDist2d(&enemyPosition) - GetUnitSize() / 2 - pSkillTarget->GetUnitSize() / 2;
 
-        float range_mod = 1.2f;
+        float_t range_mod = 1.2f;
         if (pSkillTarget->IsMoving())
             range_mod = 1.5f;
 
@@ -825,7 +825,7 @@ void Unit::Attack(Unit *pTarget, uint32_t ct, uint32_t attack_interval, AttackIn
     }
 }
 
-DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag)
+DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag)
 {
     DamageInfo damage_info{};
 
@@ -838,7 +838,7 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
         }
     }
 
-    float fReduce{0.0f};
+    float_t fReduce{0.0f};
     for (auto &dit : m_vDamageReducePercentInfo) {
         if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100)) {
             damageReduceByState.fDamage -= dit.physical_reduce;
@@ -874,7 +874,7 @@ DamageInfo Unit::DealPhysicalNormalLeftHandDamage(Unit *pFrom, float nDamage, El
     return damage_info;
 }
 
-DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag)
+DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag)
 {
     DamageInfo damage_info{};
 
@@ -893,7 +893,7 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
             damageReduceByState.nDamage -= dit.physical_reduce;
     }
 
-    float fReduce{0.0f};
+    float_t fReduce{0.0f};
     for (auto &dit : m_vDamageReducePercentInfo) {
         if (dit.IsAppliableCreatureGroup(nTargetGroup) && dit.ratio > irand(1, 100)) {
             damageReduceByState.fDamage -= dit.physical_reduce;
@@ -938,7 +938,7 @@ DamageInfo Unit::DealPhysicalNormalDamage(Unit *pFrom, float nDamage, ElementalT
     return damage_info;
 }
 
-Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type, DamageType damageType, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty,
+Damage Unit::DealDamage(Unit *pFrom, float_t nDamage, ElementalType elemental_type, DamageType damageType, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty,
     StateMod *damage_advantage)
 {
     int32_t nPrevHP = GetHealth();
@@ -962,7 +962,7 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
     if (damage_result.nDamage < 0)
         damage_result.nDamage = 0;
 
-    float mana_shield_absorb_ratio{0.0f};
+    float_t mana_shield_absorb_ratio{0.0f};
     switch (damageType) {
     case DT_NORMAL_PHYSICAL_DAMAGE:
     case DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE:
@@ -1091,41 +1091,41 @@ Damage Unit::DealDamage(Unit *pFrom, float nDamage, ElementalType elemental_type
 }
 
 Damage Unit::DealPhysicalDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealPhysicalLeftHandDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealAdditionalDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_ADDITIONAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealAdditionalLeftHandDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_ADDITIONAL_LEFT_HAND_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::DealMagicalDamage(Unit *pFrom, float nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+Damage Unit::DealMagicalDamage(Unit *pFrom, float_t nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, type, DT_NORMAL_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealAdditionalMagicalDamage(
-    Unit *pFrom, float nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, type, DT_ADDITIONAL_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
-Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, float critical_amp, int32_t critical_bonus, int32_t nFlag)
+Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, float_t critical_amp, int32_t critical_bonus, int32_t nFlag)
 {
     Damage damage{};
     if (damage_type == DT_NORMAL_MAGICAL_DAMAGE || damage_type == DT_STATE_MAGICAL_DAMAGE) {
@@ -1147,7 +1147,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
     nDamage += nDamage * m_Expert[GetCreatureGroup()].fAvoid;
 
     int32_t nFinalDamage{0};
-    float fDamageAdjust{1.0f};
+    float_t fDamageAdjust{1.0f};
 
     bool bIsPhysicalDamage =
         (damage_type == DT_NORMAL_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_LEFT_HAND_DAMAGE || damage_type == DT_STATE_PHYSICAL_DAMAGE || damage_type == DT_NORMAL_PHYSICAL_SKILL_DAMAGE);
@@ -1225,7 +1225,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
         }
     }
     else if (bIsStateDamage) {
-        float fDefAdjust = 1.0f;
+        float_t fDefAdjust = 1.0f;
         if (bIsMagicalDamage && GetMagicPoint() < pTarget->GetMagicDefence()) {
             fDefAdjust = 1.0f - (pTarget->GetMagicDefence() - GetMagicPoint()) / (((pTarget->GetMagicDefence() > 0) ? pTarget->GetMagicDefence() : 1) * 2);
         }
@@ -1264,7 +1264,7 @@ Damage Unit::CalcDamage(Unit *pTarget, DamageType damage_type, float nDamage, El
             nFinalDamage *= (0.90f + m_nDoubleWeaponMasteryLevel * 0.01f);
     }
 
-    float fElementalResist = 1.0f - (pTarget->GetElementalResist(elemental_type) / 300);
+    float_t fElementalResist = 1.0f - (pTarget->GetElementalResist(elemental_type) / 300);
     damage.nDamage = nFinalDamage * fElementalResist;
     damage.nResistedDamage = nFinalDamage - damage.nDamage;
 
@@ -1528,7 +1528,7 @@ uint16_t Unit::Putoff(ItemWearType pos)
             return TS_RESULT_TOO_HEAVY;
 
         const auto &current_bag_base = m_anWear[(absolute_pos)]->GetItemBase();
-        float current_bag_capacity{0};
+        float_t current_bag_capacity{0};
         for (int32_t i = 0; i < MAX_OPTION_NUMBER; ++i) {
             if (current_bag_base->opt_type[i] != static_cast<int32_t>(ITEM_EFFECT_PASSIVE::CARRY_WEIGHT))
                 continue;
@@ -1598,7 +1598,7 @@ bool Unit::IsWearShield()
     return result;
 }
 
-float Unit::GetItemChance() const
+float_t Unit::GetItemChance() const
 {
     return m_Attribute.nItemChance;
 }
@@ -1798,7 +1798,7 @@ void Unit::onUpdateState(State *state, bool bIsExpire)
     Messages::BroadcastStateMessage(this, state, bIsExpire);
 }
 
-uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float var1, float var2, const std::string &szParameter)
+uint16_t Unit::onItemUseEffect(Unit *pCaster, Item *pItem, int32_t type, float_t var1, float_t var2, const std::string &szParameter)
 {
     uint16_t result{TS_RESULT_SUCCESS};
 
@@ -1997,7 +1997,7 @@ State *Unit::GetStateByEffectType(int32_t effectType) const
 
 std::pair<float, int32_t> Unit::GetHateMod(int32_t nHateModType, bool bIsHarmful)
 {
-    float fAmpValue = 1.0f;
+    float_t fAmpValue = 1.0f;
     int32_t nIncValue = 0;
 
     for (auto &hm : m_vHateMod) {
@@ -2062,8 +2062,8 @@ bool Unit::ClearExpiredState(uint32_t t)
 
 int32_t Unit::GetAttackPointRight(ElementalType type, bool bPhysical, bool bBad)
 {
-    float v4{1};
-    float v5 = m_Attribute.nAttackPointRight;
+    float_t v4{1};
+    float_t v5 = m_Attribute.nAttackPointRight;
 
     // TODO: ElementalStateMod
 
@@ -2092,7 +2092,7 @@ DamageInfo Unit::DealPhysicalSkillDamage(Unit *pFrom, int32_t nDamage, Elemental
     return result;
 }
 
-void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float nDamage, ElementalType elemental_type)
+void Unit::ProcessAdditionalDamage(DamageInfo &damage_info, DamageType additionalDamage, std::vector<AdditionalDamageInfo> &vAdditionalDamage, Unit *pFrom, float_t nDamage, ElementalType elemental_type)
 {
     if (damage_info.bMiss || damage_info.bPerfectBlock)
         return;
@@ -2131,7 +2131,7 @@ uint32_t Unit::GetTotalCoolTime(int32_t skill_id) const
         return sk->GetSkillCoolTime();
 }
 
-float Unit::GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
+float_t Unit::GetCoolTimeMod(ElementalType type, bool bPhysical, bool bBad) const
 {
     if (bPhysical) {
         if (bBad)
@@ -2239,7 +2239,7 @@ void Unit::procState(uint32_t t)
                 continue;
 
             auto code = static_cast<StateCode>(static_cast<int32_t>(pState->GetValue(0)));
-            float fEffectLength = pState->GetValue(4) * GameRule::DEFAULT_UNIT_SIZE;
+            float_t fEffectLength = pState->GetValue(4) * GameRule::DEFAULT_UNIT_SIZE;
             auto nTargetType = static_cast<int32_t>(pState->GetValue(7));
             int32_t nLevel = pState->GetLevel();
             auto nHitRate = static_cast<int32_t>(pState->GetValue(8) + nLevel * pState->GetValue(9));
@@ -2524,13 +2524,13 @@ void Unit::procStateDamage(uint32_t t)
 }
 
 Damage Unit::DealPhysicalStateDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_PHYSICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
 
 Damage Unit::DealMagicalStateDamage(
-    Unit *pFrom, float nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
+    Unit *pFrom, float_t nDamage, ElementalType elemental_type, int32_t accuracy_bonus, int32_t critical_bonus, int32_t nFlag, StateMod *damage_penalty, StateMod *damage_advantage)
 {
     return DealDamage(pFrom, nDamage, elemental_type, DT_STATE_MAGICAL_DAMAGE, accuracy_bonus, critical_bonus, nFlag, damage_penalty, damage_advantage);
 }
@@ -2596,7 +2596,7 @@ bool Unit::OnCompleteSkill()
     return false;
 }
 
-float Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
+float_t Unit::GetManaCostRatio(ElementalType type, bool bPhysical, bool bBad)
 {
     return 1.0f;
 }
@@ -2840,9 +2840,9 @@ bool Unit::onProcAura(Skill *pSkill, int32_t nRequestedLevel)
     return res;
 }
 
-float Unit::GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad)
+float_t Unit::GetMagicalHateMod(ElementalType type, bool bPhysical, bool bBad)
 {
-    float result = 0;
+    float_t result = 0;
 
     if (bPhysical) {
         if (bBad)
@@ -2977,7 +2977,7 @@ void Unit::RemoveStatesOnDamage()
     }
 }
 
-int32_t Unit::GetCriticalDamage(int32_t damage, float critical_amp, int32_t critical_bonus)
+int32_t Unit::GetCriticalDamage(int32_t damage, float_t critical_amp, int32_t critical_bonus)
 {
     if (irand(0, 99) <= (critical_amp * GetCritical() + critical_bonus))
         return (damage * (GetCriticalPower() / 100.0f));
@@ -3260,7 +3260,7 @@ void Unit::removeExhaustiveSkillStateMod(ElementalSkillStateMod &skillStateMod, 
     }
 }
 
-float Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_t nOriginalCoolTime) const
+float_t Unit::GetCastingMod(ElementalType type, bool bPhysical, bool bBad, uint32_t nOriginalCoolTime) const
 {
     if (bPhysical) {
         if (bBad) {

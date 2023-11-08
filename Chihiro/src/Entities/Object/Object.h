@@ -21,7 +21,7 @@
 #include "Util.h"
 #include "Errors.h"
 
-enum ObjType : int {
+enum ObjType : int32_t {
     OBJ_STATIC = 0, // Player (Pyrok)
     OBJ_MOVABLE = 1, // NPC (Pyrok)
     OBJ_CLIENT = 2 // Static (Pyrok)
@@ -185,7 +185,7 @@ public:
         return *((uint64_t *)&(_uint32Values[index]));
     }
 
-    float GetFloatValue(uint16_t index) const
+    float_t GetFloatValue(uint16_t index) const
     {
         ASSERT(index < _valuesCount || PrintIndexError(index, false));
         return m_floatValues[index];
@@ -212,13 +212,13 @@ public:
     void UpdateUInt32Value(uint16_t index, uint32_t value);
     void SetUInt64Value(uint16_t index, uint64_t value);
     void AddUInt32Valie(uint16_t index, uint64_t value) { SetUInt64Value(index, GetUInt64Value(index) + value); }
-    void SetFloatValue(uint16_t index, float value);
-    void AddFloatValue(uint16_t index, float value) { SetFloatValue(index, GetFloatValue(index) + value); }
+    void SetFloatValue(uint16_t index, float_t value);
+    void AddFloatValue(uint16_t index, float_t value) { SetFloatValue(index, GetFloatValue(index) + value); }
     void SetByteValue(uint16_t index, uint8_t offset, uint8_t value);
     void SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value);
     void SetInt16Value(uint16_t index, uint8_t offset, int16_t value) { SetUInt16Value(index, offset, (uint16_t)value); }
 
-    void SetStatFloatValue(uint16_t index, float value);
+    void SetStatFloatValue(uint16_t index, float_t value);
     void SetStatInt32Value(uint16_t index, int32_t value);
 
     bool AddUInt64Value(uint16_t index, uint64_t value);
@@ -226,8 +226,8 @@ public:
 
     void ApplyModUInt32Value(uint16_t index, int32_t val, bool apply);
     void ApplyModInt32Value(uint16_t index, int32_t val, bool apply);
-    void ApplyModPositiveFloatValue(uint16_t index, float val, bool apply);
-    void ApplyModSignedFloatValue(uint16_t index, float val, bool apply);
+    void ApplyModPositiveFloatValue(uint16_t index, float_t val, bool apply);
+    void ApplyModSignedFloatValue(uint16_t index, float_t val, bool apply);
 
     void SetFlag(uint16_t index, uint32_t newFlag);
 
@@ -340,7 +340,7 @@ protected:
     union {
         int32_t *m_int32Values;
         uint32_t *_uint32Values;
-        float *m_floatValues;
+        float_t *m_floatValues;
     };
     bool *_changedFields;
     uint16_t _valuesCount;
@@ -359,15 +359,15 @@ private:
 };
 
 struct Position {
-    float m_positionX{};
-    float m_positionY{};
-    float m_positionZ{};
-    float _orientation{};
+    float_t m_positionX{};
+    float_t m_positionY{};
+    float_t m_positionZ{};
+    float_t _orientation{};
     uint8_t m_nLayer{};
 
     bool operator==(Position pos) { return pos.m_positionX == m_positionX && pos.m_positionY == m_positionY && pos.m_positionZ == m_positionZ && pos.m_nLayer == m_nLayer; }
 
-    void SetCurrentXY(float x, float y)
+    void SetCurrentXY(float_t x, float_t y)
     {
         this->m_positionX = x;
         this->m_positionY = y;
@@ -377,20 +377,20 @@ struct Position {
 
     void SetLayer(uint8_t value) { m_nLayer = value; }
 
-    void Relocate(float x, float y)
+    void Relocate(float_t x, float_t y)
     {
         m_positionX = x;
         m_positionY = y;
     }
 
-    void Relocate(float x, float y, float z)
+    void Relocate(float_t x, float_t y, float_t z)
     {
         m_positionX = x;
         m_positionY = y;
         m_positionZ = z;
     }
 
-    void Relocate(float x, float y, float z, float orientation)
+    void Relocate(float_t x, float_t y, float_t z, float_t orientation)
     {
         m_positionX = x;
         m_positionY = y;
@@ -414,31 +414,31 @@ struct Position {
         _orientation = pos->_orientation;
     }
 
-    void SetOrientation(float orientation) { _orientation = orientation; }
+    void SetOrientation(float_t orientation) { _orientation = orientation; }
 
-    float GetPositionX() const { return m_positionX; }
-    float GetPositionY() const { return m_positionY; }
-    float GetPositionZ() const { return m_positionZ; }
+    float_t GetPositionX() const { return m_positionX; }
+    float_t GetPositionY() const { return m_positionY; }
+    float_t GetPositionZ() const { return m_positionZ; }
 
-    float GetRX() const;
-    float GetRY() const;
+    float_t GetRX() const;
+    float_t GetRY() const;
 
-    float GetOrientation() const { return _orientation; }
+    float_t GetOrientation() const { return _orientation; }
 
-    void GetPosition(float &x, float &y) const
+    void GetPosition(float_t &x, float_t &y) const
     {
         x = m_positionX;
         y = m_positionY;
     }
 
-    void GetPosition(float &x, float &y, float &z) const
+    void GetPosition(float_t &x, float_t &y, float_t &z) const
     {
         x = m_positionX;
         y = m_positionY;
         z = m_positionZ;
     }
 
-    void GetPosition(float &x, float &y, float &z, float &o) const
+    void GetPosition(float_t &x, float_t &y, float_t &z, float_t &o) const
     {
         x = m_positionX;
         y = m_positionY;
@@ -462,45 +462,45 @@ struct Position {
         return pos;
     }
 
-    float GetExactDist2dSq(float x, float y) const
+    float_t GetExactDist2dSq(float_t x, float_t y) const
     {
-        float dx = m_positionX - x;
-        float dy = m_positionY - y;
+        float_t dx = m_positionX - x;
+        float_t dy = m_positionY - y;
         return dx * dx + dy * dy;
     }
 
-    float GetExactDist2d(const float x, const float y) const { return sqrt(GetExactDist2dSq(x, y)); }
+    float_t GetExactDist2d(const float_t x, const float_t y) const { return sqrt(GetExactDist2dSq(x, y)); }
 
-    float GetExactDist2dSq(const Position *pos) const
+    float_t GetExactDist2dSq(const Position *pos) const
     {
-        float dx = m_positionX - pos->m_positionX;
-        float dy = m_positionY - pos->m_positionY;
+        float_t dx = m_positionX - pos->m_positionX;
+        float_t dy = m_positionY - pos->m_positionY;
         return dx * dx + dy * dy;
     }
 
-    float GetExactDist2d(const Position *pos) const
+    float_t GetExactDist2d(const Position *pos) const
     {
-        float tmp = sqrt(GetExactDist2dSq(pos));
+        float_t tmp = sqrt(GetExactDist2dSq(pos));
         return tmp;
     }
 
-    float GetExactDistSq(float x, float y, float z) const
+    float_t GetExactDistSq(float_t x, float_t y, float_t z) const
     {
-        float dz = m_positionZ - z;
+        float_t dz = m_positionZ - z;
         return GetExactDist2dSq(x, y) + dz * dz;
     }
 
-    float GetExactDist(float x, float y, float z) const { return sqrt(GetExactDistSq(x, y, z)); }
+    float_t GetExactDist(float_t x, float_t y, float_t z) const { return sqrt(GetExactDistSq(x, y, z)); }
 
-    float GetExactDistSq(const Position *pos) const
+    float_t GetExactDistSq(const Position *pos) const
     {
-        float dx = m_positionX - pos->m_positionX;
-        float dy = m_positionY - pos->m_positionY;
-        float dz = m_positionZ - pos->m_positionZ;
+        float_t dx = m_positionX - pos->m_positionX;
+        float_t dy = m_positionY - pos->m_positionY;
+        float_t dz = m_positionZ - pos->m_positionZ;
         return dx * dx + dy * dy + dz * dz;
     }
 
-    float GetExactDist(const Position *pos) const { return sqrt(GetExactDistSq(pos)); }
+    float_t GetExactDist(const Position *pos) const { return sqrt(GetExactDistSq(pos)); }
 
     std::string ToString() const { return NGemity::StringFormat("<BR>X: {}, Y: {}, Layer: {}<BR>", GetPositionX(), GetPositionY(), GetLayer()); }
 };
@@ -569,11 +569,11 @@ public:
     bool SetPendingMove(std::vector<Position> vMoveInfo, uint8_t speed);
     bool Step(uint32_t tm) override;
 
-    virtual float GetScale() const { return 1.0f; }
+    virtual float_t GetScale() const { return 1.0f; }
 
-    virtual float GetSize() const { return 1.0f; }
+    virtual float_t GetSize() const { return 1.0f; }
 
-    float GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
+    float_t GetUnitSize() const { return (GetSize() * 12) * GetScale(); }
 
     void SendEnterMsg(Player *);
     void AddNoise(int, int, int32_t);

@@ -45,7 +45,7 @@ bool TerrainPropInfo::Initialize(std::string szFileName)
     if (TextLines.empty())
         return false;
 
-    float fCurrentVisibleRatio = 1.0f;
+    float_t fCurrentVisibleRatio = 1.0f;
     int32_t ptype = 0;
     int32_t rtype = 0;
     int32_t sflag = 0;
@@ -138,7 +138,7 @@ bool TerrainPropInfo::CheckPropFileType(std::string rname, std::string szTail)
     return rname.find(szTail) != std::string::npos;
 }
 
-void TerrainPropInfo::SetPropInfo(int32_t nLineIndex, uint16_t /*wPropNum*/, PropType propType, RenderType renderType, int32_t nCategory, float fVisibleRatio, std::string rName, int32_t nShadowFlag)
+void TerrainPropInfo::SetPropInfo(int32_t nLineIndex, uint16_t /*wPropNum*/, PropType propType, RenderType renderType, int32_t nCategory, float_t fVisibleRatio, std::string rName, int32_t nShadowFlag)
 {
     PropInfo p{};
     p.nLineIndex = nLineIndex;

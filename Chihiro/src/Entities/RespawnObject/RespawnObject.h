@@ -16,38 +16,31 @@
  *  with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Common.h"
+#include "GameContent.h"
 #include "GameRule.h"
 #include "Monster.h"
 
-struct RespawnInfo : public MonsterRespawnInfo {
-    explicit RespawnInfo(MonsterRespawnInfo info)
-        : MonsterRespawnInfo(info)
-        , count(0)
-    {
-        prespawn_count = (!info.dungeon_id && !info.way_point_id && (info.max_num * GameRule::MONSTER_PRESPAWN_RATE >= 1.0f)) ? (info.max_num * GameRule::MONSTER_PRESPAWN_RATE) : info.max_num;
-        way_point_id = info.way_point_id;
-    }
-
-    uint32_t count;
-    uint32_t prespawn_count;
-};
-
 class RespawnObject : public MonsterDeleteHandler {
 public:
-    explicit RespawnObject(MonsterRespawnInfo rh);
+    explicit RespawnObject(const GameContent::MonsterRespawnInfo &rh)
+        : respawnInfo(rh)
+    {
+        lastDeadTime = 0;
+        m_nMaxRespawnNum = respawnInfo.prespawn_count;
+    }
     ~RespawnObject() = default;
 
     // Deleting the copy & assignment operators
     // Better safe than sorry
-    RespawnObject(const RespawnObject &) = delete;
     RespawnObject &operator=(const RespawnObject &) = delete;
 
     void onMonsterDelete(Monster *mob) override;
     void Update(uint32_t diff);
 
 private:
-    RespawnInfo info;
+    GameContent::MonsterRespawnInfo respawnInfo;
     uint32_t m_nMaxRespawnNum;
     std::vector<uint32_t> m_vRespawnedMonster;
+
     uint32_t lastDeadTime;
 };

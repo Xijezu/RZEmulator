@@ -28,7 +28,7 @@
 void FieldProp::EnterPacket(TS_SC_ENTER &pEnterPct, FieldProp *pFieldProp, Player * /*pPlayer*/)
 {
     TS_SC_ENTER__FIELD_PROP_INFO fieldPropInfo{};
-    fieldPropInfo.prop_id =pFieldProp->m_PropInfo.nPropID;
+    fieldPropInfo.prop_id =pFieldProp->m_PropInfo.nPropId;
     fieldPropInfo.fZOffset = pFieldProp->m_PropInfo.fZOffset; 
     fieldPropInfo.fRotateX = pFieldProp->m_PropInfo.fRotateX;
     fieldPropInfo.fRotateY = pFieldProp->m_PropInfo.fRotateY;
@@ -183,7 +183,7 @@ FieldProp::FieldProp(FieldPropDeleteHandler *propDeleteHandler, const FieldPropR
 
     m_bIsCasting = false;
     sMemoryPool.AllocMiscHandle(this);
-    m_pFieldPropBase = sObjectMgr.GetFieldPropBase(pPropInfo.nPropID);
+    m_pFieldPropBase = sObjectMgr.GetFieldPropBase(pPropInfo.nPropId);
     m_pDeleteHandler = propDeleteHandler;
     nLifeTime = m_pFieldPropBase->nLifeTime;
     m_nRegenTime = sWorld.GetArTime();

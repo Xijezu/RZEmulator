@@ -17,12 +17,12 @@
 
 #include "Boxf.h"
 
-bool X2D::Boxf::IsInclude(float x, float y)
+bool X2D::Boxf::IsInclude(float_t x, float_t y)
 {
     return x >= begin.x && x <= end.x && y >= begin.y && y <= end.y;
 }
 
-void X2D::Boxf::SetLeft(float x)
+void X2D::Boxf::SetLeft(float_t x)
 {
     begin.x = x;
     if (end.x < x) {
@@ -31,7 +31,7 @@ void X2D::Boxf::SetLeft(float x)
     }
 }
 
-void X2D::Boxf::SetTop(float y)
+void X2D::Boxf::SetTop(float_t y)
 {
     begin.y = y;
     if (end.y < y) {
@@ -40,7 +40,7 @@ void X2D::Boxf::SetTop(float y)
     }
 }
 
-void X2D::Boxf::SetRight(float x)
+void X2D::Boxf::SetRight(float_t x)
 {
     end.x = x;
     if (x < begin.x) {
@@ -49,7 +49,7 @@ void X2D::Boxf::SetRight(float x)
     }
 }
 
-void X2D::Boxf::SetBottom(float y)
+void X2D::Boxf::SetBottom(float_t y)
 {
     end.y = y;
     if (y < begin.y) {
@@ -69,7 +69,7 @@ void X2D::Boxf::Set(X2D::Pointf _begin, X2D::Pointf _end)
 
 void X2D::Boxf::normalize()
 {
-    float t;
+    float_t t;
 
     if (end.x < begin.x) {
         t = begin.x;

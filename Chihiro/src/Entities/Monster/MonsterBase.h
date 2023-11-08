@@ -83,8 +83,8 @@ struct MonsterBase {
     int32_t location_id;
     int32_t level;
     int32_t grp;
-    float size;
-    float scale;
+    float_t size;
+    float_t scale;
     int32_t magic_type;
     int32_t race;
     int32_t visible_range;
@@ -100,7 +100,7 @@ struct MonsterBase {
     int32_t standard_run_speed;
     int32_t walk_speed;
     int32_t run_speed;
-    float attack_range;
+    float_t attack_range;
     int32_t hp;
     int32_t mp;
     int32_t attacK_point;
@@ -114,8 +114,8 @@ struct MonsterBase {
     int32_t magic_accuracy;
     int32_t magic_avoid;
     int32_t taming_id;
-    float taming_percentage;
-    float taming_exp_mod;
+    float_t taming_percentage;
+    float_t taming_exp_mod;
     int32_t exp[2];
     int32_t jp[2];
     int32_t gold_drop_percentage;
@@ -132,7 +132,7 @@ struct MonsterBase {
     int32_t drop_max_level[10];
     int32_t skill_id[4];
     int32_t skill_lv[4];
-    float skill_probability[4];
+    float_t skill_probability[4];
     int32_t local_flag;
 };
 
@@ -176,53 +176,17 @@ struct HateModifierTag {
 
 enum ATTACK_TYPE_FLAG : uint16_t { AT_FIRST_ATTACK = 0x1, AT_GROUP_FIRST_ATTACK = 0x2, AT_RESPONSE_CASTING = 0x4, AT_RESPONSE_RACE = 0x8, AT_RESPONSE_BATTLE = 0x10 };
 
-enum MONSTER_GENERATE_CODE : int {
+enum MONSTER_GENERATE_CODE : int32_t {
     MGC_NONE = 0,
     MGC_BY_RESPAWN = 1,
     MGC_BY_SCRIPT = 2,
     MGC_BY_SHOVELING = 3,
 };
 
-enum MONSTER_STATUS : int {
+enum MONSTER_STATUS : int32_t {
     STATUS_NORMAL = 0,
     STATUS_TRACKING = 1,
     STATUS_FIND_ATTACK_POS = 2,
     STATUS_ATTACK = 3,
     STATUS_DEAD = 4,
-};
-
-struct MonsterRespawnInfo {
-    uint32_t interval;
-    float left;
-    float top;
-    float right;
-    float bottom;
-    uint8_t layer;
-    uint32_t monster_id;
-    uint32_t max_num;
-    uint32_t inc;
-    uint32_t id;
-    bool is_wandering;
-    int32_t dungeon_id;
-    int32_t way_point_id;
-
-    MonsterRespawnInfo() = default;
-
-    MonsterRespawnInfo(
-        uint32_t _id, uint32_t _interval, float _left, float _top, float _right, float _bottom, uint32_t _monster_id, uint32_t _max_num, uint32_t _inc, bool _is_wandering, int32_t _way_point_id)
-    {
-        id = _id;
-        interval = _interval;
-        left = _left;
-        top = _top;
-        right = _right;
-        bottom = _bottom;
-        layer = 0;
-        dungeon_id = 0;
-        monster_id = _monster_id;
-        max_num = _max_num;
-        inc = _inc;
-        is_wandering = _is_wandering;
-        way_point_id = _way_point_id;
-    }
 };

@@ -454,7 +454,7 @@ void Summon::onModifyStatAndAttribute()
     }
 }
 
-void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
+void Summon::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float_t var1, float_t var2, float_t fRatio)
 {
     if (bIsBaseVar) {
         switch (type) {
@@ -494,7 +494,7 @@ void Summon::applyJobLevelBonus()
     m_cStat.mentality += stat.mentality;
 }
 
-float Summon::GetFCM() const
+float_t Summon::GetFCM() const
 {
     Skill *skill{nullptr};
     if (GetMaster() != nullptr && (skill = GetMaster()->GetSkill(SKILL_CREATURE_MASTERY)) != nullptr) {
@@ -522,12 +522,12 @@ void Summon::onBeforeCalculateStat()
         m_Attribute.nMoveSpeed += m_tSummonBase->run_speed - GameRule::GetBaseMoveSpeed();
 }
 
-float Summon::GetSize() const
+float_t Summon::GetSize() const
 {
     return m_tSummonBase->size;
 }
 
-float Summon::GetScale() const
+float_t Summon::GetScale() const
 {
     return m_tSummonBase->scale;
 }
@@ -609,12 +609,12 @@ struct applyPassiveSkillAmplifyEffectFunctor : SkillFunctor {
     {
         switch (pSkill->GetSkillBase()->GetSkillEffectType()) {
         case EF_AMPLIFY_SUMMON_HP_MP_SP: {
-            float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
-            float fMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
-            // float fMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
-            float fHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
-            float fMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
-            // float fSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
+            float_t fMaxHPInc = pSkill->GetVar(0) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(1);
+            float_t fMaxMPInc = pSkill->GetVar(2) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(3);
+            // float_t fMaxSPInc = pSkill->GetVar(4) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(5);
+            float_t fHPRegenInc = pSkill->GetVar(6) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(7);
+            float_t fMPRegenInc = pSkill->GetVar(8) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(9);
+            // float_t fSPRegenInc = pSkill->GetVar(10) + pSkill->GetCurrentSkillLevel() * pSkill->GetVar(11);
 
             m_pSummon->SetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_HEALTH_MODIFIER) + fMaxHPInc);
             m_pSummon->SetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER, m_pSummon->GetFloatValue(UNIT_FIELD_MAX_MANA_MODIFIER) + fMaxMPInc);

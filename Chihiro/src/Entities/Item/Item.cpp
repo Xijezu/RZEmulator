@@ -259,7 +259,7 @@ bool Item::IsJoinable() const
     return GetItemTemplate()->flaglist[FLAG_DUPLICATE] != 0;
 }
 
-float Item::GetWeight() const
+float_t Item::GetWeight() const
 {
     return GetItemTemplate()->weight * (float)GetItemInstance().GetCount();
 }

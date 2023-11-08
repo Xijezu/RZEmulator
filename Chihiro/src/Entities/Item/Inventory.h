@@ -44,10 +44,10 @@ public:
     Item *FindBySID(int64_t uid);
     Item *FindByHandle(uint32_t handle);
 
-    void SetWeightModifier(float fWeightModifier) { m_fWeightModifier = fWeightModifier; }
-    void AddWeightModifier(float fWeightModifier) { m_fWeightModifier += fWeightModifier; }
-    float GetWeight() const { return m_fWeight + m_fWeightModifier; }
-    float GetWeightModifier() const { return m_fWeightModifier; }
+    void SetWeightModifier(float_t fWeightModifier) { m_fWeightModifier = fWeightModifier; }
+    void AddWeightModifier(float_t fWeightModifier) { m_fWeightModifier += fWeightModifier; }
+    float_t GetWeight() const { return m_fWeight + m_fWeightModifier; }
+    float_t GetWeightModifier() const { return m_fWeightModifier; }
     bool IsValid(Item *pItem) const { return check(pItem); }
     int32_t IssueNewIndex() { return ++m_nIndex; }
 
@@ -58,8 +58,8 @@ private:
     bool check(Item *pItem) const;
 
     InventoryEventReceiver *m_pEventReceiver;
-    float m_fWeight;
-    float m_fWeightModifier;
+    float_t m_fWeight;
+    float_t m_fWeightModifier;
     std::vector<Item *> m_vList;
     std::vector<Item *> m_vExpireItemList;
     int32_t m_nIndex;

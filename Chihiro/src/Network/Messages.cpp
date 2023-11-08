@@ -51,7 +51,7 @@ void Messages::SendLevelMessage(Player *pPlayer, Unit *pUnit)
     pPlayer->SendPacket(resultPct);
 }
 
-void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int32_t add_hp, float add_mp, bool display)
+void Messages::SendHPMPMessage(Player *pPlayer, Unit *pUnit, int32_t add_hp, float_t add_mp, bool display)
 {
     if (pPlayer == nullptr || pUnit == nullptr)
         return;
@@ -445,7 +445,7 @@ void Messages::SendWearInfo(Player *pPlayer, Unit *pUnit)
     pPlayer->SendPacket(wearPct);
 }
 
-void Messages::BroadcastHPMPMessage(Unit *pUnit, int32_t add_hp, float add_mp, bool need_to_display)
+void Messages::BroadcastHPMPMessage(Unit *pUnit, int32_t add_hp, float_t add_mp, bool need_to_display)
 {
     TS_SC_HPMP hpmpPct{};
     hpmpPct.handle = pUnit->GetHandle();

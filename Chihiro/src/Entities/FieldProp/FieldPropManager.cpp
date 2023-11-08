@@ -22,7 +22,7 @@
 
 void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32_t lifeTime)
 {
-    auto propTemplate = sObjectMgr.GetFieldPropBase(prop.nPropID);
+    auto propTemplate = sObjectMgr.GetFieldPropBase(prop.nPropId);
     if (propTemplate == nullptr)
         return;
 
@@ -39,7 +39,7 @@ void FieldPropManager::SpawnFieldPropFromScript(FieldPropRespawnInfo prop, int32
 void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
     FieldPropRespawnInfo info{prop};
-    int32_t nPropID = prop.nPropID;
+    int32_t nPropID = prop.nPropId;
     FieldPropTemplate *propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
     if (propTemplate == nullptr)
         return;
@@ -49,7 +49,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 
     {
         NG_UNIQUE_GUARD writeGuard(i_lock);
-        info.nPropID = nPropID;
+        info.nPropId = nPropID;
         info.layer = 0; // Layer management
         m_vRespawnInfo.emplace_back(info);
         FieldPropRegenInfo ri = FieldPropRegenInfo{propTemplate->nRegenTime + sWorld.GetArTime(), propTemplate->nLifeTime};
@@ -73,11 +73,12 @@ void FieldPropManager::onFieldPropDelete(FieldProp *prop)
             m_vExpireObject.erase(pos);
         }
 
+        /*
         if (!prop->m_PropInfo.bOnce) {
             FieldPropRegenInfo ri = FieldPropRegenInfo{prop->m_pFieldPropBase->nRegenTime + sWorld.GetArTime(), prop->nLifeTime};
             ri.pRespawnInfo = prop->m_PropInfo;
             m_vRespawnList.emplace_back(ri);
-        }
+        }*/
     }
 }
 

@@ -30,7 +30,7 @@ class WorldLocation;
 
 constexpr int32_t MAX_ITEM_COOLTIME_GROUP = 20;
 
-enum BONUS_TYPE : int {
+enum BONUS_TYPE : int32_t {
     BONUS_PCBANG = 0x0,
     BONUS_STAMINA = 0x1,
     BONUS_PREMIUM_PCBANG = 0x2,
@@ -49,7 +49,7 @@ enum UNMOUNT_TYPE : uint8_t {
     UNMOUNT_UNSUMMON = 2,
 };
 
-enum TRADE_MODE : int {
+enum TRADE_MODE : int32_t {
     TM_REQUEST_TRADE = 0,
     TM_ACCEPT_TRADE,
     TM_BEGIN_TRADE,
@@ -77,7 +77,7 @@ struct BonusInfo {
     int32_t jp;
 };
 
-enum CONDITION_INFO : int { CONDITION_GOOD = 0, CONDITION_AVERAGE = 1, CONDITION_BAD = 2 };
+enum CONDITION_INFO : int32_t { CONDITION_GOOD = 0, CONDITION_AVERAGE = 1, CONDITION_BAD = 2 };
 
 class Player : public Unit, public QuestEventHandler, public InventoryEventReceiver {
 public:
@@ -144,7 +144,7 @@ public:
     int32_t GetGuildID() const { return GetInt32Value(PLAYER_FIELD_GUILD_ID); }
     bool HasRidingState() { return GetUInt32Value(PLAYER_FIELD_RIDING_UID) != 0; }
     bool IsRiding() { return GetInt32Value(PLAYER_FIELD_RIDING_IDX) != MOUNT_NOTHING; }
-    float GetWeight() const { return GetFloatValue(PLAYER_FIELD_WEIGHT); }
+    float_t GetWeight() const { return GetFloatValue(PLAYER_FIELD_WEIGHT); }
 
     int32_t AddStamina(int32_t nStamina);
     int32_t GetStaminaRegenRate();
@@ -257,7 +257,7 @@ public:
     uint16_t putonItem(ItemWearType, Item *) override;
     uint16_t putoffItem(ItemWearType) override;
     void SendItemWearInfoMessage(Item *item, Unit *u);
-    void ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast);
+    void ChangeLocation(float_t x, float_t y, bool bByRequest, bool bBroadcast);
 
     bool IsAlly(const Unit *pUnit) override;
 
@@ -373,7 +373,7 @@ protected:
     void onCompleteCalculateStat() override;
     void onBeforeCalculateStat() override;
     void onRegisterSkill(int64_t skillUID, int32_t skill_id, int32_t prev_level, int32_t skill_level) override;
-    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio) override;
+    void onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float_t var1, float_t var2, float_t fRatio) override;
     void onExpChange() override;
     void onEnergyChange() override;
     void onJobLevelUp() override;
@@ -409,9 +409,9 @@ private:
     QuestManager m_QuestManager{};
     bool m_bStaminaActive{false};
     bool m_bUsingTent{false};
-    float m_fDistEXPMod{1.0f};
-    float m_fActiveSummonExpAmp{0.0f};
-    float m_fDeactiveSummonExpAmp{0.0f};
+    float_t m_fDistEXPMod{1.0f};
+    float_t m_fActiveSummonExpAmp{0.0f};
+    float_t m_fDeactiveSummonExpAmp{0.0f};
 
     uint32_t m_nItemCooltime[MAX_ITEM_COOLTIME_GROUP]{0};
 

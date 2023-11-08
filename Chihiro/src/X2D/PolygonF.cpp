@@ -144,8 +144,8 @@ bool X2D::Polygonf::IsCollision(X2D::Rectf rc)
             if (rc.IsInclude(p1))
                 return true;
         }
-        float rsx = rc.size.x + rc.pos.x;
-        float rsy = rc.size.y + rc.pos.y;
+        float_t rsx = rc.size.x + rc.pos.x;
+        float_t rsy = rc.size.y + rc.pos.y;
 
         line_a.begin.x = rc.pos.x;
         line_a.begin.y = rc.pos.y;
@@ -256,8 +256,8 @@ bool X2D::PolygonF::IsCollision(X2D::RectangleF rc)
             if (rc.IsInclude(p1))
                 return true;
         }
-        float rsx = rc.m_BottomRight.x;
-        float rsy = rc.m_BottomRight.y;
+        float_t rsx = rc.m_BottomRight.x;
+        float_t rsy = rc.m_BottomRight.y;
 
         line_a.begin.x = rc.m_TopLeft.x;
         line_a.begin.y = rc.m_TopLeft.y;
@@ -335,7 +335,7 @@ bool X2D::PolygonF::IsLooseInclude(X2D::Pointf pt)
             if (res == Linef::IntersectResult::Intersect)
                 nIntersectCnt++;
             if (res == Linef::IntersectResult::Touch) {
-                float y = np.y;
+                float_t y = np.y;
                 if (np.y >= p.y)
                     y = p.y;
                 if (pt.y == y) {

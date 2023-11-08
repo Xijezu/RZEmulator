@@ -159,8 +159,8 @@ void Unit::CalculateStat()
     m_cStatByState.luck += (m_cStat.luck - stateStat.luck);
     // TODO onAfterApplyStat -> summonstatpenalty
     finalizeStat();
-    float b1 = GetLevel();
-    float fcm = GetFCM();
+    float_t b1 = GetLevel();
+    float_t fcm = GetFCM();
     SetMaxHealth((uint32_t)(GetMaxHealth() + (m_cStat.vital * 33.0f) + (b1 * 20.0f)));
     SetMaxMana((uint32_t)(GetMaxMana() + (m_cStat.intelligence * 33.0f) + (b1 * 20.0f)));
     calcAttribute(m_Attribute);
@@ -263,10 +263,10 @@ void Unit::applyPassiveSkillAmplifyEffect(Skill *pSkill)
         break;
     }
     case EF_AMPLIFY_HP_MP: {
-        float fMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fMaxMPInc = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        float fHPRegenInc = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
-        float fMPRegenInc = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
+        float_t fMaxHPInc = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float_t fMaxMPInc = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fHPRegenInc = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
+        float_t fMPRegenInc = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
 
         /*m_fMaxHPAmplifier += fMaxHPInc;
         m_fMaxMPAmplifier += fMaxMPInc;*/
@@ -637,8 +637,8 @@ void Unit::applyState(State &state)
                 break;
         }
 
-        float fHPAbsorbRatio = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
-        float fMPAbsorbRatio = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
+        float_t fHPAbsorbRatio = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
+        float_t fMPAbsorbRatio = state.GetValue(2) + state.GetLevel() * state.GetValue(3);
         int32_t nRatio = state.GetValue(6) + state.GetLevel() * state.GetValue(7);
 
         if (fHPAbsorbRatio || fMPAbsorbRatio) {
@@ -747,9 +747,9 @@ void Unit::applyState(State &state)
     } break;
 
     case SEF_FORCE_CHIP: {
-        float fNormalStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
-        float fRangeStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
-        float fPhysicalSkillStatePenalty = (state.GetValue(2) + state.GetValue(3) * state.GetLevel());
+        float_t fNormalStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
+        float_t fRangeStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
+        float_t fPhysicalSkillStatePenalty = (state.GetValue(2) + state.GetValue(3) * state.GetLevel());
 
         if (IsPlayer() || IsSummon()) {
             fNormalStatePenalty = fNormalStatePenalty * 0.25f;
@@ -763,7 +763,7 @@ void Unit::applyState(State &state)
     } break;
 
     case SEF_SOUL_CHIP: {
-        float fMagicalSkillStatePenalty = (state.GetValue(2) + state.GetLevel() * state.GetValue(3));
+        float_t fMagicalSkillStatePenalty = (state.GetValue(2) + state.GetLevel() * state.GetValue(3));
 
         if (IsPlayer() || IsSummon())
             fMagicalSkillStatePenalty = fMagicalSkillStatePenalty * 0.25f;
@@ -776,10 +776,10 @@ void Unit::applyState(State &state)
         break;
 
     case SEF_LUNAR_CHIP: {
-        float fNormalStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
-        float fRangeStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
-        float fPhysicalSkillStatePenalty = (state.GetValue(2) + state.GetValue(3) * state.GetLevel());
-        float fMagicalSkillStatePenalty = (state.GetValue(2) + state.GetLevel() * state.GetValue(3));
+        float_t fNormalStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
+        float_t fRangeStatePenalty = (state.GetValue(0) + state.GetValue(1) * state.GetLevel());
+        float_t fPhysicalSkillStatePenalty = (state.GetValue(2) + state.GetValue(3) * state.GetLevel());
+        float_t fMagicalSkillStatePenalty = (state.GetValue(2) + state.GetLevel() * state.GetValue(3));
 
         if (IsPlayer() || IsSummon()) {
             fNormalStatePenalty = fNormalStatePenalty * 0.25f;
@@ -795,7 +795,7 @@ void Unit::applyState(State &state)
     } break;
 
     case SEF_MP_COST_INC: {
-        float fCostReduce = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
+        float_t fCostReduce = state.GetValue(0) + state.GetLevel() * state.GetValue(1);
         int32_t nElementalType = state.GetValue(5);
 
         if (nElementalType != 99) {
@@ -861,12 +861,12 @@ void Unit::applyState(State &state)
     } break;
 
     case SEF_ADD_PARAMETER_ON_SKILL: {
-        float fDamage = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
-        float fMagicDamage = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
+        float_t fDamage = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
+        float_t fMagicDamage = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
         int32_t nCritical = state.GetValue(4) * state.GetLevel();
         int32_t nElementalType = state.GetValue(5);
-        float fHate = state.GetValue(6) * state.GetLevel();
-        float fCoolTime = state.GetValue(7) * state.GetLevel();
+        float_t fHate = state.GetValue(6) * state.GetLevel();
+        float_t fCoolTime = state.GetValue(7) * state.GetLevel();
         bool bExhaustive = state.GetValue(8);
         int32_t nApplySkillType = state.GetValue(9);
         int32_t nApplyToHarmful = state.GetValue(10);
@@ -1088,8 +1088,8 @@ void Unit::applyState(State &state)
         break;
 
     case SEF_HEALING_AMPLIFY: {
-        float fHPHealRatio = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
-        float fMPHealRatio = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
+        float_t fHPHealRatio = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
+        float_t fMPHealRatio = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
 
         SetFloatValue(UNIT_FIELD_HEAL_RATIO, GetFloatValue(UNIT_FIELD_HEAL_RATIO) + fHPHealRatio);
         SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO, GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO) + fMPHealRatio);
@@ -1130,12 +1130,12 @@ void Unit::applyState(State &state)
         break;
 
     case SEF_MISC: {
-        float fValue1 = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
-        float fValue2 = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
-        float fValue3 = state.GetValue(4) + state.GetValue(5) * state.GetLevel();
-        float fValue4 = state.GetValue(6) + state.GetValue(7) * state.GetLevel();
-        float fValue5 = state.GetValue(8) + state.GetValue(9) * state.GetLevel();
-        float fValue6 = state.GetValue(10) + state.GetValue(11) * state.GetLevel();
+        float_t fValue1 = state.GetValue(0) + state.GetValue(1) * state.GetLevel();
+        float_t fValue2 = state.GetValue(2) + state.GetValue(3) * state.GetLevel();
+        float_t fValue3 = state.GetValue(4) + state.GetValue(5) * state.GetLevel();
+        float_t fValue4 = state.GetValue(6) + state.GetValue(7) * state.GetLevel();
+        float_t fValue5 = state.GetValue(8) + state.GetValue(9) * state.GetLevel();
+        float_t fValue6 = state.GetValue(10) + state.GetValue(11) * state.GetLevel();
 
         switch (state.GetCode()) {
         case SC_NIGHTMARE:
@@ -1385,7 +1385,7 @@ void Unit::applyItemEffect()
         if (curItem != nullptr && curItem->GetItemTemplate() != nullptr) {
             auto iwt = (ItemWearType)i;
             if (TranslateWearPosition(iwt, curItem, &ref_list)) {
-                float fItemRatio = 1.0f;
+                float_t fItemRatio = 1.0f;
                 if (curItem->GetLevelLimit() > GetLevel() && curItem->GetLevelLimit() <= m_nUnitExpertLevel)
                     fItemRatio = 0.40000001f;
 
@@ -1402,8 +1402,8 @@ void Unit::applyItemEffect()
                     }
                 }
 
-                float fAddPoint32_t = 0.0f;
-                float fTotalPoints = 0.0f;
+                float_t fAddPoint32_t = 0.0f;
+                float_t fTotalPoints = 0.0f;
 
                 for (int32_t ol = 0; ol < 2; ol++) {
                     if (curItem->GetItemTemplate()->enhance_id[ol] != 0) {
@@ -1426,7 +1426,7 @@ void Unit::applyItemEffect()
     }
 }
 
-void Unit::ampParameter2(uint32_t nBitset, float fValue)
+void Unit::ampParameter2(uint32_t nBitset, float_t fValue)
 {
     if (nBitset & FLAG_ET_NONE_RESIST)
         m_ResistAmplifier.fResist[ElementalType::TYPE_NONE] += fValue;
@@ -1494,7 +1494,7 @@ void Unit::ampParameter2(uint32_t nBitset, float fValue)
         SetFlag(UNIT_FIELD_STATUS, STATUS_MP_REGEN_STOPPED);
 }
 
-void Unit::ampParameter(uint32_t nBitset, float fValue, bool bStat)
+void Unit::ampParameter(uint32_t nBitset, float_t fValue, bool bStat)
 {
     if (bStat) {
         if (nBitset & FLAG_STR)
@@ -1593,7 +1593,7 @@ void Unit::ampParameter(uint32_t nBitset, float fValue, bool bStat)
     }
 }
 
-void Unit::incParameter(uint32_t nBitset, float nValue, bool bStat)
+void Unit::incParameter(uint32_t nBitset, float_t nValue, bool bStat)
 {
     if (bStat) {
         if (nBitset & StateStatFlag::FLAG_STR)
@@ -1699,7 +1699,7 @@ void Unit::incParameter(uint32_t nBitset, float nValue, bool bStat)
     }
 }
 
-void Unit::incParameter2(uint32_t nBitset, float fValue)
+void Unit::incParameter2(uint32_t nBitset, float_t fValue)
 {
     if (nBitset & FlagEffectType::FLAG_ET_NONE_RESIST)
         m_Resist.nResist[ElementalType::TYPE_NONE] += fValue;
@@ -1891,9 +1891,9 @@ void Unit::applyStateAmplify(State *state)
     }
 }
 
-void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
+void Unit::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float_t var1, float_t var2, float_t fRatio)
 {
-    float item_var_penalty = (type != IEP_ATTACK_SPEED) ? (var1 * fRatio) : var1;
+    float_t item_var_penalty = (type != IEP_ATTACK_SPEED) ? (var1 * fRatio) : var1;
 
     if (type != IEP_ATTACK_SPEED && bIsBaseVar && pItem != nullptr) {
         item_var_penalty += (float)(var2 * (float)(pItem->GetItemInstance().GetLevel() - 1));
@@ -2046,9 +2046,9 @@ void Unit::calcAttribute(CreatureAtributeServer &attribute)
     attribute.nCriticalPower = 80;
     attribute.nCritical += ((m_cStat.luck * 0.2f) + 3.0f);
 
-    float b1 = GetLevel();
-    float fcm = GetFCM();
-    float dl = (fcm * 5.0f);
+    float_t b1 = GetLevel();
+    float_t fcm = GetFCM();
+    float_t dl = (fcm * 5.0f);
 
     if (IsUsingBow() || IsUsingCrossBow()) {
         attribute.nAttackPointRight += (1.2f * m_cStat.agility) + (2.2f * m_cStat.dexterity) + (fcm * b1);
@@ -2356,7 +2356,7 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
 
     case EF_MAGIC_TRAINING: {
         int32_t nCastSpeed = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fCoolTime = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fCoolTime = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
         int32_t nCastKeep = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
 
         m_Attribute.nCastingSpeed += nCastSpeed;
@@ -2367,8 +2367,8 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
     case EF_HUNTING_TRAINING: {
         int32_t nCreatureType = pSkill->GetVar(0);
 
-        float fDamage = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel();
-        float fAvoid = pSkill->GetVar(3) + pSkill->GetVar(4) * pSkill->GetCurrentSkillLevel();
+        float_t fDamage = pSkill->GetVar(1) + pSkill->GetVar(2) * pSkill->GetCurrentSkillLevel();
+        float_t fAvoid = pSkill->GetVar(3) + pSkill->GetVar(4) * pSkill->GetCurrentSkillLevel();
 
         m_Expert[nCreatureType].fDamage += fDamage;
         m_Expert[nCreatureType].fAvoid += fAvoid;
@@ -2394,24 +2394,24 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
     } break;
 
     case EF_HEALING_AMPLIFY: {
-        float fHPHealRatio = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fMPHealRatio = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fHPHealRatio = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float_t fMPHealRatio = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
 
         SetFloatValue(UNIT_FIELD_HEAL_RATIO, GetFloatValue(UNIT_FIELD_HEAL_RATIO) + fHPHealRatio);
         SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO, GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO) + fMPHealRatio);
     } break;
 
     case EF_HEALING_AMPLIFY_BY_ITEM: {
-        float fHPHealRatioByItem = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fMPHealRatioByItem = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fHPHealRatioByItem = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float_t fMPHealRatioByItem = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
 
         SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM, GetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_ITEM) + fHPHealRatioByItem);
         SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM, GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_ITEM) + fMPHealRatioByItem);
     } break;
 
     case EF_HEALING_AMPLIFY_BY_REST: {
-        float fHPHealRatioByRest = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fMPHealRatioByRest = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fHPHealRatioByRest = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float_t fMPHealRatioByRest = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
 
         SetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_REST, GetFloatValue(UNIT_FIELD_HEAL_RATIO_BY_REST) + fHPHealRatioByRest);
         SetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_REST, GetFloatValue(UNIT_FIELD_MP_HEAL_RATIO_BY_REST) + fMPHealRatioByRest);
@@ -2427,11 +2427,11 @@ void Unit::applyPassiveSkillEffect(Skill *pSkill)
         if (pWeapon == nullptr)
             break;
 
-        float fAttackPoint = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
-        float fAttackSpeed = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
-        float fAccuracy = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
-        float fMagicPoint = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
-        float fCritical = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
+        float_t fAttackPoint = pSkill->GetVar(0) + pSkill->GetVar(1) * pSkill->GetCurrentSkillLevel();
+        float_t fAttackSpeed = pSkill->GetVar(2) + pSkill->GetVar(3) * pSkill->GetCurrentSkillLevel();
+        float_t fAccuracy = pSkill->GetVar(4) + pSkill->GetVar(5) * pSkill->GetCurrentSkillLevel();
+        float_t fMagicPoint = pSkill->GetVar(6) + pSkill->GetVar(7) * pSkill->GetCurrentSkillLevel();
+        float_t fCritical = pSkill->GetVar(8) + pSkill->GetVar(9) * pSkill->GetCurrentSkillLevel();
 
         m_AttributeAmplifier.fAttackPointRight += fAttackPoint;
         m_AttributeAmplifier.fAttackSpeedRight += fAttackSpeed;
@@ -2545,7 +2545,7 @@ void Unit::applyDoubeWeaponEffect()
     }
 
     m_nDoubleWeaponMasteryLevel = nExpertSkillLv;
-    float fBase{0.75f}, fAddPerLevel{0.005f};
+    float_t fBase{0.75f}, fAddPerLevel{0.005f};
 
     m_Attribute.nAttackSpeedRight = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackSpeedRight;
     m_Attribute.nAttackSpeedLeft = (fBase + fAddPerLevel * nExpertSkillLv) * m_Attribute.nAttackSpeedLeft;

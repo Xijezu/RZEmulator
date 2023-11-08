@@ -117,8 +117,8 @@ void X2D::QuadTreeMapInfo::Node::divide()
         Pointf p1{};
         Pointf p2{};
 
-        float easx = ((this->m_Area.m_BottomRight.x - this->m_Area.m_TopLeft.x) * 0.5f) + this->m_Area.m_TopLeft.x;
-        float easy = ((this->m_Area.m_BottomRight.y - this->m_Area.m_TopLeft.y) * 0.5f) + this->m_Area.m_TopLeft.y;
+        float_t easx = ((this->m_Area.m_BottomRight.x - this->m_Area.m_TopLeft.x) * 0.5f) + this->m_Area.m_TopLeft.x;
+        float_t easy = ((this->m_Area.m_BottomRight.y - this->m_Area.m_TopLeft.y) * 0.5f) + this->m_Area.m_TopLeft.y;
         auto new_depth = (uint16_t)(this->m_unDepth + 1);
 
         p1 = Pointf(this->m_Area.m_TopLeft.x, this->m_Area.m_TopLeft.y);
@@ -154,7 +154,7 @@ void X2D::QuadTreeMapInfo::Node::divide()
     }
 }
 
-X2D::QuadTreeMapInfo::QuadTreeMapInfo(float width, float height)
+X2D::QuadTreeMapInfo::QuadTreeMapInfo(float_t width, float_t height)
 {
     Pointf p1 = Pointf(0, 0);
     Pointf p2 = Pointf(width, height);

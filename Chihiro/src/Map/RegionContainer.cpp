@@ -21,7 +21,7 @@
 
 #define REGION_BLOCK_COUNT 100
 
-void RegionContainer::InitRegion(float map_width, float map_height)
+void RegionContainer::InitRegion(float_t map_width, float_t map_height)
 {
     m_MapWidth = map_width;
     m_MapHeight = map_height;

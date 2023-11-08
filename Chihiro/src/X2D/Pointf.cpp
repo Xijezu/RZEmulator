@@ -17,16 +17,16 @@
 
 #include "Pointf.h"
 
-X2D::Pointf::Pointf(float _x, float _y)
+X2D::Pointf::Pointf(float_t _x, float_t _y)
 {
     x = _x;
     y = _y;
 }
 
-float X2D::Pointf::GetAlternativeDistance(X2D::Pointf rh)
+float_t X2D::Pointf::GetAlternativeDistance(X2D::Pointf rh)
 {
-    float v2;
-    float v3;
+    float_t v2;
+    float_t v3;
 
     v2 = x - rh.x;
     v3 = y - rh.y;
@@ -37,13 +37,13 @@ float X2D::Pointf::GetAlternativeDistance(X2D::Pointf rh)
     return v3 + v2;
 }
 
-void X2D::Pointf::Set(float _x, float _y)
+void X2D::Pointf::Set(float_t _x, float_t _y)
 {
     x = _x;
     y = _y;
 }
 
-float X2D::Pointf::GetDistance(X2D::Pointf rh)
+float_t X2D::Pointf::GetDistance(X2D::Pointf rh)
 {
     return (float)sqrt((x - rh.x) * (x - rh.x) + (y - rh.y) * (y - rh.y));
 }

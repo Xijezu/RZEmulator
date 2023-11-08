@@ -20,8 +20,8 @@
 #include "SharedMutex.h"
 
 constexpr int32_t VISIBLE_REGION_RANGE = 3;
-constexpr int VISIBLE_REGION_BOX_WIDTH = (VISIBLE_REGION_RANGE * 2 + 1);
-constexpr int s_Matrix[VISIBLE_REGION_BOX_WIDTH][VISIBLE_REGION_BOX_WIDTH] = {
+constexpr int32_t VISIBLE_REGION_BOX_WIDTH = (VISIBLE_REGION_RANGE * 2 + 1);
+constexpr int32_t s_Matrix[VISIBLE_REGION_BOX_WIDTH][VISIBLE_REGION_BOX_WIDTH] = {
     {0, 0, 1, 1, 1, 0, 0},
     {0, 1, 1, 1, 1, 1, 0},
     {1, 1, 1, 1, 1, 1, 1},
@@ -48,7 +48,7 @@ public:
     RegionContainer(const RegionContainer &) = delete;
     RegionContainer &operator=(const RegionContainer &) = delete;
 
-    void InitRegion(float map_width, float map_height);
+    void InitRegion(float_t map_width, float_t map_height);
     bool IsValidRegion(uint32_t rx, uint32_t ry, uint8_t layer);
     Region *GetRegion(WorldObject *pObject);
     Region *GetRegion(uint32_t rx, uint32_t ry, uint8_t layer);
@@ -147,8 +147,8 @@ private:
     Region *getRegionPtr(uint32_t rx, uint32_t ry, uint8_t layer);
     Region *getRegion(uint32_t rx, uint32_t ry, uint8_t layer);
 
-    float m_MapWidth;
-    float m_MapHeight;
+    float_t m_MapWidth;
+    float_t m_MapHeight;
     uint32_t m_nRegionWidth;
     uint32_t m_nRegionHeight;
     uint32_t m_nRegionBlockWidth;

@@ -49,7 +49,7 @@ struct EnhanceInfo {
     int32_t nMaxEnhance;
     uint32_t nLocalFlag;
     int32_t nNeedItemCode;
-    float fPercentage[20];
+    float_t fPercentage[20];
 
     enum {
         RESULT_FAIL = 1,

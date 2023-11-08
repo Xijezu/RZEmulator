@@ -22,7 +22,7 @@
 
 class XPacket;
 
-enum SkillStatus : int { SS_IDLE = 0, SS_CAST = 1, SS_FIRE = 2, SS_COMPLETE = 3, SS_PRE_CAST = 4 };
+enum SkillStatus : int32_t { SS_IDLE = 0, SS_CAST = 1, SS_FIRE = 2, SS_COMPLETE = 3, SS_PRE_CAST = 4 };
 
 struct SkillTargetFunctor;
 class Skill {
@@ -47,9 +47,9 @@ public:
     static void AddSkillResult(std::vector<SkillResult> &pvList, bool bIsSuccess, int32_t nSuccessType, uint32_t handle);
     static void AddSkillDamageResult(std::vector<SkillResult> &pvList, uint8_t type, int32_t damageType, DamageInfo damageInfo, uint32_t handle);
     static void AddSkillDamageWithKnockBackResult(
-        std::vector<SkillResult> &pvList, uint8_t type, int32_t damage_type, const DamageInfo &damage_info, uint32_t handle, float x, float y, uint32_t knock_back_time);
-    static int32_t EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float fEffectLength, const int32_t nRegionType,
-        const float fRegionProperty, const int32_t nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int32_t nDistributeType, const int32_t nTargetMax,
+        std::vector<SkillResult> &pvList, uint8_t type, int32_t damage_type, const DamageInfo &damage_info, uint32_t handle, float_t x, float_t y, uint32_t knock_back_time);
+    static int32_t EnumSkillTargetsAndCalcDamage(const Position &_OriginalPos, uint8_t layer, const Position &_TargetPos, bool bTargetOrigin, const float_t fEffectLength, const int32_t nRegionType,
+        const float_t fRegionProperty, const int32_t nOriginalDamage, const bool bIncludeOriginalPos, Unit *pCaster, const int32_t nDistributeType, const int32_t nTargetMax,
         /*out*/ std::vector<Unit *> &vTargetList, bool bEnemyOnly = true);
 
     int32_t Cast(int32_t nSkillLevel, uint32_t handle, Position pos, uint8_t layer, bool bIsCastedByItem);
@@ -59,7 +59,7 @@ public:
     void ProcSkill();
     bool ProcAura();
 
-    inline float GetVar(int32_t idx) const { return GetSkillBase()->var[idx]; }
+    inline float_t GetVar(int32_t idx) const { return GetSkillBase()->var[idx]; }
 
     bool Cancel();
     uint32_t GetSkillEnhance() const;
@@ -93,7 +93,7 @@ public:
 
 private:
     Position m_targetPosition{};
-    float m_fRange;
+    float_t m_fRange;
     uint32_t m_nCastingDelay;
     uint32_t m_nEnhance{};
     uint16_t m_nErrorCode{};
@@ -109,7 +109,7 @@ private:
     uint32_t m_nAuraMPDecTime;
     uint32_t m_nAuraRefreshTime;
     Position m_RushPos;
-    float m_fRushFace;
+    float_t m_fRushFace;
     int32_t m_nRushDamage;
 
     SkillStatus m_Status{};
@@ -160,8 +160,8 @@ private:
     void PHYSICAL_SINGLE_REGION_DAMAGE_OLD(Unit *pTarget);
     void PHYSICAL_SINGLE_DAMAGE_ABSORB(Unit *pTarget);
     void TAUNT(Unit *pTarget);
-    bool RUSH(Unit *pTarget, float fSpeed);
-    bool AFFECT_RUSH(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface, float fSpeed);
+    bool RUSH(Unit *pTarget, float_t fSpeed);
+    bool AFFECT_RUSH(Unit *pTarget, float_t &pfRushDistance, Position &pRushPos, float_t &pface, float_t fSpeed);
 
     void TOGGLE_AURA(Unit *pTarget);
     void SKILL_ADD_HP_MP(Unit *pTarget);
@@ -170,8 +170,8 @@ private:
     void SINGLE_PHYSICAL_DAMAGE_T2(Unit *pTarget);
 
     bool PHYSICAL_DAMAGE_RUSH(Unit *pTarget, int32_t &pnAdditionalDamage);
-    bool AFFECT_RUSH_OLD(Unit *pTarget, float &pfRushDistance, Position &pRushPos, float &pface);
-    int32_t AFFECT_KNOCK_BACK(Unit *pTarget, float fRange, uint32_t knock_back_time);
+    bool AFFECT_RUSH_OLD(Unit *pTarget, float_t &pfRushDistance, Position &pRushPos, float_t &pface);
+    int32_t AFFECT_KNOCK_BACK(Unit *pTarget, float_t fRange, uint32_t knock_back_time);
     void PHYSICAL_MULTIPLE_REGION_DAMAGE_OLD(Unit *pTarget);
     void PHYSICAL_MULTIPLE_SPECIAL_REGION_DAMAGE(Unit *pTarget);
     void PHYSICAL_SPECIAL_REGION_DAMAGE(Unit *pTarget);

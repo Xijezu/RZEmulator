@@ -20,7 +20,7 @@
 
 class Player;
 
-enum WL_Time : int {
+enum WL_Time : int32_t {
     Dawn = 0,
     Daytime = 1,
     Evening = 2,
@@ -28,9 +28,9 @@ enum WL_Time : int {
     WLT_Max = 4,
 };
 
-enum WL_Weather : int { Clear = 0, LightRain = 1, Rain = 2, HeavyRain = 3, LightSnow = 4, Snow = 5, HeavySnow = 6, WLW_Max = 7 };
+enum WL_Weather : int32_t { Clear = 0, LightRain = 1, Rain = 2, HeavyRain = 3, LightSnow = 4, Snow = 5, HeavySnow = 6, WLW_Max = 7 };
 
-enum WL_Type : int {
+enum WL_Type : int32_t {
     WT_Etc = 0,
     Town = 1,
     WL_Field = 2,
@@ -43,7 +43,7 @@ enum WL_Type : int {
     FleaMarket = 10,
 };
 
-enum WL_SpecLocId : int {
+enum WL_SpecLocId : int32_t {
     Abyss = 110900,
     SecRoute1 = 130100,
     SecRoute2 = 130101,

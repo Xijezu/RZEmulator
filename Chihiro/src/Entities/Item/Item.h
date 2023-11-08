@@ -88,7 +88,7 @@ public:
     bool IsExpireItem() const;
     bool IsJoinable() const;
     bool IsQuestItem() const;
-    float GetWeight() const;
+    float_t GetWeight() const;
     void CopyFrom(const Item *pFrom);
 
     inline bool IsBullet() const { return GetItemGroup() == ItemGroup::GROUP_BULLET; }

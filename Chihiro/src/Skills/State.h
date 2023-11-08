@@ -75,7 +75,7 @@ public:
     bool AddState(StateType type, uint32_t caster, uint16_t level, uint32_t start_time, uint32_t end_time, int32_t base_damage, bool bIsAura);
     void SetLevel(int32_t idx, uint16_t level) { m_nLevel[idx] = level; }
     int32_t GetEffectType() const;
-    float GetValue(int32_t idx) const;
+    float_t GetValue(int32_t idx) const;
     bool IsHarmful();
     bool IsAura() const { return m_bAura; }
     bool IsDuplicatedGroup(int32_t nGroupID);

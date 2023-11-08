@@ -25,7 +25,7 @@ enum SKILL_TYPE : int16_t {
     ST_SYSTEM = 2,
 };
 
-enum SKILL_EFFECT_TARGET_LIMIT : int {
+enum SKILL_EFFECT_TARGET_LIMIT : int32_t {
     SKILL_EFFECT_TARGET_LIMIT_ANY_BODY = 0,
     SKILL_EFFECT_TARGET_LIMIT_NOT_ENEMY = 1,
     SKILL_EFFECT_TARGET_LIMIT_ONLY_ALLY = 2,
@@ -59,7 +59,7 @@ struct SkillResult {
     TS_SC_SKILL__HIT_RUSH hitRush;
 };
 
-enum TARGET_TYPE : int {
+enum TARGET_TYPE : int32_t {
     TARGET_MISC = 0,
     TARGET_TARGET = 1,
     TARGET_REGION_WITH_TARGET = 2,
@@ -225,7 +225,7 @@ enum SKILL_UID : uint32_t {
     SKILL_INSTANCE_GAME_EXIT = 64827,
 };
 
-enum SKILL_EFFECT_TYPE : int {
+enum SKILL_EFFECT_TYPE : int32_t {
     EF_MISC = 0,
 
     EF_RESPAWN_MONSTER_NEAR = 2,
@@ -513,7 +513,7 @@ struct SkillTreeBase {
     int32_t max_skill_lv{};
     int32_t lv{};
     int32_t job_lv{};
-    float jp_ratio{};
+    float_t jp_ratio{};
     int32_t need_skill_id[3]{};
     int32_t need_skill_lv[3]{};
 };
@@ -562,9 +562,9 @@ struct SkillBase {
     int32_t GetCostItemCode() const;
     int64_t GetCostItemCount(int32_t skill_lv) const;
     int32_t GetCostHP(int32_t skill_lv) const;
-    float GetCostHPPercent(int32_t skill_lv) const;
+    float_t GetCostHPPercent(int32_t skill_lv) const;
     int32_t GetCostMP(int32_t skill_lv, int32_t enhance) const;
-    float GetCostMPPercent(int32_t skill_lv) const;
+    float_t GetCostMPPercent(int32_t skill_lv) const;
     int32_t GetCostHavoc(int32_t skill_lv) const;
     int32_t GetCostEnergy(int32_t skill_lv) const;
     int32_t GetCostItem() const;
@@ -622,14 +622,14 @@ struct SkillBase {
     int32_t cost_mp{};
     int32_t cost_mp_per_skl{};
     int32_t cost_mp_per_enhance{};
-    float cost_hp_per{};
-    float cost_hp_per_skl_per{};
-    float cost_mp_per{};
-    float cost_mp_per_skl_per{};
+    float_t cost_hp_per{};
+    float_t cost_hp_per_skl_per{};
+    float_t cost_mp_per{};
+    float_t cost_mp_per_skl_per{};
     int32_t cost_havoc{};
     int32_t cost_havoc_per_skl{};
-    float cost_energy{};
-    float cost_energy_per_skl{};
+    float_t cost_energy{};
+    float_t cost_energy_per_skl{};
     int32_t cost_exp{};
     int32_t cost_exp_per_enhance{};
     int32_t cost_jp{};
@@ -663,12 +663,12 @@ struct SkillBase {
     uint8_t vf_two_hand_staff{};
     uint8_t vf_shield_only{};
     uint8_t vf_is_not_need_weapon{};
-    float delay_cast{};
-    float delay_cast_per_skl{};
-    float delay_cast_mode_per{};
-    float delay_common{};
-    float delay_cooltime{};
-    float delay_cooltime_mode{};
+    float_t delay_cast{};
+    float_t delay_cast_per_skl{};
+    float_t delay_cast_mode_per{};
+    float_t delay_common{};
+    float_t delay_cooltime{};
+    float_t delay_cooltime_mode{};
     int32_t cool_time_group_id{};
     uint8_t uf_self{};
     uint8_t uf_party{};
@@ -683,25 +683,25 @@ struct SkillBase {
     short effect_type{};
     int32_t state_id{};
     int32_t state_level_base{};
-    float state_level_per_skl{};
-    float state_level_per_enhance{};
-    float state_second{};
-    float state_second_per_level{};
-    float state_second_per_enhance{};
+    float_t state_level_per_skl{};
+    float_t state_level_per_enhance{};
+    float_t state_second{};
+    float_t state_second_per_level{};
+    float_t state_second_per_enhance{};
     uint8_t state_type{};
     int32_t probability_on_hit{};
     int32_t probability_inc_by_slv{};
     short hit_bonus{};
     short hit_bonus_per_enhance{};
     short percentage{};
-    float hate_mod{};
+    float_t hate_mod{};
     short hate_basic{};
-    float hate_per_skl{};
-    float hate_per_enhance{};
+    float_t hate_per_skl{};
+    float_t hate_per_enhance{};
     int32_t critical_bonus{};
     int32_t critical_bonus_per_skl{};
-    float var[20]{};
+    float_t var[20]{};
     short is_projectile{};
-    float projectile_speed{};
-    float projectile_acceleration{};
+    float_t projectile_speed{};
+    float_t projectile_acceleration{};
 };

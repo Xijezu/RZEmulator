@@ -31,7 +31,7 @@
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
 typedef struct {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(MonitorSession *, XPacket *)> handler;
 } PacketHandler;
@@ -52,14 +52,14 @@ PacketHandler declareHandler(eStatus status, void (MonitorSession::*handler)(con
 
 const PacketHandler _PacketHandler[] = {{declareHandler(STATUS_CONNECTED, &MonitorSession::onResultHandler)}};
 
-constexpr int PacketTableSize = (sizeof(_PacketHandler) / sizeof(PacketHandler));
+constexpr int32_t PacketTableSize = (sizeof(_PacketHandler) / sizeof(PacketHandler));
 
 ReadDataHandlerResult MonitorSession::ProcessIncoming(XPacket *pRecvPct)
 {
     ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < PacketTableSize; i++) {
         if ((uint16_t)_PacketHandler[i].cmd == _cmd) {
@@ -117,7 +117,7 @@ bool MonitorSession::Finished()
     return bRet;
 }
 
-MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server)
+MonitorSession::MonitorSession(boost::asio::ip::tcp::socket &&socket, int32_t *ppUserCount, bool *ppRequester, NGemity::Server server)
     : XSocket(std::move(socket))
     , m_nLastUpdateTime(sServerMonitor.GetTime())
     , pUserCount(ppUserCount)

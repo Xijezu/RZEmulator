@@ -57,7 +57,7 @@ namespace X2D {
             uint16_t m_unDepth{};
         };
 
-        QuadTreeMapInfo(float width, float height);
+        QuadTreeMapInfo(float_t width, float_t height);
         void Enum(Pointf c, QuadTreeMapInfo::FunctorAdaptor &f);
         bool Add(MapLocationInfo u);
         bool Collision(X2D::Pointf c);

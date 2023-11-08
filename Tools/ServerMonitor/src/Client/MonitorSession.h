@@ -30,7 +30,7 @@ struct Server;
 // Handle login commands
 class MonitorSession : public XSocket {
 public:
-    explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int *ppUserCount, bool *ppRequester, NGemity::Server server);
+    explicit MonitorSession(boost::asio::ip::tcp::socket &&socket, int32_t *ppUserCount, bool *ppRequester, NGemity::Server server);
     ~MonitorSession();
 
     // Network handlers
@@ -43,7 +43,7 @@ public:
 
 private:
     uint32_t m_nLastUpdateTime;
-    int *pUserCount{nullptr};
+    int32_t *pUserCount{nullptr};
     bool *bRequesterEnabled{nullptr};
     std::unique_ptr<RsaCipher> m_pCipher;
     NGemity::Server m_Server;

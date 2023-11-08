@@ -32,7 +32,7 @@ void SendSerializedPacket(TS_SERIALIZABLE_PACKET const &packet, SOCKET_TYPE *Soc
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
 typedef struct {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(LunaSession *, XPacket *)> handler;
 } LunaHandler;
@@ -54,14 +54,14 @@ LunaHandler declareHandler(eStatus status, void (LunaSession::*handler)(const T 
 const LunaHandler LunaPacketHandler[] = {{declareHandler(STATUS_CONNECTED, &LunaSession::onResultHandler)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onPacketServerList)},
     {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResult)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onAuthResultString)}, {declareHandler(STATUS_CONNECTED, &LunaSession::onRsaKey)}};
 
-constexpr int LunaTableSize = (sizeof(LunaPacketHandler) / sizeof(LunaHandler));
+constexpr int32_t LunaTableSize = (sizeof(LunaPacketHandler) / sizeof(LunaHandler));
 
 ReadDataHandlerResult LunaSession::ProcessIncoming(XPacket *pRecvPct)
 {
     ASSERT(pRecvPct);
 
     auto _cmd = pRecvPct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < LunaTableSize; i++) {
         if ((uint16_t)LunaPacketHandler[i].cmd == _cmd) {

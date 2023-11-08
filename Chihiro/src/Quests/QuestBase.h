@@ -26,7 +26,7 @@ constexpr int32_t MAX_RANDOM_QUEST_VALUE = 3;
 constexpr int32_t QUEST_PARAMETER_CHAOS = 99;
 constexpr int32_t FAVOR_GROUP_ID_CONTACT = 999;
 
-enum class QuestType : int {
+enum class QuestType : int32_t {
     QUEST_MISC = 100,
     QUEST_KILL_TOTAL = 101,
     QUEST_KILL_INDIVIDUAL = 102,
@@ -43,7 +43,7 @@ enum class QuestType : int {
     QUEST_RANDOM_COLLECT = 902,
 };
 
-enum class QuestProgress : int { QUEST_IS_STARTABLE = 0, QUEST_IS_IN_PROGRESS = 1, QUEST_IS_FINISHABLE = 255 };
+enum class QuestProgress : int32_t { QUEST_IS_STARTABLE = 0, QUEST_IS_IN_PROGRESS = 1, QUEST_IS_FINISHABLE = 255 };
 
 struct Reward {
     int32_t nItemCode;

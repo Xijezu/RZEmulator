@@ -173,7 +173,7 @@ bool GroupManager::onLogout(int32_t nPartyID, Player *pPlayer)
     return result;
 }
 
-void GroupManager::GetNearMember(Player *pPlayer, float distance, std::vector<Player *> &vList)
+void GroupManager::GetNearMember(Player *pPlayer, float_t distance, std::vector<Player *> &vList)
 {
     auto info = getPartyInfo(pPlayer->GetPartyID());
     if (info == nullptr)

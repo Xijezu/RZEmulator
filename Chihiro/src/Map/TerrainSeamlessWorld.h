@@ -51,7 +51,7 @@ public:
     bool Initialize(std::string szFilename, bool bMapFileCheck);
 
     int32_t GetWorldID(int32_t nMapPosX, int32_t nMapPosY);
-    float GetFOV();
+    float_t GetFOV();
     std::string GetLQWaterFileName(int32_t nMapPosX, int32_t nMapPosY);
     std::string GetMinimapImageFileName(int32_t nMapPosX, int32_t nMapPosY);
     std::string GetFieldPropFileName(int32_t nMapPosX, int32_t nMapPosY);
@@ -63,8 +63,8 @@ public:
 
     int32_t m_nTileCountPerSegment{};
     int32_t m_nSegmentCountPerMap{};
-    float m_fTileLength{};
-    float m_fFOV{};
+    float_t m_fTileLength{};
+    float_t m_fFOV{};
     KSize m_sizMapCount{};
     int32_t m_nMapLayer{};
 

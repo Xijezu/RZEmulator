@@ -654,7 +654,7 @@ void ObjectMgr::LoadSkillResource()
         base.hate_per_enhance = field[idx++].GetFloat();
         base.critical_bonus = field[idx++].GetInt32();
         base.critical_bonus_per_skl = field[idx++].GetInt32();
-        for (float &i : base.var) {
+        for (float_t &i : base.var) {
             i = field[idx++].GetFloat();
         }
         idx += 2;
@@ -1255,7 +1255,7 @@ FieldPropTemplate *ObjectMgr::GetFieldPropBase(int32_t idx)
     return nullptr;
 }
 
-void ObjectMgr::AddWayPoint(int32_t waypoint_id, float x, float y)
+void ObjectMgr::AddWayPoint(int32_t waypoint_id, float_t x, float_t y)
 {
     Position pos{};
     pos.Relocate(x, y, 0);
@@ -1303,7 +1303,7 @@ DropGroup *ObjectMgr::GetDropGroupInfo(int32_t drop_group_id)
     return nullptr;
 }
 
-void ObjectMgr::RegisterMonsterRespawnInfo(MonsterRespawnInfo info)
+void ObjectMgr::RegisterMonsterRespawnInfo(GameContent::MonsterRespawnInfo info)
 {
     if (_monsterBaseStore.count(info.monster_id))
         g_vRespawnInfo.emplace_back(info);
@@ -1319,15 +1319,15 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const in
             if (_jobBonusStore.count((uint32_t)jobs[i])) {
                 auto jlb = _jobBonusStore[jobs[i]];
 
-                float v1 = (levels[i] - 20);
+                float_t v1 = (levels[i] - 20);
                 if (levels[i] > 40)
                     v1 = 20;
 
-                float v2 = (levels[i] - 40);
+                float_t v2 = (levels[i] - 40);
                 if (levels[i] >= 50)
                     v2 = 10;
 
-                float v0 = levels[i];
+                float_t v0 = levels[i];
                 if (levels[i] >= 20)
                     v0 = 20;
 
@@ -1409,7 +1409,7 @@ int32_t ObjectMgr::GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_leve
 {
     auto pSkillBase = GetSkillBase((uint32_t)skill_id);
     std::vector<SkillTreeBase> trees = getSkillTree(nJobID);
-    float jp_ratio = -1.0f;
+    float_t jp_ratio = -1.0f;
     if (pSkillBase->id != 0 && skill_level <= 50 && !trees.empty()) {
         for (auto st : trees) {
             if (st.skill_id == skill_id && st.max_skill_lv >= skill_level) {

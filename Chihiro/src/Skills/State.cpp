@@ -104,7 +104,7 @@ int32_t State::GetEffectType() const
     return m_pTemplate != nullptr ? m_pTemplate->effect_type : 0;
 }
 
-float State::GetValue(int32_t idx) const
+float_t State::GetValue(int32_t idx) const
 {
     return m_pTemplate != nullptr ? m_pTemplate->value[idx] : 0;
 }

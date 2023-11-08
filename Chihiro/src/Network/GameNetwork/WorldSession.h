@@ -20,7 +20,7 @@
 #include "Log.h"
 #include "XSocket.h"
 
-enum STORAGE_MODE : int {
+enum STORAGE_MODE : int32_t {
     ITEM_INVENTORY_TO_STORAGE = 0x0,
     ITEM_STORAGE_TO_INVENTORY = 0x1,
     GOLD_INVENTORY_TO_STORAGE = 0x2,

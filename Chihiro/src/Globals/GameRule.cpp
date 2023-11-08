@@ -21,16 +21,16 @@
 
 int32_t GameRule::_modtable[8] = {0, 3, 3, 2, 2, 3, 2, 2};
 int32_t GameRule::_chipLevelLimit[8] = {20, 50, 80, 100, 120, 150, 180, 200};
-float GameRule::_staminaExpRate[300] = {0};
+float_t GameRule::_staminaExpRate[300] = {0};
 int32_t GameRule::nEnhanceFailType = 2;
 
-float GameRule::GetItemValue(float item_current_value, int32_t item_rank_value, int32_t creature_level, int32_t item_rank, int32_t item_level)
+float_t GameRule::GetItemValue(float_t item_current_value, int32_t item_rank_value, int32_t creature_level, int32_t item_rank, int32_t item_level)
 {
-    float ilp = GetItemLevelPenalty(creature_level, item_rank, item_level);
+    float_t ilp = GetItemLevelPenalty(creature_level, item_rank, item_level);
     //-,*,+
-    float v8 = (item_current_value - item_rank_value) * ilp;
+    float_t v8 = (item_current_value - item_rank_value) * ilp;
     return v8 + item_rank_value;
-    // float f1 = item_current_value * item_rank_value;
+    // float_t f1 = item_current_value * item_rank_value;
     // return f1 * ilp;
 }
 
@@ -41,9 +41,9 @@ float GameRule::GetItemValue(float item_current_value, int32_t item_rank_value, 
  * finally I tried to reconstruct it more or less 1:1 and this is the result
  * I fricking hate IDAs pseudocode plugin...
  */
-float GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level)
+float_t GameRule::GetItemLevelPenalty(int32_t creature_level, int32_t item_rank, int32_t item_level)
 {
-    float result = 0;
+    float_t result = 0;
     int32_t recommended = GetItemRecommendedLevel(item_rank, item_level);
     int32_t limit = GetItemLevelLimit(item_rank);
 
@@ -123,22 +123,22 @@ int32_t GameRule::GetItemRecommendedLevel(int32_t item_rank, int32_t item_level)
     return result;
 }
 
-float GameRule::GetPickableRange()
+float_t GameRule::GetPickableRange()
 {
     return 20;
 }
 
-float GameRule::GetItemDropRate()
+float_t GameRule::GetItemDropRate()
 {
     return sWorld.getRate(RATES_ITEM_DROP);
 }
 
-float GameRule::GetGoldDropRate()
+float_t GameRule::GetGoldDropRate()
 {
     return sWorld.getRate(RATES_GOLD_DROP);
 }
 
-float GameRule::GetEXPRate()
+float_t GameRule::GetEXPRate()
 {
     return sWorld.getRate(RATES_EXP);
 }
@@ -148,7 +148,7 @@ int32_t GameRule::GetChipLevelLimit(int32_t idx)
     return _chipLevelLimit[idx];
 }
 
-float GameRule::GetChaosDropRate()
+float_t GameRule::GetChaosDropRate()
 {
     return sWorld.getRate(RATES_CHAOS_DROP);
 }
@@ -169,7 +169,7 @@ int64_t GameRule::GetIntValueByRandomInt64(double fValue)
     return (int64_t)result;
 }
 
-float GameRule::GetStaminaRatio(int32_t level)
+float_t GameRule::GetStaminaRatio(int32_t level)
 {
     if (level < 1)
         level = 1;
@@ -182,7 +182,7 @@ float GameRule::GetStaminaRatio(int32_t level)
     return _staminaExpRate[level];
 }
 
-float GameRule::GetStaminaBonus()
+float_t GameRule::GetStaminaBonus()
 {
     return sWorld.getRate(RATES_STAMINA_BONUS);
 }

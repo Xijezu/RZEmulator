@@ -51,7 +51,7 @@ public:
 
     /// \brief Gets the current players AccountID, used in WorldSocket
     /// \return account id
-    int GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
+    int32_t GetAccountId() const { return m_pPlayer != nullptr ? m_pPlayer->nAccountID : 0; }
 
     /// \brief Gets the current players account name, used in WorldSocket
     /// \return account name

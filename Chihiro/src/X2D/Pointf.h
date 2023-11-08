@@ -18,15 +18,15 @@
 #include "Common.h"
 
 namespace X2D {
-    enum CcwResult : int {
+    enum CcwResult : int32_t {
         Parallelism = 0,
         ClockWise = 1,
         CounterClockWise = -1,
     };
 
     struct PointBasef {
-        float x;
-        float y;
+        float_t x;
+        float_t y;
     };
 
     class Pointf {
@@ -34,17 +34,17 @@ namespace X2D {
         Pointf() = default;
         ~Pointf() = default;
 
-        Pointf(float _x, float _y);
+        Pointf(float_t _x, float_t _y);
 
-        float GetX() { return x; }
+        float_t GetX() { return x; }
 
-        float GetY() { return y; }
+        float_t GetY() { return y; }
 
-        void Set(float _x, float _y);
-        float GetAlternativeDistance(Pointf rh);
-        float GetDistance(Pointf rh);
+        void Set(float_t _x, float_t _y);
+        float_t GetAlternativeDistance(Pointf rh);
+        float_t GetDistance(Pointf rh);
 
-        float x;
-        float y;
+        float_t x;
+        float_t y;
     };
 }

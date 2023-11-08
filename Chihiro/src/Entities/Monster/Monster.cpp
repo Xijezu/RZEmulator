@@ -165,17 +165,17 @@ void Monster::onDead(Unit *pKiller, bool decreaseEXPOnDead)
 
         auto firstContrib = vPartyContribute.front();
         int32_t nMaxPriorityLevel = (vPartyContribute.empty()) ? 0 : firstContrib.nLevel;
-        float fMaxContribute = (vPartyContribute.empty()) ? 0.0f : firstContrib.fContribute;
+        float_t fMaxContribute = (vPartyContribute.empty()) ? 0.0f : firstContrib.fContribute;
 
-        float fDropRatePenalty{1.0f};
+        float_t fDropRatePenalty{1.0f};
         int32_t nLevelDiff = nMaxPriorityLevel - GetLevel();
 
         if (nLevelDiff >= 10)
             fDropRatePenalty = std::max(1 - (nLevelDiff - 10) * 0.2f, 0.0f);
 
-        float fChaosDropRateBonus{1.0f};
-        float fItemDropRateBonus{1.0f};
-        float fGoldDropRateBonus{1.0f};
+        float_t fChaosDropRateBonus{1.0f};
+        float_t fItemDropRateBonus{1.0f};
+        float_t fGoldDropRateBonus{1.0f};
 
         procDropChaos(pKiller, vPartyContribute, fDropRatePenalty);
 
@@ -207,7 +207,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     int32_t nTamerPartyID{0};
     int32_t nFirstAttackPartyID{0};
     int32_t nLastAttackPartyID{0};
-    float fMaxDamageAdd{0.1f};
+    float_t fMaxDamageAdd{0.1f};
 
     if (m_nFirstAttackTime + GameRule::MAX_FIRST_ATTACK_BONUS_TIME < t) {
         fMaxDamageAdd = 0.4f;
@@ -276,7 +276,7 @@ void Monster::calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPar
     std::sort(vPartyContribute.begin(), vPartyContribute.end(), [](const VirtualParty &a, const VirtualParty &b) -> bool { return a.nDamage > b.nDamage; });
 
     for (auto itVector = vPartyContribute.begin(); itVector != vPartyContribute.end(); ++itVector) {
-        float fContribute{0.0f};
+        float_t fContribute{0.0f};
         if (nTamerPartyID != 0 && nTamerPartyID == (*itVector).nPartyID)
             (*itVector).bTamer = true;
 
@@ -349,7 +349,7 @@ void Monster::procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute
 
     for (auto &vp : vPartyContribute) {
         int32_t nSharedEXP = nEXP * vp.fContribute;
-        float fSharedJP = nJP * vp.fContribute;
+        float_t fSharedJP = nJP * vp.fContribute;
         if (nSharedEXP < 1)
             nSharedEXP = 1;
 
@@ -472,7 +472,7 @@ void Monster::SetStatus(MONSTER_STATUS status)
     }
 }
 
-void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
+void Monster::procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty)
 {
     int64_t item_count;
     for (int32_t i = 0; i < 10; ++i) {
@@ -580,7 +580,7 @@ void Monster::ForceKill(Player *byPlayer)
     Messages::SendHPMPMessage(byPlayer, this, 0, 0, true);
 }
 
-void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
+void Monster::procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty)
 {
     int64_t gold;
     int32_t tax;
@@ -801,7 +801,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
         if (m_nLastTrackTime + 50 < t) {
             m_nLastTrackTime = t;
 
-            float fMod = irand(0, 9);
+            float_t fMod = irand(0, 9);
             fMod /= 100.0f;
             fMod += 1.0f;
 
@@ -850,7 +850,7 @@ void Monster::AI_processAttack(Unit *pEnemy, uint32_t t)
             bool bDoubleAttack{false};
             Attack(pEnemy, t, GetAttackInterval(), Damages, bDoubleAttack);
 
-            float fAttackMotionRate{0.5f}; // We don't have this in Epic 4 yet, so lets default
+            float_t fAttackMotionRate{0.5f}; // We don't have this in Epic 4 yet, so lets default
             SetNextMovableTime(t + GetAttackInterval() * fAttackMotionRate);
             broadcastAttackMessage(pEnemy, Damages, GetAttackInterval() * 10, (GetNextAttackableTime() - t) * 10, bDoubleAttack, false);
         }
@@ -895,12 +895,12 @@ bool Monster::IsAutoTrap() const
     return m_Base->fight_type == MonsterBase::FIGHT_TYPE_AUTO_TRAP;
 }
 
-float Monster::GetChaseRange() const
+float_t Monster::GetChaseRange() const
 {
     return (12 * m_Base->chase_range);
 }
 
-float Monster::GetFirstAttackRange()
+float_t Monster::GetFirstAttackRange()
 {
     return m_Base->visible_range;
 }
@@ -946,7 +946,7 @@ int32_t Monster::GetTameCode() const
     return m_Base->taming_id;
 }
 
-float Monster::GetTamePercentage() const
+float_t Monster::GetTamePercentage() const
 {
     return m_Base->taming_percentage;
 }
@@ -1243,11 +1243,11 @@ void Monster::processFirstAttack(uint32_t t)
     }
 }
 
-void Monster::FindAttackablePosition(Position &myPosition, Position &enemyPosition, float distance, float gap)
+void Monster::FindAttackablePosition(Position &myPosition, Position &enemyPosition, float_t distance, float_t gap)
 {
     auto duplicateEnemyPosition = enemyPosition.GetPosition();
-    float walk_length = distance - gap;
-    float v{0};
+    float_t walk_length = distance - gap;
+    float_t v{0};
     if (walk_length >= 0.0f) {
         v = (walk_length / distance) + 0.1f;
         enemyPosition.m_positionX = ((enemyPosition.GetPositionX() - myPosition.GetPositionX()) * v) + myPosition.GetPositionX();
@@ -1281,13 +1281,13 @@ Position Monster::getNonDuplicateAttackPos(Unit *pEnemy)
     auto result = pEnemy->GetCurrentPosition(ct);
 
     auto range = GetRealAttackRange() + (GetUnitSize() * 0.5f) + (pEnemy->GetUnitSize() * 0.5f);
-    float fMod = irand(-1, 3);
+    float_t fMod = irand(-1, 3);
     if (fMod == 0.0f)
         fMod = 1.0f;
 
-    float angle = fMod * 0.6283f;
+    float_t angle = fMod * 0.6283f;
     auto myPosition = GetCurrentPosition(ct);
-    float distance = myPosition.GetExactDist2d(&result);
+    float_t distance = myPosition.GetExactDist2d(&result);
     fMod = 0.0f;
     if (distance != 0.0f)
         fMod = acos((myPosition.GetPositionX() - result.GetPositionX()) / distance);
@@ -1356,18 +1356,18 @@ void Monster::procQuest(Position pos, Unit *pKiller, takePriority pPriority, std
     }
 }
 
-void Monster::procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty)
+void Monster::procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty)
 {
-    float fChance = m_Base->chaos_drop_percentage * GameRule::GetChaosDropRate() * fDropRatePenalty;
+    float_t fChance = m_Base->chaos_drop_percentage * GameRule::GetChaosDropRate() * fDropRatePenalty;
     auto rnd = (uint32_t)rand32();
-    float chaos = rnd % 100;
+    float_t chaos = rnd % 100;
 
     if (chaos >= fChance)
         return;
 
     chaos = irand(m_Base->chaos_min[0], m_Base->chaos_max[0]);
     for (auto &vp : vPartyContribute) {
-        float fSharedChaos = vp.fContribute * chaos;
+        float_t fSharedChaos = vp.fContribute * chaos;
         if (vp.hPlayer == 0) {
             // sWorld.addChaos(this, vp.nPartyID, fSharedChaos);
         }

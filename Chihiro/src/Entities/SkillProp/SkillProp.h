@@ -24,7 +24,7 @@ struct TS_SC_ENTER;
 
 class SkillProp : public WorldObject {
 public:
-    static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float fHateRatio);
+    static SkillProp *Create(uint32_t caster, Skill *pSkill, int32_t nMagicPoint, float_t fHateRatio);
     static void EnterPacket(TS_SC_ENTER &pEnterPct, SkillProp *pSkillProp, Player *pPlayer);
     SkillProp() = delete;
     ~SkillProp() override = default;
@@ -56,7 +56,7 @@ protected:
     void FIRE_TRAP_MULTIPLE_DAMAGE(Unit *pCaster);
 
 private:
-    explicit SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float fHateRatio);
+    explicit SkillProp(uint32_t caster, Skill pSkill, int32_t nMagicPoint, float_t fHateRatio);
 
     struct _SKILL_PROP_INFO {
         uint32_t m_nStartTime;
@@ -72,5 +72,5 @@ private:
     bool m_bProcessEnded;
     bool m_bIsRemovePended;
     int32_t m_nOwnerMagicPoint;
-    float m_fHateRatio;
+    float_t m_fHateRatio;
 };

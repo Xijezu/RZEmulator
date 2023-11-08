@@ -124,11 +124,11 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor {
     std::vector<uint32_t> &pvResult;
     uint32_t t;
     Position pos;
-    float left;
-    float right;
-    float top;
-    float bottom;
-    float range;
+    float_t left;
+    float_t right;
+    float_t top;
+    float_t bottom;
+    float_t range;
     bool bIncludeClient;
     bool bIncludeNPC;
 
@@ -143,6 +143,6 @@ struct EnumMovableObjectRegionFunctor : public RegionFunctor {
         EnumMovableObjectRegionFunctor *pParent;
     };
 
-    EnumMovableObjectRegionFunctor(std::vector<uint32_t> &_pvResult, Position _pos, float _range, bool _bIncludeClient, bool _bIncludeNPC);
+    EnumMovableObjectRegionFunctor(std::vector<uint32_t> &_pvResult, Position _pos, float_t _range, bool _bIncludeClient, bool _bIncludeNPC);
     void Run(Region *region) override;
 };

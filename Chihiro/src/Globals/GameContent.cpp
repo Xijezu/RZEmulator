@@ -27,7 +27,7 @@
 #include "Skill.h"
 #include "World.h"
 
-bool GameContent::IsBlocked(float x, float y)
+bool GameContent::IsBlocked(float_t x, float_t y)
 {
     if (x < 0 || x > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || y < 0 || y > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
         return true;
@@ -36,7 +36,7 @@ bool GameContent::IsBlocked(float x, float y)
     return sObjectMgr.g_qtBlockInfo.Collision({x, y});
 }
 
-bool GameContent::CollisionToLine(float x1, float y1, float x2, float y2)
+bool GameContent::CollisionToLine(float_t x1, float_t y1, float_t x2, float_t y2)
 {
     return sObjectMgr.g_qtBlockInfo.m_MasterNode.LooseCollision({{x1, y1}, {x2, y2}});
 }
@@ -188,7 +188,7 @@ bool GameContent::SelectItemIDFromDropGroup(int32_t nDropGroupID, int32_t &nItem
 int64_t GameContent::GetItemSellPrice(int64_t price, int32_t rank, int32_t lv, bool same_price_for_buying)
 {
     int64_t k;
-    float f[8]{0};
+    float_t f[8]{0};
     int32_t i;
 
     k = price;
@@ -226,7 +226,7 @@ int64_t GameContent::GetItemSellPrice(int64_t price, int32_t rank, int32_t lv, b
     return 0;
 }
 
-Monster *GameContent::RespawnMonster(float x, float y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
+Monster *GameContent::RespawnMonster(float_t x, float_t y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
 {
     auto mob = sMemoryPool.AllocMonster((uint32_t)id);
     if (mob != nullptr) {
@@ -313,7 +313,7 @@ uint16_t GameContent::isLearnableSkill(Unit *pUnit, int32_t skill_id, int32_t sk
     return TS_RESULT_ACCESS_DENIED;
 }
 
-int32_t GameContent::GetLocationID(const float x, const float y)
+int32_t GameContent::GetLocationID(const float_t x, const float_t y)
 {
     int32_t loc_id = 0;
     int32_t priority = 0x7fffffff;

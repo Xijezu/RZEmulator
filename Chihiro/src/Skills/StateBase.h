@@ -258,7 +258,7 @@ enum StateBaseEffect {
     BEF_SERIOUS_BLOODY = 54,
 };
 
-enum StateEffect : int {
+enum StateEffect : int32_t {
     SEF_MISC = 0,
     SEF_PARAMETER_INC = 1,
     SEF_PARAMETER_AMP = 2,
@@ -345,10 +345,10 @@ struct StateTemplate {
     int32_t base_effect_id;
     int32_t fire_interval;
     int32_t elemental_type;
-    float amplify_base;
-    float amplify_per_skl;
+    float_t amplify_base;
+    float_t amplify_per_skl;
     int32_t add_damage_base;
     int32_t add_damage_per_skl;
     int32_t effect_type;
-    float value[MAX_STATE_VALUE]{0};
+    float_t value[MAX_STATE_VALUE]{0};
 };

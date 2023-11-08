@@ -24,7 +24,7 @@ namespace X2D {
     public:
         Rectf() = default;
         ~Rectf() = default;
-        virtual bool IsInclude(float x, float y);
+        virtual bool IsInclude(float_t x, float_t y);
         virtual bool IsInclude(Pointf p);
         virtual bool Set(Pointf begin, Pointf end);
 
@@ -37,7 +37,7 @@ namespace X2D {
         ~RectangleF() = default;
         RectangleF(Pointf p1, Pointf p2);
         explicit RectangleF(std::vector<Pointf> points);
-        virtual bool IsInclude(float x, float y);
+        virtual bool IsInclude(float_t x, float_t y);
         virtual bool IsInclude(Pointf p);
         bool IsCollision(Linef line);
 

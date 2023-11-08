@@ -50,7 +50,7 @@ public:
 
     /// \brief Gets the GameIDX - used in WorldSocket
     /// \return GameIDX
-    int GetAccountId() const { return (m_pGame != nullptr ? m_pGame->server_idx : 0); }
+    int32_t GetAccountId() const { return (m_pGame != nullptr ? m_pGame->server_idx : 0); }
 
     /// \brief Gets the server name - used in WorldSocket
     /// \return server name

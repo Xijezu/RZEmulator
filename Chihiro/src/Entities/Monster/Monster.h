@@ -50,7 +50,7 @@ struct VirtualParty {
     int32_t nPartyID;
     uint32_t hPlayer;
     int32_t nDamage;
-    float fContribute;
+    float_t fContribute;
     bool bTamer;
     int32_t nLevel;
 };
@@ -89,8 +89,8 @@ public:
     void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
     MonsterBase *GetBase() const { return m_Base; }
     void applyJobLevelBonus() override{};
-    float GetSize() const override { return m_Base->size; }
-    float GetScale() const override { return m_Base->scale; }
+    float_t GetSize() const override { return m_Base->size; }
+    float_t GetScale() const override { return m_Base->scale; }
 
     const std::string &GetNameAsString() override;
 
@@ -115,18 +115,18 @@ public:
 
     bool IsMonster() const override { return true; }
 
-    float GetChaseRange() const;
-    float GetFirstAttackRange();
+    float_t GetChaseRange() const;
+    float_t GetFirstAttackRange();
     bool IsFirstAttacker() const;
     bool IsGroupFirstAttacker() const;
     uint32_t GetTamer() const;
     bool IsCastRevenger() const;
     bool IsBattleRevenger() const;
     int32_t GetMonsterGroup() const;
-    float GetTameExpAdjust() const { return m_Base != nullptr ? m_Base->taming_exp_mod : 1.0f; }
+    float_t GetTameExpAdjust() const { return m_Base != nullptr ? m_Base->taming_exp_mod : 1.0f; }
     int32_t GetTameItemCode() const;
     int32_t GetTameCode() const;
-    float GetTamePercentage() const;
+    float_t GetTamePercentage() const;
     int32_t GetMonsterID() const;
     CreatureStat *GetBaseStat() const override;
     int32_t GetRace() const override;
@@ -150,7 +150,7 @@ protected:
     void processMove(uint32_t t);
     void ForceKill(Player *byPlayer);
     void processFirstAttack(uint32_t t);
-    void FindAttackablePosition(Position &myPosition, Position &enemyPosition, float distance, float gap);
+    void FindAttackablePosition(Position &myPosition, Position &enemyPosition, float_t distance, float_t gap);
     void getMovePosition(Position &newPos);
     Position getNonDuplicateAttackPos(Unit *pEnemy);
 
@@ -169,10 +169,10 @@ private:
     DamageTag *getDamageTag(uint32_t handle, uint32_t t);
     void calcPartyContribute(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute);
     void procEXP(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute);
-    void procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
+    void procDropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty);
     void procQuest(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute);
-    void procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
-    void procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute, float fDropRatePenalty);
+    void procDropGold(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty);
+    void procDropChaos(Unit *pKiller, std::vector<VirtualParty> &vPartyContribute, float_t fDropRatePenalty);
     void dropItem(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int32_t code, long count, int32_t level, bool bIsEventItem, int32_t nFlagIndex);
     void dropItemGroup(Position pos, Unit *pKiller, takePriority pPriority, std::vector<VirtualParty> &vPartyContribute, int32_t nDropGroupID, long count, int32_t level, int32_t nFlagIndex);
 
@@ -183,7 +183,7 @@ private:
     Position m_pRespawn{};
     MonsterBase *m_Base{nullptr};
 
-    float m_nLastEnemyDistance;
+    float_t m_nLastEnemyDistance;
     uint32_t m_nLastTrackTime;
 
     bool m_bComeBackHome;

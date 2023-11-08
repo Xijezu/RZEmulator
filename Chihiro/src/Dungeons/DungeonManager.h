@@ -33,17 +33,17 @@ struct DungeonTemplate {
     int32_t end_time;
     int32_t raid_start_time;
     int32_t raid_end_time;
-    float core_offset_x;
-    float core_offset_y;
-    float core_offset_z;
-    float core_around_x;
-    float core_around_y;
-    float core_around_z;
-    float core_scale_x;
-    float core_scale_y;
-    float core_scale_z;
+    float_t core_offset_x;
+    float_t core_offset_y;
+    float_t core_offset_z;
+    float_t core_around_x;
+    float_t core_around_y;
+    float_t core_around_z;
+    float_t core_scale_x;
+    float_t core_scale_y;
+    float_t core_scale_z;
     bool core_is_lock_height;
-    float core_lock_height;
+    float_t core_lock_height;
     int32_t boss_id[2];
     X2D::Boxf box;
     int32_t connector_id;
@@ -82,7 +82,7 @@ public:
     /// \param x X coord
     /// \param y Y coord
     /// \return DungeonID on success, 0 on failure
-    int32_t GetDungeonID(float x, float y);
+    int32_t GetDungeonID(float_t x, float_t y);
     /// \brief Registers our template to the list
     void RegisterDungeonTemplate(DungeonTemplate);
     /*Position GetSiegeStartPosition(int32_t nDungeonID);

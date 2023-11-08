@@ -23,10 +23,10 @@
 
 struct LocationInfoHeader {
     int32_t nPriority;
-    float x;
-    float y;
-    float z;
-    float fRadius;
+    float_t x;
+    float_t y;
+    float_t z;
+    float_t fRadius;
 };
 
 struct NfsHeader {
@@ -38,10 +38,10 @@ struct NfsHeader {
 };
 
 struct ScriptRegion {
-    float left;
-    float top;
-    float right;
-    float bottom;
+    float_t left;
+    float_t top;
+    float_t right;
+    float_t bottom;
     std::string szName;
 };
 
@@ -80,13 +80,13 @@ public:
     int32_t nCurrentRegionIdx{0};
 
 private:
-    void SetDefaultLocation(int32_t x, int32_t y, float fMapLength, int32_t LocationId);
+    void SetDefaultLocation(int32_t x, int32_t y, float_t fMapLength, int32_t LocationId);
     void RegisterMapLocationInfo(MapLocationInfo location_info);
-    void LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-    void LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float fMapLength);
-    void LoadAttributeFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-    void LoadFieldPropFile(const std::string &szFileName, int32_t x, int32_t y, float fAttrLen, float fMapLength);
-    void LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float fMapLength);
+    void LoadLocationFile(const std::string &szFilename, int32_t x, int32_t y, float_t fAttrLen, float_t fMapLength);
+    void LoadScriptFile(const std::string &szFilename, int32_t x, int32_t y, float_t fMapLength);
+    void LoadAttributeFile(const std::string &szFileName, int32_t x, int32_t y, float_t fAttrLen, float_t fMapLength);
+    void LoadFieldPropFile(const std::string &szFileName, int32_t x, int32_t y, float_t fAttrLen, float_t fMapLength);
+    void LoadRegionInfo(ByteBuffer &buffer, int32_t x, int32_t y, float_t fMapLength);
     void LoadRegionScriptInfo(ByteBuffer &buffer);
 
     TerrainSeamlessWorldInfo seamlessWorldInfo{};
@@ -95,8 +95,8 @@ private:
     const int32_t g_nMapWidth = 700000;
     const int32_t g_nMapHeight = 1000000;
 
-    float fTileSize{0};
-    float fMapLength{0};
+    float_t fTileSize{0};
+    float_t fMapLength{0};
 
 protected:
     Maploader() = default;

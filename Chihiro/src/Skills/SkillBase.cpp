@@ -256,7 +256,7 @@ int32_t SkillBase::GetCostHP(int32_t skill_lv) const
     return cost_hp + cost_hp_per_skl * (skill_lv);
 }
 
-float SkillBase::GetCostHPPercent(int32_t skill_lv) const
+float_t SkillBase::GetCostHPPercent(int32_t skill_lv) const
 {
     return cost_hp_per + cost_hp_per_skl_per * skill_lv;
 }
@@ -266,7 +266,7 @@ int32_t SkillBase::GetCostMP(int32_t skill_lv, int32_t enhance) const
     return cost_mp + cost_mp_per_skl * (skill_lv) + cost_mp_per_enhance * (enhance);
 }
 
-float SkillBase::GetCostMPPercent(int32_t skill_lv) const
+float_t SkillBase::GetCostMPPercent(int32_t skill_lv) const
 {
     return cost_mp_per + cost_mp_per_skl_per * skill_lv;
 }

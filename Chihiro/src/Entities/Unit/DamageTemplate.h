@@ -32,7 +32,7 @@ enum DamageFlag {
 };
 
 struct HateModifier {
-    HateModifier(int32_t nHateModType, int32_t nHarmfulType, float _fAmpValue, int32_t _nIncValue)
+    HateModifier(int32_t nHateModType, int32_t nHarmfulType, float_t _fAmpValue, int32_t _nIncValue)
         : fAmpValue(_fAmpValue)
         , nIncValue(_nIncValue)
     {
@@ -84,7 +84,7 @@ struct HateModifier {
     bool bIsApplyToHarmful;
     bool bIsApplyToHelpful;
 
-    float fAmpValue;
+    float_t fAmpValue;
     int32_t nIncValue;
 };
 
@@ -138,7 +138,7 @@ struct AttackInfo : public DamageInfo {
 };
 
 struct AdditionalDamageInfo {
-    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, uint16_t _nDamage, float _fDamage)
+    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, uint16_t _nDamage, float_t _fDamage)
     {
         ratio = _ratio;
         require_type = _require_type;
@@ -147,7 +147,7 @@ struct AdditionalDamageInfo {
         fDamage = _fDamage;
     }
 
-    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, float _fDamage)
+    AdditionalDamageInfo(uint8_t _ratio, ElementalType _require_type, ElementalType _type, float_t _fDamage)
     {
         ratio = _ratio;
         require_type = _require_type;
@@ -160,7 +160,7 @@ struct AdditionalDamageInfo {
     ElementalType require_type;
     ElementalType type;
     uint16_t nDamage;
-    float fDamage;
+    float_t fDamage;
 };
 
 struct AddHPMPOnCriticalInfo {
@@ -177,8 +177,8 @@ struct AddHPMPOnCriticalInfo {
 };
 
 struct DamageReflectInfo {
-    DamageReflectInfo(uint8_t _fire_ratio, float _range, ElementalType _type, unsigned short _nReflectDamage, float _fPhysicalReflectRatio, float _fPhysicalSkillReflectRatio,
-        float _fMagicalReflectRatio, bool _bIgnoreDefence)
+    DamageReflectInfo(uint8_t _fire_ratio, float_t _range, ElementalType _type, unsigned short _nReflectDamage, float_t _fPhysicalReflectRatio, float_t _fPhysicalSkillReflectRatio,
+        float_t _fMagicalReflectRatio, bool _bIgnoreDefence)
         : fire_ratio(_fire_ratio)
         , range(_range)
         , type(_type)
@@ -191,12 +191,12 @@ struct DamageReflectInfo {
     }
 
     unsigned char fire_ratio;
-    float range;
+    float_t range;
     ElementalType type;
     unsigned short nReflectDamage;
-    float fPhysicalReflectRatio;
-    float fPhysicalSkillReflectRatio;
-    float fMagicalReflectRatio;
+    float_t fPhysicalReflectRatio;
+    float_t fPhysicalSkillReflectRatio;
+    float_t fMagicalReflectRatio;
     bool bIgnoreDefence;
 };
 
@@ -253,7 +253,7 @@ struct _HEAL_ON_ATTACK_TAG {
 };
 
 struct _DAMAGE_ABSORB_TAG {
-    _DAMAGE_ABSORB_TAG(int32_t _ratio, float _hp_absorb_ratio, float _mp_absorb_ratio)
+    _DAMAGE_ABSORB_TAG(int32_t _ratio, float_t _hp_absorb_ratio, float_t _mp_absorb_ratio)
         : ratio(_ratio)
         , hp_absorb_ratio(_hp_absorb_ratio)
         , mp_absorb_ratio(_mp_absorb_ratio)
@@ -261,8 +261,8 @@ struct _DAMAGE_ABSORB_TAG {
     }
 
     int32_t ratio;
-    float hp_absorb_ratio;
-    float mp_absorb_ratio;
+    float_t hp_absorb_ratio;
+    float_t mp_absorb_ratio;
 };
 
 struct _STEAL_ON_ATTACK_TAG {

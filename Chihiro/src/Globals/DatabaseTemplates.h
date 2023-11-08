@@ -23,7 +23,7 @@ constexpr int32_t MAX_DROP_GROUP = 10;
 struct DropGroup {
     int32_t uid;
     int32_t drop_item_id[MAX_DROP_GROUP];
-    float drop_percentage[MAX_DROP_GROUP];
+    float_t drop_percentage[MAX_DROP_GROUP];
 };
 
 struct LevelResourceTemplate {
@@ -34,13 +34,13 @@ struct LevelResourceTemplate {
 
 struct JobLevelBonusTemplate {
     int32_t job_id;
-    float strength[4];
-    float vital[4];
-    float dexterity[4];
-    float agility[4];
-    float intelligence[4];
-    float mentality[4];
-    float luck[4];
+    float_t strength[4];
+    float_t vital[4];
+    float_t dexterity[4];
+    float_t agility[4];
+    float_t intelligence[4];
+    float_t mentality[4];
+    float_t luck[4];
 };
 
 struct JobResourceTemplate {
@@ -57,6 +57,6 @@ struct MarketInfo {
     int32_t sort_id;
     std::string name;
     uint32_t code;
-    float price_ratio;
-    float huntaholic_ratio;
+    float_t price_ratio;
+    float_t huntaholic_ratio;
 };

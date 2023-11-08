@@ -21,7 +21,7 @@
 #include "Common.h"
 #include "SharedMutex.h"
 
-enum PARTY_TYPE : int {
+enum PARTY_TYPE : int32_t {
     TYPE_UNKNOWN = 0xFF,
     TYPE_NORMAL_PARTY = 0,
     TYPE_RAID_ATTACKTEAM = 1,
@@ -31,7 +31,7 @@ enum PARTY_TYPE : int {
     TYPE_BATTLE_ARENA_EXERCISE_TEAM = 5*/
 };
 
-enum ITEM_SHARE_MODE : int { ITEM_SHARE_MONOPOLY = 0, ITEM_SHARE_RANDOM = 1, ITEM_SHARE_LINEAR = 2 };
+enum ITEM_SHARE_MODE : int32_t { ITEM_SHARE_MONOPOLY = 0, ITEM_SHARE_RANDOM = 1, ITEM_SHARE_LINEAR = 2 };
 
 class Player;
 struct PartyMemberTag {
@@ -86,7 +86,7 @@ public:
     std::string GetPartyName(int32_t nPartyID);
     PARTY_TYPE GetPartyType(int32_t nPartyID);
     std::string GetLeaderName(int32_t nPartyID);
-    void GetNearMember(Player *pPlayer, float distance, std::vector<Player *> &vList);
+    void GetNearMember(Player *pPlayer, float_t distance, std::vector<Player *> &vList);
 
     ///- booleans
     bool IsLeader(int32_t nPartyID, const std::string &szPlayerName);

@@ -85,9 +85,9 @@ void World::InitWorld()
     NG_LOG_INFO("server.worldserver", "Initialized scripting in %u ms", GetMSTimeDiffToNow(oldTime));
 
     for (auto &ri : sObjectMgr.g_vRespawnInfo) {
-        MonsterRespawnInfo nri(ri);
-        float cx = (nri.right - nri.left) * 0.5f + nri.left;
-        float cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
+        GameContent::MonsterRespawnInfo nri{ri};
+        float_t cx = (nri.right - nri.left) * 0.5f + nri.left;
+        float_t cy = (nri.top - nri.bottom) * 0.5f + nri.bottom;
         auto ro = new RespawnObject{nri};
         m_vRespawnList.emplace_back(ro);
     }
@@ -130,7 +130,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_MAX_LEVEL] = (uint32_t)sConfigMgr->GetIntDefault("Game.MaxLevel", 150);
     m_int_configs[CONFIG_SERVER_INDEX] = (uint32_t)sConfigMgr->GetIntDefault("Game.ServerIndex", 1);
 
-    // Float Configs
+    // float_t Configs
     setFloatConfig(CONFIG_MAP_LENGTH, sConfigMgr->GetFloatDefault("Game.MapLength", 16128.0f));
 
     // Rates
@@ -487,15 +487,15 @@ void World::KickAll()
     }
 }
 
-void World::addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp)
+void World::addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float_t jp)
 {
-    float fJP = 0;
+    float_t fJP = 0;
     if (pPlayer->GetHealth() != 0) {
-        float fJP = jp;
+        float_t fJP = jp;
         // TODO: Remove immorality points
         if (pPlayer->GetInt32Value(PLAYER_FIELD_IP) > 0) {
             if (pCorpse->GetLevel() >= pPlayer->GetLevel()) {
-                float fIPDec = -1.0f;
+                float_t fIPDec = -1.0f;
             }
         }
     }
@@ -577,10 +577,10 @@ uint32_t World::procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess)
     return item_handle;
 }
 
-bool World::checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float fDropRatePenalty, float fPCBangDropRateBonus)
+bool World::checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float_t fDropRatePenalty, float_t fPCBangDropRateBonus)
 {
-    float fCreatureCardMod = 1.0f;
-    float fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
+    float_t fCreatureCardMod = 1.0f;
+    float_t fMod = pKiller->GetItemChance() * 0.01f + 1.0f;
     if (code > 0) {
         if (sObjectMgr.GetItemBase(code)->eGroup == ItemGroup::GROUP_SUMMONCARD)
             fCreatureCardMod = getRate(RATES_CREATURE_DROP); /* Usually 1.0f on retail, but why not use it when it's available anyway?*/
@@ -652,7 +652,7 @@ bool World::ProcTame(Monster *pMonster)
      * lPenalty = 0.05f * (float)((20 - pMonster->GetLevel()) + player->GetLevel());
      * lPenalty is multiplied with the TamePercentage here
      */
-    float fTameProbability = pMonster->GetTamePercentage();
+    float_t fTameProbability = pMonster->GetTamePercentage();
     auto pSkill = player->GetSkill(SKILL_CREATURE_TAMING);
     if (pSkill == nullptr) {
         // really, you shouldn't get here. If you do, you fucked up somewhere.
@@ -725,7 +725,7 @@ void World::AddSession_(WorldSession *s)
     m_sessions[s->GetAccountId()] = s;
 }
 
-void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
+void World::addChaos(Unit *pCorpse, Player *pPlayer, float_t chaos)
 {
     if (pPlayer == nullptr || pCorpse == nullptr || pPlayer->GetChaos() >= pPlayer->GetMaxChaos())
         return;
@@ -751,14 +751,14 @@ void World::addChaos(Unit *pCorpse, Player *pPlayer, float chaos)
     }
 }
 
-void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp)
+void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float_t jp)
 {
     int32_t nMinLevel = 255;
     int32_t nMaxLevel = 0;
     int32_t nTotalLevel = 0;
     int32_t nCount = 0;
     int32_t nTotalCount = 0;
-    float fLevelPenalty = 0;
+    float_t fLevelPenalty = 0;
     Player *pOneManPlayer{nullptr};
     sGroupManager.DoEachMemberTag(nPartyID, [&pCorpse, &nMinLevel, &nMaxLevel, &nTotalLevel, &nCount, &nTotalCount, &pOneManPlayer](PartyMemberTag &tag) {
         if (tag.bIsOnline && tag.pPlayer != nullptr) {
@@ -795,15 +795,15 @@ void World::addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp)
             exp = 0;
             jp = 0;
         }
-        float lp = fLevelPenalty * 0.01f + 1.0f;
+        float_t lp = fLevelPenalty * 0.01f + 1.0f;
         auto nSharedEXP = (int32_t)(exp * lp);
         auto nSharedJP = (int32_t)(jp * lp);
         sGroupManager.DoEachMemberTag(nPartyID, [this, &nTotalLevel, &nSharedEXP, &nSharedJP, &nMaxLevel, &pCorpse](PartyMemberTag &tag) {
             if (tag.bIsOnline && tag.pPlayer != nullptr) {
-                float ratio = (float)tag.pPlayer->GetLevel() / nTotalLevel;
-                float fEXP = nSharedEXP * ratio;
-                float fJP = nSharedJP * ratio;
-                float penalty = 1.0f - 0.1f * ((float)(nMaxLevel - tag.pPlayer->GetLevel()) * 0.1f);
+                float_t ratio = (float)tag.pPlayer->GetLevel() / nTotalLevel;
+                float_t fEXP = nSharedEXP * ratio;
+                float_t fJP = nSharedJP * ratio;
+                float_t penalty = 1.0f - 0.1f * ((float)(nMaxLevel - tag.pPlayer->GetLevel()) * 0.1f);
                 penalty = std::max(0.0f, penalty >= 1.0f ? 1.0f : penalty);
                 fEXP = (penalty * fEXP) * 1.0f; // @todo: partyexprate
                 fJP = (penalty * fJP) * 1.0f;
@@ -835,13 +835,13 @@ void World::procPartyShare(Player *pClient, Item *pItem)
     }
 }
 
-void World::EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint32_t> &pvResult, bool bIncludeClient, bool bIncludeNPC)
+void World::EnumMovableObject(Position pos, uint8_t layer, float_t range, std::vector<uint32_t> &pvResult, bool bIncludeClient, bool bIncludeNPC)
 {
     EnumMovableObjectRegionFunctor fn(pvResult, pos, range, bIncludeClient, bIncludeNPC);
     sRegion.DoEachVisibleRegion((uint32_t)(pos.GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), (uint32_t)(pos.GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE)), layer, fn);
 }
 
-void World::MoveObject(Unit *pObject, Position &newPos, float face)
+void World::MoveObject(Unit *pObject, Position &newPos, float_t face)
 {
     uint32_t tm = GetArTime();
 

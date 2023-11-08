@@ -59,7 +59,7 @@ void AuthClientSession::OnClose()
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
 typedef struct AuthHandler {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(AuthClientSession *, XPacket *)> handler;
 } AuthHandler;
@@ -87,7 +87,7 @@ const AuthHandler packetHandler[] = {
     declareHandler(STATUS_AUTHED, &AuthClientSession::HandleSelectServer),
 };
 
-constexpr int tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
+constexpr int32_t tableSize = sizeof(packetHandler) / sizeof(AuthHandler);
 
 /// Handler for incoming packets
 ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
@@ -96,7 +96,7 @@ ReadDataHandlerResult AuthClientSession::ProcessIncoming(XPacket *pRecvPct)
 
     auto _cmd = pRecvPct->GetPacketID();
 
-    int i = 0;
+    int32_t i = 0;
     for (i = 0; i < tableSize; i++) {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (_isAuthed && packetHandler[i].status == STATUS_AUTHED))) {
             packetHandler[i].handler(this, pRecvPct);

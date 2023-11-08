@@ -17,7 +17,7 @@
 
 #include "RegionTester.h"
 
-void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float_t RegionProperty)
 {
     dx = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
     dy = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
@@ -26,10 +26,10 @@ void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float
     denominator = sqrt(dx * dx + dy * dy);
     thickness = RegionProperty * 12.0f / 2;
 
-    float _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
-    float _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+    float_t _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    float_t _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
 
-    float m = std::sqrt(_V1x * _V1x + _V1y * _V1y);
+    float_t m = std::sqrt(_V1x * _V1x + _V1y * _V1y);
     V1x = _V1x / m;
     V1y = _V1y / m;
 
@@ -39,14 +39,14 @@ void DirectionRegionTester::Init(Position OriginalPos, Position TargetPos, float
 
 bool DirectionRegionTester::IsInRegion(Position pos)
 {
-    float dist = std::abs(-dy * pos.GetPositionX() + dx * pos.GetPositionY() + c) / denominator;
+    float_t dist = std::abs(-dy * pos.GetPositionX() + dx * pos.GetPositionY() + c) / denominator;
     if (thickness > dist) {
-        float _V2x = pos.GetPositionX() - ori_x;
-        float _V2y = pos.GetPositionY() - ori_y;
+        float_t _V2x = pos.GetPositionX() - ori_x;
+        float_t _V2y = pos.GetPositionY() - ori_y;
 
-        float V2x, V2y;
+        float_t V2x, V2y;
 
-        float m = std::sqrt(_V2x * _V2x + _V2y * _V2y);
+        float_t m = std::sqrt(_V2x * _V2x + _V2y * _V2y);
         V2x = _V2x / m;
         V2y = _V2y / m;
 
@@ -55,7 +55,7 @@ bool DirectionRegionTester::IsInRegion(Position pos)
     return false;
 }
 
-void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+void CrossRegionTester::Init(Position OriginalPos, Position TargetPos, float_t RegionProperty)
 {
     x1 = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
     y1 = OriginalPos.GetPositionX() - TargetPos.GetPositionX();
@@ -75,12 +75,12 @@ bool CrossRegionTester::IsInRegion(Position pos)
         (thickness > (std::abs(x2 * pos.GetPositionX() + y2 * pos.GetPositionY() + c2) / denominator));
 }
 
-void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float RegionProperty)
+void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float_t RegionProperty)
 {
-    float _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
-    float _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
+    float_t _V1x = TargetPos.GetPositionX() - OriginalPos.GetPositionX();
+    float_t _V1y = TargetPos.GetPositionY() - OriginalPos.GetPositionY();
 
-    float m = std::sqrt(_V1x * _V1x + _V1y * _V1y);
+    float_t m = std::sqrt(_V1x * _V1x + _V1y * _V1y);
 
     if (m == 0) {
         V1x = 1;
@@ -99,12 +99,12 @@ void ArcCircleRegionTester::Init(Position OriginalPos, Position TargetPos, float
 
 bool ArcCircleRegionTester::IsInRegion(Position pos)
 {
-    float _V2x = pos.GetPositionX() - x;
-    float _V2y = pos.GetPositionY() - y;
+    float_t _V2x = pos.GetPositionX() - x;
+    float_t _V2y = pos.GetPositionY() - y;
 
-    float V2x, V2y;
+    float_t V2x, V2y;
 
-    float m = std::sqrt(_V2x * _V2x + _V2y * _V2y);
+    float_t m = std::sqrt(_V2x * _V2x + _V2y * _V2y);
 
     if (m == 0)
         return true;

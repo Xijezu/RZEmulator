@@ -175,7 +175,7 @@ bool Object::RemoveUInt64Value(uint16_t index, uint64_t value)
     return false;
 }
 
-void Object::SetFloatValue(uint16_t index, float value)
+void Object::SetFloatValue(uint16_t index, float_t value)
 {
     ASSERT(index < _valuesCount || PrintIndexError(index, true));
 
@@ -229,7 +229,7 @@ void Object::SetUInt16Value(uint16_t index, uint8_t offset, uint16_t value)
     }
 }
 
-void Object::SetStatFloatValue(uint16_t index, float value)
+void Object::SetStatFloatValue(uint16_t index, float_t value)
 {
     if (value < 0)
         value = 0.0f;
@@ -261,16 +261,16 @@ void Object::ApplyModInt32Value(uint16_t index, int32_t val, bool apply)
     SetInt32Value(index, cur);
 }
 
-void Object::ApplyModSignedFloatValue(uint16_t index, float val, bool apply)
+void Object::ApplyModSignedFloatValue(uint16_t index, float_t val, bool apply)
 {
-    float cur = GetFloatValue(index);
+    float_t cur = GetFloatValue(index);
     cur += (apply ? val : -val);
     SetFloatValue(index, cur);
 }
 
-void Object::ApplyModPositiveFloatValue(uint16_t index, float val, bool apply)
+void Object::ApplyModPositiveFloatValue(uint16_t index, float_t val, bool apply)
 {
-    float cur = GetFloatValue(index);
+    float_t cur = GetFloatValue(index);
     cur += (apply ? val : -val);
     if (cur < 0)
         cur = 0;
@@ -452,8 +452,8 @@ void WorldObject::AddToWorld()
 
 void WorldObject::AddNoise(int32_t r1, int32_t r2, int32_t v)
 {
-    float prev_x = GetPositionX();
-    float prev_y = GetPositionY();
+    float_t prev_x = GetPositionX();
+    float_t prev_y = GetPositionY();
 
     auto rs = (double)sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE);
     auto tx = (int32_t)(GetPositionX() / rs);
@@ -518,7 +518,7 @@ bool ArMoveVector::Step(uint32_t current_time)
         for (auto &info : ends) {
             if (current_time < info.end_time) {
                 uint32_t et = current_time - proc_time;
-                float fet = (float)et / (float)(info.end_time - proc_time);
+                float_t fet = (float)et / (float)(info.end_time - proc_time);
                 m_positionX = (info.end.m_positionX - m_positionX) * fet + m_positionX;
                 m_positionY = (info.end.m_positionY - m_positionY) * fet + m_positionY;
                 if (bWithZMoving) {
@@ -566,17 +566,17 @@ void ArMoveVector::SetMultipleMove(std::vector<Position> &_to, uint8_t _speed, u
         proc_time = ct;
         uint32_t start_time2 = ct;
         SetDirection(_to.front());
-        float before_x = m_positionX;
-        float before_y = m_positionY;
+        float_t before_x = m_positionX;
+        float_t before_y = m_positionY;
 
         for (const auto &pos : _to) {
-            float cx = pos.m_positionX - before_x;
-            float cy = pos.m_positionY - before_y;
+            float_t cx = pos.m_positionX - before_x;
+            float_t cy = pos.m_positionY - before_y;
 
             before_x = pos.m_positionX;
             before_y = pos.m_positionY;
 
-            float length = sqrt(cy * cy + cx * cx);
+            float_t length = sqrt(cy * cy + cx * cx);
             auto end_time = (uint32_t)(length / ((float)this->speed / 30.0f) + (float)start_time2);
 
             MoveInfo mi(pos, end_time);
@@ -600,8 +600,8 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint32_t _start_time, u
 
     start_time = st;
     proc_time = st;
-    float X = _to.GetPositionX() - GetPositionX();
-    float Y = _to.GetPositionY() - GetPositionY();
+    float_t X = _to.GetPositionX() - GetPositionX();
+    float_t Y = _to.GetPositionY() - GetPositionY();
     SetDirection(_to);
     lengtha = sqrt(Y * Y + X * X);
     lengthb = speed;
@@ -618,7 +618,7 @@ void ArMoveVector::SetMove(Position _to, uint8_t _speed, uint32_t _start_time, u
 
 void ArMoveVector::SetDirection(Position pos)
 {
-    float px{}, py{};
+    float_t px{}, py{};
     px = pos.m_positionX - m_positionX;
     py = pos.m_positionY - m_positionY;
     if (0.0 != px || 0.0 != py) {
@@ -648,11 +648,11 @@ bool ArMoveVector::IsMoving(uint32_t t)
         return false;
 }
 
-float Position::GetRX() const
+float_t Position::GetRX() const
 {
     return static_cast<uint32_t>(GetPositionX() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
 }
-float Position::GetRY() const
+float_t Position::GetRY() const
 {
     return static_cast<uint32_t>(GetPositionY() / sWorld.getIntConfig(CONFIG_MAP_REGION_SIZE));
 }

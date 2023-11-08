@@ -1332,7 +1332,7 @@ Item *Player::GetStorageItem(uint32_t idx)
 
 /********************** INVENTORY END **********************/
 
-void Player::ChangeLocation(float x, float y, bool bByRequest, bool bBroadcast)
+void Player::ChangeLocation(float_t x, float_t y, bool bByRequest, bool bBroadcast)
 {
     Position client_pos{};
     client_pos.Relocate(x, y, 0, 0);
@@ -2068,7 +2068,7 @@ Quest *Player::FindQuest(int32_t code)
 
 int32_t Player::GetMoveSpeed()
 {
-    float fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
+    float_t fWT = GetFloatValue(PLAYER_FIELD_WEIGHT) / m_Attribute.nMaxWeight;
     if (fWT >= 1.0f || fWT < 0.0f) {
         return (int32_t)((float)Unit::GetMoveSpeed() * 0.1f);
     }
@@ -2338,7 +2338,7 @@ void Player::EndQuest(int32_t code, int32_t nRewardID, bool bForce)
         return;
     }
     auto nPrevGold = GetGold();
-    float fMod{0.0f};
+    float_t fMod{0.0f};
     if (Quest::IsRandomQuest(q->m_Instance.Code)) {
         int32_t i = 0;
         int32_t nMaxItemCollectTypeCount = 3;
@@ -2461,7 +2461,7 @@ void Player::onJobLevelUp()
     m_QuestManager.UpdateQuestStatusByJobLevel(GetJobDepth(), GetCurrentJLv());
 }
 
-void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float var1, float var2, float fRatio)
+void Player::onItemWearEffect(Item *pItem, bool bIsBaseVar, int32_t type, float_t var1, float_t var2, float_t fRatio)
 {
     switch (type) {
     case 26:
@@ -3467,8 +3467,8 @@ bool Player::CheckTradeWeight()
     if (tradeTarget == nullptr)
         return false;
 
-    float weight = 0;
-    float targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
+    float_t weight = 0;
+    float_t targetWeight = tradeTarget->GetFloatValue(PLAYER_FIELD_WEIGHT);
 
     for (auto &it : m_vTradeItemList) {
         auto pItem = sMemoryPool.GetObjectInWorld<Item>(it.first);
@@ -3559,14 +3559,14 @@ void Player::onAfterRemoveState(State *state, bool bOnDead)
         setSummonUpdate();
     }
     // else if (state->GetEffectType() == SEF_IMMORTALIZE) {
-    //     int nHealingHP = state->GetValue(2) > state->GetValue(3) * GetMaxHealth() ? state->GetValue(2) : state->GetValue(3) * GetMaxHealth();
+    //     int32_t nHealingHP = state->GetValue(2) > state->GetValue(3) * GetMaxHealth() ? state->GetValue(2) : state->GetValue(3) * GetMaxHealth();
     //     AddHealth(nHealingHP);
 
     //     Messages::BroadcastHPMPMessage(this, nHealingHP, 0);
     // }
     // else if (state->GetEffectType() == SEF_AUTO_RESURRECTION_AFTER_REMOVE_STATE) {
-    //     int nCostMP = (state.GetValue(0) + state.GetValue(1) * state.GetLevel()) * GetMP();
-    //     int nIncHP = (state.GetValue(2) + state.GetValue(3) * state.GetLevel()) * nCostMP;
+    //     int32_t nCostMP = (state.GetValue(0) + state.GetValue(1) * state.GetLevel()) * GetMP();
+    //     int32_t nIncHP = (state.GetValue(2) + state.GetValue(3) * state.GetLevel()) * nCostMP;
     //     Resurrect(CRT_STATE, nIncHP, -nCostMP, GetLastDecreasedEXP(), true);
     // }
 

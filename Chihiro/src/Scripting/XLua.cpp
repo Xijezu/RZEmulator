@@ -19,6 +19,7 @@
 
 #include <filesystem>
 
+#include "Common.h"
 #include "Config.h"
 #include "DungeonManager.h"
 #include "GameContent.h"
@@ -183,16 +184,16 @@ void XLua::SCRIPT_RespawnRareMob(sol::variadic_args args)
 
     uint32_t id = args[0].get<int32_t>();
     uint32_t interval = args[1].get<uint32_t>();
-    float left = args[2].get<float>();
-    float top = args[3].get<float>();
-    float right = left + 1;
-    float bottom = top + 1;
+    float_t left = args[2].get<float>();
+    float_t top = args[3].get<float>();
+    float_t right = left + 1;
+    float_t bottom = top + 1;
     uint32_t monster_id = args[4].get<uint32_t>();
     uint32_t max_num = args[5].get<uint32_t>();
     bool is_wander = args[6].get<bool>();
     int32_t wander_id = args.size() > 7 ? args[7].get<uint32_t>() : 0;
 
-    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
+    GameContent::MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, max_num, is_wander, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 
@@ -274,7 +275,7 @@ int32_t XLua::SCRIPT_GetLocalFlag()
     return sWorld.getIntConfig(CONFIG_LOCAL_FLAG);
 }
 
-constexpr unsigned int str2int(const char *str, int h = 0)
+constexpr uint32_t str2int(const char *str, int32_t h = 0)
 {
     return !str[h] ? 5381 : (str2int(str, h + 1) * 33) ^ str[h];
 }
@@ -698,7 +699,7 @@ void XLua::SCRIPT_AddRespawnInfo(sol::variadic_args args)
 
     assert(max_num != 0);
 
-    MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
+    GameContent::MonsterRespawnInfo info(id, interval, left, top, right, bottom, monster_id, max_num, inc, true, wander_id);
     sObjectMgr.RegisterMonsterRespawnInfo(info);
 }
 

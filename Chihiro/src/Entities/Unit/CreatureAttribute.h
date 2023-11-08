@@ -28,10 +28,10 @@ struct CreatureElementalResist {
 };
 
 struct ExpertMod {
-    float fAvoid;
-    float fDamage;
+    float_t fAvoid;
+    float_t fDamage;
 
-    void Reset(float v)
+    void Reset(float_t v)
     {
         fAvoid = v;
         fDamage = v;
@@ -39,7 +39,7 @@ struct ExpertMod {
 };
 
 struct DamageReduceInfo {
-    DamageReduceInfo(unsigned char _ratio, float _physical_reduce, float _physical_skill_reduce, float _magical_skill_reduce, int32_t _apply_creature_group_1, int32_t _apply_creature_group_2,
+    DamageReduceInfo(unsigned char _ratio, float_t _physical_reduce, float_t _physical_skill_reduce, float_t _magical_skill_reduce, int32_t _apply_creature_group_1, int32_t _apply_creature_group_2,
         int32_t _apply_creature_group_3, int32_t _apply_creature_group_4, int32_t _apply_creature_group_5)
         : ratio(_ratio)
         , physical_reduce(_physical_reduce)
@@ -61,9 +61,9 @@ struct DamageReduceInfo {
     }
 
     unsigned char ratio;
-    float physical_reduce;
-    float physical_skill_reduce;
-    float magical_skill_reduce;
+    float_t physical_reduce;
+    float_t physical_skill_reduce;
+    float_t magical_skill_reduce;
     int32_t apply_creature_group_list[5];
 };
 
@@ -79,11 +79,11 @@ struct StateMod {
         fHate = 1.0f;
     }
 
-    float fDamage;
+    float_t fDamage;
     int32_t nDamage;
-    float fCritical;
+    float_t fCritical;
     int32_t nCritical;
-    float fHate;
+    float_t fHate;
 };
 
 struct ElementalSkillStateMod {
@@ -105,16 +105,16 @@ struct ElementalSkillStateMod {
         nCastingSpeedApplyTime = 0;
     }
 
-    float fManaCostRatio;
-    float fCooltime;
-    float fCastingSpeed;
-    float fHate;
+    float_t fManaCostRatio;
+    float_t fCooltime;
+    float_t fCastingSpeed;
+    float_t fHate;
     int32_t nMagicalAccuracy;
     int32_t nPhysicalAccuracy;
     int32_t nCritical;
 
-    float fMagicalDamage;
-    float fPhysicalDamage;
+    float_t fMagicalDamage;
+    float_t fPhysicalDamage;
     int32_t nElementalType;
     uint32_t nCastingSpeedApplyTime;
 
@@ -162,100 +162,100 @@ struct CreatureStat {
     }
 
     short stat_id;
-    float strength;
-    float vital;
-    float dexterity;
-    float agility;
-    float intelligence;
-    float mentality;
-    float luck;
+    float_t strength;
+    float_t vital;
+    float_t dexterity;
+    float_t agility;
+    float_t intelligence;
+    float_t mentality;
+    float_t luck;
 };
 
 struct CreatureStatAmplifier {
-    float stat_id;
-    float strength;
-    float vital;
-    float dexterity;
-    float agility;
-    float intelligence;
-    float mentality;
-    float luck;
+    float_t stat_id;
+    float_t strength;
+    float_t vital;
+    float_t dexterity;
+    float_t agility;
+    float_t intelligence;
+    float_t mentality;
+    float_t luck;
 };
 
 struct CreatureAttributeAmplifier {
-    float fCritical;
-    float fCriticalPower;
-    float fAttackPointRight;
-    float fAttackPointLeft;
-    float fDefence;
-    float fBlockDefence;
-    float fMagicPoint;
-    float fMagicDefence;
-    float fAccuracyRight;
-    float fAccuracyLeft;
-    float fMagicAccuracy;
-    float fAvoid;
-    float fMagicAvoid;
-    float fBlockChance;
-    float fMoveSpeed;
-    float fAttackSpeed;
-    float fAttackRange;
-    float fMaxWeight;
-    float fCastingSpeed;
-    float fCoolTimeSpeed;
-    float fItemChance;
-    float fHPRegenPercentage;
-    float fHPRegenPoint;
-    float fMPRegenPercentage;
-    float fMPRegenPoint;
-    float fAttackSpeedRight;
-    float fAttackSpeedLeft;
-    float fDoubleAttackRatio;
-    float fStunResistance;
-    float fMoveSpeedDecreaseResistance;
-    float fHPAdd;
-    float fMPAdd;
-    float fHPAddByItem;
-    float fMPAddByItem;
+    float_t fCritical;
+    float_t fCriticalPower;
+    float_t fAttackPointRight;
+    float_t fAttackPointLeft;
+    float_t fDefence;
+    float_t fBlockDefence;
+    float_t fMagicPoint;
+    float_t fMagicDefence;
+    float_t fAccuracyRight;
+    float_t fAccuracyLeft;
+    float_t fMagicAccuracy;
+    float_t fAvoid;
+    float_t fMagicAvoid;
+    float_t fBlockChance;
+    float_t fMoveSpeed;
+    float_t fAttackSpeed;
+    float_t fAttackRange;
+    float_t fMaxWeight;
+    float_t fCastingSpeed;
+    float_t fCoolTimeSpeed;
+    float_t fItemChance;
+    float_t fHPRegenPercentage;
+    float_t fHPRegenPoint;
+    float_t fMPRegenPercentage;
+    float_t fMPRegenPoint;
+    float_t fAttackSpeedRight;
+    float_t fAttackSpeedLeft;
+    float_t fDoubleAttackRatio;
+    float_t fStunResistance;
+    float_t fMoveSpeedDecreaseResistance;
+    float_t fHPAdd;
+    float_t fMPAdd;
+    float_t fHPAddByItem;
+    float_t fMPAddByItem;
 };
 
 struct CreatureAtributeServer {
 
-	float nCritical;			
-	float nCriticalPower;		
-	float nAttackPointRight;	
-	float nAttackPointLeft;	
-	float nDefence;			
-	float nBlockDefence;		
-	float nMagicPoint;		
-	float nMagicDefence;		
-	float nAccuracyRight;		
-	float nAccuracyLeft;		
-	float nMagicAccuracy;		
-	float nAvoid;				
-	float nMagicAvoid;		
-	float nBlockChance;		
-	float nMoveSpeed;			
-	float nAttackSpeed;		
-	float nAttackRange;		
-	float nMaxWeight;			
-	float nCastingSpeed;		
-	float nCoolTimeSpeed;		
-	float nItemChance;		
-	float nHPRegenPercentage;	
-	float nHPRegenPoint;		
-	float nMPRegenPercentage;	
-	float nMPRegenPoint;		
+	float_t nCritical;			
+	float_t nCriticalPower;		
+	float_t nAttackPointRight;	
+	float_t nAttackPointLeft;	
+	float_t nDefence;			
+	float_t nBlockDefence;		
+	float_t nMagicPoint;		
+	float_t nMagicDefence;		
+	float_t nAccuracyRight;		
+	float_t nAccuracyLeft;		
+	float_t nMagicAccuracy;		
+	float_t nAvoid;				
+	float_t nMagicAvoid;		
+	float_t nBlockChance;		
+	float_t nMoveSpeed;			
+	float_t nAttackSpeed;		
+	float_t nAttackRange;		
+	float_t nMaxWeight;			
+	float_t nCastingSpeed;		
+	float_t nCoolTimeSpeed;		
+	float_t nItemChance;		
+	float_t nHPRegenPercentage;	
+	float_t nHPRegenPoint;		
+	float_t nMPRegenPercentage;	
+	float_t nMPRegenPoint;		
 
-	float nAttackSpeedRight;	
-	float nAttackSpeedLeft;	
-	float nDoubleAttackRatio;
-	float nStunResistance;
-	float nMoveSpeedDecreaseResistance;
-	float nHPAdd;
-	float nMPAdd;
-	float nHPAddByItem;
-	float nMPAddByItem;
+	float_t nAttackSpeedRight;	
+	float_t nAttackSpeedLeft;	
+	float_t nDoubleAttackRatio;
+	float_t nStunResistance;
+	float_t nMoveSpeedDecreaseResistance;
+	float_t nHPAdd;
+	float_t nMPAdd;
+	float_t nHPAddByItem;
+	float_t nMPAddByItem;
 
     CreatureAtributeServer() = default;
     constexpr CreatureAtributeServer& operator=(const CreatureAtributeServer&) = default;
@@ -328,5 +328,5 @@ struct CreatureAtributeServer {
 };
 
 struct CreatureElementalResistAmplifier {
-    float fResist[ElementalType::TYPE_COUNT]{0};
+    float_t fResist[ElementalType::TYPE_COUNT]{0};
 };

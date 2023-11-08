@@ -17,32 +17,24 @@
 
 #include "RespawnObject.h"
 
-#include "GameContent.h"
 #include "Log.h"
 #include "MemPool.h"
 #include "ObjectMgr.h"
 #include "World.h"
 
-RespawnObject::RespawnObject(MonsterRespawnInfo rh)
-    : info(RespawnInfo{rh})
-{
-    m_nMaxRespawnNum = info.prespawn_count;
-    lastDeadTime = 0;
-}
-
 void RespawnObject::Update(uint32_t diff)
 {
     /// No need to update anything
-    if (info.count >= m_nMaxRespawnNum)
+    if (respawnInfo.count >= m_nMaxRespawnNum)
         return;
 
     uint32_t ct = sWorld.GetArTime();
 
     /// Only update based on spawn rates (each X seconds after dead)
-    if (lastDeadTime != 0 && lastDeadTime + info.interval > ct)
+    if (lastDeadTime != 0 && lastDeadTime + respawnInfo.interval > ct)
         return;
 
-    auto respawn_count = std::min(m_nMaxRespawnNum - info.count, info.inc);
+    auto respawn_count = std::min(m_nMaxRespawnNum - respawnInfo.count, respawnInfo.inc);
 
     if (lastDeadTime == 0) {
         lastDeadTime = ct;
@@ -58,8 +50,8 @@ void RespawnObject::Update(uint32_t diff)
             int32_t y{};
 
             do {
-                x = irand((int32_t)info.left, (int32_t)info.right);
-                y = irand((int32_t)info.top, (int32_t)info.bottom);
+                x = frand(respawnInfo.left, respawnInfo.right);
+                y = frand(respawnInfo.top, respawnInfo.bottom);
 
                 if (++try_cnt > 500) {
                     NG_LOG_ERROR("server.worldserver", "Cannot respawn monster - try_cnt = 500");
@@ -68,15 +60,15 @@ void RespawnObject::Update(uint32_t diff)
             } while (GameContent::IsBlocked(x, y));
 
             /// Generate monster if not blocked
-            auto monster = GameContent::RespawnMonster(x, y, info.layer, info.monster_id, info.is_wandering, info.way_point_id, this, true);
+            auto monster = GameContent::RespawnMonster(x, y, respawnInfo.layer, respawnInfo.monster_id, respawnInfo.is_wandering, respawnInfo.way_point_id, this, true);
 
             /// Put it to the list when it's not blocked
             if (monster != nullptr) {
-                if (info.dungeon_id != 0) {
+                if (respawnInfo.dungeon_id != 0) {
                     // monster.m_nDungeonId = info.dungeon_id;
                 }
                 m_vRespawnedMonster.emplace_back(monster->GetHandle());
-                info.count++;
+                respawnInfo.count++;
             }
         }
     }
@@ -88,7 +80,7 @@ void RespawnObject::onMonsterDelete(Monster *mob)
         return;
 
     lastDeadTime = sWorld.GetArTime();
-    --info.count;
+    --respawnInfo.count;
 
     auto pos = std::find(m_vRespawnedMonster.begin(), m_vRespawnedMonster.end(), mob->GetHandle());
     if (pos != m_vRespawnedMonster.end()) {
@@ -96,6 +88,6 @@ void RespawnObject::onMonsterDelete(Monster *mob)
         mob->m_pDeleteHandler = nullptr;
     }
 
-    if (m_nMaxRespawnNum < info.max_num)
+    if (m_nMaxRespawnNum < respawnInfo.max_num)
         ++m_nMaxRespawnNum;
 }

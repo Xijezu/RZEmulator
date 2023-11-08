@@ -46,8 +46,8 @@ struct Player {
     bool bIsInGame;
     bool bKickNextLogin;
     uint64_t nOneTimeKey;
-    int nGameIDX;
-    int nPermission;
+    int32_t nGameIDX;
+    int32_t nPermission;
 };
 
 /// Storage object for the list of players on the server

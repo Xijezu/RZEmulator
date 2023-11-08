@@ -25,9 +25,9 @@
 
 enum ShutdownExitCode { SHUTDOWN_EXIT_CODE = 0, ERROR_EXIT_CODE = 1, RESTART_EXIT_CODE = 2 };
 
-enum WorldTimers : int { WUPDATE_WORLDLOCATION, WUPDATE_PINGDB, WUPDATE_COUNT };
+enum WorldTimers : int32_t { WUPDATE_WORLDLOCATION, WUPDATE_PINGDB, WUPDATE_COUNT };
 
-enum WorldBoolConfigs : int {
+enum WorldBoolConfigs : int32_t {
     CONFIG_PK_SERVER = 0,
     CONFIG_DISABLE_TRADE,
     CONFIG_MONSTER_WANDERING,
@@ -87,11 +87,11 @@ public:
 
     bool SetMultipleMove(Unit *pUnit, Position curPos, std::vector<Position> newPos, uint8_t speed, bool bAbsoluteMove, uint32_t t, bool bBroadcastMove);
     bool SetMove(Unit *obj, Position curPos, Position newPos, uint8_t speed, bool bAbsoluteMove, uint32_t t, bool bBroadcastMove = true);
-    void MoveObject(Unit *pObject, Position &newPos, float face);
-    void EnumMovableObject(Position pos, uint8_t layer, float range, std::vector<uint32_t> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
+    void MoveObject(Unit *pObject, Position &newPos, float_t face);
+    void EnumMovableObject(Position pos, uint8_t layer, float_t range, std::vector<uint32_t> &pvResult, bool bIncludeClient = true, bool bIncludeNPC = true);
 
-    void addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float jp);
-    void addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float jp);
+    void addEXP(Unit *pCorpse, Player *pPlayer, int32_t exp, float_t jp);
+    void addEXP(Unit *pCorpse, int32_t nPartyID, int32_t exp, float_t jp);
 
     WorldSession *FindSession(uint32_t id) const;
     void AddSession(WorldSession *s);
@@ -106,7 +106,7 @@ public:
     bool RemoveItemFromWorld(Item *pItem);
     void RemoveObjectFromWorld(WorldObject *obj);
     void MonsterDropItemToWorld(Unit *pUnit, Item *pItem);
-    bool checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float fDropRatePenalty, float fPCBangDropRateBonus);
+    bool checkDrop(Unit *pKiller, int32_t code, int32_t percentage, float_t fDropRatePenalty, float_t fPCBangDropRateBonus);
     bool ProcTame(Monster *pMonster);
     void ClearTamer(Monster *pMonster, bool bBroadcastMsg);
     bool SetTamer(Monster *pMonster, Player *pPlayer, int32_t nSkillLevel);
@@ -117,7 +117,7 @@ public:
     // Item
     uint32_t procAddItem(Player *pClient, Item *pItem, bool bIsPartyProcess);
     void procPartyShare(Player *pClient, Item *pItem);
-    void addChaos(Unit *pCorpse, Player *pPlayer, float chaos);
+    void addChaos(Unit *pCorpse, Player *pPlayer, float_t chaos);
 
     // Warping
     void WarpBegin(Player *);
@@ -172,20 +172,20 @@ public:
     uint64_t GetSkillIndex();
 
     /// Set a server rate
-    void setRate(Rates rate, float value) { rate_values[rate] = value; }
+    void setRate(Rates rate, float_t value) { rate_values[rate] = value; }
 
     /// Get a server rate
-    float getRate(Rates rate) const { return rate_values[rate]; }
+    float_t getRate(Rates rate) const { return rate_values[rate]; }
 
-    /// Set a float configuration element
-    void setFloatConfig(WorldFloatConfigs index, float value)
+    /// Set a float_t configuration element
+    void setFloatConfig(WorldFloatConfigs index, float_t value)
     {
         if (index < FLOAT_CONFIG_VALUE_COUNT)
             m_float_configs[index] = value;
     }
 
-    /// Get a float configuration element
-    float getFloatConfig(WorldFloatConfigs index) { return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f; }
+    /// Get a float_t configuration element
+    float_t getFloatConfig(WorldFloatConfigs index) { return index < FLOAT_CONFIG_VALUE_COUNT ? m_float_configs[index] : 0.0f; }
 
     /// Set a server configuration element
     void setBoolConfig(WorldBoolConfigs index, bool value)
@@ -232,8 +232,8 @@ private:
     AtomicIndex s_nStateIndex{0};
     AtomicIndex s_nItemIndex{0};
 
-    float m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
-    float rate_values[MAX_RATES];
+    float_t m_float_configs[FLOAT_CONFIG_VALUE_COUNT];
+    float_t rate_values[MAX_RATES];
     int32_t m_int_configs[INT_CONFIG_VALUE_COUNT];
     bool m_bool_configs[BOOL_CONFIG_VALUE_COUNT];
 

@@ -74,7 +74,7 @@ void AuthGameSession::OnClose()
 enum eStatus { STATUS_CONNECTED = 0, STATUS_AUTHED };
 
 typedef struct GameHandler {
-    int cmd;
+    int32_t cmd;
     eStatus status;
     std::function<void(AuthGameSession *, XPacket *)> handler;
 } GameHandler;
@@ -99,7 +99,7 @@ const GameHandler packetHandler[] = {declareHandler(STATUS_CONNECTED, &AuthGameS
     declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientLogout), declareHandler(STATUS_AUTHED, &AuthGameSession::HandleClientKickFailed),
     declareHandler(STATUS_CONNECTED, &AuthGameSession::HandlePingPacket)};
 
-constexpr int tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
+constexpr int32_t tableSize = (sizeof(packetHandler) / sizeof(GameHandler));
 
 // Handler for incoming packets
 ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
@@ -107,7 +107,7 @@ ReadDataHandlerResult AuthGameSession::ProcessIncoming(XPacket *pGamePct)
     ASSERT(pGamePct);
 
     auto _cmd = pGamePct->GetPacketID();
-    int i = 0;
+    int32_t i = 0;
 
     for (i = 0; i < tableSize; i++) {
         if ((uint16_t)packetHandler[i].cmd == _cmd && (packetHandler[i].status == STATUS_CONNECTED || (m_bIsAuthed && packetHandler[i].status == STATUS_AUTHED))) {

@@ -45,7 +45,7 @@ public:
     static void EnterPacket(TS_SC_ENTER &pEnterPct, FieldProp *pFieldProp, Player *pPlayer);
     /// \brief Creates and spawns a fieldprop
     /// \param propDeleteHandler Always the instance of FieldPropManager, is used to delete it from its list
-    /// \param pPropInfo RespawnInfo
+    /// \param pPropInfo MonsterRespawnInfo
     /// \param lifeTime how long the prop is on the map
     /// \return Newly created Fieldprop on success, nullptr on failure
     static FieldProp *Create(FieldPropDeleteHandler *propDeleteHandler, FieldPropRespawnInfo pPropInfo, uint32_t lifeTime);
