@@ -108,7 +108,7 @@ public:
     uint32_t m_nEndTime[3]{};
     uint32_t m_nRemainDuration[3]{};
     uint32_t m_nLastProcessedTime;
-    StateTemplate *m_pTemplate{nullptr};
+    const StateTemplate *m_pTemplate{nullptr};
     int32_t m_nTotalDamage;
     bool m_bAura;
     int32_t m_nStateValue;

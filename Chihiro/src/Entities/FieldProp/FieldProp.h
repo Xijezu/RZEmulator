@@ -61,7 +61,7 @@ private:
 
     uint32_t m_nRegenTime;
     FieldPropDeleteHandler *m_pDeleteHandler;
-    FieldPropTemplate *m_pFieldPropBase;
+    const FieldPropTemplate *m_pFieldPropBase;
     FieldPropRespawnInfo m_PropInfo;
     int32_t m_nUseCount;
     bool m_bIsCasting;

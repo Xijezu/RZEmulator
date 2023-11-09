@@ -20,7 +20,7 @@
 
 #include "World.h"
 
-bool SkillBase::IsUseableWeapon(ItemClass cl)
+bool SkillBase::IsUseableWeapon(ItemClass cl) const
 {
     auto c = (int32_t)cl;
 
@@ -68,7 +68,7 @@ bool SkillBase::IsUseableWeapon(ItemClass cl)
     return false;
 }
 
-int32_t SkillBase::GetStateSecond(int32_t skill_lv, int32_t enhance_lv)
+int32_t SkillBase::GetStateSecond(int32_t skill_lv, int32_t enhance_lv) const
 {
     return ((int32_t)state_second + skill_lv * (int32_t)state_second_per_level) + ((int32_t)enhance_lv * (int32_t)state_second_per_enhance);
 }
@@ -78,12 +78,12 @@ int32_t SkillBase::GetHitBonus(int32_t enhance, int32_t level_diff) const
     return hit_bonus + level_diff * percentage + enhance * hit_bonus_per_enhance;
 }
 
-int32_t SkillBase::GetStateLevel(int32_t skill_lv, int32_t enhance_lv)
+int32_t SkillBase::GetStateLevel(int32_t skill_lv, int32_t enhance_lv) const
 {
     return (int32_t)(state_level_base + (state_level_per_enhance * enhance_lv) + (state_level_per_skl * skill_lv));
 }
 
-uint32_t SkillBase::GetCastDelay(int32_t skill_lv, int32_t enhance)
+uint32_t SkillBase::GetCastDelay(int32_t skill_lv, int32_t enhance) const
 {
     return static_cast<uint32_t>((delay_cast + delay_cast_per_skl * (skill_lv)) * (delay_cast_mode_per * enhance + 1.0f));
 }
@@ -93,7 +93,7 @@ uint32_t SkillBase::GetCoolTime(int32_t enhance) const
     return sWorld.getBoolConfig(CONFIG_NO_SKILL_COOLTIME) ? 0 : static_cast<uint32_t>(delay_cooltime * (delay_cooltime_mode * enhance + 1.0f));
 }
 
-int32_t SkillBase::GetNeedJobPoint(int32_t skill_lv)
+int32_t SkillBase::GetNeedJobPoint(int32_t skill_lv) const
 {
     int32_t result;
 

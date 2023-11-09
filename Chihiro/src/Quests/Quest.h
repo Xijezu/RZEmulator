@@ -54,7 +54,7 @@ public:
     int32_t GetRandomValue(int32_t idx) const;
     bool IsFinishable() const;
 
-    QuestBaseServer *m_QuestBase{nullptr};
+    const QuestBaseServer *m_QuestBase{nullptr};
     QuestEventHandler *m_Handler{nullptr};
     QuestInstance m_Instance{};
     bool m_bIsNeedUpdateToDB{false};

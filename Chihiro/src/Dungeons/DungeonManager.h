@@ -64,6 +64,7 @@ struct DungeonTemplate {
     int32_t tax_rate;
 };
 
+struct Position;
 class DungeonManager {
 public:
     static DungeonManager &Instance()
@@ -74,19 +75,39 @@ public:
 
     ~DungeonManager() = default;
 
-    /// \brief Gets the startlocation of the dungeon (used for enter_dungeon() for example)
-    /// \param nDungeonID DungeonID
-    /// \return the correct position
-    Position GetRaidStartPosition(int32_t nDungeonID);
     /// \brief Gets the dungeon ID from coordinates
     /// \param x X coord
     /// \param y Y coord
     /// \return DungeonID on success, 0 on failure
-    int32_t GetDungeonID(float_t x, float_t y);
+    int32_t GetDungeonID(float_t x, float_t y) const;
     /// \brief Registers our template to the list
     void RegisterDungeonTemplate(DungeonTemplate);
-    /*Position GetSiegeStartPosition(int32_t nDungeonID);
-        Position GetSiegeDefencePosition(int32_t nDungeonID);*/
+
+    static time_t GetDungeonRaidStartTime(int32_t nStartTime);
+    static time_t GetDungeonRaidEndTime(int32_t nEndtime);
+    static time_t GetNextDungeonSiegeStartTime(int32_t nStartTime, time_t lastDungeonSiegeFinishTime);
+    static time_t GetNextDungeonSiegeEndTime(int32_t nEndTime, time_t dungeonSiegeStartTime);
+
+    void OnUpdate(uint32_t time);
+
+    Position GetRaidStartPosition(int32_t nDungeonID);
+    Position GetSiegeStartPosition(int32_t nDungeonID);
+    Position GetSiegeDefencePosition(int32_t nDungeonID);
+
+    int32_t GetDungeonLevel(int32_t nDungeonID);
+    int32_t GetMaxRaidParty(int32_t nDungeonID);
+    int32_t GetMaxGuildParty(int32_t nDungeonID);
+
+    bool BeginDungeonRaid(int32_t nDungeonID, int32_t nGuildID);
+    uint8_t GetRaidDungeonLayer(int32_t nDungeonID, int32_t nGuildID);
+    bool IsRaidBegin(int32_t nDungeonID, int32_t nGuildID);
+    bool IsDungeonRaidTime(int32_t nDungeonID);
+    bool IsDungeonSiegeAttackteamMakingPeriod(int32_t nDungeonID);
+    /*void CreateDungeonSiege(int32_t nDungeonID);
+    void BeginDungeonSiege(int32_t nDungeonID);
+    void EndDungeonSiege(int32_t nDungeonID);
+    bool DropDungeonOwnership(int32_t nDungeonID);*/
+
 private:
     std::vector<DungeonTemplate> m_vDungeonInfo{};
 

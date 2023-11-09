@@ -40,7 +40,7 @@ void FieldPropManager::RegisterFieldProp(FieldPropRespawnInfo prop)
 {
     FieldPropRespawnInfo info{prop};
     int32_t nPropID = prop.nPropId;
-    FieldPropTemplate *propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
+    const FieldPropTemplate *propTemplate = sObjectMgr.GetFieldPropBase(nPropID);
     if (propTemplate == nullptr)
         return;
 

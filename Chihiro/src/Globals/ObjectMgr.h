@@ -21,8 +21,8 @@
 #include "CreatureAttribute.h"
 #include "DatabaseTemplates.h"
 #include "FieldPropBase.h"
-#include "MonsterBase.h"
 #include "GameContent.h"
+#include "MonsterBase.h"
 #include "NPCBase.h"
 #include "Object.h"
 #include "QuadTreeMapInfo.h"
@@ -110,20 +110,22 @@ public:
 
     void UnloadAll();
 
+    // Get Templates
+    std::shared_ptr<ItemTemplate> GetItemBase(int32_t item_id);
+    const JobResourceTemplate *GetJobInfo(int32_t job_id);
+    const SummonResourceTemplate *GetSummonBase(int32_t idx);
+    const MonsterBase *GetMonsterInfo(int32_t idx);
+    const FieldPropTemplate *GetFieldPropBase(int32_t idx);
+    const QuestBaseServer *GetQuestBase(int32_t code);
+    const QuestLink *GetQuestLink(int32_t code, int32_t start_id);
+    const StateTemplate *GetStateInfo(int32_t code);
+    const SkillBase *GetSkillBase(int32_t);
+    const std::vector<MarketInfo> *GetMarketInfo(const std::string &);
+
     const std::string &GetValueFromNameID(int32_t name_id);
     CreatureStat *GetStatInfo(int32_t stat_id);
-    std::shared_ptr<ItemTemplate> GetItemBase(int32_t item_id);
-    SkillBase *GetSkillBase(int32_t);
     CreatureStat GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[]);
     CreatureStat GetSummonLevelBonus(int32_t summon_code, int32_t growth_depth, int32_t level);
-    JobResourceTemplate *GetJobInfo(int32_t job_id);
-    SummonResourceTemplate *GetSummonBase(int32_t idx);
-    MonsterBase *GetMonsterInfo(int32_t idx);
-    FieldPropTemplate *GetFieldPropBase(int32_t idx);
-    std::vector<MarketInfo> *GetMarketInfo(const std::string &);
-    QuestBaseServer *GetQuestBase(int32_t code);
-    QuestLink *GetQuestLink(int32_t code, int32_t start_id);
-    StateTemplate *GetStateInfo(int32_t code);
     bool checkQuestTypeFlag(QuestType type, int32_t flag);
     std::string GetSummonName();
     int32_t GetNeedJpForJobLevelUp(int, int32_t);

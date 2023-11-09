@@ -519,7 +519,7 @@ bool QuestManager::IsStartableQuest(int32_t code)
         return true;
     }
     else {
-        for (int32_t &id : qbs->nForeQuest) {
+        for (const int32_t id : qbs->nForeQuest) {
             if (id != 0 && IsFinishedQuest(id)) {
                 return true;
             }

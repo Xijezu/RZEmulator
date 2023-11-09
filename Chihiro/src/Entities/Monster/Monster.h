@@ -76,7 +76,7 @@ class Monster : public Unit {
 
 public:
     static void EnterPacket(TS_SC_ENTER &pEnterPct, Monster *monster, Player *pPlayer);
-    explicit Monster(uint32_t handle, MonsterBase *mb);
+    explicit Monster(uint32_t handle, const MonsterBase *mb);
     ~Monster() = default;
     // Deleting the copy & assignment operators
     // Better safe than sorry
@@ -87,7 +87,7 @@ public:
     void OnUpdate() override;
     bool StartAttack(uint32_t target, bool bNeedFastReaction) override;
     void SetRespawnPosition(Position pos) { m_pRespawn = pos; }
-    MonsterBase *GetBase() const { return m_Base; }
+    const MonsterBase *GetBase() const { return m_Base; }
     void applyJobLevelBonus() override{};
     float_t GetSize() const override { return m_Base->size; }
     float_t GetScale() const override { return m_Base->scale; }
@@ -181,7 +181,7 @@ private:
     std::vector<HateModifierTag> m_vHateModifierByState{};
 
     Position m_pRespawn{};
-    MonsterBase *m_Base{nullptr};
+    const MonsterBase *m_Base{nullptr};
 
     float_t m_nLastEnemyDistance;
     uint32_t m_nLastTrackTime;

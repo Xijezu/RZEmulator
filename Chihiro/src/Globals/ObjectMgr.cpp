@@ -1248,7 +1248,7 @@ std::shared_ptr<ItemTemplate> ObjectMgr::GetItemBase(const int32_t item_id)
     return nullptr;
 }
 
-FieldPropTemplate *ObjectMgr::GetFieldPropBase(int32_t idx)
+const FieldPropTemplate *ObjectMgr::GetFieldPropBase(int32_t idx)
 {
     if (_fieldPropTemplateStore.count(idx) == 1)
         return &_fieldPropTemplateStore[idx];
@@ -1349,21 +1349,21 @@ CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const in
     return stat;
 }
 
-JobResourceTemplate *ObjectMgr::GetJobInfo(const int32_t job_id)
+const JobResourceTemplate *ObjectMgr::GetJobInfo(const int32_t job_id)
 {
     if (_jobTemplateStore.count(job_id) == 1)
         return &_jobTemplateStore[job_id];
     return nullptr;
 }
 
-SummonResourceTemplate *ObjectMgr::GetSummonBase(const int32_t idx)
+const SummonResourceTemplate *ObjectMgr::GetSummonBase(const int32_t idx)
 {
     if (_summonResourceStore.count(idx) == 1)
         return &_summonResourceStore[idx];
     return nullptr;
 }
 
-std::vector<MarketInfo> *ObjectMgr::GetMarketInfo(const std::string &szKey)
+const std::vector<MarketInfo> *ObjectMgr::GetMarketInfo(const std::string &szKey)
 {
     if (_marketResourceStore.count(szKey) == 1)
         return &_marketResourceStore[szKey];
@@ -1423,7 +1423,7 @@ int32_t ObjectMgr::GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_leve
     return -1;
 }
 
-SkillBase *ObjectMgr::GetSkillBase(const int32_t skill_id)
+const SkillBase *ObjectMgr::GetSkillBase(const int32_t skill_id)
 {
     if (_skillBaseStore.count(skill_id) == 1)
         return &_skillBaseStore[skill_id];
@@ -1442,7 +1442,7 @@ int64_t ObjectMgr::GetNeedExp(int32_t level)
     return _levelResourceStore[l - 1].normal_exp;
 }
 
-MonsterBase *ObjectMgr::GetMonsterInfo(int32_t idx)
+const MonsterBase *ObjectMgr::GetMonsterInfo(int32_t idx)
 {
     if (_monsterBaseStore.count(idx) == 1)
         return &_monsterBaseStore[idx];
@@ -1456,7 +1456,7 @@ int64_t ObjectMgr::GetNeedSummonExp(int32_t level)
     return 0;
 }
 
-QuestBaseServer *ObjectMgr::GetQuestBase(int32_t code)
+const QuestBaseServer *ObjectMgr::GetQuestBase(int32_t code)
 {
     if (_questTemplateStore.count(code) == 1)
         return &_questTemplateStore[code];
@@ -1511,13 +1511,13 @@ bool ObjectMgr::checkQuestTypeFlag(QuestType type, int32_t flag)
     }
 }
 
-QuestLink *ObjectMgr::GetQuestLink(int32_t code, int32_t start_id)
+const QuestLink *ObjectMgr::GetQuestLink(int32_t code, int32_t start_id)
 {
     auto l = std::find_if(_questLinkStore.begin(), _questLinkStore.end(), [&code, start_id](const QuestLink &ql) { return ql.code == code && (ql.nStartTextID == start_id || start_id == 0); });
     return l != _questLinkStore.end() ? &*l : nullptr;
 }
 
-StateTemplate *ObjectMgr::GetStateInfo(int32_t code)
+const StateTemplate *ObjectMgr::GetStateInfo(int32_t code)
 {
     if (_stateTemplateStore.count(code) == 1)
         return &_stateTemplateStore[code];

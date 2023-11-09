@@ -66,7 +66,7 @@ public:
 
     int32_t GetCurrentSkillLevel() const { return m_nSkillLevel + m_nSkillLevelAdd; }
 
-    SkillBase *GetSkillBase() const { return m_SkillBase; }
+    const SkillBase *GetSkillBase() const { return m_SkillBase; }
 
     uint8_t GetRequestedSkillLevel() const { return m_nRequestedSkillLevel; }
 
@@ -83,7 +83,7 @@ public:
     int32_t m_nSkillLevelAdd{0};
     int32_t cool_time;
 
-    SkillBase *m_SkillBase{nullptr};
+    const SkillBase *m_SkillBase{nullptr};
 
     void broadcastSkillMessage(WorldObject *pObject, int32_t cost_hp, int32_t cost_mp, int32_t nType);
     void broadcastSkillMessage(Unit *pUnit1, Unit *pUnit2, int32_t cost_hp, int32_t cost_mp, int32_t nType);

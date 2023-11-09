@@ -120,7 +120,7 @@ protected:
     void onSPChange() override;
 
 private:
-    SummonResourceTemplate *m_tSummonBase{nullptr};
+    const SummonResourceTemplate *m_tSummonBase{nullptr};
     Player *m_pMaster{nullptr};
 
     int32_t m_nAccountID{};

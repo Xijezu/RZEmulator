@@ -2497,7 +2497,7 @@ void Unit::applyPassiveSkillEffect()
 
     for (auto &pSkill : m_vPassiveSkillList) {
         if (pSkill->GetSkillBase()->IsNeedWeapon()) {
-            if (pSkill->GetSkillBase()->IsUseableWeapon(CLASS_SHIELD)) {
+            if (pSkill->GetSkillBase()->IsUseableWeapon(ItemClass::CLASS_SHIELD)) {
                 if (!IsWearShield())
                     continue;
             }

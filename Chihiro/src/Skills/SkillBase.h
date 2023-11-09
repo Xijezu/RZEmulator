@@ -586,14 +586,14 @@ struct SkillBase {
     bool IsNeedShield() const;
     bool IsNeedWeapon() const;
 
-    int32_t GetNeedJobPoint(int32_t skill_lv);
-    bool IsUseableWeapon(ItemClass cl);
-    int32_t GetStateSecond(int32_t skill_lv, int32_t enhance_lv);
+    int32_t GetNeedJobPoint(int32_t skill_lv) const;
+    bool IsUseableWeapon(ItemClass cl) const;
+    int32_t GetStateSecond(int32_t skill_lv, int32_t enhance_lv) const;
     int32_t GetStateType() const;
     int32_t GetHitBonus(int32_t enhance, int32_t level_diff) const;
     int32_t GetStateId() const;
-    int32_t GetStateLevel(int32_t skill_lv, int32_t enhance_lv);
-    uint32_t GetCastDelay(int32_t skill_lv, int32_t enhance);
+    int32_t GetStateLevel(int32_t skill_lv, int32_t enhance_lv) const;
+    uint32_t GetCastDelay(int32_t skill_lv, int32_t enhance) const;
     uint32_t GetCommonDelay() const;
     uint32_t GetCoolTime(int32_t enhance) const;
     uint32_t GetFireRange() const;

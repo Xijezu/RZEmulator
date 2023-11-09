@@ -34,7 +34,7 @@
 #include "World.h"
 #include "XPacket.h"
 
-Monster::Monster(uint32_t handle, MonsterBase *mb)
+Monster::Monster(uint32_t handle, const MonsterBase *mb)
     : Unit(true)
 {
     _mainType = MT_NPC;

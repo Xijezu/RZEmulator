@@ -658,7 +658,7 @@ void Messages::SendQuestInformation(Player *pPlayer, int32_t code, int32_t text,
                 progress = 1;
             }
             else {
-                QuestLink *l = sObjectMgr.GetQuestLink(code, q->m_Instance.nStartID);
+                auto l = sObjectMgr.GetQuestLink(code, q->m_Instance.nStartID);
                 if (l != nullptr && l->nEndTextID != 0)
                     textID = l->nEndTextID;
 #if EPIC >= EPIC_5_1

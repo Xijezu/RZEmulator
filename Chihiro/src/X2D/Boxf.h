@@ -24,7 +24,7 @@ namespace X2D {
         Boxf() = default;
         ~Boxf() = default;
 
-        bool IsInclude(float_t x, float_t y);
+        bool IsInclude(float_t x, float_t y) const;
         void SetLeft(float_t x);
         void SetTop(float_t y);
         void SetRight(float_t x);

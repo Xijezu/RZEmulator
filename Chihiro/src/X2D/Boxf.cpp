@@ -17,7 +17,7 @@
 
 #include "Boxf.h"
 
-bool X2D::Boxf::IsInclude(float_t x, float_t y)
+bool X2D::Boxf::IsInclude(float_t x, float_t y) const
 {
     return x >= begin.x && x <= end.x && y >= begin.y && y <= end.y;
 }

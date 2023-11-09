@@ -187,60 +187,46 @@ bool GameContent::SelectItemIDFromDropGroup(int32_t nDropGroupID, int32_t &nItem
 
 int64_t GameContent::GetItemSellPrice(int64_t price, int32_t rank, int32_t lv, bool same_price_for_buying)
 {
-    int64_t k;
-    float_t f[8]{0};
-    int32_t i;
+    int64_t k = price;
+    float_t f[8]{1.35f, 0.4f, 0.2f, 0.13f, 0.1f, 0.1f, 0.1f, 0.1f};
 
-    k = price;
-    if (rank <= 8) {
-        f[0] = 1.35f;
-        f[1] = 0.4f;
-        f[2] = 0.2f;
-        f[3] = 0.13f;
-        f[4] = 0.1f;
-        f[5] = 0.1f;
-        f[6] = 0.1f;
-        f[7] = 0.1f;
-        if (lv >= 2) {
-            i = lv - 1;
-            do {
-                if (rank != 0 && rank != 1) {
-                    if (rank == 2) {
-                        k += (int64_t)((k * 0.4f * 0.01f) * 100);
-                    }
-                    else {
-                        k += (int64_t)((f[rank] * k * 0.001f) * 1000);
-                    }
-                }
-                else {
-                    k += (int64_t)((k * 1.35f * 0.1f) * 10);
-                }
-                --i;
-            } while (i > 0);
+    ASSERT(rank > 8, "Rank cannot be bigger than 8: %d - GameContent::GetItemSellPrice", rank);
+
+    for (int32_t i = 2; i <= lv; i++) {
+        switch (rank) {
+        case 0:
+            k += (price * f[rank] * 0.1f) * 10;
+            break;
+        case 1:
+            k += (price * f[rank - 1] * 0.1f) * 10;
+            break;
+        case 2:
+            k += (price * f[rank - 1] * 0.01f) * 100;
+            break;
+        default:
+            k += (price * f[rank - 1] * 0.001f) * 1000;
+            break;
         }
-        if (same_price_for_buying)
-            return k;
-        else
-            return k / 2;
     }
-    return 0;
+
+    return (k * (same_price_for_buying ? 1.0f : 0.25f));
 }
 
 Monster *GameContent::RespawnMonster(float_t x, float_t y, uint8_t layer, int32_t id, bool is_wandering, int32_t way_point_id, MonsterDeleteHandler *pDeleteHandler, bool /*bNeedLock*/)
 {
-    auto mob = sMemoryPool.AllocMonster((uint32_t)id);
-    if (mob != nullptr) {
-        mob->SetCurrentXY(x, y);
-        mob->SetLayer(layer);
-        mob->m_pDeleteHandler = pDeleteHandler;
-        mob->m_bIsWandering = is_wandering;
-        if (way_point_id != 0)
-            mob->m_pWayPointInfo = sObjectMgr.GetWayPoint(way_point_id);
-        mob->SetRespawnPosition({x, y, 0});
-        sWorld.AddMonsterToWorld(mob);
-        sWorld.SetMove(mob, mob->GetPosition(), mob->GetPosition(), 0, true, sWorld.GetArTime(), false);
-    }
-    return mob;
+    auto pMonster = sMemoryPool.AllocMonster((uint32_t)id);
+    if (pMonster == nullptr)
+        return nullptr;
+
+    pMonster->SetCurrentXY(x, y);
+    pMonster->SetLayer(layer);
+    pMonster->m_bIsWandering = is_wandering;
+    pMonster->m_pDeleteHandler = pDeleteHandler;
+    if (way_point_id != 0)
+        pMonster->m_pWayPointInfo = sObjectMgr.GetWayPoint(way_point_id);
+    sWorld.AddMonsterToWorld(pMonster);
+
+    return pMonster;
 }
 
 uint16_t GameContent::IsLearnableSkill(Unit *pUnit, int32_t skill_id, int32_t skill_level, int32_t &job_id)

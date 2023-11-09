@@ -46,8 +46,8 @@ void RespawnObject::Update(uint32_t diff)
         int32_t try_cnt = 0;
         for (uint32_t i = 0; i < respawn_count; ++i) {
             /// Generate random respawn coordinates based on a rectangle
-            int32_t x{};
-            int32_t y{};
+            float_t x{};
+            float_t y{};
 
             do {
                 x = frand(respawnInfo.left, respawnInfo.right);
