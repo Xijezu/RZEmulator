@@ -383,7 +383,7 @@ public:
 
     Skill *GetCastSkill() const { return m_castingSkill; }
 
-    virtual CreatureStat *GetBaseStat() const { return nullptr; }
+    virtual const CreatureStat *GetBaseStat() const { return nullptr; }
 
     virtual bool IsUsingBow() const { return false; }
 

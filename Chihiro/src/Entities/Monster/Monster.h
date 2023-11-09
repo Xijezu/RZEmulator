@@ -128,7 +128,7 @@ public:
     int32_t GetTameCode() const;
     float_t GetTamePercentage() const;
     int32_t GetMonsterID() const;
-    CreatureStat *GetBaseStat() const override;
+    const CreatureStat *GetBaseStat() const override;
     int32_t GetRace() const override;
 
     int32_t GetHate(uint32_t handle);
@@ -203,7 +203,7 @@ private:
     bool m_bTamedSuccess;
     int32_t m_nWayPointIdx;
     bool m_bIsWandering;
-    WayPointInfo *m_pWayPointInfo;
+    const WayPointInfo *m_pWayPointInfo{nullptr};
 
     MONSTER_STATUS m_nStatus;
 };

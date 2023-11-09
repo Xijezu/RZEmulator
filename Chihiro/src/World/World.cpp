@@ -156,16 +156,18 @@ WorldSession *World::FindSession(uint32_t id) const
 }
 
 /// Remove a given session
-bool World::RemoveSession(uint32_t id)
+bool World::RemoveSession(uint32_t id, bool bKickPlayer)
 {
     ///- Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
     SessionMap::const_iterator itr = m_sessions.find(id);
 
-    if (itr != m_sessions.end() && itr->second) {
-        itr->second->KickPlayer();
+    if (itr != m_sessions.end() && itr->second != nullptr) {
+        if (bKickPlayer)
+            itr->second->KickPlayer();
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void World::AddSession(WorldSession *s)
@@ -716,11 +718,11 @@ void World::AddSession_(WorldSession *s)
 {
     ASSERT(s);
 
-    if (!RemoveSession(s->GetAccountId())) {
-        s->KickPlayer();
-        delete s;
-        return;
-    }
+    if (FindSession(s->GetAccountId()))
+        if (!RemoveSession(s->GetAccountId())) {
+            s->KickPlayer();
+            return;
+        }
 
     m_sessions[s->GetAccountId()] = s;
 }

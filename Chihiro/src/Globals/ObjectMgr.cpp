@@ -1234,7 +1234,7 @@ void ObjectMgr::LoadSummonNameResource()
     NG_LOG_INFO("server.worldserver", ">> Loaded %u SummonDefaultNames in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-CreatureStat *ObjectMgr::GetStatInfo(const int32_t stat_id)
+const CreatureStat *ObjectMgr::GetStatInfo(const int32_t stat_id)
 {
     if (_creatureBaseStore.count(stat_id) == 1)
         return &_creatureBaseStore[stat_id];
@@ -1289,14 +1289,14 @@ void ObjectMgr::SetWayPointType(int32_t waypoint_id, int32_t type)
     g_vWayPoint[waypoint_id] = info;
 }
 
-WayPointInfo *ObjectMgr::GetWayPoint(int32_t waypoint_id)
+const WayPointInfo *ObjectMgr::GetWayPoint(int32_t waypoint_id)
 {
     if (g_vWayPoint.count(waypoint_id) != 0)
         return &g_vWayPoint[waypoint_id];
     return nullptr;
 }
 
-DropGroup *ObjectMgr::GetDropGroupInfo(int32_t drop_group_id)
+const DropGroup *ObjectMgr::GetDropGroupInfo(int32_t drop_group_id)
 {
     if (_dropTemplateStore.count(drop_group_id) == 1)
         return &_dropTemplateStore[drop_group_id];
@@ -1314,37 +1314,29 @@ void ObjectMgr::RegisterMonsterRespawnInfo(GameContent::MonsterRespawnInfo info)
 CreatureStat ObjectMgr::GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[])
 {
     CreatureStat stat{};
-    if (depth >= 0) {
-        for (int32_t i = 0; i < 4; i++) {
-            if (_jobBonusStore.count((uint32_t)jobs[i])) {
-                auto jlb = _jobBonusStore[jobs[i]];
 
-                float_t v1 = (levels[i] - 20);
-                if (levels[i] > 40)
-                    v1 = 20;
+    ASSERT(depth >= 0 && depth < 4, "Job Depth Invalid - ObjectMgr::GetJobLevelBonus");
 
-                float_t v2 = (levels[i] - 40);
-                if (levels[i] >= 50)
-                    v2 = 10;
+    for (int32_t i = 0; i <= depth; i++) {
+        if (_jobBonusStore.count(jobs[i]) == 0)
+            continue;
 
-                float_t v0 = levels[i];
-                if (levels[i] >= 20)
-                    v0 = 20;
+        const auto &bonus = _jobBonusStore[jobs[i]];
 
-                if (v1 <= 0)
-                    v1 = 0;
-
-                if (v2 <= 0)
-                    v2 = 0;
-                stat.strength += (int32_t)((v1 * jlb.strength[1]) + (v2 * jlb.strength[2]) + (jlb.strength[3]) + (v0 * jlb.strength[0]));
-                stat.vital += (int32_t)((v1 * jlb.vital[1]) + (v2 * jlb.vital[2]) + (jlb.vital[3]) + (v0 * jlb.vital[0]));
-                stat.dexterity += (int32_t)((v1 * jlb.dexterity[1]) + (v2 * jlb.dexterity[2]) + (jlb.dexterity[3]) + (v0 * jlb.dexterity[0]));
-                stat.agility += (int32_t)((v1 * jlb.agility[1]) + (v2 * jlb.agility[2]) + (jlb.agility[3]) + (v0 * jlb.agility[0]));
-                stat.intelligence += (int32_t)((v1 * jlb.intelligence[1]) + (v2 * jlb.intelligence[2]) + (jlb.intelligence[3]) + (v0 * jlb.intelligence[0]));
-                stat.mentality += (int32_t)((v1 * jlb.mentality[1]) + (v2 * jlb.mentality[2]) + (jlb.mentality[3]) + (v0 * jlb.mentality[0]));
-                stat.luck += (int32_t)((v1 * jlb.luck[1]) + (v2 * jlb.luck[2]) + (jlb.luck[3]) + (v0 * jlb.luck[0]));
-            }
-        }
+        stat.strength += bonus.strength[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.strength[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.strength[2] * std::min(10, (levels[i] - 40)))) + bonus.strength[3];
+        stat.vital += bonus.vital[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.vital[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.vital[2] * std::min(10, (levels[i] - 40)))) + bonus.vital[3];
+        stat.dexterity += bonus.dexterity[0] * std::min((int)20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.dexterity[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.dexterity[2] * std::min(10, (levels[i] - 40)))) + bonus.dexterity[3];
+        stat.agility += bonus.agility[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.agility[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.agility[2] * std::min(10, (levels[i] - 40)))) + bonus.agility[3];
+        stat.intelligence += bonus.intelligence[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.intelligence[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.intelligence[2] * std::min(10, (levels[i] - 40)))) + bonus.intelligence[3];
+        stat.mentality += bonus.mentality[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.mentality[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.mentality[2] * std::min(10, (levels[i] - 40)))) + bonus.mentality[3];
+        stat.luck += bonus.luck[0] * std::min(20, levels[i]) + std::max(0, static_cast<int32_t>(bonus.luck[1] * std::min(20, (levels[i] - 20)))) +
+            std::max(0, static_cast<int32_t>(bonus.luck[2] * std::min(10, (levels[i] - 40)))) + bonus.luck[3];
     }
     return stat;
 }

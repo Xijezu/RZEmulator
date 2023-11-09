@@ -37,7 +37,7 @@ public:
     static void DB_UpdateSummon(Player *, Summon *);
     static void EnterPacket(TS_SC_ENTER &, Summon *, Player *pPlayer);
 
-    CreatureStat *GetBaseStat() const override;
+    const CreatureStat *GetBaseStat() const override;
     inline uint32_t GetSummonSID() const { return GetUInt32Value(UNIT_FIELD_UID); }
 
     bool IsBattleMode() const override { return m_bIsBattleMode; }

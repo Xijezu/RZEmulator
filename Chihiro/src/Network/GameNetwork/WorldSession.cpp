@@ -47,12 +47,14 @@ WorldSession::WorldSession(boost::asio::ip::tcp::socket &&socket)
 // Close patch file descriptor before leaving
 WorldSession::~WorldSession()
 {
+    sWorld.RemoveSession(GetAccountId());
     if (m_pPlayer)
         onReturnToLobby(nullptr);
 }
 
 void WorldSession::OnClose()
 {
+    sWorld.RemoveSession(GetAccountId());
     if (_accountName.length() > 0)
         sAuthNetwork.SendClientLogoutToAuth(_accountName);
     if (m_pPlayer)
@@ -234,6 +236,7 @@ void WorldSession::onAuthResult(const TS_AG_CLIENT_LOGIN *pRecvPct)
         _accountId = pRecvPct->nAccountID;
         _accountName = pRecvPct->account;
         m_nPermission = pRecvPct->permission;
+        sWorld.AddSession(this);
     }
     Messages::SendResult(this, NGemity::Packets::TS_CS_ACCOUNT_WITH_AUTH, pRecvPct->result, 0);
 }

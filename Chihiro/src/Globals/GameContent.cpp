@@ -29,8 +29,15 @@
 
 bool GameContent::IsBlocked(float_t x, float_t y)
 {
-    if (x < 0 || x > sWorld.getIntConfig(CONFIG_MAP_WIDTH) || y < 0 || y > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
+    if (static_cast<int32_t>(x) < 0)
         return true;
+    if (static_cast<int32_t>(x) > sWorld.getIntConfig(CONFIG_MAP_WIDTH))
+        return true;
+    if (static_cast<int32_t>(y) < 0)
+        return true;
+    if (static_cast<int32_t>(y) > sWorld.getIntConfig(CONFIG_MAP_HEIGHT))
+        return true;
+
     if (sWorld.getBoolConfig(CONFIG_NO_COLLISION_CHECK))
         return false;
     return sObjectMgr.g_qtBlockInfo.Collision({x, y});

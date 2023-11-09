@@ -121,25 +121,27 @@ public:
     const StateTemplate *GetStateInfo(int32_t code);
     const SkillBase *GetSkillBase(int32_t);
     const std::vector<MarketInfo> *GetMarketInfo(const std::string &);
+    const CreatureStat *GetStatInfo(int32_t stat_id);
 
     const std::string &GetValueFromNameID(int32_t name_id);
-    CreatureStat *GetStatInfo(int32_t stat_id);
-    CreatureStat GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[]);
-    CreatureStat GetSummonLevelBonus(int32_t summon_code, int32_t growth_depth, int32_t level);
-    bool checkQuestTypeFlag(QuestType type, int32_t flag);
     std::string GetSummonName();
-    int32_t GetNeedJpForJobLevelUp(int, int32_t);
-    int32_t GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_level, int32_t nJobID);
-    int64_t GetNeedExp(int32_t level);
-    int64_t GetNeedSummonExp(int32_t level);
-    WayPointInfo *GetWayPoint(int32_t waypoint_id);
-    DropGroup *GetDropGroupInfo(int32_t drop_group_id);
+    const WayPointInfo *GetWayPoint(int32_t waypoint_id);
+    const DropGroup *GetDropGroupInfo(int32_t drop_group_id);
 
     void RegisterMonsterRespawnInfo(GameContent::MonsterRespawnInfo info);
     void AddWayPoint(int32_t waypoint_id, float_t x, float_t y);
     void SetWayPointType(int32_t waypoint_id, int32_t type);
 
     int32_t g_currentLocationId{0};
+
+    CreatureStat GetJobLevelBonus(int32_t depth, int32_t jobs[], const int32_t levels[]);
+    CreatureStat GetSummonLevelBonus(int32_t summon_code, int32_t growth_depth, int32_t level);
+    int32_t GetNeedJpForJobLevelUp(int, int32_t);
+    int32_t GetNeedJpForSkillLevelUp(int32_t skill_id, int32_t skill_level, int32_t nJobID);
+    int64_t GetNeedExp(int32_t level);
+    int64_t GetNeedSummonExp(int32_t level);
+
+    bool checkQuestTypeFlag(QuestType type, int32_t flag);
 
     std::unordered_map<int, WayPointInfo> g_vWayPoint{};
     std::vector<GameContent::MonsterRespawnInfo> g_vRespawnInfo{};

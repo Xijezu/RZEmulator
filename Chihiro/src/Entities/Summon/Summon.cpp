@@ -353,9 +353,9 @@ bool Summon::TranslateWearPosition(ItemWearType &pos, Item *pItem, std::vector<i
     return true;
 }
 
-CreatureStat *Summon::GetBaseStat() const
+const CreatureStat *Summon::GetBaseStat() const
 {
-    return sObjectMgr.GetStatInfo((uint32_t)m_tSummonBase->stat_id);
+    return sObjectMgr.GetStatInfo(m_tSummonBase->stat_id);
 }
 
 Summon::~Summon()

@@ -320,7 +320,7 @@ public:
 
     bool TranslateWearPosition(ItemWearType &pos, Item *item, std::vector<int32_t> *ItemList) override;
 
-    CreatureStat *GetBaseStat() const override;
+    const CreatureStat *GetBaseStat() const override;
     Inventory *GetInventory() { return &m_Inventory; }
 
     uint32_t GetCreatureGroup() const override { return 9; }

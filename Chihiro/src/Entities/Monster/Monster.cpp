@@ -956,7 +956,7 @@ int32_t Monster::GetMonsterID() const
     return m_Base->id;
 }
 
-CreatureStat *Monster::GetBaseStat() const
+const CreatureStat *Monster::GetBaseStat() const
 {
     return sObjectMgr.GetStatInfo(m_Base->stat_id);
 }

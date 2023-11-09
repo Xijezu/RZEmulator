@@ -95,7 +95,7 @@ public:
 
     WorldSession *FindSession(uint32_t id) const;
     void AddSession(WorldSession *s);
-    bool RemoveSession(uint32_t id);
+    bool RemoveSession(uint32_t id, bool bKickPlayer=false);
     void UpdateSessions(uint32_t diff);
     void KickAll();
 
