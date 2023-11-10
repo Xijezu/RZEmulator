@@ -98,10 +98,12 @@ private:
     int32_t SCRIPT_UpdateGoldChaos();
     int32_t SCRIPT_LearnAllSkill();
     void SCRIPT_LearnCreatureAllSkill(sol::variadic_args);
+    void SCRIPT_DropItem(sol::variadic_args args);
+
     void SCRIPT_SavePlayer();
     uint32_t SCRIPT_InsertItem(sol::variadic_args);
 
-    sol::object SCRIPT_GetValue(std::string);
+    sol::object SCRIPT_GetValue(sol::variadic_args);
     void SCRIPT_SetValue(std::string, sol::variadic_args);
 
     std::string SCRIPT_GetFlag(std::string);

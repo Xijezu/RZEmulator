@@ -280,78 +280,98 @@ constexpr uint32_t str2int(const char *str, int32_t h = 0)
     return !str[h] ? 5381 : (str2int(str, h + 1) * 33) ^ str[h];
 }
 
-sol::object XLua::SCRIPT_GetValue(std::string szKey)
+sol::object XLua::SCRIPT_GetValue(sol::variadic_args args)
 {
-    if (m_pUnit == nullptr)
+    if (m_pUnit == nullptr) {
+        NG_LOG_WARN("server.scripting", "m_pUnit is nullptr");
         return return_object("");
+    }
+
+    if (args.size() < 1) {
+        NG_LOG_WARN("server.scripting", "GetValue was called without arguments");
+        return return_object("");
+    }
+
+    auto szKey = args[0].as<std::string>();
+    Player *target = nullptr;
+
+    if (args.size() > 1) {
+        auto playerName = args[1].as<std::string>();
+        target = Player::FindPlayer(playerName);
+        if (target == nullptr) {
+            NG_LOG_WARN("server.scripting", "Player named '%s' not found", playerName.c_str());
+            return return_object("");
+        }
+    }
+    else {
+        target = m_pUnit->As<Player>();
+        if (target == nullptr) {
+            NG_LOG_WARN("server.scripting", "m_pUnit is not a Player instance");
+            return return_object("");
+        }
+    }
+
 
     switch (str2int(szKey.c_str())) {
     case str2int("race"):
-        return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_RACE));
+        return return_object(target->GetInt32Value(UNIT_FIELD_RACE));
     case str2int("job"):
-        return return_object(m_pUnit->GetCurrentJob());
+        return return_object(target->GetCurrentJob());
     case str2int("hp"):
     case str2int("health"):
-        return return_object(m_pUnit->GetHealth());
+        return return_object(target->GetHealth());
     case str2int("mp"):
     case str2int("mana"):
-        return return_object(m_pUnit->GetMana());
+        return return_object(target->GetMana());
     case str2int("max_hp"):
-        return return_object(m_pUnit->GetMaxHealth());
+        return return_object(target->GetMaxHealth());
     case str2int("max_mp"):
-        return return_object(m_pUnit->GetMaxMana());
+        return return_object(target->GetMaxMana());
     case str2int("x"):
-        return return_object(m_pUnit->GetPositionX());
+        return return_object(target->GetPositionX());
     case str2int("y"):
-        return return_object(m_pUnit->GetPositionY());
+        return return_object(target->GetPositionY());
     case str2int("auto_user"):
         return return_object((int32_t)0);
     case str2int("lv"):
     case str2int("level"):
-        return return_object(m_pUnit->GetLevel());
+        return return_object(target->GetLevel());
     case str2int("job_depth"):
-        return m_pUnit->IsPlayer() ? return_object(m_pUnit->GetJobDepth()) : return_object(""s);
+        return target->IsPlayer() ? return_object(target->GetJobDepth()) : return_object(""s);
     case str2int("job_level"):
     case str2int("jlv"):
-        return return_object(m_pUnit->GetCurrentJLv());
+        return return_object(target->GetCurrentJLv());
     case str2int("stamina"):
     case str2int("stanima"): // I do that typo all the time /shrug
-        return return_object(m_pUnit->GetInt32Value(UNIT_FIELD_STAMINA));
+        return return_object(target->GetInt32Value(UNIT_FIELD_STAMINA));
     case str2int("layer"):
-        return return_object(m_pUnit->GetLayer());
+        return return_object(target->GetLayer());
     case str2int("jp"):
-        return return_object(m_pUnit->GetJP());
+        return return_object(target->GetJP());
     case str2int("name"):
-        return return_object(m_pUnit->GetName());
+        return return_object(target->GetName());
     case str2int("job_0"):
-        return return_object(m_pUnit->GetPrevJobId(0));
+        return return_object(target->GetPrevJobId(0));
     case str2int("job_1"):
-        return return_object(m_pUnit->GetPrevJobId(1));
+        return return_object(target->GetPrevJobId(1));
     case str2int("job_2"):
-        return return_object(m_pUnit->GetPrevJobId(2));
+        return return_object(target->GetPrevJobId(2));
     case str2int("jlv_0"):
-        return return_object(m_pUnit->GetPrevJobLv(0));
+        return return_object(target->GetPrevJobLv(0));
     case str2int("jlv_1"):
-        return return_object(m_pUnit->GetPrevJobLv(1));
+        return return_object(target->GetPrevJobLv(1));
     case str2int("jlv_2"):
-        return return_object(m_pUnit->GetPrevJobLv(2));
+        return return_object(target->GetPrevJobLv(2));
+    case str2int("gold"):
+        return return_object((int64_t)target->GetGold());
+    case str2int("guild_id"):
+        return return_object(target->GetInt32Value(PLAYER_FIELD_GUILD_ID));
+    case str2int("permission"):
+        return return_object(target->GetPermission());
+    case str2int("chaos"):
+        return return_object(target->GetInt32Value(PLAYER_FIELD_CHAOS));
     default:
         break;
-    }
-
-    if (!m_pUnit->IsPlayer())
-        return return_object("");
-
-    auto pPlayer = m_pUnit->As<Player>();
-    switch (str2int(szKey.c_str())) {
-    case str2int("gold"):
-        return return_object((int64_t)pPlayer->GetGold());
-    case str2int("guild_id"):
-        return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_GUILD_ID));
-    case str2int("permission"):
-        return return_object(pPlayer->GetPermission());
-    case str2int("chaos"):
-        return return_object(pPlayer->GetInt32Value(PLAYER_FIELD_CHAOS));
     }
 
     NG_LOG_WARN("server.scripting", "Warning: Invalid key for get_value(key): %s", szKey.c_str());
@@ -384,90 +404,106 @@ void XLua::SCRIPT_SetFlag(sol::variadic_args args)
 
 void XLua::SCRIPT_SetValue(std::string szKey, sol::variadic_args args)
 {
-    if (m_pUnit == nullptr)
+
+    if (m_pUnit == nullptr) {
+        NG_LOG_WARN("server.scripting", "m_pUnit is nullptr");
         return;
+    }
+
+    if (args.size() < 1) {
+        NG_LOG_WARN("server.scripting", "No arguments provided for SetValue");
+        return;
+    }
+    Player *target = nullptr;
+
+    if (args.size() > 1) {
+        auto playerName = args[1].as<std::string>();
+        target = Player::FindPlayer(playerName);
+        if (target == nullptr) {
+            NG_LOG_WARN("server.scripting", "Player named '%s' not found", playerName.c_str());
+            return;
+        }
+    }
+    else {
+        target = m_pUnit->As<Player>();
+        if (target == nullptr) {
+            NG_LOG_WARN("server.scripting", "m_pUnit is not a Player instance");
+            return;
+        }
+    }
 
     switch (str2int(szKey.c_str())) {
     case str2int("race"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int32_t>());
+        target->SetInt32Value(UNIT_FIELD_RACE, args[0].get<int32_t>());
         break;
     case str2int("job"):
-        m_pUnit->SetCurrentJob(args[0].get<uint32_t>());
+        target->SetCurrentJob(args[0].get<uint32_t>());
         break;
     case str2int("hp"):
     case str2int("health"):
-        m_pUnit->SetHealth(args[0].get<uint32_t>());
-        Messages::BroadcastHPMPMessage(m_pUnit, args[0].get<uint32_t>(), 0, false);
+        target->SetHealth(args[0].get<uint32_t>());
+        Messages::BroadcastHPMPMessage(target, args[0].get<uint32_t>(), 0, false);
         break;
     case str2int("mp"):
     case str2int("mana"):
-        m_pUnit->SetMana(args[0].get<uint32_t>());
-        Messages::BroadcastHPMPMessage(m_pUnit, 0, args[0].get<uint32_t>(), false);
+        target->SetMana(args[0].get<uint32_t>());
+        Messages::BroadcastHPMPMessage(target, 0, args[0].get<uint32_t>(), false);
         break;
     case str2int("x"):
-        m_pUnit->Relocate(args[0].get<int32_t>(), m_pUnit->GetPositionY());
+        target->Relocate(args[0].get<int32_t>(), target->GetPositionY());
         break;
     case str2int("y"):
-        m_pUnit->Relocate(m_pUnit->GetPositionX(), args[0].get<int32_t>());
+        target->Relocate(target->GetPositionX(), args[0].get<int32_t>());
         break;
     case str2int("lv"):
     case str2int("level"):
-        m_pUnit->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
+        target->SetEXP((uint32_t)sObjectMgr.GetNeedExp(args[0].get<uint32_t>()));
         break;
     case str2int("job_level"):
     case str2int("jlv"):
-        m_pUnit->SetCurrentJLv(args[0].get<int32_t>());
+        target->SetCurrentJLv(args[0].get<int32_t>());
         break;
     case str2int("stamina"):
     case str2int("stanima"): // I do that typo all the time /shrug
-        m_pUnit->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
+        target->SetInt32Value(UNIT_FIELD_STAMINA, args[0].get<int32_t>());
         break;
     case str2int("jp"):
-        m_pUnit->SetJP(args[0].get<int32_t>());
-        Messages::SendPropertyMessage(m_pUnit->As<Player>(), m_pUnit, "jp", args[0].get<int32_t>());
+        target->SetJP(args[0].get<int32_t>());
+        Messages::SendPropertyMessage(target->As<Player>(), target, "jp", args[0].get<int32_t>());
         break;
     case str2int("job_0"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JOB, args[0].get<uint32_t>());
         break;
     case str2int("job_1"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JOB + 1, args[0].get<uint32_t>());
         break;
     case str2int("job_2"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JOB + 2, args[0].get<uint32_t>());
         break;
     case str2int("jlv_0"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JLV, args[0].get<uint32_t>());
         break;
     case str2int("jlv_1"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JLV + 1, args[0].get<uint32_t>());
         break;
     case str2int("jlv_2"):
-        m_pUnit->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint32_t>());
+        target->SetInt32Value(UNIT_FIELD_PREV_JLV + 2, args[0].get<uint32_t>());
         break;
-    default:
-        break;
-    }
-
-    if (!m_pUnit->IsPlayer())
-        return;
-
-    auto pPlayer = m_pUnit->As<Player>();
-    switch (str2int(szKey.c_str())) {
     case str2int("gold"):
-        pPlayer->ChangeGold(args[0].get<int64_t>());
+        target->ChangeGold(args[0].get<int64_t>());
         break;
     case str2int("permission"):
-        pPlayer->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
+        target->SetInt32Value(PLAYER_FIELD_PERMISSION, args[0].get<uint32_t>());
         break;
     case str2int("chaos"):
-        pPlayer->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint32_t>());
-        pPlayer->SendGoldChaosMessage();
+        target->SetInt32Value(PLAYER_FIELD_CHAOS, args[0].get<uint32_t>());
+        target->SendGoldChaosMessage();
         break;
     default:
         break;
     }
 
-    pPlayer->onChangeProperty(szKey, args[0].get<int32_t>());
+    target->onChangeProperty(szKey, args[0].get<int32_t>());
 }
 
 sol::object XLua::SCRIPT_GetEnv(std::string szKey)
@@ -1036,4 +1072,29 @@ void XLua::SCRIPT_LearnCreatureAllSkill(sol::variadic_args args)
         return;
 
     GameContent::LearnAllSkill(pSummon);
+
+
+
+void XLua::SCRIPT_DropItem(sol::variadic_args args)
+{
+    if (args.size() < 4) {
+        NG_LOG_ERROR("server.scripting", "SCRIPT_DropItem: Invalid Arguments");
+        return;
+    }
+    int x = args[0].get<int>();
+    int y = args[1].get<int>();
+    unsigned char layer = args[2].get<unsigned char>();
+    int code = args[3].get<int>();
+    int count = (args.size() >= 5) ? args[4].get<int64_t>() : 1;
+    int nEnhance = (args.size() >= 6) ? args[5].get<int32_t>() : 0;
+    int nLevel = (args.size() >= 7) ? args[6].get<int32_t>() : 1;
+    int nFlag = (args.size() >= 8) ? args[7].get<int32_t>() : -1;
+    auto ni = Item::AllocItem(0, code, count, GenerateCode::BY_GM, nLevel, nEnhance, nFlag, 0, 0, 0, 0, 0);
+    if (ni == nullptr)
+        return;
+    ni->SetCurrentXY(x, y);
+    ni->SetLayer(layer);
+    ni->AddNoise(rand32(), rand32(), 9);
+    sWorld.AddItemToWorld(ni);
+
 }
